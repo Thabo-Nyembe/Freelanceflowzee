@@ -692,6 +692,25 @@ export default function HealthScoreClient() {
   const [showSLOHistoryDialog, setShowSLOHistoryDialog] = useState(false)
   const [showViewAllSLOsDialog, setShowViewAllSLOsDialog] = useState(false)
 
+  // Infrastructure Dialog States
+  const [showServersDialog, setShowServersDialog] = useState(false)
+  const [showDatabasesDialog, setShowDatabasesDialog] = useState(false)
+  const [showCloudDialog, setShowCloudDialog] = useState(false)
+  const [showContainersDialog, setShowContainersDialog] = useState(false)
+  const [showNetworkDialog, setShowNetworkDialog] = useState(false)
+  const [showStorageDialog, setShowStorageDialog] = useState(false)
+  const [showComputeDialog, setShowComputeDialog] = useState(false)
+
+  // Additional Dialog States
+  const [showDiagnosticsDialog, setShowDiagnosticsDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showCriticalAlertsDialog, setShowCriticalAlertsDialog] = useState(false)
+  const [showResolveIncidentsDialog, setShowResolveIncidentsDialog] = useState(false)
+  const [showObjectivesDialog, setShowObjectivesDialog] = useState(false)
+  const [showErrorBudgetDialog, setShowErrorBudgetDialog] = useState(false)
+  const [showCustomReportDialog, setShowCustomReportDialog] = useState(false)
+  const [showScheduleEditorDialog, setShowScheduleEditorDialog] = useState(false)
+
   // Database State
   const [dbHealthScores, setDbHealthScores] = useState<DbHealthScore[]>([])
   const [loading, setLoading] = useState(true)
@@ -944,15 +963,15 @@ export default function HealthScoreClient() {
   }
 
   const handleRunDiagnostics = () => {
-    toast.info('Running diagnostics', { description: 'Performing system health check...' })
+    setShowDiagnosticsDialog(true)
   }
 
   const handleExportHealth = () => {
-    toast.success('Exporting health report', { description: 'Health metrics will be downloaded' })
+    setShowExportDialog(true)
   }
 
   const handleConfigureAlerts = () => {
-    toast.info('Configure Alerts', { description: 'Opening alert configuration...' })
+    setShowAlertsDialog(true)
   }
 
   return (
@@ -1559,7 +1578,7 @@ export default function HealthScoreClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Viewing Servers', { description: 'Displaying server infrastructure details' })}
+                onClick={() => setShowServersDialog(true)}
                 className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
               >
                 <Server className="w-5 h-5" />
@@ -1567,7 +1586,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Viewing Databases', { description: 'Displaying database connections and metrics' })}
+                onClick={() => setShowDatabasesDialog(true)}
                 className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
               >
                 <Database className="w-5 h-5" />
@@ -1575,7 +1594,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Viewing Cloud Resources', { description: 'Opening cloud infrastructure dashboard' })}
+                onClick={() => setShowCloudDialog(true)}
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
               >
                 <Cloud className="w-5 h-5" />
@@ -1583,7 +1602,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Viewing Containers', { description: 'Displaying container orchestration status' })}
+                onClick={() => setShowContainersDialog(true)}
                 className="h-20 flex-col gap-2 bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 hover:scale-105 transition-all duration-200"
               >
                 <Container className="w-5 h-5" />
@@ -1591,7 +1610,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Viewing Network', { description: 'Displaying network topology and traffic' })}
+                onClick={() => setShowNetworkDialog(true)}
                 className="h-20 flex-col gap-2 bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400 hover:scale-105 transition-all duration-200"
               >
                 <Network className="w-5 h-5" />
@@ -1599,7 +1618,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Viewing Storage', { description: 'Displaying storage volumes and capacity' })}
+                onClick={() => setShowStorageDialog(true)}
                 className="h-20 flex-col gap-2 bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400 hover:scale-105 transition-all duration-200"
               >
                 <HardDrive className="w-5 h-5" />
@@ -1607,7 +1626,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Viewing Compute', { description: 'Displaying compute resources and utilization' })}
+                onClick={() => setShowComputeDialog(true)}
                 className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
               >
                 <Cpu className="w-5 h-5" />
@@ -1803,7 +1822,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.warning('Critical Alerts', { description: 'Showing only critical severity alerts' })}
+                onClick={() => setShowCriticalAlertsDialog(true)}
                 className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
               >
                 <AlertTriangle className="w-5 h-5" />
@@ -1811,7 +1830,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.success('Resolve All', { description: 'All acknowledged incidents will be resolved' })}
+                onClick={() => setShowResolveIncidentsDialog(true)}
                 className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
               >
                 <CheckCircle className="w-5 h-5" />
@@ -1999,7 +2018,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('SLO Objectives', { description: 'Viewing all service level objectives' })}
+                onClick={() => setShowObjectivesDialog(true)}
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
               >
                 <Target className="w-5 h-5" />
@@ -2007,7 +2026,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => toast.info('Error Budgets', { description: 'Displaying error budget consumption across all SLOs' })}
+                onClick={() => setShowErrorBudgetDialog(true)}
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
               >
                 <TrendingUp className="w-5 h-5" />
@@ -2826,7 +2845,10 @@ export default function HealthScoreClient() {
                   <p className="text-xs text-gray-500">Comprehensive 30-day analysis</p>
                 </button>
                 <button
-                  onClick={() => toast.info('Custom Report', { description: 'Select date range for custom report' })}
+                  onClick={() => {
+                    setShowReportsDialog(false)
+                    setShowCustomReportDialog(true)
+                  }}
                   className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <p className="font-medium text-gray-900 dark:text-white">Custom Report</p>
@@ -3242,8 +3264,8 @@ export default function HealthScoreClient() {
               <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <Button variant="outline" onClick={() => setShowOnCallDialog(false)}>Close</Button>
                 <Button onClick={() => {
-                  toast.info('Opening schedule editor')
                   setShowOnCallDialog(false)
+                  setShowScheduleEditorDialog(true)
                 }}>
                   Edit Schedule
                 </Button>
@@ -3497,6 +3519,929 @@ export default function HealthScoreClient() {
               </ScrollArea>
               <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
                 <Button variant="outline" onClick={() => setShowViewAllSLOsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Diagnostics Dialog */}
+        <Dialog open={showDiagnosticsDialog} onOpenChange={setShowDiagnosticsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-emerald-500" />
+                System Diagnostics
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Run comprehensive diagnostics across all system components.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Server className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm">Server Health Check</span>
+                  </div>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Database className="w-4 h-4 text-green-500" />
+                    <span className="text-sm">Database Connectivity</span>
+                  </div>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Network className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm">Network Latency Test</span>
+                  </div>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-4 h-4 text-red-500" />
+                    <span className="text-sm">Security Scan</span>
+                  </div>
+                  <input type="checkbox" className="rounded" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <HardDrive className="w-4 h-4 text-amber-500" />
+                    <span className="text-sm">Disk Usage Analysis</span>
+                  </div>
+                  <input type="checkbox" defaultChecked className="rounded" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowDiagnosticsDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Diagnostics completed', { description: 'All selected checks passed successfully' })
+                  setShowDiagnosticsDialog(false)
+                }}>
+                  <Activity className="w-4 h-4 mr-2" />
+                  Run Diagnostics
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-green-500" />
+                Export Health Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Choose the format and data to include in your export.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <Label>Export Format</Label>
+                  <select className="w-full p-2 mt-1 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option value="pdf">PDF Report</option>
+                    <option value="csv">CSV Data</option>
+                    <option value="json">JSON Data</option>
+                    <option value="excel">Excel Spreadsheet</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Time Range</Label>
+                  <select className="w-full p-2 mt-1 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option value="24h">Last 24 Hours</option>
+                    <option value="7d">Last 7 Days</option>
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Include Data</Label>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-sm">Service Health Metrics</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-sm">Infrastructure Status</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-sm">Alert History</span>
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-sm">SLO Performance</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Export started', { description: 'Your report will be downloaded shortly' })
+                  setShowExportDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Report
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Servers Dialog */}
+        <Dialog open={showServersDialog} onOpenChange={setShowServersDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Server className="w-5 h-5 text-amber-500" />
+                Server Infrastructure
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {mockHosts.filter(h => h.type === 'server').length}
+                  </div>
+                  <div className="text-xs text-gray-500">Total Servers</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-green-500">
+                    {mockHosts.filter(h => h.type === 'server' && h.status === 'healthy').length}
+                  </div>
+                  <div className="text-xs text-gray-500">Healthy</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-yellow-500">
+                    {mockHosts.filter(h => h.type === 'server' && h.status === 'degraded').length}
+                  </div>
+                  <div className="text-xs text-gray-500">Degraded</div>
+                </div>
+              </div>
+              <ScrollArea className="h-[250px]">
+                <div className="space-y-3">
+                  {mockHosts.filter(h => h.type === 'server').map(host => (
+                    <div key={host.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${host.status === 'healthy' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                          <span className="font-medium">{host.hostname}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{host.region}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div>CPU: <span className={host.cpu > 80 ? 'text-red-500' : 'text-green-500'}>{host.cpu}%</span></div>
+                        <div>Memory: <span className={host.memory > 80 ? 'text-red-500' : 'text-green-500'}>{host.memory}%</span></div>
+                        <div>Disk: <span className={host.disk > 80 ? 'text-red-500' : 'text-green-500'}>{host.disk}%</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowServersDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Refreshing server metrics')
+                  setShowServersDialog(false)
+                }}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Databases Dialog */}
+        <Dialog open={showDatabasesDialog} onOpenChange={setShowDatabasesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-orange-500" />
+                Database Connections
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 mb-1">Active Connections</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">142</div>
+                  <div className="text-xs text-green-500">of 200 max</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 mb-1">Avg Query Time</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">8ms</div>
+                  <div className="text-xs text-green-500">-2ms from avg</div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium">PostgreSQL Primary</span>
+                    </div>
+                    <span className="text-xs text-green-500">Healthy</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Version 15.4 - 42K queries/min</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium">PostgreSQL Replica</span>
+                    </div>
+                    <span className="text-xs text-green-500">Synced</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Replication lag: 0ms</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium">Redis Cache</span>
+                    </div>
+                    <span className="text-xs text-green-500">Healthy</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Memory: 62% - Hit rate: 98.5%</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowDatabasesDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Database connections verified')
+                  setShowDatabasesDialog(false)
+                }}>
+                  Test Connections
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cloud Dialog */}
+        <Dialog open={showCloudDialog} onOpenChange={setShowCloudDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cloud className="w-5 h-5 text-red-500" />
+                Cloud Resources
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">12</div>
+                  <div className="text-xs text-gray-500">EC2 Instances</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">5</div>
+                  <div className="text-xs text-gray-500">RDS Instances</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">3</div>
+                  <div className="text-xs text-gray-500">S3 Buckets</div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">AWS us-east-1</span>
+                    <span className="text-xs text-green-500">All systems operational</span>
+                  </div>
+                  <div className="text-xs text-gray-500">8 instances running</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">AWS eu-west-1</span>
+                    <span className="text-xs text-green-500">All systems operational</span>
+                  </div>
+                  <div className="text-xs text-gray-500">4 instances running</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowCloudDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Cloud resources synchronized')
+                  setShowCloudDialog(false)
+                }}>
+                  Sync Resources
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Containers Dialog */}
+        <Dialog open={showContainersDialog} onOpenChange={setShowContainersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Container className="w-5 h-5 text-rose-500" />
+                Container Orchestration
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">48</div>
+                  <div className="text-xs text-gray-500">Running Pods</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-green-500">45</div>
+                  <div className="text-xs text-gray-500">Healthy</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-yellow-500">3</div>
+                  <div className="text-xs text-gray-500">Pending</div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">api-gateway</span>
+                    <span className="text-xs text-green-500">6/6 replicas</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Deployment healthy</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">auth-service</span>
+                    <span className="text-xs text-green-500">4/4 replicas</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">Deployment healthy</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">user-service</span>
+                    <span className="text-xs text-yellow-500">2/3 replicas</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">1 pod pending</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowContainersDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Containers scaled successfully')
+                  setShowContainersDialog(false)
+                }}>
+                  Scale Pods
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Network Dialog */}
+        <Dialog open={showNetworkDialog} onOpenChange={setShowNetworkDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Network className="w-5 h-5 text-yellow-500" />
+                Network Topology
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 mb-1">Inbound Traffic</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">1.2 GB/s</div>
+                  <div className="text-xs text-green-500 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" /> +5% from avg
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 mb-1">Outbound Traffic</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">890 MB/s</div>
+                  <div className="text-xs text-green-500 flex items-center gap-1">
+                    <TrendingDown className="w-3 h-3" /> -2% from avg
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Load Balancer</span>
+                    <span className="text-xs text-green-500">Active</span>
+                  </div>
+                  <div className="text-xs text-gray-500">12,450 active connections</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">CDN</span>
+                    <span className="text-xs text-green-500">98.5% hit rate</span>
+                  </div>
+                  <div className="text-xs text-gray-500">45 edge locations</div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">DNS</span>
+                    <span className="text-xs text-green-500">All resolving</span>
+                  </div>
+                  <div className="text-xs text-gray-500">Avg response: 12ms</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowNetworkDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Network scan completed')
+                  setShowNetworkDialog(false)
+                }}>
+                  Run Network Scan
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Storage Dialog */}
+        <Dialog open={showStorageDialog} onOpenChange={setShowStorageDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <HardDrive className="w-5 h-5 text-lime-500" />
+                Storage Volumes
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">2.4 TB</div>
+                  <div className="text-xs text-gray-500">Total Storage</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">1.1 TB</div>
+                  <div className="text-xs text-gray-500">Used</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-green-500">1.3 TB</div>
+                  <div className="text-xs text-gray-500">Available</div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">/dev/sda1 (Root)</span>
+                    <span className="text-xs text-green-500">38% used</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500" style={{ width: '38%' }}></div>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">/dev/sdb1 (Data)</span>
+                    <span className="text-xs text-yellow-500">68% used</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-yellow-500" style={{ width: '68%' }}></div>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">/dev/sdc1 (Backup)</span>
+                    <span className="text-xs text-green-500">25% used</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500" style={{ width: '25%' }}></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowStorageDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Storage cleanup initiated')
+                  setShowStorageDialog(false)
+                }}>
+                  Clean Up Storage
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compute Dialog */}
+        <Dialog open={showComputeDialog} onOpenChange={setShowComputeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Cpu className="w-5 h-5 text-green-500" />
+                Compute Resources
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 mb-1">Total vCPUs</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">128</div>
+                  <div className="text-xs text-gray-500">Across all instances</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 mb-1">Avg CPU Usage</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">52%</div>
+                  <div className="text-xs text-green-500">Within normal range</div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">prod-api-01</span>
+                    <span className="text-xs">45% CPU</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500" style={{ width: '45%' }}></div>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">prod-api-02</span>
+                    <span className="text-xs">52% CPU</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500" style={{ width: '52%' }}></div>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">k8s-node-02</span>
+                    <span className="text-xs text-red-500">92% CPU</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-red-500" style={{ width: '92%' }}></div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowComputeDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Auto-scaling configured')
+                  setShowComputeDialog(false)
+                }}>
+                  Configure Scaling
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Critical Alerts Dialog */}
+        <Dialog open={showCriticalAlertsDialog} onOpenChange={setShowCriticalAlertsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                Critical Alerts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Showing only critical severity alerts that require immediate attention.
+              </p>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {mockAlerts.filter(a => a.severity === 'critical').map(alert => (
+                    <div key={alert.id} className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-red-700 dark:text-red-400">{alert.name}</span>
+                        <span className="text-xs bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 px-2 py-1 rounded">Critical</span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{alert.description}</p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                        <span>Threshold: {alert.threshold}</span>
+                        <span>Service: {alert.service}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {mockAlerts.filter(a => a.severity === 'critical').length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-500" />
+                      <p>No critical alerts at this time</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowCriticalAlertsDialog(false)}>Close</Button>
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Alert notifications sent')
+                  setShowCriticalAlertsDialog(false)
+                }}>
+                  Escalate All
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Resolve Incidents Dialog */}
+        <Dialog open={showResolveIncidentsDialog} onOpenChange={setShowResolveIncidentsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                Resolve Incidents
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select incidents to resolve. Only acknowledged incidents can be resolved.
+              </p>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {mockIncidents.filter(i => i.status !== 'resolved').map(incident => (
+                    <div key={incident.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <input type="checkbox" className="mt-1 rounded" defaultChecked={incident.status === 'acknowledged'} disabled={incident.status !== 'acknowledged'} />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium">{incident.title}</span>
+                            <span className={`text-xs px-2 py-1 rounded ${
+                              incident.status === 'acknowledged' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            }`}>
+                              {incident.status}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500">{incident.service} - Duration: {incident.duration}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {mockIncidents.filter(i => i.status !== 'resolved').length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <CheckCircle className="w-12 h-12 mx-auto mb-2 text-green-500" />
+                      <p>All incidents have been resolved</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+              <div className="space-y-2">
+                <Label htmlFor="resolution_notes">Resolution Notes</Label>
+                <Textarea id="resolution_notes" placeholder="Describe how the incidents were resolved..." />
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowResolveIncidentsDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Selected incidents resolved')
+                  setShowResolveIncidentsDialog(false)
+                }}>
+                  Resolve Selected
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Objectives Dialog */}
+        <Dialog open={showObjectivesDialog} onOpenChange={setShowObjectivesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-indigo-500" />
+                Service Level Objectives
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-green-500">{mockSLOs.filter(s => s.status === 'met').length}</div>
+                  <div className="text-xs text-gray-500">Meeting Target</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-yellow-500">{mockSLOs.filter(s => s.status === 'at_risk').length}</div>
+                  <div className="text-xs text-gray-500">At Risk</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <div className="text-2xl font-bold text-red-500">{mockSLOs.filter(s => s.status === 'breached').length}</div>
+                  <div className="text-xs text-gray-500">Breached</div>
+                </div>
+              </div>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {mockSLOs.map(slo => (
+                    <div key={slo.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <div className="font-medium">{slo.name}</div>
+                          <div className="text-xs text-gray-500">{slo.service}</div>
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getSLOStatusColor(slo.status)}`}>
+                          {slo.status === 'met' ? 'Meeting' : slo.status === 'at_risk' ? 'At Risk' : 'Breached'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Current: <strong>{slo.current}%</strong></span>
+                        <span>Target: {slo.target}%</span>
+                        <span>Window: {slo.timeWindow}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowObjectivesDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  setShowObjectivesDialog(false)
+                  setShowCreateSLODialog(true)
+                }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New SLO
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Error Budget Dialog */}
+        <Dialog open={showErrorBudgetDialog} onOpenChange={setShowErrorBudgetDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-500" />
+                Error Budget Status
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Error budget consumption across all service level objectives.
+              </p>
+              <ScrollArea className="h-[350px]">
+                <div className="space-y-4">
+                  {mockSLOs.map(slo => (
+                    <div key={slo.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <div className="font-medium">{slo.name}</div>
+                          <div className="text-xs text-gray-500">{slo.service}</div>
+                        </div>
+                        <span className={`text-sm font-bold ${slo.budgetRemaining > 50 ? 'text-green-500' : slo.budgetRemaining > 20 ? 'text-yellow-500' : 'text-red-500'}`}>
+                          {slo.budgetRemaining}% remaining
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>Budget Consumed: {slo.budgetConsumed}%</span>
+                          <span>Time Window: {slo.timeWindow}</span>
+                        </div>
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${slo.budgetConsumed < 50 ? 'bg-green-500' : slo.budgetConsumed < 80 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                            style={{ width: `${slo.budgetConsumed}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-green-500">0%</span>
+                          <span className="text-yellow-500">50%</span>
+                          <span className="text-red-500">100%</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowErrorBudgetDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Error budget report exported')
+                  setShowErrorBudgetDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Report
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Custom Report Dialog */}
+        <Dialog open={showCustomReportDialog} onOpenChange={setShowCustomReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-purple-500" />
+                Custom Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select a custom date range for your health report.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="start_date">Start Date</Label>
+                  <Input id="start_date" type="date" className="mt-1" />
+                </div>
+                <div>
+                  <Label htmlFor="end_date">End Date</Label>
+                  <Input id="end_date" type="date" className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label>Report Type</Label>
+                <select className="w-full p-2 mt-1 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Full Health Report</option>
+                  <option>Service Performance Only</option>
+                  <option>Infrastructure Only</option>
+                  <option>Incidents & Alerts</option>
+                  <option>SLO Compliance</option>
+                </select>
+              </div>
+              <div>
+                <Label>Export Format</Label>
+                <select className="w-full p-2 mt-1 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>PDF</option>
+                  <option>CSV</option>
+                  <option>Excel</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowCustomReportDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Custom report generation started')
+                  setShowCustomReportDialog(false)
+                }}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Generate Report
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Editor Dialog */}
+        <Dialog open={showScheduleEditorDialog} onOpenChange={setShowScheduleEditorDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-500" />
+                On-Call Schedule Editor
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <Label>Rotation Type</Label>
+                  <select className="w-full p-2 mt-1 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option>Daily</option>
+                    <option>Weekly</option>
+                    <option>Bi-Weekly</option>
+                    <option>Monthly</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Start Time</Label>
+                  <Input type="time" defaultValue="09:00" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Team Members</Label>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm">John Smith</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Primary</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm">Sarah Chen</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Secondary</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm">Mike Johnson</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Backup</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <Label>Escalation Policy</Label>
+                  <select className="w-full p-2 mt-1 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option>Standard (15 min)</option>
+                    <option>Aggressive (5 min)</option>
+                    <option>Relaxed (30 min)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowScheduleEditorDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Schedule updated successfully')
+                  setShowScheduleEditorDialog(false)
+                }}>
+                  Save Schedule
+                </Button>
               </div>
             </div>
           </DialogContent>

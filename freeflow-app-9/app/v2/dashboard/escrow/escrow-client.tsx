@@ -451,6 +451,10 @@ export default function EscrowClient() {
   const [showViewPayoutsDialog, setShowViewPayoutsDialog] = useState(false)
   const [showDisputesDialog, setShowDisputesDialog] = useState(false)
   const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showDisputeResponseDialog, setShowDisputeResponseDialog] = useState(false)
+  const [selectedDisputeForResponse, setSelectedDisputeForResponse] = useState<Dispute | null>(null)
   const [transactionFilter, setTransactionFilter] = useState<TransactionType | 'all'>('all')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedEscrowDeposit, setSelectedEscrowDeposit] = useState<EscrowDeposit | null>(null)
@@ -509,6 +513,39 @@ export default function EscrowClient() {
     description: '',
     evidence: ''
   })
+
+  // Transfer form state
+  const [transferForm, setTransferForm] = useState({
+    fromAccount: '',
+    toAccount: '',
+    amount: '',
+    note: ''
+  })
+
+  // Dispute response form state
+  const [disputeResponseForm, setDisputeResponseForm] = useState({
+    response: '',
+    evidence: '',
+    additionalNotes: ''
+  })
+
+  // Report form state
+  const [reportForm, setReportForm] = useState({
+    reportType: '',
+    dateRange: '',
+    format: ''
+  })
+
+  // Export data form state
+  const [exportForm, setExportForm] = useState({
+    dataType: 'all',
+    dateRange: '30d',
+    format: 'csv'
+  })
+
+  // API key state
+  const [apiKey, setApiKey] = useState('ek_live_xxxxxxxxxxxx')
+  const [isRegeneratingKey, setIsRegeneratingKey] = useState(false)
 
   // Fetch deposits on mount
   useEffect(() => {
@@ -638,6 +675,39 @@ export default function EscrowClient() {
       reason: '',
       description: '',
       evidence: ''
+    })
+  }
+
+  const resetTransferForm = () => {
+    setTransferForm({
+      fromAccount: '',
+      toAccount: '',
+      amount: '',
+      note: ''
+    })
+  }
+
+  const resetDisputeResponseForm = () => {
+    setDisputeResponseForm({
+      response: '',
+      evidence: '',
+      additionalNotes: ''
+    })
+  }
+
+  const resetReportForm = () => {
+    setReportForm({
+      reportType: '',
+      dateRange: '',
+      format: ''
+    })
+  }
+
+  const resetExportForm = () => {
+    setExportForm({
+      dataType: 'all',
+      dateRange: '30d',
+      format: 'csv'
     })
   }
 
@@ -948,6 +1018,246 @@ export default function EscrowClient() {
       ...prev,
       milestones: prev.milestones.filter((_, i) => i !== index)
     }))
+  }
+
+  // Transfer handler
+  const handleSubmitTransfer = async () => {
+    if (!transferForm.fromAccount || !transferForm.toAccount || !transferForm.amount) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    if (transferForm.fromAccount === transferForm.toAccount) {
+      toast.error('Source and destination accounts must be different')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in to initiate transfers')
+        return
+      }
+
+      // Create a transaction record for the transfer
+      const { error } = await supabase
+        .from('escrow_transactions')
+        .insert({
+          buyer_id: user.id,
+          seller_id: transferForm.toAccount,
+          amount: parseFloat(transferForm.amount),
+          status: 'processing',
+          type: 'transfer',
+          description: transferForm.note || 'Fund transfer',
+          metadata: {
+            from_account: transferForm.fromAccount,
+            initiated_by: user.id
+          }
+        })
+
+      if (error) throw error
+
+      toast.success('Transfer initiated successfully', {
+        description: `${formatCurrency(parseFloat(transferForm.amount))} transfer is being processed`
+      })
+      setShowNewTransferDialog(false)
+      resetTransferForm()
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Please try again'
+      toast.error('Failed to initiate transfer', {
+        description: errorMessage
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // API key regeneration handler
+  const handleRegenerateApiKey = async () => {
+    setIsRegeneratingKey(true)
+    try {
+      // Simulate API key regeneration
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      const newKey = `ek_live_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`
+      setApiKey(newKey)
+      toast.success('API key regenerated successfully', {
+        description: 'Your previous key has been invalidated'
+      })
+      setShowRegenerateApiKeyDialog(false)
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Please try again'
+      toast.error('Failed to regenerate API key', {
+        description: errorMessage
+      })
+    } finally {
+      setIsRegeneratingKey(false)
+    }
+  }
+
+  // Export data handler
+  const handleExportData = async () => {
+    setIsSubmitting(true)
+    try {
+      // Create CSV content based on export form
+      let csvContent = ''
+      const timestamp = new Date().toISOString().split('T')[0]
+      let filename = `escrow-export-${timestamp}`
+
+      if (exportForm.dataType === 'all' || exportForm.dataType === 'transactions') {
+        csvContent += 'Transaction ID,Type,Amount,Fee,Net,Status,Customer,Date\n'
+        mockTransactions.forEach(txn => {
+          csvContent += `${txn.id},${txn.type},${txn.amount},${txn.fee},${txn.net},${txn.status},${txn.customer || 'Platform'},${txn.createdAt}\n`
+        })
+        filename += '-transactions'
+      }
+
+      if (exportForm.dataType === 'all' || exportForm.dataType === 'accounts') {
+        if (csvContent) csvContent += '\n\n'
+        csvContent += 'Account ID,Business Name,Email,Country,Status,Available Balance,Total Volume\n'
+        mockConnectedAccounts.forEach(acc => {
+          csvContent += `${acc.id},${acc.businessName},${acc.email},${acc.country},${acc.status},${acc.balance.available},${acc.totalVolume}\n`
+        })
+        filename += '-accounts'
+      }
+
+      if (exportForm.dataType === 'all' || exportForm.dataType === 'payouts') {
+        if (csvContent) csvContent += '\n\n'
+        csvContent += 'Payout ID,Amount,Method,Status,Destination,Arrival Date\n'
+        mockPayouts.forEach(po => {
+          csvContent += `${po.id},${po.amount},${po.method},${po.status},${po.destination},${po.arrivalDate}\n`
+        })
+        filename += '-payouts'
+      }
+
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${filename}.csv`
+      link.click()
+      URL.revokeObjectURL(link.href)
+
+      toast.success('Data exported successfully', {
+        description: `Downloaded ${filename}.csv`
+      })
+      setShowExportDataDialog(false)
+      resetExportForm()
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Please try again'
+      toast.error('Failed to export data', {
+        description: errorMessage
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Dispute response handler
+  const handleSubmitDisputeResponse = async () => {
+    if (!selectedDisputeForResponse || !disputeResponseForm.response) {
+      toast.error('Please provide a response to the dispute')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // In a real app, this would submit to the disputes API
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Dispute response submitted', {
+        description: `Response to dispute ${selectedDisputeForResponse.id} has been submitted for review`
+      })
+      setShowDisputeResponseDialog(false)
+      resetDisputeResponseForm()
+      setSelectedDisputeForResponse(null)
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Please try again'
+      toast.error('Failed to submit dispute response', {
+        description: errorMessage
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Report generation handler
+  const handleGenerateReport = async (format: 'csv' | 'pdf' | 'excel') => {
+    if (!reportForm.reportType || !reportForm.dateRange) {
+      toast.error('Please select report type and date range')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const timestamp = new Date().toISOString().split('T')[0]
+      let content = ''
+      let filename = `escrow-${reportForm.reportType}-report-${timestamp}`
+
+      // Generate report content based on type
+      switch (reportForm.reportType) {
+        case 'transactions':
+          content = 'Transaction Summary Report\n\n'
+          content += 'Transaction ID,Type,Amount,Fee,Net,Status,Customer,Date\n'
+          mockTransactions.forEach(txn => {
+            content += `${txn.id},${txn.type},${txn.amount},${txn.fee},${txn.net},${txn.status},${txn.customer || 'Platform'},${txn.createdAt}\n`
+          })
+          break
+        case 'payouts':
+          content = 'Payout Report\n\n'
+          content += 'Payout ID,Amount,Method,Status,Destination,Arrival Date\n'
+          mockPayouts.forEach(po => {
+            content += `${po.id},${po.amount},${po.method},${po.status},${po.destination},${po.arrivalDate}\n`
+          })
+          break
+        case 'disputes':
+          content = 'Dispute Analysis Report\n\n'
+          content += 'Dispute ID,Amount,Status,Reason,Customer,Due By\n'
+          mockDisputes.forEach(d => {
+            content += `${d.id},${d.amount},${d.status},${d.reason},${d.customer},${d.dueBy}\n`
+          })
+          break
+        case 'fees':
+          content = 'Fee Summary Report\n\n'
+          content += 'Total Fees Collected,Average Fee %,Fee Waivers,Net Fees MTD\n'
+          content += `$8432.50,2.8%,$245.00,$8187.50\n`
+          break
+        case 'accounts':
+          content = 'Connected Accounts Report\n\n'
+          content += 'Account ID,Business Name,Email,Country,Status,Available Balance,Total Volume\n'
+          mockConnectedAccounts.forEach(acc => {
+            content += `${acc.id},${acc.businessName},${acc.email},${acc.country},${acc.status},${acc.balance.available},${acc.totalVolume}\n`
+          })
+          break
+        default:
+          content = 'Report data not available'
+      }
+
+      // Create and download the file
+      const mimeType = format === 'csv' ? 'text/csv' : 'application/octet-stream'
+      const extension = format === 'excel' ? 'xlsx' : format
+      const blob = new Blob([content], { type: `${mimeType};charset=utf-8;` })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${filename}.${extension}`
+      link.click()
+      URL.revokeObjectURL(link.href)
+
+      toast.success(`${format.toUpperCase()} report downloaded`, {
+        description: `${reportForm.reportType} report for ${reportForm.dateRange} has been downloaded`
+      })
+      setShowReportsDialog(false)
+      resetReportForm()
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Please try again'
+      toast.error('Failed to generate report', {
+        description: errorMessage
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -2053,10 +2363,10 @@ export default function EscrowClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">API Key</p>
                           <div className="flex items-center gap-2">
-                            <input type="password" defaultValue="ek_live_xxxxxxxxxxxx" className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
+                            <input type="password" value={apiKey} readOnly className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText('ek_live_xxxxxxxxxxxx')
+                                navigator.clipboard.writeText(apiKey)
                                 toast.success('API key copied to clipboard')
                               }}
                               className="px-4 py-2 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500"
@@ -2064,10 +2374,7 @@ export default function EscrowClient() {
                               <Copy className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => {
-                                toast.info('Regenerating API key...', { description: 'This will invalidate your current key' })
-                                setTimeout(() => toast.success('API key regenerated successfully'), 1500)
-                              }}
+                              onClick={() => setShowRegenerateApiKeyDialog(true)}
                               className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
                             >
                               <RefreshCw className="w-4 h-4" />
@@ -2110,14 +2417,11 @@ export default function EscrowClient() {
                             <p className="text-sm text-gray-500">Download all transaction data</p>
                           </div>
                           <button
-                            onClick={() => {
-                              toast.info('Exporting data...', { description: 'Preparing your CSV file' })
-                              setTimeout(() => toast.success('Data exported successfully', { description: 'Your download will begin shortly' }), 1500)
-                            }}
+                            onClick={() => setShowExportDataDialog(true)}
                             className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2"
                           >
                             <Download className="w-4 h-4" />
-                            Export CSV
+                            Export Data
                           </button>
                         </div>
                       </div>
@@ -2772,7 +3076,7 @@ export default function EscrowClient() {
         </Dialog>
 
         {/* New Transfer Dialog */}
-        <Dialog open={showNewTransferDialog} onOpenChange={setShowNewTransferDialog}>
+        <Dialog open={showNewTransferDialog} onOpenChange={(open) => { setShowNewTransferDialog(open); if (!open) resetTransferForm(); }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -2785,38 +3089,48 @@ export default function EscrowClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="transfer-from">From Account</Label>
-                <Select>
+                <Label htmlFor="transfer-from">From Account *</Label>
+                <Select
+                  value={transferForm.fromAccount}
+                  onValueChange={(value) => setTransferForm(prev => ({ ...prev, fromAccount: value }))}
+                >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select source account" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="main">Main Platform Account</SelectItem>
-                    <SelectItem value="reserve">Reserve Account</SelectItem>
+                    <SelectItem value="main">Main Platform Account ({formatCurrency(mockBalance.available)})</SelectItem>
+                    <SelectItem value="reserve">Reserve Account ({formatCurrency(mockBalance.reserved)})</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="transfer-to">To Account</Label>
-                <Select>
+                <Label htmlFor="transfer-to">To Account *</Label>
+                <Select
+                  value={transferForm.toAccount}
+                  onValueChange={(value) => setTransferForm(prev => ({ ...prev, toAccount: value }))}
+                >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select destination" />
                   </SelectTrigger>
                   <SelectContent>
                     {mockConnectedAccounts.map(account => (
-                      <SelectItem key={account.id} value={account.id}>{account.businessName}</SelectItem>
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.businessName} - {account.status}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="transfer-amount">Amount</Label>
+                <Label htmlFor="transfer-amount">Amount *</Label>
                 <div className="relative mt-1">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                   <Input
                     id="transfer-amount"
                     type="number"
                     placeholder="0.00"
+                    value={transferForm.amount}
+                    onChange={(e) => setTransferForm(prev => ({ ...prev, amount: e.target.value }))}
                     className="pl-8"
                   />
                 </div>
@@ -2826,16 +3140,31 @@ export default function EscrowClient() {
                 <Input
                   id="transfer-note"
                   placeholder="Transfer description..."
+                  value={transferForm.note}
+                  onChange={(e) => setTransferForm(prev => ({ ...prev, note: e.target.value }))}
                   className="mt-1"
                 />
               </div>
               <DialogFooter className="pt-4">
-                <Button variant="outline" onClick={() => setShowNewTransferDialog(false)}>
+                <Button variant="outline" onClick={() => { setShowNewTransferDialog(false); resetTransferForm(); }} disabled={isSubmitting}>
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Transfer initiated'); setShowNewTransferDialog(false); }} className="bg-emerald-600 hover:bg-emerald-700">
-                  <Send className="w-4 h-4 mr-2" />
-                  Initiate Transfer
+                <Button
+                  onClick={handleSubmitTransfer}
+                  disabled={isSubmitting || !transferForm.fromAccount || !transferForm.toAccount || !transferForm.amount}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Initiate Transfer
+                    </>
+                  )}
                 </Button>
               </DialogFooter>
             </div>
@@ -2921,9 +3250,9 @@ export default function EscrowClient() {
                       size="sm"
                       className="mt-2 bg-orange-600 hover:bg-orange-700"
                       onClick={() => {
+                        setSelectedDisputeForResponse(dispute)
                         setShowDisputesDialog(false)
-                        setActiveTab('disputes')
-                        toast.info('Opening dispute response form', { description: `Responding to dispute ${dispute.id}` })
+                        setShowDisputeResponseDialog(true)
                       }}
                     >
                       Respond Now
@@ -2944,7 +3273,7 @@ export default function EscrowClient() {
         </Dialog>
 
         {/* Reports Dialog */}
-        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <Dialog open={showReportsDialog} onOpenChange={(open) => { setShowReportsDialog(open); if (!open) resetReportForm(); }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
@@ -2957,8 +3286,11 @@ export default function EscrowClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Report Type</Label>
-                <Select>
+                <Label>Report Type *</Label>
+                <Select
+                  value={reportForm.reportType}
+                  onValueChange={(value) => setReportForm(prev => ({ ...prev, reportType: value }))}
+                >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select report type" />
                   </SelectTrigger>
@@ -2972,8 +3304,11 @@ export default function EscrowClient() {
                 </Select>
               </div>
               <div>
-                <Label>Date Range</Label>
-                <Select>
+                <Label>Date Range *</Label>
+                <Select
+                  value={reportForm.dateRange}
+                  onValueChange={(value) => setReportForm(prev => ({ ...prev, dateRange: value }))}
+                >
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select date range" />
                   </SelectTrigger>
@@ -2987,52 +3322,263 @@ export default function EscrowClient() {
                 </Select>
               </div>
               <div>
-                <Label>Format</Label>
+                <Label>Download Format</Label>
                 <div className="flex gap-2 mt-1">
                   <Button
                     variant="outline"
-                    className="flex-1"
-                    onClick={() => {
-                      toast.success('Downloading CSV report', { description: 'Your download will begin shortly' })
-                      setShowReportsDialog(false)
-                    }}
+                    className={`flex-1 ${reportForm.format === 'csv' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                    onClick={() => handleGenerateReport('csv')}
+                    disabled={isSubmitting || !reportForm.reportType || !reportForm.dateRange}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     CSV
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1"
-                    onClick={() => {
-                      toast.success('Downloading PDF report', { description: 'Your download will begin shortly' })
-                      setShowReportsDialog(false)
-                    }}
+                    className={`flex-1 ${reportForm.format === 'pdf' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                    onClick={() => handleGenerateReport('pdf')}
+                    disabled={isSubmitting || !reportForm.reportType || !reportForm.dateRange}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     PDF
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1"
-                    onClick={() => {
-                      toast.success('Downloading Excel report', { description: 'Your download will begin shortly' })
-                      setShowReportsDialog(false)
-                    }}
+                    className={`flex-1 ${reportForm.format === 'excel' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                    onClick={() => handleGenerateReport('excel')}
+                    disabled={isSubmitting || !reportForm.reportType || !reportForm.dateRange}
                   >
                     <Download className="w-4 h-4 mr-2" />
                     Excel
                   </Button>
                 </div>
+                {(!reportForm.reportType || !reportForm.dateRange) && (
+                  <p className="text-xs text-gray-500 mt-2">Select report type and date range to download</p>
+                )}
               </div>
               <DialogFooter className="pt-4">
-                <Button variant="outline" onClick={() => setShowReportsDialog(false)}>
+                <Button variant="outline" onClick={() => { setShowReportsDialog(false); resetReportForm(); }} disabled={isSubmitting}>
                   Cancel
-                </Button>
-                <Button onClick={() => { toast.success('Report generated successfully'); setShowReportsDialog(false); }} className="bg-emerald-600 hover:bg-emerald-700">
-                  Generate Report
                 </Button>
               </DialogFooter>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Key Regeneration Confirmation Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-orange-600">
+                <AlertTriangle className="w-5 h-5" />
+                Regenerate API Key
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to regenerate your API key? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <p className="text-sm text-orange-800 dark:text-orange-200">
+                  <strong>Warning:</strong> Regenerating your API key will immediately invalidate your current key.
+                  Any integrations using the old key will stop working until you update them with the new key.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)} disabled={isRegeneratingKey}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleRegenerateApiKey}
+                  disabled={isRegeneratingKey}
+                  className="bg-orange-600 hover:bg-orange-700"
+                >
+                  {isRegeneratingKey ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Regenerating...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Regenerate Key
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={(open) => { setShowExportDataDialog(open); if (!open) resetExportForm(); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-emerald-600" />
+                Export Data
+              </DialogTitle>
+              <DialogDescription>
+                Download your escrow data for backup or analysis
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Data Type</Label>
+                <Select
+                  value={exportForm.dataType}
+                  onValueChange={(value) => setExportForm(prev => ({ ...prev, dataType: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Data</SelectItem>
+                    <SelectItem value="transactions">Transactions Only</SelectItem>
+                    <SelectItem value="accounts">Connected Accounts Only</SelectItem>
+                    <SelectItem value="payouts">Payouts Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select
+                  value={exportForm.dateRange}
+                  onValueChange={(value) => setExportForm(prev => ({ ...prev, dateRange: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                    <SelectItem value="90d">Last 90 days</SelectItem>
+                    <SelectItem value="all">All time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Data will be exported in CSV format for easy import into spreadsheet applications.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => { setShowExportDataDialog(false); resetExportForm(); }} disabled={isSubmitting}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleExportData}
+                  disabled={isSubmitting}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Data
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dispute Response Dialog */}
+        <Dialog open={showDisputeResponseDialog} onOpenChange={(open) => { setShowDisputeResponseDialog(open); if (!open) { resetDisputeResponseForm(); setSelectedDisputeForResponse(null); } }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-orange-600" />
+                Respond to Dispute
+              </DialogTitle>
+              <DialogDescription>
+                {selectedDisputeForResponse && `Dispute ${selectedDisputeForResponse.id} - ${formatCurrency(selectedDisputeForResponse.amount)}`}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedDisputeForResponse && (
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-gray-500">Reason</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{selectedDisputeForResponse.reason.replace('_', ' ')}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Customer</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{selectedDisputeForResponse.customer}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Due By</p>
+                      <p className="font-medium text-orange-600">{new Date(selectedDisputeForResponse.dueBy).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500">Transaction</p>
+                      <p className="font-medium text-gray-900 dark:text-white">{selectedDisputeForResponse.transactionId}</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="dispute-response-text">Your Response *</Label>
+                  <Textarea
+                    id="dispute-response-text"
+                    placeholder="Provide a detailed response explaining why this dispute should be resolved in your favor..."
+                    value={disputeResponseForm.response}
+                    onChange={(e) => setDisputeResponseForm(prev => ({ ...prev, response: e.target.value }))}
+                    className="mt-1"
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dispute-evidence-links">Evidence Links</Label>
+                  <Textarea
+                    id="dispute-evidence-links"
+                    placeholder="Add links to receipts, contracts, communication logs, or other supporting documents..."
+                    value={disputeResponseForm.evidence}
+                    onChange={(e) => setDisputeResponseForm(prev => ({ ...prev, evidence: e.target.value }))}
+                    className="mt-1"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="dispute-additional-notes">Additional Notes (optional)</Label>
+                  <Input
+                    id="dispute-additional-notes"
+                    placeholder="Any other relevant information..."
+                    value={disputeResponseForm.additionalNotes}
+                    onChange={(e) => setDisputeResponseForm(prev => ({ ...prev, additionalNotes: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => { setShowDisputeResponseDialog(false); resetDisputeResponseForm(); setSelectedDisputeForResponse(null); }}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSubmitDisputeResponse}
+                    disabled={isSubmitting || !disputeResponseForm.response}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Submit Response'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
 

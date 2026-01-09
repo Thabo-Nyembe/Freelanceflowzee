@@ -624,6 +624,28 @@ export default function AppStoreClient() {
   const [showSeeAllDialog, setShowSeeAllDialog] = useState(false)
   const [seeAllType, setSeeAllType] = useState<'editors' | 'trending' | 'collections'>('editors')
 
+  // Additional Dialog States for Full Functionality
+  const [showOpenAppDialog, setShowOpenAppDialog] = useState(false)
+  const [appToOpen, setAppToOpen] = useState<App | null>(null)
+  const [showAppSettingsDialog, setShowAppSettingsDialog] = useState(false)
+  const [appForSettings, setAppForSettings] = useState<App | null>(null)
+  const [showBillingDialog, setShowBillingDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showNewAppsDialog, setShowNewAppsDialog] = useState(false)
+  const [showOnSaleDialog, setShowOnSaleDialog] = useState(false)
+  const [showTeamPicksDialog, setShowTeamPicksDialog] = useState(false)
+  const [showForYouDialog, setShowForYouDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [cacheType, setCacheType] = useState<'app' | 'download' | 'search'>('app')
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; connected: boolean; icon: string } | null>(null)
+  const [integrations, setIntegrations] = useState([
+    { name: 'Apple App Store', connected: true, icon: '' },
+    { name: 'Google Play', connected: true, icon: '' },
+    { name: 'Microsoft Store', connected: false, icon: '' },
+    { name: 'Slack', connected: true, icon: '' },
+  ])
+
   // Fetch user on mount
   useEffect(() => {
     const getUser = async () => {
@@ -1171,13 +1193,13 @@ export default function AppStoreClient() {
             {/* Discover Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Sparkles, label: 'For You', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setPricingFilter('all'); toast.success('Showing personalized recommendations') } },
+                { icon: Sparkles, label: 'For You', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowForYouDialog(true) },
                 { icon: TrendingUp, label: 'Trending', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSeeAllType('trending'); setShowSeeAllDialog(true) } },
                 { icon: Award, label: 'Top Charts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => { setSeeAllType('editors'); setShowSeeAllDialog(true) } },
-                { icon: Zap, label: 'New Apps', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.success('Showing new apps from this week') },
-                { icon: Gift, label: 'Free Today', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setPricingFilter('free'); setActiveTab('browse'); toast.success('Showing free apps') } },
-                { icon: Tag, label: 'On Sale', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.success('Showing apps currently on sale') },
-                { icon: Users, label: 'Team Picks', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.success('Showing team recommended apps') },
+                { icon: Zap, label: 'New Apps', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowNewAppsDialog(true) },
+                { icon: Gift, label: 'Free Today', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setPricingFilter('free'); setActiveTab('browse') } },
+                { icon: Tag, label: 'On Sale', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setShowOnSaleDialog(true) },
+                { icon: Users, label: 'Team Picks', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowTeamPicksDialog(true) },
                 { icon: Heart, label: 'Wishlist', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowWishlistDialog(true) },
               ].map((action, idx) => (
                 <Button
@@ -1398,11 +1420,11 @@ export default function AppStoreClient() {
                     <div className="flex gap-2 mt-4 pt-3 border-t">
                       {app.status === 'installed' ? (
                         <>
-                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); toast.success('App opened successfully') }}>
+                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); setAppToOpen(app); setShowOpenAppDialog(true) }}>
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
-                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleUninstallApp(app) }} disabled={loading}>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setAppForSettings(app); setShowAppSettingsDialog(true) }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </>
@@ -1411,7 +1433,7 @@ export default function AppStoreClient() {
                           <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={(e) => { e.stopPropagation(); handleInstallApp(app) }} disabled={loading}>
                             Purchase
                           </Button>
-                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.success('App opened successfully') }}>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setAppToOpen(app); setShowOpenAppDialog(true) }}>
                             <Play className="w-4 h-4" />
                           </Button>
                         </>
@@ -1462,10 +1484,10 @@ export default function AppStoreClient() {
                             <p className="text-sm text-muted-foreground">v{app.version} • {formatBytes(app.size)}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.success('App opened successfully') }}>
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); setAppToOpen(app); setShowOpenAppDialog(true) }}>
                               <Play className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleViewApp(app) }}>
+                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setAppForSettings(app); setShowAppSettingsDialog(true) }}>
                               <Settings className="w-4 h-4" />
                             </Button>
                             <Button size="sm" variant="outline" className="text-red-600" onClick={(e) => { e.stopPropagation(); handleUninstallApp(app) }} disabled={loading}>
@@ -1733,8 +1755,8 @@ export default function AppStoreClient() {
                 { icon: Network, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setSettingsTab('integrations') },
                 { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setSettingsTab('security') },
                 { icon: Terminal, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setSettingsTab('advanced') },
-                { icon: DollarSign, label: 'Billing', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => toast.success('Billing settings opened') },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.success('Settings reset to defaults') },
+                { icon: DollarSign, label: 'Billing', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => setShowBillingDialog(true) },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setShowResetSettingsDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1793,8 +1815,8 @@ export default function AppStoreClient() {
                         <div className="flex items-center justify-between">
                           <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">Grid or list view</p></div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => toast.success('Grid view enabled')}><Grid3X3 className="h-4 w-4" /></Button>
-                            <Button variant="outline" size="sm" onClick={() => toast.success('List view enabled')}><List className="h-4 w-4" /></Button>
+                            <Button variant={viewMode === 'grid' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('grid')}><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant={viewMode === 'list' ? 'default' : 'outline'} size="sm" onClick={() => setViewMode('list')}><List className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1904,15 +1926,10 @@ export default function AppStoreClient() {
                         <CardDescription>Manage app store integrations</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { name: 'Apple App Store', connected: true, icon: '🍎' },
-                          { name: 'Google Play', connected: true, icon: '🤖' },
-                          { name: 'Microsoft Store', connected: false, icon: '🪟' },
-                          { name: 'Slack', connected: true, icon: '💬' },
-                        ].map((integration, idx) => (
+                        {integrations.map((integration, idx) => (
                           <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <div className="flex items-center gap-3">
-                              <span className="text-2xl">{integration.icon}</span>
+                              <span className="text-2xl">{idx === 0 ? '' : idx === 1 ? '' : idx === 2 ? '' : ''}</span>
                               <div>
                                 <p className="font-medium">{integration.name}</p>
                                 <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
@@ -1922,11 +1939,8 @@ export default function AppStoreClient() {
                               variant={integration.connected ? 'outline' : 'default'}
                               size="sm"
                               onClick={() => {
-                                if (integration.connected) {
-                                  toast.success(`Disconnected from ${integration.name}`)
-                                } else {
-                                  toast.success(`Connected to ${integration.name}`)
-                                }
+                                setSelectedIntegration({ ...integration, icon: idx === 0 ? '' : idx === 1 ? '' : idx === 2 ? '' : '' })
+                                setShowIntegrationDialog(true)
                               }}
                             >
                               {integration.connected ? 'Disconnect' : 'Connect'}
@@ -2001,15 +2015,15 @@ export default function AppStoreClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">App Cache</p><p className="text-sm text-gray-500">1.2 GB used</p></div>
-                          <Button variant="outline" size="sm" onClick={() => toast.success('App cache cleared successfully')}>Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => { setCacheType('app'); setShowClearCacheDialog(true) }}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Download History</p><p className="text-sm text-gray-500">256 MB used</p></div>
-                          <Button variant="outline" size="sm" onClick={() => toast.success('Download history cleared successfully')}>Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => { setCacheType('download'); setShowClearCacheDialog(true) }}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Search History</p><p className="text-sm text-gray-500">12 MB used</p></div>
-                          <Button variant="outline" size="sm" onClick={() => toast.success('Search history cleared successfully')}>Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => { setCacheType('search'); setShowClearCacheDialog(true) }}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2189,11 +2203,11 @@ export default function AppStoreClient() {
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedApp.status === 'installed' ? (
                     <>
-                      <Button className="flex-1" onClick={() => toast.success('App opened successfully')}>
+                      <Button className="flex-1" onClick={() => { setAppToOpen(selectedApp); setShowAppDialog(false); setShowOpenAppDialog(true) }}>
                         <Play className="w-4 h-4 mr-2" />
                         Open App
                       </Button>
-                      <Button variant="outline" onClick={() => toast.success('Settings opened')}>
+                      <Button variant="outline" onClick={() => { setAppForSettings(selectedApp); setShowAppDialog(false); setShowAppSettingsDialog(true) }}>
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Button>
@@ -2208,7 +2222,7 @@ export default function AppStoreClient() {
                         <DollarSign className="w-4 h-4 mr-2" />
                         Purchase Now
                       </Button>
-                      <Button variant="outline" onClick={() => toast.success('App opened successfully')}>
+                      <Button variant="outline" onClick={() => { setAppToOpen(selectedApp); setShowAppDialog(false); setShowOpenAppDialog(true) }}>
                         <Play className="w-4 h-4 mr-2" />
                         Continue Trial
                       </Button>
@@ -2531,7 +2545,9 @@ export default function AppStoreClient() {
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation()
-                        toast.success('App opened successfully')
+                        setAppToOpen(app)
+                        setShowMyAppsDialog(false)
+                        setShowOpenAppDialog(true)
                       }}
                     >
                       <Play className="w-3 h-3" />
@@ -2651,6 +2667,648 @@ export default function AppStoreClient() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Open App Dialog */}
+      <Dialog open={showOpenAppDialog} onOpenChange={setShowOpenAppDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5 text-green-500" />
+              Launch {appToOpen?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {appToOpen && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                  {appToOpen.name.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold">{appToOpen.name}</h4>
+                  <p className="text-sm text-muted-foreground">v{appToOpen.version} by {appToOpen.developer.name}</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="font-medium text-sm">Launch Options</h4>
+                <Button
+                  className="w-full justify-start"
+                  onClick={() => {
+                    toast.success(`Launching ${appToOpen.name} in new window...`)
+                    setShowOpenAppDialog(false)
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Open in New Window
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    toast.success(`Opening ${appToOpen.name} in current tab...`)
+                    setShowOpenAppDialog(false)
+                  }}
+                >
+                  <Monitor className="w-4 h-4 mr-2" />
+                  Open in Current View
+                </Button>
+                {appToOpen.platforms.includes('mobile') && (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      toast.success(`Opening ${appToOpen.name} on mobile device...`)
+                      setShowOpenAppDialog(false)
+                    }}
+                  >
+                    <Smartphone className="w-4 h-4 mr-2" />
+                    Open on Mobile
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center justify-between pt-4 border-t text-sm text-muted-foreground">
+                <span>Last opened: {appToOpen.installedAt ? formatDate(appToOpen.installedAt) : 'Never'}</span>
+                <Button variant="ghost" size="sm" onClick={() => { setAppForSettings(appToOpen); setShowOpenAppDialog(false); setShowAppSettingsDialog(true) }}>
+                  <Settings className="w-4 h-4 mr-1" />
+                  Settings
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* App Settings Dialog */}
+      <Dialog open={showAppSettingsDialog} onOpenChange={setShowAppSettingsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-blue-500" />
+              {appForSettings?.name} Settings
+            </DialogTitle>
+          </DialogHeader>
+          {appForSettings && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold">
+                  {appForSettings.name.substring(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold">{appForSettings.name}</h4>
+                  <p className="text-sm text-muted-foreground">v{appForSettings.version}</p>
+                </div>
+                {getStatusBadge(appForSettings.status)}
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base">Auto-Update</Label>
+                    <p className="text-sm text-muted-foreground">Automatically install updates</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base">Notifications</Label>
+                    <p className="text-sm text-muted-foreground">Receive app notifications</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base">Background Sync</Label>
+                    <p className="text-sm text-muted-foreground">Sync data in background</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base">Data Usage</Label>
+                    <p className="text-sm text-muted-foreground">Allow mobile data usage</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+              <div className="space-y-2 pt-4 border-t">
+                <h4 className="font-medium text-sm">App Permissions</h4>
+                <div className="flex flex-wrap gap-2">
+                  {appForSettings.permissions.map((permission, idx) => (
+                    <Badge key={idx} variant="outline">{permission}</Badge>
+                  ))}
+                  {appForSettings.permissions.length === 0 && (
+                    <span className="text-sm text-muted-foreground">No special permissions required</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAppSettingsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success(`Settings saved for ${appForSettings.name}`)
+                  setShowAppSettingsDialog(false)
+                }}>
+                  Save Settings
+                </Button>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full text-red-600"
+                onClick={() => {
+                  handleUninstallApp(appForSettings)
+                  setShowAppSettingsDialog(false)
+                }}
+                disabled={loading}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Uninstall App
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Billing Dialog */}
+      <Dialog open={showBillingDialog} onOpenChange={setShowBillingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-emerald-500" />
+              Billing & Subscriptions
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg text-white">
+              <p className="text-sm opacity-90">Current Monthly Spend</p>
+              <p className="text-3xl font-bold">${analytics.monthlySpend.toFixed(2)}</p>
+              <p className="text-sm opacity-90 mt-1">Total: ${analytics.totalSpend.toFixed(2)} all time</p>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Active Subscriptions</h4>
+              {apps.filter(app => app.status === 'installed' && app.pricing === 'subscription').map((app) => (
+                <div key={app.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-xs font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{app.name}</p>
+                      <p className="text-xs text-muted-foreground">{app.billingCycle || 'monthly'}</p>
+                    </div>
+                  </div>
+                  <span className="font-semibold">${app.price}/mo</span>
+                </div>
+              ))}
+              {apps.filter(app => app.status === 'installed' && app.pricing === 'subscription').length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">No active subscriptions</p>
+              )}
+            </div>
+            <div className="space-y-2 pt-4 border-t">
+              <h4 className="font-medium text-sm">Payment Method</h4>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-6 bg-gradient-to-r from-blue-600 to-blue-800 rounded flex items-center justify-center text-white text-xs">
+                    VISA
+                  </div>
+                  <span className="text-sm">**** **** **** 4242</span>
+                </div>
+                <Button variant="ghost" size="sm">Edit</Button>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4 border-t">
+              <Button variant="outline" className="flex-1" onClick={() => setShowBillingDialog(false)}>
+                Close
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                toast.success('Opening payment history...')
+                setShowBillingDialog(false)
+              }}>
+                View History
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Settings Dialog */}
+      <Dialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="w-5 h-5" />
+              Reset App Store Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              This will reset all App Store settings to their default values. This action cannot be undone.
+            </p>
+            <div className="space-y-2">
+              <h4 className="font-medium text-sm">This will reset:</h4>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                <li>Display preferences</li>
+                <li>Download settings</li>
+                <li>Notification preferences</li>
+                <li>Security settings</li>
+                <li>Developer options</li>
+              </ul>
+            </div>
+            <div className="flex gap-2 pt-4 border-t">
+              <Button variant="outline" className="flex-1" onClick={() => setShowResetSettingsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={() => {
+                  toast.success('All settings have been reset to defaults')
+                  setShowResetSettingsDialog(false)
+                }}
+              >
+                Reset Settings
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Cache Dialog */}
+      <Dialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-orange-500" />
+              Clear {cacheType === 'app' ? 'App Cache' : cacheType === 'download' ? 'Download History' : 'Search History'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              {cacheType === 'app' && 'This will clear cached app data and temporary files. Apps may take longer to load initially after clearing.'}
+              {cacheType === 'download' && 'This will clear your download history. Installed apps will not be affected.'}
+              {cacheType === 'search' && 'This will clear your search history and recent searches. Your preferences will be preserved.'}
+            </p>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Space to be freed:</span>
+                <span className="font-semibold">
+                  {cacheType === 'app' && '1.2 GB'}
+                  {cacheType === 'download' && '256 MB'}
+                  {cacheType === 'search' && '12 MB'}
+                </span>
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4 border-t">
+              <Button variant="outline" className="flex-1" onClick={() => setShowClearCacheDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  toast.success(`${cacheType === 'app' ? 'App cache' : cacheType === 'download' ? 'Download history' : 'Search history'} cleared successfully`)
+                  setShowClearCacheDialog(false)
+                }}
+              >
+                Clear Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Apps Dialog */}
+      <Dialog open={showNewAppsDialog} onOpenChange={setShowNewAppsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-green-500" />
+              New Apps This Week
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Discover the latest apps added to the store this week.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {apps.slice(0, 6).map((app) => (
+                <div
+                  key={app.id}
+                  className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedApp(app)
+                    setShowNewAppsDialog(false)
+                    setShowAppDialog(true)
+                  }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
+                    {app.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-semibold truncate">{app.name}</h4>
+                      <Badge className="bg-green-100 text-green-700 text-xs">New</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{app.developer.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                      <span className="text-xs">{app.rating.toFixed(1)}</span>
+                      {getPricingBadge(app.pricing, app.price)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowNewAppsDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowNewAppsDialog(false)
+                setActiveTab('browse')
+              }}>
+                Browse All Apps
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* On Sale Dialog */}
+      <Dialog open={showOnSaleDialog} onOpenChange={setShowOnSaleDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5 text-red-500" />
+              Apps On Sale
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Limited time offers on popular apps. Don't miss out!
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {apps.filter(app => app.pricing === 'subscription' || app.pricing === 'paid').slice(0, 4).map((app) => (
+                <div
+                  key={app.id}
+                  className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer relative"
+                  onClick={() => {
+                    setSelectedApp(app)
+                    setShowOnSaleDialog(false)
+                    setShowAppDialog(true)
+                  }}
+                >
+                  <Badge className="absolute -top-2 -right-2 bg-red-500 text-white">-30%</Badge>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                    {app.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold truncate">{app.name}</h4>
+                    <p className="text-sm text-muted-foreground truncate">{app.developer.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm line-through text-muted-foreground">${app.price}</span>
+                      <span className="text-sm font-bold text-red-600">${(app.price * 0.7).toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+              <p className="text-sm text-red-600 dark:text-red-400">Sale ends in 3 days, 14 hours</p>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowOnSaleDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setPricingFilter('subscription')
+                setShowOnSaleDialog(false)
+                setActiveTab('browse')
+              }}>
+                View All Deals
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Team Picks Dialog */}
+      <Dialog open={showTeamPicksDialog} onOpenChange={setShowTeamPicksDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-500" />
+              Team Recommended Apps
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Apps recommended by your team members for better collaboration and productivity.
+            </p>
+            <div className="space-y-3">
+              {apps.filter(app => app.category === 'productivity' || app.category === 'communication').slice(0, 5).map((app, idx) => (
+                <div
+                  key={app.id}
+                  className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedApp(app)
+                    setShowTeamPicksDialog(false)
+                    setShowAppDialog(true)
+                  }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold">
+                    {app.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-semibold">{app.name}</h4>
+                      <Badge variant="outline" className="text-xs">
+                        <Users className="w-3 h-3 mr-1" />
+                        {3 + idx} team members use
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-1">{app.tagline}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                      <span className="text-xs">{app.rating.toFixed(1)}</span>
+                      {getStatusBadge(app.status)}
+                    </div>
+                  </div>
+                  {app.status === 'available' && (
+                    <Button size="sm" onClick={(e) => {
+                      e.stopPropagation()
+                      handleInstallApp(app)
+                    }}>
+                      <Download className="w-3 h-3 mr-1" />
+                      Get
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowTeamPicksDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setCategoryFilter('productivity')
+                setShowTeamPicksDialog(false)
+                setActiveTab('browse')
+              }}>
+                Browse Productivity Apps
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* For You Dialog */}
+      <Dialog open={showForYouDialog} onOpenChange={setShowForYouDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-500" />
+              Recommended For You
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Personalized app recommendations based on your usage patterns and preferences.
+            </p>
+            <div className="p-4 bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <span className="font-medium text-sm text-indigo-700 dark:text-indigo-300">AI-Powered Recommendations</span>
+              </div>
+              <p className="text-sm text-indigo-600 dark:text-indigo-300">
+                Based on your installed apps and activity, we think you'll love these.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              {apps.slice(0, 5).map((app, idx) => (
+                <div
+                  key={app.id}
+                  className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedApp(app)
+                    setShowForYouDialog(false)
+                    setShowAppDialog(true)
+                  }}
+                >
+                  <div className="text-lg font-bold text-muted-foreground w-6">#{idx + 1}</div>
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                    {app.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-semibold">{app.name}</h4>
+                      {app.editorChoice && <Award className="w-4 h-4 text-yellow-500" />}
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-1">{app.tagline}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline" className="text-xs bg-indigo-50 dark:bg-indigo-900/30">
+                        {90 - idx * 5}% match
+                      </Badge>
+                      {getPricingBadge(app.pricing, app.price)}
+                    </div>
+                  </div>
+                  {app.status === 'available' ? (
+                    <Button size="sm" onClick={(e) => {
+                      e.stopPropagation()
+                      handleInstallApp(app)
+                    }}>
+                      <Download className="w-3 h-3 mr-1" />
+                      Get
+                    </Button>
+                  ) : (
+                    getStatusBadge(app.status)
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowForYouDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowForYouDialog(false)
+                setActiveTab('discover')
+              }}>
+                Explore More
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Connect/Disconnect Dialog */}
+      <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Network className="w-5 h-5 text-purple-500" />
+              {selectedIntegration?.connected ? 'Disconnect' : 'Connect'} {selectedIntegration?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedIntegration && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                <span className="text-4xl">{selectedIntegration.icon}</span>
+                <div className="flex-1">
+                  <h4 className="font-semibold">{selectedIntegration.name}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedIntegration.connected ? 'Currently connected' : 'Not connected'}
+                  </p>
+                </div>
+              </div>
+              {selectedIntegration.connected ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Disconnecting will remove the integration between your App Store account and {selectedIntegration.name}.
+                    You can reconnect at any time.
+                  </p>
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      This will not affect any apps you've already installed from {selectedIntegration.name}.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Connect your {selectedIntegration.name} account to sync apps and get personalized recommendations.
+                  </p>
+                  <div className="space-y-2">
+                    <Label>Account Email</Label>
+                    <Input type="email" placeholder={`your-email@${selectedIntegration.name.toLowerCase().replace(/\s/g, '')}.com`} />
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-2 pt-4 border-t">
+                <Button variant="outline" className="flex-1" onClick={() => setShowIntegrationDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1"
+                  variant={selectedIntegration.connected ? 'destructive' : 'default'}
+                  onClick={() => {
+                    const newStatus = !selectedIntegration.connected
+                    setIntegrations(prev => prev.map(int =>
+                      int.name === selectedIntegration.name
+                        ? { ...int, connected: newStatus }
+                        : int
+                    ))
+                    toast.success(newStatus
+                      ? `Connected to ${selectedIntegration.name}`
+                      : `Disconnected from ${selectedIntegration.name}`
+                    )
+                    setShowIntegrationDialog(false)
+                  }}
+                >
+                  {selectedIntegration.connected ? 'Disconnect' : 'Connect'}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

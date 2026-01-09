@@ -401,6 +401,11 @@ export default function VideoStudioClient() {
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<'16:9' | '9:16' | '1:1'>('16:9')
   const [showCollaborateDialog, setShowCollaborateDialog] = useState(false)
   const [showCloudStorageDialog, setShowCloudStorageDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showFileBrowserDialog, setShowFileBrowserDialog] = useState(false)
+  const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
+  const [selectedStoragePath, setSelectedStoragePath] = useState('')
+  const [projectToDelete, setProjectToDelete] = useState<VideoProject | null>(null)
 
   // Handler functions for track controls
   const handleToggleTrackVisibility = (track: 'video' | 'audio' | 'titles') => {
@@ -1051,7 +1056,7 @@ export default function VideoStudioClient() {
         setShowUploadDialog(true)
         break
       case 'Templates':
-        toast.success('Opening Templates gallery')
+        setShowTemplatesDialog(true)
         break
       case 'Cloud Storage':
         setShowCloudStorageDialog(true)
@@ -1060,8 +1065,44 @@ export default function VideoStudioClient() {
         setShowCollaborateDialog(true)
         break
       default:
-        toast.info(`${label} clicked`)
+        // Handle any other quick actions
+        setShowNewProjectDialog(true)
     }
+  }
+
+  // Handler for selecting a template
+  const handleSelectTemplate = (template: Template) => {
+    const applyPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1000)
+    })
+    toast.promise(applyPromise, {
+      loading: `Applying template "${template.name}"...`,
+      success: `Template "${template.name}" applied to new project`,
+      error: 'Failed to apply template'
+    })
+    setShowTemplatesDialog(false)
+  }
+
+  // Handler for file browser selection
+  const handleSelectPath = (path: string) => {
+    setSelectedStoragePath(path)
+    setShowFileBrowserDialog(false)
+  }
+
+  // Handler for deleting a project
+  const handleDeleteProject = () => {
+    if (!projectToDelete) return
+    const deletePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 800)
+    })
+    toast.promise(deletePromise, {
+      loading: `Moving "${projectToDelete.title}" to trash...`,
+      success: `"${projectToDelete.title}" moved to trash`,
+      error: 'Failed to delete project'
+    })
+    setShowDeleteProjectDialog(false)
+    setShowProjectOptionsDialog(false)
+    setProjectToDelete(null)
   }
 
   // Handler for selecting aspect ratio preset
@@ -3070,8 +3111,8 @@ export default function VideoStudioClient() {
               <div>
                 <label className="text-sm font-medium">New Location</label>
                 <div className="flex gap-2 mt-1">
-                  <Input placeholder="/path/to/new/location" className="flex-1" />
-                  <Button variant="outline" onClick={() => toast.info('File browser opened')}>Browse</Button>
+                  <Input placeholder="/path/to/new/location" className="flex-1" value={selectedStoragePath} onChange={(e) => setSelectedStoragePath(e.target.value)} />
+                  <Button variant="outline" onClick={() => setShowFileBrowserDialog(true)}>Browse</Button>
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
@@ -3210,7 +3251,7 @@ export default function VideoStudioClient() {
                   <Copy className="w-4 h-4 mr-2" />
                   Duplicate
                 </Button>
-                <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { toast.success(`"${selectedProject.title}" moved to trash`); setShowProjectOptionsDialog(false); }}>
+                <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { setProjectToDelete(selectedProject); setShowDeleteProjectDialog(true); }}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
                 </Button>
@@ -3313,6 +3354,176 @@ export default function VideoStudioClient() {
                 <Button className="flex-1" onClick={handleCloudStorageSync}>Sync Now</Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Gallery Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Grid3X3 className="w-5 h-5" />
+                Template Gallery
+              </DialogTitle>
+              <DialogDescription>Choose a template to start your new project</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[60vh]">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pr-4">
+                {templates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="group cursor-pointer rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all"
+                    onClick={() => handleSelectTemplate(template)}
+                  >
+                    <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 relative">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Layout className="w-8 h-8 text-gray-400" />
+                      </div>
+                      {template.isPremium && (
+                        <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500">
+                          <Star className="w-3 h-3 mr-1" />
+                          Premium
+                        </Badge>
+                      )}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button size="sm" className="bg-white text-black hover:bg-gray-100">
+                          <Plus className="w-4 h-4 mr-1" />
+                          Use Template
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h4 className="font-medium text-sm text-gray-900 dark:text-white">{template.name}</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">{template.description}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <Badge variant="secondary" className="text-xs">{template.category}</Badge>
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          {template.rating}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {template.duration}s
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Download className="w-3 h-3" />
+                          {template.downloads.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Cancel</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* File Browser Dialog */}
+        <Dialog open={showFileBrowserDialog} onOpenChange={setShowFileBrowserDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Folder className="w-5 h-5" />
+                Select Folder
+              </DialogTitle>
+              <DialogDescription>Choose a location for your project files</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <HardDrive className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium">/Users/Studio</span>
+              </div>
+              <ScrollArea className="h-64 border rounded-lg">
+                <div className="p-2 space-y-1">
+                  {[
+                    { name: 'Documents', path: '/Users/Studio/Documents', icon: Folder },
+                    { name: 'Projects', path: '/Users/Studio/Projects', icon: Folder },
+                    { name: 'Videos', path: '/Users/Studio/Videos', icon: Video },
+                    { name: 'Media', path: '/Users/Studio/Media', icon: Layers },
+                    { name: 'Exports', path: '/Users/Studio/Exports', icon: Download },
+                    { name: 'Backups', path: '/Users/Studio/Backups', icon: Cloud },
+                    { name: 'Shared', path: '/Users/Studio/Shared', icon: Users },
+                    { name: 'Archive', path: '/Users/Studio/Archive', icon: Folder }
+                  ].map((folder, idx) => (
+                    <button
+                      key={idx}
+                      className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left ${selectedStoragePath === folder.path ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800' : ''}`}
+                      onClick={() => setSelectedStoragePath(folder.path)}
+                    >
+                      <folder.icon className={`w-4 h-4 ${selectedStoragePath === folder.path ? 'text-purple-600' : 'text-gray-500'}`} />
+                      <span className={`text-sm ${selectedStoragePath === folder.path ? 'text-purple-700 dark:text-purple-300 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>{folder.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+              {selectedStoragePath && (
+                <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <p className="text-sm text-purple-700 dark:text-purple-300">
+                    Selected: <span className="font-medium">{selectedStoragePath}</span>
+                  </p>
+                </div>
+              )}
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowFileBrowserDialog(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={() => handleSelectPath(selectedStoragePath)} disabled={!selectedStoragePath}>
+                  Select Folder
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Project Confirmation Dialog */}
+        <Dialog open={showDeleteProjectDialog} onOpenChange={setShowDeleteProjectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Project
+              </DialogTitle>
+              <DialogDescription>This action cannot be undone</DialogDescription>
+            </DialogHeader>
+            {projectToDelete && (
+              <div className="space-y-4">
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    Are you sure you want to delete <span className="font-bold">&quot;{projectToDelete.title}&quot;</span>? This will permanently remove the project and all associated files.
+                  </p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Duration:</span>
+                    <span className="font-medium">{formatDuration(projectToDelete.duration)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Size:</span>
+                    <span className="font-medium">{formatFileSize(projectToDelete.size)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Version:</span>
+                    <span className="font-medium">v{projectToDelete.version}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">Last edited:</span>
+                    <span className="font-medium">{formatTimeAgo(projectToDelete.lastEdited)}</span>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" className="flex-1" onClick={() => { setShowDeleteProjectDialog(false); setProjectToDelete(null); }}>
+                    Cancel
+                  </Button>
+                  <Button variant="destructive" className="flex-1" onClick={handleDeleteProject}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Project
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

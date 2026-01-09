@@ -783,6 +783,33 @@ export default function AllocationClient() {
   const [showIntegrationsDialog, setShowIntegrationsDialog] = useState(false)
   const [calendarMonth, setCalendarMonth] = useState('February 2024')
 
+  // Additional dialog states for previously toast-only buttons
+  const [showAssignResourceDialog, setShowAssignResourceDialog] = useState(false)
+  const [showTimeEntryDialog, setShowTimeEntryDialog] = useState(false)
+  const [showApproveAllocationsDialog, setShowApproveAllocationsDialog] = useState(false)
+  const [showTransferAllocationDialog, setShowTransferAllocationDialog] = useState(false)
+  const [showCapacityTrendsDialog, setShowCapacityTrendsDialog] = useState(false)
+  const [showHiringPlanDialog, setShowHiringPlanDialog] = useState(false)
+  const [showWorkloadBalanceDialog, setShowWorkloadBalanceDialog] = useState(false)
+  const [showOptimizeDialog, setShowOptimizeDialog] = useState(false)
+  const [showTrendsReportDialog, setShowTrendsReportDialog] = useState(false)
+
+  // Form states for new dialogs
+  const [timeEntryData, setTimeEntryData] = useState({
+    resource: '',
+    project: '',
+    hours: 0,
+    date: '',
+    description: ''
+  })
+
+  const [transferData, setTransferData] = useState({
+    allocation: '',
+    fromProject: '',
+    toProject: '',
+    hours: 0
+  })
+
   // Quick actions with proper dialog handlers
   const allocationQuickActions = [
     { id: '1', label: 'New Allocation', icon: 'plus', action: () => { setFormData(initialFormState); setShowCreateDialog(true) }, variant: 'default' as const },
@@ -1077,11 +1104,11 @@ export default function AllocationClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Allocation', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => { setFormData(initialFormState); setShowCreateDialog(true) } },
-                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('Select a resource to assign') },
+                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowAssignResourceDialog(true) },
                 { icon: Calendar, label: 'Schedule', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('schedule') },
-                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Time tracking feature ready') },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Select pending allocations to approve') },
-                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Transfer allocation between projects') },
+                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowTimeEntryDialog(true) },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowApproveAllocationsDialog(true) },
+                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowTransferAllocationDialog(true) },
                 { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('reports') },
                 { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
@@ -1341,12 +1368,12 @@ export default function AllocationClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: BarChart3, label: 'Forecast', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowCapacityReportDialog(true) },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.success('Capacity Trends', { description: 'Analyzing capacity trends over time' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowCapacityTrendsDialog(true) },
                 { icon: AlertTriangle, label: 'Alerts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setShowAlertsDialog(true) },
-                { icon: Users, label: 'Hiring', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.success('Hiring Plan', { description: 'Opening hiring capacity planner' }) },
-                { icon: Layers, label: 'Balance', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('Workload Balance', { description: 'Analyzing workload distribution' }) },
+                { icon: Users, label: 'Hiring', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowHiringPlanDialog(true) },
+                { icon: Layers, label: 'Balance', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowWorkloadBalanceDialog(true) },
                 { icon: Calendar, label: 'Schedule', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('schedule') },
-                { icon: RefreshCw, label: 'Optimize', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Optimizing', { description: 'Running capacity optimization algorithm' }) },
+                { icon: RefreshCw, label: 'Optimize', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowOptimizeDialog(true) },
                 { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1616,7 +1643,7 @@ export default function AllocationClient() {
               {[
                 { icon: PieChart, label: 'Utilization', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowUtilizationDialog(true) },
                 { icon: BarChart3, label: 'Revenue', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCapacityReportDialog(true) },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Trends Report', { description: 'Generating trends analysis report' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowTrendsReportDialog(true) },
                 { icon: Users, label: 'Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowTeamViewDialog(true) },
                 { icon: Briefcase, label: 'Projects', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('schedule') },
                 { icon: DollarSign, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowBillingReportDialog(true) },
@@ -3512,6 +3539,613 @@ export default function AllocationClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowIntegrationsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Resource Dialog */}
+        <Dialog open={showAssignResourceDialog} onOpenChange={setShowAssignResourceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <UserCheck className="w-5 h-5" />
+                Assign Resource to Project
+              </DialogTitle>
+              <DialogDescription>
+                Quick assignment of team members to projects
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Resource</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Choose a resource" /></SelectTrigger>
+                  <SelectContent>
+                    {mockResources.map(resource => (
+                      <SelectItem key={resource.id} value={resource.id}>
+                        {resource.name} - {resource.role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Select Project</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Choose a project" /></SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.filter(p => p.status === 'active').map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name} ({project.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Hours per Week</Label>
+                  <Input type="number" defaultValue={40} min={1} max={60} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select defaultValue="medium">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignResourceDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowAssignResourceDialog(false); toast.success('Resource Assigned', { description: 'Allocation has been created successfully' }) }}>
+                <UserCheck className="w-4 h-4 mr-2" />
+                Assign Resource
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Entry Dialog */}
+        <Dialog open={showTimeEntryDialog} onOpenChange={setShowTimeEntryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Clock className="w-5 h-5" />
+                Log Time Entry
+              </DialogTitle>
+              <DialogDescription>
+                Record time worked on a project
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Resource</Label>
+                <Select
+                  value={timeEntryData.resource}
+                  onValueChange={(v) => setTimeEntryData(prev => ({ ...prev, resource: v }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select resource" /></SelectTrigger>
+                  <SelectContent>
+                    {mockResources.map(resource => (
+                      <SelectItem key={resource.id} value={resource.id}>
+                        {resource.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Project</Label>
+                <Select
+                  value={timeEntryData.project}
+                  onValueChange={(v) => setTimeEntryData(prev => ({ ...prev, project: v }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.filter(p => p.status === 'active').map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Hours</Label>
+                  <Input
+                    type="number"
+                    value={timeEntryData.hours}
+                    onChange={(e) => setTimeEntryData(prev => ({ ...prev, hours: Number(e.target.value) }))}
+                    min={0.5}
+                    max={24}
+                    step={0.5}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={timeEntryData.date}
+                    onChange={(e) => setTimeEntryData(prev => ({ ...prev, date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="What did you work on?"
+                  value={timeEntryData.description}
+                  onChange={(e) => setTimeEntryData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTimeEntryDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                setShowTimeEntryDialog(false);
+                setTimeEntryData({ resource: '', project: '', hours: 0, date: '', description: '' });
+                toast.success('Time Entry Logged', { description: `${timeEntryData.hours} hours recorded successfully` })
+              }}>
+                <Clock className="w-4 h-4 mr-2" />
+                Log Time
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Approve Allocations Dialog */}
+        <Dialog open={showApproveAllocationsDialog} onOpenChange={setShowApproveAllocationsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5" />
+                Pending Allocation Approvals
+              </DialogTitle>
+              <DialogDescription>
+                Review and approve pending resource allocations
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {mockAllocations.filter(a => a.status === 'pending').length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-500" />
+                    <p>No pending allocations to approve</p>
+                  </div>
+                ) : (
+                  mockAllocations.filter(a => a.status === 'pending').map(allocation => (
+                    <div key={allocation.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="bg-gradient-to-br from-fuchsia-500 to-purple-500 text-white text-sm">
+                          {allocation.resource_name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{allocation.resource_name}</p>
+                        <p className="text-sm text-gray-500">{allocation.project_name} - {allocation.hours_per_week}h/week</p>
+                        <p className="text-xs text-gray-400">{allocation.start_date} to {allocation.end_date}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600"
+                          onClick={() => { handleCancelAllocation(allocation.id, allocation.resource_name) }}
+                        >
+                          Reject
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => { handleApproveAllocation(allocation.id, allocation.resource_name) }}
+                        >
+                          Approve
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowApproveAllocationsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Transfer Allocation Dialog */}
+        <Dialog open={showTransferAllocationDialog} onOpenChange={setShowTransferAllocationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <GitBranch className="w-5 h-5" />
+                Transfer Allocation
+              </DialogTitle>
+              <DialogDescription>
+                Move an allocation between projects
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Allocation</Label>
+                <Select
+                  value={transferData.allocation}
+                  onValueChange={(v) => {
+                    const alloc = mockAllocations.find(a => a.id === v)
+                    setTransferData(prev => ({
+                      ...prev,
+                      allocation: v,
+                      fromProject: alloc?.project_name || '',
+                      hours: alloc?.hours_per_week || 0
+                    }))
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Choose allocation to transfer" /></SelectTrigger>
+                  <SelectContent>
+                    {mockAllocations.filter(a => a.status === 'active').map(allocation => (
+                      <SelectItem key={allocation.id} value={allocation.id}>
+                        {allocation.resource_name} - {allocation.project_name} ({allocation.hours_per_week}h/week)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {transferData.fromProject && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Current Project</p>
+                  <p className="font-medium">{transferData.fromProject}</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label>Transfer To Project</Label>
+                <Select
+                  value={transferData.toProject}
+                  onValueChange={(v) => setTransferData(prev => ({ ...prev, toProject: v }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select destination project" /></SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.filter(p => p.status === 'active' && p.name !== transferData.fromProject).map(project => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name} ({project.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Hours to Transfer</Label>
+                <Input
+                  type="number"
+                  value={transferData.hours}
+                  onChange={(e) => setTransferData(prev => ({ ...prev, hours: Number(e.target.value) }))}
+                  min={1}
+                  max={60}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowTransferAllocationDialog(false); setTransferData({ allocation: '', fromProject: '', toProject: '', hours: 0 }) }}>Cancel</Button>
+              <Button onClick={() => {
+                setShowTransferAllocationDialog(false);
+                setTransferData({ allocation: '', fromProject: '', toProject: '', hours: 0 });
+                toast.success('Allocation Transferred', { description: 'Resource allocation has been moved to the new project' })
+              }}>
+                <GitBranch className="w-4 h-4 mr-2" />
+                Transfer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Capacity Trends Dialog */}
+        <Dialog open={showCapacityTrendsDialog} onOpenChange={setShowCapacityTrendsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <TrendingUp className="w-5 h-5" />
+                Capacity Trends Analysis
+              </DialogTitle>
+              <DialogDescription>
+                Historical capacity and utilization trends
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <TrendingUp className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                  <p className="text-2xl font-bold text-green-600">+12%</p>
+                  <p className="text-sm text-gray-500">Utilization Growth</p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                  <BarChart3 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                  <p className="text-2xl font-bold text-blue-600">85%</p>
+                  <p className="text-sm text-gray-500">Avg Utilization</p>
+                </div>
+                <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                  <Users className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                  <p className="text-2xl font-bold text-purple-600">+3</p>
+                  <p className="text-sm text-gray-500">Team Growth</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-medium">Monthly Trend</h4>
+                {['January', 'February', 'March', 'April'].map((month, i) => (
+                  <div key={month} className="flex items-center gap-4">
+                    <div className="w-24 text-sm">{month}</div>
+                    <div className="flex-1">
+                      <Progress value={70 + (i * 5)} className="h-3" />
+                    </div>
+                    <div className="w-16 text-right text-sm font-medium">{70 + (i * 5)}%</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCapacityTrendsDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowCapacityTrendsDialog(false); setActiveTab('reports') }}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Full Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Hiring Plan Dialog */}
+        <Dialog open={showHiringPlanDialog} onOpenChange={setShowHiringPlanDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Users className="w-5 h-5" />
+                Hiring Capacity Planner
+              </DialogTitle>
+              <DialogDescription>
+                Plan future hiring based on capacity needs
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <p className="text-sm text-gray-500 mb-1">Current Gap</p>
+                  <p className="text-2xl font-bold text-orange-600">-45h/week</p>
+                  <p className="text-xs text-gray-400">Based on upcoming projects</p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm text-gray-500 mb-1">Recommended Hires</p>
+                  <p className="text-2xl font-bold text-blue-600">2 FTEs</p>
+                  <p className="text-xs text-gray-400">To meet Q2 demand</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-medium">Recommended Roles</h4>
+                <div className="space-y-3">
+                  {[
+                    { role: 'Senior Frontend Developer', urgency: 'high', hours: 40 },
+                    { role: 'UX Designer', urgency: 'medium', hours: 30 },
+                    { role: 'DevOps Engineer', urgency: 'low', hours: 20 }
+                  ].map(rec => (
+                    <div key={rec.role} className="flex items-center gap-4 p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium">{rec.role}</p>
+                        <p className="text-xs text-gray-500">{rec.hours}h/week needed</p>
+                      </div>
+                      <Badge className={getPriorityColor(rec.urgency as Priority)}>
+                        {rec.urgency}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowHiringPlanDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowHiringPlanDialog(false); toast.success('Hiring Plan Exported', { description: 'Plan has been exported for review' }) }}>
+                <ArrowUpRight className="w-4 h-4 mr-2" />
+                Export Plan
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workload Balance Dialog */}
+        <Dialog open={showWorkloadBalanceDialog} onOpenChange={setShowWorkloadBalanceDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Layers className="w-5 h-5" />
+                Workload Distribution Analysis
+              </DialogTitle>
+              <DialogDescription>
+                Analyze and balance team workloads
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{mockResources.filter(r => r.utilization >= 70 && r.utilization <= 90).length}</p>
+                  <p className="text-sm text-gray-500">Optimal (70-90%)</p>
+                </div>
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-yellow-600">{mockResources.filter(r => r.utilization < 70).length}</p>
+                  <p className="text-sm text-gray-500">Under-utilized</p>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-600">{mockResources.filter(r => r.utilization > 100).length}</p>
+                  <p className="text-sm text-gray-500">Over-allocated</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-medium">Rebalancing Suggestions</h4>
+                <div className="space-y-3">
+                  {mockResources.filter(r => r.utilization > 100).map(resource => (
+                    <div key={resource.id} className="flex items-center gap-4 p-3 border border-red-200 bg-red-50 dark:bg-red-900/10 rounded-lg">
+                      <AlertTriangle className="w-5 h-5 text-red-500" />
+                      <div className="flex-1">
+                        <p className="font-medium">{resource.name}</p>
+                        <p className="text-sm text-gray-500">Move {resource.allocated_hours - resource.capacity_hours}h to available team members</p>
+                      </div>
+                      <Button size="sm" variant="outline" onClick={() => { toast.success('Rebalancing', { description: `Rebalancing ${resource.name}'s workload` }) }}>
+                        Rebalance
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWorkloadBalanceDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowWorkloadBalanceDialog(false); toast.success('Auto-Balance', { description: 'Running automatic workload balancing' }) }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Auto-Balance All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Optimize Dialog */}
+        <Dialog open={showOptimizeDialog} onOpenChange={setShowOptimizeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <RefreshCw className="w-5 h-5" />
+                Capacity Optimization
+              </DialogTitle>
+              <DialogDescription>
+                Run optimization algorithms on team allocations
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Zap className="w-5 h-5 text-yellow-500" />
+                    <div>
+                      <p className="font-medium">Smart Allocation</p>
+                      <p className="text-sm text-gray-500">AI-powered resource matching</p>
+                    </div>
+                  </div>
+                  <Button className="w-full" variant="outline" onClick={() => toast.success('Analyzing', { description: 'Running smart allocation analysis' })}>
+                    Run Analysis
+                  </Button>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Layers className="w-5 h-5 text-blue-500" />
+                    <div>
+                      <p className="font-medium">Load Balancing</p>
+                      <p className="text-sm text-gray-500">Distribute workload evenly</p>
+                    </div>
+                  </div>
+                  <Button className="w-full" variant="outline" onClick={() => toast.success('Balancing', { description: 'Optimizing workload distribution' })}>
+                    Balance Workload
+                  </Button>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    <div>
+                      <p className="font-medium">Utilization Optimizer</p>
+                      <p className="text-sm text-gray-500">Maximize team efficiency</p>
+                    </div>
+                  </div>
+                  <Button className="w-full" variant="outline" onClick={() => toast.success('Optimizing', { description: 'Maximizing utilization efficiency' })}>
+                    Optimize
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowOptimizeDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowOptimizeDialog(false); toast.success('Full Optimization', { description: 'Running complete optimization suite' }) }}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Run All
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trends Report Dialog */}
+        <Dialog open={showTrendsReportDialog} onOpenChange={setShowTrendsReportDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <TrendingUp className="w-5 h-5" />
+                Trends Analysis Report
+              </DialogTitle>
+              <DialogDescription>
+                Performance and allocation trends over time
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-xl font-bold text-green-600">+15%</p>
+                  <p className="text-xs text-gray-500">Billable Hours</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-xl font-bold text-blue-600">+8%</p>
+                  <p className="text-xs text-gray-500">Utilization</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-xl font-bold text-purple-600">+22%</p>
+                  <p className="text-xs text-gray-500">Revenue</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-xl font-bold text-orange-600">-5%</p>
+                  <p className="text-xs text-gray-500">Bench Time</p>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-medium mb-3">Utilization Trend (Last 6 Months)</h4>
+                  <div className="space-y-2">
+                    {['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'].map((month, i) => (
+                      <div key={month} className="flex items-center gap-4">
+                        <div className="w-12 text-sm text-gray-500">{month}</div>
+                        <div className="flex-1">
+                          <Progress value={65 + (i * 5)} className="h-2" />
+                        </div>
+                        <div className="w-12 text-right text-sm">{65 + (i * 5)}%</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-3">Top Performing Projects</h4>
+                  <div className="space-y-2">
+                    {mockProjects.filter(p => p.status === 'active').slice(0, 3).map((project, i) => (
+                      <div key={project.id} className="flex items-center gap-3 p-2 border rounded">
+                        <span className="w-6 h-6 rounded-full bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                        <span className="flex-1">{project.name}</span>
+                        <Badge variant="outline">{formatCurrency(project.spent_amount)}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTrendsReportDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowTrendsReportDialog(false); setShowExportDialog(true) }}>
+                <ArrowUpRight className="w-4 h-4 mr-2" />
+                Export Report
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

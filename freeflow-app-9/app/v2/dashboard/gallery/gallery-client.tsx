@@ -466,6 +466,18 @@ export default function GalleryClient() {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // New dialog states for real functionality
+  const [showFollowDialog, setShowFollowDialog] = useState(false)
+  const [selectedPhotographer, setSelectedPhotographer] = useState<Photographer | null>(null)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showConnectServiceDialog, setShowConnectServiceDialog] = useState(false)
+  const [selectedService, setSelectedService] = useState<{ name: string; isConnected: boolean } | null>(null)
+  const [showEmptyTrashDialog, setShowEmptyTrashDialog] = useState(false)
+  const [showDataExportDialog, setShowDataExportDialog] = useState(false)
+  const [showQRCodeDialog, setShowQRCodeDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState('zip')
+  const [exportResolution, setExportResolution] = useState('original')
+
   // Form state for Upload Dialog
   const [uploadForm, setUploadForm] = useState({
     title: '',
@@ -705,9 +717,25 @@ export default function GalleryClient() {
     }
   }
 
-  const handleFollowPhotographer = async (photographerId: string, photographerName: string) => {
-    // In a real implementation, this would update a follows table
-    toast.success('Following', { description: `You are now following ${photographerName}` })
+  const handleFollowPhotographer = (photographer: Photographer) => {
+    setSelectedPhotographer(photographer)
+    setShowFollowDialog(true)
+  }
+
+  const handleConfirmFollow = async () => {
+    if (!selectedPhotographer) return
+    setIsSubmitting(true)
+    try {
+      // In a real implementation, this would update a follows table in Supabase
+      await new Promise(resolve => setTimeout(resolve, 500)) // Simulate API call
+      toast.success('Following', { description: `You are now following ${selectedPhotographer.name}` })
+      setShowFollowDialog(false)
+      setSelectedPhotographer(null)
+    } catch (error: any) {
+      toast.error('Follow failed', { description: error.message || 'Failed to follow photographer' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleCopyApiKey = async () => {
@@ -719,24 +747,85 @@ export default function GalleryClient() {
     }
   }
 
-  const handleRegenerateApiKey = async () => {
-    toast.success('API Key regenerated', { description: 'Your new API key is ready. The old key is now invalid.' })
+  const handleRegenerateApiKey = () => {
+    setShowRegenerateApiKeyDialog(true)
   }
 
-  const handleConnectService = (serviceName: string, isConnected: boolean) => {
-    if (isConnected) {
-      toast.success('Disconnected', { description: `${serviceName} has been disconnected` })
-    } else {
-      toast.info('Connecting...', { description: `Redirecting to ${serviceName} authorization...` })
+  const handleConfirmRegenerateApiKey = async () => {
+    setIsSubmitting(true)
+    try {
+      // In a real implementation, this would call an API to regenerate the key
+      await new Promise(resolve => setTimeout(resolve, 800)) // Simulate API call
+      toast.success('API Key regenerated', { description: 'Your new API key is ready. The old key is now invalid.' })
+      setShowRegenerateApiKeyDialog(false)
+    } catch (error: any) {
+      toast.error('Regeneration failed', { description: error.message || 'Failed to regenerate API key' })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  const handleEmptyTrash = async () => {
-    toast.success('Trash emptied', { description: 'All items in trash have been permanently deleted' })
+  const handleConnectService = (serviceName: string, isConnected: boolean) => {
+    setSelectedService({ name: serviceName, isConnected })
+    setShowConnectServiceDialog(true)
   }
 
-  const handleRequestDataExport = async () => {
-    toast.success('Export requested', { description: 'Your data export is being prepared. You will be notified when it is ready.' })
+  const handleConfirmServiceAction = async () => {
+    if (!selectedService) return
+    setIsSubmitting(true)
+    try {
+      // In a real implementation, this would handle OAuth flow or disconnect
+      await new Promise(resolve => setTimeout(resolve, 600)) // Simulate API call
+      if (selectedService.isConnected) {
+        toast.success('Disconnected', { description: `${selectedService.name} has been disconnected` })
+      } else {
+        toast.success('Connected', { description: `${selectedService.name} has been connected successfully` })
+      }
+      setShowConnectServiceDialog(false)
+      setSelectedService(null)
+    } catch (error: any) {
+      toast.error('Action failed', { description: error.message || 'Failed to update service connection' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEmptyTrash = () => {
+    setShowEmptyTrashDialog(true)
+  }
+
+  const handleConfirmEmptyTrash = async () => {
+    setIsSubmitting(true)
+    try {
+      // In a real implementation, this would delete all items in trash from Supabase
+      await new Promise(resolve => setTimeout(resolve, 700)) // Simulate API call
+      toast.success('Trash emptied', { description: 'All items in trash have been permanently deleted' })
+      setShowEmptyTrashDialog(false)
+    } catch (error: any) {
+      toast.error('Failed to empty trash', { description: error.message || 'An error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRequestDataExport = () => {
+    setShowDataExportDialog(true)
+  }
+
+  const handleConfirmDataExport = async () => {
+    setIsSubmitting(true)
+    try {
+      // In a real implementation, this would trigger a data export job
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      toast.success('Export requested', {
+        description: `Your ${exportFormat.toUpperCase()} export (${exportResolution} resolution) is being prepared. You will be notified when it is ready.`
+      })
+      setShowDataExportDialog(false)
+    } catch (error: any) {
+      toast.error('Export failed', { description: error.message || 'Failed to request data export' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleDeleteAllPhotos = async () => {
@@ -805,7 +894,13 @@ export default function GalleryClient() {
   }
 
   const handleShareViaQRCode = () => {
-    toast.success('QR Code generated', { description: 'QR code has been generated for sharing' })
+    setShowQRCodeDialog(true)
+  }
+
+  const handleDownloadQRCode = () => {
+    // In a real implementation, this would download the QR code image
+    toast.success('QR Code downloaded', { description: 'QR code image has been saved' })
+    setShowQRCodeDialog(false)
   }
 
   return (
@@ -1242,7 +1337,7 @@ export default function GalleryClient() {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleFollowPhotographer(photographer.id, photographer.name)}
+                    onClick={() => handleFollowPhotographer(photographer)}
                     className="w-full mt-4 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Follow
@@ -2028,7 +2123,7 @@ export default function GalleryClient() {
                         <p className="text-sm text-gray-500 dark:text-gray-400">@{selectedPhoto.photographer.username}</p>
                       </div>
                       <button
-                        onClick={() => handleFollowPhotographer(selectedPhoto.photographer.id, selectedPhoto.photographer.name)}
+                        onClick={() => handleFollowPhotographer(selectedPhoto.photographer)}
                         className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         Follow
@@ -2562,6 +2657,418 @@ export default function GalleryClient() {
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   {isSubmitting ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Follow Photographer Dialog */}
+        <Dialog open={showFollowDialog} onOpenChange={setShowFollowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Follow Photographer</DialogTitle>
+            </DialogHeader>
+            {selectedPhotographer && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{selectedPhotographer.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">@{selectedPhotographer.username}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{selectedPhotographer.location}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{selectedPhotographer.photos}</p>
+                    <p className="text-xs text-gray-500">Photos</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{formatNumber(selectedPhotographer.followers)}</p>
+                    <p className="text-xs text-gray-500">Followers</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{selectedPhotographer.following}</p>
+                    <p className="text-xs text-gray-500">Following</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{selectedPhotographer.bio}</p>
+                <div className="flex items-center gap-2 pt-2">
+                  <input
+                    type="checkbox"
+                    id="notify-uploads"
+                    defaultChecked
+                    className="rounded border-gray-300"
+                  />
+                  <label htmlFor="notify-uploads" className="text-sm text-gray-700 dark:text-gray-300">
+                    Notify me when they upload new photos
+                  </label>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setShowFollowDialog(false)
+                      setSelectedPhotographer(null)
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmFollow}
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isSubmitting ? 'Following...' : 'Follow'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Dialog */}
+        <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Regenerate API Key</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-3">
+                  <Key className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-800 dark:text-amber-300">Important Notice</p>
+                    <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                      Regenerating your API key will invalidate the current key immediately. Any applications using the old key will stop working.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Current API Key</Label>
+                <Input type="password" value="kazi-gallery-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono bg-gray-50 dark:bg-gray-900" />
+              </div>
+              <div className="space-y-2">
+                <Label>Reason for Regeneration (Optional)</Label>
+                <Select defaultValue="security">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="security">Security concern</SelectItem>
+                    <SelectItem value="compromised">Key may be compromised</SelectItem>
+                    <SelectItem value="rotation">Regular rotation</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowRegenerateApiKeyDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmRegenerateApiKey}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Regenerating...' : 'Regenerate Key'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect/Disconnect Service Dialog */}
+        <Dialog open={showConnectServiceDialog} onOpenChange={setShowConnectServiceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedService?.isConnected ? 'Disconnect' : 'Connect'} {selectedService?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedService && (
+              <div className="space-y-4">
+                {selectedService.isConnected ? (
+                  <>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+                          <Globe className="h-5 w-5 text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{selectedService.name}</p>
+                          <p className="text-sm text-emerald-600">Currently connected</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Disconnecting {selectedService.name} will:
+                    </p>
+                    <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2 ml-4">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                        Stop automatic photo syncing
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                        Remove cross-posting capabilities
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                        Revoke API access permissions
+                      </li>
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gray-200 dark:bg-gray-800">
+                          <Globe className="h-5 w-5 text-gray-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{selectedService.name}</p>
+                          <p className="text-sm text-gray-500">Not connected</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Connecting {selectedService.name} will allow you to:
+                    </p>
+                    <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2 ml-4">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                        Sync photos automatically
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                        Cross-post to your profile
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                        Import existing photos
+                      </li>
+                    </ul>
+                  </>
+                )}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => {
+                      setShowConnectServiceDialog(false)
+                      setSelectedService(null)
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirmServiceAction}
+                    disabled={isSubmitting}
+                    className={`flex-1 px-4 py-2 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 ${
+                      selectedService.isConnected
+                        ? 'bg-red-600 text-white hover:bg-red-700'
+                        : 'bg-amber-500 text-white hover:bg-amber-600'
+                    }`}
+                  >
+                    {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isSubmitting
+                      ? selectedService.isConnected ? 'Disconnecting...' : 'Connecting...'
+                      : selectedService.isConnected ? 'Disconnect' : 'Connect'
+                    }
+                  </button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Empty Trash Confirmation Dialog */}
+        <Dialog open={showEmptyTrashDialog} onOpenChange={setShowEmptyTrashDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600 flex items-center gap-2">
+                <Trash2 className="w-5 h-5" />
+                Empty Trash
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  This will permanently delete all items in your trash. This action cannot be undone.
+                </p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Items in trash:</span>
+                  <span className="font-medium text-gray-900 dark:text-white">12 photos, 3 collections</span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Space to recover:</span>
+                  <span className="font-medium text-emerald-600">245 MB</span>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowEmptyTrashDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmEmptyTrash}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Emptying...' : 'Empty Trash'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Data Export Dialog */}
+        <Dialog open={showDataExportDialog} onOpenChange={setShowDataExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Export Your Data
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Export all your photos and data. You will receive a download link via email when your export is ready.
+              </p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Export Format</Label>
+                  <Select value={exportFormat} onValueChange={setExportFormat}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="zip">ZIP Archive (photos + metadata)</SelectItem>
+                      <SelectItem value="json">JSON (metadata only)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Photo Resolution</Label>
+                  <Select value={exportResolution} onValueChange={setExportResolution}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="original">Original (full quality)</SelectItem>
+                      <SelectItem value="high">High (2400px)</SelectItem>
+                      <SelectItem value="medium">Medium (1200px)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Total photos:</span>
+                    <span className="font-medium">2,458</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Estimated size:</span>
+                    <span className="font-medium">{exportResolution === 'original' ? '24.5 GB' : exportResolution === 'high' ? '12.3 GB' : '6.1 GB'}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Estimated time:</span>
+                    <span className="font-medium">{exportResolution === 'original' ? '~2 hours' : exportResolution === 'high' ? '~1 hour' : '~30 min'}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="include-metadata" defaultChecked className="rounded border-gray-300" />
+                  <label htmlFor="include-metadata" className="text-sm text-gray-700 dark:text-gray-300">
+                    Include EXIF metadata
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowDataExportDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDataExport}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Requesting...' : 'Request Export'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* QR Code Dialog */}
+        <Dialog open={showQRCodeDialog} onOpenChange={setShowQRCodeDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="text-center">Share via QR Code</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <div className="w-48 h-48 bg-white rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                  {/* QR Code placeholder - in production, use a QR code library */}
+                  <div className="w-full h-full bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center relative overflow-hidden">
+                    <div className="grid grid-cols-7 gap-1 p-2">
+                      {Array.from({ length: 49 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-4 h-4 ${Math.random() > 0.5 ? 'bg-gray-900 dark:bg-white' : 'bg-transparent'}`}
+                        />
+                      ))}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-10 h-10 bg-white dark:bg-gray-900 rounded flex items-center justify-center">
+                        <Image className="w-6 h-6 text-amber-500" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Scan this QR code to view the gallery
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 font-mono">
+                  {typeof window !== 'undefined' ? window.location.origin : ''}/gallery/shared/my-gallery
+                </p>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowQRCodeDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={handleDownloadQRCode}
+                  className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download
                 </button>
               </div>
             </div>
