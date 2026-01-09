@@ -2095,7 +2095,7 @@ export default function EmployeesClient() {
               <div className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center"><Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" /><p className="text-sm text-gray-500">Drag and drop or click to upload</p><p className="text-xs text-gray-400 mt-1">PDF, DOC, DOCX up to 10MB</p></div>
               <div><Label>Expiration Date (Optional)</Label><Input type="date" className="mt-1" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Document uploaded successfully'); setShowDocumentDialog(false) }}>Upload Document</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement document upload API call */ setShowDocumentDialog(false) }}>Upload Document</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2111,11 +2111,11 @@ export default function EmployeesClient() {
                 <div className="space-y-2 mt-2">
                   <Input placeholder="Key Result 1" />
                   <Input placeholder="Key Result 2" />
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => toast.info('Add additional key result fields above')}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { /* TODO: Implement dynamic key result field addition */ }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Goal created successfully'); setShowGoalDialog(false) }}>Create Goal</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement goal creation API call */ setShowGoalDialog(false) }}>Create Goal</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2129,7 +2129,7 @@ export default function EmployeesClient() {
               <div><Label>Recipients</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select recipients" /></SelectTrigger><SelectContent><SelectItem value="all">All Employees</SelectItem><SelectItem value="engineering">Engineering Only</SelectItem><SelectItem value="managers">Managers Only</SelectItem><SelectItem value="custom">Custom Selection</SelectItem></SelectContent></Select></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Anonymous Responses</p><p className="text-sm text-gray-500">Protect respondent identity</p></div><Switch defaultChecked /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Survey created successfully'); setShowSurveyDialog(false) }}>Create Survey</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement survey creation API call */ setShowSurveyDialog(false) }}>Create Survey</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2143,7 +2143,7 @@ export default function EmployeesClient() {
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Include Self-Review</p><p className="text-sm text-gray-500">Allow employee to self-assess</p></div><Switch defaultChecked /></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div><Switch /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Performance review started'); setShowReviewDialog(false) }}>Start Review</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement start performance review API call */ setShowReviewDialog(false) }}>Start Review</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2312,7 +2312,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Export started. File will download shortly.'); setShowExportDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement employee data export */ setShowExportDialog(false) }}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -2373,7 +2373,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTimeOffRequestDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Time off request submitted'); setShowTimeOffRequestDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement time off request submission API call */ setShowTimeOffRequestDialog(false) }}>
                 Submit Request
               </Button>
             </DialogFooter>
@@ -2433,7 +2433,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Report generated successfully'); setShowExportReportDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement report generation API call */ setShowExportReportDialog(false) }}>
                 <Download className="h-4 w-4 mr-2" />
                 Generate Report
               </Button>
@@ -2478,7 +2478,7 @@ export default function EmployeesClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCourseDialog(false)}>Close</Button>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => {
-                toast.success(selectedCourse?.status === 'completed' ? 'Opening course materials...' : selectedCourse?.status === 'in_progress' ? 'Resuming course...' : 'Starting course...');
+                /* TODO: Implement course action (view materials, resume, or start) based on status */
                 setShowCourseDialog(false)
               }}>
                 {selectedCourse?.status === 'completed' ? 'View Materials' : selectedCourse?.status === 'in_progress' ? 'Continue' : 'Start Course'}
@@ -2534,7 +2534,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddIntegrationDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Integration connected successfully'); setShowAddIntegrationDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement integration connection API call */ setShowAddIntegrationDialog(false) }}>
                 <Zap className="h-4 w-4 mr-2" />
                 Connect
               </Button>
@@ -2586,8 +2586,8 @@ export default function EmployeesClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConfigureIntegrationDialog(false)}>Cancel</Button>
-              <Button variant="outline" className="text-red-600" onClick={() => { toast.success('Integration disconnected'); setShowConfigureIntegrationDialog(false) }}>Disconnect</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Integration settings saved'); setShowConfigureIntegrationDialog(false) }}>Save Changes</Button>
+              <Button variant="outline" className="text-red-600" onClick={() => { /* TODO: Implement integration disconnect API call */ setShowConfigureIntegrationDialog(false) }}>Disconnect</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement save integration settings API call */ setShowConfigureIntegrationDialog(false) }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2607,7 +2607,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('New API key generated'); setShowRegenerateKeyDialog(false) }}>
+              <Button variant="destructive" onClick={() => { /* TODO: Implement API key regeneration */ setShowRegenerateKeyDialog(false) }}>
                 Regenerate Key
               </Button>
             </DialogFooter>
@@ -2648,7 +2648,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Export started. Download will begin shortly.'); setShowExportDataDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement full HR data export */ setShowExportDataDialog(false) }}>
                 <Download className="h-4 w-4 mr-2" />
                 Export All
               </Button>
@@ -2692,7 +2692,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Data imported successfully'); setShowImportDataDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement HR data import */ setShowImportDataDialog(false) }}>
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>
@@ -2739,7 +2739,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowComplianceReportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Compliance report generated'); setShowComplianceReportDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement compliance report generation */ setShowComplianceReportDialog(false) }}>
                 <FileCheck className="h-4 w-4 mr-2" />
                 Generate
               </Button>
@@ -2766,7 +2766,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('Terminated employees archived'); setShowArchiveDialog(false) }}>
+              <Button variant="destructive" onClick={() => { /* TODO: Implement archive terminated employees API call */ setShowArchiveDialog(false) }}>
                 Archive All
               </Button>
             </DialogFooter>
@@ -2798,7 +2798,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.error('Action blocked for safety. Contact admin.'); setShowDeleteAllDialog(false) }}>
+              <Button variant="destructive" onClick={() => { /* TODO: Implement delete all HR data (requires admin confirmation) */ setShowDeleteAllDialog(false) }}>
                 Delete All Data
               </Button>
             </DialogFooter>
@@ -2827,7 +2827,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('Settings reset to defaults'); setShowResetSettingsDialog(false) }}>
+              <Button variant="destructive" onClick={() => { /* TODO: Implement reset settings to defaults API call */ setShowResetSettingsDialog(false) }}>
                 Reset Settings
               </Button>
             </DialogFooter>
@@ -2901,7 +2901,7 @@ export default function EmployeesClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditProfileDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Profile updated successfully'); setShowEditProfileDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement update employee profile API call */ setShowEditProfileDialog(false) }}>
                 Save Changes
               </Button>
             </DialogFooter>
@@ -2939,7 +2939,7 @@ export default function EmployeesClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDownloadDocDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success('Download started'); setShowDownloadDocDialog(false) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { /* TODO: Implement document download */ setShowDownloadDocDialog(false) }}>
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </Button>
@@ -2961,7 +2961,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteDocDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('Document deleted'); setShowDeleteDocDialog(false) }}>
+              <Button variant="destructive" onClick={() => { /* TODO: Implement delete document API call */ setShowDeleteDocDialog(false) }}>
                 Delete Document
               </Button>
             </DialogFooter>

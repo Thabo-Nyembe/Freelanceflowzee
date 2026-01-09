@@ -647,7 +647,7 @@ export default function AIDesignClient() {
               <History className="w-4 h-4 mr-2" />
               History
             </Button>
-            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => toast.success('Upgrade to Pro', { description: 'Get unlimited credits and exclusive features' })}>
+            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => { /* TODO: Navigate to upgrade page */ }}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>
@@ -1297,7 +1297,7 @@ export default function AIDesignClient() {
                 >
                   <List className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Filter Options', { description: 'Filter by style, status, or date' })}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Open filter options */ }}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1744,7 +1744,7 @@ export default function AIDesignClient() {
                             <div className="text-sm text-muted-foreground">Fast, high-quality generations</div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => toast.success('Flux Pro Enabled', { description: 'Fast, high-quality generations now available' })}>Enable</Button>
+                        <Button variant="outline" size="sm" onClick={() => { /* TODO: Enable Flux Pro */ }}>Enable</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1934,7 +1934,7 @@ export default function AIDesignClient() {
                           <Download className="w-6 h-6" />
                           <span>Export All</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.success('Cache Cleared', { description: 'All temporary files have been removed' })}>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => { /* TODO: Clear cache */ }}>
                           <RefreshCw className="w-6 h-6" />
                           <span>Clear Cache</span>
                         </Button>
@@ -1942,7 +1942,7 @@ export default function AIDesignClient() {
                           <History className="w-6 h-6" />
                           <span>View History</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => toast.info('Help Center', { description: 'Visit our documentation for guides and tutorials' })}>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => { /* TODO: Open help center */ }}>
                           <HelpCircle className="w-6 h-6" />
                           <span>Get Help</span>
                         </Button>
@@ -2089,7 +2089,7 @@ export default function AIDesignClient() {
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => toast.success('Image Upscaled', { description: 'High-resolution version ready' })}>
+                    <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Upscale image */ }}>
                       <Maximize2 className="w-4 h-4 mr-2" />
                       Upscale
                     </Button>

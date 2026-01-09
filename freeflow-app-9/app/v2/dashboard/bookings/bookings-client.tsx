@@ -1208,7 +1208,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <Copy className="w-4 h-4" />
                                 Copy Key
                               </Button>
-                              <Button variant="outline" className="gap-2" onClick={() => toast.success('API Key Regenerated', { description: 'A new API key has been generated. Update your integrations.' })}>
+                              <Button variant="outline" className="gap-2" onClick={() => { /* TODO: Implement API key regeneration */ }}>
                                 <RefreshCw className="w-4 h-4" />
                                 Regenerate
                               </Button>
@@ -1317,7 +1317,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <div className="font-medium text-gray-900 dark:text-white">Cancel All Pending Bookings</div>
                                 <p className="text-sm text-gray-500">Mass cancel all pending bookings</p>
                               </div>
-                              <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => { if (confirm('Are you sure you want to cancel all pending bookings? This action cannot be undone.')) { toast.success('Bookings Cancelled', { description: 'All pending bookings have been cancelled' }) } }}>
+                              <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => { if (confirm('Are you sure you want to cancel all pending bookings? This action cannot be undone.')) { /* TODO: Implement bulk cancel pending bookings */ } }}>
                                 Cancel All
                               </Button>
                             </div>
@@ -1326,7 +1326,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <div className="font-medium text-gray-900 dark:text-white">Reset Booking Page</div>
                                 <p className="text-sm text-gray-500">Reset all settings to default</p>
                               </div>
-                              <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => { if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) { toast.success('Settings Reset', { description: 'Booking page settings have been reset to defaults' }) } }}>
+                              <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => { if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) { /* TODO: Implement settings reset */ } }}>
                                 <RefreshCw className="w-4 h-4 mr-2" />
                                 Reset
                               </Button>
@@ -1336,7 +1336,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <div className="font-medium text-gray-900 dark:text-white">Export All Data</div>
                                 <p className="text-sm text-gray-500">Download complete booking history</p>
                               </div>
-                              <Button variant="outline" className="gap-2" onClick={() => toast.success('Export Started', { description: 'Your booking data export is being prepared. You will receive a download link shortly.' })}>
+                              <Button variant="outline" className="gap-2" onClick={() => { /* TODO: Implement booking data export */ }}>
                                 <Download className="w-4 h-4" />
                                 Export
                               </Button>
@@ -2376,7 +2376,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowAddServiceDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Service Added', { description: 'New service has been created' }); setShowAddServiceDialog(false) }}>Add Service</Button>
+              <Button onClick={() => { /* TODO: Implement add service */ setShowAddServiceDialog(false) }}>Add Service</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2409,7 +2409,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowEditServiceDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Service Updated', { description: 'Service has been updated' }); setShowEditServiceDialog(false) }}>Save Changes</Button>
+              <Button onClick={() => { /* TODO: Implement update service */ setShowEditServiceDialog(false) }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2447,7 +2447,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowAddMemberDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Member Added', { description: 'Team member has been added' }); setShowAddMemberDialog(false) }}>Add Member</Button>
+              <Button onClick={() => { /* TODO: Implement add team member */ setShowAddMemberDialog(false) }}>Add Member</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2481,7 +2481,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowEditMemberDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Member Updated', { description: 'Team member has been updated' }); setShowEditMemberDialog(false) }}>Save Changes</Button>
+              <Button onClick={() => { /* TODO: Implement update team member */ setShowEditMemberDialog(false) }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2517,8 +2517,8 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" className="text-red-600" onClick={() => { toast.success('Integration Disconnected', { description: `${selectedIntegration} has been disconnected` }); setShowConfigureIntegrationDialog(false) }}>Disconnect</Button>
-              <Button onClick={() => { toast.success('Settings Saved', { description: `${selectedIntegration} settings have been updated` }); setShowConfigureIntegrationDialog(false) }}>Save Settings</Button>
+              <Button variant="outline" className="text-red-600" onClick={() => { /* TODO: Implement disconnect integration */ setShowConfigureIntegrationDialog(false) }}>Disconnect</Button>
+              <Button onClick={() => { /* TODO: Implement save integration settings */ setShowConfigureIntegrationDialog(false) }}>Save Settings</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2533,7 +2533,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               <p className="text-sm text-gray-500">Connect your {selectedIntegration} account to enable integration features.</p>
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                 <p className="text-sm mb-4">Click the button below to authorize access to your {selectedIntegration} account.</p>
-                <Button className="w-full" onClick={() => { toast.success('Integration Connected', { description: `${selectedIntegration} has been connected successfully` }); setShowConnectIntegrationDialog(false) }}>
+                <Button className="w-full" onClick={() => { /* TODO: Implement OAuth connect integration */ setShowConnectIntegrationDialog(false) }}>
                   Authorize {selectedIntegration}
                 </Button>
               </div>
@@ -2576,7 +2576,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Webhook Added', { description: 'Webhook has been configured' }); setShowAddWebhookDialog(false) }}>Add Webhook</Button>
+              <Button onClick={() => { /* TODO: Implement add webhook */ setShowAddWebhookDialog(false) }}>Add Webhook</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -2288,7 +2288,7 @@ export default function MediaLibraryClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1" onClick={() => { setSelectedCollection(null); toast.success('Collection opened'); }}>
+                  <Button className="flex-1" onClick={() => { /* TODO: Implement open collection functionality */ setSelectedCollection(null); }}>
                     <FolderOpen className="w-4 h-4 mr-2" />
                     Open Collection
                   </Button>
@@ -2296,7 +2296,7 @@ export default function MediaLibraryClient({
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Collection Editor', { description: 'Edit collection details and assets' })}>
+                  <Button variant="outline" onClick={() => { /* TODO: Implement collection editor functionality */ }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2661,7 +2661,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowShareModeDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowShareModeDialog(false); toast.success('Share mode enabled - select assets from the list'); }}>
+              <Button onClick={() => { /* TODO: Implement share mode functionality */ setShowShareModeDialog(false); }}>
                 Enable Share Mode
               </Button>
             </DialogFooter>
@@ -2706,7 +2706,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBrandKitDialog(false)}>Close</Button>
-              <Button onClick={() => { setShowBrandKitDialog(false); toast.success('Brand Kit opened'); }}>
+              <Button onClick={() => { /* TODO: Implement brand kit management functionality */ setShowBrandKitDialog(false); }}>
                 Manage Brand Kit
               </Button>
             </DialogFooter>
@@ -2780,7 +2780,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBulkMoveDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowBulkMoveDialog(false); toast.success('Bulk move mode enabled - select assets to move'); }}>
+              <Button onClick={() => { /* TODO: Implement bulk move functionality */ setShowBulkMoveDialog(false); }}>
                 Start Selection
               </Button>
             </DialogFooter>
@@ -2818,7 +2818,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSortFoldersDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowSortFoldersDialog(false); toast.success('Folders sorted'); }}>
+              <Button onClick={() => { /* TODO: Implement folder sorting functionality */ setShowSortFoldersDialog(false); }}>
                 Apply Sort
               </Button>
             </DialogFooter>
@@ -2875,7 +2875,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFolderPermissionsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowFolderPermissionsDialog(false); toast.success('Permissions updated'); }}>
+              <Button onClick={() => { /* TODO: Implement folder permissions update functionality */ setShowFolderPermissionsDialog(false); }}>
                 Save Permissions
               </Button>
             </DialogFooter>
@@ -2953,7 +2953,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowShareCollectionsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowShareCollectionsDialog(false); toast.success('Collection shared'); }}>
+              <Button onClick={() => { /* TODO: Implement collection sharing functionality */ setShowShareCollectionsDialog(false); }}>
                 Share
               </Button>
             </DialogFooter>
@@ -2993,7 +2993,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTagManagerDialog(false)}>Close</Button>
-              <Button onClick={() => { setShowTagManagerDialog(false); toast.success('Tags updated'); }}>
+              <Button onClick={() => { /* TODO: Implement tag manager save functionality */ setShowTagManagerDialog(false); }}>
                 Save Tags
               </Button>
             </DialogFooter>
@@ -3043,7 +3043,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCollaborationDialog(false)}>Close</Button>
-              <Button onClick={() => { setShowCollaborationDialog(false); toast.success('Collaborators updated'); }}>
+              <Button onClick={() => { /* TODO: Implement collaborator update functionality */ setShowCollaborationDialog(false); }}>
                 Save Changes
               </Button>
             </DialogFooter>
@@ -3095,7 +3095,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPrivacySettingsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowPrivacySettingsDialog(false); toast.success('Privacy settings saved'); }}>
+              <Button onClick={() => { /* TODO: Implement privacy settings save functionality */ setShowPrivacySettingsDialog(false); }}>
                 Save Settings
               </Button>
             </DialogFooter>
@@ -3139,7 +3139,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDuplicateCollectionDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowDuplicateCollectionDialog(false); toast.success('Collection duplicated'); }}>
+              <Button onClick={() => { /* TODO: Implement collection duplication functionality */ setShowDuplicateCollectionDialog(false); }}>
                 Duplicate
               </Button>
             </DialogFooter>
@@ -3181,7 +3181,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCloudImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowCloudImportDialog(false); toast.success('Opening cloud browser...'); }}>
+              <Button onClick={() => { /* TODO: Implement cloud import browser functionality */ setShowCloudImportDialog(false); }}>
                 Browse Files
               </Button>
             </DialogFooter>
@@ -3226,7 +3226,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUrlImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowUrlImportDialog(false); toast.success('Import started...'); }}>
+              <Button onClick={() => { /* TODO: Implement URL import functionality */ setShowUrlImportDialog(false); }}>
                 Import
               </Button>
             </DialogFooter>
@@ -3456,7 +3456,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportBuilderDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowReportBuilderDialog(false); toast.success('Report generation started'); }}>
+              <Button onClick={() => { /* TODO: Implement report generation functionality */ setShowReportBuilderDialog(false); }}>
                 Generate Report
               </Button>
             </DialogFooter>

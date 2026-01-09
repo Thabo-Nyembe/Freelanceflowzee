@@ -1300,7 +1300,7 @@ export default function DataExportClient() {
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => { fetchDataExports(); toast.success('Data refreshed'); }}>
+                <Button variant="outline" size="sm" onClick={() => { fetchDataExports(); }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
@@ -2813,7 +2813,7 @@ export default function DataExportClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="outline" size="sm" onClick={() => toast.success('Logs exported', { description: 'Log file downloaded successfully' })}>
+              <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement log export functionality */ }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Logs
               </Button>
@@ -3112,7 +3112,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Filters applied'); setShowFilterDialog(false); }}>Apply Filters</Button>
+              <Button onClick={() => { /* TODO: Apply filter logic */ setShowFilterDialog(false); }}>Apply Filters</Button>
             </div>
           </div>
         </DialogContent>
@@ -3150,7 +3150,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPipelineConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Pipeline configuration saved'); setShowPipelineConfigureDialog(false); }}>Save Changes</Button>
+              <Button onClick={() => { /* TODO: Save pipeline configuration */ setShowPipelineConfigureDialog(false); }}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>
@@ -3181,7 +3181,7 @@ export default function DataExportClient() {
               </pre>
             </ScrollArea>
             <div className="flex justify-between">
-              <Button variant="outline" size="sm" onClick={() => toast.success('Pipeline logs exported', { description: 'Log file downloaded successfully' })}><Download className="w-4 h-4 mr-2" />Export Logs</Button>
+              <Button variant="outline" size="sm" onClick={() => { /* TODO: Export pipeline logs */ }}><Download className="w-4 h-4 mr-2" />Export Logs</Button>
               <Button variant="outline" onClick={() => setShowPipelineLogsDialog(false)}>Close</Button>
             </div>
           </div>
@@ -3204,7 +3204,7 @@ export default function DataExportClient() {
             <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowPipelineMoreDialog(false); setShowCloneDialog(true); }}>
               <GitBranch className="w-4 h-4 mr-2" />Clone Pipeline
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-red-600" onClick={() => { setShowPipelineMoreDialog(false); toast.success('Pipeline deleted'); }}>
+            <Button variant="ghost" className="w-full justify-start text-red-600" onClick={() => { if (confirm('Are you sure you want to delete this pipeline?')) { setShowPipelineMoreDialog(false); /* TODO: Delete pipeline */ } }}>
               <Trash2 className="w-4 h-4 mr-2" />Delete Pipeline
             </Button>
           </div>
@@ -3255,7 +3255,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddSourceDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Data source added successfully'); setShowAddSourceDialog(false); }} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={() => { /* TODO: Add data source */ setShowAddSourceDialog(false); }} className="bg-green-600 hover:bg-green-700">
                 <Plus className="w-4 h-4 mr-2" />Add Source
               </Button>
             </div>
@@ -3315,7 +3315,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowSourceConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Source configuration saved'); setShowSourceConfigureDialog(false); }}>Save Changes</Button>
+              <Button onClick={() => { /* TODO: Save source configuration */ setShowSourceConfigureDialog(false); }}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>
@@ -3437,7 +3437,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowCreateTransformDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Transform created'); setShowCreateTransformDialog(false); }} className="bg-purple-600 hover:bg-purple-700">Create</Button>
+              <Button onClick={() => { /* TODO: Create transform */ setShowCreateTransformDialog(false); }} className="bg-purple-600 hover:bg-purple-700">Create</Button>
             </div>
           </div>
         </DialogContent>
@@ -3523,7 +3523,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddMappingDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Mapping added'); setShowAddMappingDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Add Mapping</Button>
+              <Button onClick={() => { /* TODO: Add column mapping */ setShowAddMappingDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Add Mapping</Button>
             </div>
           </div>
         </DialogContent>
@@ -3562,7 +3562,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddDestinationDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Destination added'); setShowAddDestinationDialog(false); }} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={() => { /* TODO: Add destination */ setShowAddDestinationDialog(false); }} className="bg-green-600 hover:bg-green-700">
                 <Plus className="w-4 h-4 mr-2" />Add Destination
               </Button>
             </div>
@@ -3645,7 +3645,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowDestConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Destination configuration saved'); setShowDestConfigureDialog(false); }}>Save Changes</Button>
+              <Button onClick={() => { /* TODO: Save destination configuration */ setShowDestConfigureDialog(false); }}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>
@@ -3667,7 +3667,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowIpAllowlistDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('IP allowlist updated'); setShowIpAllowlistDialog(false); }}>Save</Button>
+              <Button onClick={() => { /* TODO: Update IP allowlist */ setShowIpAllowlistDialog(false); }}>Save</Button>
             </div>
           </div>
         </DialogContent>
@@ -3706,7 +3706,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowWebhookConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Webhook configured'); setShowWebhookConfigureDialog(false); }}>Save</Button>
+              <Button onClick={() => { /* TODO: Configure webhook */ setShowWebhookConfigureDialog(false); }}>Save</Button>
             </div>
           </div>
         </DialogContent>
@@ -3752,8 +3752,8 @@ export default function DataExportClient() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.success('Downloading archive', { description: `${file} download started` })}><Download className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="sm" className="text-red-600" onClick={() => toast.success('Archive deleted', { description: `${file} has been removed` })}><Trash2 className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => { /* TODO: Download archive file */ }}><Download className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" className="text-red-600" onClick={() => { if (confirm(`Are you sure you want to delete ${file}?`)) { /* TODO: Delete archive */ } }}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
               ))}
@@ -3925,7 +3925,7 @@ export default function DataExportClient() {
                     <Key className="w-4 h-4 text-gray-400" />
                     <span>{cred}</span>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => toast.success('Credential settings', { description: `Configuring ${cred}` })}><Settings className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => { /* TODO: Open credential configuration for ${cred} */ }}><Settings className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
@@ -3953,7 +3953,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowNewJobDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Job created'); setShowNewJobDialog(false); }}>Create Job</Button>
+              <Button onClick={() => { /* TODO: Create job */ setShowNewJobDialog(false); }}>Create Job</Button>
             </div>
           </div>
         </DialogContent>
@@ -3974,7 +3974,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowRunNowDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Job started'); setShowRunNowDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Run Now</Button>
+              <Button onClick={() => { /* TODO: Run job now */ setShowRunNowDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Run Now</Button>
             </div>
           </div>
         </DialogContent>
@@ -3987,7 +3987,7 @@ export default function DataExportClient() {
             <p className="text-gray-600 dark:text-gray-300">Pause all running jobs temporarily.</p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPauseJobsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Jobs paused'); setShowPauseJobsDialog(false); }} className="bg-orange-600 hover:bg-orange-700">Pause All</Button>
+              <Button onClick={() => { if (confirm('Are you sure you want to pause all jobs?')) { /* TODO: Pause all jobs */ setShowPauseJobsDialog(false); } }} className="bg-orange-600 hover:bg-orange-700">Pause All</Button>
             </div>
           </div>
         </DialogContent>
@@ -4002,7 +4002,7 @@ export default function DataExportClient() {
               {mockExportJobs.filter(j => j.status === 'completed').map(j => (
                 <div key={j.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span>{j.name}</span>
-                  <Button size="sm" onClick={() => toast.success('Download started', { description: `${j.name} is being downloaded` })}><Download className="w-4 h-4" /></Button>
+                  <Button size="sm" onClick={() => { /* TODO: Download job export */ }}><Download className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
@@ -4044,7 +4044,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowJobFilterDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Filters applied'); setShowJobFilterDialog(false); }}>Apply</Button>
+              <Button onClick={() => { /* TODO: Apply job filters */ setShowJobFilterDialog(false); }}>Apply</Button>
             </div>
           </div>
         </DialogContent>
@@ -4063,7 +4063,7 @@ export default function DataExportClient() {
               <Label>Value</Label><Input placeholder="e.g., active" />
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowFilterTransformDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Filter created'); setShowFilterTransformDialog(false); }}>Create</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowFilterTransformDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Create filter transform */ setShowFilterTransformDialog(false); }}>Create</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4101,7 +4101,7 @@ export default function DataExportClient() {
             <Label>SQL Query</Label>
             <textarea className="w-full h-32 p-2 border rounded-md bg-gray-50 dark:bg-gray-800 font-mono text-sm mt-2" placeholder="SELECT * FROM source WHERE..." />
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowCustomSqlDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('SQL transform created'); setShowCustomSqlDialog(false); }}>Create</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowCustomSqlDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Create SQL transform */ setShowCustomSqlDialog(false); }}>Create</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4127,7 +4127,7 @@ export default function DataExportClient() {
               </Select>
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowAddColumnDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Column added'); setShowAddColumnDialog(false); }}>Add</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowAddColumnDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Add column */ setShowAddColumnDialog(false); }}>Add</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4152,7 +4152,7 @@ export default function DataExportClient() {
       <Dialog open={showMapAllDialog} onOpenChange={setShowMapAllDialog}>
         <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Map All Columns</DialogTitle></DialogHeader>
           <div className="py-4"><p className="text-gray-600">Automatically map all source columns to destination using naming conventions.</p></div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowMapAllDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('All columns mapped'); setShowMapAllDialog(false); }}>Map All</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowMapAllDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Map all columns */ setShowMapAllDialog(false); }}>Map All</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4166,7 +4166,7 @@ export default function DataExportClient() {
       <Dialog open={showExportSchemaDialog} onOpenChange={setShowExportSchemaDialog}>
         <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Export Schema</DialogTitle></DialogHeader>
           <div className="py-4"><p className="text-gray-600">Export schema definition as JSON or DDL.</p></div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowExportSchemaDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Schema exported'); setShowExportSchemaDialog(false); }}>Export</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowExportSchemaDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Export schema */ setShowExportSchemaDialog(false); }}>Export</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4190,7 +4190,7 @@ export default function DataExportClient() {
             <div className="space-y-2"><Label>Source Column</Label><Input defaultValue={mockSchemaMappings[selectedMappingIndex || 0]?.sourceColumn} /></div>
             <div className="space-y-2"><Label>Destination Column</Label><Input defaultValue={mockSchemaMappings[selectedMappingIndex || 0]?.destinationColumn} /></div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowEditMappingDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Mapping updated'); setShowEditMappingDialog(false); }}>Save</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowEditMappingDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Update mapping */ setShowEditMappingDialog(false); }}>Save</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4337,7 +4337,7 @@ export default function DataExportClient() {
               </Select>
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowTestDestinationDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Connection test successful'); setShowTestDestinationDialog(false); }}>Test Connection</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowTestDestinationDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Test destination connection */ setShowTestDestinationDialog(false); }}>Test Connection</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4357,7 +4357,7 @@ export default function DataExportClient() {
               </Select>
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowIntegrationFilterDialog(false)}>Cancel</Button><Button onClick={() => { toast.success('Filters applied'); setShowIntegrationFilterDialog(false); }}>Apply</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowIntegrationFilterDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Apply integration filters */ setShowIntegrationFilterDialog(false); }}>Apply</Button></div>
         </DialogContent>
       </Dialog>
     </div>

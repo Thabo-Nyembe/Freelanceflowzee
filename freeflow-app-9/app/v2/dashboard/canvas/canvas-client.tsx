@@ -2403,7 +2403,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { setShowExportDialog(false); toast.success('Export started') }}>Export</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { /* TODO: Export canvas */ setShowExportDialog(false) }}>Export</Button>
             </div>
           </div>
         </DialogContent>
@@ -2423,7 +2423,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</label>
               <div className="flex gap-2">
                 <Input value="https://freeflow.app/canvas/share/abc123" readOnly className="flex-1" />
-                <Button variant="outline" onClick={() => toast.success('Link copied to clipboard')}>Copy</Button>
+                <Button variant="outline" onClick={() => { navigator.clipboard.writeText('https://freeflow.app/canvas/share/abc123'); toast.success('Link copied to clipboard') }}>Copy</Button>
               </div>
             </div>
             <div className="space-y-2">
@@ -2440,7 +2440,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowShareDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { setShowShareDialog(false); toast.success('Invitation sent') }}>Send Invite</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { /* TODO: Send invitation */ setShowShareDialog(false) }}>Send Invite</Button>
             </div>
           </div>
         </DialogContent>
@@ -2471,7 +2471,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600" onClick={() => { setShowImportDialog(false); toast.success('Ready to import') }}>Import</Button>
+              <Button className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600" onClick={() => { /* TODO: Import files */ setShowImportDialog(false) }}>Import</Button>
             </div>
           </div>
         </DialogContent>
@@ -2512,7 +2512,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowAIGenerateDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setShowAIGenerateDialog(false); toast.success('AI generation started') }}>Generate</Button>
+              <Button className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { /* TODO: Start AI generation */ setShowAIGenerateDialog(false) }}>Generate</Button>
             </div>
           </div>
         </DialogContent>

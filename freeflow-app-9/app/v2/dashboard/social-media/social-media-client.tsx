@@ -2003,7 +2003,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowCreatePostDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowCreatePostDialog(false); toast.success('Post created as draft') }}>Create Draft</Button>
+                <Button onClick={() => { setShowCreatePostDialog(false); /* TODO: Implement create draft functionality */ }}>Create Draft</Button>
               </div>
             </div>
           </DialogContent>
@@ -2033,7 +2033,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowScheduleDialog(false); toast.success('Post scheduled successfully') }}>Schedule</Button>
+                <Button onClick={() => { setShowScheduleDialog(false); /* TODO: Implement post scheduling functionality */ }}>Schedule</Button>
               </div>
             </div>
           </DialogContent>
@@ -2077,7 +2077,7 @@ export default function SocialMediaClient() {
               <p className="text-gray-500">Select a platform to connect:</p>
               <div className="grid grid-cols-2 gap-3">
                 {['Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'YouTube'].map(platform => (
-                  <Button key={platform} variant="outline" className="h-16" onClick={() => { setShowConnectAccountDialog(false); toast.success(`Connecting to ${platform}...`) }}>
+                  <Button key={platform} variant="outline" className="h-16" onClick={() => { setShowConnectAccountDialog(false); /* TODO: Implement ${platform} OAuth connection */ }}>
                     <Share2 className="w-5 h-5 mr-2" />
                     {platform}
                   </Button>
@@ -2118,7 +2118,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowExportDialog(false); toast.success('Export started') }}>
+                <Button onClick={() => { setShowExportDialog(false); /* TODO: Implement analytics data export */ }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
@@ -2155,7 +2155,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowGenerateCaptionDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowGenerateCaptionDialog(false); toast.success('Caption generated!') }}>
+                <Button onClick={() => { setShowGenerateCaptionDialog(false); /* TODO: Implement AI caption generation */ }}>
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate
                 </Button>
@@ -2181,7 +2181,13 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowHashtagsDialog(false)}>Close</Button>
-                <Button onClick={() => { setShowHashtagsDialog(false); toast.success('Hashtags copied!') }}>Copy All</Button>
+                <Button onClick={() => {
+                  const hashtags = ['#socialmedia', '#marketing', '#digitalmarketing', '#business', '#growth', '#success', '#entrepreneur', '#branding'].join(' ');
+                  navigator.clipboard.writeText(hashtags).then(() => {
+                    toast.success('Hashtags copied to clipboard!');
+                    setShowHashtagsDialog(false);
+                  });
+                }}>Copy All</Button>
               </div>
             </div>
           </DialogContent>
@@ -2237,7 +2243,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowCreateVisualDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowCreateVisualDialog(false); toast.success('Opening visual editor...') }}>Create</Button>
+                <Button onClick={() => { setShowCreateVisualDialog(false); /* TODO: Implement visual content editor */ }}>Create</Button>
               </div>
             </div>
           </DialogContent>
@@ -2259,7 +2265,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowReplyDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowReplyDialog(false); toast.success('Reply sent!') }}>
+                <Button onClick={() => { setShowReplyDialog(false); /* TODO: Implement send reply to social media */ }}>
                   <Send className="w-4 h-4 mr-2" />
                   Send Reply
                 </Button>
@@ -2302,7 +2308,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowNewCampaignDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowNewCampaignDialog(false); toast.success('Campaign created!') }}>Create Campaign</Button>
+                <Button onClick={() => { setShowNewCampaignDialog(false); /* TODO: Implement campaign creation */ }}>Create Campaign</Button>
               </div>
             </div>
           </DialogContent>
@@ -2332,7 +2338,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowInviteTeamDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowInviteTeamDialog(false); toast.success('Invitation sent!') }}>Send Invite</Button>
+                <Button onClick={() => { setShowInviteTeamDialog(false); /* TODO: Implement team invitation */ }}>Send Invite</Button>
               </div>
             </div>
           </DialogContent>
@@ -2377,7 +2383,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowRegenerateKeyDialog(false); toast.success('New API key generated') }}>Regenerate</Button>
+                <Button onClick={() => { setShowRegenerateKeyDialog(false); /* TODO: Implement API key regeneration */ }}>Regenerate</Button>
               </div>
             </div>
           </DialogContent>
@@ -2397,7 +2403,7 @@ export default function SocialMediaClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowImportDialog(false); toast.success('Import started') }}>Import</Button>
+                <Button onClick={() => { setShowImportDialog(false); /* TODO: Implement data import */ }}>Import</Button>
               </div>
             </div>
           </DialogContent>
@@ -2413,7 +2419,7 @@ export default function SocialMediaClient() {
               <p className="text-gray-500">Are you sure you want to delete all draft posts? This action cannot be undone.</p>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDeleteDraftsDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => { setShowDeleteDraftsDialog(false); toast.success('All drafts deleted') }}>Delete All Drafts</Button>
+                <Button variant="destructive" onClick={() => { setShowDeleteDraftsDialog(false); /* TODO: Implement delete all drafts */ }}>Delete All Drafts</Button>
               </div>
             </div>
           </DialogContent>
@@ -2429,7 +2435,7 @@ export default function SocialMediaClient() {
               <p className="text-gray-500">Are you sure you want to disconnect all social media accounts? You will need to reconnect them to continue posting.</p>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDisconnectDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => { setShowDisconnectDialog(false); toast.success('All accounts disconnected') }}>Disconnect All</Button>
+                <Button variant="destructive" onClick={() => { setShowDisconnectDialog(false); /* TODO: Implement disconnect all accounts */ }}>Disconnect All</Button>
               </div>
             </div>
           </DialogContent>
@@ -2445,7 +2451,7 @@ export default function SocialMediaClient() {
               <p className="text-gray-500">Are you sure you want to reset all analytics data? This will clear all historical metrics and cannot be undone.</p>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowResetAnalyticsDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => { setShowResetAnalyticsDialog(false); toast.success('Analytics data reset') }}>Reset Analytics</Button>
+                <Button variant="destructive" onClick={() => { setShowResetAnalyticsDialog(false); /* TODO: Implement analytics reset */ }}>Reset Analytics</Button>
               </div>
             </div>
           </DialogContent>
@@ -2461,7 +2467,7 @@ export default function SocialMediaClient() {
               <p className="text-gray-500">The post will be duplicated as a new draft. You can edit it before publishing.</p>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowDuplicateDialog(false); toast.success('Post duplicated to drafts') }}>
+                <Button onClick={() => { setShowDuplicateDialog(false); /* TODO: Implement post duplication */ }}>
                   <Copy className="w-4 h-4 mr-2" />
                   Duplicate
                 </Button>
@@ -2515,7 +2521,7 @@ export default function SocialMediaClient() {
               <p className="text-gray-500">Are you sure you want to delete this post? This action cannot be undone.</p>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDeletePostDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => { setShowDeletePostDialog(false); toast.success('Post deleted') }}>
+                <Button variant="destructive" onClick={() => { setShowDeletePostDialog(false); /* TODO: Implement post deletion */ }}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
                 </Button>
