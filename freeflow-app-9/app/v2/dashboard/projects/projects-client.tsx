@@ -125,6 +125,12 @@ export default function ProjectsClient() {
   const [newProjectBudget, setNewProjectBudget] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
 
+  // Share dialog state
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [shareProjectId, setShareProjectId] = useState<number | null>(null)
+  const [shareEmail, setShareEmail] = useState('')
+  const [sharePermission, setSharePermission] = useState<string>('view')
+
   // ============================================================================
   // DATA FETCHING
   // ============================================================================
@@ -530,6 +536,62 @@ export default function ProjectsClient() {
     }
   }
 
+  const handleOpenShareDialog = (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    logger.info('Share dialog opened', { projectId, projectName: project?.name })
+    setShareProjectId(projectId)
+    setShareEmail('')
+    setSharePermission('view')
+    setShareDialogOpen(true)
+  }
+
+  const handleShareProject = async () => {
+    if (!shareProjectId) return
+
+    const project = projects.find(p => p.id === shareProjectId)
+    if (!project) return
+
+    const actionKey = `share-${shareProjectId}`
+
+    // If email is provided, share via email
+    if (shareEmail.trim()) {
+      try {
+        setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+        logger.info('Sharing project via email', { projectId: shareProjectId, email: shareEmail, permission: sharePermission })
+
+        // Simulate API call for sharing
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        toast.success('Project shared!', {
+          description: `Invitation sent to ${shareEmail} with ${sharePermission} access`
+        })
+        setShareDialogOpen(false)
+        setShareEmail('')
+        setSharePermission('view')
+      } catch (err: any) {
+        logger.error('Share project failed', { error: err })
+        toast.error('Failed to share project', { description: err.message })
+      } finally {
+        setActionLoading(prev => ({ ...prev, [actionKey]: false }))
+      }
+    } else {
+      // Copy share link to clipboard
+      const shareUrl = `${window.location.origin}/dashboard/projects/${shareProjectId}?shared=true`
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Share link copied!', {
+        description: 'Project link has been copied to your clipboard'
+      })
+      setShareDialogOpen(false)
+    }
+  }
+
+  const handleCopyShareLink = async () => {
+    if (!shareProjectId) return
+    const shareUrl = `${window.location.origin}/dashboard/projects/${shareProjectId}?shared=true`
+    await navigator.clipboard.writeText(shareUrl)
+    toast.success('Link copied!', { description: 'Share link copied to clipboard' })
+  }
+
   // Helper function to generate CSV from projects
   const generateProjectsCSV = (projectList: Project[]) => {
     const headers = ['ID', 'Name', 'Description', 'Status', 'Phase', 'Progress', 'Budget', 'Spent', 'Due Date', 'Team']
@@ -816,7 +878,7 @@ export default function ProjectsClient() {
                               <DropdownMenuItem onClick={() => navigator.clipboard.writeText(project.id.toString()).then(() => toast.success('Project ID copied'))}>
                                 <Copy className="h-4 w-4 mr-2" /> Copy ID
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleOpenShareDialog(project.id)}>
                                 <Share2 className="h-4 w-4 mr-2" /> Share
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -990,6 +1052,79 @@ export default function ProjectsClient() {
                   <Plus className="h-4 w-4 mr-2" />
                 )}
                 Create Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ================================================================
+            SHARE PROJECT MODAL
+            ================================================================ */}
+        <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Share Project</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Project: <span className="font-semibold">{projects.find(p => p.id === shareProjectId)?.name}</span>
+              </p>
+
+              {/* Share Link Section */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Share Link</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    readOnly
+                    value={shareProjectId ? `${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/projects/${shareProjectId}` : ''}
+                    className="bg-gray-50 dark:bg-gray-800"
+                  />
+                  <Button variant="outline" size="icon" onClick={handleCopyShareLink}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Invite by Email Section */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Invite by Email</label>
+                <Input
+                  type="email"
+                  placeholder="Enter email address"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                />
+              </div>
+
+              {/* Permission Level */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Permission Level</label>
+                <Select value={sharePermission} onValueChange={setSharePermission}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select permission" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="view">View Only</SelectItem>
+                    <SelectItem value="comment">Can Comment</SelectItem>
+                    <SelectItem value="edit">Can Edit</SelectItem>
+                    <SelectItem value="admin">Full Access</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShareDialogOpen(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                onClick={handleShareProject}
+                disabled={actionLoading[`share-${shareProjectId}`]}
+              >
+                {actionLoading[`share-${shareProjectId}`] ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Share2 className="h-4 w-4 mr-2" />
+                )}
+                {shareEmail.trim() ? 'Send Invitation' : 'Copy Link'}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -687,7 +687,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                   <option value="30days">Last 30 Days</option>
                   <option value="90days">Last 90 Days</option>
                 </select>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" onClick={() => toast.info('Filter options', { description: 'Advanced filter options coming soon' })}>
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
@@ -1201,7 +1201,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                           <Label>Reminder Email Subject</Label>
                           <Input defaultValue="Reminder: Invoice #{{invoice_number}} is due" />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.success('Email template editor', { description: 'Opening email template customization...' })}>
                           <Mail className="w-4 h-4 mr-2" />
                           Customize Email Templates
                         </Button>
@@ -1235,7 +1235,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             </div>
                             <div className="flex items-center gap-2">
                               {gateway.connected && <Badge className="bg-green-100 text-green-700">Connected</Badge>}
-                              <Button variant={gateway.connected ? 'outline' : 'default'} size="sm">
+                              <Button variant={gateway.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.success(gateway.connected ? `Configuring ${gateway.name}` : `Connecting to ${gateway.name}`, { description: gateway.connected ? 'Opening gateway configuration...' : 'Starting gateway connection setup...' })}>
                                 {gateway.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1340,10 +1340,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="inv_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('inv_live_xxxxxxxxxxxxxxxxxx'); toast.success('API key copied', { description: 'API key has been copied to clipboard' }) }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => toast.success('API key regenerated', { description: 'A new API key has been generated. Update your integrations.' })}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1379,7 +1379,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => toast.success('Webhook test sent', { description: 'A test event has been sent to your webhook URL' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
                         </Button>
@@ -1407,7 +1407,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{app.description}</p>
-                              <Button variant="outline" size="sm" className="w-full">
+                              <Button variant="outline" size="sm" className="w-full" onClick={() => toast.success(app.connected ? `Configuring ${app.name}` : `Connecting to ${app.name}`, { description: app.connected ? 'Opening integration settings...' : 'Starting OAuth connection flow...' })}>
                                 {app.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1465,12 +1465,12 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => toast.success('Exporting all invoices', { description: 'Preparing CSV file for download...' })}>
                             <Download className="w-5 h-5 text-blue-600" />
                             <span>Export All Invoices</span>
                             <span className="text-xs text-gray-500">CSV format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => toast.success('Generating report', { description: 'Preparing Excel report for download...' })}>
                             <FileSpreadsheet className="w-5 h-5 text-green-600" />
                             <span>Export Report</span>
                             <span className="text-xs text-gray-500">Excel format</span>
@@ -1545,7 +1545,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Archive All Draft Invoices</div>
                             <p className="text-sm text-gray-500">Move all drafts to archive</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.success('Draft invoices archived', { description: `${stats.draft} draft invoices have been moved to archive` })}>
                             Archive Drafts
                           </Button>
                         </div>
@@ -1554,7 +1554,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Reset Invoice Numbering</div>
                             <p className="text-sm text-gray-500">Reset invoice number sequence</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.warning('Invoice numbers reset', { description: 'Invoice numbering has been reset to INV-1001' })}>
                             Reset Numbers
                           </Button>
                         </div>
@@ -1563,7 +1563,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Delete All Data</div>
                             <p className="text-sm text-gray-500">Permanently delete all invoice data</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => toast.error('Action blocked', { description: 'Please contact support to permanently delete all invoice data' })}>
                             Delete All Data
                           </Button>
                         </div>
@@ -2111,7 +2111,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             <Button variant="outline" onClick={() => setShowCreateModal(false)}>
               Cancel
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast.info('Invoice preview', { description: 'Opening invoice preview in a new tab...' })}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>

@@ -572,6 +572,20 @@ export default function MonitoringClient() {
   const [showDashboardsDialog, setShowDashboardsDialog] = useState(false)
   const [showAlertsDialog, setShowAlertsDialog] = useState(false)
   const [showMetricsDialog, setShowMetricsDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showConfigureChannelDialog, setShowConfigureChannelDialog] = useState(false)
+  const [showAddChannelDialog, setShowAddChannelDialog] = useState(false)
+  const [showCloudIntegrationDialog, setShowCloudIntegrationDialog] = useState(false)
+  const [showDatabaseIntegrationDialog, setShowDatabaseIntegrationDialog] = useState(false)
+  const [showResetAlertsDialog, setShowResetAlertsDialog] = useState(false)
+  const [showRemoveHostsDialog, setShowRemoveHostsDialog] = useState(false)
+  const [showDeleteOrgDialog, setShowDeleteOrgDialog] = useState(false)
+  const [showSSHDialog, setShowSSHDialog] = useState(false)
+  const [showHostMetricsDialog, setShowHostMetricsDialog] = useState(false)
+  const [showHostLogsDialog, setShowHostLogsDialog] = useState(false)
+  const [showCreateDashboardDialog, setShowCreateDashboardDialog] = useState(false)
+  const [selectedChannel, setSelectedChannel] = useState<string | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null)
   const [serverForm, setServerForm] = useState<ServerFormData>(initialServerForm)
   const [alertForm, setAlertForm] = useState<AlertFormData>(initialAlertForm)
 
@@ -1080,7 +1094,7 @@ export default function MonitoringClient() {
                   <CardTitle>Log Stream</CardTitle>
                   <div className="flex items-center gap-3">
                     <Input placeholder="Search logs..." className="w-64" />
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
                       <Filter className="w-4 h-4 mr-2" />
                       Filter
                     </Button>
@@ -1512,10 +1526,15 @@ export default function MonitoringClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="dd_api_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              navigator.clipboard.writeText('dd_api_xxxxxxxxxxxxxxxxxx')
+                              toast.success('API Key copied to clipboard')
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              toast.info('Regenerating API key...', { description: 'This would regenerate your API key in production' })
+                            }}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1524,7 +1543,10 @@ export default function MonitoringClient() {
                           <Label>Application Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="dd_app_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              navigator.clipboard.writeText('dd_app_xxxxxxxxxxxxxxxxxx')
+                              toast.success('Application Key copied to clipboard')
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1565,11 +1587,14 @@ export default function MonitoringClient() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Switch defaultChecked={channel.enabled} />
-                              <Button variant="ghost" size="sm">Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedChannel(channel.name)
+                                setShowConfigureChannelDialog(true)
+                              }}>Configure</Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddChannelDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Channel
                         </Button>
@@ -1813,7 +1838,10 @@ export default function MonitoringClient() {
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{integration.description}</p>
-                              <Button variant="outline" size="sm" className="w-full">
+                              <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                                setSelectedIntegration(integration.name)
+                                setShowCloudIntegrationDialog(true)
+                              }}>
                                 {integration.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1850,7 +1878,10 @@ export default function MonitoringClient() {
                                   Connected
                                 </Badge>
                               ) : (
-                                <Button variant="outline" size="sm">Connect</Button>
+                                <Button variant="outline" size="sm" onClick={() => {
+                                  setSelectedIntegration(db.name)
+                                  setShowDatabaseIntegrationDialog(true)
+                                }}>Connect</Button>
                               )}
                             </div>
                           </div>
@@ -2039,7 +2070,7 @@ export default function MonitoringClient() {
                             <div className="font-medium">Reset All Alerts</div>
                             <p className="text-sm text-gray-500">Clear all alert history</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowResetAlertsDialog(true)}>
                             Reset Alerts
                           </Button>
                         </div>
@@ -2048,7 +2079,7 @@ export default function MonitoringClient() {
                             <div className="font-medium">Remove All Hosts</div>
                             <p className="text-sm text-gray-500">Unregister all monitored hosts</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowRemoveHostsDialog(true)}>
                             Remove Hosts
                           </Button>
                         </div>
@@ -2057,7 +2088,7 @@ export default function MonitoringClient() {
                             <div className="font-medium">Delete Organization</div>
                             <p className="text-sm text-gray-500">Permanently delete this organization</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowDeleteOrgDialog(true)}>
                             Delete Organization
                           </Button>
                         </div>
@@ -2181,15 +2212,15 @@ export default function MonitoringClient() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowSSHDialog(true)}>
                     <Terminal className="w-4 h-4 mr-2" />
                     SSH
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowHostMetricsDialog(true)}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Metrics
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowHostLogsDialog(true)}>
                     <FileText className="w-4 h-4 mr-2" />
                     Logs
                   </Button>
@@ -2394,7 +2425,10 @@ export default function MonitoringClient() {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={() => {
+                setShowDashboardsDialog(false)
+                setShowCreateDashboardDialog(true)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Dashboard
               </Button>
@@ -2520,6 +2554,518 @@ export default function MonitoringClient() {
             </div>
             <div className="flex justify-end">
               <Button variant="outline" onClick={() => setShowMetricsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5" />
+                Log Filters
+              </DialogTitle>
+              <DialogDescription>Configure log stream filters</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Log Level</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="debug">Debug</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="warn">Warning</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="fatal">Fatal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Service</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    <SelectItem value="redis-cluster">redis-cluster</SelectItem>
+                    <SelectItem value="api-gateway">api-gateway</SelectItem>
+                    <SelectItem value="user-service">user-service</SelectItem>
+                    <SelectItem value="worker-queue">worker-queue</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Range</Label>
+                <Select defaultValue="1h">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15m">Last 15 minutes</SelectItem>
+                    <SelectItem value="1h">Last 1 hour</SelectItem>
+                    <SelectItem value="6h">Last 6 hours</SelectItem>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Filters applied')
+                setShowFilterDialog(false)
+              }}>Apply Filters</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Configure Channel Dialog */}
+        <Dialog open={showConfigureChannelDialog} onOpenChange={setShowConfigureChannelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure {selectedChannel}</DialogTitle>
+              <DialogDescription>Update notification channel settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Channel Name</Label>
+                <Input defaultValue={selectedChannel || ''} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enable Channel</Label>
+                  <p className="text-sm text-gray-500">Send notifications to this channel</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Critical Alerts Only</Label>
+                  <p className="text-sm text-gray-500">Only send critical severity alerts</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowConfigureChannelDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Channel configuration updated', { description: selectedChannel })
+                setShowConfigureChannelDialog(false)
+              }}>Save Changes</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Channel Dialog */}
+        <Dialog open={showAddChannelDialog} onOpenChange={setShowAddChannelDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Add Notification Channel
+              </DialogTitle>
+              <DialogDescription>Configure a new notification channel</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Channel Type</Label>
+                <Select defaultValue="slack">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="slack">Slack</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="pagerduty">PagerDuty</SelectItem>
+                    <SelectItem value="webhook">Webhook</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Channel Name</Label>
+                <Input placeholder="e.g., #alerts or ops@company.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Webhook URL / API Key</Label>
+                <Input placeholder="Enter webhook URL or API key" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAddChannelDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Notification channel added')
+                setShowAddChannelDialog(false)
+              }}>Add Channel</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Cloud Integration Dialog */}
+        <Dialog open={showCloudIntegrationDialog} onOpenChange={setShowCloudIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Configure {selectedIntegration}</DialogTitle>
+              <DialogDescription>Set up cloud provider integration</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Access Key ID</Label>
+                <Input placeholder="Enter access key ID" type="password" />
+              </div>
+              <div className="space-y-2">
+                <Label>Secret Access Key</Label>
+                <Input placeholder="Enter secret access key" type="password" />
+              </div>
+              <div className="space-y-2">
+                <Label>Region</Label>
+                <Select defaultValue="us-west-2">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us-west-2">US West (Oregon)</SelectItem>
+                    <SelectItem value="us-east-1">US East (N. Virginia)</SelectItem>
+                    <SelectItem value="eu-west-1">EU West (Ireland)</SelectItem>
+                    <SelectItem value="ap-southeast-1">Asia Pacific (Singapore)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Auto-discover resources</Label>
+                  <p className="text-sm text-gray-500">Automatically find and monitor resources</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCloudIntegrationDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Cloud integration configured', { description: selectedIntegration })
+                setShowCloudIntegrationDialog(false)
+              }}>Connect</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Database Integration Dialog */}
+        <Dialog open={showDatabaseIntegrationDialog} onOpenChange={setShowDatabaseIntegrationDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Connect {selectedIntegration}</DialogTitle>
+              <DialogDescription>Set up database monitoring</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Host</Label>
+                  <Input placeholder="localhost" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Port</Label>
+                  <Input placeholder="5432" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Database Name</Label>
+                <Input placeholder="mydb" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Username</Label>
+                  <Input placeholder="admin" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Password</Label>
+                  <Input placeholder="password" type="password" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>SSL/TLS</Label>
+                  <p className="text-sm text-gray-500">Use encrypted connection</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDatabaseIntegrationDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Database connected', { description: selectedIntegration })
+                setShowDatabaseIntegrationDialog(false)
+              }}>Connect</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Alerts Dialog */}
+        <Dialog open={showResetAlertsDialog} onOpenChange={setShowResetAlertsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600 flex items-center gap-2">
+                <AlertOctagon className="w-5 h-5" />
+                Reset All Alerts
+              </DialogTitle>
+              <DialogDescription>This action cannot be undone. All alert history will be permanently deleted.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This will clear all {mockAlerts.length} alerts from the system. Are you sure you want to continue?
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowResetAlertsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('All alerts have been reset')
+                setShowResetAlertsDialog(false)
+              }}>Reset All Alerts</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Remove Hosts Dialog */}
+        <Dialog open={showRemoveHostsDialog} onOpenChange={setShowRemoveHostsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600 flex items-center gap-2">
+                <AlertOctagon className="w-5 h-5" />
+                Remove All Hosts
+              </DialogTitle>
+              <DialogDescription>This action cannot be undone. All monitored hosts will be unregistered.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This will remove all {stats.total} hosts from monitoring. You will need to re-register them to resume monitoring.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowRemoveHostsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('All hosts have been removed')
+                setShowRemoveHostsDialog(false)
+              }}>Remove All Hosts</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Organization Dialog */}
+        <Dialog open={showDeleteOrgDialog} onOpenChange={setShowDeleteOrgDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600 flex items-center gap-2">
+                <AlertOctagon className="w-5 h-5" />
+                Delete Organization
+              </DialogTitle>
+              <DialogDescription>This action is permanent and cannot be undone.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Deleting this organization will permanently remove:
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>All {stats.total} monitored hosts</li>
+                <li>All alert configurations and history</li>
+                <li>All dashboards and widgets</li>
+                <li>All API keys and integrations</li>
+              </ul>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDeleteOrgDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.error('Organization deleted', { description: 'This would delete the organization in production' })
+                setShowDeleteOrgDialog(false)
+              }}>Delete Organization</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* SSH Dialog */}
+        <Dialog open={showSSHDialog} onOpenChange={setShowSSHDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="w-5 h-5" />
+                SSH to {selectedHost?.name}
+              </DialogTitle>
+              <DialogDescription>Establish secure shell connection</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm">
+                <p>$ ssh -i ~/.ssh/id_rsa ubuntu@{selectedHost?.ip_address}</p>
+                <p className="text-gray-500 mt-2"># Connecting to {selectedHost?.hostname}...</p>
+                <p className="text-gray-500"># Instance: {selectedHost?.instance_type}</p>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">
+                Click below to copy the SSH command to your clipboard.
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSSHDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                navigator.clipboard.writeText(`ssh -i ~/.ssh/id_rsa ubuntu@${selectedHost?.ip_address}`)
+                toast.success('SSH command copied to clipboard')
+              }}>
+                <Copy className="w-4 h-4 mr-2" />
+                Copy Command
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Host Metrics Dialog */}
+        <Dialog open={showHostMetricsDialog} onOpenChange={setShowHostMetricsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Metrics for {selectedHost?.name}
+              </DialogTitle>
+              <DialogDescription>Real-time performance metrics</DialogDescription>
+            </DialogHeader>
+            {selectedHost && (
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Cpu className="w-4 h-4 text-blue-500" />
+                      <span className="font-medium">CPU</span>
+                    </div>
+                    <p className="text-2xl font-bold">{selectedHost.cpu_usage}%</p>
+                    <Progress value={selectedHost.cpu_usage} className="mt-2" />
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MemoryStick className="w-4 h-4 text-purple-500" />
+                      <span className="font-medium">Memory</span>
+                    </div>
+                    <p className="text-2xl font-bold">{selectedHost.memory_usage}%</p>
+                    <Progress value={selectedHost.memory_usage} className="mt-2" />
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <HardDrive className="w-4 h-4 text-green-500" />
+                      <span className="font-medium">Disk</span>
+                    </div>
+                    <p className="text-2xl font-bold">{selectedHost.disk_usage}%</p>
+                    <Progress value={selectedHost.disk_usage} className="mt-2" />
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Activity className="w-4 h-4 text-orange-500" />
+                      <span className="font-medium">Load Average</span>
+                    </div>
+                    <p className="text-2xl font-bold">{selectedHost.load_avg.toFixed(2)}</p>
+                    <p className="text-sm text-gray-500 mt-1">{selectedHost.processes} processes</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-gray-500">Network In</p>
+                    <p className="font-medium">{selectedHost.network_in} MB/s</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-gray-500">Network Out</p>
+                    <p className="font-medium">{selectedHost.network_out} MB/s</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowHostMetricsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Host Logs Dialog */}
+        <Dialog open={showHostLogsDialog} onOpenChange={setShowHostLogsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Logs for {selectedHost?.name}
+              </DialogTitle>
+              <DialogDescription>Recent log entries from this host</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4 max-h-[400px] overflow-y-auto">
+              {mockLogs.filter(log => selectedHost?.name && log.host.includes(selectedHost.name.split('-')[0])).length > 0 ? (
+                mockLogs.filter(log => selectedHost?.name && log.host.includes(selectedHost.name.split('-')[0])).map(log => (
+                  <div key={log.id} className="p-2 bg-gray-50 dark:bg-gray-800 rounded font-mono text-xs">
+                    <span className="text-gray-400">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                    <Badge className={`ml-2 ${getLogLevelColor(log.level)}`}>{log.level.toUpperCase()}</Badge>
+                    <span className="ml-2 text-gray-700 dark:text-gray-300">{log.message}</span>
+                  </div>
+                ))
+              ) : (
+                mockLogs.slice(0, 5).map(log => (
+                  <div key={log.id} className="p-2 bg-gray-50 dark:bg-gray-800 rounded font-mono text-xs">
+                    <span className="text-gray-400">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                    <Badge className={`ml-2 ${getLogLevelColor(log.level)}`}>{log.level.toUpperCase()}</Badge>
+                    <span className="ml-2 text-gray-700 dark:text-gray-300">{log.message}</span>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowHostLogsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Dashboard Dialog */}
+        <Dialog open={showCreateDashboardDialog} onOpenChange={setShowCreateDashboardDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Create Dashboard
+              </DialogTitle>
+              <DialogDescription>Set up a new monitoring dashboard</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Dashboard Name</Label>
+                <Input placeholder="e.g., Production Overview" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input placeholder="Describe what this dashboard monitors" />
+              </div>
+              <div className="space-y-2">
+                <Label>Template</Label>
+                <Select defaultValue="blank">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blank">Blank Dashboard</SelectItem>
+                    <SelectItem value="infrastructure">Infrastructure Overview</SelectItem>
+                    <SelectItem value="apm">APM Performance</SelectItem>
+                    <SelectItem value="database">Database Metrics</SelectItem>
+                    <SelectItem value="container">Container Monitoring</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Share with team</Label>
+                  <p className="text-sm text-gray-500">Allow team members to view and edit</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCreateDashboardDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Dashboard created')
+                setShowCreateDashboardDialog(false)
+              }}>Create Dashboard</Button>
             </div>
           </DialogContent>
         </Dialog>

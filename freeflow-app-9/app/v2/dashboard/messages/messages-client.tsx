@@ -961,7 +961,7 @@ export default function MessagesClient() {
                 className="pl-10 w-72"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => toast.info('Filter Messages', { description: 'Opening filter options...' })}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={mutating}>
@@ -1067,19 +1067,20 @@ export default function MessagesClient() {
             {/* Channels Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Channel', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: Plus, label: 'New Channel', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleCreateChannel() },
+                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Browse Channels', { description: 'Showing all available channels' }) },
+                { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => handleInvitePeople() },
+                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.info('Starred Channels', { description: 'Filtering to show starred channels' }) } },
+                { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleOpenMarketplace() },
+                { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleCreateWorkflow() },
+                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.info('Archived Channels', { description: 'Showing archived channels' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => toast.info('Channel Settings', { description: 'Opening channel settings' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1285,19 +1286,20 @@ export default function MessagesClient() {
             {/* Messages Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
+                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('New Direct Message', { description: 'Select a contact to start a new DM' }) },
+                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); toast.info('Compose Message', { description: 'Use the message input below to compose your message' }) } },
+                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Reply All', { description: 'Select a message to reply to all recipients' }) },
+                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Forward Message', { description: 'Select a message to forward' }) },
+                { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Saved Messages', { description: 'Showing your saved messages' }) },
+                { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleViewPinnedMessages() },
+                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Search Messages', { description: 'Use the search bar above to search messages' }) },
+                { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Filter Messages', { description: 'Opening filter options...' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1376,7 +1378,7 @@ export default function MessagesClient() {
                               {message.reactions.length > 0 && (
                                 <div className="flex gap-1 mt-2">
                                   {message.reactions.map((reaction, idx) => (
-                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs">
+                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => toast.info('Reaction', { description: `${reaction.count} people reacted with ${getReactionIcon(reaction.type)}` })}>
                                       {getReactionIcon(reaction.type)} {reaction.count}
                                     </Button>
                                   ))}
@@ -1442,19 +1444,20 @@ export default function MessagesClient() {
             {/* Threads Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('All Threads', { description: 'Showing all active threads' }) },
+                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Following', { description: 'Showing threads you are following' }) },
+                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Unread Threads', { description: `You have ${stats.activeThreads} unread threads` }) },
+                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('My Replies', { description: 'Showing threads you have replied to' }) },
+                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.info('Thread Mentions', { description: 'Showing threads where you were mentioned' }) },
+                { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Archived Threads', { description: 'Showing archived threads' }) },
+                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Search Threads', { description: 'Use the search bar to find threads' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Thread Settings', { description: 'Opening thread notification settings' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1531,19 +1534,20 @@ export default function MessagesClient() {
             {/* Calls Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleStartCall('New Call') },
+                { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleStartCall('Video Call') },
+                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => toast.info('Start Huddle', { description: 'Starting a quick huddle session...' }) },
+                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Screen Share', { description: 'Starting screen share...' }) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => toast.info('Schedule Call', { description: 'Opening call scheduler...' }) },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Call Recordings', { description: 'Showing your call recordings' }) },
+                { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Call History', { description: `You have made ${stats.totalCalls} calls today` }) },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Call Settings', { description: 'Opening call & audio settings' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1677,19 +1681,20 @@ export default function MessagesClient() {
             {/* Files Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Upload, label: 'Upload', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: FolderOpen, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Image, label: 'Images', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Upload, label: 'Upload', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => handleUploadFile() },
+                { icon: FolderOpen, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Browse Files', { description: `Browsing ${stats.totalFiles} files across all channels` }) },
+                { icon: Image, label: 'Images', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Images', { description: 'Filtering to show image files only' }) },
+                { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Videos', { description: 'Filtering to show video files only' }) },
+                { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Documents', { description: 'Filtering to show document files only' }) },
+                { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.info('Code Files', { description: 'Filtering to show code snippets and files' }) },
+                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('Search Files', { description: 'Use the search bar to find files' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('File Settings', { description: 'Opening file storage settings' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1774,19 +1779,20 @@ export default function MessagesClient() {
             {/* Mentions Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: AtSign, label: 'All Mentions', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
+                { icon: AtSign, label: 'All Mentions', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('All Mentions', { description: 'Showing all mentions and notifications' }) },
+                { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => toast.info('Unread Mentions', { description: `You have ${stats.mentions} unread mentions` }) },
+                { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => toast.info('Reactions', { description: 'Showing messages with reactions' }) },
+                { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.info('Starred Mentions', { description: 'Showing starred mentions' }) },
+                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => toast.info('Reply All', { description: 'Select a mention to reply to all' }) },
+                { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => handleMarkAllAsRead() },
+                { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Filter Mentions', { description: 'Opening filter options...' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Mention Settings', { description: 'Opening mention notification settings' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -2166,8 +2172,9 @@ export default function MessagesClient() {
                             {['#4a154b', '#1264a3', '#2eb67d', '#e01e5a', '#36c5f0', '#ecb22e'].map(color => (
                               <button
                                 key={color}
-                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
                                 style={{ backgroundColor: color }}
+                                onClick={() => toast.success('Theme Updated', { description: `Sidebar color set to ${color}` })}
                               />
                             ))}
                           </div>
