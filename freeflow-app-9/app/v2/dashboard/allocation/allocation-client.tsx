@@ -1970,21 +1970,21 @@ export default function AllocationClient() {
                         <p className="font-medium">Over-allocation Alerts</p>
                         <p className="text-sm text-gray-500">Notify when resources are over-booked</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Over-allocation Alerts', { description: 'Notification setting toggled' })}>Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle over-allocation alerts */ }}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Pending Approvals</p>
                         <p className="text-sm text-gray-500">Daily digest of pending requests</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Pending Approvals', { description: 'Notification setting toggled' })}>Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle pending approvals */ }}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Capacity Warnings</p>
                         <p className="text-sm text-gray-500">Alert when capacity runs low</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Capacity Warnings', { description: 'Notification setting toggled' })}>Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle capacity warnings */ }}>Enabled</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -3362,21 +3362,21 @@ export default function AllocationClient() {
                   <p className="font-medium">Over-allocation Alerts</p>
                   <p className="text-sm text-gray-500">When resources are over-booked</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Toggle', { description: 'Alert setting toggled' })}>Enabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle alert */ }}>Enabled</Button>
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Pending Approvals</p>
                   <p className="text-sm text-gray-500">Daily digest</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Toggle', { description: 'Alert setting toggled' })}>Enabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle alert */ }}>Enabled</Button>
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Capacity Warnings</p>
                   <p className="text-sm text-gray-500">Low capacity alerts</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Toggle', { description: 'Alert setting toggled' })}>Enabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle alert */ }}>Enabled</Button>
               </div>
             </div>
             <DialogFooter>
@@ -3402,7 +3402,7 @@ export default function AllocationClient() {
                 {['Senior Developer', 'Engineering Manager', 'UX Designer', 'Backend Developer', 'DevOps Engineer'].map(role => (
                   <div key={role} className="flex items-center justify-between p-3 border rounded-lg">
                     <span className="font-medium">{role}</span>
-                    <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Role', { description: `Editing ${role}` })}>
+                    <Button variant="ghost" size="sm" onClick={() => { /* TODO: Edit role */ }}>
                       <Edit className="w-4 h-4" />
                     </Button>
                   </div>
@@ -3411,7 +3411,7 @@ export default function AllocationClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRolesDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Add Role', { description: 'Opening role creator' }) }}>
+              <Button onClick={() => { /* TODO: Open role creator */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Role
               </Button>

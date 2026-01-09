@@ -1719,21 +1719,21 @@ export default function BuildsClient() {
                         <p className="font-medium">Max concurrent jobs</p>
                         <p className="text-sm text-gray-500">Limit parallel workflow runs</p>
                       </div>
-                      <Input type="number" defaultValue={5} className="w-20 text-center" onChange={() => toast.success('Setting updated')} />
+                      <Input type="number" defaultValue={5} className="w-20 text-center" onChange={() => { /* TODO: Save max concurrent jobs setting */ }} />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Queue pending jobs</p>
                         <p className="text-sm text-gray-500">Hold jobs when limit reached</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Queue pending jobs toggled')}>Enabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle queue pending jobs setting */ }}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Cancel in-progress on new push</p>
                         <p className="text-sm text-gray-500">Stop old runs when new commits arrive</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Cancel in-progress toggled')}>Disabled</Button>
+                      <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle cancel in-progress setting */ }}>Disabled</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -2357,7 +2357,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.info('Search applied')
+                /* TODO: Apply search filters */
                 setShowSearchBuildsDialog(false)
               }}>
                 Search
@@ -2406,7 +2406,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Settings saved')
+                /* TODO: Save build settings */
                 setShowBuildSettingsDialog(false)
               }}>
                 Save
@@ -2451,7 +2451,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Workflow created')
+                /* TODO: Create workflow */
                 setShowNewWorkflowDialog(false)
               }}>
                 Create
@@ -2491,7 +2491,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('All workflows triggered')
+                /* TODO: Trigger all workflows */
                 setShowRunAllWorkflowsDialog(false)
               }}>
                 Run All
@@ -2526,7 +2526,7 @@ export default function BuildsClient() {
                     <p className="text-sm text-gray-500">{template.desc}</p>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
-                    toast.success('Template selected', { description: template.name })
+                    /* TODO: Apply template */
                     setShowTemplatesDialog(false)
                   }}>
                     Use
@@ -2561,7 +2561,7 @@ export default function BuildsClient() {
                     {getTriggerIcon(trigger as WorkflowTrigger)}
                     <span className="capitalize">{trigger.replace('_', ' ')}</span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => toast.success(`${trigger} toggled`)}>
+                  <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle trigger */ }}>
                     Enabled
                   </Button>
                 </div>
@@ -2669,7 +2669,7 @@ export default function BuildsClient() {
                     <p className="font-medium">Legacy Deploy</p>
                     <p className="text-sm text-gray-500">Archived 30 days ago</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => toast.success('Workflow restored')}>
+                  <Button size="sm" variant="outline" onClick={() => { /* TODO: Restore workflow */ }}>
                     Restore
                   </Button>
                 </div>
@@ -2704,7 +2704,7 @@ export default function BuildsClient() {
                   <p className="font-medium">Allow fork PRs</p>
                   <p className="text-sm text-gray-500">Run workflows from forks</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Setting toggled')}>Disabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle fork PRs setting */ }}>Disabled</Button>
               </div>
               <div className="flex items-center justify-between">
                 <div>
@@ -2719,7 +2719,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Settings saved')
+                /* TODO: Save workflow settings */
                 setShowWorkflowSettingsDialog(false)
               }}>
                 Save
@@ -2764,7 +2764,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Environment created')
+                /* TODO: Create environment */
                 setShowNewEnvDialog(false)
               }}>
                 Create
@@ -2808,7 +2808,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Deployment started')
+                /* TODO: Start deployment */
                 setShowDeployDialog(false)
               }}>
                 Deploy
@@ -2835,7 +2835,7 @@ export default function BuildsClient() {
                   <p className="font-medium">Required reviewers</p>
                   <p className="text-sm text-gray-500">Approval before deploy</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Toggle reviewers')}>Enabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle reviewers */ }}>Enabled</Button>
               </div>
               <div className="flex items-center justify-between">
                 <div>
@@ -2849,7 +2849,7 @@ export default function BuildsClient() {
                   <p className="font-medium">Branch restrictions</p>
                   <p className="text-sm text-gray-500">Only from specific branches</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Toggle restrictions')}>Disabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle restrictions */ }}>Disabled</Button>
               </div>
             </div>
             <div className="flex gap-3">
@@ -2857,7 +2857,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Protection rules saved')
+                /* TODO: Save protection rules */
                 setShowProtectionDialog(false)
               }}>
                 Save
@@ -2885,7 +2885,7 @@ export default function BuildsClient() {
                     <Lock className="w-4 h-4 text-gray-400" />
                     <span className="font-mono text-sm">{secret}</span>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Secret deleted')}>
+                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm('Delete this secret?')) { /* TODO: Delete secret */ } }}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2927,7 +2927,7 @@ export default function BuildsClient() {
                     <span className="text-gray-400 mx-2">=</span>
                     <span className="text-sm text-gray-600">{variable.value}</span>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => toast.success('Edit variable')}>
+                  <Button variant="ghost" size="sm" onClick={() => { /* TODO: Open edit variable dialog */ }}>
                     <Settings className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2966,7 +2966,7 @@ export default function BuildsClient() {
                     </Avatar>
                     <span>{reviewer}</span>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Reviewer removed')}>
+                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm('Remove this reviewer?')) { /* TODO: Remove reviewer */ } }}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -3009,7 +3009,7 @@ export default function BuildsClient() {
                     </div>
                     <p className="text-sm text-gray-500 mt-1">{new Date(build.created_at).toLocaleString()}</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => toast.info('View deployment details')}>
+                  <Button size="sm" variant="outline" onClick={() => { /* TODO: Show deployment details */ }}>
                     View
                   </Button>
                 </div>
@@ -3041,14 +3041,14 @@ export default function BuildsClient() {
                   <p className="font-medium">Auto-deploy</p>
                   <p className="text-sm text-gray-500">Deploy on successful build</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Auto-deploy toggled')}>Disabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle auto-deploy */ }}>Disabled</Button>
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Rollback on failure</p>
                   <p className="text-sm text-gray-500">Auto-rollback if deploy fails</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Rollback toggled')}>Enabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle rollback */ }}>Enabled</Button>
               </div>
             </div>
             <div className="flex gap-3">
@@ -3056,7 +3056,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Settings saved')
+                /* TODO: Save env settings */
                 setShowEnvSettingsDialog(false)
               }}>
                 Save
@@ -3092,7 +3092,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Environment updated')
+                /* TODO: Update environment config */
                 setShowConfigureEnvDialog(false)
               }}>
                 Save
@@ -3189,7 +3189,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Download started', { description: selectedArtifact ? selectedArtifact.name : 'Artifact download started' })
+                /* TODO: Download artifact */
                 setShowDownloadDialog(false)
                 setSelectedArtifact(null)
               }}>
@@ -3262,7 +3262,7 @@ export default function BuildsClient() {
                       <p className="text-xs text-gray-500">Build #{artifact.build_number}</p>
                     </div>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => toast.success('Opening report...')}>
+                  <Button size="sm" variant="outline" onClick={() => { /* TODO: Open report */ }}>
                     <Eye className="w-4 h-4" />
                   </Button>
                 </div>
@@ -3298,7 +3298,7 @@ export default function BuildsClient() {
                       <p className="text-xs text-gray-500">{formatBytes(artifact.size_bytes)}</p>
                     </div>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => toast.success('Download started')}>
+                  <Button size="sm" variant="outline" onClick={() => { /* TODO: Start download */ }}>
                     <Download className="w-4 h-4" />
                   </Button>
                 </div>
@@ -3391,7 +3391,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button variant="destructive" className="flex-1" onClick={() => {
-                toast.success('Cleanup completed', { description: 'Expired artifacts have been removed' })
+                if (confirm('Cleanup expired artifacts?')) { /* TODO: Cleanup artifacts */ }
                 setShowCleanupDialog(false)
               }}>
                 <Trash2 className="w-4 h-4 mr-2" />
@@ -3431,7 +3431,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.info('Search applied')
+                /* TODO: Apply artifact search */
                 setShowSearchArtifactsDialog(false)
               }}>
                 Search
@@ -3465,7 +3465,7 @@ export default function BuildsClient() {
                   <p className="font-medium">Auto-cleanup</p>
                   <p className="text-sm text-gray-500">Remove expired automatically</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Auto-cleanup toggled')}>Enabled</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Toggle auto-cleanup */ }}>Enabled</Button>
               </div>
             </div>
             <div className="flex gap-3">
@@ -3473,7 +3473,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Settings saved')
+                /* TODO: Save artifact settings */
                 setShowArtifactSettingsDialog(false)
               }}>
                 Save
@@ -3509,7 +3509,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Secret added')
+                /* TODO: Add secret */
                 setShowAddSecretDialog(false)
               }}>
                 Add Secret
@@ -3548,7 +3548,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button variant="destructive" className="flex-1" onClick={() => {
-                toast.success('Secret deleted', { description: `${selectedSecret} has been removed` })
+                /* TODO: Delete secret */
                 setShowDeleteSecretDialog(false)
                 setSelectedSecret(null)
               }}>
@@ -3583,7 +3583,7 @@ export default function BuildsClient() {
                 Close
               </Button>
               <Button className="flex-1" onClick={() => {
-                toast.success('Copied to clipboard')
+                navigator.clipboard.writeText(`$\{{ secrets.${selectedSecret} }}`); toast.success('Copied to clipboard')
                 setShowCopySecretDialog(false)
                 setSelectedSecret(null)
               }}>
@@ -3624,7 +3624,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button variant="destructive" className="flex-1" onClick={() => {
-                toast.success('Cache deleted', { description: `${selectedCache} has been removed` })
+                /* TODO: Delete cache */
                 setShowDeleteCacheDialog(false)
                 setSelectedCache(null)
               }}>
@@ -3683,7 +3683,7 @@ export default function BuildsClient() {
                   toast.error('Please fill in all fields')
                   return
                 }
-                toast.success('Schedule created', { description: `${newScheduleName} will run on schedule` })
+                /* TODO: Create schedule */
                 setShowAddScheduleDialog(false)
                 setNewScheduleName('')
                 setNewScheduleCron('')
@@ -3742,7 +3742,7 @@ export default function BuildsClient() {
                   toast.error('Please fill in all fields')
                   return
                 }
-                toast.success('Variable added', { description: `${newVariableKey} has been created` })
+                /* TODO: Add variable */
                 setShowAddVariableDialog(false)
                 setNewVariableKey('')
                 setNewVariableValue('')
@@ -3807,7 +3807,7 @@ export default function BuildsClient() {
                   toast.error('Please enter a reviewer')
                   return
                 }
-                toast.success('Reviewer added', { description: `${newReviewerEmail} is now a required reviewer` })
+                /* TODO: Add reviewer */
                 setShowAddReviewerDialog(false)
                 setNewReviewerEmail('')
               }}>
@@ -3847,9 +3847,7 @@ export default function BuildsClient() {
               </pre>
             </ScrollArea>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => {
-                toast.success('Logs downloaded')
-              }}>
+              <Button variant="outline" onClick={() => { /* TODO: Download logs */ }}>
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
@@ -3883,7 +3881,7 @@ export default function BuildsClient() {
                         <p className="text-xs text-gray-500">{formatBytes(artifact.size_bytes)}</p>
                       </div>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => toast.success(`Downloading ${artifact.name}...`)}>
+                    <Button size="sm" variant="outline" onClick={() => { /* TODO: Download artifact */ }}>
                       <Download className="w-4 h-4" />
                     </Button>
                   </div>
@@ -3941,7 +3939,7 @@ export default function BuildsClient() {
                 Cancel
               </Button>
               <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
-                toast.success('Build re-run started', { description: `Build #${selectedBuild?.build_number} is running again` })
+                /* TODO: Re-run build */
                 setShowRerunBuildDialog(false)
               }}>
                 <RotateCcw className="w-4 h-4 mr-2" />
@@ -3994,7 +3992,7 @@ jobs:
               </pre>
             </ScrollArea>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => toast.success('File copied to clipboard')}>
+              <Button variant="outline" onClick={() => { /* TODO: Copy file content to clipboard */ }}>
                 <Copy className="w-4 h-4 mr-2" />
                 Copy
               </Button>
@@ -4036,7 +4034,7 @@ jobs:
                 Cancel
               </Button>
               <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
-                toast.success('Workflow triggered', { description: `${selectedWorkflow?.name} is now running` })
+                /* TODO: Trigger workflow */
                 setShowRunSingleWorkflowDialog(false)
               }}>
                 <Play className="w-4 h-4 mr-2" />

@@ -883,7 +883,7 @@ export default function FilesHubClient() {
             >
               <List className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => toast.info('Filter options', { description: 'Use the tabs and search to filter files' })}>
+            <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement filter dropdown */ }}>
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
@@ -1025,7 +1025,7 @@ export default function FilesHubClient() {
                           <p className="text-sm text-gray-500">Modified {formatDate(file.modifiedAt)} at {formatTime(file.modifiedAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => toast.success('File downloaded successfully')}>
+                          <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement file download */ }}>
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleShareFile(file.id, file.name)}>
@@ -1086,7 +1086,7 @@ export default function FilesHubClient() {
                         <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
                           {link.access}
                         </Badge>
-                        <Button variant="ghost" size="sm" onClick={() => toast.success('Link copied to clipboard')}>
+                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(link.link); toast.success('Link copied to clipboard'); }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1239,11 +1239,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.success('Cache cleared', { description: 'Local cache has been cleared successfully' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement cache clearing */ }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Clear Local Cache
                       </Button>
-                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600" onClick={() => toast.info('Upgrade to Pro', { description: 'Contact sales for storage plan upgrades' })}>
+                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600" onClick={() => { /* TODO: Implement upgrade flow */ }}>
                         Upgrade Storage Plan
                       </Button>
                     </CardContent>
@@ -1307,7 +1307,7 @@ export default function FilesHubClient() {
                               <p className="text-xs text-gray-500">{device.type} • Last sync: {device.lastSync}</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Device unlinked', { description: `${device.name} has been removed from your account` })}>Unlink</Button>
+                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm(`Unlink ${device.name}?`)) { /* TODO: Implement device unlinking */ } }}>Unlink</Button>
                         </div>
                       ))}
                     </CardContent>
@@ -1434,8 +1434,8 @@ export default function FilesHubClient() {
                               <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
                                 {link.access}
                               </Badge>
-                              <Button variant="ghost" size="sm" onClick={() => toast.success('Link copied to clipboard')}><Copy className="w-4 h-4" /></Button>
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Link removed')}><Trash2 className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement link copy */ }}><Copy className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm('Remove this link?')) { /* TODO: Implement link removal */ } }}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1646,7 +1646,7 @@ export default function FilesHubClient() {
                             {app.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm" onClick={() => toast.success(`Connecting to ${app.name}`, { description: 'Integration setup started' })}>Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement app connection flow */ }}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1669,7 +1669,7 @@ export default function FilesHubClient() {
                         </div>
                         <code className="text-xs text-gray-500 break-all">https://api.yourapp.com/webhooks/files</code>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.info('Add Webhook', { description: 'Webhook configuration panel coming soon' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement webhook configuration */ }}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Webhook
                       </Button>
@@ -1688,8 +1688,8 @@ export default function FilesHubClient() {
                         <Label className="text-sm font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="fh_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => toast.success('Key revealed')}><Eye className="w-4 h-4" /></Button>
-                          <Button variant="outline" size="icon" onClick={() => toast.success('Key copied to clipboard')}><Copy className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement key reveal toggle */ }}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('Key copied'); }}><Copy className="w-4 h-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1697,7 +1697,7 @@ export default function FilesHubClient() {
                           Keep your API key secure. Never share it in public repositories.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.warning('API Key Regenerated', { description: 'Your new API key has been generated. Update your integrations.' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { if (confirm('Regenerate API key? Existing integrations will stop working.')) { /* TODO: Implement API key regeneration */ } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Regenerate API Key
                       </Button>
@@ -1790,7 +1790,7 @@ export default function FilesHubClient() {
                         <Label className="text-sm font-medium">Encryption Key</Label>
                         <div className="flex gap-2">
                           <Input value="•••••••••••••••••••••" readOnly className="flex-1 font-mono" />
-                          <Button variant="outline" size="icon" onClick={() => toast.success('Key revealed')}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement encryption key reveal */ }}><Eye className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1825,11 +1825,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.success('Audit log exported', { description: 'Download will start shortly' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement audit log export */ }}>
                         <Download className="w-4 h-4 mr-2" />
                         Export Audit Log
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => toast.info('Audit Log', { description: 'Full audit log viewer coming soon' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement full audit log viewer */ }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Full Audit Log
                       </Button>
@@ -1920,11 +1920,11 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.success('Data export started', { description: 'You will receive an email when your data is ready for download' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement data export */ }}>
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => toast.success('Trash emptied', { description: 'All deleted files have been permanently removed' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { if (confirm('Empty trash? All deleted files will be permanently removed.')) { /* TODO: Implement empty trash */ } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Empty Trash Now
                       </Button>
@@ -1964,7 +1964,7 @@ export default function FilesHubClient() {
                           Last backup: Today at 3:00 AM
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.success('Backup initiated', { description: 'Creating backup of all your files...' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement backup creation */ }}>
                         <Download className="w-4 h-4 mr-2" />
                         Create Backup Now
                       </Button>
@@ -2035,19 +2035,19 @@ export default function FilesHubClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'This action cannot be undone. Contact support to proceed.' })}>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('DELETE ALL FILES? This action cannot be undone!')) { /* TODO: Implement delete all files - requires support */ } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete All Files
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'All shared links will be revoked immediately.' })}>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Revoke all shared links? This will break all active shared links immediately.')) { /* TODO: Implement revoke all links */ } }}>
                         <Link2 className="w-4 h-4 mr-2" />
                         Revoke All Shared Links
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'All settings will be reset to defaults.' })}>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Reset all settings to defaults?')) { /* TODO: Implement settings reset */ } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reset All Settings
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.error('Are you sure?', { description: 'Files Hub will be disabled for your account.' })}>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Disable Files Hub? You can re-enable it from account settings.')) { /* TODO: Implement disable files hub */ } }}>
                         <Lock className="w-4 h-4 mr-2" />
                         Disable Files Hub
                       </Button>
@@ -2143,7 +2143,7 @@ export default function FilesHubClient() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.success('File downloaded successfully')}>
+                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => { /* TODO: Implement file download for selectedFile */ }}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>
