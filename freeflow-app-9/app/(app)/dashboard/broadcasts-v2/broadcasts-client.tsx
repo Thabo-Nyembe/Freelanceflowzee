@@ -1379,7 +1379,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toast.info(`Editing automation: ${automation.name}`)}
+                          onClick={() => { /* TODO: Implement automation editor dialog */ }}
                         >
                           Edit
                         </Button>
@@ -1396,7 +1396,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => toast.success('Automation duplicated', { description: `Copy of ${automation.name} created` })}
+                          onClick={() => { /* TODO: Implement automation duplication */ }}
                         >
                           Duplicate
                         </Button>
@@ -1478,7 +1478,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toast.info(`Editing series: ${series.name}`)}
+                    onClick={() => { /* TODO: Implement series step editor */ }}
                   >
                     Edit Steps
                   </Button>
@@ -1495,7 +1495,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toast.info('Opening enrollment settings')}
+                    onClick={() => { /* TODO: Implement enrollment settings dialog */ }}
                   >
                     Enrollment Settings
                   </Button>
@@ -1510,7 +1510,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               {mockTemplates.map(template => (
                 <div
                   key={template.id}
-                  onClick={() => toast.info(`Opening template: ${template.name}`)}
+                  onClick={() => { /* TODO: Implement template editor/preview */ }}
                   className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all"
                 >
                   <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center text-3xl mb-4">

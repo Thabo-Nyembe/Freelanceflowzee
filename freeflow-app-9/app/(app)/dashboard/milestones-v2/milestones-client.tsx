@@ -1447,7 +1447,7 @@ export default function MilestonesClient() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                              <DropdownMenuItem onClick={() => toast.info('Edit milestone', { description: milestone.name })}>
+                              <DropdownMenuItem onClick={() => { /* TODO: Implement milestone editor dialog */ }}>
                                 <Edit2 className="w-4 h-4 mr-2" />
                                 Edit Milestone
                               </DropdownMenuItem>
@@ -2180,7 +2180,7 @@ export default function MilestonesClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="ms_sk_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.success('Key copied to clipboard')}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('ms_sk_xxxxxxxxxxxxx'); toast.success('Key copied to clipboard'); }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2258,7 +2258,7 @@ export default function MilestonesClient() {
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => toast.success('Old milestones archived successfully')}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => { /* TODO: Implement milestone archival */ }}>
                             <Archive className="w-5 h-5" />
                             <span>Archive Old</span>
                           </Button>
@@ -2266,7 +2266,7 @@ export default function MilestonesClient() {
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Stats</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => toast.success('Completed milestones purged successfully')}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => { if (confirm('Purge all completed milestones? This cannot be undone.')) { /* TODO: Implement milestone purge */ } }}>
                             <Trash2 className="w-5 h-5" />
                             <span>Purge Completed</span>
                           </Button>
@@ -3541,7 +3541,7 @@ export default function MilestonesClient() {
               </div>
             </ScrollArea>
             <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => toast.success('All notifications marked as read')}>
+              <Button variant="ghost" onClick={() => { /* TODO: Implement mark all notifications as read */ }}>
                 Mark all as read
               </Button>
               <Button variant="outline" onClick={() => setShowNotificationsDialog(false)}>

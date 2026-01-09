@@ -1181,7 +1181,7 @@ export default function ComplianceClient() {
                 <Input placeholder="Search controls..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Filter: Select status, risk level, or framework to filter')}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement filter dropdown */ }}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1672,7 +1672,7 @@ export default function ComplianceClient() {
                         }}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.info(`Policy settings for ${policy.name}`)}>
+                        <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement policy settings dialog */ }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1836,7 +1836,7 @@ export default function ComplianceClient() {
                             <Label className="text-gray-900 dark:text-white font-medium">Organization Name</Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Inc.</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Edit mode: Click to modify organization name')}>Edit</Button>
+                          <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement organization name edit */ }}>Edit</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>

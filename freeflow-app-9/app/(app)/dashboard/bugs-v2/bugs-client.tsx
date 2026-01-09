@@ -1901,7 +1901,7 @@ export default function BugsClient() {
                               <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
                               <span className="font-medium">{label.name}</span>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Label', { description: `Editing label: ${label.name}` })}>
+                            <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement label editor dialog */ }}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1957,7 +1957,7 @@ export default function BugsClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.info('Add Status', { description: 'Custom status creation dialog would open here' })}>
+                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement custom status creation dialog */ }}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Custom Status
                       </Button>
@@ -2180,14 +2180,14 @@ export default function BugsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Test Data</p>
                             <p className="text-sm text-gray-500">Remove all test and demo bugs</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Delete Test Data', { description: 'This action would delete all test/demo bugs' })}>Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Delete all test/demo bugs? This cannot be undone.')) { /* TODO: Implement test data deletion */ } }}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Project</p>
                             <p className="text-sm text-gray-500">Delete all bugs and reset to default</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.error('Reset Project', { description: 'This is a destructive action. Please confirm in settings.' })}>Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Reset project and delete all bugs? This cannot be undone.')) { /* TODO: Implement project reset */ } }}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2412,7 +2412,7 @@ export default function BugsClient() {
                             <p className="font-medium text-sm truncate">{att.name}</p>
                             <p className="text-xs text-muted-foreground">{formatFileSize(att.size)}</p>
                           </div>
-                          <Button variant="ghost" size="sm" onClick={() => toast.success('Downloading', { description: `Downloading ${att.name}...` })}>
+                          <Button variant="ghost" size="sm" onClick={() => window.open(att.url || '#', '_blank')}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
@@ -3059,7 +3059,7 @@ export default function BugsClient() {
                       variant="outline"
                       className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                       style={{ borderColor: label.color }}
-                      onClick={() => toast.info('Label Filter', { description: `Toggled filter for: ${label.name}` })}
+                      onClick={() => { /* TODO: Implement label filter toggle */ }}
                     >
                       <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: label.color }} />
                       {label.name}
@@ -3295,7 +3295,7 @@ export default function BugsClient() {
               <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
                 Close
               </Button>
-              <Button onClick={() => toast.info('View Full History', { description: 'Opening full activity log...' })}>
+              <Button onClick={() => { /* TODO: Implement full activity log view */ }}>
                 View Full Log
               </Button>
             </DialogFooter>

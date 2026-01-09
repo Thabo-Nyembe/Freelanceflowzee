@@ -2720,7 +2720,7 @@ export default function DeploymentsClient() {
                 <div className="flex gap-2 mt-1">
                   <Input placeholder="Key" className="flex-1 font-mono" />
                   <Input placeholder="Value" className="flex-1" />
-                  <Button onClick={() => toast.success('Item Added', { description: 'New config item added' })}><Plus className="h-4 w-4" /></Button>
+                  <Button onClick={() => { /* TODO: Implement config item addition */ }}><Plus className="h-4 w-4" /></Button>
                 </div>
               </div>
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2731,7 +2731,7 @@ export default function DeploymentsClient() {
                       <span className="font-mono text-sm">{item}</span>
                       <div className="flex items-center gap-2">
                         <Input defaultValue={i === 0 ? 'true' : i === 1 ? 'false' : '100'} className="w-24 h-8" />
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('Item Deleted', { description: `${item} removed` })}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => { if (confirm(`Delete ${item}?`)) { /* TODO: Implement config item deletion */ } }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                       </div>
                     </div>
                   ))}
@@ -2788,7 +2788,7 @@ export default function DeploymentsClient() {
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
                 <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                 <p className="text-sm text-gray-500 mb-2">Drag and drop files here, or click to browse</p>
-                <Button variant="outline" onClick={() => toast.info('File Browser', { description: 'File browser would open here' })}>Browse Files</Button>
+                <Button variant="outline" onClick={() => { /* TODO: Implement file browser/picker */ }}>Browse Files</Button>
               </div>
               <div>
                 <Label>Destination Folder</Label>
@@ -3054,7 +3054,7 @@ export default function DeploymentsClient() {
                 <Label>Format</Label>
                 <div className="flex gap-2 mt-2">
                   {['PDF', 'CSV', 'JSON'].map(fmt => (
-                    <Button key={fmt} variant="outline" size="sm" className="flex-1" onClick={() => toast.info(`${fmt} Selected`, { description: `Export will be in ${fmt} format` })}>{fmt}</Button>
+                    <Button key={fmt} variant="outline" size="sm" className="flex-1" onClick={() => { /* TODO: Implement format selection state */ }}>{fmt}</Button>
                   ))}
                 </div>
               </div>
@@ -3338,7 +3338,7 @@ export default function DeploymentsClient() {
                         </div>
                       </div>
                     </div>
-                    <Button size="sm" className="w-full mt-3" onClick={() => toast.success('Plugin Installed', { description: `${plugin.name} has been added` })}>Install</Button>
+                    <Button size="sm" className="w-full mt-3" onClick={() => { /* TODO: Implement plugin installation */ }}>Install</Button>
                   </div>
                 ))}
               </div>
