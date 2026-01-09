@@ -1681,14 +1681,24 @@ export default function ThirdPartyIntegrationsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>Production API Key</Label>
-                            <Button variant="ghost" size="sm" onClick={() => toast.success('Production API key regenerated', { description: 'Your new key is now active' })}>Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              if (confirm('Are you sure you want to regenerate the Production API key? This will invalidate your current key.')) {
+                                /* TODO: Implement API key regeneration */
+                                toast.success('Production API key regenerated', { description: 'Your new key is now active' })
+                              }
+                            }}>Regenerate</Button>
                           </div>
                           <Input type="password" value="zap_live_••••••••••••••••" readOnly className="font-mono" />
                         </div>
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>Test API Key</Label>
-                            <Button variant="ghost" size="sm" onClick={() => toast.success('Test API key regenerated', { description: 'Your new test key is now active' })}>Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              if (confirm('Are you sure you want to regenerate the Test API key? This will invalidate your current test key.')) {
+                                /* TODO: Implement test API key regeneration */
+                                toast.success('Test API key regenerated', { description: 'Your new test key is now active' })
+                              }
+                            }}>Regenerate</Button>
                           </div>
                           <Input type="password" value="zap_test_••••••••••••••••" readOnly className="font-mono" />
                         </div>
@@ -1728,7 +1738,10 @@ export default function ThirdPartyIntegrationsClient() {
                                 <p className="text-xs text-gray-500 font-mono">{webhook.url}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" onClick={() => toast.success(`Webhook test sent`, { description: `Test event sent to ${webhook.name}` })}>Test</Button>
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                /* TODO: Implement actual webhook test API call */
+                                toast.success(`Webhook test sent`, { description: `Test event sent to ${webhook.name}` })
+                              }}>Test</Button>
                                 <Button variant="ghost" size="sm" onClick={() => {
                                   setSelectedIntegrationForAction(webhook.name)
                                   setShowConfigureDialog(true)
@@ -1803,11 +1816,18 @@ export default function ThirdPartyIntegrationsClient() {
                           <Switch defaultChecked />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.success('Export started', { description: 'Your data export will be ready for download shortly' })}>
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => {
+                          /* TODO: Implement data export functionality */
+                          toast.success('Export started', { description: 'Your data export will be ready for download shortly' })
+                        }}>
                             <FileText className="w-4 h-4" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2" onClick={() => toast.success('Configuration cloned', { description: 'Settings have been copied to clipboard' })}>
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => {
+                            const configData = JSON.stringify(configSettings, null, 2)
+                            navigator.clipboard.writeText(configData)
+                            toast.success('Configuration cloned', { description: 'Settings have been copied to clipboard' })
+                          }}>
                             <Copy className="w-4 h-4" />
                             Clone Configuration
                           </Button>

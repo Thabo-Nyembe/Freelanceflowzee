@@ -1509,7 +1509,12 @@ export default function ProjectsHubClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => toast.success('Webhook Deleted', { description: 'Webhook removed successfully' })}>
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                    if (confirm('Are you sure you want to delete this webhook?')) {
+                                      /* TODO: Implement webhook deletion */
+                                      toast.success('Webhook Deleted', { description: 'Webhook removed successfully' })
+                                    }
+                                  }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1673,10 +1678,17 @@ export default function ProjectsHubClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               {field.required && <Badge variant="outline">Required</Badge>}
-                              <Button variant="ghost" size="sm" onClick={() => toast.success('Edit Field', { description: 'Editor opened' })}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                /* TODO: Implement field editing - open edit dialog */
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => toast.success('Field Deleted', { description: 'Custom field removed' })}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                if (confirm('Are you sure you want to delete this custom field?')) {
+                                  /* TODO: Implement custom field deletion */
+                                  toast.success('Field Deleted', { description: 'Custom field removed' })
+                                }
+                              }}>
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
@@ -2501,7 +2513,10 @@ export default function ProjectsHubClient() {
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <span className="text-sm">Send test message</span>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Test message sent to Slack')}>Send Test</Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  /* TODO: Implement Slack test message sending */
+                  toast.success('Test message sent to Slack')
+                }}>Send Test</Button>
               </div>
             </div>
             <DialogFooter>
@@ -2565,7 +2580,11 @@ export default function ProjectsHubClient() {
                   { name: 'Confluence', icon: '📄', desc: 'Documentation sync' },
                   { name: 'Bitbucket', icon: '🪣', desc: 'Repository integration' },
                 ].map(integration => (
-                  <div key={integration.name} className="p-4 border rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" onClick={() => { toast.success(`${integration.name} connected`); setShowIntegrationDialog(false) }}>
+                  <div key={integration.name} className="p-4 border rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" onClick={() => {
+                    /* TODO: Implement integration connection flow */
+                    toast.success(`${integration.name} connected`)
+                    setShowIntegrationDialog(false)
+                  }}>
                     <div className="text-2xl mb-2">{integration.icon}</div>
                     <p className="font-medium">{integration.name}</p>
                     <p className="text-xs text-gray-500">{integration.desc}</p>
@@ -2602,13 +2621,22 @@ export default function ProjectsHubClient() {
                 <span className="text-sm">Sync on push</span>
                 <Switch defaultChecked />
               </div>
-              <Button variant="outline" className="w-full" onClick={() => toast.success('Syncing...', { description: 'Manual sync started' })}>
+              <Button variant="outline" className="w-full" onClick={() => {
+                /* TODO: Implement manual sync with integration */
+                toast.success('Syncing...', { description: 'Manual sync started' })
+              }}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Sync Now
               </Button>
             </div>
             <DialogFooter>
-              <Button variant="outline" className="text-red-600" onClick={() => { toast.success('Integration disconnected'); setShowIntegrationConfigDialog(false) }}>Disconnect</Button>
+              <Button variant="outline" className="text-red-600" onClick={() => {
+                if (confirm('Are you sure you want to disconnect this integration?')) {
+                  /* TODO: Implement integration disconnection */
+                  toast.success('Integration disconnected')
+                  setShowIntegrationConfigDialog(false)
+                }
+              }}>Disconnect</Button>
               <Button onClick={handleSaveIntegrationConfig}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>

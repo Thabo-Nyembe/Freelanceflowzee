@@ -2124,7 +2124,7 @@ export default function InvoicingClient() {
                     <Printer className="w-4 h-4 mr-2" />
                     Print
                   </Button>
-                  <Button variant="outline" onClick={() => toast.success('Edit mode ready')}>
+                  <Button variant="outline" onClick={() => { /* TODO: Implement edit mode toggle */ }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2298,7 +2298,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.success('Invoice created successfully')
+                /* TODO: Implement create invoice */
                 setShowNewInvoiceDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -2363,7 +2363,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Payment recorded successfully')
+                /* TODO: Implement record payment */
                 setShowRecordPaymentDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -2416,7 +2416,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.success('Payment reminders sent successfully')
+                /* TODO: Implement send reminders */
                 setShowSendRemindersDialog(false)
               }}>
                 <Send className="w-4 h-4 mr-2" />
@@ -2483,7 +2483,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.success('Report exported successfully')
+                /* TODO: Implement export report */
                 setShowExportReportDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -2534,7 +2534,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.success('Invoices exported successfully')
+                /* TODO: Implement export invoices */
                 setShowExportInvoicesDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -2732,7 +2732,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Client added successfully')
+                /* TODO: Implement add client */
                 setShowAddClientDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -2772,7 +2772,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.success('Emails sent successfully')
+                /* TODO: Implement send emails to all */
                 setShowEmailAllDialog(false)
               }}>
                 <Send className="w-4 h-4 mr-2" />
@@ -2818,7 +2818,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Statements generated successfully')
+                /* TODO: Implement generate statements */
                 setShowStatementsDialog(false)
               }}>
                 <FileText className="w-4 h-4 mr-2" />
@@ -2854,7 +2854,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex gap-2">
               <Input placeholder="New category..." className="flex-1" />
-              <Button onClick={() => toast.success('Category added')}>
+              <Button onClick={() => { /* TODO: Implement add category */ }}>
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
@@ -2882,7 +2882,7 @@ export default function InvoicingClient() {
                 const input = document.createElement('input')
                 input.type = 'file'
                 input.accept = '.csv,.xlsx,.xls'
-                input.onchange = () => toast.success('File selected for import')
+                input.onchange = () => { /* TODO: Handle file selection for import */ }
                 input.click()
               }}>Browse Files</Button>
             </div>
@@ -2897,7 +2897,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
-                toast.success('Import started')
+                /* TODO: Implement import clients */
                 setShowImportDialog(false)
               }}>
                 <Globe className="w-4 h-4 mr-2" />
@@ -2939,7 +2939,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.success('Clients exported successfully')
+                /* TODO: Implement export clients */
                 setShowExportClientsDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -3018,8 +3018,10 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
-                toast.success('Refund processed successfully')
-                setShowRefundsDialog(false)
+                if (confirm('Are you sure you want to process this refund?')) {
+                  /* TODO: Implement process refund */
+                  setShowRefundsDialog(false)
+                }
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Process Refund
@@ -3060,7 +3062,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Bank settings saved')
+                /* TODO: Implement save bank settings */
                 setShowBankDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -3166,7 +3168,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.success('Transactions exported successfully')
+                /* TODO: Implement export transactions */
                 setShowExportTransactionsDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -3226,7 +3228,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={() => {
-                toast.success('Expense added successfully')
+                /* TODO: Implement add expense */
                 setShowAddExpenseDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -3258,7 +3260,7 @@ export default function InvoicingClient() {
                 input.type = 'file'
                 input.accept = 'image/*,.pdf'
                 input.multiple = true
-                input.onchange = () => toast.success('Receipt files selected')
+                input.onchange = () => { /* TODO: Handle receipt file selection */ }
                 input.click()
               }}>Browse Files</Button>
             </div>
@@ -3268,7 +3270,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-pink-600 hover:bg-pink-700" onClick={() => {
-                toast.success('Receipts uploaded successfully')
+                /* TODO: Implement upload receipts */
                 setShowExpenseReceiptsDialog(false)
               }}>
                 <Receipt className="w-4 h-4 mr-2" />
@@ -3304,7 +3306,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex gap-2">
               <Input placeholder="New category..." className="flex-1" />
-              <Button onClick={() => toast.success('Category added')}>
+              <Button onClick={() => { /* TODO: Implement add expense category */ }}>
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
@@ -3340,7 +3342,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex gap-2">
               <Input placeholder="Add new vendor..." className="flex-1" />
-              <Button onClick={() => toast.success('Vendor added')}>
+              <Button onClick={() => { /* TODO: Implement add vendor */ }}>
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
@@ -3374,7 +3376,7 @@ export default function InvoicingClient() {
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{formatCurrency(expense.amount)}</p>
-                    <Button size="sm" variant="outline" className="text-green-600" onClick={() => toast.success('Expense approved')}>
+                    <Button size="sm" variant="outline" className="text-green-600" onClick={() => { /* TODO: Implement approve expense */ }}>
                       <CheckCircle2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -3383,7 +3385,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('All expenses approved')
+                /* TODO: Implement approve all expenses */
                 setShowApproveExpensesDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -3468,7 +3470,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.success('Expenses exported successfully')
+                /* TODO: Implement export expenses */
                 setShowExportExpensesDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -3675,7 +3677,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
-                toast.success('Report scheduled successfully')
+                /* TODO: Implement schedule report */
                 setShowScheduleReportDialog(false)
               }}>
                 <Calendar className="w-4 h-4 mr-2" />
@@ -3718,7 +3720,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.success('Reports exported successfully')
+                /* TODO: Implement export reports */
                 setShowExportReportsDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -3761,7 +3763,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-slate-600 hover:bg-slate-700" onClick={() => {
-                toast.success('Opening print dialog...')
+                /* TODO: Implement print report */
                 window.print()
                 setShowPrintReportDialog(false)
               }}>
@@ -3798,7 +3800,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-slate-600 hover:bg-slate-700" onClick={() => {
-                toast.success('Configuration exported successfully')
+                /* TODO: Implement export config */
                 setShowExportConfigDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -3836,7 +3838,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.success(`${selectedGateway} settings saved`)
+                /* TODO: Implement save payment gateway settings */
                 setShowPaymentGatewayDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -3869,8 +3871,10 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
-                toast.success('API key regenerated successfully')
-                setShowRegenerateApiKeyDialog(false)
+                if (confirm('Are you sure you want to regenerate your API key? This will invalidate the existing key.')) {
+                  /* TODO: Implement regenerate API key */
+                  setShowRegenerateApiKeyDialog(false)
+                }
               }}>
                 <Key className="w-4 h-4 mr-2" />
                 Regenerate Key
@@ -3902,8 +3906,10 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button variant="destructive" className="flex-1" onClick={() => {
-                toast.success('Draft invoices deleted')
-                setShowDeleteDraftsDialog(false)
+                if (confirm('Are you sure you want to delete all draft invoices? This action cannot be undone.')) {
+                  /* TODO: Implement delete draft invoices */
+                  setShowDeleteDraftsDialog(false)
+                }
               }}>
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Delete Drafts
@@ -3935,8 +3941,10 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button variant="destructive" className="flex-1" onClick={() => {
-                toast.success('Settings reset to defaults')
-                setShowResetSettingsDialog(false)
+                if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+                  /* TODO: Implement reset settings */
+                  setShowResetSettingsDialog(false)
+                }
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Reset Settings
@@ -3997,7 +4005,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.success('Invoice created successfully')
+                /* TODO: Implement create client invoice */
                 setShowCreateClientInvoiceDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -4061,7 +4069,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Client updated successfully')
+                /* TODO: Implement update client */
                 setShowEditClientDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -4165,7 +4173,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Invoice updated successfully')
+                /* TODO: Implement update invoice */
                 setShowEditInvoiceDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -4197,19 +4205,19 @@ export default function InvoicingClient() {
               <Edit className="w-4 h-4 mr-2" />
               Edit Invoice
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Invoice sent'); setShowInvoiceOptionsDialog(false); }}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { /* TODO: Implement send invoice */ setShowInvoiceOptionsDialog(false); }}>
               <Send className="w-4 h-4 mr-2" />
               Send Invoice
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Invoice duplicated'); setShowInvoiceOptionsDialog(false); }}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { /* TODO: Implement duplicate invoice */ setShowInvoiceOptionsDialog(false); }}>
               <Copy className="w-4 h-4 mr-2" />
               Duplicate Invoice
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => { toast.success('Downloading...'); setShowInvoiceOptionsDialog(false); }}>
+            <Button variant="outline" className="w-full justify-start" onClick={() => { /* TODO: Implement download PDF */ setShowInvoiceOptionsDialog(false); }}>
               <Download className="w-4 h-4 mr-2" />
               Download PDF
             </Button>
-            <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { toast.success('Invoice voided'); setShowInvoiceOptionsDialog(false); }}>
+            <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { if (confirm('Are you sure you want to void this invoice? This action cannot be undone.')) { /* TODO: Implement void invoice */ setShowInvoiceOptionsDialog(false); } }}>
               <FileX className="w-4 h-4 mr-2" />
               Void Invoice
             </Button>
@@ -4247,7 +4255,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Recurring invoices processed')
+                /* TODO: Implement process recurring invoices */
                 setShowProcessRecurringDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -4324,7 +4332,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success(`Category "${selectedCategory}" updated successfully`)
+                /* TODO: Implement update category */
                 setShowEditCategoryDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -4362,7 +4370,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => {
-                toast.success(`Expense category "${selectedExpenseCategory}" updated successfully`)
+                /* TODO: Implement update expense category */
                 setShowEditExpenseCategoryDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -4413,7 +4421,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success(`Vendor "${selectedVendor}" updated successfully`)
+                /* TODO: Implement update vendor */
                 setShowEditVendorDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -4465,7 +4473,7 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success(`Receipt for ${selectedPaymentReceipt?.invoiceNumber} downloaded successfully`)
+                /* TODO: Implement download receipt */
                 setShowDownloadReceiptDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />

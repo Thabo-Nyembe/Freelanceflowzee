@@ -2808,7 +2808,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
-                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Test Coverage Report...')}>
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => { /* TODO: Implement test coverage report generation */ }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                       <BarChart3 className="w-5 h-5 text-blue-600" />
@@ -2819,7 +2819,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Execution Summary...')}>
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => { /* TODO: Implement execution summary generation */ }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                       <PieChart className="w-5 h-5 text-green-600" />
@@ -2830,7 +2830,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Defect Report...')}>
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => { /* TODO: Implement defect report generation */ }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                       <Bug className="w-5 h-5 text-red-600" />
@@ -2841,7 +2841,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     </div>
                   </CardContent>
                 </Card>
-                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Trend Analysis...')}>
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => { /* TODO: Implement trend analysis generation */ }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
                       <TrendingUp className="w-5 h-5 text-orange-600" />
@@ -2877,7 +2877,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.info('Exporting all reports...')}>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { /* TODO: Implement export all reports functionality */ }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export All
               </Button>
