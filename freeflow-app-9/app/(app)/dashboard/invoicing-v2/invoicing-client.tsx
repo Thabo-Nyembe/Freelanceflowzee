@@ -2129,7 +2129,7 @@ export default function InvoicingClient() {
                     <Printer className="w-4 h-4 mr-2" />
                     Print
                   </Button>
-                  <Button variant="outline" onClick={() => toast.success('Edit mode ready')}>
+                  <Button variant="outline" onClick={() => { /* TODO: Implement invoice edit mode */ }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

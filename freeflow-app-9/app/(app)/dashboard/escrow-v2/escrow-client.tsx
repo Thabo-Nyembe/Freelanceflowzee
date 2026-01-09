@@ -523,7 +523,6 @@ export default function EscrowClient() {
       ...mockEscrowQuickActionsBase[0],
       action: () => {
         setShowCreatePayout(true)
-        toast.success('Transfer form opened')
       }
     },
     {

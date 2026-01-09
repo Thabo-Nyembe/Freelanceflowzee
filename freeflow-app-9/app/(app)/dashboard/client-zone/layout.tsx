@@ -84,9 +84,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
       activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
     })
 
-    toast.success('Notifications center opened!', {
-      description: 'View all your project updates and messages'
-    })
+    // TODO: Implement notifications panel/dialog
   }
 
   // ============================================================================
@@ -100,9 +98,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
       activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
     })
 
-    toast.success('Team communication opened!', {
-      description: 'Send a message or schedule a call with your team'
-    })
+    // TODO: Implement team communication dialog
   }
 
   // ============================================================================

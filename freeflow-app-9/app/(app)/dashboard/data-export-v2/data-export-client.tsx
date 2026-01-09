@@ -415,7 +415,7 @@ const mockDataExportActivities = [
 ]
 
 const mockDataExportQuickActions = [
-  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => { toast.info('Pipeline wizard opened - configure source, transformations, and destination') }, variant: 'default' as const },
+  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => { /* TODO: Implement pipeline wizard */ }, variant: 'default' as const },
   { id: '2', label: 'Run All Syncs', icon: 'play', action: async () => {
     const toastId = toast.loading('Running all data syncs...')
     try {
