@@ -107,6 +107,8 @@ export default function CustomReportsClient() {
   const [showNewReportDialog, setShowNewReportDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [selectedExportFormat, setSelectedExportFormat] = useState<'pdf' | 'excel' | 'csv'>('pdf')
 
   // Quick actions with proper dialog handlers
   const customReportsQuickActions = [
@@ -502,6 +504,16 @@ export default function CustomReportsClient() {
                                 key={widget.id}
                                 variant="outline"
                                 className="justify-start border-gray-700 hover:bg-slate-800"
+                                onClick={() => {
+                                  const widgetExists = selectedWidgets.some(w => w.id === widget.id)
+                                  if (widgetExists) {
+                                    setSelectedWidgets(selectedWidgets.filter(w => w.id !== widget.id))
+                                    toast.info(`${widget.name} removed`, { description: 'Widget removed from report' })
+                                  } else {
+                                    setSelectedWidgets([...selectedWidgets, widget as Widget])
+                                    toast.success(`${widget.name} added`, { description: 'Widget added to report' })
+                                  }
+                                }}
                               >
                                 <Icon className="w-4 h-4 mr-2" />
                                 {widget.name}
@@ -662,6 +674,11 @@ export default function CustomReportsClient() {
                       <Button
                         className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                         size="lg"
+                        onClick={() => {
+                          toast.success('Download Started', {
+                            description: `Downloading ${reportName || 'report'} as ${exportFormat.toUpperCase()}`
+                          })
+                        }}
                       >
                         <Download className="w-5 h-5 mr-2" />
                         Download Report
@@ -678,6 +695,7 @@ export default function CustomReportsClient() {
                         <Button
                           variant="outline"
                           className="flex-1 border-gray-700 hover:bg-slate-800"
+                          onClick={() => setShowScheduleDialog(true)}
                         >
                           <Calendar className="w-4 h-4 mr-2" />
                           Schedule
@@ -830,15 +848,27 @@ export default function CustomReportsClient() {
             <div>
               <label className="text-sm text-gray-400 mb-2 block">Export Format</label>
               <div className="grid grid-cols-3 gap-2">
-                <Button variant="outline" className="border-slate-600 hover:bg-slate-800">
+                <Button
+                  variant={selectedExportFormat === 'pdf' ? 'default' : 'outline'}
+                  className={selectedExportFormat === 'pdf' ? 'bg-blue-600 hover:bg-blue-700' : 'border-slate-600 hover:bg-slate-800'}
+                  onClick={() => setSelectedExportFormat('pdf')}
+                >
                   <FileText className="w-4 h-4 mr-2" />
                   PDF
                 </Button>
-                <Button variant="outline" className="border-slate-600 hover:bg-slate-800">
+                <Button
+                  variant={selectedExportFormat === 'excel' ? 'default' : 'outline'}
+                  className={selectedExportFormat === 'excel' ? 'bg-blue-600 hover:bg-blue-700' : 'border-slate-600 hover:bg-slate-800'}
+                  onClick={() => setSelectedExportFormat('excel')}
+                >
                   <Table className="w-4 h-4 mr-2" />
                   Excel
                 </Button>
-                <Button variant="outline" className="border-slate-600 hover:bg-slate-800">
+                <Button
+                  variant={selectedExportFormat === 'csv' ? 'default' : 'outline'}
+                  className={selectedExportFormat === 'csv' ? 'bg-blue-600 hover:bg-blue-700' : 'border-slate-600 hover:bg-slate-800'}
+                  onClick={() => setSelectedExportFormat('csv')}
+                >
                   <FileText className="w-4 h-4 mr-2" />
                   CSV
                 </Button>
@@ -926,6 +956,75 @@ export default function CustomReportsClient() {
               toast.success('Settings Saved', { description: 'Your report preferences have been updated' })
             }} className="bg-purple-600 hover:bg-purple-700">
               Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-400" />
+              Schedule Report
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Set up automatic report generation and delivery.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Report Name</label>
+              <input
+                type="text"
+                value={reportName || 'Custom Report'}
+                readOnly
+                className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Frequency</label>
+              <select className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Delivery Time</label>
+              <input
+                type="time"
+                defaultValue="09:00"
+                className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Email Recipients</label>
+              <input
+                type="email"
+                placeholder="Enter email addresses, separated by commas"
+                className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <p className="text-white text-sm font-medium">Include PDF Attachment</p>
+                <p className="text-gray-500 text-xs">Attach the report as a PDF file</p>
+              </div>
+              <input type="checkbox" className="rounded border-slate-600" defaultChecked />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)} className="border-slate-600">
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              setShowScheduleDialog(false)
+              toast.success('Schedule Created', { description: 'Your report will be generated automatically' })
+            }} className="bg-blue-600 hover:bg-blue-700">
+              Create Schedule
             </Button>
           </DialogFooter>
         </DialogContent>

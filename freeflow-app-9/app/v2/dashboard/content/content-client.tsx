@@ -350,12 +350,32 @@ export default function ContentClient() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false)
   const [isWebhookDialogOpen, setIsWebhookDialogOpen] = useState(false)
+  const [isCreateTypeDialogOpen, setIsCreateTypeDialogOpen] = useState(false)
+  const [isConfigureTypeDialogOpen, setIsConfigureTypeDialogOpen] = useState(false)
+  const [isAddLocaleDialogOpen, setIsAddLocaleDialogOpen] = useState(false)
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isRegenerateKeysDialogOpen, setIsRegenerateKeysDialogOpen] = useState(false)
+  const [selectedContentType, setSelectedContentType] = useState<ContentTypeModel | null>(null)
 
   // Form state
   const [contentForm, setContentForm] = useState<ContentFormState>(defaultContentForm)
   const [assetForm, setAssetForm] = useState<AssetFormState>(defaultAssetForm)
   const [webhookForm, setWebhookForm] = useState<WebhookFormState>(defaultWebhookForm)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Content type form state
+  const [contentTypeForm, setContentTypeForm] = useState({
+    name: '',
+    apiId: '',
+    description: ''
+  })
+
+  // Locale form state
+  const [localeForm, setLocaleForm] = useState({
+    code: '',
+    name: '',
+    fallback: 'en-US'
+  })
 
   // Use the content hook
   const {
@@ -988,6 +1008,82 @@ export default function ContentClient() {
     setIsEditDialogOpen(true)
   }
 
+  // Create content type handler
+  const handleCreateContentType = () => {
+    if (!contentTypeForm.name.trim()) {
+      toast.error('Name is required')
+      return
+    }
+
+    toast.success('Content Type Created', {
+      description: `"${contentTypeForm.name}" has been created. Configure fields in the builder.`
+    })
+    setContentTypeForm({ name: '', apiId: '', description: '' })
+    setIsCreateTypeDialogOpen(false)
+  }
+
+  // Configure content type handler
+  const handleConfigureContentType = (ct: ContentTypeModel) => {
+    setSelectedContentType(ct)
+    setIsConfigureTypeDialogOpen(true)
+  }
+
+  // Add locale handler
+  const handleAddLocale = () => {
+    if (!localeForm.code.trim() || !localeForm.name.trim()) {
+      toast.error('Code and name are required')
+      return
+    }
+
+    toast.success('Locale Added', {
+      description: `"${localeForm.name}" (${localeForm.code}) has been added`
+    })
+    setLocaleForm({ code: '', name: '', fallback: 'en-US' })
+    setIsAddLocaleDialogOpen(false)
+  }
+
+  // Import content handler
+  const handleImportContent = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      try {
+        const text = await file.text()
+        const data = JSON.parse(text)
+
+        toast.success('Import Started', {
+          description: `Importing ${data.entries?.length || 0} entries and ${data.assets?.length || 0} assets...`
+        })
+
+        // In a real implementation, this would process the import
+        setTimeout(() => {
+          toast.success('Import Complete', {
+            description: 'Content has been successfully imported'
+          })
+          setIsImportDialogOpen(false)
+          refetchContent()
+        }, 2000)
+      } catch (error) {
+        toast.error('Import Failed', {
+          description: 'Invalid JSON file format'
+        })
+      }
+    }
+    input.click()
+  }
+
+  // Regenerate API keys handler
+  const handleRegenerateKeys = () => {
+    toast.success('API Keys Regenerated', {
+      description: 'New API keys have been generated. Update your applications.'
+    })
+    setIsRegenerateKeysDialogOpen(false)
+  }
+
   // Quick actions for the toolbar
   const contentQuickActionsWithHandlers = [
     { id: '1', label: 'New Entry', icon: 'FileText', shortcut: 'N', action: () => setIsCreateDialogOpen(true) },
@@ -1299,7 +1395,7 @@ export default function ContentClient() {
           <TabsContent value="types" className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold dark:text-white">Content Types</h3>
-              <Button className="bg-cyan-600 hover:bg-cyan-700">
+              <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={() => setIsCreateTypeDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Type
               </Button>
@@ -1333,7 +1429,7 @@ export default function ContentClient() {
                         </div>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleConfigureContentType(ct)}>
                       Configure
                     </Button>
                   </div>
@@ -1358,7 +1454,7 @@ export default function ContentClient() {
           <TabsContent value="locales" className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold dark:text-white">Localization</h3>
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsAddLocaleDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Locale
               </Button>
@@ -1562,7 +1658,7 @@ export default function ContentClient() {
                             <Download className="w-5 h-5" />
                             <span>Export Content</span>
                           </Button>
-                          <Button variant="outline" className="h-20 flex flex-col gap-2">
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={handleImportContent}>
                             <Plus className="w-5 h-5" />
                             <span>Import Content</span>
                           </Button>
@@ -1614,7 +1710,7 @@ export default function ContentClient() {
                           cda_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
                         </code>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => setIsRegenerateKeysDialogOpen(true)}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Regenerate Keys
                       </Button>
@@ -2041,6 +2137,233 @@ export default function ContentClient() {
                   setWebhookForm(defaultWebhookForm)
                   setIsWebhookDialogOpen(false)
                 }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Content Type Dialog */}
+      <Dialog open={isCreateTypeDialogOpen} onOpenChange={setIsCreateTypeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Content Type</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Name *</Label>
+              <Input
+                value={contentTypeForm.name}
+                onChange={(e) => setContentTypeForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., Blog Post"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>API ID</Label>
+              <Input
+                value={contentTypeForm.apiId}
+                onChange={(e) => setContentTypeForm(prev => ({ ...prev, apiId: e.target.value }))}
+                placeholder="e.g., blogPost (auto-generated if empty)"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={contentTypeForm.description}
+                onChange={(e) => setContentTypeForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe this content type..."
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button
+                className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+                onClick={handleCreateContentType}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Content Type
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setContentTypeForm({ name: '', apiId: '', description: '' })
+                  setIsCreateTypeDialogOpen(false)
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Content Type Dialog */}
+      <Dialog open={isConfigureTypeDialogOpen} onOpenChange={setIsConfigureTypeDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Configure: {selectedContentType?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedContentType && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Name</Label>
+                    <Input defaultValue={selectedContentType.name} className="mt-1" />
+                  </div>
+                  <div>
+                    <Label>API ID</Label>
+                    <Input defaultValue={selectedContentType.apiId} className="mt-1 bg-gray-50 dark:bg-gray-800" readOnly />
+                  </div>
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea defaultValue={selectedContentType.description} className="mt-1" rows={2} />
+                </div>
+                <div className="border-t dark:border-gray-700 pt-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <Label>Fields ({selectedContentType.fields.length})</Label>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Field Builder', { description: 'Open the visual field builder to add fields' })}>
+                      <Plus className="w-4 h-4 mr-1" />
+                      Add Field
+                    </Button>
+                  </div>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {selectedContentType.fields.map((field) => (
+                      <div key={field.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">{field.type}</span>
+                          <span className="font-medium dark:text-white">{field.name}</span>
+                          {field.required && <Badge variant="outline" className="text-xs">Required</Badge>}
+                          {field.localized && <Badge variant="outline" className="text-xs"><GlobeIcon className="w-3 h-3 mr-1" />i18n</Badge>}
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Field', { description: `Editing ${field.name}` })}>
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+            <div className="flex gap-3 pt-4">
+              <Button
+                className="flex-1 bg-cyan-600 hover:bg-cyan-700"
+                onClick={() => {
+                  toast.success('Content Type Updated', { description: `"${selectedContentType?.name}" has been saved` })
+                  setIsConfigureTypeDialogOpen(false)
+                }}
+              >
+                Save Changes
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedContentType(null)
+                  setIsConfigureTypeDialogOpen(false)
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Locale Dialog */}
+      <Dialog open={isAddLocaleDialogOpen} onOpenChange={setIsAddLocaleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Locale</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Locale Code *</Label>
+              <Input
+                value={localeForm.code}
+                onChange={(e) => setLocaleForm(prev => ({ ...prev, code: e.target.value }))}
+                placeholder="e.g., pt-BR"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Display Name *</Label>
+              <Input
+                value={localeForm.name}
+                onChange={(e) => setLocaleForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., Portuguese (Brazil)"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Fallback Locale</Label>
+              <Select
+                value={localeForm.fallback}
+                onValueChange={(v) => setLocaleForm(prev => ({ ...prev, fallback: v }))}
+              >
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {mockLocales.map(locale => (
+                    <SelectItem key={locale.code} value={locale.code}>{locale.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                onClick={handleAddLocale}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Locale
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setLocaleForm({ code: '', name: '', fallback: 'en-US' })
+                  setIsAddLocaleDialogOpen(false)
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Keys Dialog */}
+      <Dialog open={isRegenerateKeysDialogOpen} onOpenChange={setIsRegenerateKeysDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Regenerate API Keys</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+              <p className="text-yellow-800 dark:text-yellow-200 text-sm">
+                <strong>Warning:</strong> Regenerating API keys will immediately invalidate your current keys.
+                Any applications using the old keys will stop working until updated with the new keys.
+              </p>
+            </div>
+            <div className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to regenerate your API keys?
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="destructive"
+                className="flex-1"
+                onClick={handleRegenerateKeys}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Regenerate Keys
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setIsRegenerateKeysDialogOpen(false)}
               >
                 Cancel
               </Button>

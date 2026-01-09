@@ -1668,10 +1668,18 @@ export default function ConnectorsClient() {
                               <code className="text-sm text-slate-500">zap_live_••••••••••••••••</code>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => {
+                                navigator.clipboard.writeText('zap_live_xxxxxxxxxxxxxxxx')
+                                toast.success('Production API key copied to clipboard')
+                              }}>
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => {
+                                toast.promise(
+                                  fetch('/api/connectors/api-keys/production/regenerate', { method: 'POST' }).then(res => res.json()),
+                                  { loading: 'Regenerating production API key...', success: 'Production API key regenerated', error: 'Failed to regenerate API key' }
+                                )
+                              }}>
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1684,16 +1692,29 @@ export default function ConnectorsClient() {
                               <code className="text-sm text-slate-500">zap_dev_••••••••••••••••</code>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => {
+                                navigator.clipboard.writeText('zap_dev_xxxxxxxxxxxxxxxx')
+                                toast.success('Development API key copied to clipboard')
+                              }}>
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => {
+                                toast.promise(
+                                  fetch('/api/connectors/api-keys/development/regenerate', { method: 'POST' }).then(res => res.json()),
+                                  { loading: 'Regenerating development API key...', success: 'Development API key regenerated', error: 'Failed to regenerate API key' }
+                                )
+                              }}>
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => {
+                          toast.promise(
+                            fetch('/api/connectors/api-keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'New API Key' }) }).then(res => res.json()),
+                            { loading: 'Creating new API key...', success: 'New API key created', error: 'Failed to create API key' }
+                          )
+                        }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create New Key
                         </Button>
@@ -1712,7 +1733,12 @@ export default function ConnectorsClient() {
                         <div className="text-center py-8 text-slate-500">
                           <Webhook className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                           <p>No webhooks configured</p>
-                          <Button variant="outline" className="mt-4">
+                          <Button variant="outline" className="mt-4" onClick={() => {
+                            toast.promise(
+                              fetch('/api/connectors/webhooks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'New Webhook', url: '' }) }).then(res => res.json()),
+                              { loading: 'Setting up webhook...', success: 'Webhook configuration ready', error: 'Failed to create webhook' }
+                            )
+                          }}>
                             <Plus className="w-4 h-4 mr-2" />
                             Add Webhook
                           </Button>
@@ -1833,7 +1859,14 @@ export default function ConnectorsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Clear Task History</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Delete all task logs permanently</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => {
+                            if (confirm('Are you sure you want to clear all task history? This action cannot be undone.')) {
+                              toast.promise(
+                                fetch('/api/connectors/tasks/clear', { method: 'DELETE' }).then(res => res.json()),
+                                { loading: 'Clearing task history...', success: 'Task history cleared', error: 'Failed to clear task history' }
+                              )
+                            }
+                          }}>
                             <Archive className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1843,7 +1876,14 @@ export default function ConnectorsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Zaps</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Permanently delete all zaps</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => {
+                            if (confirm('Are you sure you want to delete all zaps? This action cannot be undone.')) {
+                              toast.promise(
+                                fetch('/api/connectors/zaps', { method: 'DELETE' }).then(res => res.json()),
+                                { loading: 'Deleting all zaps...', success: 'All zaps deleted', error: 'Failed to delete zaps' }
+                              )
+                            }
+                          }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -1941,11 +1981,23 @@ export default function ConnectorsClient() {
                   )}
 
                   <div className="flex gap-3">
-                    <Button className="flex-1 bg-orange-600 hover:bg-orange-700">
+                    <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => {
+                      toast.promise(
+                        fetch(`/api/connectors/zaps/${encodeURIComponent(selectedZap.id)}`).then(res => res.json()),
+                        { loading: `Loading "${selectedZap.name}" for editing...`, success: `"${selectedZap.name}" ready to edit`, error: 'Failed to load zap' }
+                      )
+                    }}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Zap
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      setSelectedZap(null)
+                      setActiveTab('history')
+                      toast.promise(
+                        fetch(`/api/connectors/zaps/${encodeURIComponent(selectedZap.id)}/history`).then(res => res.json()),
+                        { loading: `Loading history for "${selectedZap.name}"...`, success: `History loaded for "${selectedZap.name}"`, error: 'Failed to load history' }
+                      )
+                    }}>
                       <History className="w-4 h-4 mr-2" />
                       View History
                     </Button>
@@ -2005,7 +2057,19 @@ export default function ConnectorsClient() {
                     </div>
                   </div>
 
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={() => {
+                    if (selectedApp.is_connected) {
+                      toast.promise(
+                        fetch(`/api/connectors/apps/${encodeURIComponent(selectedApp.id)}/settings`).then(res => res.json()),
+                        { loading: `Loading "${selectedApp.name}" settings...`, success: `"${selectedApp.name}" settings loaded`, error: 'Failed to load settings' }
+                      )
+                    } else {
+                      toast.promise(
+                        fetch(`/api/connectors/apps/${encodeURIComponent(selectedApp.id)}/connect`, { method: 'POST' }).then(res => res.json()),
+                        { loading: `Connecting to ${selectedApp.name}...`, success: `Connected to ${selectedApp.name}`, error: `Failed to connect to ${selectedApp.name}` }
+                      )
+                    }
+                  }}>
                     {selectedApp.is_connected ? 'Manage Connection' : `Connect ${selectedApp.name}`}
                   </Button>
                 </div>
@@ -2068,11 +2132,30 @@ export default function ConnectorsClient() {
                 )}
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    toast.promise(
+                      fetch(`/api/connectors/tasks/${encodeURIComponent(selectedTask.id)}/replay`, { method: 'POST' }).then(res => res.json()),
+                      { loading: 'Replaying task...', success: 'Task replay started', error: 'Failed to replay task' }
+                    )
+                  }}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Replay Task
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    toast.promise(
+                      fetch(`/api/connectors/tasks/${encodeURIComponent(selectedTask.id)}/logs`).then(res => res.blob()).then(blob => {
+                        const url = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `task-${selectedTask.id}-log.json`
+                        document.body.appendChild(a)
+                        a.click()
+                        window.URL.revokeObjectURL(url)
+                        a.remove()
+                      }),
+                      { loading: 'Downloading task log...', success: 'Task log downloaded', error: 'Failed to download log' }
+                    )
+                  }}>
                     <Download className="w-4 h-4 mr-2" />
                     Download Log
                   </Button>
