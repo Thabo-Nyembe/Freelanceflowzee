@@ -796,10 +796,7 @@ export default function CommunityHubPage() {
       postType: post?.type,
       currentComments: post?.comments
     })
-
-    toast.success('Comments opened', {
-      description: `${post?.type} post - ${post?.comments || 0} comments - ${post?.likes || 0} likes`
-    })
+    // TODO: Implement comment dialog
   }
 
   const handleSharePost = async (id: string) => {
@@ -1033,10 +1030,7 @@ export default function CommunityHubPage() {
       memberName: member?.name,
       isOnline: member?.isOnline
     })
-
-    toast.success('Chat opened', {
-      description: `${member?.name} - ${member?.title} - ${member?.isOnline ? 'Online' : `Last seen: ${member?.lastSeen}`}`
-    })
+    // TODO: Implement chat functionality
   }
 
   const handleJoinEvent = async (id: string) => {
@@ -1067,10 +1061,7 @@ export default function CommunityHubPage() {
 
   const handleCreateEvent = () => {
     logger.info('Opening event creation form')
-
-    toast.success('Event form opened', {
-      description: 'Online, offline, or hybrid - Set date, location, and attendee limit'
-    })
+    // TODO: Implement event creation dialog
   }
 
   const handleJoinGroup = async (id: string) => {
@@ -1100,18 +1091,12 @@ export default function CommunityHubPage() {
 
   const handleCreateGroup = () => {
     logger.info('Opening group creation form')
-
-    toast.success('Group form opened', {
-      description: 'Public, private, or secret - Set category, rules, and member permissions'
-    })
+    // TODO: Implement group creation dialog
   }
 
   const handlePostJob = () => {
     logger.info('Opening job posting form')
-
-    toast.success('Job post form opened', {
-      description: 'Fixed or hourly - Set budget, deadline, and required skills'
-    })
+    // TODO: Implement job posting dialog
   }
 
   const handleApplyToJob = (id: string) => {
@@ -1174,18 +1159,12 @@ export default function CommunityHubPage() {
       memberName: member?.name,
       category: member?.category
     })
-
-    toast.success('Profile opened', {
-      description: `${member?.name} - ${member?.title} - ${member?.rating}★ rating - ${member?.totalProjects} projects completed`
-    })
+    // TODO: Implement profile view
   }
 
   const handleEditProfile = () => {
     logger.info('Opening profile editor')
-
-    toast.success('Profile editor opened', {
-      description: 'Update skills, bio, portfolio, rates, and availability'
-    })
+    // TODO: Implement profile editor
   }
 
   const handleSendEndorsement = (id: string) => {
@@ -2102,7 +2081,7 @@ export default function CommunityHubPage() {
         dispatch({ type: 'SHARE_POST', payload: postId })
         break
       case 'comment':
-        toast.success('💬 Comments opened for post ' + postId)
+        // TODO: Open comments for post
         break
       case 'report':
         toast.warning('⚠️ Reporting post ' + postId)
@@ -2133,7 +2112,7 @@ export default function CommunityHubPage() {
         dispatch({ type: 'UNBLOCK_MEMBER', payload: memberId })
         break
       case 'message':
-        toast.success('💬 Chat opened with ' + memberId)
+        // TODO: Open chat with member
         break
       case 'hire':
         toast.success('💼 Starting hire process for ' + memberId)

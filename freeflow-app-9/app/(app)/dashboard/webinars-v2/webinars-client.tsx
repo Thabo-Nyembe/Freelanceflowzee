@@ -1760,10 +1760,7 @@ export default function WebinarsClient() {
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Email Templates</h3>
-              <Button className="gap-2" onClick={() => {
-                setShowTemplateDialog(true)
-                toast.success('Template editor opened')
-              }}>
+              <Button className="gap-2" onClick={() => setShowTemplateDialog(true)}>
                 <Plus className="w-4 h-4" />
                 Create Template
               </Button>
@@ -2110,7 +2107,7 @@ export default function WebinarsClient() {
                             </div>
                             <Button variant="outline" size="sm" onClick={() => {
                               if (integration.status === 'connected') {
-                                toast.success(`${integration.name} configuration opened`)
+                                setSettingsTab('integrations')
                               } else {
                                 // In real app, would open OAuth flow
                                 toast.success(`Connecting to ${integration.name}...`)

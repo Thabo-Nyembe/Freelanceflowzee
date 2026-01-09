@@ -740,7 +740,6 @@ export default function TimeTrackingClient() {
   // Real Print Handler
   const handlePrint = () => {
     window.print()
-    toast.success('Print dialog opened')
   }
 
   // Real View Invoice Handler - opens invoice dialog with details
@@ -1659,7 +1658,7 @@ export default function TimeTrackingClient() {
 
             {teamTab === 'timeoff' && (
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => { toast.success('Time off request form opened'); }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => { /* TODO: Implement time off request dialog */ }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
                 <CardContent className="p-0">
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>

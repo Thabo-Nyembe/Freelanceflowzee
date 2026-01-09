@@ -771,8 +771,8 @@ export default function MarketplaceClient() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input placeholder="Search apps..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
-            <Button variant="outline" onClick={() => { setShowWishlistPanel(!showWishlistPanel); toast.success(`Wishlist ${showWishlistPanel ? 'closed' : 'opened'}`) }}><Heart className="h-4 w-4 mr-2" />Wishlist ({wishlist.length})</Button>
-            <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setShowSubmitAppDialog(true); toast.success('App submission form ready') }}><Plus className="h-4 w-4 mr-2" />Submit App</Button>
+            <Button variant="outline" onClick={() => setShowWishlistPanel(!showWishlistPanel)}><Heart className="h-4 w-4 mr-2" />Wishlist ({wishlist.length})</Button>
+            <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => setShowSubmitAppDialog(true)}><Plus className="h-4 w-4 mr-2" />Submit App</Button>
           </div>
         </div>
 
@@ -1088,8 +1088,8 @@ export default function MarketplaceClient() {
                       <div className="text-center"><p className="text-xl font-bold">&lt;2hr</p><p className="text-xs text-gray-500">Response</p></div>
                     </div>
                     <div className="flex gap-3">
-                      <Button onClick={() => { window.open('https://techpro.example.com', '_blank'); toast.success('Vendor store opened') }}><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
-                      <Button variant="outline" onClick={() => { window.location.href = 'mailto:contact@techpro.example.com?subject=Inquiry'; toast.success('Opening email client') }}><Mail className="h-4 w-4 mr-2" />Contact</Button>
+                      <Button onClick={() => window.open('https://techpro.example.com', '_blank')}><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
+                      <Button variant="outline" onClick={() => window.location.href = 'mailto:contact@techpro.example.com?subject=Inquiry'}><Mail className="h-4 w-4 mr-2" />Contact</Button>
                       <Button variant="outline" onClick={() => { const vendorId = 'techpro'; if (followedVendors.includes(vendorId)) { setFollowedVendors(prev => prev.filter(id => id !== vendorId)); toast.success('Unfollowed TechPro Solutions'); } else { setFollowedVendors(prev => [...prev, vendorId]); toast.success('Now following TechPro Solutions'); } }}><Heart className={`h-4 w-4 mr-2 ${followedVendors.includes('techpro') ? 'fill-red-500 text-red-500' : ''}`} />{followedVendors.includes('techpro') ? 'Following' : 'Follow'}</Button>
                     </div>
                   </div>
@@ -1325,7 +1325,7 @@ export default function MarketplaceClient() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(downloadFile('reviews', 'csv'), { loading: 'Exporting reviews...', success: 'Reviews exported to CSV', error: 'Export failed' })}><Download className="h-4 w-4 mr-2" />Export</Button>
-                  <Button className="bg-white text-amber-700 hover:bg-amber-50" onClick={() => { setActiveTab('reviews'); toast.success('Bulk response editor ready - select reviews to respond') }}><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
+                  <Button className="bg-white text-amber-700 hover:bg-amber-50" onClick={() => setActiveTab('reviews')}><MessageSquare className="h-4 w-4 mr-2" />Respond All</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1882,7 +1882,7 @@ export default function MarketplaceClient() {
                 )}
                 {settingsTab === 'payments' && (
                   <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button onClick={() => { window.open('/dashboard/settings/payments/add-provider', '_blank'); toast.success('Payment provider setup opened') }}><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button onClick={() => window.open('/dashboard/settings/payments/add-provider', '_blank')}><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
                     <CardContent className="space-y-4">
                       {mockPaymentProviders.map(provider => (
                         <div key={provider.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">

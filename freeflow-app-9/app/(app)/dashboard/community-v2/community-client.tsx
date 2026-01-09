@@ -967,7 +967,6 @@ export default function CommunityClient() {
   const handleOpenUserSettings = () => {
     setShowUserSettings(true)
     setActiveTab('settings')
-    toast.success('User settings opened')
   }
 
   // Toggle Notification Settings
@@ -977,7 +976,6 @@ export default function CommunityClient() {
       return
     }
     setShowNotificationSettings(prev => !prev)
-    toast.success(showNotificationSettings ? 'Notification panel closed' : 'Notification settings opened')
   }
 
   // Load Pinned Messages
@@ -1044,7 +1042,6 @@ export default function CommunityClient() {
   // Open Gift Menu
   const handleOpenGiftMenu = () => {
     setShowGiftMenu(prev => !prev)
-    toast.success(showGiftMenu ? 'Gift menu closed' : 'Gift menu opened - select a gift to send')
   }
 
   // Open Image Picker
@@ -1066,9 +1063,6 @@ export default function CommunityClient() {
   // Toggle Emoji Picker for Input
   const handleToggleEmojiPicker = () => {
     setShowEmojiPicker(prev => !prev)
-    if (!showEmojiPicker) {
-      toast.success('Emoji picker opened')
-    }
   }
 
   // Open Role Settings
@@ -1076,14 +1070,12 @@ export default function CommunityClient() {
     setShowRoleSettings(roleId)
     setActiveTab('settings')
     setSettingsTab('permissions')
-    toast.success('Role settings opened')
   }
 
   // Open Bot Marketplace
   const handleOpenBotMarketplace = () => {
     setShowBotMarketplace(true)
     window.open('https://discord.com/application-directory', '_blank')
-    toast.success('Bot marketplace opened in new tab')
   }
 
   // Follow User Handler

@@ -947,17 +947,11 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                                window.open(`/dashboard/invoices/${invoice.id}`, '_blank')
-                                toast.success(`Invoice #${invoice.invoice_number} opened in new tab`)
-                              }}>
+                            <DropdownMenuItem onClick={() => window.open(`/dashboard/invoices/${invoice.id}`, '_blank')}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => {
-                                window.open(`/dashboard/invoices/${invoice.id}/edit`, '_blank')
-                                toast.success(`Invoice #${invoice.invoice_number} opened for editing`)
-                              }}>
+                            <DropdownMenuItem onClick={() => window.open(`/dashboard/invoices/${invoice.id}/edit`, '_blank')}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -1355,10 +1349,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                           <Label>Reminder Email Subject</Label>
                           <Input defaultValue="Reminder: Invoice #{{invoice_number}} is due" />
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => {
-                            window.open('/dashboard/settings/email-templates', '_blank')
-                            toast.success('Email template editor opened')
-                          }}>
+                        <Button variant="outline" className="w-full" onClick={() => window.open('/dashboard/settings/email-templates', '_blank')}>
                           <Mail className="w-4 h-4 mr-2" />
                           Customize Email Templates
                         </Button>
@@ -1395,7 +1386,6 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                               <Button variant={gateway.connected ? 'outline' : 'default'} size="sm" onClick={async () => {
                                   if (gateway.connected) {
                                     window.open(`/dashboard/settings/integrations/${gateway.name.toLowerCase()}`, '_blank')
-                                    toast.success(`${gateway.name} settings opened`)
                                   } else {
                                     try {
                                       const response = await fetch(`/api/integrations/${gateway.name.toLowerCase()}/connect`, { method: 'POST' })
@@ -1620,7 +1610,6 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                               <Button variant="outline" size="sm" className="w-full" onClick={async () => {
                                   if (app.connected) {
                                     window.open(`/dashboard/settings/integrations/${app.name.toLowerCase()}`, '_blank')
-                                    toast.success(`${app.name} settings opened`)
                                   } else {
                                     try {
                                       const response = await fetch(`/api/integrations/${app.name.toLowerCase()}/oauth`, { method: 'POST' })
@@ -2395,9 +2384,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                   toast.error('Please fill in client name and invoice title to preview')
                   return
                 }
-                toast.success('Invoice preview ready', {
-                  description: `${newInvoice.title} for ${newInvoice.client} - Total: ${getCurrencySymbol(newInvoice.currency)}${calculateTotal().toLocaleString()}`
-                })
+                // TODO: Implement invoice preview
               }}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
