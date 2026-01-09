@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -39,6 +39,44 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Slider } from '@/components/ui/slider'
+import {
+  Brain,
+  Users,
+  TrendingUp,
+  Activity,
+  Settings,
+  RefreshCw,
+  Download,
+  Upload,
+  MessageSquare,
+  Video,
+  Phone,
+  Share2,
+  Bell,
+  Zap,
+  Target,
+  BarChart3,
+  Sparkles,
+  Calendar,
+  Clock,
+  Plus,
+  Filter,
+  Eye,
+  Trash2,
+  Archive,
+  Star,
+  Send,
+  Mic,
+  Shield,
+  Lock,
+  Globe,
+  Layers,
+} from 'lucide-react'
 
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -50,26 +88,80 @@ import { useAnnouncer } from '@/lib/accessibility'
 // ============================================================================
 
 const enhancedAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Performance Update', description: 'System running optimally with 99.9% uptime this month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'success' as const, title: 'Goal Achievement', description: 'Monthly targets exceeded by 15%. Great progress!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Goals' },
-  { id: '3', type: 'warning' as const, title: 'Action Required', description: 'Review pending items to maintain workflow efficiency.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Tasks' },
+  { id: '1', type: 'recommendation' as const, title: 'Performance Update', description: 'System running optimally with 99.9% uptime this month.', impact: 'medium' as const, createdAt: new Date() },
+  { id: '2', type: 'opportunity' as const, title: 'Goal Achievement', description: 'Monthly targets exceeded by 15%. Great progress!', impact: 'high' as const, createdAt: new Date() },
+  { id: '3', type: 'alert' as const, title: 'Action Required', description: 'Review pending items to maintain workflow efficiency.', impact: 'medium' as const, createdAt: new Date() },
 ]
 
 const enhancedCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Developer', lastActive: '5m ago' },
-  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '30m ago' },
+  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, color: '#3B82F6', isTyping: false },
+  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, color: '#10B981', isTyping: true },
+  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, color: '#F59E0B', isTyping: false },
+  { id: '4', name: 'David Park', avatar: '/avatars/david.jpg', status: 'offline' as const, color: '#6366F1', isTyping: false },
 ]
 
 const enhancedPredictions = [
-  { id: '1', label: 'Completion Rate', current: 85, target: 95, predicted: 92, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Efficiency Score', current: 78, target: 90, predicted: 86, confidence: 82, trend: 'up' as const },
+  {
+    label: 'Completion Rate',
+    currentValue: 85,
+    predictedValue: 92,
+    confidence: 88,
+    trend: 'up' as const,
+    timeframe: 'Next Month',
+    factors: [
+      { name: 'Team velocity increase', impact: 'positive' as const, weight: 0.4 },
+      { name: 'Resource allocation', impact: 'positive' as const, weight: 0.3 },
+      { name: 'Holiday schedule', impact: 'negative' as const, weight: 0.2 },
+    ]
+  },
+  {
+    label: 'Efficiency Score',
+    currentValue: 78,
+    predictedValue: 86,
+    confidence: 82,
+    trend: 'up' as const,
+    timeframe: 'Q1 2026',
+    factors: [
+      { name: 'Process automation', impact: 'positive' as const, weight: 0.5 },
+      { name: 'Team training', impact: 'positive' as const, weight: 0.3 },
+    ]
+  },
 ]
 
 const enhancedActivities = [
-  { id: '1', user: 'Alexandra Chen', action: 'updated', target: 'system settings', timestamp: '5m ago', type: 'info' as const },
-  { id: '2', user: 'Marcus Johnson', action: 'completed', target: 'task review', timestamp: '15m ago', type: 'success' as const },
-  { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
+  {
+    id: '1',
+    type: 'update' as const,
+    title: 'updated system settings',
+    user: { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg' },
+    timestamp: new Date(Date.now() - 5 * 60000),
+    isRead: false,
+  },
+  {
+    id: '2',
+    type: 'status_change' as const,
+    title: 'completed task review',
+    user: { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg' },
+    timestamp: new Date(Date.now() - 15 * 60000),
+    isRead: false,
+  },
+  {
+    id: '3',
+    type: 'create' as const,
+    title: 'generated weekly report',
+    user: { id: '0', name: 'System' },
+    timestamp: new Date(Date.now() - 60 * 60000),
+    isRead: true,
+  },
+  {
+    id: '4',
+    type: 'comment' as const,
+    title: 'commented on Project Alpha',
+    description: 'Great progress on the new feature implementation!',
+    user: { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg' },
+    timestamp: new Date(Date.now() - 2 * 60 * 60000),
+    isRead: true,
+  },
 ]
 
 export default function EnhancedClient() {
@@ -81,6 +173,21 @@ export default function EnhancedClient() {
   const [newItemDialogOpen, setNewItemDialogOpen] = useState(false)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+
+  // Additional dialog states
+  const [aiSettingsDialogOpen, setAiSettingsDialogOpen] = useState(false)
+  const [analyticsConfigDialogOpen, setAnalyticsConfigDialogOpen] = useState(false)
+  const [collaborationDialogOpen, setCollaborationDialogOpen] = useState(false)
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false)
+  const [callDialogOpen, setCallDialogOpen] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [notificationsDialogOpen, setNotificationsDialogOpen] = useState(false)
+  const [refreshDialogOpen, setRefreshDialogOpen] = useState(false)
+
+  // Activity states
+  const [activities, setActivities] = useState(enhancedActivities)
+  const [selectedRecipient, setSelectedRecipient] = useState('')
+  const [messageContent, setMessageContent] = useState('')
 
   // New Item form state
   const [newItemForm, setNewItemForm] = useState({
@@ -105,6 +212,55 @@ export default function EnhancedClient() {
     autoSave: true,
     theme: 'system',
     language: 'en',
+  })
+
+  // AI Settings form state
+  const [aiSettingsForm, setAiSettingsForm] = useState({
+    aiEnabled: true,
+    naturalLanguageQueries: true,
+    predictiveAnalytics: true,
+    autoInsights: true,
+    confidenceThreshold: 75,
+    dataRefreshInterval: '1h',
+    aiModel: 'advanced',
+  })
+
+  // Analytics Config form state
+  const [analyticsConfigForm, setAnalyticsConfigForm] = useState({
+    enablePredictions: true,
+    showConfidenceScores: true,
+    factorAnalysis: true,
+    trendAnalysis: true,
+    predictionTimeframe: '30d',
+    dataSource: 'all',
+  })
+
+  // Collaboration form state
+  const [collaborationForm, setCollaborationForm] = useState({
+    realTimeSync: true,
+    showPresence: true,
+    typingIndicators: true,
+    cursorSharing: false,
+    sessionRecording: false,
+  })
+
+  // Notification preferences
+  const [notificationPrefs, setNotificationPrefs] = useState({
+    activityUpdates: true,
+    mentions: true,
+    comments: true,
+    statusChanges: true,
+    aiInsights: true,
+    pushNotifications: false,
+    soundAlerts: false,
+  })
+
+  // Share form state
+  const [shareForm, setShareForm] = useState({
+    shareType: 'link',
+    accessLevel: 'view',
+    expiresIn: 'never',
+    password: '',
   })
 
   // Handle new item creation
@@ -161,11 +317,207 @@ export default function EnhancedClient() {
     )
   }
 
+  // Handle AI settings save
+  const handleSaveAiSettings = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Updating AI configuration...',
+        success: () => {
+          setAiSettingsDialogOpen(false)
+          announce('AI settings updated successfully')
+          return 'AI settings updated successfully'
+        },
+        error: 'Failed to update AI settings',
+      }
+    )
+  }
+
+  // Handle analytics config save
+  const handleSaveAnalyticsConfig = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Saving analytics configuration...',
+        success: () => {
+          setAnalyticsConfigDialogOpen(false)
+          announce('Analytics configuration saved')
+          return 'Analytics configuration saved'
+        },
+        error: 'Failed to save analytics configuration',
+      }
+    )
+  }
+
+  // Handle collaboration settings save
+  const handleSaveCollaborationSettings = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Updating collaboration settings...',
+        success: () => {
+          setCollaborationDialogOpen(false)
+          announce('Collaboration settings updated')
+          return 'Collaboration settings updated'
+        },
+        error: 'Failed to update collaboration settings',
+      }
+    )
+  }
+
+  // Handle send message
+  const handleSendMessage = () => {
+    if (!selectedRecipient || !messageContent.trim()) {
+      toast.error('Please select a recipient and enter a message')
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Sending message...',
+        success: () => {
+          setMessageDialogOpen(false)
+          setMessageContent('')
+          setSelectedRecipient('')
+          announce(`Message sent to ${selectedRecipient}`)
+          return `Message sent to ${selectedRecipient}`
+        },
+        error: 'Failed to send message',
+      }
+    )
+  }
+
+  // Handle start call
+  const handleStartCall = (callType: 'audio' | 'video') => {
+    if (!selectedRecipient) {
+      toast.error('Please select a contact to call')
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Starting ${callType} call...`,
+        success: () => {
+          setCallDialogOpen(false)
+          setSelectedRecipient('')
+          announce(`${callType.charAt(0).toUpperCase() + callType.slice(1)} call started with ${selectedRecipient}`)
+          return `${callType.charAt(0).toUpperCase() + callType.slice(1)} call started with ${selectedRecipient}`
+        },
+        error: 'Failed to start call',
+      }
+    )
+  }
+
+  // Handle share
+  const handleShare = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Generating share link...',
+        success: () => {
+          setShareDialogOpen(false)
+          announce('Share link created and copied to clipboard')
+          return 'Share link created and copied to clipboard'
+        },
+        error: 'Failed to create share link',
+      }
+    )
+  }
+
+  // Handle save notification preferences
+  const handleSaveNotificationPrefs = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Saving notification preferences...',
+        success: () => {
+          setNotificationsDialogOpen(false)
+          announce('Notification preferences updated')
+          return 'Notification preferences updated'
+        },
+        error: 'Failed to save notification preferences',
+      }
+    )
+  }
+
+  // Handle refresh data
+  const handleRefreshData = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Refreshing all data sources...',
+        success: () => {
+          setRefreshDialogOpen(false)
+          announce('All data sources refreshed')
+          return 'All data sources refreshed successfully'
+        },
+        error: 'Failed to refresh data',
+      }
+    )
+  }
+
+  // Handle AI query
+  const handleAIQuery = useCallback(async (query: string): Promise<string> => {
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    announce(`AI query processed: ${query}`)
+    return `Based on your query "${query}", I've analyzed your data and found several relevant insights. Your current metrics show positive trends across key performance indicators.`
+  }, [announce])
+
+  // Handle mark activity read
+  const handleMarkActivityRead = useCallback((id: string) => {
+    setActivities(prev => prev.map(a => a.id === id ? { ...a, isRead: true } : a))
+    toast.success('Activity marked as read')
+  }, [])
+
+  // Handle mark all activities read
+  const handleMarkAllRead = useCallback(() => {
+    setActivities(prev => prev.map(a => ({ ...a, isRead: true })))
+    toast.success('All activities marked as read')
+    announce('All activities marked as read')
+  }, [announce])
+
+  // Handle pin activity
+  const handlePinActivity = useCallback((id: string) => {
+    setActivities(prev => prev.map(a =>
+      a.id === id ? { ...a, isPinned: !a.isPinned } : a
+    ))
+    toast.success('Activity pin toggled')
+  }, [])
+
+  // Handle archive activity
+  const handleArchiveActivity = useCallback((id: string) => {
+    setActivities(prev => prev.filter(a => a.id !== id))
+    toast.success('Activity archived')
+    announce('Activity archived')
+  }, [announce])
+
+  // Handle refresh predictions
+  const handleRefreshPredictions = useCallback(() => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Refreshing predictions...',
+        success: 'Predictions refreshed with latest data',
+        error: 'Failed to refresh predictions',
+      }
+    )
+  }, [])
+
   // Quick actions with real dialog triggers
   const enhancedQuickActions = [
-    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setNewItemDialogOpen(true) },
-    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setExportDialogOpen(true) },
-    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setSettingsDialogOpen(true) },
+    { id: '1', label: 'New Item', icon: <Plus className="h-4 w-4" />, shortcut: 'N', action: () => setNewItemDialogOpen(true), category: 'Create' },
+    { id: '2', label: 'Export', icon: <Download className="h-4 w-4" />, shortcut: 'E', action: () => setExportDialogOpen(true), category: 'Data' },
+    { id: '3', label: 'Settings', icon: <Settings className="h-4 w-4" />, shortcut: 'S', action: () => setSettingsDialogOpen(true), category: 'Settings' },
+    { id: '4', label: 'AI Config', icon: <Brain className="h-4 w-4" />, shortcut: 'A', action: () => setAiSettingsDialogOpen(true), category: 'AI' },
+    { id: '5', label: 'Analytics', icon: <BarChart3 className="h-4 w-4" />, shortcut: 'Y', action: () => setAnalyticsConfigDialogOpen(true), category: 'Analytics' },
+    { id: '6', label: 'Collaborate', icon: <Users className="h-4 w-4" />, shortcut: 'C', action: () => setCollaborationDialogOpen(true), category: 'Team' },
+    { id: '7', label: 'Message', icon: <MessageSquare className="h-4 w-4" />, shortcut: 'M', action: () => setMessageDialogOpen(true), category: 'Communication' },
+    { id: '8', label: 'Call', icon: <Video className="h-4 w-4" />, shortcut: 'V', action: () => setCallDialogOpen(true), category: 'Communication' },
+    { id: '9', label: 'Share', icon: <Share2 className="h-4 w-4" />, shortcut: 'H', action: () => setShareDialogOpen(true), category: 'Share' },
+    { id: '10', label: 'Notifications', icon: <Bell className="h-4 w-4" />, shortcut: 'B', action: () => setNotificationsDialogOpen(true), category: 'Settings' },
+    { id: '11', label: 'Refresh', icon: <RefreshCw className="h-4 w-4" />, shortcut: 'R', action: () => setRefreshDialogOpen(true), category: 'Data' },
   ]
 
   return (

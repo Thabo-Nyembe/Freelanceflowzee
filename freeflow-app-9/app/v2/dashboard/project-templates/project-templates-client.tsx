@@ -55,7 +55,12 @@ import {
   Award,
   Download,
   Settings,
-  CheckCircle
+  CheckCircle,
+  Trash2,
+  Edit2,
+  X,
+  AlertTriangle,
+  FileUp
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -63,6 +68,26 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+
+// Template type definition
+interface ProjectTemplate {
+  id: number
+  name: string
+  description: string
+  category: string
+  type: string
+  duration: string
+  price: string
+  complexity: string
+  rating: number
+  usageCount: number
+  thumbnail: string
+  tags: string[]
+  features: string[]
+  deliverables: string[]
+  isPopular: boolean
+  isFeatured: boolean
+}
 
 
 // ============================================================================
@@ -106,6 +131,17 @@ export default function ProjectTemplatesClient() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 
+  // Additional dialog states
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
+  const [showTemplateActionsMenu, setShowTemplateActionsMenu] = useState<number | null>(null)
+
+  // Selected template for operations
+  const [selectedTemplate, setSelectedTemplate] = useState<ProjectTemplate | null>(null)
+
   // New template form state
   const [newTemplateName, setNewTemplateName] = useState('')
   const [newTemplateDescription, setNewTemplateDescription] = useState('')
@@ -127,6 +163,27 @@ export default function ProjectTemplatesClient() {
   const [notifyOnUse, setNotifyOnUse] = useState(true)
   const [templateVisibility, setTemplateVisibility] = useState('public')
   const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Import form state
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importFormat, setImportFormat] = useState('json')
+  const [isImporting, setIsImporting] = useState(false)
+
+  // Duplicate form state
+  const [duplicateName, setDuplicateName] = useState('')
+  const [isDuplicating, setIsDuplicating] = useState(false)
+
+  // Delete state
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Filters state
+  const [filterComplexity, setFilterComplexity] = useState('all')
+  const [filterType, setFilterType] = useState('all')
+  const [filterRating, setFilterRating] = useState('all')
+  const [filterPriceRange, setFilterPriceRange] = useState('all')
+
+  // Using template state
+  const [isUsingTemplate, setIsUsingTemplate] = useState(false)
 
   // Quick actions with dialog openers
   const projectTemplatesQuickActions = [
@@ -194,6 +251,154 @@ export default function ProjectTemplatesClient() {
     }
   }
 
+  // Import template handler
+  const handleImport = async () => {
+    if (!importFile) {
+      toast.error('Please select a file to import')
+      return
+    }
+
+    setIsImporting(true)
+    try {
+      // Simulate import process
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      toast.success(`Successfully imported templates from ${importFile.name}`)
+      setShowImportDialog(false)
+      setImportFile(null)
+    } catch (err) {
+      toast.error('Failed to import templates')
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  // Use template handler
+  const handleUseTemplate = async (template: ProjectTemplate) => {
+    setIsUsingTemplate(true)
+    try {
+      // Simulate creating project from template
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success(`Project created from "${template.name}" template`, {
+        description: 'Redirecting to project dashboard...',
+      })
+    } catch (err) {
+      toast.error('Failed to create project from template')
+    } finally {
+      setIsUsingTemplate(false)
+    }
+  }
+
+  // Preview template handler
+  const handlePreviewTemplate = (template: ProjectTemplate) => {
+    setSelectedTemplate(template)
+    setShowPreviewDialog(true)
+  }
+
+  // Duplicate template handler
+  const handleOpenDuplicateDialog = (template: ProjectTemplate) => {
+    setSelectedTemplate(template)
+    setDuplicateName(`${template.name} (Copy)`)
+    setShowDuplicateDialog(true)
+  }
+
+  const handleDuplicateTemplate = async () => {
+    if (!duplicateName.trim()) {
+      toast.error('Please enter a name for the duplicate')
+      return
+    }
+
+    setIsDuplicating(true)
+    try {
+      // Simulate duplicate process
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success(`Template duplicated as "${duplicateName}"`)
+      setShowDuplicateDialog(false)
+      setDuplicateName('')
+      setSelectedTemplate(null)
+    } catch (err) {
+      toast.error('Failed to duplicate template')
+    } finally {
+      setIsDuplicating(false)
+    }
+  }
+
+  // Delete template handler
+  const handleOpenDeleteDialog = (template: ProjectTemplate) => {
+    setSelectedTemplate(template)
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteTemplate = async () => {
+    if (!selectedTemplate) return
+
+    setIsDeleting(true)
+    try {
+      // Simulate delete process
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success(`Template "${selectedTemplate.name}" deleted successfully`)
+      setShowDeleteDialog(false)
+      setSelectedTemplate(null)
+    } catch (err) {
+      toast.error('Failed to delete template')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  // Apply filters handler
+  const handleApplyFilters = () => {
+    toast.success('Filters applied successfully')
+    setShowFiltersDialog(false)
+  }
+
+  // Reset filters handler
+  const handleResetFilters = () => {
+    setFilterComplexity('all')
+    setFilterType('all')
+    setFilterRating('all')
+    setFilterPriceRange('all')
+    toast.info('Filters reset to default')
+  }
+
+  // Browse category handler
+  const handleBrowseCategory = (categoryId: string) => {
+    setSelectedCategory(categoryId)
+    setActiveTab('templates')
+    toast.success(`Showing ${categoryId === 'all' ? 'all' : categoryId} templates`)
+  }
+
+  // Template menu actions
+  const handleTemplateAction = (action: string, template: ProjectTemplate) => {
+    setShowTemplateActionsMenu(null)
+    switch (action) {
+      case 'preview':
+        handlePreviewTemplate(template)
+        break
+      case 'duplicate':
+        handleOpenDuplicateDialog(template)
+        break
+      case 'edit':
+        setSelectedTemplate(template)
+        setNewTemplateName(template.name)
+        setNewTemplateDescription(template.description)
+        setNewTemplateCategory(template.category)
+        setNewTemplateType(template.type)
+        setNewTemplateDuration(template.duration)
+        setNewTemplatePrice(template.price)
+        setShowNewTemplateDialog(true)
+        break
+      case 'delete':
+        handleOpenDeleteDialog(template)
+        break
+      default:
+        break
+    }
+  }
+
   // A+++ LOAD PROJECT TEMPLATES DATA
   useEffect(() => {
     const loadProjectTemplatesData = async () => {
@@ -223,7 +428,7 @@ export default function ProjectTemplatesClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
-  const projectTemplates = [
+  const projectTemplates: ProjectTemplate[] = [
     {
       id: 1,
       name: 'Complete Brand Identity Package',
@@ -521,11 +726,14 @@ export default function ProjectTemplatesClient() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              onClick={() => setShowNewTemplateDialog(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Template
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowImportDialog(true)}>
               <Upload className="h-4 w-4 mr-2" />
               Import
             </Button>
@@ -636,7 +844,7 @@ export default function ProjectTemplatesClient() {
                     </option>
                   ))}
                 </select>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}>
                   <Filter className="h-4 w-4 mr-2" />
                   More Filters
                 </Button>
@@ -663,10 +871,48 @@ export default function ProjectTemplatesClient() {
                         </Badge>
                       )}
                     </div>
-                    <div className="absolute top-4 right-4">
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="absolute top-4 right-4 relative">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800"
+                        onClick={() => setShowTemplateActionsMenu(showTemplateActionsMenu === template.id ? null : template.id)}
+                      >
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
+                      {showTemplateActionsMenu === template.id && (
+                        <div className="absolute right-0 top-10 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-50">
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                            onClick={() => handleTemplateAction('preview', template)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            Preview
+                          </button>
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                            onClick={() => handleTemplateAction('edit', template)}
+                          >
+                            <Edit2 className="h-4 w-4" />
+                            Edit
+                          </button>
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                            onClick={() => handleTemplateAction('duplicate', template)}
+                          >
+                            <Copy className="h-4 w-4" />
+                            Duplicate
+                          </button>
+                          <hr className="my-2 border-gray-200 dark:border-gray-700" />
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 flex items-center gap-2"
+                            onClick={() => handleTemplateAction('delete', template)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -721,14 +967,32 @@ export default function ProjectTemplatesClient() {
                     </div>
 
                     <div className="flex items-center space-x-2 pt-2">
-                      <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
-                        <Plus className="h-3 w-3 mr-1" />
+                      <Button
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                        onClick={() => handleUseTemplate(template)}
+                        disabled={isUsingTemplate}
+                      >
+                        {isUsingTemplate ? (
+                          <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-1" />
+                        ) : (
+                          <Plus className="h-3 w-3 mr-1" />
+                        )}
                         Use Template
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePreviewTemplate(template)}
+                        title="Preview template"
+                      >
                         <Eye className="h-3 w-3" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenDuplicateDialog(template)}
+                        title="Duplicate template"
+                      >
                         <Copy className="h-3 w-3" />
                       </Button>
                     </div>
@@ -751,7 +1015,11 @@ export default function ProjectTemplatesClient() {
                       </div>
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">{category.name}</h3>
                       <p className="text-gray-600 dark:text-gray-300 mb-4">{category.count} templates available</p>
-                      <Button variant="outline" className="w-full">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => handleBrowseCategory(category.id)}
+                      >
                         Browse Templates
                       </Button>
                     </CardContent>
@@ -770,7 +1038,10 @@ export default function ProjectTemplatesClient() {
                 <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                   Turn your successful projects into reusable templates to accelerate future work and maintain consistency.
                 </p>
-                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+                <Button
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                  onClick={() => setShowNewTemplateDialog(true)}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Template
                 </Button>
@@ -1078,6 +1349,406 @@ export default function ProjectTemplatesClient() {
                 </>
               )}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileUp className="h-5 w-5 text-green-600" />
+              Import Templates
+            </DialogTitle>
+            <DialogDescription>
+              Import templates from a file to add to your collection
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="importFormat">File Format</Label>
+              <select
+                id="importFormat"
+                value={importFormat}
+                onChange={(e) => setImportFormat(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="json">JSON</option>
+                <option value="csv">CSV</option>
+                <option value="xml">XML</option>
+                <option value="zip">ZIP (with assets)</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="importFile">Select File</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
+                <input
+                  type="file"
+                  id="importFile"
+                  accept={`.${importFormat}`}
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                  className="hidden"
+                />
+                <label htmlFor="importFile" className="cursor-pointer">
+                  <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">
+                    {importFile ? importFile.name : 'Click to select a file or drag and drop'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Supported: {importFormat.toUpperCase()} files
+                  </p>
+                </label>
+              </div>
+            </div>
+
+            {importFile && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-800">{importFile.name}</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setImportFile(null)}
+                  className="text-green-600 hover:text-green-700"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleImport}
+              disabled={isImporting || !importFile}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isImporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-purple-600" />
+              Template Preview
+            </DialogTitle>
+            <DialogDescription>
+              {selectedTemplate?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedTemplate && (
+            <div className="space-y-6 py-4">
+              <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                <FileText className="h-16 w-16 text-gray-400" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-gray-500">Category</Label>
+                  <p className="font-medium capitalize">{selectedTemplate.category.replace('-', ' ')}</p>
+                </div>
+                <div>
+                  <Label className="text-sm text-gray-500">Type</Label>
+                  <Badge className={getTypeColor(selectedTemplate.type)}>{selectedTemplate.type}</Badge>
+                </div>
+                <div>
+                  <Label className="text-sm text-gray-500">Duration</Label>
+                  <p className="font-medium">{selectedTemplate.duration}</p>
+                </div>
+                <div>
+                  <Label className="text-sm text-gray-500">Price Range</Label>
+                  <p className="font-medium">{selectedTemplate.price}</p>
+                </div>
+                <div>
+                  <Label className="text-sm text-gray-500">Rating</Label>
+                  <p className="font-medium flex items-center gap-1">
+                    <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                    {selectedTemplate.rating}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-sm text-gray-500">Usage Count</Label>
+                  <p className="font-medium">{selectedTemplate.usageCount} projects</p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-500 mb-2 block">Description</Label>
+                <p className="text-gray-700 dark:text-gray-300">{selectedTemplate.description}</p>
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-500 mb-2 block">Features</Label>
+                <ul className="space-y-1">
+                  {selectedTemplate.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-500 mb-2 block">Deliverables</Label>
+                <ul className="space-y-1">
+                  {selectedTemplate.deliverables.map((deliverable, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-sm">
+                      <FileText className="h-4 w-4 text-blue-500" />
+                      {deliverable}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-500 mb-2 block">Tags</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedTemplate.tags.map((tag) => (
+                    <Badge key={tag} variant="secondary">{tag}</Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                if (selectedTemplate) {
+                  handleUseTemplate(selectedTemplate)
+                  setShowPreviewDialog(false)
+                }
+              }}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Use This Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Duplicate Dialog */}
+      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Copy className="h-5 w-5 text-blue-600" />
+              Duplicate Template
+            </DialogTitle>
+            <DialogDescription>
+              Create a copy of &quot;{selectedTemplate?.name}&quot;
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="duplicateName">New Template Name</Label>
+              <Input
+                id="duplicateName"
+                placeholder="Enter name for the duplicate"
+                value={duplicateName}
+                onChange={(e) => setDuplicateName(e.target.value)}
+              />
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                The duplicate will include all features, deliverables, and settings from the original template.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDuplicateTemplate}
+              disabled={isDuplicating || !duplicateName.trim()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isDuplicating ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Duplicating...
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Duplicate
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="h-5 w-5" />
+              Delete Template
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{selectedTemplate?.name}&quot;?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-800">
+                <strong>Warning:</strong> This action cannot be undone. All template data, including features, deliverables, and usage history will be permanently deleted.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteTemplate}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Template
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filters Dialog */}
+      <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-purple-600" />
+              Advanced Filters
+            </DialogTitle>
+            <DialogDescription>
+              Refine your template search with additional filters
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="filterComplexity">Complexity Level</Label>
+              <select
+                id="filterComplexity"
+                value={filterComplexity}
+                onChange={(e) => setFilterComplexity(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">All Levels</option>
+                <option value="simple">Simple</option>
+                <option value="moderate">Moderate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="filterType">Template Type</Label>
+              <select
+                id="filterType"
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">All Types</option>
+                <option value="basic">Basic</option>
+                <option value="standard">Standard</option>
+                <option value="premium">Premium</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="filterRating">Minimum Rating</Label>
+              <select
+                id="filterRating"
+                value={filterRating}
+                onChange={(e) => setFilterRating(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">Any Rating</option>
+                <option value="4.5">4.5+ Stars</option>
+                <option value="4.0">4.0+ Stars</option>
+                <option value="3.5">3.5+ Stars</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="filterPriceRange">Price Range</Label>
+              <select
+                id="filterPriceRange"
+                value={filterPriceRange}
+                onChange={(e) => setFilterPriceRange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="all">Any Price</option>
+                <option value="low">Under $1,000</option>
+                <option value="medium">$1,000 - $5,000</option>
+                <option value="high">$5,000+</option>
+              </select>
+            </div>
+          </div>
+
+          <DialogFooter className="flex justify-between">
+            <Button variant="ghost" onClick={handleResetFilters}>
+              Reset Filters
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleApplyFilters}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Apply Filters
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -351,6 +351,19 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const [allocateDialogOpen, setAllocateDialogOpen] = useState(false)
   const [balanceDialogOpen, setBalanceDialogOpen] = useState(false)
   const [reportDialogOpen, setReportDialogOpen] = useState(false)
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false)
+  const [addProjectDialogOpen, setAddProjectDialogOpen] = useState(false)
+  const [timeOffDialogOpen, setTimeOffDialogOpen] = useState(false)
+  const [skillsDialogOpen, setSkillsDialogOpen] = useState(false)
+  const [reassignDialogOpen, setReassignDialogOpen] = useState(false)
+  const [notifyDialogOpen, setNotifyDialogOpen] = useState(false)
+  const [addDepartmentDialogOpen, setAddDepartmentDialogOpen] = useState(false)
+  const [editDepartmentDialogOpen, setEditDepartmentDialogOpen] = useState(false)
+  const [editStatusDialogOpen, setEditStatusDialogOpen] = useState(false)
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('')
+  const [selectedStatus, setSelectedStatus] = useState<string>('')
+  const [selectedWeek, setSelectedWeek] = useState(0) // 0 = current week
+  const [selectedProjectColor, setSelectedProjectColor] = useState('#3B82F6')
 
   // Allocation form state
   const [allocationForm, setAllocationForm] = useState({
@@ -380,6 +393,55 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     groupBy: 'team',
     format: 'pdf'
   })
+
+  // New member form state
+  const [newMemberForm, setNewMemberForm] = useState({
+    name: '',
+    email: '',
+    role: '',
+    department: 'Engineering',
+    hourlyRate: 100,
+    capacity: 40
+  })
+
+  // New project form state
+  const [newProjectForm, setNewProjectForm] = useState({
+    name: '',
+    client: '',
+    color: '#3B82F6',
+    startDate: '',
+    endDate: '',
+    budget: 50000,
+    totalHours: 400
+  })
+
+  // Time off form state
+  const [timeOffForm, setTimeOffForm] = useState({
+    memberId: '',
+    startDate: '',
+    endDate: '',
+    type: 'PTO'
+  })
+
+  // Reassign form state
+  const [reassignForm, setReassignForm] = useState({
+    fromMemberId: '',
+    toMemberId: '',
+    projectId: '',
+    hours: 8
+  })
+
+  // Notify form state
+  const [notifyForm, setNotifyForm] = useState({
+    recipients: 'all',
+    subject: '',
+    message: '',
+    sendEmail: true,
+    sendSlack: false
+  })
+
+  // New department form state
+  const [newDepartmentName, setNewDepartmentName] = useState('')
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -449,6 +511,259 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     setReportDialogOpen(false)
   }
 
+  // Export schedule handler
+  const handleExportSchedule = () => {
+    toast.success('Schedule exported', {
+      description: 'Team schedule has been exported to Excel'
+    })
+  }
+
+  // Add new team member handler
+  const handleAddMember = () => {
+    if (!newMemberForm.name || !newMemberForm.email) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.success('Team member added', {
+      description: `${newMemberForm.name} has been added to the team`
+    })
+    setAddMemberDialogOpen(false)
+    setNewMemberForm({
+      name: '',
+      email: '',
+      role: '',
+      department: 'Engineering',
+      hourlyRate: 100,
+      capacity: 40
+    })
+  }
+
+  // Add new project handler
+  const handleAddProject = () => {
+    if (!newProjectForm.name || !newProjectForm.client) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    toast.success('Project created', {
+      description: `${newProjectForm.name} has been created`
+    })
+    setAddProjectDialogOpen(false)
+    setNewProjectForm({
+      name: '',
+      client: '',
+      color: '#3B82F6',
+      startDate: '',
+      endDate: '',
+      budget: 50000,
+      totalHours: 400
+    })
+  }
+
+  // Time off request handler
+  const handleTimeOffRequest = () => {
+    if (!timeOffForm.memberId || !timeOffForm.startDate || !timeOffForm.endDate) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    const member = mockTeamMembers.find(m => m.id === timeOffForm.memberId)
+    toast.success('Time off scheduled', {
+      description: `${timeOffForm.type} scheduled for ${member?.name}`
+    })
+    setTimeOffDialogOpen(false)
+    setTimeOffForm({
+      memberId: '',
+      startDate: '',
+      endDate: '',
+      type: 'PTO'
+    })
+  }
+
+  // Reassign resources handler
+  const handleReassign = () => {
+    if (!reassignForm.fromMemberId || !reassignForm.toMemberId || !reassignForm.projectId) {
+      toast.error('Please select all required fields')
+      return
+    }
+    const fromMember = mockTeamMembers.find(m => m.id === reassignForm.fromMemberId)
+    const toMember = mockTeamMembers.find(m => m.id === reassignForm.toMemberId)
+    toast.success('Resources reassigned', {
+      description: `${reassignForm.hours}h reassigned from ${fromMember?.name} to ${toMember?.name}`
+    })
+    setReassignDialogOpen(false)
+    setReassignForm({
+      fromMemberId: '',
+      toMemberId: '',
+      projectId: '',
+      hours: 8
+    })
+  }
+
+  // Send notification handler
+  const handleSendNotification = () => {
+    if (!notifyForm.subject || !notifyForm.message) {
+      toast.error('Please fill in subject and message')
+      return
+    }
+    toast.success('Notification sent', {
+      description: `Message sent to ${notifyForm.recipients === 'all' ? 'all team members' : 'selected members'}`
+    })
+    setNotifyDialogOpen(false)
+    setNotifyForm({
+      recipients: 'all',
+      subject: '',
+      message: '',
+      sendEmail: true,
+      sendSlack: false
+    })
+  }
+
+  // Add department handler
+  const handleAddDepartment = () => {
+    if (!newDepartmentName) {
+      toast.error('Please enter a department name')
+      return
+    }
+    toast.success('Department added', {
+      description: `${newDepartmentName} department has been created`
+    })
+    setAddDepartmentDialogOpen(false)
+    setNewDepartmentName('')
+  }
+
+  // Edit department handler
+  const handleEditDepartment = () => {
+    toast.success('Department updated', {
+      description: `${selectedDepartment} settings have been saved`
+    })
+    setEditDepartmentDialogOpen(false)
+  }
+
+  // Edit status handler
+  const handleEditStatus = () => {
+    toast.success('Status updated', {
+      description: `${selectedStatus} status has been updated`
+    })
+    setEditStatusDialogOpen(false)
+  }
+
+  // Schedule navigation handlers
+  const handlePreviousWeek = () => {
+    setSelectedWeek(prev => prev - 1)
+    toast.info('Previous week', {
+      description: `Showing week ${selectedWeek - 1 < 0 ? selectedWeek - 1 : selectedWeek - 1}`
+    })
+  }
+
+  const handleThisWeek = () => {
+    setSelectedWeek(0)
+    toast.info('Current week', {
+      description: 'Showing current week schedule'
+    })
+  }
+
+  const handleNextWeek = () => {
+    setSelectedWeek(prev => prev + 1)
+    toast.info('Next week', {
+      description: `Showing week +${selectedWeek + 1}`
+    })
+  }
+
+  // Overview quick action handlers
+  const handleTeamView = () => {
+    setActiveTab('team')
+    toast.info('Team view', { description: 'Switched to team capacity view' })
+  }
+
+  const handleAnalytics = () => {
+    setReportDialogOpen(true)
+  }
+
+  const handleScheduleView = () => {
+    setActiveTab('schedule')
+    toast.info('Schedule view', { description: 'Switched to schedule view' })
+  }
+
+  const handleForecastView = () => {
+    setActiveTab('forecast')
+    toast.info('Forecast view', { description: 'Switched to capacity forecast' })
+  }
+
+  const handleOverloadView = () => {
+    const overbooked = mockTeamMembers.filter(m => m.status === 'overbooked')
+    if (overbooked.length > 0) {
+      toast.warning('Overloaded members', {
+        description: `${overbooked.length} team member(s) are overbooked: ${overbooked.map(m => m.name).join(', ')}`
+      })
+    } else {
+      toast.success('No overloads', { description: 'All team members are within capacity' })
+    }
+  }
+
+  const handleOptimize = () => {
+    setBalanceDialogOpen(true)
+  }
+
+  const handleSettingsView = () => {
+    setActiveTab('settings')
+    toast.info('Settings', { description: 'Switched to settings view' })
+  }
+
+  // Team quick action handlers
+  const handleViewAllTeam = () => {
+    toast.info('All team members', {
+      description: `Showing all ${mockTeamMembers.length} team members`
+    })
+  }
+
+  const handleUtilizationView = () => {
+    const avgUtil = Math.round(mockTeamMembers.reduce((s, m) => s + m.utilizationRate, 0) / mockTeamMembers.length)
+    toast.info('Team utilization', {
+      description: `Average team utilization: ${avgUtil}%`
+    })
+  }
+
+  const handleSkillsView = () => {
+    setSkillsDialogOpen(true)
+  }
+
+  // Integration handlers
+  const handleConnectIntegration = (name: string) => {
+    toast.success('Connection initiated', {
+      description: `Connecting to ${name}...`
+    })
+  }
+
+  const handleRegenerateApiKey = () => {
+    toast.success('API key regenerated', {
+      description: 'New API key has been generated. Please update your integrations.'
+    })
+  }
+
+  const handleExportData = () => {
+    toast.success('Data exported', {
+      description: 'All capacity data has been exported to JSON'
+    })
+  }
+
+  const handleImportData = () => {
+    toast.info('Import data', {
+      description: 'Select a file to import capacity data'
+    })
+  }
+
+  // Danger zone handlers
+  const handleClearAllocations = () => {
+    toast.warning('Allocations cleared', {
+      description: 'All team allocations have been removed'
+    })
+  }
+
+  const handleResetCapacityData = () => {
+    toast.warning('Data reset', {
+      description: 'All capacity planning data has been reset to defaults'
+    })
+  }
+
   // Quick actions with real dialog functionality
   const capacityQuickActions = [
     { id: '1', label: 'Allocate', icon: 'plus', action: () => setAllocateDialogOpen(true), variant: 'default' as const },
@@ -472,10 +787,16 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             <p className="text-gray-600 dark:text-gray-400 mt-1">Resource scheduling, team allocation & workload management</p>
           </div>
           <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <button
+              onClick={handleExportSchedule}
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
               Export Schedule
             </button>
-            <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => setAllocateDialogOpen(true)}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            >
               <span>+ New Allocation</span>
             </button>
           </div>
@@ -561,16 +882,16 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             {/* Overview Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Users, label: 'Team View', color: 'text-indigo-600 dark:text-indigo-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Calendar, label: 'Schedule', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: TrendingUp, label: 'Forecast', color: 'text-green-600 dark:text-green-400' },
-                { icon: AlertTriangle, label: 'Overload', color: 'text-red-600 dark:text-red-400' },
-                { icon: Target, label: 'Optimize', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+                { icon: Users, label: 'Team View', color: 'text-indigo-600 dark:text-indigo-400', onClick: handleTeamView },
+                { icon: BarChart3, label: 'Analytics', color: 'text-purple-600 dark:text-purple-400', onClick: handleAnalytics },
+                { icon: Calendar, label: 'Schedule', color: 'text-blue-600 dark:text-blue-400', onClick: handleScheduleView },
+                { icon: TrendingUp, label: 'Forecast', color: 'text-green-600 dark:text-green-400', onClick: handleForecastView },
+                { icon: AlertTriangle, label: 'Overload', color: 'text-red-600 dark:text-red-400', onClick: handleOverloadView },
+                { icon: Target, label: 'Optimize', color: 'text-orange-600 dark:text-orange-400', onClick: handleOptimize },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400', onClick: () => setReportDialogOpen(true) },
+                { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', onClick: handleSettingsView }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" onClick={action.onClick} className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -694,16 +1015,16 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             {/* Team Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: UserPlus, label: 'Add Member', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: Users, label: 'View All', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: BarChart3, label: 'Utilization', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Clock, label: 'Time Off', color: 'text-amber-600 dark:text-amber-400' },
-                { icon: Zap, label: 'Skills', color: 'text-green-600 dark:text-green-400' },
-                { icon: Shuffle, label: 'Reassign', color: 'text-orange-600 dark:text-orange-400' },
-                { icon: Download, label: 'Export', color: 'text-gray-600 dark:text-gray-400' },
-                { icon: Mail, label: 'Notify', color: 'text-pink-600 dark:text-pink-400' }
+                { icon: UserPlus, label: 'Add Member', color: 'text-blue-600 dark:text-blue-400', onClick: () => setAddMemberDialogOpen(true) },
+                { icon: Users, label: 'View All', color: 'text-cyan-600 dark:text-cyan-400', onClick: handleViewAllTeam },
+                { icon: BarChart3, label: 'Utilization', color: 'text-purple-600 dark:text-purple-400', onClick: handleUtilizationView },
+                { icon: Clock, label: 'Time Off', color: 'text-amber-600 dark:text-amber-400', onClick: () => setTimeOffDialogOpen(true) },
+                { icon: Zap, label: 'Skills', color: 'text-green-600 dark:text-green-400', onClick: handleSkillsView },
+                { icon: Shuffle, label: 'Reassign', color: 'text-orange-600 dark:text-orange-400', onClick: () => setReassignDialogOpen(true) },
+                { icon: Download, label: 'Export', color: 'text-gray-600 dark:text-gray-400', onClick: () => setReportDialogOpen(true) },
+                { icon: Mail, label: 'Notify', color: 'text-pink-600 dark:text-pink-400', onClick: () => setNotifyDialogOpen(true) }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={i} variant="outline" onClick={action.onClick} className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
                   <action.icon className={`h-5 w-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -731,7 +1052,10 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                   <option value="overbooked">Overbooked</option>
                 </select>
               </div>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors">
+              <button
+                onClick={() => setAddMemberDialogOpen(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+              >
                 + Add Team Member
               </button>
             </div>
@@ -923,7 +1247,10 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                   <option value="at_risk">At Risk</option>
                 </select>
               </div>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors">
+              <button
+                onClick={() => setAddProjectDialogOpen(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors"
+              >
                 + New Project
               </button>
             </div>
@@ -1076,11 +1403,11 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
 
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Schedule</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Schedule {selectedWeek !== 0 && `(${selectedWeek > 0 ? '+' : ''}${selectedWeek})`}</h3>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">← Previous</button>
-                  <button className="px-3 py-1 text-sm bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded">This Week</button>
-                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">Next →</button>
+                  <button onClick={handlePreviousWeek} className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">← Previous</button>
+                  <button onClick={handleThisWeek} className={`px-3 py-1 text-sm rounded ${selectedWeek === 0 ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300' : 'border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}>This Week</button>
+                  <button onClick={handleNextWeek} className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">Next →</button>
                 </div>
               </div>
 
@@ -1509,12 +1836,12 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <span className="font-medium">{dept}</span>
                               <div className="flex items-center gap-2">
                                 <Badge variant="secondary">Active</Badge>
-                                <Button variant="ghost" size="sm">Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => { setSelectedDepartment(dept); setEditDepartmentDialogOpen(true); }}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="mt-4 w-full">
+                        <Button variant="outline" className="mt-4 w-full" onClick={() => setAddDepartmentDialogOpen(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Department
                         </Button>
@@ -1542,7 +1869,8 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                             {['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899'].map(color => (
                               <button
                                 key={color}
-                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                                onClick={() => { setSelectedProjectColor(color); toast.success('Color selected', { description: `Default project color set to ${color}` }); }}
+                                className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform ${selectedProjectColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-900 dark:ring-white' : 'border-white'}`}
                                 style={{ backgroundColor: color }}
                               />
                             ))}
@@ -1614,7 +1942,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                                 <div className={`w-3 h-3 rounded-full bg-${status.color}-500`} />
                                 <span className="font-medium">{status.name}</span>
                               </div>
-                              <Button variant="ghost" size="sm">Edit</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedStatus(status.name); setEditStatusDialogOpen(true); }}>Edit</Button>
                             </div>
                           ))}
                         </div>
@@ -1764,7 +2092,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               {integration.connected ? (
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
                               ) : (
-                                <Button size="sm" variant="outline">Connect</Button>
+                                <Button size="sm" variant="outline" onClick={() => handleConnectIntegration(integration.name)}>Connect</Button>
                               )}
                             </div>
                             {integration.connected && (
@@ -1786,16 +2114,16 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm">Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={handleRegenerateApiKey}>Regenerate</Button>
                           </div>
                           <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={handleExportData}>
                             <Download className="w-4 h-4" />
                             Export Data
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={handleImportData}>
                             <Upload className="w-4 h-4" />
                             Import Data
                           </Button>
@@ -1901,14 +2229,14 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                             <Label className="text-red-700 dark:text-red-400">Clear All Allocations</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all team allocations from projects</p>
                           </div>
-                          <Button variant="destructive" size="sm">Clear</Button>
+                          <Button variant="destructive" size="sm" onClick={handleClearAllocations}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset Capacity Data</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Reset all capacity planning data to defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={handleResetCapacityData}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2294,6 +2622,613 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
               <Button onClick={handleGenerateReport} className="bg-blue-600 hover:bg-blue-700">
                 <Download className="w-4 h-4 mr-2" />
                 Generate Report
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Team Member Dialog */}
+      <Dialog open={addMemberDialogOpen} onOpenChange={setAddMemberDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-blue-600" />
+              Add Team Member
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Full Name *</Label>
+                <Input
+                  placeholder="Enter full name"
+                  value={newMemberForm.name}
+                  onChange={(e) => setNewMemberForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  placeholder="email@company.com"
+                  value={newMemberForm.email}
+                  onChange={(e) => setNewMemberForm(prev => ({ ...prev, email: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Role</Label>
+                <Input
+                  placeholder="e.g., Senior Developer"
+                  value={newMemberForm.role}
+                  onChange={(e) => setNewMemberForm(prev => ({ ...prev, role: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Department</Label>
+                <Select
+                  value={newMemberForm.department}
+                  onValueChange={(value) => setNewMemberForm(prev => ({ ...prev, department: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Engineering">Engineering</SelectItem>
+                    <SelectItem value="Design">Design</SelectItem>
+                    <SelectItem value="Operations">Operations</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                    <SelectItem value="Sales">Sales</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Hourly Rate</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-gray-500">$</span>
+                  <Input
+                    type="number"
+                    value={newMemberForm.hourlyRate}
+                    onChange={(e) => setNewMemberForm(prev => ({ ...prev, hourlyRate: parseInt(e.target.value) || 0 }))}
+                  />
+                  <span className="text-sm text-gray-500">/hour</span>
+                </div>
+              </div>
+              <div>
+                <Label>Weekly Capacity</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    type="number"
+                    value={newMemberForm.capacity}
+                    onChange={(e) => setNewMemberForm(prev => ({ ...prev, capacity: parseInt(e.target.value) || 0 }))}
+                  />
+                  <span className="text-sm text-gray-500">hours</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setAddMemberDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddMember} className="bg-blue-600 hover:bg-blue-700">
+                Add Team Member
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Project Dialog */}
+      <Dialog open={addProjectDialogOpen} onOpenChange={setAddProjectDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-green-600" />
+              Create New Project
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Project Name *</Label>
+                <Input
+                  placeholder="Enter project name"
+                  value={newProjectForm.name}
+                  onChange={(e) => setNewProjectForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Client *</Label>
+                <Input
+                  placeholder="Enter client name"
+                  value={newProjectForm.client}
+                  onChange={(e) => setNewProjectForm(prev => ({ ...prev, client: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Project Color</Label>
+              <div className="flex gap-2 mt-2">
+                {['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899', '#06B6D4', '#84CC16'].map(color => (
+                  <button
+                    key={color}
+                    onClick={() => setNewProjectForm(prev => ({ ...prev, color }))}
+                    className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform ${newProjectForm.color === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2' : 'border-white'}`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={newProjectForm.startDate}
+                  onChange={(e) => setNewProjectForm(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={newProjectForm.endDate}
+                  onChange={(e) => setNewProjectForm(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Budget</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-gray-500">$</span>
+                  <Input
+                    type="number"
+                    value={newProjectForm.budget}
+                    onChange={(e) => setNewProjectForm(prev => ({ ...prev, budget: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Total Hours</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    type="number"
+                    value={newProjectForm.totalHours}
+                    onChange={(e) => setNewProjectForm(prev => ({ ...prev, totalHours: parseInt(e.target.value) || 0 }))}
+                  />
+                  <span className="text-sm text-gray-500">hours</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setAddProjectDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddProject} className="bg-green-600 hover:bg-green-700">
+                Create Project
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Time Off Dialog */}
+      <Dialog open={timeOffDialogOpen} onOpenChange={setTimeOffDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-amber-600" />
+              Schedule Time Off
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label>Team Member</Label>
+              <Select
+                value={timeOffForm.memberId}
+                onValueChange={(value) => setTimeOffForm(prev => ({ ...prev, memberId: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockTeamMembers.map(member => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Time Off Type</Label>
+              <Select
+                value={timeOffForm.type}
+                onValueChange={(value) => setTimeOffForm(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PTO">PTO (Paid Time Off)</SelectItem>
+                  <SelectItem value="Holiday">Holiday</SelectItem>
+                  <SelectItem value="Sick">Sick Leave</SelectItem>
+                  <SelectItem value="Personal">Personal Day</SelectItem>
+                  <SelectItem value="Unpaid">Unpaid Leave</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={timeOffForm.startDate}
+                  onChange={(e) => setTimeOffForm(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={timeOffForm.endDate}
+                  onChange={(e) => setTimeOffForm(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setTimeOffDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleTimeOffRequest} className="bg-amber-600 hover:bg-amber-700">
+                Schedule Time Off
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Skills Dialog */}
+      <Dialog open={skillsDialogOpen} onOpenChange={setSkillsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-green-600" />
+              Team Skills Matrix
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[70vh]">
+            <div className="space-y-4 py-4">
+              {mockTeamMembers.map(member => (
+                <div key={member.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                      {member.avatar}
+                    </div>
+                    <div>
+                      <div className="font-medium">{member.name}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{member.role}</div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {member.skills.map(skill => (
+                      <span key={skill} className="px-3 py-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded-full text-sm">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={() => setSkillsDialogOpen(false)}>
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reassign Resources Dialog */}
+      <Dialog open={reassignDialogOpen} onOpenChange={setReassignDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shuffle className="w-5 h-5 text-orange-600" />
+              Reassign Resources
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label>From Team Member</Label>
+              <Select
+                value={reassignForm.fromMemberId}
+                onValueChange={(value) => setReassignForm(prev => ({ ...prev, fromMemberId: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select source member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockTeamMembers.map(member => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.name} ({member.allocatedHours}h allocated)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>To Team Member</Label>
+              <Select
+                value={reassignForm.toMemberId}
+                onValueChange={(value) => setReassignForm(prev => ({ ...prev, toMemberId: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select target member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockTeamMembers.filter(m => m.id !== reassignForm.fromMemberId).map(member => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.name} ({member.availableHours}h available)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Project</Label>
+              <Select
+                value={reassignForm.projectId}
+                onValueChange={(value) => setReassignForm(prev => ({ ...prev, projectId: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockProjects.map(project => (
+                    <SelectItem key={project.id} value={project.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: project.color }} />
+                        {project.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Hours to Reassign</Label>
+              <Input
+                type="number"
+                value={reassignForm.hours}
+                onChange={(e) => setReassignForm(prev => ({ ...prev, hours: parseInt(e.target.value) || 0 }))}
+                className="mt-1"
+                min={1}
+                max={40}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setReassignDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleReassign} className="bg-orange-600 hover:bg-orange-700">
+                Reassign
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Notification Dialog */}
+      <Dialog open={notifyDialogOpen} onOpenChange={setNotifyDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-pink-600" />
+              Send Team Notification
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label>Recipients</Label>
+              <Select
+                value={notifyForm.recipients}
+                onValueChange={(value) => setNotifyForm(prev => ({ ...prev, recipients: value }))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Team Members</SelectItem>
+                  <SelectItem value="managers">Managers Only</SelectItem>
+                  <SelectItem value="available">Available Members</SelectItem>
+                  <SelectItem value="overbooked">Overbooked Members</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Subject</Label>
+              <Input
+                placeholder="Enter notification subject"
+                value={notifyForm.subject}
+                onChange={(e) => setNotifyForm(prev => ({ ...prev, subject: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label>Message</Label>
+              <textarea
+                placeholder="Enter your message..."
+                value={notifyForm.message}
+                onChange={(e) => setNotifyForm(prev => ({ ...prev, message: e.target.value }))}
+                className="mt-1 w-full h-24 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm resize-none"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <Label>Send via Email</Label>
+                <Switch
+                  checked={notifyForm.sendEmail}
+                  onCheckedChange={(checked) => setNotifyForm(prev => ({ ...prev, sendEmail: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <Label>Send via Slack</Label>
+                <Switch
+                  checked={notifyForm.sendSlack}
+                  onCheckedChange={(checked) => setNotifyForm(prev => ({ ...prev, sendSlack: checked }))}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setNotifyDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSendNotification} className="bg-pink-600 hover:bg-pink-700">
+                Send Notification
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Department Dialog */}
+      <Dialog open={addDepartmentDialogOpen} onOpenChange={setAddDepartmentDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-indigo-600" />
+              Add Department
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label>Department Name</Label>
+              <Input
+                placeholder="Enter department name"
+                value={newDepartmentName}
+                onChange={(e) => setNewDepartmentName(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setAddDepartmentDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddDepartment} className="bg-indigo-600 hover:bg-indigo-700">
+                Add Department
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Department Dialog */}
+      <Dialog open={editDepartmentDialogOpen} onOpenChange={setEditDepartmentDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-indigo-600" />
+              Edit Department: {selectedDepartment}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label>Department Name</Label>
+              <Input
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <Label>Active Status</Label>
+              <Switch defaultChecked />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setEditDepartmentDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditDepartment} className="bg-indigo-600 hover:bg-indigo-700">
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Status Dialog */}
+      <Dialog open={editStatusDialogOpen} onOpenChange={setEditStatusDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-indigo-600" />
+              Edit Status: {selectedStatus}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label>Status Name</Label>
+              <Input
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label>Status Color</Label>
+              <div className="flex gap-2 mt-2">
+                {['green', 'gray', 'red', 'blue', 'amber', 'purple'].map(color => (
+                  <button
+                    key={color}
+                    className={`w-8 h-8 rounded-full bg-${color}-500 border-2 border-white shadow-sm hover:scale-110 transition-transform`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setEditStatusDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditStatus} className="bg-indigo-600 hover:bg-indigo-700">
+                Save Changes
               </Button>
             </div>
           </div>

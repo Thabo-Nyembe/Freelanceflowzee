@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 
 import React, { useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Mail, FileText, Sparkles, Brain, Instagram, Twitter, Linkedin, Facebook, Copy, RefreshCw, Check, Wand2, Plus, Download, Settings } from 'lucide-react'
+import { Mail, FileText, Sparkles, Brain, Instagram, Twitter, Linkedin, Facebook, Copy, RefreshCw, Check, Wand2, Plus, Download, Settings, Save, Share2, Edit3, Trash2, History, Star, StarOff, Filter, Search, MoreVertical, Bookmark, BookmarkCheck, Send, Eye, EyeOff, Palette, Zap, MessageSquare, TrendingUp, Clock, Calendar, Users, Target, BarChart2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -92,11 +92,47 @@ export default function AiContentStudioClient() {
   const [maxTokens, setMaxTokens] = useState('2000')
   const [isSavingSettings, setIsSavingSettings] = useState(false)
 
+  // Additional dialog states
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+
+  // Share form state
+  const [shareEmail, setShareEmail] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
+  const [sharePermission, setSharePermission] = useState('view')
+  const [isSharing, setIsSharing] = useState(false)
+
+  // Schedule form state
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [scheduleTime, setScheduleTime] = useState('')
+  const [schedulePlatform, setSchedulePlatform] = useState('instagram')
+  const [isScheduling, setIsScheduling] = useState(false)
+
+  // Template form state
+  const [templateName, setTemplateName] = useState('')
+  const [templateCategory, setTemplateCategory] = useState('social')
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false)
+
+  // History state
+  const [contentHistory] = useState([
+    { id: '1', title: 'Product Launch Post', platform: 'Instagram', createdAt: '2024-01-15', type: 'social' },
+    { id: '2', title: 'Q4 Newsletter', platform: 'Email', createdAt: '2024-01-14', type: 'email' },
+    { id: '3', title: 'LinkedIn Article Draft', platform: 'LinkedIn', createdAt: '2024-01-13', type: 'social' },
+    { id: '4', title: 'Holiday Campaign Ad', platform: 'Facebook', createdAt: '2024-01-12', type: 'ad' },
+    { id: '5', title: 'Customer Success Story', platform: 'Twitter', createdAt: '2024-01-11', type: 'social' },
+  ])
+
   // Quick actions with dialog triggers
   const aiContentStudioQuickActions = [
     { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewContentDialog(true) },
     { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
     { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+    { id: '4', label: 'History', icon: 'History', shortcut: 'H', action: () => setShowHistoryDialog(true) },
+    { id: '5', label: 'Share', icon: 'Share2', shortcut: 'R', action: () => setShowShareDialog(true) },
+    { id: '6', label: 'Schedule', icon: 'Calendar', shortcut: 'C', action: () => setShowScheduleDialog(true) },
   ]
 
   // Handler for creating new content
@@ -176,6 +212,126 @@ export default function AiContentStudioClient() {
     }
   }
 
+  // Handler for sharing content
+  const handleShare = async () => {
+    if (!shareEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shareEmail)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    setIsSharing(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success(`Content shared with ${shareEmail} successfully`)
+      logger.info('Content shared', { email: shareEmail, permission: sharePermission })
+      setShowShareDialog(false)
+      setShareEmail('')
+      setShareMessage('')
+    } catch {
+      toast.error('Failed to share content')
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
+  // Handler for scheduling content
+  const handleSchedule = async () => {
+    if (!scheduleDate || !scheduleTime) {
+      toast.error('Please select both date and time')
+      return
+    }
+    setIsScheduling(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`)
+      toast.success(`Content scheduled for ${scheduledDateTime.toLocaleString()} on ${schedulePlatform}`)
+      logger.info('Content scheduled', { date: scheduleDate, time: scheduleTime, platform: schedulePlatform })
+      setShowScheduleDialog(false)
+      setScheduleDate('')
+      setScheduleTime('')
+    } catch {
+      toast.error('Failed to schedule content')
+    } finally {
+      setIsScheduling(false)
+    }
+  }
+
+  // Handler for saving template
+  const handleSaveTemplate = async () => {
+    if (!templateName.trim()) {
+      toast.error('Please enter a template name')
+      return
+    }
+    setIsSavingTemplate(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      const templates = JSON.parse(localStorage.getItem('aiContentTemplates') || '[]')
+      templates.push({
+        id: Date.now().toString(),
+        name: templateName,
+        category: templateCategory,
+        createdAt: new Date().toISOString()
+      })
+      localStorage.setItem('aiContentTemplates', JSON.stringify(templates))
+      toast.success(`Template "${templateName}" saved successfully`)
+      logger.info('Template saved', { name: templateName, category: templateCategory })
+      setShowTemplateDialog(false)
+      setTemplateName('')
+    } catch {
+      toast.error('Failed to save template')
+    } finally {
+      setIsSavingTemplate(false)
+    }
+  }
+
+  // Handler for loading history item
+  const handleLoadHistoryItem = (item: typeof contentHistory[0]) => {
+    toast.success(`Loading "${item.title}" from history`)
+    logger.info('History item loaded', { id: item.id, title: item.title })
+    setShowHistoryDialog(false)
+  }
+
+  // Handler for deleting history item
+  const handleDeleteHistoryItem = (item: typeof contentHistory[0]) => {
+    toast.success(`"${item.title}" removed from history`)
+    logger.info('History item deleted', { id: item.id, title: item.title })
+  }
+
+  // Handler for viewing analytics
+  const handleViewAnalytics = () => {
+    setShowAnalyticsDialog(true)
+    logger.info('Analytics dialog opened')
+  }
+
+  // Handler for quick generate
+  const handleQuickGenerate = () => {
+    toast.success('Quick generate started - AI is creating content')
+    logger.info('Quick generate triggered')
+  }
+
+  // Handler for toggling favorite
+  const handleToggleFavorite = (itemId: string, isFavorite: boolean) => {
+    toast.success(isFavorite ? 'Added to favorites' : 'Removed from favorites')
+    logger.info('Favorite toggled', { itemId, isFavorite })
+  }
+
+  // Handler for filtering content
+  const handleFilterContent = (filterType: string) => {
+    toast.info(`Filtering by: ${filterType}`)
+    logger.info('Content filtered', { filterType })
+  }
+
+  // Handler for searching content
+  const handleSearchContent = (query: string) => {
+    if (query.trim()) {
+      toast.info(`Searching for: ${query}`)
+      logger.info('Content searched', { query })
+    }
+  }
+
   useEffect(() => {
     if (userId) {
       logger.info('AI Content Studio page loaded', { userId })
@@ -203,11 +359,70 @@ export default function AiContentStudioClient() {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg">
-            <Sparkles className="h-6 w-6 text-white" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">AI Content Studio</h1>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">AI Content Studio</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistoryDialog(true)}
+            >
+              <History className="w-4 h-4 mr-2" />
+              History
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleViewAnalytics}
+            >
+              <BarChart2 className="w-4 h-4 mr-2" />
+              Analytics
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTemplateDialog(true)}
+            >
+              <Bookmark className="w-4 h-4 mr-2" />
+              Templates
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleQuickGenerate}
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Quick Generate
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowScheduleDialog(true)}
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowShareDialog(true)}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowSettingsDialog(true)}
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         <p className="text-gray-600">
           Create professional emails, proposals, and marketing content with AI assistance
@@ -495,6 +710,377 @@ export default function AiContentStudioClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* History Dialog */}
+      <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5 text-purple-600" />
+              Content History
+            </DialogTitle>
+            <DialogDescription>
+              View and manage your previously created content.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search history..."
+                  className="pl-9"
+                  onChange={(e) => handleSearchContent(e.target.value)}
+                />
+              </div>
+              <Select onValueChange={handleFilterContent}>
+                <SelectTrigger className="w-[140px]">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="social">Social Posts</SelectItem>
+                  <SelectItem value="email">Emails</SelectItem>
+                  <SelectItem value="ad">Advertisements</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {contentHistory.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <FileText className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.platform} - {item.createdAt}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleToggleFavorite(item.id, true)}
+                    >
+                      <Star className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleLoadHistoryItem(item)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteHistoryItem(item)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-purple-600" />
+              Share Content
+            </DialogTitle>
+            <DialogDescription>
+              Share your AI-generated content with team members or collaborators.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="share-email">Email Address</Label>
+              <Input
+                id="share-email"
+                type="email"
+                placeholder="colleague@company.com"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="share-permission">Permission Level</Label>
+              <Select value={sharePermission} onValueChange={setSharePermission}>
+                <SelectTrigger id="share-permission">
+                  <SelectValue placeholder="Select permission" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">View Only</SelectItem>
+                  <SelectItem value="comment">Can Comment</SelectItem>
+                  <SelectItem value="edit">Can Edit</SelectItem>
+                  <SelectItem value="admin">Full Access</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="share-message">Message (Optional)</Label>
+              <Textarea
+                id="share-message"
+                placeholder="Add a message for the recipient..."
+                value={shareMessage}
+                onChange={(e) => setShareMessage(e.target.value)}
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleShare}
+              disabled={isSharing}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              {isSharing ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Sharing...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Share
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-purple-600" />
+              Schedule Content
+            </DialogTitle>
+            <DialogDescription>
+              Schedule your content to be published at a specific date and time.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="schedule-platform">Platform</Label>
+              <Select value={schedulePlatform} onValueChange={setSchedulePlatform}>
+                <SelectTrigger id="schedule-platform">
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="twitter">Twitter</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="email">Email Campaign</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="schedule-date">Date</Label>
+                <Input
+                  id="schedule-date"
+                  type="date"
+                  value={scheduleDate}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="schedule-time">Time</Label>
+                <Input
+                  id="schedule-time"
+                  type="time"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-purple-700">
+                <Clock className="h-4 w-4" />
+                <span>Best posting times for {schedulePlatform}: 9:00 AM, 12:00 PM, 6:00 PM</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSchedule}
+              disabled={isScheduling}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              {isScheduling ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                <>
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Schedule
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Dialog */}
+      <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bookmark className="h-5 w-5 text-purple-600" />
+              Save as Template
+            </DialogTitle>
+            <DialogDescription>
+              Save your current content as a reusable template for future use.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="template-name">Template Name</Label>
+              <Input
+                id="template-name"
+                placeholder="e.g., Product Launch Post"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="template-category">Category</Label>
+              <Select value={templateCategory} onValueChange={setTemplateCategory}>
+                <SelectTrigger id="template-category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="social">Social Media</SelectItem>
+                  <SelectItem value="email">Email Marketing</SelectItem>
+                  <SelectItem value="ad">Advertisements</SelectItem>
+                  <SelectItem value="blog">Blog Posts</SelectItem>
+                  <SelectItem value="newsletter">Newsletters</SelectItem>
+                  <SelectItem value="proposal">Proposals</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveTemplate}
+              disabled={isSavingTemplate}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              {isSavingTemplate ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <BookmarkCheck className="w-4 h-4 mr-2" />
+                  Save Template
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart2 className="h-5 w-5 text-purple-600" />
+              Content Analytics
+            </DialogTitle>
+            <DialogDescription>
+              View performance metrics for your AI-generated content.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <Card className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                </div>
+                <p className="text-2xl font-bold text-green-600">2,450</p>
+                <p className="text-xs text-muted-foreground">Total Views</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Users className="h-5 w-5 text-blue-500" />
+                </div>
+                <p className="text-2xl font-bold text-blue-600">342</p>
+                <p className="text-xs text-muted-foreground">Engagements</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Target className="h-5 w-5 text-purple-500" />
+                </div>
+                <p className="text-2xl font-bold text-purple-600">89%</p>
+                <p className="text-xs text-muted-foreground">Quality Score</p>
+              </Card>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Top Performing Content</h4>
+              {contentHistory.slice(0, 3).map((item, index) => (
+                <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="font-bold text-purple-600">#{index + 1}</span>
+                    <span className="text-sm">{item.title}</span>
+                  </div>
+                  <Badge variant="outline">{item.platform}</Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Full analytics report exported')
+                setShowAnalyticsDialog(false)
+              }}
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -517,6 +1103,12 @@ function MarketingContentGenerator({ aiContentStudioQuickActions }: MarketingCon
   const [generatedContent, setGeneratedContent] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [isFavorited, setIsFavorited] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedContent, setEditedContent] = useState('')
+  const [tone, setTone] = useState('professional')
+  const [showPreview, setShowPreview] = useState(true)
+  const [savedDraft, setSavedDraft] = useState(false)
 
   const platformIcons: Record<string, React.ReactNode> = {
     instagram: <Instagram className="w-4 h-4" />,
@@ -566,6 +1158,102 @@ function MarketingContentGenerator({ aiContentStudioQuickActions }: MarketingCon
     setCopied(true)
     toast.success('Copied to clipboard!')
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  // Handler for toggling favorite
+  const handleToggleFavorite = () => {
+    setIsFavorited(!isFavorited)
+    toast.success(isFavorited ? 'Removed from favorites' : 'Added to favorites')
+  }
+
+  // Handler for saving draft
+  const handleSaveDraft = () => {
+    if (!generatedContent) {
+      toast.error('No content to save')
+      return
+    }
+    const drafts = JSON.parse(localStorage.getItem('contentDrafts') || '[]')
+    drafts.push({
+      id: Date.now().toString(),
+      content: generatedContent,
+      platform,
+      contentType,
+      topic,
+      savedAt: new Date().toISOString()
+    })
+    localStorage.setItem('contentDrafts', JSON.stringify(drafts))
+    setSavedDraft(true)
+    toast.success('Draft saved successfully')
+    setTimeout(() => setSavedDraft(false), 2000)
+  }
+
+  // Handler for editing content
+  const handleStartEdit = () => {
+    setEditedContent(generatedContent)
+    setIsEditing(true)
+  }
+
+  // Handler for saving edits
+  const handleSaveEdit = () => {
+    setGeneratedContent(editedContent)
+    setIsEditing(false)
+    toast.success('Content updated successfully')
+  }
+
+  // Handler for canceling edit
+  const handleCancelEdit = () => {
+    setEditedContent('')
+    setIsEditing(false)
+  }
+
+  // Handler for downloading content
+  const handleDownload = () => {
+    if (!generatedContent) {
+      toast.error('No content to download')
+      return
+    }
+    const blob = new Blob([generatedContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${platform}-${contentType}-${Date.now()}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Content downloaded successfully')
+  }
+
+  // Handler for clearing content
+  const handleClearContent = () => {
+    setGeneratedContent('')
+    setTopic('')
+    setIsFavorited(false)
+    toast.info('Content cleared')
+  }
+
+  // Handler for changing tone
+  const handleToneChange = (newTone: string) => {
+    setTone(newTone)
+    if (generatedContent) {
+      toast.info(`Tone changed to ${newTone} - regenerate to apply`)
+    }
+  }
+
+  // Handler for toggling preview
+  const handleTogglePreview = () => {
+    setShowPreview(!showPreview)
+  }
+
+  // Handler for sharing to platform
+  const handleShareToPlatform = () => {
+    if (!generatedContent) {
+      toast.error('No content to share')
+      return
+    }
+    // Copy to clipboard for sharing
+    navigator.clipboard.writeText(generatedContent)
+    toast.success(`Content copied - Ready to paste on ${platform}`)
   }
 
   return (

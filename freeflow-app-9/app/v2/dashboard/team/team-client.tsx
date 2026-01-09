@@ -62,7 +62,16 @@ import {
   CheckCircle,
   AlertCircle,
   AlertTriangle,
-  XCircle
+  XCircle,
+  Edit3,
+  Trash2,
+  UserCog,
+  FolderOpen,
+  Activity,
+  Calendar,
+  BarChart3,
+  Download,
+  Send
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -79,6 +88,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 
 // ============================================================================
@@ -153,6 +170,25 @@ export default function TeamClient() {
 
   const [showBulkInviteDialog, setShowBulkInviteDialog] = useState(false)
   const [bulkEmails, setBulkEmails] = useState('')
+
+  // Edit member dialog state
+  const [showEditMemberDialog, setShowEditMemberDialog] = useState(false)
+  const [editMemberId, setEditMemberId] = useState<number | null>(null)
+  const [editMemberName, setEditMemberName] = useState('')
+  const [editMemberEmail, setEditMemberEmail] = useState('')
+  const [editMemberRole, setEditMemberRole] = useState('')
+  const [editMemberPhone, setEditMemberPhone] = useState('')
+  const [editMemberLocation, setEditMemberLocation] = useState('')
+
+  // Message dialog state
+  const [showMessageDialog, setShowMessageDialog] = useState(false)
+  const [messageMemberId, setMessageMemberId] = useState<number | null>(null)
+  const [messageContent, setMessageContent] = useState('')
+
+  // Permissions dialog state
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false)
+  const [permissionsMemberId, setPermissionsMemberId] = useState<number | null>(null)
+  const [selectedPermission, setSelectedPermission] = useState('Read')
 
   const [teamMembers, setTeamMembers] = useState<any[]>([
     {
@@ -458,15 +494,56 @@ export default function TeamClient() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
+    setEditMemberId(id)
+    setEditMemberName(member.name)
+    setEditMemberEmail(member.email)
+    setEditMemberRole(member.role)
+    setEditMemberPhone(member.phone)
+    setEditMemberLocation(member.location)
+    setShowEditMemberDialog(true)
+
     logger.info('Edit member dialog opened', {
       memberId: id,
       memberName: member.name,
       currentRole: member.role
     })
+  }
 
-    toast.info('Edit Team Member', {
-      description: `Editing ${member.name} - ${member.role}`
+  const confirmEditMember = () => {
+    if (!editMemberId || !editMemberName.trim() || !editMemberEmail.trim()) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    const member = teamMembers.find(m => m.id === editMemberId)
+    if (!member) return
+
+    setTeamMembers(teamMembers.map(m =>
+      m.id === editMemberId
+        ? {
+            ...m,
+            name: editMemberName,
+            email: editMemberEmail,
+            role: editMemberRole,
+            phone: editMemberPhone,
+            location: editMemberLocation
+          }
+        : m
+    ))
+
+    logger.info('Member details updated', {
+      memberId: editMemberId,
+      name: editMemberName,
+      email: editMemberEmail,
+      role: editMemberRole
     })
+
+    toast.success('Member Updated', {
+      description: `${editMemberName}'s details have been updated`
+    })
+
+    setShowEditMemberDialog(false)
+    setEditMemberId(null)
   }
 
   const handleRemoveMember = (id: number) => {
@@ -580,22 +657,44 @@ export default function TeamClient() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    const permissions = ['Read', 'Write', 'Admin', 'Owner']
+    setPermissionsMemberId(id)
+    setSelectedPermission('Read')
+    setShowPermissionsDialog(true)
 
     logger.info('Permissions dialog opened', {
       memberId: id,
       memberName: member.name,
       role: member.role
     })
+  }
 
-    toast.info('Set Permissions', {
-      description: `Configure ${permissions.length} permission levels for ${member.name}`
+  const confirmSetPermissions = () => {
+    if (!permissionsMemberId) return
+
+    const member = teamMembers.find(m => m.id === permissionsMemberId)
+    if (!member) return
+
+    logger.info('Permissions updated', {
+      memberId: permissionsMemberId,
+      memberName: member.name,
+      permission: selectedPermission
     })
+
+    toast.success('Permissions Updated', {
+      description: `${member.name} now has ${selectedPermission} permissions`
+    })
+
+    setShowPermissionsDialog(false)
+    setPermissionsMemberId(null)
   }
 
   const handleSendMessage = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
+
+    setMessageMemberId(id)
+    setMessageContent('')
+    setShowMessageDialog(true)
 
     logger.info('Message composer opened', {
       memberId: id,
@@ -603,10 +702,30 @@ export default function TeamClient() {
       email: member.email,
       status: member.status
     })
+  }
 
-    toast.info('Send Message', {
-      description: `Composing message to ${member.name} (${member.email})`
+  const confirmSendMessage = () => {
+    if (!messageMemberId || !messageContent.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+
+    const member = teamMembers.find(m => m.id === messageMemberId)
+    if (!member) return
+
+    logger.info('Message sent', {
+      memberId: messageMemberId,
+      memberName: member.name,
+      messageLength: messageContent.length
     })
+
+    toast.success('Message Sent', {
+      description: `Message sent to ${member.name}`
+    })
+
+    setShowMessageDialog(false)
+    setMessageMemberId(null)
+    setMessageContent('')
   }
 
   const handleViewActivity = (id: number) => {
@@ -1006,15 +1125,49 @@ export default function TeamClient() {
             </TextShimmer>
             <p className="text-gray-600 dark:text-gray-300 mt-2">Manage and collaborate with your team members</p>
           </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" size="sm" onClick={handleTeamAnalytics}>
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportTeam}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleTeamChat}>
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Team Chat
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleScheduleMeeting}>
+            <Video className="h-4 w-4 mr-2" />
+            Schedule Meeting
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleViewCalendar}>
+            <Calendar className="h-4 w-4 mr-2" />
+            Calendar
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleTeamSettings}>
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </Button>
-          <Button size="sm">
-            <UserPlus className="h-4 w-4 mr-2" />
-            Add Member
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Member
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleInviteMember}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Invite Single Member
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleBulkInvite}>
+                <Send className="h-4 w-4 mr-2" />
+                Bulk Invite
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -1126,7 +1279,7 @@ export default function TeamClient() {
                   </option>
                 ))}
               </select>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => handleFilter(selectedRole)}>
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
@@ -1162,9 +1315,63 @@ export default function TeamClient() {
                         </div>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleViewMember(member.id)}>
+                          <Users className="h-4 w-4 mr-2" />
+                          View Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleEditMember(member.id)}>
+                          <Edit3 className="h-4 w-4 mr-2" />
+                          Edit Member
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleChangeRole(member.id)}>
+                          <UserCog className="h-4 w-4 mr-2" />
+                          Change Role
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleAssignProject(member.id)}>
+                          <FolderOpen className="h-4 w-4 mr-2" />
+                          Assign Project
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewProjects(member.id)}>
+                          <Target className="h-4 w-4 mr-2" />
+                          View Projects
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewActivity(member.id)}>
+                          <Activity className="h-4 w-4 mr-2" />
+                          View Activity
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handlePerformanceReview(member.id)}>
+                          <BarChart3 className="h-4 w-4 mr-2" />
+                          Performance Review
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleTimeTracking(member.id)}>
+                          <Clock className="h-4 w-4 mr-2" />
+                          Time Tracking
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleSetPermissions(member.id)}>
+                          <Settings className="h-4 w-4 mr-2" />
+                          Set Permissions
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleRemoveMember(member.id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove Member
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   
                   <div className="space-y-2 mb-4">
@@ -1214,17 +1421,36 @@ export default function TeamClient() {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => handleSendMessage(member.id)}>
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Chat
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      toast.info('Email Composer', {
+                        description: `Opening email to ${member.email}`
+                      })
+                      window.open(`mailto:${member.email}`, '_blank')
+                    }}>
                       <Mail className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      toast.info('Phone Call', {
+                        description: `Calling ${member.name} at ${member.phone}`
+                      })
+                      window.open(`tel:${member.phone}`, '_blank')
+                    }}>
                       <Phone className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      logger.info('Video call initiated', {
+                        memberId: member.id,
+                        memberName: member.name,
+                        status: member.status
+                      })
+                      toast.info('Video Call', {
+                        description: `Starting video call with ${member.name}`
+                      })
+                    }}>
                       <Video className="h-4 w-4" />
                     </Button>
                   </div>
@@ -1433,6 +1659,197 @@ export default function TeamClient() {
             </Button>
             <Button onClick={confirmBulkInvite}>
               Send Invitations
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Member Dialog */}
+      <Dialog open={showEditMemberDialog} onOpenChange={setShowEditMemberDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit3 className="h-5 w-5" />
+              Edit Team Member
+            </DialogTitle>
+            <DialogDescription>
+              Update member details for {teamMembers.find(m => m.id === editMemberId)?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Full Name</Label>
+              <Input
+                id="edit-name"
+                placeholder="John Doe"
+                value={editMemberName}
+                onChange={(e) => setEditMemberName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">Email Address</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                placeholder="member@company.com"
+                value={editMemberEmail}
+                onChange={(e) => setEditMemberEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-role">Role</Label>
+              <Select value={editMemberRole} onValueChange={setEditMemberRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Team Member">Team Member</SelectItem>
+                  <SelectItem value="Lead Designer">Lead Designer</SelectItem>
+                  <SelectItem value="Frontend Developer">Frontend Developer</SelectItem>
+                  <SelectItem value="Backend Developer">Backend Developer</SelectItem>
+                  <SelectItem value="Project Manager">Project Manager</SelectItem>
+                  <SelectItem value="QA Engineer">QA Engineer</SelectItem>
+                  <SelectItem value="Marketing Specialist">Marketing Specialist</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-phone">Phone Number</Label>
+              <Input
+                id="edit-phone"
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                value={editMemberPhone}
+                onChange={(e) => setEditMemberPhone(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-location">Location</Label>
+              <Input
+                id="edit-location"
+                placeholder="San Francisco, CA"
+                value={editMemberLocation}
+                onChange={(e) => setEditMemberLocation(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditMemberDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditMember}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Message Dialog */}
+      <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Send Message
+            </DialogTitle>
+            <DialogDescription>
+              Send a message to {teamMembers.find(m => m.id === messageMemberId)?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="message-content">Message</Label>
+              <Textarea
+                id="message-content"
+                placeholder="Type your message here..."
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMessageDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmSendMessage}>
+              <Send className="h-4 w-4 mr-2" />
+              Send Message
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Permissions Dialog */}
+      <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Set Permissions
+            </DialogTitle>
+            <DialogDescription>
+              Configure permissions for {teamMembers.find(m => m.id === permissionsMemberId)?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="permission-level">Permission Level</Label>
+              <Select value={selectedPermission} onValueChange={setSelectedPermission}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select permission level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Read">Read - View only access</SelectItem>
+                  <SelectItem value="Write">Write - Can edit and create</SelectItem>
+                  <SelectItem value="Admin">Admin - Full management access</SelectItem>
+                  <SelectItem value="Owner">Owner - Complete control</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Permission Details</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                {selectedPermission === 'Read' && (
+                  <>
+                    <li>- View projects and tasks</li>
+                    <li>- Access team calendar</li>
+                    <li>- Read team messages</li>
+                  </>
+                )}
+                {selectedPermission === 'Write' && (
+                  <>
+                    <li>- All Read permissions</li>
+                    <li>- Create and edit tasks</li>
+                    <li>- Post messages and comments</li>
+                    <li>- Upload files</li>
+                  </>
+                )}
+                {selectedPermission === 'Admin' && (
+                  <>
+                    <li>- All Write permissions</li>
+                    <li>- Manage team members</li>
+                    <li>- Configure project settings</li>
+                    <li>- Access analytics</li>
+                  </>
+                )}
+                {selectedPermission === 'Owner' && (
+                  <>
+                    <li>- All Admin permissions</li>
+                    <li>- Delete projects</li>
+                    <li>- Manage billing</li>
+                    <li>- Transfer ownership</li>
+                  </>
+                )}
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmSetPermissions}>
+              Save Permissions
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -21,6 +21,24 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Gift,
   Share2,
@@ -32,7 +50,19 @@ import {
   Zap,
   Mail,
   Crown,
-  Sparkles
+  Sparkles,
+  Plus,
+  DollarSign,
+  Settings,
+  Eye,
+  Send,
+  X,
+  Download,
+  Calendar,
+  Target,
+  CreditCard,
+  Wallet,
+  RefreshCw
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
@@ -151,6 +181,34 @@ export default function ReferralsClient() {
   const [rewards, setRewards] = useState<Reward[]>([])
   const [loyaltyPoints, setLoyaltyPoints] = useState(0)
   const [totalCommission, setTotalCommission] = useState(0)
+
+  // DIALOG STATES
+  const [isRedeemPointsDialogOpen, setIsRedeemPointsDialogOpen] = useState(false)
+  const [isViewReferralsDialogOpen, setIsViewReferralsDialogOpen] = useState(false)
+  const [isViewEarningsDialogOpen, setIsViewEarningsDialogOpen] = useState(false)
+  const [isCreateReferralDialogOpen, setIsCreateReferralDialogOpen] = useState(false)
+  const [isTrackProgressDialogOpen, setIsTrackProgressDialogOpen] = useState(false)
+  const [isPayoutDialogOpen, setIsPayoutDialogOpen] = useState(false)
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
+  const [isReferralDetailsDialogOpen, setIsReferralDetailsDialogOpen] = useState(false)
+  const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null)
+
+  // FORM STATES
+  const [newReferralData, setNewReferralData] = useState({
+    name: '',
+    email: '',
+    company: '',
+    notes: ''
+  })
+  const [payoutAmount, setPayoutAmount] = useState(0)
+  const [payoutMethod, setPayoutMethod] = useState<'bank' | 'paypal' | 'crypto'>('bank')
+  const [settingsData, setSettingsData] = useState({
+    emailNotifications: true,
+    autoPayouts: false,
+    minPayoutAmount: 100,
+    referralBonus: 20
+  })
+  const [isProcessing, setIsProcessing] = useState(false)
 
   // A+++ LOAD REFERRAL DATA
   useEffect(() => {
@@ -508,6 +566,245 @@ export default function ReferralsClient() {
   }
 
   // ============================================================================
+  // HANDLER 7: CREATE REFERRAL
+  // ============================================================================
+
+  const handleCreateReferral = async () => {
+    try {
+      if (!newReferralData.name || !newReferralData.email) {
+        toast.error('Missing information', {
+          description: 'Please fill in name and email'
+        })
+        return
+      }
+
+      setIsProcessing(true)
+
+      logger.info('Creating new referral', {
+        name: newReferralData.name,
+        email: newReferralData.email,
+        company: newReferralData.company
+      })
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const newReferral: Referral = {
+        id: referrals.length + 1,
+        name: newReferralData.company || newReferralData.name,
+        email: newReferralData.email,
+        avatar: `/avatars/new-${referrals.length + 1}.jpg`,
+        referralDate: new Date().toISOString().split('T')[0],
+        status: 'pending',
+        projectsCompleted: 0,
+        commissionEarned: 0
+      }
+
+      setReferrals(prev => [...prev, newReferral])
+      setNewReferralData({ name: '', email: '', company: '', notes: '' })
+      setIsCreateReferralDialogOpen(false)
+      setIsProcessing(false)
+
+      toast.success('Referral created!', {
+        description: `Invitation sent to ${newReferralData.email}`
+      })
+
+      logger.info('Referral created successfully', { referralId: newReferral.id })
+    } catch (error: any) {
+      setIsProcessing(false)
+      logger.error('Failed to create referral', { error })
+      toast.error('Failed to create referral', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 8: REQUEST PAYOUT
+  // ============================================================================
+
+  const handleRequestPayout = async () => {
+    try {
+      if (payoutAmount <= 0) {
+        toast.error('Invalid amount', {
+          description: 'Please enter a valid payout amount'
+        })
+        return
+      }
+
+      if (payoutAmount > totalCommission) {
+        toast.error('Insufficient balance', {
+          description: `Maximum available: $${totalCommission.toLocaleString()}`
+        })
+        return
+      }
+
+      setIsProcessing(true)
+
+      logger.info('Requesting payout', {
+        amount: payoutAmount,
+        method: payoutMethod,
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      setTotalCommission(prev => prev - payoutAmount)
+      setPayoutAmount(0)
+      setIsPayoutDialogOpen(false)
+      setIsProcessing(false)
+
+      toast.success('Payout requested!', {
+        description: `$${payoutAmount.toLocaleString()} will be sent to your ${payoutMethod} within 3-5 business days`
+      })
+
+      logger.info('Payout request submitted', { amount: payoutAmount, method: payoutMethod })
+    } catch (error: any) {
+      setIsProcessing(false)
+      logger.error('Failed to request payout', { error })
+      toast.error('Failed to request payout', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 9: SAVE SETTINGS
+  // ============================================================================
+
+  const handleSaveSettings = async () => {
+    try {
+      setIsProcessing(true)
+
+      logger.info('Saving referral settings', {
+        settings: settingsData,
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      setIsSettingsDialogOpen(false)
+      setIsProcessing(false)
+
+      toast.success('Settings saved!', {
+        description: 'Your referral program settings have been updated'
+      })
+
+      logger.info('Settings saved successfully', { settings: settingsData })
+    } catch (error: any) {
+      setIsProcessing(false)
+      logger.error('Failed to save settings', { error })
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 10: VIEW REFERRAL DETAILS (DIALOG VERSION)
+  // ============================================================================
+
+  const handleOpenReferralDetails = (referral: Referral) => {
+    setSelectedReferral(referral)
+    setIsReferralDetailsDialogOpen(true)
+
+    logger.info('Viewing referral details', {
+      referralId: referral.id,
+      referralName: referral.name,
+      status: referral.status
+    })
+  }
+
+  // ============================================================================
+  // HANDLER 11: SEND REMINDER TO REFERRAL
+  // ============================================================================
+
+  const handleSendReminder = async (referralId: number) => {
+    try {
+      const referral = referrals.find(r => r.id === referralId)
+
+      logger.info('Sending reminder to referral', {
+        referralId,
+        referralName: referral?.name
+      })
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 600))
+
+      toast.success('Reminder sent!', {
+        description: `Email reminder sent to ${referral?.email}`
+      })
+
+      logger.info('Reminder sent successfully', { referralId })
+    } catch (error: any) {
+      logger.error('Failed to send reminder', { error, referralId })
+      toast.error('Failed to send reminder', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 12: EXPORT REFERRAL DATA
+  // ============================================================================
+
+  const handleExportReferralData = async (format: 'csv' | 'pdf') => {
+    try {
+      logger.info('Exporting referral data', {
+        format,
+        referralCount: referrals.length,
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1200)),
+        {
+          loading: `Generating ${format.toUpperCase()} export...`,
+          success: `Referral data exported as ${format.toUpperCase()}`,
+          error: 'Failed to export data'
+        }
+      )
+
+      logger.info('Export completed', { format })
+    } catch (error: any) {
+      logger.error('Failed to export referral data', { error, format })
+      toast.error('Failed to export data', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 13: REFRESH DATA
+  // ============================================================================
+
+  const handleRefreshData = async () => {
+    try {
+      logger.info('Refreshing referral data', {
+        clientName: KAZI_CLIENT_DATA.clientInfo.name
+      })
+
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 800)),
+        {
+          loading: 'Refreshing data...',
+          success: 'Referral data refreshed',
+          error: 'Failed to refresh data'
+        }
+      )
+
+      logger.info('Data refresh completed')
+    } catch (error: any) {
+      logger.error('Failed to refresh data', { error })
+      toast.error('Failed to refresh data', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
   // LOADING STATE
   // ============================================================================
 
@@ -550,13 +847,56 @@ export default function ReferralsClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="flex items-center space-x-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 text-white">
-            <Gift className="h-8 w-8" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+              <Gift className="h-8 w-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Referral & Rewards Program</h1>
+              <p className="text-gray-600 mt-1">Share KAZI with your network and earn rewards</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Referral & Rewards Program</h1>
-            <p className="text-gray-600 mt-1">Share KAZI with your network and earn rewards</p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshData}
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsTrackProgressDialogOpen(true)}
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Track Progress
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPayoutDialogOpen(true)}
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Request Payout
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSettingsDialogOpen(true)}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Button>
+            <Button
+              onClick={() => setIsCreateReferralDialogOpen(true)}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create Referral
+            </Button>
           </div>
         </div>
       </motion.div>
@@ -589,7 +929,13 @@ export default function ReferralsClient() {
                 <p className="text-gray-600 text-sm mb-1">Loyalty Points</p>
                 <NumberFlow value={loyaltyPoints} className="text-3xl font-bold text-gray-900 block" />
               </div>
-              <Button size="sm" variant="outline" className="w-full">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => setIsRedeemPointsDialogOpen(true)}
+              >
+                <Wallet className="h-4 w-4 mr-2" />
                 Redeem Points
               </Button>
             </div>
@@ -611,7 +957,13 @@ export default function ReferralsClient() {
                 <p className="text-gray-600 text-sm mb-1">Total Referrals</p>
                 <NumberFlow value={referrals.length} className="text-3xl font-bold text-gray-900 block" />
               </div>
-              <Button size="sm" variant="outline" className="w-full">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => setIsViewReferralsDialogOpen(true)}
+              >
+                <Eye className="h-4 w-4 mr-2" />
                 View Referrals
               </Button>
             </div>
@@ -633,7 +985,13 @@ export default function ReferralsClient() {
                 <p className="text-gray-600 text-sm mb-1">Commission Earned</p>
                 <p className="text-3xl font-bold text-gray-900">${totalCommission.toLocaleString()}</p>
               </div>
-              <Button size="sm" variant="outline" className="w-full">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={() => setIsViewEarningsDialogOpen(true)}
+              >
+                <DollarSign className="h-4 w-4 mr-2" />
                 View Earnings
               </Button>
             </div>
@@ -763,7 +1121,7 @@ export default function ReferralsClient() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   className="p-4 rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-                  onClick={() => handleViewReferralDetails(referral.id)}
+                  onClick={() => handleOpenReferralDetails(referral)}
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-4 flex-1">

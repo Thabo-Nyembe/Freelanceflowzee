@@ -131,6 +131,14 @@ export default function WhiteLabelClient() {
   const [showNewItemDialog, setShowNewItemDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showUploadLogoDialog, setShowUploadLogoDialog] = useState(false)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [showCustomizeBrandingDialog, setShowCustomizeBrandingDialog] = useState(false)
+  const [showApplyTemplateDialog, setShowApplyTemplateDialog] = useState(false)
+  const [selectedTemplateForApply, setSelectedTemplateForApply] = useState<typeof WHITE_LABEL_TEMPLATES[0] | null>(null)
+  const [currentLogoType, setCurrentLogoType] = useState<string>('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [isVerifyingDomain, setIsVerifyingDomain] = useState(false)
 
   // Form states for dialogs
   const [newItemForm, setNewItemForm] = useState({
@@ -219,6 +227,222 @@ export default function WhiteLabelClient() {
     setShowSettingsDialog(false)
     toast.success('Settings Saved', { description: 'White-label settings have been updated' })
     announce('White-label settings saved', 'polite')
+  }
+
+  // Handle Reset Colors to defaults
+  const handleResetColors = () => {
+    setConfig(prev => ({
+      ...prev,
+      colors: {
+        light: DEFAULT_LIGHT_COLORS,
+        dark: DEFAULT_DARK_COLORS
+      }
+    }))
+    setSelectedPreset(null)
+    toast.success('Colors Reset', { description: 'Color scheme has been reset to defaults' })
+    announce('Color scheme reset to defaults', 'polite')
+  }
+
+  // Handle Logo Upload
+  const handleUploadLogo = (logoType: string) => {
+    setCurrentLogoType(logoType)
+    setShowUploadLogoDialog(true)
+  }
+
+  const handleLogoUploadSubmit = () => {
+    setShowUploadLogoDialog(false)
+
+    const uploadPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ success: true, logoType: currentLogoType })
+      }, 1500)
+    })
+
+    toast.promise(uploadPromise, {
+      loading: `Uploading ${currentLogoType} logo...`,
+      success: `${currentLogoType} logo uploaded successfully`,
+      error: 'Failed to upload logo'
+    })
+
+    announce(`${currentLogoType} logo uploaded`, 'polite')
+  }
+
+  // Handle Verify Domain
+  const handleVerifyDomain = async () => {
+    if (!customDomain.trim()) {
+      toast.error('Validation Error', { description: 'Please enter a domain name' })
+      return
+    }
+
+    setIsVerifyingDomain(true)
+
+    const verifyPromise = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Simulate domain verification
+        if (customDomain.includes('.')) {
+          setConfig(prev => ({
+            ...prev,
+            customDomain: {
+              domain: customDomain,
+              isVerified: false,
+              sslEnabled: false,
+              verificationToken: 'kazi-verify-' + Date.now()
+            }
+          }))
+          resolve({ domain: customDomain })
+        } else {
+          reject(new Error('Invalid domain format'))
+        }
+      }, 2000)
+    })
+
+    toast.promise(verifyPromise, {
+      loading: 'Verifying domain...',
+      success: `Domain ${customDomain} verification initiated. Please add the DNS records.`,
+      error: 'Failed to verify domain. Please check the format.'
+    })
+
+    try {
+      await verifyPromise
+    } finally {
+      setIsVerifyingDomain(false)
+    }
+
+    announce(`Domain verification initiated for ${customDomain}`, 'polite')
+  }
+
+  // Handle Copy DNS Record
+  const handleCopyDnsRecord = (value: string) => {
+    navigator.clipboard.writeText(value)
+    toast.success('Copied!', { description: 'DNS record value copied to clipboard' })
+    announce('DNS record copied to clipboard', 'polite')
+  }
+
+  // Handle Apply Template
+  const handleOpenApplyTemplate = (template: typeof WHITE_LABEL_TEMPLATES[0]) => {
+    setSelectedTemplateForApply(template)
+    setShowApplyTemplateDialog(true)
+  }
+
+  const handleApplyTemplate = () => {
+    if (!selectedTemplateForApply) return
+
+    setShowApplyTemplateDialog(false)
+
+    const applyPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        // Apply template settings
+        setConfig(prev => ({
+          ...prev,
+          brandName: selectedTemplateForApply.name,
+          displayName: selectedTemplateForApply.name,
+          description: selectedTemplateForApply.description
+        }))
+        resolve({ template: selectedTemplateForApply.name })
+      }, 1500)
+    })
+
+    toast.promise(applyPromise, {
+      loading: `Applying ${selectedTemplateForApply.name} template...`,
+      success: `${selectedTemplateForApply.name} template applied successfully`,
+      error: 'Failed to apply template'
+    })
+
+    announce(`Applied ${selectedTemplateForApply.name} template`, 'polite')
+  }
+
+  // Handle Export (for individual format buttons in export view)
+  const handleExportFormat = (format: 'css' | 'json' | 'scss' | 'assets') => {
+    const exportPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        let content = ''
+        let filename = ''
+        let mimeType = 'text/plain'
+
+        switch (format) {
+          case 'css':
+            content = generateBrandingExportCss(config)
+            filename = 'branding-variables.css'
+            break
+          case 'json':
+            content = JSON.stringify(config, null, 2)
+            filename = 'branding-config.json'
+            mimeType = 'application/json'
+            break
+          case 'scss':
+            content = generateBrandingExportCss(config).replace(/--/g, '$').replace(/:/g, ':').replace(/;/g, ';')
+            filename = 'branding-variables.scss'
+            break
+          case 'assets':
+            content = JSON.stringify({
+              assets: ['logo-light.png', 'logo-dark.png', 'favicon.ico', 'icon.png'],
+              exportDate: new Date().toISOString()
+            }, null, 2)
+            filename = 'assets-manifest.json'
+            break
+        }
+
+        const blob = new Blob([content], { type: mimeType })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+
+        resolve({ format, filename })
+      }, 1000)
+    })
+
+    toast.promise(exportPromise, {
+      loading: `Exporting ${format.toUpperCase()}...`,
+      success: `${format.toUpperCase()} exported successfully`,
+      error: `Failed to export ${format.toUpperCase()}`
+    })
+
+    announce(`Exported branding as ${format}`, 'polite')
+  }
+
+  // Handle Copy CSS
+  const handleCopyCss = () => {
+    const css = generateBrandingExportCss(config)
+    navigator.clipboard.writeText(css)
+    toast.success('Copied!', { description: 'CSS variables copied to clipboard' })
+    announce('CSS variables copied to clipboard', 'polite')
+  }
+
+  // Handle Preview
+  const handlePreview = () => {
+    setShowPreviewDialog(true)
+  }
+
+  // Handle Save Changes
+  const handleSaveChanges = async () => {
+    setIsSaving(true)
+
+    const savePromise = new Promise((resolve) => {
+      setTimeout(() => {
+        // Simulate saving to backend
+        resolve({ success: true, timestamp: new Date().toISOString() })
+      }, 2000)
+    })
+
+    toast.promise(savePromise, {
+      loading: 'Saving white-label configuration...',
+      success: 'All changes saved successfully!',
+      error: 'Failed to save changes. Please try again.'
+    })
+
+    try {
+      await savePromise
+      setConfig(prev => ({ ...prev, updatedAt: new Date().toISOString() }))
+    } finally {
+      setIsSaving(false)
+    }
+
+    announce('White-label configuration saved', 'polite')
   }
 
   // Quick actions with real dialog functionality
@@ -584,7 +808,12 @@ export default function WhiteLabelClient() {
                     <Palette className="w-5 h-5 text-purple-400" />
                     <h3 className="font-semibold text-white">Color Presets</h3>
                   </div>
-                  <Button variant="outline" size="sm" className="border-gray-700 hover:bg-slate-800">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-700 hover:bg-slate-800"
+                    onClick={handleResetColors}
+                  >
                     <RefreshCw className="w-4 h-4 mr-1" />
                     Reset
                   </Button>
@@ -734,7 +963,12 @@ export default function WhiteLabelClient() {
                     <div key={asset.key} className="p-4 bg-slate-900/50 rounded-lg border border-gray-700">
                       <p className="font-medium text-white mb-1">{asset.label}</p>
                       <p className="text-xs text-gray-400 mb-3">{asset.desc}</p>
-                      <Button variant="outline" size="sm" className="w-full border-gray-700 hover:bg-slate-800">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-gray-700 hover:bg-slate-800"
+                        onClick={() => handleUploadLogo(asset.label)}
+                      >
                         <Upload className="w-4 h-4 mr-1" />
                         Upload
                       </Button>
@@ -764,8 +998,19 @@ export default function WhiteLabelClient() {
                         placeholder="studio.yourdomain.com"
                         className="flex-1 bg-slate-900/50 border-gray-700"
                       />
-                      <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
-                        Verify Domain
+                      <Button
+                        className="bg-gradient-to-r from-purple-600 to-pink-600"
+                        onClick={handleVerifyDomain}
+                        disabled={isVerifyingDomain}
+                      >
+                        {isVerifyingDomain ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                            Verifying...
+                          </>
+                        ) : (
+                          'Verify Domain'
+                        )}
                       </Button>
                     </div>
                     <p className="text-xs text-gray-400 mt-2">
@@ -809,7 +1054,11 @@ export default function WhiteLabelClient() {
                               <code className="flex-1 px-3 py-2 bg-slate-950 rounded text-xs text-gray-300 font-mono overflow-x-auto">
                                 {record.value}
                               </code>
-                              <Button variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopyDnsRecord(record.value)}
+                              >
                                 <Copy className="w-4 h-4" />
                               </Button>
                             </div>
@@ -878,7 +1127,10 @@ export default function WhiteLabelClient() {
                       </div>
 
                       <div className="pt-4 border-t border-gray-700">
-                        <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
+                        <Button
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600"
+                          onClick={() => handleOpenApplyTemplate(template)}
+                        >
                           <Zap className="w-4 h-4 mr-1" />
                           Apply Template
                         </Button>
@@ -901,19 +1153,24 @@ export default function WhiteLabelClient() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { format: 'CSS', desc: 'CSS Variables', icon: Code },
-                    { format: 'JSON', desc: 'Theme Configuration', icon: Code },
-                    { format: 'SCSS', desc: 'Sass Variables', icon: Code },
-                    { format: 'Assets', desc: 'Logo & Images', icon: Image }
+                    { format: 'css', label: 'CSS', desc: 'CSS Variables', icon: Code },
+                    { format: 'json', label: 'JSON', desc: 'Theme Configuration', icon: Code },
+                    { format: 'scss', label: 'SCSS', desc: 'Sass Variables', icon: Code },
+                    { format: 'assets', label: 'Assets', desc: 'Logo & Images', icon: Image }
                   ].map((exportType) => (
                     <div
                       key={exportType.format}
                       className="p-4 bg-slate-900/50 rounded-lg border border-gray-700 hover:border-purple-500/50 transition-colors cursor-pointer"
                     >
                       <exportType.icon className="w-8 h-8 text-purple-400 mb-2" />
-                      <p className="font-medium text-white mb-1">{exportType.format}</p>
+                      <p className="font-medium text-white mb-1">{exportType.label}</p>
                       <p className="text-xs text-gray-400 mb-3">{exportType.desc}</p>
-                      <Button variant="outline" size="sm" className="w-full border-gray-700 hover:bg-slate-800">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full border-gray-700 hover:bg-slate-800"
+                        onClick={() => handleExportFormat(exportType.format as 'css' | 'json' | 'scss' | 'assets')}
+                      >
                         <Download className="w-4 h-4 mr-1" />
                         Export
                       </Button>
@@ -929,7 +1186,12 @@ export default function WhiteLabelClient() {
                     <Code className="w-5 h-5 text-purple-400" />
                     <h3 className="font-semibold text-white">CSS Export Preview</h3>
                   </div>
-                  <Button variant="outline" size="sm" className="border-gray-700 hover:bg-slate-800">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-700 hover:bg-slate-800"
+                    onClick={handleCopyCss}
+                  >
                     <Copy className="w-4 h-4 mr-1" />
                     Copy
                   </Button>
@@ -944,13 +1206,30 @@ export default function WhiteLabelClient() {
 
           {/* Action Buttons */}
           <div className="flex items-center justify-center gap-4 mt-8">
-            <Button variant="outline" className="border-gray-700 hover:bg-slate-800">
+            <Button
+              variant="outline"
+              className="border-gray-700 hover:bg-slate-800"
+              onClick={handlePreview}
+            >
               <Eye className="w-4 h-4 mr-2" />
               Preview
             </Button>
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+              onClick={handleSaveChanges}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -1197,6 +1476,258 @@ export default function WhiteLabelClient() {
             >
               <Save className="w-4 h-4 mr-2" />
               Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Logo Dialog */}
+      <Dialog open={showUploadLogoDialog} onOpenChange={setShowUploadLogoDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Upload className="w-5 h-5 text-purple-400" />
+              Upload {currentLogoType}
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Upload your logo file. Supported formats: PNG, SVG, JPG (max 5MB).
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center hover:border-purple-500/50 transition-colors cursor-pointer">
+              <Upload className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+              <p className="text-sm text-gray-300 mb-2">
+                Drag and drop your file here, or click to browse
+              </p>
+              <p className="text-xs text-gray-500">PNG, SVG, or JPG up to 5MB</p>
+              <input
+                type="file"
+                accept=".png,.svg,.jpg,.jpeg"
+                className="hidden"
+                id="logo-upload"
+                onChange={() => {
+                  toast.info('File selected', { description: 'Ready to upload' })
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4 border-gray-700 hover:bg-slate-800"
+                onClick={() => document.getElementById('logo-upload')?.click()}
+              >
+                Browse Files
+              </Button>
+            </div>
+
+            <div className="p-3 bg-slate-800 rounded-lg border border-gray-700">
+              <p className="text-sm text-gray-300 mb-2">Recommended specifications:</p>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-green-400" />
+                  Minimum resolution: 200x200 pixels
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-green-400" />
+                  Transparent background (PNG/SVG)
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-green-400" />
+                  Square aspect ratio for icons
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowUploadLogoDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleLogoUploadSubmit}
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Logo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="sm:max-w-[800px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Eye className="w-5 h-5 text-purple-400" />
+              Brand Preview
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Preview how your white-label branding will appear to users.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Preview Container */}
+            <div className="border border-gray-700 rounded-lg overflow-hidden">
+              {/* Mock Header */}
+              <div
+                className="p-4 flex items-center justify-between"
+                style={{ backgroundColor: config.colors.dark.primary }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">
+                      {config.brandName.charAt(0)}
+                    </span>
+                  </div>
+                  <span className="font-semibold text-white">{config.displayName}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white/10 rounded-full" />
+                </div>
+              </div>
+
+              {/* Mock Content */}
+              <div className="p-6 bg-slate-950">
+                <h2
+                  className="text-xl font-bold mb-2"
+                  style={{ color: config.colors.dark.primary }}
+                >
+                  Welcome to {config.brandName}
+                </h2>
+                <p className="text-gray-400 mb-4">{config.tagline || 'Your platform tagline'}</p>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div
+                    className="p-4 rounded-lg"
+                    style={{ backgroundColor: config.colors.dark.primary + '20' }}
+                  >
+                    <p className="text-sm font-medium text-white mb-1">Primary Color</p>
+                    <p className="text-xs text-gray-400">{config.colors.dark.primary}</p>
+                  </div>
+                  <div
+                    className="p-4 rounded-lg"
+                    style={{ backgroundColor: config.colors.dark.secondary + '20' }}
+                  >
+                    <p className="text-sm font-medium text-white mb-1">Secondary Color</p>
+                    <p className="text-xs text-gray-400">{config.colors.dark.secondary}</p>
+                  </div>
+                </div>
+
+                <Button
+                  className="mt-4"
+                  style={{ backgroundColor: config.colors.dark.primary }}
+                >
+                  Sample Button
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <span className="text-sm text-gray-300">Preview Mode</span>
+              <div className="flex gap-2">
+                <Badge variant="secondary">Desktop</Badge>
+                <Badge variant="secondary">Dark Theme</Badge>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPreviewDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Close Preview
+            </Button>
+            <Button
+              onClick={() => {
+                setShowPreviewDialog(false)
+                handleSaveChanges()
+              }}
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save & Apply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Apply Template Dialog */}
+      <Dialog open={showApplyTemplateDialog} onOpenChange={setShowApplyTemplateDialog}>
+        <DialogContent className="sm:max-w-[500px] bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Zap className="w-5 h-5 text-purple-400" />
+              Apply Template
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              This will apply the selected template to your white-label configuration.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedTemplateForApply && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-slate-800 rounded-lg border border-gray-700">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h4 className="font-semibold text-white">{selectedTemplateForApply.name}</h4>
+                    <Badge variant="secondary" className="mt-1">
+                      {selectedTemplateForApply.industry}
+                    </Badge>
+                  </div>
+                  {selectedTemplateForApply.isPopular && (
+                    <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+                      <Star className="w-3 h-3 mr-1" />
+                      Popular
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-gray-400 mb-3">{selectedTemplateForApply.description}</p>
+                <div className="flex flex-wrap gap-1">
+                  {selectedTemplateForApply.features.map((feature, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs border-gray-600">
+                      {feature}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-300">Warning</p>
+                    <p className="text-xs text-amber-200/70">
+                      Applying this template will override your current brand name and description settings.
+                      Your color scheme and other customizations will be preserved.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowApplyTemplateDialog(false)}
+              className="border-gray-700 hover:bg-slate-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleApplyTemplate}
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              Apply Template
             </Button>
           </DialogFooter>
         </DialogContent>

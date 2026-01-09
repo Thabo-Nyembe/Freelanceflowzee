@@ -18,10 +18,24 @@ import { useState, useEffect } from 'react'
 import {
   Calendar,
   Settings as SettingsIcon,
-  FileText
+  FileText,
+  Plus,
+  Download,
+  CheckCircle
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import EnhancedCalendarBooking from '@/components/booking/enhanced-calendar-booking'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
@@ -102,6 +116,49 @@ export default function BookingClient() {
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
+  // Dialog states
+  const [showNewBookingDialog, setShowNewBookingDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+
+  // New booking form state
+  const [bookingTitle, setBookingTitle] = useState('')
+  const [bookingDate, setBookingDate] = useState('')
+  const [bookingTime, setBookingTime] = useState('')
+  const [bookingDuration, setBookingDuration] = useState('60')
+  const [bookingService, setBookingService] = useState('consultation')
+  const [bookingNotes, setBookingNotes] = useState('')
+  const [clientName, setClientName] = useState('')
+  const [clientEmail, setClientEmail] = useState('')
+  const [isCreatingBooking, setIsCreatingBooking] = useState(false)
+
+  // Settings form state
+  const [autoConfirm, setAutoConfirm] = useState(true)
+  const [bufferTime, setBufferTime] = useState('15')
+  const [maxBookingsPerDay, setMaxBookingsPerDay] = useState('12')
+  const [reminderHours, setReminderHours] = useState('24')
+  const [workingHoursStart, setWorkingHoursStart] = useState('09:00')
+  const [workingHoursEnd, setWorkingHoursEnd] = useState('17:00')
+  const [isSavingSettings, setIsSavingSettings] = useState(false)
+
+  // Reports state
+  const [reportPeriod, setReportPeriod] = useState('month')
+  const [reportType, setReportType] = useState('summary')
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+
+  // Export state
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [exportDateRange, setExportDateRange] = useState('all')
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Quick actions with dialog openers
+  const bookingQuickActionsWithDialogs = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewBookingDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
   // A+++ LOAD BOOKING DATA
   useEffect(() => {
     const loadBookingData = async () => {
@@ -132,130 +189,236 @@ export default function BookingClient() {
     loadBookingData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
   // Handler functions with real features
-  const handleNewBooking = async () => {
-    logger.info('Initiating new booking', {
+  const handleNewBooking = () => {
+    logger.info('Opening new booking dialog', {
       action: 'new-booking',
       timestamp: new Date().toISOString()
     })
-
-    toast.info('Opening booking form...', {
-      description: 'Loading available time slots and services'
-    })
-
-    // Simulate loading available time slots
-    const response = await fetch('/api/bookings/time-slots')
-    const timeSlots = await response.json()
-    const availableSlots = timeSlots?.available || 24
-    const services = timeSlots?.services || 8
-
-    logger.info('Booking form ready', {
-      availableSlots,
-      services,
-      formState: 'ready'
-    })
-
-    toast.success('Booking form ready', {
-      description: `${availableSlots} available time slots - ${services} services - Select your preferred date and time`
-    })
-
-    // In a real app, this would open a modal or navigate to booking form
-    announce('Booking form opened with available time slots', 'polite')
+    setShowNewBookingDialog(true)
+    announce('New booking dialog opened', 'polite')
   }
 
-  const handleBookingSettings = async () => {
-    logger.info('Accessing booking settings', {
+  const handleCreateBooking = async () => {
+    if (!bookingTitle.trim()) {
+      toast.error('Please enter a booking title')
+      return
+    }
+    if (!bookingDate) {
+      toast.error('Please select a date')
+      return
+    }
+    if (!bookingTime) {
+      toast.error('Please select a time')
+      return
+    }
+    if (!clientName.trim()) {
+      toast.error('Please enter client name')
+      return
+    }
+
+    setIsCreatingBooking(true)
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      logger.info('Booking created successfully', {
+        title: bookingTitle,
+        date: bookingDate,
+        time: bookingTime,
+        duration: bookingDuration,
+        service: bookingService,
+        client: clientName
+      })
+
+      toast.success('Booking created successfully', {
+        description: `${bookingTitle} scheduled for ${bookingDate} at ${bookingTime}`
+      })
+
+      setShowNewBookingDialog(false)
+      // Reset form
+      setBookingTitle('')
+      setBookingDate('')
+      setBookingTime('')
+      setBookingDuration('60')
+      setBookingService('consultation')
+      setBookingNotes('')
+      setClientName('')
+      setClientEmail('')
+      announce('Booking created successfully', 'polite')
+    } catch (err) {
+      toast.error('Failed to create booking')
+      logger.error('Failed to create booking', { error: err })
+    } finally {
+      setIsCreatingBooking(false)
+    }
+  }
+
+  const handleBookingSettings = () => {
+    logger.info('Opening booking settings dialog', {
       action: 'settings',
       timestamp: new Date().toISOString()
     })
-
-    toast.info('Loading booking preferences...', {
-      description: 'Opening settings panel'
-    })
-
-    // Simulate loading booking preferences
-    const preferences = {
-      autoConfirm: true,
-      bufferTime: 15,
-      maxBookingsPerDay: 12,
-      reminderTime: 24,
-      workingHours: '9:00-17:00',
-      categories: ['Consultation', 'Follow-up', 'Workshop', 'Meeting']
-    }
-
-    logger.info('Settings loaded successfully', {
-      ...preferences,
-      categoriesCount: preferences.categories.length
-    })
-
-    toast.success('Booking settings loaded', {
-      description: `${preferences.categories.length} service categories - ${preferences.maxBookingsPerDay} max daily bookings - ${preferences.bufferTime}min buffer - ${preferences.reminderTime}h reminders`
-    })
-
-    announce('Booking settings panel opened', 'polite')
+    setShowSettingsDialog(true)
+    announce('Booking settings dialog opened', 'polite')
   }
 
-  const handleBookingReports = async () => {
-    logger.info('Generating booking report', {
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true)
+    try {
+      // Simulate saving settings
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      logger.info('Settings saved successfully', {
+        autoConfirm,
+        bufferTime,
+        maxBookingsPerDay,
+        reminderHours,
+        workingHours: `${workingHoursStart}-${workingHoursEnd}`
+      })
+
+      toast.success('Booking settings saved successfully')
+      setShowSettingsDialog(false)
+      announce('Settings saved successfully', 'polite')
+    } catch (err) {
+      toast.error('Failed to save settings')
+      logger.error('Failed to save settings', { error: err })
+    } finally {
+      setIsSavingSettings(false)
+    }
+  }
+
+  const handleBookingReports = () => {
+    logger.info('Opening reports dialog', {
       action: 'reports',
       timestamp: new Date().toISOString()
     })
+    setShowReportsDialog(true)
+    announce('Reports dialog opened', 'polite')
+  }
 
-    toast.info('Generating comprehensive report...', {
-      description: 'Gathering booking statistics and analytics'
-    })
+  const handleGenerateReport = async () => {
+    setIsGeneratingReport(true)
+    try {
+      // Simulate report generation
+      await new Promise(resolve => setTimeout(resolve, 2000))
 
-    // Simulate report generation
-    const reportData = {
-      totalBookings: 143,
-      thisMonth: 38,
-      pendingBookings: 12,
-      completedBookings: 115,
-      cancelledBookings: 16,
-      revenue: 14750,
-      topService: 'Consultation'
-    }
+      const reportData = {
+        totalBookings: 143,
+        thisMonth: 38,
+        pendingBookings: 12,
+        completedBookings: 115,
+        cancelledBookings: 16,
+        revenue: 14750,
+        topService: 'Consultation'
+      }
 
-    const reportContent = `# Booking Report - ${new Date().toLocaleDateString()}
+      const reportContent = `# Booking Report - ${new Date().toLocaleDateString()}
+## Period: ${reportPeriod === 'week' ? 'Last 7 Days' : reportPeriod === 'month' ? 'Last 30 Days' : reportPeriod === 'quarter' ? 'Last 90 Days' : 'All Time'}
+## Type: ${reportType === 'summary' ? 'Summary Report' : reportType === 'detailed' ? 'Detailed Report' : 'Financial Report'}
 
-## Summary
+### Summary
 - Total Bookings: ${reportData.totalBookings}
 - This Month: ${reportData.thisMonth}
 - Pending: ${reportData.pendingBookings}
 - Completed: ${reportData.completedBookings}
 - Cancelled: ${reportData.cancelledBookings}
-- Revenue: $${reportData.revenue}
+- Revenue: $${reportData.revenue.toLocaleString()}
 - Top Service: ${reportData.topService}
 
-## Status Breakdown
+### Status Breakdown
 - Completion Rate: ${((reportData.completedBookings / reportData.totalBookings) * 100).toFixed(1)}%
 - Cancellation Rate: ${((reportData.cancelledBookings / reportData.totalBookings) * 100).toFixed(1)}%
 - Active Bookings: ${reportData.pendingBookings}
 `
 
-    const fileName = `booking-report-${Date.now()}.md`
-    const blob = new Blob([reportContent], { type: 'text/markdown' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = fileName
-    a.click()
-    URL.revokeObjectURL(url)
+      const fileName = `booking-report-${reportPeriod}-${Date.now()}.md`
+      const blob = new Blob([reportContent], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      a.click()
+      URL.revokeObjectURL(url)
 
-    const fileSizeKB = (blob.size / 1024).toFixed(1)
-    const completionRate = ((reportData.completedBookings / reportData.totalBookings) * 100).toFixed(1)
+      logger.info('Report generated successfully', {
+        ...reportData,
+        fileName,
+        period: reportPeriod,
+        type: reportType
+      })
 
-    logger.info('Report generated successfully', {
-      ...reportData,
-      fileName,
-      fileSize: blob.size,
-      completionRate
-    })
+      toast.success('Report generated and downloaded', {
+        description: `${fileName} - ${reportData.totalBookings} bookings analyzed`
+      })
 
-    toast.success('Booking report generated', {
-      description: `${fileName} - ${fileSizeKB} KB - ${reportData.totalBookings} total bookings - ${completionRate}% completion rate - $${reportData.revenue} revenue`
-    })
+      setShowReportsDialog(false)
+      announce('Report downloaded successfully', 'polite')
+    } catch (err) {
+      toast.error('Failed to generate report')
+      logger.error('Failed to generate report', { error: err })
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }
 
-    announce('Booking report downloaded successfully', 'polite')
+  const handleExport = async () => {
+    setIsExporting(true)
+    try {
+      // Simulate export
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const bookingsData = [
+        { id: 1, title: 'Consultation', date: '2024-01-15', client: 'John Doe', status: 'completed' },
+        { id: 2, title: 'Follow-up', date: '2024-01-16', client: 'Jane Smith', status: 'pending' },
+        { id: 3, title: 'Workshop', date: '2024-01-17', client: 'Bob Wilson', status: 'completed' },
+      ]
+
+      let content = ''
+      let mimeType = ''
+      let extension = ''
+
+      if (exportFormat === 'csv') {
+        content = 'ID,Title,Date,Client,Status\n' +
+          bookingsData.map(b => `${b.id},${b.title},${b.date},${b.client},${b.status}`).join('\n')
+        mimeType = 'text/csv'
+        extension = 'csv'
+      } else if (exportFormat === 'json') {
+        content = JSON.stringify(bookingsData, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+      } else {
+        content = bookingsData.map(b => `${b.id}\t${b.title}\t${b.date}\t${b.client}\t${b.status}`).join('\n')
+        mimeType = 'text/plain'
+        extension = 'txt'
+      }
+
+      const fileName = `bookings-export-${Date.now()}.${extension}`
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      a.click()
+      URL.revokeObjectURL(url)
+
+      logger.info('Export completed', {
+        format: exportFormat,
+        dateRange: exportDateRange,
+        fileName
+      })
+
+      toast.success('Export completed', {
+        description: `${fileName} downloaded successfully`
+      })
+
+      setShowExportDialog(false)
+      announce('Export completed successfully', 'polite')
+    } catch (err) {
+      toast.error('Failed to export bookings')
+      logger.error('Failed to export', { error: err })
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   // A+++ LOADING STATE
@@ -271,7 +434,7 @@ export default function BookingClient() {
           <CollaborationIndicator collaborators={bookingCollaborators} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={bookingQuickActions} />
+          <QuickActionsToolbar actions={bookingQuickActionsWithDialogs} />
           <ActivityFeed activities={bookingActivities} />
         </div>
 <DashboardSkeleton />
@@ -336,6 +499,416 @@ export default function BookingClient() {
       <div className="container mx-auto px-4">
         <EnhancedCalendarBooking />
       </div>
+
+      {/* New Booking Dialog */}
+      <Dialog open={showNewBookingDialog} onOpenChange={setShowNewBookingDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-violet-600" />
+              Create New Booking
+            </DialogTitle>
+            <DialogDescription>
+              Schedule a new appointment with client details
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bookingTitle">Booking Title *</Label>
+                <Input
+                  id="bookingTitle"
+                  placeholder="e.g., Initial Consultation"
+                  value={bookingTitle}
+                  onChange={(e) => setBookingTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bookingService">Service Type</Label>
+                <select
+                  id="bookingService"
+                  value={bookingService}
+                  onChange={(e) => setBookingService(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+                >
+                  <option value="consultation">Consultation</option>
+                  <option value="follow-up">Follow-up</option>
+                  <option value="workshop">Workshop</option>
+                  <option value="meeting">Meeting</option>
+                  <option value="training">Training</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bookingDate">Date *</Label>
+                <Input
+                  id="bookingDate"
+                  type="date"
+                  value={bookingDate}
+                  onChange={(e) => setBookingDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bookingTime">Time *</Label>
+                <Input
+                  id="bookingTime"
+                  type="time"
+                  value={bookingTime}
+                  onChange={(e) => setBookingTime(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bookingDuration">Duration (mins)</Label>
+                <select
+                  id="bookingDuration"
+                  value={bookingDuration}
+                  onChange={(e) => setBookingDuration(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+                >
+                  <option value="15">15 minutes</option>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">60 minutes</option>
+                  <option value="90">90 minutes</option>
+                  <option value="120">2 hours</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="clientName">Client Name *</Label>
+                <Input
+                  id="clientName"
+                  placeholder="Enter client name"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="clientEmail">Client Email</Label>
+                <Input
+                  id="clientEmail"
+                  type="email"
+                  placeholder="client@example.com"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bookingNotes">Notes</Label>
+              <Textarea
+                id="bookingNotes"
+                placeholder="Add any additional notes for this booking..."
+                value={bookingNotes}
+                onChange={(e) => setBookingNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewBookingDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateBooking}
+              disabled={isCreatingBooking}
+              className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white"
+            >
+              {isCreatingBooking ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Booking
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <SettingsIcon className="h-5 w-5 text-gray-600" />
+              Booking Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your booking preferences and availability
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="workingHoursStart">Working Hours Start</Label>
+                <Input
+                  id="workingHoursStart"
+                  type="time"
+                  value={workingHoursStart}
+                  onChange={(e) => setWorkingHoursStart(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="workingHoursEnd">Working Hours End</Label>
+                <Input
+                  id="workingHoursEnd"
+                  type="time"
+                  value={workingHoursEnd}
+                  onChange={(e) => setWorkingHoursEnd(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bufferTime">Buffer Time (mins)</Label>
+                <select
+                  id="bufferTime"
+                  value={bufferTime}
+                  onChange={(e) => setBufferTime(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  <option value="0">No buffer</option>
+                  <option value="5">5 minutes</option>
+                  <option value="10">10 minutes</option>
+                  <option value="15">15 minutes</option>
+                  <option value="30">30 minutes</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="maxBookingsPerDay">Max Daily Bookings</Label>
+                <Input
+                  id="maxBookingsPerDay"
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={maxBookingsPerDay}
+                  onChange={(e) => setMaxBookingsPerDay(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reminderHours">Reminder Time (hours before)</Label>
+              <select
+                id="reminderHours"
+                value={reminderHours}
+                onChange={(e) => setReminderHours(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                <option value="1">1 hour</option>
+                <option value="2">2 hours</option>
+                <option value="12">12 hours</option>
+                <option value="24">24 hours</option>
+                <option value="48">48 hours</option>
+              </select>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm font-medium">Auto-confirm bookings</Label>
+                  <p className="text-xs text-gray-500">Automatically confirm new bookings</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={autoConfirm}
+                  onChange={(e) => setAutoConfirm(e.target.checked)}
+                  className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSettings}
+              disabled={isSavingSettings}
+              className="bg-gray-900 hover:bg-gray-800 text-white"
+            >
+              {isSavingSettings ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reports Dialog */}
+      <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              Generate Report
+            </DialogTitle>
+            <DialogDescription>
+              Generate and download booking reports
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reportPeriod">Report Period</Label>
+              <select
+                id="reportPeriod"
+                value={reportPeriod}
+                onChange={(e) => setReportPeriod(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="week">Last 7 Days</option>
+                <option value="month">Last 30 Days</option>
+                <option value="quarter">Last 90 Days</option>
+                <option value="year">Last Year</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reportType">Report Type</Label>
+              <select
+                id="reportType"
+                value={reportType}
+                onChange={(e) => setReportType(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="summary">Summary Report</option>
+                <option value="detailed">Detailed Report</option>
+                <option value="financial">Financial Report</option>
+              </select>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Report includes:</strong> Booking statistics, completion rates, revenue summary, and service breakdown.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReportsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGenerateReport}
+              disabled={isGeneratingReport}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isGeneratingReport ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Generate Report
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-green-600" />
+              Export Bookings
+            </DialogTitle>
+            <DialogDescription>
+              Export your booking data for backup or analysis
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="exportFormat">Export Format</Label>
+              <select
+                id="exportFormat"
+                value={exportFormat}
+                onChange={(e) => setExportFormat(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="csv">CSV (Excel compatible)</option>
+                <option value="json">JSON</option>
+                <option value="txt">Plain Text</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="exportDateRange">Date Range</Label>
+              <select
+                id="exportDateRange"
+                value={exportDateRange}
+                onChange={(e) => setExportDateRange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="all">All Bookings</option>
+                <option value="week">Last 7 Days</option>
+                <option value="month">Last 30 Days</option>
+                <option value="quarter">Last 90 Days</option>
+                <option value="year">Last Year</option>
+              </select>
+            </div>
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="text-sm text-green-800">
+                <strong>Export includes:</strong> Booking ID, title, date, time, client info, and status.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExport}
+              disabled={isExporting}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              {isExporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Data
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

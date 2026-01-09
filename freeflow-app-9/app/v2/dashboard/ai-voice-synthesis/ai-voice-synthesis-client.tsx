@@ -25,12 +25,22 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
+import { Label } from '@/components/ui/label'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 // Note: Radix Select removed due to infinite loop bug - using native HTML select instead
 import {
   Mic, Play, Download, Share2, Settings, Sparkles,
   User, Clock, DollarSign, Star,
   Search, Grid, List, BarChart, FileAudio,
-  Wand2, BookOpen, Code, Check
+  Wand2, BookOpen, Code, Check, Plus, Upload,
+  Copy, Pause, RotateCcw, Volume2, X, FolderPlus
 } from 'lucide-react'
 
 import {
@@ -156,6 +166,28 @@ export default function AiVoiceSynthesisClient() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isSynthesizing, setIsSynthesizing] = useState(false)
   const [copiedSSML, setCopiedSSML] = useState(false)
+  const [playingVoiceId, setPlayingVoiceId] = useState<string | null>(null)
+  const [playingProjectId, setPlayingProjectId] = useState<number | null>(null)
+
+  // Dialog states
+  const [createVoiceDialogOpen, setCreateVoiceDialogOpen] = useState(false)
+  const [cloneVoiceDialogOpen, setCloneVoiceDialogOpen] = useState(false)
+  const [exportAudioDialogOpen, setExportAudioDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [selectedProjectForShare, setSelectedProjectForShare] = useState<any>(null)
+
+  // Form states for dialogs
+  const [newVoiceName, setNewVoiceName] = useState('')
+  const [newVoiceDescription, setNewVoiceDescription] = useState('')
+  const [newVoiceGender, setNewVoiceGender] = useState('neutral')
+  const [cloneVoiceFile, setCloneVoiceFile] = useState<File | null>(null)
+  const [cloneVoiceName, setCloneVoiceName] = useState('')
+  const [exportFormat, setExportFormat] = useState('mp3')
+  const [exportQuality, setExportQuality] = useState('high')
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
 
   // Data state
   const [voices, setVoices] = useState<Voice[]>([])
@@ -349,7 +381,222 @@ export default function AiVoiceSynthesisClient() {
 
   const handleCopySSML = () => {
     setCopiedSSML(true)
+    navigator.clipboard.writeText(text)
+    toast.success('Text copied to clipboard')
     setTimeout(() => setCopiedSSML(false), 2000)
+  }
+
+  // Reset voice settings to defaults
+  const handleResetSettings = () => {
+    setSpeed([1.0])
+    setPitch([1.0])
+    setVolume([80])
+    setAudioFormat('mp3')
+    setAudioQuality('high')
+    toast.success('Settings reset to defaults')
+    logger.info('Voice settings reset to defaults')
+  }
+
+  // Preview synthesized audio
+  const handlePreviewAudio = () => {
+    if (!text.trim()) {
+      toast.error('Please enter text to preview')
+      return
+    }
+    if (!selectedVoice) {
+      toast.error('Please select a voice first')
+      return
+    }
+
+    setIsPlaying(!isPlaying)
+    if (!isPlaying) {
+      toast.info('Playing audio preview...', {
+        description: `${selectedVoice.displayName} - ${text.substring(0, 50)}...`
+      })
+      logger.info('Audio preview started', { voice: selectedVoice.name })
+      // Simulate audio playback duration
+      setTimeout(() => {
+        setIsPlaying(false)
+        toast.success('Audio preview completed')
+      }, Math.min(estimatedDuration * 1000, 5000))
+    } else {
+      toast.info('Audio preview paused')
+      logger.info('Audio preview paused')
+    }
+  }
+
+  // Preview voice sample
+  const handlePreviewVoice = (voice: Voice) => {
+    if (playingVoiceId === voice.id) {
+      setPlayingVoiceId(null)
+      toast.info('Voice preview stopped')
+      return
+    }
+
+    setPlayingVoiceId(voice.id)
+    toast.info(`Playing voice sample: ${voice.displayName}`, {
+      description: `${voice.language} - ${voice.gender}`
+    })
+    logger.info('Voice preview started', { voiceId: voice.id, voiceName: voice.name })
+
+    // Simulate voice sample playback
+    setTimeout(() => {
+      setPlayingVoiceId(null)
+    }, 3000)
+  }
+
+  // Create new voice
+  const handleCreateVoice = async () => {
+    if (!newVoiceName.trim()) {
+      toast.error('Please enter a voice name')
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Creating custom voice...',
+        success: () => {
+          logger.info('Custom voice created', { name: newVoiceName, gender: newVoiceGender })
+          setCreateVoiceDialogOpen(false)
+          setNewVoiceName('')
+          setNewVoiceDescription('')
+          setNewVoiceGender('neutral')
+          return `Voice "${newVoiceName}" created successfully`
+        },
+        error: 'Failed to create voice'
+      }
+    )
+  }
+
+  // Clone voice from audio sample
+  const handleCloneVoice = async () => {
+    if (!cloneVoiceFile) {
+      toast.error('Please upload an audio sample')
+      return
+    }
+    if (!cloneVoiceName.trim()) {
+      toast.error('Please enter a name for the cloned voice')
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3500)),
+      {
+        loading: 'Analyzing audio and cloning voice...',
+        success: () => {
+          logger.info('Voice cloned successfully', { name: cloneVoiceName, fileName: cloneVoiceFile.name })
+          setCloneVoiceDialogOpen(false)
+          setCloneVoiceFile(null)
+          setCloneVoiceName('')
+          return `Voice "${cloneVoiceName}" cloned from audio sample`
+        },
+        error: 'Failed to clone voice'
+      }
+    )
+  }
+
+  // Export audio
+  const handleExportAudio = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: `Exporting audio as ${exportFormat.toUpperCase()} (${exportQuality} quality)...`,
+        success: () => {
+          logger.info('Audio exported', { format: exportFormat, quality: exportQuality })
+          setExportAudioDialogOpen(false)
+          return `Audio exported as ${exportFormat.toUpperCase()} successfully`
+        },
+        error: 'Failed to export audio'
+      }
+    )
+  }
+
+  // Save settings
+  const handleSaveSettings = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Saving settings...',
+        success: () => {
+          logger.info('Settings saved', { speed: speed[0], pitch: pitch[0], volume: volume[0] })
+          setSettingsDialogOpen(false)
+          return 'Settings saved successfully'
+        },
+        error: 'Failed to save settings'
+      }
+    )
+  }
+
+  // Create new project
+  const handleCreateProject = async () => {
+    if (!newProjectName.trim()) {
+      toast.error('Please enter a project name')
+      return
+    }
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Creating new project...',
+        success: () => {
+          logger.info('Project created', { name: newProjectName })
+          setNewProjectDialogOpen(false)
+          setNewProjectName('')
+          setNewProjectDescription('')
+          return `Project "${newProjectName}" created successfully`
+        },
+        error: 'Failed to create project'
+      }
+    )
+  }
+
+  // Play project audio
+  const handlePlayProject = (projectId: number, projectName: string) => {
+    if (playingProjectId === projectId) {
+      setPlayingProjectId(null)
+      toast.info('Playback stopped')
+      return
+    }
+
+    setPlayingProjectId(projectId)
+    toast.info(`Playing: ${projectName}`)
+    logger.info('Project playback started', { projectId, projectName })
+
+    // Simulate playback
+    setTimeout(() => {
+      setPlayingProjectId(null)
+    }, 5000)
+  }
+
+  // Download project
+  const handleDownloadProject = (projectId: number, projectName: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Preparing download for ${projectName}...`,
+        success: () => {
+          logger.info('Project downloaded', { projectId, projectName })
+          return `${projectName} downloaded successfully`
+        },
+        error: 'Failed to download project'
+      }
+    )
+  }
+
+  // Share project
+  const handleShareProject = (project: any) => {
+    setSelectedProjectForShare(project)
+    setShareDialogOpen(true)
+  }
+
+  // Copy share link
+  const handleCopyShareLink = () => {
+    const shareLink = `https://freeflow.app/voice-projects/${selectedProjectForShare?.id}`
+    navigator.clipboard.writeText(shareLink)
+    toast.success('Share link copied to clipboard')
+    logger.info('Share link copied', { projectId: selectedProjectForShare?.id })
+    setShareDialogOpen(false)
   }
 
   // A+++ LOADING STATE
@@ -538,7 +785,10 @@ export default function AiVoiceSynthesisClient() {
                       <Settings className="w-5 h-5 text-purple-500" />
                       Voice Settings
                     </h3>
-                    <Button variant="ghost" size="sm">Reset</Button>
+                    <Button variant="ghost" size="sm" onClick={handleResetSettings}>
+                      <RotateCcw className="w-4 h-4 mr-1" />
+                      Reset
+                    </Button>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -625,8 +875,14 @@ export default function AiVoiceSynthesisClient() {
                         </>
                       )}
                     </Button>
-                    <Button variant="outline" size="icon">
-                      <Play className="w-4 h-4" />
+                    <Button variant="outline" size="icon" onClick={handlePreviewAudio} disabled={!text.trim() || !selectedVoice}>
+                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => setExportAudioDialogOpen(true)} disabled={!text.trim()}>
+                      <Download className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={() => setSettingsDialogOpen(true)}>
+                      <Settings className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
@@ -805,18 +1061,19 @@ export default function AiVoiceSynthesisClient() {
 
                     <div className="flex gap-2">
                       <Button
-                        variant={selectedVoice.id === voice.id ? 'default' : 'outline'}
+                        variant={selectedVoice?.id === voice.id ? 'default' : 'outline'}
                         size="sm"
                         className="flex-1"
                         onClick={() => {
                           setSelectedVoice(voice)
                           setViewMode('synthesize')
+                          toast.success(`Voice "${voice.displayName}" selected`)
                         }}
                       >
-                        {selectedVoice.id === voice.id ? 'Selected' : 'Select'}
+                        {selectedVoice?.id === voice.id ? 'Selected' : 'Select'}
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <Play className="w-4 h-4" />
+                      <Button variant="outline" size="sm" onClick={() => handlePreviewVoice(voice)}>
+                        {playingVoiceId === voice.id ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                       </Button>
                     </div>
                   </div>
@@ -841,10 +1098,20 @@ export default function AiVoiceSynthesisClient() {
                 <h3 className="text-xl font-semibold">Voice Synthesis Projects</h3>
                 <p className="text-sm text-muted-foreground">Manage your audio generation projects</p>
               </div>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
-                <FileAudio className="w-4 h-4 mr-2" />
-                New Project
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setCloneVoiceDialogOpen(true)}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Clone Voice
+                </Button>
+                <Button variant="outline" onClick={() => setCreateVoiceDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Voice
+                </Button>
+                <Button className="bg-gradient-to-r from-purple-500 to-pink-500" onClick={() => setNewProjectDialogOpen(true)}>
+                  <FolderPlus className="w-4 h-4 mr-2" />
+                  New Project
+                </Button>
+              </div>
             </div>
 
             {/* Projects Grid */}
@@ -880,13 +1147,28 @@ export default function AiVoiceSynthesisClient() {
                   <div className="flex items-center justify-between pt-3 border-t border-white/10">
                     <span className="text-xs text-muted-foreground">Edited {project.lastEdited}</span>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                        <Play className="w-3 h-3" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={() => handlePlayProject(project.id, project.name)}
+                      >
+                        {playingProjectId === project.id ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={() => handleDownloadProject(project.id, project.name)}
+                      >
                         <Download className="w-3 h-3" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={() => handleShareProject(project)}
+                      >
                         <Share2 className="w-3 h-3" />
                       </Button>
                     </div>
@@ -1023,6 +1305,407 @@ export default function AiVoiceSynthesisClient() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Create Voice Dialog */}
+      <Dialog open={createVoiceDialogOpen} onOpenChange={setCreateVoiceDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-purple-500" />
+              Create Custom Voice
+            </DialogTitle>
+            <DialogDescription>
+              Create a new custom voice profile with your preferred settings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="voice-name">Voice Name</Label>
+              <Input
+                id="voice-name"
+                placeholder="Enter voice name..."
+                value={newVoiceName}
+                onChange={(e) => setNewVoiceName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="voice-description">Description</Label>
+              <Textarea
+                id="voice-description"
+                placeholder="Describe the voice characteristics..."
+                value={newVoiceDescription}
+                onChange={(e) => setNewVoiceDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="voice-gender">Gender</Label>
+              <select
+                id="voice-gender"
+                value={newVoiceGender}
+                onChange={(e) => setNewVoiceGender(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="neutral">Neutral</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCreateVoiceDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateVoice} className="bg-gradient-to-r from-purple-500 to-pink-500">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Voice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clone Voice Dialog */}
+      <Dialog open={cloneVoiceDialogOpen} onOpenChange={setCloneVoiceDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-purple-500" />
+              Clone Voice from Audio
+            </DialogTitle>
+            <DialogDescription>
+              Upload an audio sample to clone and create a new voice profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="clone-name">Voice Name</Label>
+              <Input
+                id="clone-name"
+                placeholder="Name for the cloned voice..."
+                value={cloneVoiceName}
+                onChange={(e) => setCloneVoiceName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Audio Sample</Label>
+              <div className="border-2 border-dashed border-muted rounded-lg p-6 text-center">
+                <input
+                  type="file"
+                  accept="audio/*"
+                  className="hidden"
+                  id="audio-upload"
+                  onChange={(e) => setCloneVoiceFile(e.target.files?.[0] || null)}
+                />
+                <label htmlFor="audio-upload" className="cursor-pointer">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                  {cloneVoiceFile ? (
+                    <p className="text-sm font-medium">{cloneVoiceFile.name}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm text-muted-foreground">Click to upload audio file</p>
+                      <p className="text-xs text-muted-foreground mt-1">MP3, WAV, OGG (max 10MB)</p>
+                    </>
+                  )}
+                </label>
+              </div>
+            </div>
+            <div className="bg-muted/50 p-3 rounded-lg">
+              <p className="text-xs text-muted-foreground">
+                <strong>Tips for best results:</strong> Use a clear audio sample of 30-60 seconds with minimal background noise.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCloneVoiceDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCloneVoice} className="bg-gradient-to-r from-purple-500 to-pink-500">
+              <Mic className="w-4 h-4 mr-2" />
+              Clone Voice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Audio Dialog */}
+      <Dialog open={exportAudioDialogOpen} onOpenChange={setExportAudioDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-purple-500" />
+              Export Audio
+            </DialogTitle>
+            <DialogDescription>
+              Configure export settings for your synthesized audio.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Audio Format</Label>
+              <select
+                value={exportFormat}
+                onChange={(e) => setExportFormat(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="mp3">MP3 (Compressed, widely compatible)</option>
+                <option value="wav">WAV (Uncompressed, high quality)</option>
+                <option value="ogg">OGG (Open format, good compression)</option>
+                <option value="flac">FLAC (Lossless, best quality)</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Quality</Label>
+              <select
+                value={exportQuality}
+                onChange={(e) => setExportQuality(e.target.value)}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="low">Low (64 kbps) - Smaller file size</option>
+                <option value="medium">Medium (128 kbps) - Balanced</option>
+                <option value="high">High (192 kbps) - Recommended</option>
+                <option value="ultra">Ultra (320 kbps) - Best quality</option>
+              </select>
+            </div>
+            <div className="bg-muted/50 p-3 rounded-lg space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Estimated file size:</span>
+                <span className="font-medium">{Math.round(estimatedDuration * (exportQuality === 'ultra' ? 40 : exportQuality === 'high' ? 24 : exportQuality === 'medium' ? 16 : 8))} KB</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Duration:</span>
+                <span className="font-medium">{formatDuration(estimatedDuration)}</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportAudioDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExportAudio} className="bg-gradient-to-r from-purple-500 to-pink-500">
+              <Download className="w-4 h-4 mr-2" />
+              Export Audio
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-500" />
+              Voice Synthesis Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your default voice synthesis preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <h4 className="font-medium">Audio Output</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Default Format</Label>
+                  <select
+                    value={audioFormat}
+                    onChange={(e) => setAudioFormat(e.target.value)}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="mp3">MP3</option>
+                    <option value="wav">WAV</option>
+                    <option value="ogg">OGG</option>
+                    <option value="flac">FLAC</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Default Quality</Label>
+                  <select
+                    value={audioQuality}
+                    onChange={(e) => setAudioQuality(e.target.value)}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="low">Low (64 kbps)</option>
+                    <option value="medium">Medium (128 kbps)</option>
+                    <option value="high">High (192 kbps)</option>
+                    <option value="ultra">Ultra (320 kbps)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium">Voice Parameters</h4>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Default Speed</Label>
+                    <span className="text-sm text-muted-foreground">{speed[0].toFixed(1)}x</span>
+                  </div>
+                  <Slider
+                    value={speed}
+                    onValueChange={setSpeed}
+                    min={0.5}
+                    max={2.0}
+                    step={0.1}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Default Pitch</Label>
+                    <span className="text-sm text-muted-foreground">{pitch[0].toFixed(1)}x</span>
+                  </div>
+                  <Slider
+                    value={pitch}
+                    onValueChange={setPitch}
+                    min={0.5}
+                    max={2.0}
+                    step={0.1}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Default Volume</Label>
+                    <span className="text-sm text-muted-foreground">{volume[0]}%</span>
+                  </div>
+                  <Slider
+                    value={volume}
+                    onValueChange={setVolume}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleResetSettings}>
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Reset to Defaults
+            </Button>
+            <Button onClick={handleSaveSettings} className="bg-gradient-to-r from-purple-500 to-pink-500">
+              <Check className="w-4 h-4 mr-2" />
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Project Dialog */}
+      <Dialog open={newProjectDialogOpen} onOpenChange={setNewProjectDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderPlus className="w-5 h-5 text-purple-500" />
+              Create New Project
+            </DialogTitle>
+            <DialogDescription>
+              Create a new voice synthesis project to organize your audio files.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                id="project-name"
+                placeholder="Enter project name..."
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project-description">Description (optional)</Label>
+              <Textarea
+                id="project-description"
+                placeholder="Describe your project..."
+                value={newProjectDescription}
+                onChange={(e) => setNewProjectDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNewProjectDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateProject} className="bg-gradient-to-r from-purple-500 to-pink-500">
+              <FolderPlus className="w-4 h-4 mr-2" />
+              Create Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5 text-purple-500" />
+              Share Project
+            </DialogTitle>
+            <DialogDescription>
+              Share "{selectedProjectForShare?.name}" with others.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Share Link</Label>
+              <div className="flex gap-2">
+                <Input
+                  readOnly
+                  value={`https://freeflow.app/voice-projects/${selectedProjectForShare?.id}`}
+                  className="font-mono text-sm"
+                />
+                <Button variant="outline" onClick={handleCopyShareLink}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Share via</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const url = `https://freeflow.app/voice-projects/${selectedProjectForShare?.id}`
+                    window.open(`mailto:?subject=Check out this voice project&body=${encodeURIComponent(url)}`, '_blank')
+                    toast.success('Email client opened')
+                  }}
+                >
+                  Email
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const url = `https://freeflow.app/voice-projects/${selectedProjectForShare?.id}`
+                    window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent('Check out this voice project!')}`, '_blank')
+                    toast.success('Twitter opened')
+                  }}
+                >
+                  Twitter
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const url = `https://freeflow.app/voice-projects/${selectedProjectForShare?.id}`
+                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')
+                    toast.success('LinkedIn opened')
+                  }}
+                >
+                  LinkedIn
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

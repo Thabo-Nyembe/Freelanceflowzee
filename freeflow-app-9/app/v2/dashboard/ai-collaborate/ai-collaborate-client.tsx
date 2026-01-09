@@ -20,6 +20,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
   Brain,
   Sparkles,
   CheckCircle,
@@ -27,7 +38,18 @@ import {
   Palette,
   Share2,
   Download,
-  Loader
+  Loader,
+  Plus,
+  Users,
+  Settings,
+  Copy,
+  Mail,
+  Link2,
+  X,
+  RefreshCw,
+  Trash2,
+  Save,
+  UserPlus
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -228,6 +250,29 @@ export default function AiCollaborateClient() {
   ])
   const [category, setCategory] = useState<'all' | 'logo' | 'palette' | 'layout' | 'typography'>('all')
   const [filteredOptions, setFilteredOptions] = useState<AIDesignOption[]>(AI_DESIGN_OPTIONS)
+
+  // DIALOG STATES
+  const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false)
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false)
+
+  // FORM STATES
+  const [newSessionName, setNewSessionName] = useState('')
+  const [newSessionDescription, setNewSessionDescription] = useState('')
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState<'viewer' | 'editor' | 'admin'>('viewer')
+  const [shareLink, setShareLink] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
+  const [aiSettings, setAiSettings] = useState({
+    autoGenerate: true,
+    notifyOnComplete: true,
+    highQualityMode: false,
+    maxOptions: 6,
+    preferredStyles: selectedStyles
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // A+++ LOAD AI OPTIONS
   useEffect(() => {
@@ -484,6 +529,313 @@ export default function AiCollaborateClient() {
     }
   }, [selectedOptions])
 
+  // ============================================================================
+  // HANDLER 7: CREATE NEW SESSION
+  // ============================================================================
+
+  const handleCreateSession = useCallback(async () => {
+    if (!newSessionName.trim()) {
+      toast.error('Please enter a session name')
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      logger.info('Creating new AI collaboration session', {
+        sessionName: newSessionName,
+        clientId: KAZI_CLIENT_DATA.clientInfo.email
+      })
+
+      const response = await fetch('/api/client-zone/ai/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSessionName,
+          description: newSessionDescription,
+          clientId: KAZI_CLIENT_DATA.clientInfo.email,
+          styles: selectedStyles,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create session')
+      }
+
+      logger.info('Session created successfully', { sessionName: newSessionName })
+      toast.success('Session created!', {
+        description: `"${newSessionName}" is ready for collaboration`
+      })
+
+      setNewSessionName('')
+      setNewSessionDescription('')
+      setCreateSessionDialogOpen(false)
+      announce('New AI collaboration session created', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to create session', { error })
+      toast.error('Failed to create session', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [newSessionName, newSessionDescription, selectedStyles, announce])
+
+  // ============================================================================
+  // HANDLER 8: INVITE COLLABORATORS
+  // ============================================================================
+
+  const handleInviteCollaborator = useCallback(async () => {
+    if (!inviteEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(inviteEmail)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      logger.info('Inviting collaborator', {
+        email: inviteEmail,
+        role: inviteRole
+      })
+
+      const response = await fetch('/api/client-zone/ai/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inviteEmail,
+          role: inviteRole,
+          clientId: KAZI_CLIENT_DATA.clientInfo.email,
+          sessionId: 'current',
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send invitation')
+      }
+
+      logger.info('Invitation sent successfully', { email: inviteEmail })
+      toast.success('Invitation sent!', {
+        description: `${inviteEmail} has been invited as ${inviteRole}`
+      })
+
+      setInviteEmail('')
+      setInviteRole('viewer')
+      setInviteDialogOpen(false)
+      announce('Collaboration invitation sent', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to invite collaborator', { error })
+      toast.error('Failed to send invitation', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [inviteEmail, inviteRole, announce])
+
+  // ============================================================================
+  // HANDLER 9: SHARE WITH DIALOG
+  // ============================================================================
+
+  const handleOpenShareDialog = useCallback(() => {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    const generatedLink = `${baseUrl}/share/ai-designs/${Date.now()}`
+    setShareLink(generatedLink)
+    setShareDialogOpen(true)
+  }, [])
+
+  const handleCopyShareLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink)
+      toast.success('Link copied to clipboard!')
+      logger.info('Share link copied', { link: shareLink })
+    } catch (error) {
+      toast.error('Failed to copy link')
+    }
+  }, [shareLink])
+
+  const handleShareViaEmail = useCallback(async () => {
+    try {
+      setIsSubmitting(true)
+      logger.info('Sharing via email', {
+        selectedCount: selectedOptions.length
+      })
+
+      const response = await fetch('/api/client-zone/ai/share-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          optionIds: selectedOptions,
+          message: shareMessage,
+          link: shareLink,
+          clientId: KAZI_CLIENT_DATA.clientInfo.email
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to share via email')
+      }
+
+      toast.success('Shared successfully!', {
+        description: 'Email with designs has been sent'
+      })
+
+      setShareMessage('')
+      setShareDialogOpen(false)
+    } catch (error: any) {
+      logger.error('Failed to share via email', { error })
+      toast.error('Failed to share', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [selectedOptions, shareMessage, shareLink])
+
+  // ============================================================================
+  // HANDLER 10: SETTINGS
+  // ============================================================================
+
+  const handleSaveSettings = useCallback(async () => {
+    try {
+      setIsSubmitting(true)
+      logger.info('Saving AI settings', { settings: aiSettings })
+
+      const response = await fetch('/api/client-zone/ai/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          settings: aiSettings,
+          clientId: KAZI_CLIENT_DATA.clientInfo.email,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save settings')
+      }
+
+      logger.info('Settings saved successfully')
+      toast.success('Settings saved!', {
+        description: 'Your AI collaboration preferences have been updated'
+      })
+
+      setSettingsDialogOpen(false)
+      announce('AI settings saved', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to save settings', { error })
+      toast.error('Failed to save settings', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [aiSettings, announce])
+
+  const handleResetSettings = useCallback(() => {
+    setAiSettings({
+      autoGenerate: true,
+      notifyOnComplete: true,
+      highQualityMode: false,
+      maxOptions: 6,
+      preferredStyles: ['Modern & Minimalist', 'Professional', 'Tech-focused']
+    })
+    toast.info('Settings reset to defaults')
+  }, [])
+
+  // ============================================================================
+  // HANDLER 11: DELETE ALL SELECTIONS
+  // ============================================================================
+
+  const handleDeleteAllSelections = useCallback(async () => {
+    try {
+      setIsSubmitting(true)
+      logger.info('Deleting all selections', {
+        count: selectedOptions.length
+      })
+
+      const response = await fetch('/api/client-zone/ai/selections', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          optionIds: selectedOptions,
+          clientId: KAZI_CLIENT_DATA.clientInfo.email
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete selections')
+      }
+
+      setSelectedOptions([])
+      setOptions(options.map(opt => ({ ...opt, selected: false })))
+
+      logger.info('All selections deleted')
+      toast.success('Selections cleared!', {
+        description: 'All designs have been deselected'
+      })
+
+      setConfirmDeleteDialogOpen(false)
+      announce('All selections cleared', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete selections', { error })
+      toast.error('Failed to clear selections', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [selectedOptions, options, announce])
+
+  // ============================================================================
+  // HANDLER 12: REGENERATE OPTIONS
+  // ============================================================================
+
+  const handleRegenerateOptions = useCallback(async () => {
+    try {
+      setIsGenerating(true)
+      logger.info('Regenerating AI options', {
+        category,
+        selectedStyles
+      })
+
+      const response = await fetch('/api/client-zone/ai/regenerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category,
+          styles: selectedStyles,
+          clientId: KAZI_CLIENT_DATA.clientInfo.email,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to regenerate options')
+      }
+
+      logger.info('Options regenerated successfully')
+      toast.success('Options regenerated!', {
+        description: 'Fresh AI designs are now available'
+      })
+
+      announce('AI options regenerated', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to regenerate options', { error })
+      toast.error('Failed to regenerate', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsGenerating(false)
+    }
+  }, [category, selectedStyles, announce])
+
   // A+++ LOADING STATE
   if (isLoading) {
     return (
@@ -529,7 +881,7 @@ export default function AiCollaborateClient() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900">
       <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent flex items-center gap-2">
               <Brain className="h-8 w-8" />
@@ -539,9 +891,32 @@ export default function AiCollaborateClient() {
               Generate, preview, and select AI-powered design options
             </p>
           </div>
-          <Badge variant="secondary" className="text-lg">
-            {selectedOptions.length} selected
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => setCreateSessionDialogOpen(true)}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Session
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setInviteDialogOpen(true)}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Invite
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setSettingsDialogOpen(true)}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Button>
+            <Badge variant="secondary" className="text-lg px-4 py-2">
+              {selectedOptions.length} selected
+            </Badge>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -555,7 +930,18 @@ export default function AiCollaborateClient() {
                       <Sparkles className="h-5 w-5 text-purple-600" />
                       <CardTitle>AI-Generated Design Options</CardTitle>
                     </div>
-                    <Badge variant="outline">{filteredOptions.length}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleRegenerateOptions}
+                        disabled={isGenerating}
+                      >
+                        <RefreshCw className={`h-4 w-4 mr-1 ${isGenerating ? 'animate-spin' : ''}`} />
+                        Regenerate
+                      </Button>
+                      <Badge variant="outline">{filteredOptions.length}</Badge>
+                    </div>
                   </div>
 
                   {/* Category Filter */}
@@ -786,7 +1172,7 @@ export default function AiCollaborateClient() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <Button
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
                       onClick={handleDownloadSelection}
                     >
                       <Download className="h-4 w-4 mr-2" />
@@ -795,10 +1181,18 @@ export default function AiCollaborateClient() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={handleShareSelection}
+                      onClick={handleOpenShareDialog}
                     >
                       <Share2 className="h-4 w-4 mr-2" />
                       Share ({selectedOptions.length})
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => setConfirmDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Clear Selection
                     </Button>
                   </CardContent>
                 </Card>
@@ -806,6 +1200,426 @@ export default function AiCollaborateClient() {
             )}
           </div>
         </div>
+
+        {/* ============================================================================ */}
+        {/* DIALOG: CREATE NEW SESSION */}
+        {/* ============================================================================ */}
+        <Dialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-purple-600" />
+                Create New AI Session
+              </DialogTitle>
+              <DialogDescription>
+                Start a new AI design collaboration session with your preferred styles.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="session-name">Session Name</Label>
+                <Input
+                  id="session-name"
+                  placeholder="e.g., Brand Redesign 2024"
+                  value={newSessionName}
+                  onChange={(e) => setNewSessionName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="session-description">Description (Optional)</Label>
+                <Textarea
+                  id="session-description"
+                  placeholder="Describe the goals and scope of this design session..."
+                  value={newSessionDescription}
+                  onChange={(e) => setNewSessionDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Selected Styles</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedStyles.map((style) => (
+                    <Badge key={style} variant="secondary">
+                      {style}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">
+                  Styles are inherited from your current preferences
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setCreateSessionDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateSession}
+                disabled={isSubmitting || !newSessionName.trim()}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Session
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* DIALOG: INVITE COLLABORATORS */}
+        {/* ============================================================================ */}
+        <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-blue-600" />
+                Invite Collaborators
+              </DialogTitle>
+              <DialogDescription>
+                Invite team members to collaborate on AI design options.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="invite-email">Email Address</Label>
+                <Input
+                  id="invite-email"
+                  type="email"
+                  placeholder="colleague@example.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <div className="flex gap-2">
+                  {(['viewer', 'editor', 'admin'] as const).map((role) => (
+                    <Button
+                      key={role}
+                      size="sm"
+                      variant={inviteRole === role ? 'default' : 'outline'}
+                      onClick={() => setInviteRole(role)}
+                      className={inviteRole === role ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                    >
+                      {role.charAt(0).toUpperCase() + role.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">
+                  {inviteRole === 'viewer' && 'Can view designs and leave comments'}
+                  {inviteRole === 'editor' && 'Can select, rate, and modify designs'}
+                  {inviteRole === 'admin' && 'Full access including settings and invites'}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-gray-900 mb-2">Current Collaborators</h4>
+                <div className="space-y-2">
+                  {aiCollaborateCollaborators.map((collab) => (
+                    <div key={collab.id} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          collab.status === 'online' ? 'bg-green-500' : 'bg-yellow-500'
+                        }`} />
+                        <span>{collab.name}</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs">{collab.role}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setInviteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleInviteCollaborator}
+                disabled={isSubmitting || !inviteEmail.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Send Invite
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* DIALOG: SHARE DESIGNS */}
+        {/* ============================================================================ */}
+        <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-green-600" />
+                Share Designs
+              </DialogTitle>
+              <DialogDescription>
+                Share your selected designs ({selectedOptions.length}) with others.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Share Link</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={shareLink}
+                    readOnly
+                    className="flex-1 bg-gray-50"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={handleCopyShareLink}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="share-message">Add a Message (Optional)</Label>
+                <Textarea
+                  id="share-message"
+                  placeholder="Check out these AI-generated designs..."
+                  value={shareMessage}
+                  onChange={(e) => setShareMessage(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Selected Designs</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedOptions.map((optId) => {
+                    const opt = options.find(o => o.id === optId)
+                    return opt ? (
+                      <Badge key={optId} variant="secondary" className="text-xs">
+                        {opt.title}
+                      </Badge>
+                    ) : null
+                  })}
+                </div>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-blue-900 mb-2">Share Options</h4>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyShareLink}
+                    className="flex-1"
+                  >
+                    <Link2 className="h-4 w-4 mr-1" />
+                    Copy Link
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleShareViaEmail}
+                    disabled={isSubmitting}
+                    className="flex-1"
+                  >
+                    <Mail className="h-4 w-4 mr-1" />
+                    Send Email
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShareDialogOpen(false)}
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* DIALOG: SETTINGS */}
+        {/* ============================================================================ */}
+        <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-600" />
+                AI Collaboration Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure your AI design generation preferences.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Auto-Generate Designs</Label>
+                    <p className="text-xs text-gray-500">Automatically generate new designs when styles change</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={aiSettings.autoGenerate ? 'default' : 'outline'}
+                    onClick={() => setAiSettings({ ...aiSettings, autoGenerate: !aiSettings.autoGenerate })}
+                    className={aiSettings.autoGenerate ? 'bg-green-600 hover:bg-green-700' : ''}
+                  >
+                    {aiSettings.autoGenerate ? 'On' : 'Off'}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Notify on Completion</Label>
+                    <p className="text-xs text-gray-500">Receive notifications when AI generation completes</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={aiSettings.notifyOnComplete ? 'default' : 'outline'}
+                    onClick={() => setAiSettings({ ...aiSettings, notifyOnComplete: !aiSettings.notifyOnComplete })}
+                    className={aiSettings.notifyOnComplete ? 'bg-green-600 hover:bg-green-700' : ''}
+                  >
+                    {aiSettings.notifyOnComplete ? 'On' : 'Off'}
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>High Quality Mode</Label>
+                    <p className="text-xs text-gray-500">Generate higher resolution designs (slower)</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={aiSettings.highQualityMode ? 'default' : 'outline'}
+                    onClick={() => setAiSettings({ ...aiSettings, highQualityMode: !aiSettings.highQualityMode })}
+                    className={aiSettings.highQualityMode ? 'bg-green-600 hover:bg-green-700' : ''}
+                  >
+                    {aiSettings.highQualityMode ? 'On' : 'Off'}
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Max Options Per Generation</Label>
+                  <div className="flex gap-2">
+                    {[3, 6, 9, 12].map((num) => (
+                      <Button
+                        key={num}
+                        size="sm"
+                        variant={aiSettings.maxOptions === num ? 'default' : 'outline'}
+                        onClick={() => setAiSettings({ ...aiSettings, maxOptions: num })}
+                        className={aiSettings.maxOptions === num ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                      >
+                        {num}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetSettings}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reset to Defaults
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setSettingsDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveSettings}
+                disabled={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Settings
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* DIALOG: CONFIRM DELETE */}
+        {/* ============================================================================ */}
+        <Dialog open={confirmDeleteDialogOpen} onOpenChange={setConfirmDeleteDialogOpen}>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Clear All Selections?
+              </DialogTitle>
+              <DialogDescription>
+                This will remove all {selectedOptions.length} selected designs from your selection.
+                This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteAllSelections}
+                disabled={isSubmitting}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                    Clearing...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear All
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </div>
   )

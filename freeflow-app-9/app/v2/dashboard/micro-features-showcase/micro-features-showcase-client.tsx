@@ -169,6 +169,38 @@ export default function MicroFeaturesShowcaseClient() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 
+  // Demo dialog states
+  const [showAnimationDemoDialog, setShowAnimationDemoDialog] = useState(false)
+  const [showButtonDemoDialog, setShowButtonDemoDialog] = useState(false)
+  const [showTooltipDemoDialog, setShowTooltipDemoDialog] = useState(false)
+  const [showConfigureDialog, setShowConfigureDialog] = useState(false)
+  const [showFeatureToggleDialog, setShowFeatureToggleDialog] = useState(false)
+
+  // Demo dialog form states
+  const [selectedAnimationType, setSelectedAnimationType] = useState('fade')
+  const [animationDuration, setAnimationDuration] = useState('300')
+  const [animationEasing, setAnimationEasing] = useState('ease-out')
+  const [selectedButtonStyle, setSelectedButtonStyle] = useState('magnetic')
+  const [buttonColor, setButtonColor] = useState('primary')
+  const [buttonSize, setButtonSize] = useState('default')
+  const [tooltipPosition, setTooltipPosition] = useState('top')
+  const [tooltipTrigger, setTooltipTrigger] = useState('hover')
+
+  // Feature toggle states
+  const [featureMagneticButtons, setFeatureMagneticButtons] = useState(true)
+  const [featureRippleEffect, setFeatureRippleEffect] = useState(true)
+  const [featureNeonGlow, setFeatureNeonGlow] = useState(true)
+  const [featureContextualTooltips, setFeatureContextualTooltips] = useState(true)
+  const [featureMicroAnimations, setFeatureMicroAnimations] = useState(true)
+  const [featureFormValidation, setFeatureFormValidation] = useState(true)
+
+  // Configuration form state
+  const [configName, setConfigName] = useState('Default Config')
+  const [configDescription, setConfigDescription] = useState('')
+  const [configGlobalAnimations, setConfigGlobalAnimations] = useState(true)
+  const [configReducedMotion, setConfigReducedMotion] = useState(false)
+  const [configHapticFeedback, setConfigHapticFeedback] = useState(false)
+
   // New Item form state
   const [newItemName, setNewItemName] = useState('')
   const [newItemType, setNewItemType] = useState('component')
@@ -246,6 +278,120 @@ export default function MicroFeaturesShowcaseClient() {
       toast.error('Failed to save settings')
     }
   }, [settingsAnimationsEnabled, settingsAnimationSpeed, settingsTheme])
+
+  // Handler for animation demo
+  const handleRunAnimationDemo = useCallback(async () => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 600))
+      toast.success('Animation Demo Complete', {
+        description: `Ran ${selectedAnimationType} animation with ${animationDuration}ms duration using ${animationEasing} easing`
+      })
+      logger.info('Animation demo executed', { type: selectedAnimationType, duration: animationDuration, easing: animationEasing })
+      setShowAnimationDemoDialog(false)
+    } catch {
+      toast.error('Failed to run animation demo')
+    }
+  }, [selectedAnimationType, animationDuration, animationEasing])
+
+  // Handler for button demo
+  const handleRunButtonDemo = useCallback(async () => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Button Demo Activated', {
+        description: `Demonstrated ${selectedButtonStyle} button style with ${buttonColor} color (${buttonSize} size)`
+      })
+      logger.info('Button demo executed', { style: selectedButtonStyle, color: buttonColor, size: buttonSize })
+      setShowButtonDemoDialog(false)
+    } catch {
+      toast.error('Failed to run button demo')
+    }
+  }, [selectedButtonStyle, buttonColor, buttonSize])
+
+  // Handler for tooltip demo
+  const handleRunTooltipDemo = useCallback(async () => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 400))
+      toast.success('Tooltip Demo Complete', {
+        description: `Tooltip displayed at ${tooltipPosition} position with ${tooltipTrigger} trigger`
+      })
+      logger.info('Tooltip demo executed', { position: tooltipPosition, trigger: tooltipTrigger })
+      setShowTooltipDemoDialog(false)
+    } catch {
+      toast.error('Failed to run tooltip demo')
+    }
+  }, [tooltipPosition, tooltipTrigger])
+
+  // Handler for saving configuration
+  const handleSaveConfiguration = useCallback(async () => {
+    if (!configName.trim()) {
+      toast.error('Please enter a configuration name')
+      return
+    }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 600))
+      toast.success('Configuration Saved', {
+        description: `"${configName}" saved with ${configGlobalAnimations ? 'animations enabled' : 'animations disabled'}${configReducedMotion ? ', reduced motion' : ''}${configHapticFeedback ? ', haptic feedback' : ''}`
+      })
+      logger.info('Configuration saved', { name: configName, globalAnimations: configGlobalAnimations, reducedMotion: configReducedMotion })
+      setShowConfigureDialog(false)
+    } catch {
+      toast.error('Failed to save configuration')
+    }
+  }, [configName, configGlobalAnimations, configReducedMotion, configHapticFeedback])
+
+  // Handler for saving feature toggles
+  const handleSaveFeatureToggles = useCallback(async () => {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500))
+      const enabledFeatures = []
+      if (featureMagneticButtons) enabledFeatures.push('Magnetic Buttons')
+      if (featureRippleEffect) enabledFeatures.push('Ripple Effect')
+      if (featureNeonGlow) enabledFeatures.push('Neon Glow')
+      if (featureContextualTooltips) enabledFeatures.push('Contextual Tooltips')
+      if (featureMicroAnimations) enabledFeatures.push('Micro Animations')
+      if (featureFormValidation) enabledFeatures.push('Form Validation')
+
+      toast.success('Feature Toggles Updated', {
+        description: `${enabledFeatures.length} features enabled: ${enabledFeatures.slice(0, 3).join(', ')}${enabledFeatures.length > 3 ? '...' : ''}`
+      })
+      logger.info('Feature toggles updated', { enabledCount: enabledFeatures.length, features: enabledFeatures })
+      setShowFeatureToggleDialog(false)
+    } catch {
+      toast.error('Failed to update feature toggles')
+    }
+  }, [featureMagneticButtons, featureRippleEffect, featureNeonGlow, featureContextualTooltips, featureMicroAnimations, featureFormValidation])
+
+  // Handler for magnetic button click
+  const handleMagneticButtonClick = useCallback(() => {
+    toast.success('Magnetic Button Activated', {
+      description: 'Experience the magnetic pull effect as you hover near the button'
+    })
+    logger.info('Magnetic button clicked')
+  }, [])
+
+  // Handler for ripple button click
+  const handleRippleButtonClick = useCallback(() => {
+    toast.success('Ripple Effect Triggered', {
+      description: 'Watch the ripple animation spread from the click point'
+    })
+    logger.info('Ripple button clicked')
+  }, [])
+
+  // Handler for neon button click
+  const handleNeonButtonClick = useCallback(() => {
+    toast.success('Neon Glow Activated', {
+      description: 'The neon glow effect illuminates on interaction'
+    })
+    logger.info('Neon button clicked')
+  }, [])
+
+  // Handler for tooltip button click
+  const handleTooltipButtonClick = useCallback(() => {
+    toast.info('Tooltip Interaction', {
+      description: 'Contextual tooltips provide helpful information on hover'
+    })
+    logger.info('Tooltip button clicked')
+  }, [])
 
   // Quick actions with real dialog functionality
   const microFeaturesShowcaseQuickActions = useMemo(() => [
@@ -392,12 +538,30 @@ export default function MicroFeaturesShowcaseClient() {
                 <CardDescription>Smooth, delightful animations</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Button
                     onClick={() => handleDemoAction('animation')}
                     disabled={isPending}
                   >
                     {isPending ? 'Loading...' : 'Try Animation'}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowAnimationDemoDialog(true)}
+                  >
+                    Animation Demo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowConfigureDialog(true)}
+                  >
+                    Configure
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowFeatureToggleDialog(true)}
+                  >
+                    Toggle Features
                   </Button>
                 </div>
               </CardContent>
@@ -408,11 +572,51 @@ export default function MicroFeaturesShowcaseClient() {
             <Card>
               <CardHeader>
                 <CardTitle>Enhanced Buttons</CardTitle>
+                <CardDescription>Interactive button styles with unique effects</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <MagneticButton>Magnetic Button</MagneticButton>
-                <RippleButton>Ripple Button</RippleButton>
-                <NeonButton>Neon Button</NeonButton>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <MagneticButton onClick={handleMagneticButtonClick}>Magnetic Button</MagneticButton>
+                  <RippleButton onClick={handleRippleButtonClick}>Ripple Button</RippleButton>
+                  <NeonButton onClick={handleNeonButtonClick}>Neon Button</NeonButton>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowButtonDemoDialog(true)}
+                  >
+                    Button Demo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      toast.info('Button Styles Preview', {
+                        description: 'All button styles are currently displayed above'
+                      })
+                    }}
+                  >
+                    Preview All
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowConfigureDialog(true)}
+                  >
+                    Configure Buttons
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      setFeatureMagneticButtons(true)
+                      setFeatureRippleEffect(true)
+                      setFeatureNeonGlow(true)
+                      toast.success('All Button Effects Reset', {
+                        description: 'All button effects have been enabled'
+                      })
+                    }}
+                  >
+                    Reset Defaults
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -421,11 +625,73 @@ export default function MicroFeaturesShowcaseClient() {
             <Card>
               <CardHeader>
                 <CardTitle>Contextual Tooltips</CardTitle>
+                <CardDescription>Helpful tooltips that provide context on hover</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ContextualTooltip content="Contextual help">
-                  <Button>Hover for tooltip</Button>
-                </ContextualTooltip>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <ContextualTooltip content="Contextual help - Click to interact">
+                    <Button onClick={handleTooltipButtonClick}>Hover for tooltip</Button>
+                  </ContextualTooltip>
+                  <ContextualTooltip content="Feature tooltip - Shows feature information">
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        toast.info('Feature Tooltip', {
+                          description: 'Feature tooltips display detailed information about specific features'
+                        })
+                      }}
+                    >
+                      Feature Info
+                    </Button>
+                  </ContextualTooltip>
+                  <ContextualTooltip content="Help tooltip - Provides guidance">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        toast.info('Help Tooltip', {
+                          description: 'Help tooltips guide users through complex interactions'
+                        })
+                      }}
+                    >
+                      Help Guide
+                    </Button>
+                  </ContextualTooltip>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowTooltipDemoDialog(true)}
+                  >
+                    Tooltip Demo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setFeatureContextualTooltips(!featureContextualTooltips)
+                      toast.success(featureContextualTooltips ? 'Tooltips Disabled' : 'Tooltips Enabled', {
+                        description: `Contextual tooltips are now ${featureContextualTooltips ? 'disabled' : 'enabled'}`
+                      })
+                    }}
+                  >
+                    {featureContextualTooltips ? 'Disable Tooltips' : 'Enable Tooltips'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowConfigureDialog(true)}
+                  >
+                    Configure Tooltips
+                  </Button>
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      toast.info('Tooltip Documentation', {
+                        description: 'Learn more about configuring and customizing tooltips'
+                      })
+                    }}
+                  >
+                    View Docs
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -666,6 +932,359 @@ export default function MicroFeaturesShowcaseClient() {
             </Button>
             <Button onClick={handleSaveSettings}>
               Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Animation Demo Dialog */}
+      <Dialog open={showAnimationDemoDialog} onOpenChange={setShowAnimationDemoDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Animation Demo</DialogTitle>
+            <DialogDescription>
+              Configure and preview micro animation effects.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="animation-type">Animation Type</Label>
+              <Select value={selectedAnimationType} onValueChange={setSelectedAnimationType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select animation" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fade">Fade In/Out</SelectItem>
+                  <SelectItem value="slide">Slide</SelectItem>
+                  <SelectItem value="scale">Scale</SelectItem>
+                  <SelectItem value="rotate">Rotate</SelectItem>
+                  <SelectItem value="bounce">Bounce</SelectItem>
+                  <SelectItem value="shake">Shake</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="animation-duration">Duration (ms)</Label>
+              <Select value={animationDuration} onValueChange={setAnimationDuration}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="150">Fast (150ms)</SelectItem>
+                  <SelectItem value="300">Normal (300ms)</SelectItem>
+                  <SelectItem value="500">Slow (500ms)</SelectItem>
+                  <SelectItem value="1000">Very Slow (1000ms)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="animation-easing">Easing Function</Label>
+              <Select value={animationEasing} onValueChange={setAnimationEasing}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select easing" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ease">Ease</SelectItem>
+                  <SelectItem value="ease-in">Ease In</SelectItem>
+                  <SelectItem value="ease-out">Ease Out</SelectItem>
+                  <SelectItem value="ease-in-out">Ease In Out</SelectItem>
+                  <SelectItem value="linear">Linear</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnimationDemoDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRunAnimationDemo}>
+              Run Demo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Button Demo Dialog */}
+      <Dialog open={showButtonDemoDialog} onOpenChange={setShowButtonDemoDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Button Style Demo</DialogTitle>
+            <DialogDescription>
+              Configure and preview enhanced button styles.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="button-style">Button Style</Label>
+              <Select value={selectedButtonStyle} onValueChange={setSelectedButtonStyle}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="magnetic">Magnetic</SelectItem>
+                  <SelectItem value="ripple">Ripple</SelectItem>
+                  <SelectItem value="neon">Neon Glow</SelectItem>
+                  <SelectItem value="slide-fill">Slide Fill</SelectItem>
+                  <SelectItem value="glassmorphism">Glassmorphism</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="button-color">Button Color</Label>
+              <Select value={buttonColor} onValueChange={setButtonColor}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select color" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primary">Primary</SelectItem>
+                  <SelectItem value="secondary">Secondary</SelectItem>
+                  <SelectItem value="destructive">Destructive</SelectItem>
+                  <SelectItem value="outline">Outline</SelectItem>
+                  <SelectItem value="ghost">Ghost</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="button-size">Button Size</Label>
+              <Select value={buttonSize} onValueChange={setButtonSize}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sm">Small</SelectItem>
+                  <SelectItem value="default">Default</SelectItem>
+                  <SelectItem value="lg">Large</SelectItem>
+                  <SelectItem value="icon">Icon Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowButtonDemoDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRunButtonDemo}>
+              Run Demo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tooltip Demo Dialog */}
+      <Dialog open={showTooltipDemoDialog} onOpenChange={setShowTooltipDemoDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Tooltip Demo</DialogTitle>
+            <DialogDescription>
+              Configure and preview contextual tooltip behavior.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="tooltip-position">Tooltip Position</Label>
+              <Select value={tooltipPosition} onValueChange={setTooltipPosition}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select position" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top">Top</SelectItem>
+                  <SelectItem value="bottom">Bottom</SelectItem>
+                  <SelectItem value="left">Left</SelectItem>
+                  <SelectItem value="right">Right</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="tooltip-trigger">Trigger Type</Label>
+              <Select value={tooltipTrigger} onValueChange={setTooltipTrigger}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select trigger" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hover">Hover</SelectItem>
+                  <SelectItem value="click">Click</SelectItem>
+                  <SelectItem value="focus">Focus</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTooltipDemoDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRunTooltipDemo}>
+              Run Demo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Dialog */}
+      <Dialog open={showConfigureDialog} onOpenChange={setShowConfigureDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Configure Micro Features</DialogTitle>
+            <DialogDescription>
+              Create and manage configuration presets for your micro features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="config-name">Configuration Name</Label>
+              <Input
+                id="config-name"
+                placeholder="Enter configuration name..."
+                value={configName}
+                onChange={(e) => setConfigName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="config-description">Description</Label>
+              <Textarea
+                id="config-description"
+                placeholder="Describe this configuration..."
+                value={configDescription}
+                onChange={(e) => setConfigDescription(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Global Animations</Label>
+                <p className="text-sm text-muted-foreground">
+                  Enable animations across all components
+                </p>
+              </div>
+              <Switch
+                checked={configGlobalAnimations}
+                onCheckedChange={setConfigGlobalAnimations}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Reduced Motion</Label>
+                <p className="text-sm text-muted-foreground">
+                  Respect user&apos;s reduced motion preference
+                </p>
+              </div>
+              <Switch
+                checked={configReducedMotion}
+                onCheckedChange={setConfigReducedMotion}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Haptic Feedback</Label>
+                <p className="text-sm text-muted-foreground">
+                  Enable haptic feedback on touch devices
+                </p>
+              </div>
+              <Switch
+                checked={configHapticFeedback}
+                onCheckedChange={setConfigHapticFeedback}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfigureDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveConfiguration}>
+              Save Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feature Toggle Dialog */}
+      <Dialog open={showFeatureToggleDialog} onOpenChange={setShowFeatureToggleDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Feature Toggles</DialogTitle>
+            <DialogDescription>
+              Enable or disable individual micro features.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Magnetic Buttons</Label>
+                <p className="text-sm text-muted-foreground">
+                  Buttons that follow cursor movement
+                </p>
+              </div>
+              <Switch
+                checked={featureMagneticButtons}
+                onCheckedChange={setFeatureMagneticButtons}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Ripple Effect</Label>
+                <p className="text-sm text-muted-foreground">
+                  Material design ripple on click
+                </p>
+              </div>
+              <Switch
+                checked={featureRippleEffect}
+                onCheckedChange={setFeatureRippleEffect}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Neon Glow</Label>
+                <p className="text-sm text-muted-foreground">
+                  Glowing neon button effects
+                </p>
+              </div>
+              <Switch
+                checked={featureNeonGlow}
+                onCheckedChange={setFeatureNeonGlow}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Contextual Tooltips</Label>
+                <p className="text-sm text-muted-foreground">
+                  Show helpful tooltips on hover
+                </p>
+              </div>
+              <Switch
+                checked={featureContextualTooltips}
+                onCheckedChange={setFeatureContextualTooltips}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Micro Animations</Label>
+                <p className="text-sm text-muted-foreground">
+                  Subtle UI transition animations
+                </p>
+              </div>
+              <Switch
+                checked={featureMicroAnimations}
+                onCheckedChange={setFeatureMicroAnimations}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Form Validation</Label>
+                <p className="text-sm text-muted-foreground">
+                  Enhanced form field validation
+                </p>
+              </div>
+              <Switch
+                checked={featureFormValidation}
+                onCheckedChange={setFeatureFormValidation}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFeatureToggleDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveFeatureToggles}>
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

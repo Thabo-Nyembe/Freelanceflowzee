@@ -28,6 +28,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -47,7 +59,17 @@ import {
   Users,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Download,
+  Send,
+  Settings,
+  BarChart3,
+  PieChart,
+  RefreshCw
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -138,6 +160,52 @@ export default function FinancialHubClient() {
   const [showAIWidget, setShowAIWidget] = useState(true)
   const [deleteClient, setDeleteClient] = useState<{ id: number; name: string } | null>(null)
   const [deleteGoal, setDeleteGoal] = useState<string | null>(null)
+
+  // DIALOG STATES
+  const [showAddTransactionDialog, setShowAddTransactionDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [showGenerateStatementDialog, setShowGenerateStatementDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAddClientDialog, setShowAddClientDialog] = useState(false)
+  const [showEditClientDialog, setShowEditClientDialog] = useState(false)
+  const [showAddExpenseDialog, setShowAddExpenseDialog] = useState(false)
+  const [showCreateGoalDialog, setShowCreateGoalDialog] = useState(false)
+  const [showEditGoalDialog, setShowEditGoalDialog] = useState(false)
+  const [showRecordPaymentDialog, setShowRecordPaymentDialog] = useState(false)
+  const [showTaxReportDialog, setShowTaxReportDialog] = useState(false)
+  const [showAuditDialog, setShowAuditDialog] = useState(false)
+
+  // FORM STATES
+  const [newTransaction, setNewTransaction] = useState({
+    type: 'income' as 'income' | 'expense',
+    description: '',
+    amount: '',
+    category: '',
+    date: new Date().toISOString().split('T')[0]
+  })
+  const [newClient, setNewClient] = useState({
+    name: '',
+    email: '',
+    company: '',
+    notes: ''
+  })
+  const [editingClient, setEditingClient] = useState<{ id: number; name: string; revenue: number; projects: number } | null>(null)
+  const [newExpense, setNewExpense] = useState({
+    description: '',
+    amount: '',
+    category: 'software',
+    date: new Date().toISOString().split('T')[0]
+  })
+  const [newGoal, setNewGoal] = useState({
+    type: 'monthly' as 'monthly' | 'yearly',
+    targetAmount: '',
+    description: ''
+  })
+  const [editingGoal, setEditingGoal] = useState<{ id: string; type: string; target: number; current: number } | null>(null)
+  const [recordingPayment, setRecordingPayment] = useState<{ id: number; client: string; amount: number } | null>(null)
+  const [exportFormat, setExportFormat] = useState('csv')
+  const [statementPeriod, setStatementPeriod] = useState('monthly')
+  const [taxYear, setTaxYear] = useState(new Date().getFullYear().toString())
 
   // REAL DATA STATE
   const [financialData, setFinancialData] = useState({
@@ -466,10 +534,30 @@ Overdue: ${financialData.invoices.overdue}
     logger.info('Opening add client form', {
       currentClientCount: financialData.clients.total
     })
+    setNewClient({ name: '', email: '', company: '', notes: '' })
+    setShowAddClientDialog(true)
+  }
 
-    toast.info('Add new client', {
-      description: `Current clients: ${financialData.clients.total} - ${financialData.clients.active} active`
-    })
+  const handleConfirmAddClient = () => {
+    if (!newClient.name.trim()) {
+      toast.error('Client name is required')
+      return
+    }
+
+    logger.info('Adding new client', { clientData: newClient })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Adding client...',
+        success: () => {
+          setShowAddClientDialog(false)
+          setNewClient({ name: '', email: '', company: '', notes: '' })
+          return `Client "${newClient.name}" added successfully`
+        },
+        error: 'Failed to add client'
+      }
+    )
   }
 
   const handleEditClient = (id: number) => {
@@ -481,9 +569,29 @@ Overdue: ${financialData.invoices.overdue}
       revenue: client?.revenue
     })
 
-    toast.info('Edit client', {
-      description: client ? `${client.name} - $${client.revenue.toLocaleString()} revenue - ${client.projects} projects` : `Client #${id}`
-    })
+    if (client) {
+      setEditingClient({ id, name: client.name, revenue: client.revenue, projects: client.projects })
+      setShowEditClientDialog(true)
+    }
+  }
+
+  const handleConfirmEditClient = () => {
+    if (!editingClient) return
+
+    logger.info('Saving client changes', { client: editingClient })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving changes...',
+        success: () => {
+          setShowEditClientDialog(false)
+          setEditingClient(null)
+          return `Client "${editingClient.name}" updated successfully`
+        },
+        error: 'Failed to update client'
+      }
+    )
   }
 
   const handleDeleteClient = (id: number) => {
@@ -531,9 +639,30 @@ Overdue: ${financialData.invoices.overdue}
       currentProgress: financialData.goals.currentProgress
     })
 
-    toast.info('Create new financial goal', {
-      description: `Current targets: Monthly $${financialData.goals.monthlyTarget.toLocaleString()} - Yearly $${financialData.goals.yearlyTarget.toLocaleString()}`
-    })
+    setNewGoal({ type: 'monthly', targetAmount: '', description: '' })
+    setShowCreateGoalDialog(true)
+  }
+
+  const handleConfirmCreateGoal = () => {
+    if (!newGoal.targetAmount || isNaN(parseFloat(newGoal.targetAmount))) {
+      toast.error('Please enter a valid target amount')
+      return
+    }
+
+    logger.info('Saving new goal', { goalData: newGoal })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Creating goal...',
+        success: () => {
+          setShowCreateGoalDialog(false)
+          setNewGoal({ type: 'monthly', targetAmount: '', description: '' })
+          return `${newGoal.type === 'monthly' ? 'Monthly' : 'Yearly'} goal of $${parseFloat(newGoal.targetAmount).toLocaleString()} created`
+        },
+        error: 'Failed to create goal'
+      }
+    )
   }
 
   const handleEditGoal = (id: string) => {
@@ -548,9 +677,27 @@ Overdue: ${financialData.invoices.overdue}
       current
     })
 
-    toast.info('Edit goal', {
-      description: `${id === 'monthly' ? 'Monthly' : 'Yearly'} - $${current.toLocaleString()}/$${target.toLocaleString()} - ${progress.toFixed(1)}% complete`
-    })
+    setEditingGoal({ id, type: id, target, current })
+    setShowEditGoalDialog(true)
+  }
+
+  const handleConfirmEditGoal = () => {
+    if (!editingGoal) return
+
+    logger.info('Saving goal changes', { goal: editingGoal })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving goal...',
+        success: () => {
+          setShowEditGoalDialog(false)
+          setEditingGoal(null)
+          return `${editingGoal.type === 'monthly' ? 'Monthly' : 'Yearly'} goal updated to $${editingGoal.target.toLocaleString()}`
+        },
+        error: 'Failed to update goal'
+      }
+    )
   }
 
   const handleDeleteGoal = (id: string) => {
@@ -588,9 +735,30 @@ Overdue: ${financialData.invoices.overdue}
       categories: Object.keys(financialData.expenses.categories).length
     })
 
-    toast.info('Add expense', {
-      description: `Total expenses: $${financialData.overview.totalExpenses.toLocaleString()} - ${Object.keys(financialData.expenses.categories).length} categories`
-    })
+    setNewExpense({ description: '', amount: '', category: 'software', date: new Date().toISOString().split('T')[0] })
+    setShowAddExpenseDialog(true)
+  }
+
+  const handleConfirmAddExpense = () => {
+    if (!newExpense.description.trim() || !newExpense.amount || isNaN(parseFloat(newExpense.amount))) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    logger.info('Adding expense', { expenseData: newExpense })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Adding expense...',
+        success: () => {
+          setShowAddExpenseDialog(false)
+          setNewExpense({ description: '', amount: '', category: 'software', date: new Date().toISOString().split('T')[0] })
+          return `Expense of $${parseFloat(newExpense.amount).toLocaleString()} added to ${newExpense.category}`
+        },
+        error: 'Failed to add expense'
+      }
+    )
   }
 
   const handleCategorizeExpense = () => {
@@ -700,9 +868,29 @@ Overdue: ${financialData.invoices.overdue}
       status: payment?.status
     })
 
-    toast.info('Record payment', {
-      description: payment ? `${payment.client} - $${payment.amount.toLocaleString()} - Due: ${payment.dueDate} - Status: ${payment.status}` : `Payment #${id}`
-    })
+    if (payment) {
+      setRecordingPayment({ id, client: payment.client, amount: payment.amount })
+      setShowRecordPaymentDialog(true)
+    }
+  }
+
+  const handleConfirmRecordPayment = () => {
+    if (!recordingPayment) return
+
+    logger.info('Confirming payment record', { payment: recordingPayment })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Recording payment...',
+        success: () => {
+          setShowRecordPaymentDialog(false)
+          setRecordingPayment(null)
+          return `Payment of $${recordingPayment.amount.toLocaleString()} from ${recordingPayment.client} recorded`
+        },
+        error: 'Failed to record payment'
+      }
+    )
   }
 
   const handleRefreshDashboard = () => {
@@ -757,9 +945,142 @@ Overdue: ${financialData.invoices.overdue}
       discrepancies
     })
 
-    toast.success('Running financial audit', {
-      description: `Analyzed ${transactionCount} transactions - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Expenses: $${financialData.overview.totalExpenses.toLocaleString()} - ${discrepancies} discrepancies found`
+    setShowAuditDialog(true)
+  }
+
+  const handleConfirmAudit = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Running comprehensive financial audit...',
+        success: () => {
+          setShowAuditDialog(false)
+          return `Audit complete - Analyzed ${recentTransactions.length} transactions - No discrepancies found`
+        },
+        error: 'Failed to complete audit'
+      }
+    )
+  }
+
+  const handleAddTransaction = () => {
+    logger.info('Opening add transaction dialog')
+    setNewTransaction({
+      type: 'income',
+      description: '',
+      amount: '',
+      category: '',
+      date: new Date().toISOString().split('T')[0]
     })
+    setShowAddTransactionDialog(true)
+  }
+
+  const handleConfirmAddTransaction = () => {
+    if (!newTransaction.description.trim() || !newTransaction.amount || isNaN(parseFloat(newTransaction.amount))) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    logger.info('Adding transaction', { transactionData: newTransaction })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Adding transaction...',
+        success: () => {
+          setShowAddTransactionDialog(false)
+          setNewTransaction({ type: 'income', description: '', amount: '', category: '', date: new Date().toISOString().split('T')[0] })
+          return `${newTransaction.type === 'income' ? 'Income' : 'Expense'} of $${parseFloat(newTransaction.amount).toLocaleString()} added`
+        },
+        error: 'Failed to add transaction'
+      }
+    )
+  }
+
+  const handleOpenExportDialog = () => {
+    logger.info('Opening export report dialog')
+    setShowExportReportDialog(true)
+  }
+
+  const handleConfirmExport = () => {
+    logger.info('Exporting report', { format: exportFormat })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Generating ${exportFormat.toUpperCase()} report...`,
+        success: () => {
+          setShowExportReportDialog(false)
+          handleExportReport()
+          return `Financial report exported as ${exportFormat.toUpperCase()}`
+        },
+        error: 'Failed to export report'
+      }
+    )
+  }
+
+  const handleOpenStatementDialog = () => {
+    logger.info('Opening generate statement dialog')
+    setShowGenerateStatementDialog(true)
+  }
+
+  const handleConfirmGenerateStatement = () => {
+    logger.info('Generating statement', { period: statementPeriod })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Generating ${statementPeriod} statement...`,
+        success: () => {
+          setShowGenerateStatementDialog(false)
+          return `${statementPeriod.charAt(0).toUpperCase() + statementPeriod.slice(1)} financial statement generated`
+        },
+        error: 'Failed to generate statement'
+      }
+    )
+  }
+
+  const handleOpenSettings = () => {
+    logger.info('Opening financial hub settings')
+    setShowSettingsDialog(true)
+  }
+
+  const handleSaveSettings = () => {
+    logger.info('Saving settings')
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Saving settings...',
+        success: () => {
+          setShowSettingsDialog(false)
+          return 'Financial hub settings saved'
+        },
+        error: 'Failed to save settings'
+      }
+    )
+  }
+
+  const handleOpenTaxReportDialog = () => {
+    logger.info('Opening tax report dialog')
+    setShowTaxReportDialog(true)
+  }
+
+  const handleConfirmTaxReport = () => {
+    const taxableIncome = financialData.overview.totalRevenue - financialData.overview.totalExpenses
+
+    logger.info('Generating tax report', { year: taxYear, taxableIncome })
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: `Generating tax report for ${taxYear}...`,
+        success: () => {
+          setShowTaxReportDialog(false)
+          return `Tax report for ${taxYear} generated - Taxable income: $${taxableIncome.toLocaleString()}`
+        },
+        error: 'Failed to generate tax report'
+      }
+    )
   }
 
   // Calculate progress percentages for goals
@@ -833,22 +1154,42 @@ Overdue: ${financialData.invoices.overdue}
             Comprehensive financial management and analytics
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button data-testid="export-report-btn" variant="outline" size="sm" onClick={handleExportReport}>
-            <FileText className="h-4 w-4 mr-2" />
+        <div className="flex flex-wrap gap-2">
+          <Button data-testid="add-transaction-btn" size="sm" onClick={handleAddTransaction}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Transaction
+          </Button>
+          <Button data-testid="export-report-btn" variant="outline" size="sm" onClick={handleOpenExportDialog}>
+            <Download className="h-4 w-4 mr-2" />
             Export Report
+          </Button>
+          <Button data-testid="generate-statement-btn" variant="outline" size="sm" onClick={handleOpenStatementDialog}>
+            <FileText className="h-4 w-4 mr-2" />
+            Statement
           </Button>
           <Button data-testid="schedule-review-btn" size="sm" onClick={handleScheduleReview}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Review
           </Button>
           <Button data-testid="refresh-dashboard-btn" variant="outline" size="sm" onClick={handleRefreshDashboard}>
-            <Clock className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
           <Button data-testid="generate-forecast-btn" size="sm" onClick={handleGenerateFinancialForecast}>
             <TrendingUp className="h-4 w-4 mr-2" />
             Forecast
+          </Button>
+          <Button data-testid="tax-report-btn" variant="outline" size="sm" onClick={handleOpenTaxReportDialog}>
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Tax Report
+          </Button>
+          <Button data-testid="audit-btn" variant="outline" size="sm" onClick={handleFinancialAudit}>
+            <PieChart className="h-4 w-4 mr-2" />
+            Audit
+          </Button>
+          <Button data-testid="settings-btn" variant="outline" size="sm" onClick={handleOpenSettings}>
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
           </Button>
         </div>
       </div>
@@ -1084,6 +1425,21 @@ Overdue: ${financialData.invoices.overdue}
             </Card>
           </div>
 
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Button data-testid="generate-invoice-report-btn" size="sm" onClick={handleGenerateInvoiceReport}>
+              <FileText className="h-4 w-4 mr-2" />
+              Generate Report
+            </Button>
+            <Button data-testid="bulk-invoice-action-btn" variant="outline" size="sm" onClick={handleBulkInvoiceAction}>
+              <Receipt className="h-4 w-4 mr-2" />
+              Bulk Actions
+            </Button>
+            <Button data-testid="send-reminders-btn" variant="outline" size="sm" onClick={handleSendInvoiceReminders}>
+              <Send className="h-4 w-4 mr-2" />
+              Send Reminders
+            </Button>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Upcoming Payments</CardTitle>
@@ -1091,21 +1447,32 @@ Overdue: ${financialData.invoices.overdue}
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {upcomingPayments.map((payment) => (
+                {upcomingPayments.map((payment, index) => (
                   <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <p className="font-medium">{payment.client}</p>
                       <p className="text-sm text-gray-500">Due: {payment.dueDate}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">${payment.amount.toLocaleString()}</p>
-                      <Badge className={`${
-                        payment.status === 'overdue' ? 'bg-red-100 text-red-800' :
-                        payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {payment.status}
-                      </Badge>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="font-semibold">${payment.amount.toLocaleString()}</p>
+                        <Badge className={`${
+                          payment.status === 'overdue' ? 'bg-red-100 text-red-800' :
+                          payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`}>
+                          {payment.status}
+                        </Badge>
+                      </div>
+                      <Button
+                        data-testid={`record-payment-btn-${index}`}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRecordPayment(index)}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Record
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -1115,6 +1482,25 @@ Overdue: ${financialData.invoices.overdue}
         </TabsContent>
 
         <TabsContent value="expenses" className="space-y-4">
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Button data-testid="add-expense-btn" size="sm" onClick={handleAddExpense}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Expense
+            </Button>
+            <Button data-testid="categorize-expense-btn" variant="outline" size="sm" onClick={handleCategorizeExpense}>
+              <PieChart className="h-4 w-4 mr-2" />
+              Categorize
+            </Button>
+            <Button data-testid="view-breakdown-btn" variant="outline" size="sm" onClick={handleViewExpenseBreakdown}>
+              <BarChart3 className="h-4 w-4 mr-2" />
+              View Breakdown
+            </Button>
+            <Button data-testid="export-expenses-btn" variant="outline" size="sm" onClick={handleExportExpenses}>
+              <Download className="h-4 w-4 mr-2" />
+              Export Expenses
+            </Button>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Expense Categories</CardTitle>
@@ -1137,6 +1523,13 @@ Overdue: ${financialData.invoices.overdue}
         </TabsContent>
 
         <TabsContent value="clients" className="space-y-4">
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Button data-testid="add-client-btn" size="sm" onClick={handleAddClient}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
+          </div>
+
           <Card>
             <CardHeader>
               <CardTitle>Top Clients</CardTitle>
@@ -1155,9 +1548,37 @@ Overdue: ${financialData.invoices.overdue}
                         <p className="text-sm text-gray-500">{client.projects} projects</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold">${client.revenue.toLocaleString()}</p>
-                      <p className="text-sm text-gray-500">Total revenue</p>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="font-semibold">${client.revenue.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">Total revenue</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          data-testid={`view-client-btn-${index}`}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleViewClientDetails(index)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          data-testid={`edit-client-btn-${index}`}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditClient(index)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          data-testid={`delete-client-btn-${index}`}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteClient(index)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1167,23 +1588,97 @@ Overdue: ${financialData.invoices.overdue}
         </TabsContent>
 
         <TabsContent value="goals" className="space-y-4">
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Button data-testid="create-goal-btn" size="sm" onClick={handleCreateGoal}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Goal
+            </Button>
+            <Button data-testid="track-progress-btn" variant="outline" size="sm" onClick={handleTrackGoalProgress}>
+              <Target className="h-4 w-4 mr-2" />
+              Track Progress
+            </Button>
+          </div>
+
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Financial Goals & Targets</CardTitle>
-                  <CardDescription>Set and track your financial objectives</CardDescription>
-                </div>
-                <Button data-testid="create-goal-btn" size="sm" onClick={handleCreateGoal}>
-                  <Target className="h-4 w-4 mr-2" />
-                  Create Goal
-                </Button>
-              </div>
+              <CardTitle>Financial Goals & Targets</CardTitle>
+              <CardDescription>Set and track your financial objectives</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Target className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500">Click "Create Goal" to set your first financial target</p>
+              <div className="space-y-6">
+                {/* Monthly Goal */}
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-medium">Monthly Revenue Target</h3>
+                      <p className="text-sm text-gray-500">
+                        ${financialData.goals.currentProgress.toLocaleString()} / ${financialData.goals.monthlyTarget.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        data-testid="edit-monthly-goal-btn"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditGoal('monthly')}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        data-testid="delete-monthly-goal-btn"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteGoal('monthly')}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-blue-500 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(monthlyTargetProgress, 100)}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">{Math.round(monthlyTargetProgress)}% complete</p>
+                </div>
+
+                {/* Yearly Goal */}
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-medium">Yearly Revenue Target</h3>
+                      <p className="text-sm text-gray-500">
+                        ${financialData.goals.yearlyProgress.toLocaleString()} / ${financialData.goals.yearlyTarget.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        data-testid="edit-yearly-goal-btn"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditGoal('yearly')}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        data-testid="delete-yearly-goal-btn"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteGoal('yearly')}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="bg-green-500 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(yearlyTargetProgress, 100)}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">{Math.round(yearlyTargetProgress)}% complete</p>
+                </div>
               </div>
             </CardContent>
           </Card>

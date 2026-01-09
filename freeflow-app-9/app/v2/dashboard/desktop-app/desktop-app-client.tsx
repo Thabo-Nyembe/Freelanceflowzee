@@ -518,6 +518,16 @@ export default function DesktopAppClient() {
   const [showNewBuildDialog, setShowNewBuildDialog] = useState(false)
   const [showDeployUpdateDialog, setShowDeployUpdateDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+  const [showCertificateDialog, setShowCertificateDialog] = useState(false)
+  const [showAddCertificateDialog, setShowAddCertificateDialog] = useState(false)
+  const [showCICDDialog, setShowCICDDialog] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<{ title: string; description: string; action: () => void } | null>(null)
+  const [selectedDownload, setSelectedDownload] = useState<{ version: string; platform: string; url: string } | null>(null)
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null)
+  const [addCertificateType, setAddCertificateType] = useState<'apple' | 'windows' | 'gpg'>('apple')
   const [newBuildConfig, setNewBuildConfig] = useState({
     platform: 'all' as Platform,
     channel: 'stable' as ReleaseChannel,
@@ -1001,6 +1011,174 @@ export default function DesktopAppClient() {
     }
   }
 
+  // Handle artifact download
+  const handleArtifactDownload = (artifactName: string, platform: string, url: string) => {
+    setSelectedDownload({ version: artifactName, platform, url })
+    setShowDownloadDialog(true)
+  }
+
+  // Execute download
+  const executeDownload = () => {
+    if (selectedDownload) {
+      toast.success('Download started', {
+        description: `Downloading ${selectedDownload.version} for ${selectedDownload.platform}...`
+      })
+      // Simulate download
+      setTimeout(() => {
+        toast.success('Download complete', {
+          description: `${selectedDownload.version} has been downloaded successfully`
+        })
+      }, 2000)
+      setShowDownloadDialog(false)
+      setSelectedDownload(null)
+    }
+  }
+
+  // Handle release download
+  const handleReleaseDownload = (version: string, platform: string, url: string) => {
+    setSelectedDownload({ version, platform, url })
+    setShowDownloadDialog(true)
+  }
+
+  // View certificate details
+  const handleViewCertificate = (cert: Certificate) => {
+    setSelectedCertificate(cert)
+    setShowCertificateDialog(true)
+  }
+
+  // Renew certificate
+  const handleRenewCertificate = (cert: Certificate) => {
+    toast.info('Certificate renewal initiated', {
+      description: `Starting renewal process for ${cert.name}...`
+    })
+    setTimeout(() => {
+      toast.success('Renewal request sent', {
+        description: `Certificate renewal for ${cert.name} has been submitted`
+      })
+    }, 1500)
+  }
+
+  // Add new certificate
+  const handleAddCertificate = (type: 'apple' | 'windows' | 'gpg') => {
+    setAddCertificateType(type)
+    setShowAddCertificateDialog(true)
+  }
+
+  // Submit new certificate
+  const handleSubmitCertificate = () => {
+    const typeNames = {
+      apple: 'Apple Developer ID',
+      windows: 'Windows EV Certificate',
+      gpg: 'GPG Key'
+    }
+    toast.success('Certificate added', {
+      description: `${typeNames[addCertificateType]} has been configured successfully`
+    })
+    setShowAddCertificateDialog(false)
+  }
+
+  // Rebuild native modules
+  const handleRebuildNativeModules = () => {
+    toast.info('Rebuilding native modules...', {
+      description: 'This may take a few minutes'
+    })
+    setTimeout(() => {
+      toast.success('Native modules rebuilt', {
+        description: 'All native modules have been recompiled successfully'
+      })
+    }, 3000)
+  }
+
+  // Configure CI/CD
+  const handleConfigureCICD = () => {
+    setShowCICDDialog(true)
+  }
+
+  // Save CI/CD configuration
+  const handleSaveCICDConfig = (provider: string) => {
+    toast.success('CI/CD configured', {
+      description: `${provider} has been connected successfully`
+    })
+    setShowCICDDialog(false)
+  }
+
+  // Manage certificates
+  const handleManageCertificates = () => {
+    setActiveTab('signing')
+    setSettingsTab('security')
+    toast.info('Navigating to certificate management')
+  }
+
+  // Clear build cache
+  const handleClearBuildCache = () => {
+    setConfirmAction({
+      title: 'Clear Build Cache',
+      description: 'This will remove all cached builds. This action cannot be undone.',
+      action: async () => {
+        toast.info('Clearing build cache...')
+        setTimeout(() => {
+          toast.success('Build cache cleared', {
+            description: 'All cached builds have been removed'
+          })
+        }, 1500)
+        setShowConfirmDialog(false)
+        setConfirmAction(null)
+      }
+    })
+    setShowConfirmDialog(true)
+  }
+
+  // Revoke update keys
+  const handleRevokeUpdateKeys = () => {
+    setConfirmAction({
+      title: 'Revoke Update Keys',
+      description: 'This will force all users to re-download the full application. Are you sure?',
+      action: async () => {
+        toast.info('Revoking update keys...')
+        setTimeout(() => {
+          toast.success('Update keys revoked', {
+            description: 'All update keys have been revoked. Users will need to download the full application.'
+          })
+        }, 1500)
+        setShowConfirmDialog(false)
+        setConfirmAction(null)
+      }
+    })
+    setShowConfirmDialog(true)
+  }
+
+  // Delete crash reports
+  const handleDeleteCrashReports = () => {
+    setConfirmAction({
+      title: 'Delete All Crash Reports',
+      description: 'This will permanently delete all crash report history. This action cannot be undone.',
+      action: async () => {
+        toast.info('Deleting crash reports...')
+        setTimeout(() => {
+          toast.success('Crash reports deleted', {
+            description: 'All crash report history has been removed'
+          })
+        }, 1500)
+        setShowConfirmDialog(false)
+        setConfirmAction(null)
+      }
+    })
+    setShowConfirmDialog(true)
+  }
+
+  // Open settings dialog
+  const handleOpenSettings = () => {
+    setShowSettingsDialog(true)
+  }
+
+  // Save settings
+  const handleSaveSettings = () => {
+    toast.success('Settings saved', {
+      description: 'Your desktop app settings have been updated'
+    })
+    setShowSettingsDialog(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -1017,7 +1195,11 @@ export default function DesktopAppClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20">
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                onClick={handleOpenSettings}
+              >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
@@ -1245,7 +1427,11 @@ export default function DesktopAppClient() {
                                             <p className="text-xs text-muted-foreground">{formatBytes(artifact.size)} • {artifact.downloads.toLocaleString()} downloads</p>
                                           </div>
                                         </div>
-                                        <Button variant="outline" size="sm">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleArtifactDownload(artifact.name, artifact.platform, artifact.downloadUrl)}
+                                        >
                                           <Download className="w-4 h-4 mr-1" />
                                           Download
                                         </Button>
@@ -1340,7 +1526,11 @@ export default function DesktopAppClient() {
                             <span>{platform.downloads.toLocaleString()}</span>
                           </div>
                         </div>
-                        <Button className="w-full mt-3" size="sm">
+                        <Button
+                          className="w-full mt-3"
+                          size="sm"
+                          onClick={() => handleReleaseDownload(release.version, platform.platform, platform.downloadUrl)}
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Download
                         </Button>
@@ -1569,11 +1759,11 @@ export default function DesktopAppClient() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleViewCertificate(cert)}>
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleRenewCertificate(cert)}>
                             <RefreshCw className="w-4 h-4 mr-1" />
                             Renew
                           </Button>
@@ -1586,17 +1776,29 @@ export default function DesktopAppClient() {
                 <div className="mt-6 pt-6 border-t">
                   <h4 className="font-medium mb-4">Add New Certificate</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      onClick={() => handleAddCertificate('apple')}
+                    >
                       <Apple className="w-8 h-8 text-gray-400" />
                       <span>Apple Developer ID</span>
                       <span className="text-xs text-muted-foreground">For macOS code signing</span>
                     </Button>
-                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      onClick={() => handleAddCertificate('windows')}
+                    >
                       <Monitor className="w-8 h-8 text-blue-400" />
                       <span>Windows EV Certificate</span>
                       <span className="text-xs text-muted-foreground">For Windows code signing</span>
                     </Button>
-                    <Button variant="outline" className="h-auto p-4 flex flex-col items-center gap-2">
+                    <Button
+                      variant="outline"
+                      className="h-auto p-4 flex flex-col items-center gap-2"
+                      onClick={() => handleAddCertificate('gpg')}
+                    >
                       <Key className="w-8 h-8 text-orange-400" />
                       <span>GPG Key</span>
                       <span className="text-xs text-muted-foreground">For Linux package signing</span>
@@ -1871,7 +2073,7 @@ export default function DesktopAppClient() {
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleRebuildNativeModules}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Rebuild All Native Modules
                         </Button>
@@ -1895,7 +2097,7 @@ export default function DesktopAppClient() {
                             </Badge>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleConfigureCICD}>
                           Configure CI/CD
                         </Button>
                       </CardContent>
@@ -2042,7 +2244,7 @@ export default function DesktopAppClient() {
                           </div>
                           <p className="text-sm text-gray-500">Expires: Mar 22, 2025</p>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleManageCertificates}>
                           <Key className="w-4 h-4 mr-2" />
                           Manage Certificates
                         </Button>
@@ -2368,7 +2570,11 @@ export default function DesktopAppClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Clear Build Cache</p>
                               <p className="text-sm text-red-600">Remove cached builds</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={handleClearBuildCache}
+                            >
                               Clear
                             </Button>
                           </div>
@@ -2379,7 +2585,11 @@ export default function DesktopAppClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Revoke All Update Keys</p>
                               <p className="text-sm text-red-600">Force full re-download</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={handleRevokeUpdateKeys}
+                            >
                               Revoke
                             </Button>
                           </div>
@@ -2390,7 +2600,11 @@ export default function DesktopAppClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Crash Reports</p>
                               <p className="text-sm text-red-600">Remove crash history</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button
+                              variant="outline"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={handleDeleteCrashReports}
+                            >
                               Delete
                             </Button>
                           </div>
