@@ -689,6 +689,9 @@ export default function ComplianceClient() {
   }
 
   const handleDeleteEvidence = () => {
+    if (!confirm('Are you sure you want to delete all evidence? This action cannot be undone.')) {
+      return
+    }
     toast.promise(
       (async () => {
         await new Promise(r => setTimeout(r, 500))
@@ -812,7 +815,7 @@ export default function ComplianceClient() {
         )
         break
       case 'Import':
-        toast.info('Import feature: Please select a JSON or CSV file to import')
+        /* TODO: Implement import file picker and parsing */
         break
       case 'Matrix':
         toast.promise(
@@ -842,7 +845,7 @@ export default function ComplianceClient() {
         )
         break
       case 'Schedule':
-        toast.info('Audit scheduling: Next audit scheduled for ' + new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString())
+        /* TODO: Implement audit scheduling dialog */
         break
       case 'Findings':
         toast.promise(
@@ -856,10 +859,10 @@ export default function ComplianceClient() {
         )
         break
       case 'Assign':
-        toast.info('Assignment: Select team members to assign to this audit')
+        /* TODO: Implement team member assignment dialog */
         break
       case 'Templates':
-        toast.info('Templates: Browse policy templates library')
+        /* TODO: Implement policy templates library browser */
         break
       case 'Approve':
         toast.promise(
@@ -872,10 +875,10 @@ export default function ComplianceClient() {
         )
         break
       case 'Versions':
-        toast.info('Version history: View all policy versions and changes')
+        /* TODO: Implement version history viewer */
         break
       case 'Attestation':
-        toast.info('Attestation: Track employee policy acknowledgements')
+        /* TODO: Implement attestation tracking */
         break
       case 'Distribute':
         toast.promise(
@@ -887,7 +890,8 @@ export default function ComplianceClient() {
         )
         break
       default:
-        toast.info(`${actionLabel} action initiated`)
+        /* TODO: Implement ${actionLabel} action */
+        break
     }
   }
 

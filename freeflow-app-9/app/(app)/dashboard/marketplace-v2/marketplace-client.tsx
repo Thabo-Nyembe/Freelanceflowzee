@@ -864,7 +864,7 @@ export default function MarketplaceClient() {
                   <TrendingUp className="w-5 h-5 text-violet-600" />
                   Trending This Week
                 </CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => { setSelectedCategory('all'); setActiveTab('browse'); toast.success('Showing all trending apps') }}>View All</Button>
+                <Button variant="ghost" size="sm" onClick={() => { setSelectedCategory('all'); setActiveTab('browse'); /* TODO: Implement view all trending apps filtering */ }}>View All</Button>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-4 overflow-x-auto pb-2">
@@ -1090,7 +1090,7 @@ export default function MarketplaceClient() {
                     <div className="flex gap-3">
                       <Button onClick={() => window.open('https://techpro.example.com', '_blank')}><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
                       <Button variant="outline" onClick={() => window.location.href = 'mailto:contact@techpro.example.com?subject=Inquiry'}><Mail className="h-4 w-4 mr-2" />Contact</Button>
-                      <Button variant="outline" onClick={() => { const vendorId = 'techpro'; if (followedVendors.includes(vendorId)) { setFollowedVendors(prev => prev.filter(id => id !== vendorId)); toast.success('Unfollowed TechPro Solutions'); } else { setFollowedVendors(prev => [...prev, vendorId]); toast.success('Now following TechPro Solutions'); } }}><Heart className={`h-4 w-4 mr-2 ${followedVendors.includes('techpro') ? 'fill-red-500 text-red-500' : ''}`} />{followedVendors.includes('techpro') ? 'Following' : 'Follow'}</Button>
+                      <Button variant="outline" onClick={() => { const vendorId = 'techpro'; if (followedVendors.includes(vendorId)) { setFollowedVendors(prev => prev.filter(id => id !== vendorId)); /* TODO: Persist unfollow to backend */ } else { setFollowedVendors(prev => [...prev, vendorId]); /* TODO: Persist follow to backend */ } }}><Heart className={`h-4 w-4 mr-2 ${followedVendors.includes('techpro') ? 'fill-red-500 text-red-500' : ''}`} />{followedVendors.includes('techpro') ? 'Following' : 'Follow'}</Button>
                     </div>
                   </div>
                 </div>
@@ -1268,8 +1268,8 @@ export default function MarketplaceClient() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => { window.location.href = `mailto:${vendor.email}?subject=Inquiry from Marketplace`; toast.success('Opening email client') }}><Mail className="h-4 w-4" /></Button>
-                          <Button size="sm" onClick={() => { window.open(vendor.website, '_blank'); toast.success('Opening vendor store') }}><ExternalLink className="h-4 w-4 mr-1" />Store</Button>
+                          <Button variant="outline" size="sm" onClick={() => { window.location.href = `mailto:${vendor.email}?subject=Inquiry from Marketplace`; }}><Mail className="h-4 w-4" /></Button>
+                          <Button size="sm" onClick={() => { window.open(vendor.website, '_blank'); }}><ExternalLink className="h-4 w-4 mr-1" />Store</Button>
                         </div>
                       </div>
                     </div>
@@ -1482,8 +1482,8 @@ export default function MarketplaceClient() {
                     <Input type="date" className="w-[150px]" />
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => { setOrderPage(1); toast.success('Orders refreshed') }}><RefreshCw className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="sm" onClick={() => { setShowFilterPanel(!showFilterPanel); toast.success(`Filters ${showFilterPanel ? 'hidden' : 'shown'}`) }}><Filter className="h-4 w-4 mr-1" />Filters</Button>
+                    <Button variant="outline" size="sm" onClick={() => { setOrderPage(1); /* TODO: Implement orders refresh from backend */ }}><RefreshCw className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => { setShowFilterPanel(!showFilterPanel); }}><Filter className="h-4 w-4 mr-1" />Filters</Button>
                   </div>
                 </div>
               </CardContent>
@@ -1547,10 +1547,10 @@ export default function MarketplaceClient() {
                   <p className="text-sm text-gray-500">Showing 1-{mockOrders.length} of {mockOrders.length} orders</p>
                   <div className="flex gap-1">
                     <Button variant="outline" size="sm" disabled>Previous</Button>
-                    <Button variant="outline" size="sm" className={orderPage === 1 ? "bg-violet-50 text-violet-700" : ""} onClick={() => { setOrderPage(1); toast.success('Page 1 loaded') }}>1</Button>
-                    <Button variant="outline" size="sm" className={orderPage === 2 ? "bg-violet-50 text-violet-700" : ""} onClick={() => { setOrderPage(2); toast.success('Page 2 loaded') }}>2</Button>
-                    <Button variant="outline" size="sm" className={orderPage === 3 ? "bg-violet-50 text-violet-700" : ""} onClick={() => { setOrderPage(3); toast.success('Page 3 loaded') }}>3</Button>
-                    <Button variant="outline" size="sm" onClick={() => { setOrderPage(prev => Math.min(prev + 1, 3)); toast.success('Next page loaded') }}>Next</Button>
+                    <Button variant="outline" size="sm" className={orderPage === 1 ? "bg-violet-50 text-violet-700" : ""} onClick={() => { setOrderPage(1); }}>1</Button>
+                    <Button variant="outline" size="sm" className={orderPage === 2 ? "bg-violet-50 text-violet-700" : ""} onClick={() => { setOrderPage(2); }}>2</Button>
+                    <Button variant="outline" size="sm" className={orderPage === 3 ? "bg-violet-50 text-violet-700" : ""} onClick={() => { setOrderPage(3); }}>3</Button>
+                    <Button variant="outline" size="sm" onClick={() => { setOrderPage(prev => Math.min(prev + 1, 3)); }}>Next</Button>
                   </div>
                 </div>
               </CardContent>

@@ -954,6 +954,9 @@ export default function TicketsClient() {
   }
 
   const handleDeleteResolvedTickets = () => {
+    if (!confirm('Are you sure you want to delete all resolved tickets? This action cannot be undone.')) {
+      return
+    }
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 600)),
       {

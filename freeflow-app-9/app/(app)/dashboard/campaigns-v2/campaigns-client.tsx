@@ -1687,10 +1687,10 @@ export default function CampaignsClient() {
                           <div className="text-lg font-semibold">{audience.segments.length}</div>
                           <div className="text-xs text-gray-500">Segments</div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 800)),
-                          { loading: 'Opening audience details...', success: `Opened ${audience.name} details`, error: 'Failed to open audience details' }
-                        )}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          /* TODO: Implement audience details view - open detail panel or navigate to audience page */
+                          setActiveTab('audiences')
+                        }}>
                           <ChevronRight className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2373,6 +2373,9 @@ export default function CampaignsClient() {
                                 toast.info('No test emails to purge', { description: 'There are no draft campaigns to delete' })
                                 return
                               }
+                              if (!confirm(`Are you sure you want to delete ${draftCampaigns.length} draft campaign(s)? This action cannot be undone.`)) {
+                                return
+                              }
                               for (const campaign of draftCampaigns) {
                                 await deleteCampaign({ id: campaign.id })
                               }
@@ -2719,7 +2722,7 @@ export default function CampaignsClient() {
             <Button
               className="bg-gradient-to-r from-rose-600 to-pink-600"
               onClick={() => {
-                toast.success('Test email sent successfully')
+                /* TODO: Implement test email sending - call email API with testEmail recipient */
                 setShowSendTestDialog(false)
               }}
             >

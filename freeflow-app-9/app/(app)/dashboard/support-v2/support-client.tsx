@@ -905,7 +905,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
           <TabsContent value="canned" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Canned Responses</h3>
-              <Button variant="outline" size="sm" onClick={() => { setShowCannedResponseEditor(true); toast.success('Create your new canned response'); }}>
+              <Button variant="outline" size="sm" onClick={() => { setShowCannedResponseEditor(true); }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Response
               </Button>
@@ -933,7 +933,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
           <TabsContent value="sla" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">SLA Policies</h3>
-              <Button variant="outline" size="sm" onClick={() => { setShowSLAEditor(true); toast.success('Configure your new SLA policy'); }}>
+              <Button variant="outline" size="sm" onClick={() => { setShowSLAEditor(true); }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Policy
               </Button>
@@ -1610,7 +1610,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium">Webhook Events</div>
                             <div className="text-sm text-gray-500">ticket.created, ticket.updated, ticket.resolved</div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => { setShowWebhookConfig(true); toast.success('Configure your webhook endpoints'); }}>Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => { setShowWebhookConfig(true); }}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1828,8 +1828,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                     <div className="border-t pt-4">
                       <div className="flex gap-2 mb-2">
                         <Button variant="outline" size="sm" onClick={() => setShowReplyEditor(true)}>Reply</Button>
-                        <Button variant="outline" size="sm" onClick={() => { setShowNoteEditor(true); toast.success('Add your internal note'); }}>Add Note</Button>
-                        <Button variant="outline" size="sm" onClick={() => { setShowForwardDialog(true); toast.success('Select recipient to forward ticket'); }}>Forward</Button>
+                        <Button variant="outline" size="sm" onClick={() => { setShowNoteEditor(true); }}>Add Note</Button>
+                        <Button variant="outline" size="sm" onClick={() => { setShowForwardDialog(true); }}>Forward</Button>
                         <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50" onClick={() => handleResolveTicket(selectedTicket.id)}>Resolve</Button>
                       </div>
                       <div className="flex gap-2">
