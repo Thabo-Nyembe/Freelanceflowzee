@@ -1704,7 +1704,7 @@ export default function CampaignsClient() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => toast.info(`Viewing ${audience.name}`, { description: 'Opening audience details' })}
+                          onClick={() => { /* TODO: Implement view audience details */ }}
                         >
                           <ChevronRight className="w-4 h-4" />
                         </Button>
@@ -2229,7 +2229,7 @@ export default function CampaignsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="mc_sk_xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.success('API key copied')}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('mc_sk_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API key copied'); }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="space-y-2">

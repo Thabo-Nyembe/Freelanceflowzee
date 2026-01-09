@@ -344,29 +344,6 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     setShowMacrosModal(false)
   }
 
-  const handleCloseTicket = (ticket: Ticket) => {
-    toast.success('Ticket closed', {
-      description: `Ticket #${ticket.id} has been closed`
-    })
-  }
-
-  const handleEscalateTicket = (ticket: Ticket) => {
-    toast.info('Ticket escalated', {
-      description: `Ticket #${ticket.id} has been escalated`
-    })
-  }
-
-  const handleMergeTickets = () => {
-    toast.success('Tickets merged', {
-      description: 'Selected tickets have been merged'
-    })
-  }
-
-  const handleExportTickets = () => {
-    toast.success('Export started', {
-      description: 'Ticket data is being exported'
-    })
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-6">
@@ -383,7 +360,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
             <p className="text-muted-foreground">Zendesk-style ticket management and customer support</p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700">
+            <button
+              onClick={() => setActiveTab('settings')}
+              className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
               <Settings className="w-4 h-4" />
               Settings
             </button>
@@ -645,7 +625,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           <Badge className={getPriorityColor(selectedTicket.priority)}>
                             {selectedTicket.priority}
                           </Badge>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+                          <button
+                            onClick={() => { /* TODO: Implement ticket actions menu */ }}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                          >
                             <MoreHorizontal className="w-4 h-4" />
                           </button>
                         </div>
@@ -750,10 +733,16 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         />
                         <div className="flex items-center justify-between p-2 border-t bg-gray-50 dark:bg-gray-800/50">
                           <div className="flex items-center gap-2">
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                            <button
+                              onClick={() => { /* TODO: Implement file attachment */ }}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                            >
                               <Paperclip className="w-4 h-4" />
                             </button>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                            <button
+                              onClick={() => { /* TODO: Implement AI assistant */ }}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                            >
                               <Bot className="w-4 h-4" />
                             </button>
                           </div>
@@ -784,17 +773,27 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           <Flag className="w-4 h-4" />
                           Escalate
                         </button>
-                        <button className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1">
+                        <button
+                          onClick={() => { /* TODO: Implement merge tickets */ }}
+                          className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1"
+                        >
                           <Merge className="w-4 h-4" />
                           Merge
                         </button>
-                        <button className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1">
+                        <button
+                          onClick={() => { /* TODO: Implement link tickets */ }}
+                          className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1"
+                        >
                           <Link2 className="w-4 h-4" />
                           Link
                         </button>
                         <div className="flex-1" />
                         <button
-                          onClick={() => deleteSupportTicket(selectedTicket.id)}
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+                              deleteSupportTicket(selectedTicket.id)
+                            }
+                          }}
                           className="px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-sm flex items-center gap-1"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -878,7 +877,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                 <h2 className="text-xl font-semibold">Response Templates</h2>
                 <p className="text-muted-foreground">Pre-written responses for common scenarios</p>
               </div>
-              <button className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2">
+              <button
+                onClick={() => { /* TODO: Implement create macro modal */ }}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Create Macro
               </button>
@@ -899,7 +901,13 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                     </p>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Used {macro.usageCount} times</span>
-                      <button className="text-teal-600 hover:text-teal-700 flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(macro.content)
+                          toast.success('Macro copied to clipboard')
+                        }}
+                        className="text-teal-600 hover:text-teal-700 flex items-center gap-1"
+                      >
                         <Copy className="w-4 h-4" />
                         Copy
                       </button>
@@ -1154,7 +1162,12 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                                   <p className="font-medium">{sla.resolution}</p>
                                 </div>
                               </div>
-                              <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">Edit</button>
+                              <button
+                                onClick={() => { /* TODO: Implement edit SLA policy */ }}
+                                className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                              >
+                                Edit
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -1330,7 +1343,12 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                                 <FileText className="w-4 h-4 text-muted-foreground" />
                                 <span>{template}</span>
                               </div>
-                              <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">Edit</button>
+                              <button
+                                onClick={() => { /* TODO: Implement edit email template */ }}
+                                className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                              >
+                                Edit
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -1569,7 +1587,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             </div>
                           ))}
                         </div>
-                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-orange-300 transition-colors">
+                        <button
+                          onClick={() => { /* TODO: Implement create trigger modal */ }}
+                          className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-orange-300 transition-colors"
+                        >
                           <Plus className="w-4 h-4 inline-block mr-2" />
                           Create New Trigger
                         </button>
@@ -1624,7 +1645,13 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER')
+                                toast.success('API key copied to clipboard')
+                              }}
+                              className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
                               <Copy className="w-4 h-4" />
                             </button>
                           </div>
@@ -1732,7 +1759,14 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="font-medium text-red-600">Purge All Tickets</p>
                             <p className="text-sm text-muted-foreground">Permanently delete all closed tickets</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (confirm('Are you sure you want to purge all closed tickets? This action cannot be undone.')) {
+                                /* TODO: Implement purge all tickets */
+                              }
+                            }}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                          >
                             <Trash2 className="w-4 h-4" />
                             Purge
                           </button>
@@ -1742,7 +1776,14 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="font-medium text-red-600">Reset All Settings</p>
                             <p className="text-sm text-muted-foreground">Reset all support settings to defaults</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+                                /* TODO: Implement reset all settings */
+                              }
+                            }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <RefreshCw className="w-4 h-4" />
                             Reset
                           </button>
@@ -1752,7 +1793,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="font-medium text-red-600">Export All Data</p>
                             <p className="text-sm text-muted-foreground">Download all tickets and customer data</p>
                           </div>
-                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                          <button
+                            onClick={() => { /* TODO: Implement export all data */ }}
+                            className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          >
                             <Download className="w-4 h-4" />
                             Export
                           </button>
@@ -2196,7 +2240,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         </button>
                         <button
                           className="px-3 py-1.5 border rounded text-sm flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-800"
-                          onClick={() => toast.info('Edit macro functionality')}
+                          onClick={() => { /* TODO: Implement edit macro */ }}
                         >
                           <FileText className="w-3 h-3" />
                           Edit
@@ -2215,7 +2259,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                 Close
               </button>
               <button
-                onClick={() => toast.info('Create new macro feature')}
+                onClick={() => { /* TODO: Implement create new macro */ }}
                 className="px-4 py-2 bg-yellow-600 text-white rounded-lg flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />

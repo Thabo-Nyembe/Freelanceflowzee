@@ -2403,7 +2403,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewCategoryModal(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Category created successfully!')
+                /* TODO: Implement category creation functionality */
                 setShowNewCategoryModal(false)
               }}>Create Category</Button>
             </DialogFooter>
@@ -3306,8 +3306,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetConfirmDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('All budgets have been reset')
-                setShowResetConfirmDialog(false)
+                if (confirm('This will permanently delete all your budgets, categories, transactions, and goals. This action cannot be undone. Are you absolutely sure?')) {
+                  /* TODO: Implement reset all budgets functionality */
+                  setShowResetConfirmDialog(false)
+                }
               }}>
                 Yes, Reset Everything
               </Button>
@@ -3376,7 +3378,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddScheduledDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Scheduled transaction created!')
+                /* TODO: Implement scheduled transaction creation */
                 setShowAddScheduledDialog(false)
               }}>
                 Create Schedule
@@ -3439,7 +3441,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportPdfDialog(false)}>Cancel</Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('PDF export started - download will begin shortly')
+                /* TODO: Implement PDF export functionality */
                 setShowExportPdfDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />
@@ -3549,10 +3551,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGenerateReportDialog(null)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success(`${showGenerateReportDialog === 'spending' ? 'Spending' :
-                              showGenerateReportDialog === 'income-expenses' ? 'Income vs Expenses' :
-                              showGenerateReportDialog === 'net-worth' ? 'Net Worth' :
-                              'Budget Performance'} report generated successfully`)
+                /* TODO: Implement report generation for ${showGenerateReportDialog} */
                 setShowGenerateReportDialog(null)
               }}>
                 Generate Report
@@ -3613,7 +3612,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Settings saved successfully')
+                /* TODO: Implement settings save functionality */
                 setShowSettingsDialog(false)
               }}>
                 Save Settings
@@ -3665,7 +3664,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditGroupDialog(null)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Category group updated successfully')
+                /* TODO: Implement category group update functionality */
                 setShowEditGroupDialog(null)
               }}>
                 Save Changes
@@ -3688,36 +3687,38 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </DialogHeader>
             <div className="space-y-3 py-4">
               <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                toast.success('Category renamed')
+                /* TODO: Implement category rename functionality */
                 setShowCategoryOptionsDialog(null)
               }}>
                 <Edit3 className="h-4 w-4" />
                 Rename Category
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                toast.success('Category moved')
+                /* TODO: Implement move category functionality */
                 setShowCategoryOptionsDialog(null)
               }}>
                 <ArrowLeftRight className="h-4 w-4" />
                 Move to Different Group
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                toast.success('Goal set for category')
+                /* TODO: Implement set goal for category functionality */
                 setShowCategoryOptionsDialog(null)
               }}>
                 <Target className="h-4 w-4" />
                 Set Goal
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                toast.success('Category hidden')
+                /* TODO: Implement hide category functionality */
                 setShowCategoryOptionsDialog(null)
               }}>
                 <Clock className="h-4 w-4" />
                 Hide Category
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2 text-red-600" onClick={() => {
-                toast.success('Category deleted')
-                setShowCategoryOptionsDialog(null)
+                if (confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
+                  /* TODO: Implement delete category functionality */
+                  setShowCategoryOptionsDialog(null)
+                }
               }}>
                 <Trash2 className="h-4 w-4" />
                 Delete Category
@@ -3772,7 +3773,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddRuleDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Auto-categorization rule created')
+                /* TODO: Implement auto-categorization rule creation */
                 setShowAddRuleDialog(false)
               }}>
                 Create Rule
@@ -3816,7 +3817,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSyncAccountDialog(null)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Account sync started - this may take a moment')
+                /* TODO: Implement account sync functionality */
                 setShowSyncAccountDialog(null)
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />
@@ -3861,7 +3862,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLinkAccountDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Redirecting to secure login...')
+                /* TODO: Implement redirect to bank login for account linking */
                 setShowLinkAccountDialog(false)
               }}>
                 Continue
@@ -3887,7 +3888,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="font-medium text-gray-900 dark:text-white mb-1">Drop your CSV file here</p>
                 <p className="text-sm text-gray-500 mb-4">or click to browse</p>
-                <Button variant="outline" size="sm" onClick={() => toast.success('File browser opened')}>Select File</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Open file browser for CSV import */ }}>Select File</Button>
               </div>
               <div className="space-y-2">
                 <Label>Account to Import To</Label>
@@ -3910,7 +3911,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportCsvDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('CSV import started')
+                /* TODO: Implement CSV import functionality */
                 setShowImportCsvDialog(false)
               }}>
                 Import
@@ -3974,7 +3975,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportCsvDialog(false)}>Cancel</Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('CSV export started - download will begin shortly')
+                /* TODO: Implement CSV export functionality */
                 setShowExportCsvDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />
@@ -4001,7 +4002,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="font-medium text-gray-900 dark:text-white mb-1">Drop your QIF file here</p>
                 <p className="text-sm text-gray-500 mb-4">or click to browse</p>
-                <Button variant="outline" size="sm" onClick={() => toast.success('File browser opened')}>Select File</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Open file browser for QIF import */ }}>Select File</Button>
               </div>
               <div className="space-y-2">
                 <Label>Account to Import To</Label>
@@ -4025,7 +4026,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportQifDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('QIF import started')
+                /* TODO: Implement QIF import functionality */
                 setShowImportQifDialog(false)
               }}>
                 Import
@@ -4093,7 +4094,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportReportsDialog(false)}>Cancel</Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Report export started - download will begin shortly')
+                /* TODO: Implement report export functionality */
                 setShowExportReportsDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />
@@ -4132,8 +4133,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCopyApiKeyDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                navigator.clipboard?.writeText('budget_api_xxxxxxxxxxxx')
-                toast.success('API key copied to clipboard')
+                navigator.clipboard.writeText('budget_api_xxxxxxxxxxxx')
                 setShowCopyApiKeyDialog(false)
               }}>
                 <Copy className="h-4 w-4 mr-2" />
@@ -4177,8 +4177,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
               <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => {
-                toast.success('New API key generated successfully')
-                setShowRegenerateApiKeyDialog(false)
+                if (confirm('This will invalidate your existing API key. All applications using the old key will stop working. Are you sure?')) {
+                  /* TODO: Implement API key regeneration */
+                  setShowRegenerateApiKeyDialog(false)
+                }
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Regenerate Key
@@ -4241,7 +4243,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDownloadDataDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Data export started - download will begin shortly')
+                /* TODO: Implement data export functionality */
                 setShowDownloadDataDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />
@@ -4313,7 +4315,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFullReportDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Full report generation started')
+                /* TODO: Implement full report generation functionality */
                 setShowFullReportDialog(false)
               }}>
                 Generate Report
@@ -4387,7 +4389,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditTransactionDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Transaction updated successfully')
+                /* TODO: Implement transaction update functionality */
                 setShowEditTransactionDialog(false)
                 setSelectedTransaction(null)
               }}>
@@ -4438,9 +4440,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteTransactionDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('Transaction deleted successfully')
-                setShowDeleteTransactionDialog(false)
-                setSelectedTransaction(null)
+                if (confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
+                  /* TODO: Implement transaction deletion */
+                  setShowDeleteTransactionDialog(false)
+                  setSelectedTransaction(null)
+                }
               }}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete Transaction

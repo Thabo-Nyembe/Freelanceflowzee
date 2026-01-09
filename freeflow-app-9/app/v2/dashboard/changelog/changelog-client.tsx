@@ -3330,14 +3330,14 @@ Thanks to all contributors!`}
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => toast.info('Loading previous page...')}
+                  onClick={() => { /* TODO: Implement audit log pagination - load previous page */ }}
                 >
                   Previous
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => toast.info('Loading next page...')}
+                  onClick={() => { /* TODO: Implement audit log pagination - load next page */ }}
                 >
                   Next
                 </Button>
