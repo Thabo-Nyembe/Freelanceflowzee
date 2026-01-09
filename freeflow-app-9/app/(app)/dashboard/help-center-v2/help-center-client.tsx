@@ -801,8 +801,8 @@ const mockHelpCenterActivities = [
 export default function HelpCenterClient() {
   const [activeTab, setActiveTab] = useState('articles')
   const [articles, setArticles] = useState<Article[]>(mockArticles)
-  const [categories] = useState<Category[]>(mockCategories)
-  const [collections] = useState<Collection[]>(mockCollections)
+  const [categories, setCategories] = useState<Category[]>(mockCategories)
+  const [collections, setCollections] = useState<Collection[]>(mockCollections)
   const [analytics] = useState<Analytics>(mockAnalytics)
   const [feedback, setFeedback] = useState<Feedback[]>(mockFeedback)
   const [searchQuery, setSearchQuery] = useState('')
@@ -817,6 +817,51 @@ export default function HelpCenterClient() {
   const [isSearching, setIsSearching] = useState(false)
   const [showCreateArticleDialog, setShowCreateArticleDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // New dialog states for full functionality
+  const [showCreateCategoryDialog, setShowCreateCategoryDialog] = useState(false)
+  const [showManageTagsDialog, setShowManageTagsDialog] = useState(false)
+  const [showTranslateDialog, setShowTranslateDialog] = useState(false)
+  const [showSubcategoryDialog, setShowSubcategoryDialog] = useState(false)
+  const [showOrganizeDialog, setShowOrganizeDialog] = useState(false)
+  const [showCrossLinkDialog, setShowCrossLinkDialog] = useState(false)
+  const [showNewCollectionDialog, setShowNewCollectionDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showEditCategoryDialog, setShowEditCategoryDialog] = useState(false)
+  const [selectedCategoryForEdit, setSelectedCategoryForEdit] = useState<Category | null>(null)
+
+  // Form states for new article
+  const [newArticleTitle, setNewArticleTitle] = useState('')
+  const [newArticleExcerpt, setNewArticleExcerpt] = useState('')
+  const [newArticleContent, setNewArticleContent] = useState('')
+  const [newArticleType, setNewArticleType] = useState<ArticleType>('article')
+  const [newArticleCategoryId, setNewArticleCategoryId] = useState('')
+  const [newArticleTags, setNewArticleTags] = useState('')
+  const [newArticleAudience, setNewArticleAudience] = useState<AudienceType>('all')
+
+  // Form states for new category
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryDescription, setNewCategoryDescription] = useState('')
+  const [newCategoryIcon, setNewCategoryIcon] = useState('')
+
+  // Form states for new collection
+  const [newCollectionName, setNewCollectionName] = useState('')
+  const [newCollectionDescription, setNewCollectionDescription] = useState('')
+  const [newCollectionIcon, setNewCollectionIcon] = useState('')
+  const [newCollectionAudience, setNewCollectionAudience] = useState<AudienceType>('all')
+
+  // Tags management state
+  const [allTags, setAllTags] = useState<string[]>(() => {
+    const tags = new Set<string>()
+    mockArticles.forEach(a => a.tags.forEach(t => tags.add(t)))
+    return Array.from(tags)
+  })
+  const [newTagName, setNewTagName] = useState('')
+
+  // Schedule state
+  const [scheduleArticleId, setScheduleArticleId] = useState('')
+  const [scheduleDate, setScheduleDate] = useState('')
+  const [scheduleTime, setScheduleTime] = useState('')
 
   // Filtered articles
   const filteredArticles = useMemo(() => {
@@ -868,8 +913,64 @@ export default function HelpCenterClient() {
 
   // Article handlers
   const handleCreateArticle = async () => {
+    // Reset form fields
+    setNewArticleTitle('')
+    setNewArticleExcerpt('')
+    setNewArticleContent('')
+    setNewArticleType('article')
+    setNewArticleCategoryId('')
+    setNewArticleTags('')
+    setNewArticleAudience('all')
     setShowCreateArticleDialog(true)
-    toast.success('Article editor opened - start creating your content')
+  }
+
+  // Save new article handler
+  const handleSaveNewArticle = async () => {
+    if (!newArticleTitle.trim()) {
+      toast.error('Please enter an article title')
+      return
+    }
+    if (!newArticleExcerpt.trim()) {
+      toast.error('Please enter an article excerpt')
+      return
+    }
+    if (!newArticleCategoryId) {
+      toast.error('Please select a category')
+      return
+    }
+
+    const newArticle: Article = {
+      id: `art-${Date.now()}`,
+      title: newArticleTitle,
+      slug: newArticleTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      excerpt: newArticleExcerpt,
+      content: newArticleContent,
+      type: newArticleType,
+      status: 'draft',
+      format: 'text',
+      categoryId: newArticleCategoryId,
+      author: { id: 'auth-1', name: 'Current User', avatar: '/avatars/user.jpg', role: 'Content Creator' },
+      language: 'en',
+      translations: [],
+      audience: newArticleAudience,
+      tags: newArticleTags.split(',').map(t => t.trim()).filter(t => t),
+      views: 0,
+      helpfulCount: 0,
+      notHelpfulCount: 0,
+      avgRating: 0,
+      readTime: Math.max(1, Math.ceil(newArticleContent.split(' ').length / 200)),
+      relatedArticles: [],
+      version: 1,
+      publishedAt: '',
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      featured: false,
+      pinned: false
+    }
+
+    setArticles(prev => [newArticle, ...prev])
+    setShowCreateArticleDialog(false)
+    toast.success(`Article "${newArticleTitle}" created as draft`)
   }
 
   const handlePublishArticle = async (articleTitle: string) => {
@@ -901,8 +1002,35 @@ export default function HelpCenterClient() {
   }
 
   const handleCreateCategory = async () => {
-    toast.info('Category creation dialog would open here')
-    // In production: setShowCreateCategoryDialog(true)
+    setNewCategoryName('')
+    setNewCategoryDescription('')
+    setNewCategoryIcon('')
+    setShowCreateCategoryDialog(true)
+  }
+
+  // Save new category handler
+  const handleSaveNewCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Please enter a category name')
+      return
+    }
+
+    const newCategory: Category = {
+      id: `cat-${Date.now()}`,
+      name: newCategoryName,
+      slug: newCategoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      description: newCategoryDescription,
+      icon: newCategoryIcon || '📁',
+      color: 'from-blue-500 to-purple-500',
+      articleCount: 0,
+      subcategories: [],
+      order: categories.length + 1,
+      visibility: 'public'
+    }
+
+    setCategories(prev => [...prev, newCategory])
+    setShowCreateCategoryDialog(false)
+    toast.success(`Category "${newCategoryName}" created successfully`)
   }
 
   // Search handlers with real state updates
@@ -962,13 +1090,32 @@ export default function HelpCenterClient() {
   }
 
   const handleManageTags = async () => {
-    toast.info('Tag manager - manage your article tags here')
-    // In production: setShowTagManagerDialog(true)
+    setShowManageTagsDialog(true)
+  }
+
+  // Add new tag handler
+  const handleAddTag = async () => {
+    if (!newTagName.trim()) {
+      toast.error('Please enter a tag name')
+      return
+    }
+    if (allTags.includes(newTagName.toLowerCase())) {
+      toast.error('Tag already exists')
+      return
+    }
+    setAllTags(prev => [...prev, newTagName.toLowerCase()])
+    setNewTagName('')
+    toast.success(`Tag "${newTagName}" added`)
+  }
+
+  // Delete tag handler
+  const handleDeleteTag = async (tag: string) => {
+    setAllTags(prev => prev.filter(t => t !== tag))
+    toast.success(`Tag "${tag}" deleted`)
   }
 
   const handleTranslate = async () => {
-    toast.info('Translation center - manage multi-language content')
-    // In production: setShowTranslationDialog(true)
+    setShowTranslateDialog(true)
   }
 
   const handleArchives = async () => {
@@ -979,17 +1126,14 @@ export default function HelpCenterClient() {
 
   const handleSettings = async () => {
     setShowSettingsDialog(true)
-    toast.success('Help center settings opened')
   }
 
   const handleSubcategory = async () => {
-    toast.info('Create a new subcategory')
-    // In production: setShowSubcategoryDialog(true)
+    setShowSubcategoryDialog(true)
   }
 
   const handleOrganize = async () => {
-    toast.info('Content organizer - drag and drop to reorder')
-    // In production: setShowOrganizerDialog(true)
+    setShowOrganizeDialog(true)
   }
 
   const handleAutoSort = async () => {
@@ -1000,8 +1144,7 @@ export default function HelpCenterClient() {
   }
 
   const handleCrossLink = async () => {
-    toast.info('Link manager - manage related articles and cross-references')
-    // In production: setShowLinkManagerDialog(true)
+    setShowCrossLinkDialog(true)
   }
 
   const handleCleanup = async () => {
@@ -1022,8 +1165,35 @@ export default function HelpCenterClient() {
   }
 
   const handleNewCollection = async () => {
-    toast.info('Create a new curated collection')
-    // In production: setShowCreateCollectionDialog(true)
+    setNewCollectionName('')
+    setNewCollectionDescription('')
+    setNewCollectionIcon('')
+    setNewCollectionAudience('all')
+    setShowNewCollectionDialog(true)
+  }
+
+  // Save new collection handler
+  const handleSaveNewCollection = async () => {
+    if (!newCollectionName.trim()) {
+      toast.error('Please enter a collection name')
+      return
+    }
+
+    const newCollection: Collection = {
+      id: `col-${Date.now()}`,
+      name: newCollectionName,
+      description: newCollectionDescription,
+      icon: newCollectionIcon || '📚',
+      color: 'from-purple-500 to-pink-500',
+      articleIds: [],
+      views: 0,
+      audience: newCollectionAudience,
+      order: collections.length + 1
+    }
+
+    setCollections(prev => [...prev, newCollection])
+    setShowNewCollectionDialog(false)
+    toast.success(`Collection "${newCollectionName}" created successfully`)
   }
 
   // Feedback filter handlers - actually filter feedback
@@ -1135,8 +1305,38 @@ export default function HelpCenterClient() {
   }
 
   const handleSchedule = async () => {
-    toast.info('Content calendar - schedule article publications')
-    // In production: setShowCalendarDialog(true)
+    setScheduleArticleId('')
+    setScheduleDate('')
+    setScheduleTime('')
+    setShowScheduleDialog(true)
+  }
+
+  // Save scheduled publication handler
+  const handleSaveSchedule = async () => {
+    if (!scheduleArticleId) {
+      toast.error('Please select an article')
+      return
+    }
+    if (!scheduleDate) {
+      toast.error('Please select a date')
+      return
+    }
+    if (!scheduleTime) {
+      toast.error('Please select a time')
+      return
+    }
+
+    const article = articles.find(a => a.id === scheduleArticleId)
+    if (article) {
+      const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`)
+      setArticles(prev => prev.map(a =>
+        a.id === scheduleArticleId
+          ? { ...a, publishedAt: scheduledDateTime.toISOString() }
+          : a
+      ))
+      setShowScheduleDialog(false)
+      toast.success(`"${article.title}" scheduled for ${scheduledDateTime.toLocaleString()}`)
+    }
   }
 
   // Article action handlers
@@ -1244,8 +1444,38 @@ export default function HelpCenterClient() {
   }
 
   const handleEditCategory = async (categoryName: string) => {
-    toast.success(`Editing category: ${categoryName}`)
-    // In production: setShowEditCategoryDialog(true) with selected category
+    const category = categories.find(c => c.name === categoryName)
+    if (category) {
+      setSelectedCategoryForEdit(category)
+      setNewCategoryName(category.name)
+      setNewCategoryDescription(category.description)
+      setNewCategoryIcon(category.icon)
+      setShowEditCategoryDialog(true)
+    }
+  }
+
+  // Save edited category handler
+  const handleSaveEditedCategory = async () => {
+    if (!selectedCategoryForEdit) return
+    if (!newCategoryName.trim()) {
+      toast.error('Please enter a category name')
+      return
+    }
+
+    setCategories(prev => prev.map(c =>
+      c.id === selectedCategoryForEdit.id
+        ? {
+            ...c,
+            name: newCategoryName,
+            slug: newCategoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+            description: newCategoryDescription,
+            icon: newCategoryIcon || c.icon
+          }
+        : c
+    ))
+    setShowEditCategoryDialog(false)
+    setSelectedCategoryForEdit(null)
+    toast.success(`Category "${newCategoryName}" updated successfully`)
   }
 
   // Copy article link handler
@@ -2389,6 +2619,608 @@ export default function HelpCenterClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Article Dialog */}
+      <Dialog open={showCreateArticleDialog} onOpenChange={setShowCreateArticleDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Create New Article
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Title *</label>
+              <Input
+                placeholder="Enter article title..."
+                value={newArticleTitle}
+                onChange={(e) => setNewArticleTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Excerpt *</label>
+              <Input
+                placeholder="Brief description of the article..."
+                value={newArticleExcerpt}
+                onChange={(e) => setNewArticleExcerpt(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Content</label>
+              <textarea
+                className="w-full min-h-[150px] p-3 rounded-lg border bg-background resize-y"
+                placeholder="Write your article content here..."
+                value={newArticleContent}
+                onChange={(e) => setNewArticleContent(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type</label>
+                <select
+                  className="w-full p-2 rounded-lg border bg-background"
+                  value={newArticleType}
+                  onChange={(e) => setNewArticleType(e.target.value as ArticleType)}
+                >
+                  <option value="article">Article</option>
+                  <option value="tutorial">Tutorial</option>
+                  <option value="guide">Guide</option>
+                  <option value="faq">FAQ</option>
+                  <option value="video">Video</option>
+                  <option value="troubleshooting">Troubleshooting</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audience</label>
+                <select
+                  className="w-full p-2 rounded-lg border bg-background"
+                  value={newArticleAudience}
+                  onChange={(e) => setNewArticleAudience(e.target.value as AudienceType)}
+                >
+                  <option value="all">All Users</option>
+                  <option value="customers">Customers</option>
+                  <option value="team">Team</option>
+                  <option value="enterprise">Enterprise</option>
+                  <option value="developers">Developers</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Category *</label>
+              <select
+                className="w-full p-2 rounded-lg border bg-background"
+                value={newArticleCategoryId}
+                onChange={(e) => setNewArticleCategoryId(e.target.value)}
+              >
+                <option value="">Select a category...</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tags (comma-separated)</label>
+              <Input
+                placeholder="tag1, tag2, tag3..."
+                value={newArticleTags}
+                onChange={(e) => setNewArticleTags(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowCreateArticleDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewArticle}>
+              <FileText className="w-4 h-4 mr-2" />
+              Create Article
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Help Center Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <h3 className="font-semibold">General Settings</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium">Public Help Center</p>
+                    <p className="text-sm text-muted-foreground">Allow anyone to view published articles</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="w-5 h-5" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium">Enable Search</p>
+                    <p className="text-sm text-muted-foreground">Allow users to search articles</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="w-5 h-5" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium">Collect Feedback</p>
+                    <p className="text-sm text-muted-foreground">Show helpful/not helpful buttons on articles</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="w-5 h-5" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium">Show Read Time</p>
+                    <p className="text-sm text-muted-foreground">Display estimated reading time</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h3 className="font-semibold">SEO Settings</h3>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Help Center Title</label>
+                  <Input defaultValue="FreeFlow Kazi Help Center" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Meta Description</label>
+                  <textarea
+                    className="w-full p-3 rounded-lg border bg-background resize-y min-h-[80px]"
+                    defaultValue="Find answers to your questions about FreeFlow Kazi. Browse our comprehensive help articles, tutorials, and guides."
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <h3 className="font-semibold">Contact Support</h3>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Support Email</label>
+                  <Input defaultValue="support@freeflowkazi.com" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <p className="font-medium">Show Contact Button</p>
+                    <p className="text-sm text-muted-foreground">Display contact support option</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="w-5 h-5" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+            <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved successfully'); }}>
+              Save Settings
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Category Dialog */}
+      <Dialog open={showCreateCategoryDialog} onOpenChange={setShowCreateCategoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5" />
+              Create New Category
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Category Name *</label>
+              <Input
+                placeholder="Enter category name..."
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <textarea
+                className="w-full p-3 rounded-lg border bg-background resize-y min-h-[80px]"
+                placeholder="Describe what articles belong in this category..."
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Icon (emoji)</label>
+              <Input
+                placeholder="e.g., enter an emoji icon"
+                value={newCategoryIcon}
+                onChange={(e) => setNewCategoryIcon(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowCreateCategoryDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewCategory}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Category
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Category Dialog */}
+      <Dialog open={showEditCategoryDialog} onOpenChange={setShowEditCategoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Edit Category
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Category Name *</label>
+              <Input
+                placeholder="Enter category name..."
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <textarea
+                className="w-full p-3 rounded-lg border bg-background resize-y min-h-[80px]"
+                placeholder="Describe what articles belong in this category..."
+                value={newCategoryDescription}
+                onChange={(e) => setNewCategoryDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Icon (emoji)</label>
+              <Input
+                placeholder="e.g., enter an emoji icon"
+                value={newCategoryIcon}
+                onChange={(e) => setNewCategoryIcon(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowEditCategoryDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveEditedCategory}>
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Tags Dialog */}
+      <Dialog open={showManageTagsDialog} onOpenChange={setShowManageTagsDialog}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="w-5 h-5" />
+              Manage Tags
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add new tag..."
+                value={newTagName}
+                onChange={(e) => setNewTagName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+              />
+              <Button onClick={handleAddTag}>
+                <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">{allTags.length} tags in use</p>
+              <ScrollArea className="h-[300px]">
+                <div className="flex flex-wrap gap-2">
+                  {allTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="flex items-center gap-1 px-3 py-1.5">
+                      {tag}
+                      <button
+                        onClick={() => handleDeleteTag(tag)}
+                        className="ml-1 hover:text-red-500"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowManageTagsDialog(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Translate Dialog */}
+      <Dialog open={showTranslateDialog} onOpenChange={setShowTranslateDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              Translation Center
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { code: 'en', name: 'English', articles: articles.length },
+                { code: 'es', name: 'Spanish', articles: articles.filter(a => a.translations.includes('es')).length },
+                { code: 'fr', name: 'French', articles: articles.filter(a => a.translations.includes('fr')).length },
+                { code: 'de', name: 'German', articles: articles.filter(a => a.translations.includes('de')).length },
+                { code: 'pt', name: 'Portuguese', articles: articles.filter(a => a.translations.includes('pt')).length },
+                { code: 'ja', name: 'Japanese', articles: articles.filter(a => a.translations.includes('ja')).length },
+              ].map((lang) => (
+                <div key={lang.code} className="p-4 rounded-lg border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{lang.name}</span>
+                    <Badge variant={lang.code === 'en' ? 'default' : 'secondary'}>
+                      {lang.code === 'en' ? 'Primary' : lang.code.toUpperCase()}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{lang.articles} articles</p>
+                  <Progress value={(lang.articles / articles.length) * 100} className="h-2 mt-2" />
+                </div>
+              ))}
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50">
+              <h4 className="font-medium mb-2">Translation Status</h4>
+              <p className="text-sm text-muted-foreground">
+                {articles.filter(a => a.translations.length > 0).length} of {articles.length} articles have translations
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowTranslateDialog(false)}>Close</Button>
+            <Button onClick={() => { toast.success('Translation queue initiated'); setShowTranslateDialog(false); }}>
+              <Languages className="w-4 h-4 mr-2" />
+              Start Translation
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Subcategory Dialog */}
+      <Dialog open={showSubcategoryDialog} onOpenChange={setShowSubcategoryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5" />
+              Create Subcategory
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Parent Category *</label>
+              <select className="w-full p-2 rounded-lg border bg-background">
+                <option value="">Select parent category...</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Subcategory Name *</label>
+              <Input placeholder="Enter subcategory name..." />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowSubcategoryDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Subcategory created'); setShowSubcategoryDialog(false); }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Subcategory
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Organize Dialog */}
+      <Dialog open={showOrganizeDialog} onOpenChange={setShowOrganizeDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layers className="w-5 h-5" />
+              Organize Content
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">Drag and drop categories and articles to reorder them.</p>
+            <div className="space-y-3">
+              {categories.map((cat, idx) => (
+                <div key={cat.id} className="p-4 rounded-lg border cursor-move hover:bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <div className="text-muted-foreground">{idx + 1}</div>
+                    <span className="text-xl">{cat.icon}</span>
+                    <div className="flex-1">
+                      <p className="font-medium">{cat.name}</p>
+                      <p className="text-sm text-muted-foreground">{cat.articleCount} articles</p>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowOrganizeDialog(false)}>Cancel</Button>
+            <Button onClick={() => { toast.success('Order saved'); setShowOrganizeDialog(false); }}>
+              Save Order
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cross-Link Dialog */}
+      <Dialog open={showCrossLinkDialog} onOpenChange={setShowCrossLinkDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link className="w-5 h-5" />
+              Cross-Link Manager
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">Manage related articles and cross-references.</p>
+            <div className="space-y-3">
+              {articles.filter(a => a.status === 'published').slice(0, 5).map((article) => (
+                <div key={article.id} className="p-4 rounded-lg border">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-medium">{article.title}</p>
+                    <Badge variant="secondary">{article.relatedArticles.length} links</Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {article.relatedArticles.map((relId) => {
+                      const relArticle = articles.find(a => a.id === relId)
+                      return relArticle ? (
+                        <Badge key={relId} variant="outline" className="text-xs">
+                          {relArticle.title.substring(0, 30)}...
+                        </Badge>
+                      ) : null
+                    })}
+                    <Button variant="ghost" size="sm" className="h-6">
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add Link
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowCrossLinkDialog(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Collection Dialog */}
+      <Dialog open={showNewCollectionDialog} onOpenChange={setShowNewCollectionDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bookmark className="w-5 h-5" />
+              Create New Collection
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Collection Name *</label>
+              <Input
+                placeholder="Enter collection name..."
+                value={newCollectionName}
+                onChange={(e) => setNewCollectionName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <textarea
+                className="w-full p-3 rounded-lg border bg-background resize-y min-h-[80px]"
+                placeholder="Describe what this collection is about..."
+                value={newCollectionDescription}
+                onChange={(e) => setNewCollectionDescription(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Icon (emoji)</label>
+              <Input
+                placeholder="e.g., enter an emoji icon"
+                value={newCollectionIcon}
+                onChange={(e) => setNewCollectionIcon(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Audience</label>
+              <select
+                className="w-full p-2 rounded-lg border bg-background"
+                value={newCollectionAudience}
+                onChange={(e) => setNewCollectionAudience(e.target.value as AudienceType)}
+              >
+                <option value="all">All Users</option>
+                <option value="customers">Customers</option>
+                <option value="team">Team</option>
+                <option value="enterprise">Enterprise</option>
+                <option value="developers">Developers</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowNewCollectionDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewCollection}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Collection
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              Schedule Publication
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Select Article *</label>
+              <select
+                className="w-full p-2 rounded-lg border bg-background"
+                value={scheduleArticleId}
+                onChange={(e) => setScheduleArticleId(e.target.value)}
+              >
+                <option value="">Select an article...</option>
+                {articles.filter(a => a.status === 'draft' || a.status === 'review').map(article => (
+                  <option key={article.id} value={article.id}>{article.title}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Publication Date *</label>
+              <Input
+                type="date"
+                value={scheduleDate}
+                onChange={(e) => setScheduleDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Publication Time *</label>
+              <Input
+                type="time"
+                value={scheduleTime}
+                onChange={(e) => setScheduleTime(e.target.value)}
+              />
+            </div>
+            {scheduleArticleId && scheduleDate && scheduleTime && (
+              <div className="p-3 rounded-lg bg-muted/50">
+                <p className="text-sm">
+                  <strong>{articles.find(a => a.id === scheduleArticleId)?.title}</strong> will be published on{' '}
+                  <strong>{new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString()}</strong>
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveSchedule}>
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule Publication
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

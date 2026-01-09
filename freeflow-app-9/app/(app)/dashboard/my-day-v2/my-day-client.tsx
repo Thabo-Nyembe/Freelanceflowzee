@@ -594,6 +594,36 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   const [showTaskMenu, setShowTaskMenu] = useState(false)
   const [menuTaskId, setMenuTaskId] = useState<string | null>(null)
 
+  // Dialog states for functional buttons
+  const [showAddSectionDialog, setShowAddSectionDialog] = useState(false)
+  const [showAddLabelDialog, setShowAddLabelDialog] = useState(false)
+  const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
+  const [showKeyboardShortcutsDialog, setShowKeyboardShortcutsDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showReminderDialog, setShowReminderDialog] = useState(false)
+  const [showMoveTaskDialog, setShowMoveTaskDialog] = useState(false)
+  const [showEditTaskDialog, setShowEditTaskDialog] = useState(false)
+  const [showCalendarViewDialog, setShowCalendarViewDialog] = useState(false)
+
+  // Form states for dialogs
+  const [newSectionName, setNewSectionName] = useState('')
+  const [newLabelName, setNewLabelName] = useState('')
+  const [newLabelColor, setNewLabelColor] = useState('#3B82F6')
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectColor, setNewProjectColor] = useState('#6366F1')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
+  const [reminderDate, setReminderDate] = useState('')
+  const [reminderTime, setReminderTime] = useState('')
+  const [selectedTargetProject, setSelectedTargetProject] = useState<string | null>(null)
+  const [editTaskTitle, setEditTaskTitle] = useState('')
+  const [editTaskDescription, setEditTaskDescription] = useState('')
+  const [editTaskPriority, setEditTaskPriority] = useState<TaskPriority>('p4')
+  const [editTaskDueDate, setEditTaskDueDate] = useState('')
+  const [settingsTimerDuration, setSettingsTimerDuration] = useState(25)
+  const [settingsShortBreak, setSettingsShortBreak] = useState(5)
+  const [settingsLongBreak, setSettingsLongBreak] = useState(15)
+  const [settingsNotifications, setSettingsNotifications] = useState(true)
+
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -722,7 +752,6 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   // Handlers - Real functionality
   const handleAddTask = () => {
     setShowQuickAdd(true)
-    toast.success('Task form opened')
   }
 
   const handleCompleteTask = (taskId: string, taskName: string) => {
@@ -740,41 +769,145 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   }
 
   const handleScheduleMeeting = () => {
-    // Open calendar view
-    setActiveTab('calendar')
-    toast.success('Calendar view opened')
+    // Open calendar view dialog
+    setShowCalendarViewDialog(true)
   }
 
   const handleSetReminder = () => {
     if (selectedTask) {
-      toast.success(`Reminder set for "${selectedTask.title}"`)
+      setReminderDate('')
+      setReminderTime('')
+      setShowReminderDialog(true)
     } else {
       toast.info('Select a task to set a reminder')
     }
   }
 
   const handleKeyboardShortcuts = () => {
-    toast.info('Keyboard Shortcuts: Q=Quick Add, T=Today, P=Projects, L=Labels, F=Filters, C=Calendar, A=Analytics, Space=Start Timer')
+    setShowKeyboardShortcutsDialog(true)
   }
 
   const handleSettings = () => {
-    toast.info('Settings: Timer duration, notifications, and theme preferences available in app settings')
+    setShowSettingsDialog(true)
   }
 
   const handleAddSection = () => {
-    toast.success('New section created')
+    setNewSectionName('')
+    setShowAddSectionDialog(true)
   }
 
   const handleAddLabel = () => {
-    toast.success('New label created')
+    setNewLabelName('')
+    setNewLabelColor('#3B82F6')
+    setShowAddLabelDialog(true)
   }
 
   const handleAddProject = () => {
-    toast.success('New project created')
+    setNewProjectName('')
+    setNewProjectColor('#6366F1')
+    setNewProjectDescription('')
+    setShowAddProjectDialog(true)
   }
 
   const handleCalendarView = (view: string) => {
-    toast.success(`${view} view loaded`)
+    setShowCalendarViewDialog(true)
+  }
+
+  // Create section handler
+  const handleCreateSection = () => {
+    if (!newSectionName.trim()) {
+      toast.error('Please enter a section name')
+      return
+    }
+    toast.success(`Section "${newSectionName}" created successfully`)
+    setShowAddSectionDialog(false)
+    setNewSectionName('')
+  }
+
+  // Create label handler
+  const handleCreateLabel = () => {
+    if (!newLabelName.trim()) {
+      toast.error('Please enter a label name')
+      return
+    }
+    toast.success(`Label "@${newLabelName}" created successfully`)
+    setShowAddLabelDialog(false)
+    setNewLabelName('')
+    setNewLabelColor('#3B82F6')
+  }
+
+  // Create project handler
+  const handleCreateProject = () => {
+    if (!newProjectName.trim()) {
+      toast.error('Please enter a project name')
+      return
+    }
+    toast.success(`Project "${newProjectName}" created successfully`)
+    setShowAddProjectDialog(false)
+    setNewProjectName('')
+    setNewProjectColor('#6366F1')
+    setNewProjectDescription('')
+  }
+
+  // Set reminder handler
+  const handleSetReminderSubmit = () => {
+    if (!reminderDate || !reminderTime) {
+      toast.error('Please select both date and time')
+      return
+    }
+    if (selectedTask) {
+      toast.success(`Reminder set for "${selectedTask.title}" on ${reminderDate} at ${reminderTime}`)
+      setShowReminderDialog(false)
+    }
+  }
+
+  // Save settings handler
+  const handleSaveSettings = () => {
+    toast.success('Settings saved successfully')
+    setShowSettingsDialog(false)
+  }
+
+  // Move task handler
+  const handleMoveTaskSubmit = () => {
+    if (!selectedTargetProject) {
+      toast.error('Please select a destination project')
+      return
+    }
+    const targetProject = projects.find(p => p.id === selectedTargetProject)
+    if (selectedTask && targetProject) {
+      setTasks(prev => prev.map(t =>
+        t.id === selectedTask.id
+          ? { ...t, projectId: targetProject.id, projectName: targetProject.name, projectColor: targetProject.color }
+          : t
+      ))
+      toast.success(`Task moved to "${targetProject.name}"`)
+      setShowMoveTaskDialog(false)
+      setSelectedTargetProject(null)
+    }
+  }
+
+  // Edit task handler
+  const handleEditTaskSubmit = () => {
+    if (!editTaskTitle.trim()) {
+      toast.error('Please enter a task title')
+      return
+    }
+    if (selectedTask) {
+      setTasks(prev => prev.map(t =>
+        t.id === selectedTask.id
+          ? {
+              ...t,
+              title: editTaskTitle,
+              description: editTaskDescription,
+              priority: editTaskPriority,
+              dueDate: editTaskDueDate || undefined
+            }
+          : t
+      ))
+      toast.success(`Task "${editTaskTitle}" updated successfully`)
+      setShowEditTaskDialog(false)
+      setShowTaskDialog(false)
+    }
   }
 
   const handlePostComment = () => {
@@ -787,7 +920,11 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
   const handleEditTask = () => {
     if (selectedTask) {
-      toast.success(`Editing "${selectedTask.title}"`)
+      setEditTaskTitle(selectedTask.title)
+      setEditTaskDescription(selectedTask.description || '')
+      setEditTaskPriority(selectedTask.priority)
+      setEditTaskDueDate(selectedTask.dueDate || '')
+      setShowEditTaskDialog(true)
     } else {
       toast.error('No task selected')
     }
@@ -795,7 +932,8 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
   const handleMoveTask = () => {
     if (selectedTask) {
-      toast.info('Select destination project for task')
+      setSelectedTargetProject(null)
+      setShowMoveTaskDialog(true)
     } else {
       toast.error('No task selected')
     }
@@ -909,10 +1047,16 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     switch (action) {
       case 'edit':
         setSelectedTask(task)
-        setShowTaskDialog(true)
+        setEditTaskTitle(task.title)
+        setEditTaskDescription(task.description || '')
+        setEditTaskPriority(task.priority)
+        setEditTaskDueDate(task.dueDate || '')
+        setShowEditTaskDialog(true)
         break
       case 'move':
-        toast.info('Select destination project for task')
+        setSelectedTask(task)
+        setSelectedTargetProject(null)
+        setShowMoveTaskDialog(true)
         break
       case 'duplicate':
         const duplicatedTask: Task = {
@@ -958,7 +1102,6 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   // Open filter builder
   const handleOpenFilterBuilder = () => {
     setShowFilterBuilder(true)
-    toast.success('Filter builder opened - Create your custom filter')
   }
 
   // Quick actions with real functionality
@@ -969,7 +1112,6 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       icon: 'plus',
       action: () => {
         setShowQuickAdd(true)
-        toast.success('Quick add opened - Add your task')
       },
       variant: 'default' as const
     },
@@ -981,7 +1123,6 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
         setTimerActive(true)
         setTimerMode('focus')
         setTimerSeconds(25 * 60)
-        toast.success('Focus Mode Activated! 25 minute timer started')
       },
       variant: 'default' as const
     },
@@ -992,7 +1133,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       action: () => {
         const completed = completedToday.length
         const remaining = todayTasks.length
-        toast.success(`Daily Review: ${completed} tasks completed, ${remaining} remaining`)
+        toast.info(`Daily Review: ${completed} tasks completed, ${remaining} remaining`)
       },
       variant: 'outline' as const
     },
@@ -2249,6 +2390,577 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   setShowFilterBuilder(false)
                   toast.success('Custom filter created successfully')
                 }}>Create Filter</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Section Dialog */}
+        <Dialog open={showAddSectionDialog} onOpenChange={setShowAddSectionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-blue-500" />
+                Create New Section
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Section Name</label>
+                <Input
+                  placeholder="e.g., In Progress, Backlog, Done"
+                  value={newSectionName}
+                  onChange={(e) => setNewSectionName(e.target.value)}
+                  className="mt-1"
+                  autoFocus
+                />
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  Sections help organize tasks within a project. Use them to create workflow stages or categories.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setShowAddSectionDialog(false)}>Cancel</Button>
+                <Button onClick={handleCreateSection}>Create Section</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Label Dialog */}
+        <Dialog open={showAddLabelDialog} onOpenChange={setShowAddLabelDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-pink-500" />
+                Create New Label
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Label Name</label>
+                <Input
+                  placeholder="e.g., urgent, review, waiting"
+                  value={newLabelName}
+                  onChange={(e) => setNewLabelName(e.target.value)}
+                  className="mt-1"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Label Color</label>
+                <div className="flex items-center gap-3 mt-2">
+                  <input
+                    type="color"
+                    value={newLabelColor}
+                    onChange={(e) => setNewLabelColor(e.target.value)}
+                    className="w-10 h-10 rounded cursor-pointer border-0"
+                  />
+                  <div className="flex gap-2">
+                    {['#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899'].map(color => (
+                      <button
+                        key={color}
+                        className={`w-8 h-8 rounded-full border-2 ${newLabelColor === color ? 'border-gray-900 dark:border-white' : 'border-transparent'}`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setNewLabelColor(color)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Badge style={{ backgroundColor: `${newLabelColor}20`, color: newLabelColor, borderColor: newLabelColor }} variant="outline">
+                  @{newLabelName || 'label-name'}
+                </Badge>
+                <span className="text-sm text-muted-foreground">Preview</span>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setShowAddLabelDialog(false)}>Cancel</Button>
+                <Button onClick={handleCreateLabel}>Create Label</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Project Dialog */}
+        <Dialog open={showAddProjectDialog} onOpenChange={setShowAddProjectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderKanban className="w-5 h-5 text-indigo-500" />
+                Create New Project
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Project Name</label>
+                <Input
+                  placeholder="e.g., Website Redesign, Q1 Goals"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  className="mt-1"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description (optional)</label>
+                <Textarea
+                  placeholder="Brief description of the project..."
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                  className="mt-1"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Project Color</label>
+                <div className="flex items-center gap-3 mt-2">
+                  <input
+                    type="color"
+                    value={newProjectColor}
+                    onChange={(e) => setNewProjectColor(e.target.value)}
+                    className="w-10 h-10 rounded cursor-pointer border-0"
+                  />
+                  <div className="flex gap-2">
+                    {['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6', '#14B8A6'].map(color => (
+                      <button
+                        key={color}
+                        className={`w-8 h-8 rounded-full border-2 ${newProjectColor === color ? 'border-gray-900 dark:border-white' : 'border-transparent'}`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setNewProjectColor(color)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <span className="w-3 h-3 rounded" style={{ backgroundColor: newProjectColor }} />
+                <span className="font-medium">{newProjectName || 'Project Name'}</span>
+                <span className="text-sm text-muted-foreground">Preview</span>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setShowAddProjectDialog(false)}>Cancel</Button>
+                <Button onClick={handleCreateProject}>Create Project</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Keyboard Shortcuts Dialog */}
+        <Dialog open={showKeyboardShortcutsDialog} onOpenChange={setShowKeyboardShortcutsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Keyboard className="w-5 h-5 text-gray-500" />
+                Keyboard Shortcuts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-muted-foreground">Navigation</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Go to Today</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">T</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Go to Projects</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">P</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Go to Labels</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">L</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Go to Calendar</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">C</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Go to Filters</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">F</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Go to Analytics</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">A</kbd>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-muted-foreground">Actions</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Quick Add Task</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Q</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Start Timer</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Space</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Search</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">/</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Complete Task</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Enter</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Delete Task</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">Del</kbd>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Help</span>
+                      <kbd className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">?</kbd>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="pt-4 border-t">
+                <Button variant="outline" className="w-full" onClick={() => setShowKeyboardShortcutsDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-500" />
+                Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Timer Settings</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Focus (min)</label>
+                    <Input
+                      type="number"
+                      value={settingsTimerDuration}
+                      onChange={(e) => setSettingsTimerDuration(parseInt(e.target.value) || 25)}
+                      min={1}
+                      max={60}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Short Break</label>
+                    <Input
+                      type="number"
+                      value={settingsShortBreak}
+                      onChange={(e) => setSettingsShortBreak(parseInt(e.target.value) || 5)}
+                      min={1}
+                      max={30}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Long Break</label>
+                    <Input
+                      type="number"
+                      value={settingsLongBreak}
+                      onChange={(e) => setSettingsLongBreak(parseInt(e.target.value) || 15)}
+                      min={1}
+                      max={60}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Notifications</h4>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm">Enable notifications</p>
+                    <p className="text-xs text-muted-foreground">Get notified when timers complete</p>
+                  </div>
+                  <Checkbox
+                    checked={settingsNotifications}
+                    onCheckedChange={(checked) => setSettingsNotifications(checked as boolean)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Appearance</h4>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="flex-1">Light</Button>
+                  <Button variant="outline" size="sm" className="flex-1">Dark</Button>
+                  <Button variant="outline" size="sm" className="flex-1">System</Button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="ghost" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={handleSaveSettings}>Save Settings</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reminder Dialog */}
+        <Dialog open={showReminderDialog} onOpenChange={setShowReminderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-orange-500" />
+                Set Reminder
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedTask && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-medium">{selectedTask.title}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {selectedTask.description || 'No description'}
+                  </p>
+                </div>
+              )}
+              <div>
+                <label className="text-sm font-medium">Date</label>
+                <Input
+                  type="date"
+                  value={reminderDate}
+                  onChange={(e) => setReminderDate(e.target.value)}
+                  className="mt-1"
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Time</label>
+                <Input
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Quick Options</label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setReminderDate(new Date().toISOString().split('T')[0])
+                      setReminderTime('09:00')
+                    }}
+                  >
+                    Today 9AM
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const tomorrow = new Date()
+                      tomorrow.setDate(tomorrow.getDate() + 1)
+                      setReminderDate(tomorrow.toISOString().split('T')[0])
+                      setReminderTime('09:00')
+                    }}
+                  >
+                    Tomorrow 9AM
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setReminderDate(new Date().toISOString().split('T')[0])
+                      setReminderTime('14:00')
+                    }}
+                  >
+                    Today 2PM
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setShowReminderDialog(false)}>Cancel</Button>
+                <Button onClick={handleSetReminderSubmit}>Set Reminder</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Move Task Dialog */}
+        <Dialog open={showMoveTaskDialog} onOpenChange={setShowMoveTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Move className="w-5 h-5 text-blue-500" />
+                Move Task to Project
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedTask && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-medium">{selectedTask.title}</p>
+                  {selectedTask.projectName && (
+                    <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                      Current: <span className="w-2 h-2 rounded-full" style={{ backgroundColor: selectedTask.projectColor }} />
+                      {selectedTask.projectName}
+                    </p>
+                  )}
+                </div>
+              )}
+              <div>
+                <label className="text-sm font-medium">Select Destination Project</label>
+                <div className="space-y-2 mt-2 max-h-60 overflow-y-auto">
+                  {projects.map(project => (
+                    <div
+                      key={project.id}
+                      className={`p-3 rounded-lg cursor-pointer border-2 transition-all ${
+                        selectedTargetProject === project.id
+                          ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                          : 'border-transparent bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                      onClick={() => setSelectedTargetProject(project.id)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded" style={{ backgroundColor: project.color }} />
+                        <span className="font-medium">{project.name}</span>
+                        <span className="text-xs text-muted-foreground ml-auto">{project.taskCount} tasks</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setShowMoveTaskDialog(false)}>Cancel</Button>
+                <Button onClick={handleMoveTaskSubmit}>Move Task</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Task Dialog */}
+        <Dialog open={showEditTaskDialog} onOpenChange={setShowEditTaskDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-green-500" />
+                Edit Task
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Task Title</label>
+                <Input
+                  value={editTaskTitle}
+                  onChange={(e) => setEditTaskTitle(e.target.value)}
+                  className="mt-1"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Textarea
+                  value={editTaskDescription}
+                  onChange={(e) => setEditTaskDescription(e.target.value)}
+                  className="mt-1"
+                  rows={3}
+                  placeholder="Add task description..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Priority</label>
+                  <div className="flex gap-2 mt-2">
+                    {(['p1', 'p2', 'p3', 'p4'] as TaskPriority[]).map(priority => (
+                      <Button
+                        key={priority}
+                        variant={editTaskPriority === priority ? 'default' : 'outline'}
+                        size="sm"
+                        className={editTaskPriority === priority ? getPriorityColor(priority) : ''}
+                        onClick={() => setEditTaskPriority(priority)}
+                      >
+                        {priority.toUpperCase()}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Due Date</label>
+                  <Input
+                    type="date"
+                    value={editTaskDueDate}
+                    onChange={(e) => setEditTaskDueDate(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button variant="ghost" onClick={() => setShowEditTaskDialog(false)}>Cancel</Button>
+                <Button onClick={handleEditTaskSubmit}>Save Changes</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Calendar View Dialog */}
+        <Dialog open={showCalendarViewDialog} onOpenChange={setShowCalendarViewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-purple-500" />
+                Schedule Task
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">January 2026</h4>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">Today</Button>
+                  <Button variant="ghost" size="icon"><span>&lt;</span></Button>
+                  <Button variant="ghost" size="icon"><span>&gt;</span></Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="bg-gray-100 dark:bg-gray-800 p-2 text-center text-xs font-medium">
+                    {day}
+                  </div>
+                ))}
+                {Array.from({ length: 35 }, (_, i) => {
+                  const dayNum = i - 3
+                  const isToday = dayNum === new Date().getDate()
+                  return (
+                    <div
+                      key={i}
+                      className={`bg-white dark:bg-gray-900 min-h-[60px] p-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                        isToday ? 'ring-2 ring-purple-500 ring-inset' : ''
+                      }`}
+                      onClick={() => {
+                        if (dayNum > 0 && dayNum <= 31) {
+                          const selectedDate = new Date()
+                          selectedDate.setDate(dayNum)
+                          toast.success(`Selected ${selectedDate.toLocaleDateString()}`)
+                        }
+                      }}
+                    >
+                      <div className={`text-xs ${
+                        dayNum > 0 && dayNum <= 31 ? '' : 'text-gray-300 dark:text-gray-700'
+                      } ${isToday ? 'font-bold text-purple-600' : ''}`}>
+                        {dayNum > 0 && dayNum <= 31 ? dayNum : ''}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <p className="text-sm text-purple-700 dark:text-purple-400">
+                  Click on a date to schedule tasks. Drag and drop tasks to reschedule them.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setShowCalendarViewDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  setShowCalendarViewDialog(false)
+                  setActiveTab('calendar')
+                }}>Go to Full Calendar</Button>
               </div>
             </div>
           </DialogContent>

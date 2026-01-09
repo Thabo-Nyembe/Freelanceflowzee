@@ -519,6 +519,13 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const [showGoalDialog, setShowGoalDialog] = useState(false)
   const [showAchievementDialog, setShowAchievementDialog] = useState(false)
 
+  // Sort and filter states for quick actions
+  const [sortBy, setSortBy] = useState<'default' | 'top-rated' | 'newest' | 'trending' | 'popular'>('default')
+  const [showOnlyCertified, setShowOnlyCertified] = useState(false)
+  const [showOnlySaved, setShowOnlySaved] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showSearchDialog, setShowSearchDialog] = useState(false)
+
   // Tutorial player state
   const [activeTutorial, setActiveTutorial] = useState<Course | null>(null)
   const [showTutorialPlayer, setShowTutorialPlayer] = useState(false)
@@ -534,6 +541,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const filteredCourses = useMemo(() => {
     let filtered = [...mockCourses]
 
+    // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(c =>
@@ -544,16 +552,59 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
       )
     }
 
+    // Category filter
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(c => c.category === selectedCategory)
     }
 
+    // Level filter
     if (levelFilter !== 'all') {
       filtered = filtered.filter(c => c.level === levelFilter)
     }
 
+    // Show only saved/bookmarked courses
+    if (showOnlySaved) {
+      filtered = filtered.filter(c => bookmarkedCourses.includes(c.id))
+    }
+
+    // Show only certified courses
+    if (showOnlyCertified) {
+      filtered = filtered.filter(c => c.certificate)
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'top-rated':
+        // Sort by rating (highest first), only show 4.5+ for "top-rated"
+        filtered = filtered
+          .filter(c => c.metrics.rating >= 4.5)
+          .sort((a, b) => b.metrics.rating - a.metrics.rating)
+        break
+      case 'newest':
+        // Sort by creation date (newest first)
+        filtered = filtered.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )
+        break
+      case 'trending':
+        // Sort by a combination of recent views, enrollments, and completion rate
+        filtered = filtered.sort((a, b) => {
+          const aTrending = (a.metrics.enrollments * 0.4) + (a.metrics.completionRate * 0.3) + (a.metrics.rating * 1000 * 0.3)
+          const bTrending = (b.metrics.enrollments * 0.4) + (b.metrics.completionRate * 0.3) + (b.metrics.rating * 1000 * 0.3)
+          return bTrending - aTrending
+        })
+        break
+      case 'popular':
+        // Sort by enrollment count (most popular first)
+        filtered = filtered.sort((a, b) => b.metrics.enrollments - a.metrics.enrollments)
+        break
+      default:
+        // Default sorting (no change)
+        break
+    }
+
     return filtered
-  }, [searchQuery, selectedCategory, levelFilter])
+  }, [searchQuery, selectedCategory, levelFilter, sortBy, showOnlySaved, showOnlyCertified, bookmarkedCourses])
 
   const getLevelColor = (level: CourseLevel) => {
     const colors: Record<CourseLevel, string> = {
@@ -668,54 +719,75 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const handleQuickAction = useCallback((actionLabel: string) => {
     switch (actionLabel) {
       case 'Search':
-        // Focus on search input
-        const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement
-        if (searchInput) {
-          searchInput.focus()
-          toast.success('Search ready - start typing')
-        }
+        // Open advanced search dialog
+        setShowSearchDialog(true)
         break
       case 'Top Rated':
-        // Filter to show top rated courses (4.5+)
+        // Filter to show top rated courses (4.5+) - actually sort by rating
         setSelectedCategory('all')
-        toast.success('Showing top-rated courses')
+        setShowOnlySaved(false)
+        setShowOnlyCertified(false)
+        setSortBy('top-rated')
+        toast.success('Sorted by highest rated courses (4.5+ stars)')
         break
       case 'New':
-        // Show newest courses
+        // Show newest courses - sort by creation date
         setSelectedCategory('all')
-        toast.success('Showing newest courses')
+        setShowOnlySaved(false)
+        setShowOnlyCertified(false)
+        setSortBy('newest')
+        toast.success('Sorted by newest courses first')
         break
       case 'Trending':
-        // Show trending courses
+        // Show trending courses - sort by recent enrollments/views
         setSelectedCategory('all')
-        toast.success('Showing trending courses')
+        setShowOnlySaved(false)
+        setShowOnlyCertified(false)
+        setSortBy('trending')
+        toast.success('Showing trending courses by recent activity')
         break
       case 'Saved':
-        // Show bookmarked courses
+        // Show bookmarked courses - toggle filter
         if (bookmarkedCourses.length === 0) {
-          toast.info('No saved courses yet. Bookmark courses to add them here.')
+          toast.info('No saved courses yet. Bookmark courses by clicking the bookmark icon on any course.')
         } else {
-          toast.success(`Showing ${bookmarkedCourses.length} saved course${bookmarkedCourses.length > 1 ? 's' : ''}`)
+          setShowOnlySaved(!showOnlySaved)
+          setShowOnlyCertified(false)
+          setSortBy('default')
+          if (!showOnlySaved) {
+            toast.success(`Showing ${bookmarkedCourses.length} saved course${bookmarkedCourses.length > 1 ? 's' : ''}`)
+          } else {
+            toast.success('Showing all courses')
+          }
         }
         break
       case 'Certified':
-        // Show courses with certificates
-        setSelectedCategory('all')
-        toast.success('Showing certified courses')
+        // Show courses with certificates - toggle filter
+        setShowOnlySaved(false)
+        setShowOnlyCertified(!showOnlyCertified)
+        setSortBy('default')
+        if (!showOnlyCertified) {
+          toast.success('Showing courses with certificates')
+        } else {
+          toast.success('Showing all courses')
+        }
         break
       case 'Popular':
-        // Show popular courses
+        // Show popular courses - sort by enrollment count
         setSelectedCategory('all')
-        toast.success('Showing popular courses')
+        setShowOnlySaved(false)
+        setShowOnlyCertified(false)
+        setSortBy('popular')
+        toast.success('Sorted by most popular courses')
         break
       case 'Filter':
-        // Show filter options
-        toast.info('Use the level filter dropdown to refine results')
+        // Open advanced filter dialog
+        setShowFilterDialog(true)
         break
       default:
         toast.success(`${actionLabel} selected`)
     }
-  }, [bookmarkedCourses.length])
+  }, [bookmarkedCourses.length, showOnlySaved, showOnlyCertified])
 
   const handleMarkAllRead = useCallback(async () => {
     toast.promise(
@@ -770,9 +842,18 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   }, [])
 
   const handleAddPaymentMethod = useCallback(async () => {
-    // Navigate to payment settings or open payment modal
-    router.push('/dashboard/settings/billing')
-    toast.success('Opening payment settings...')
+    // Navigate to payment settings
+    toast.promise(
+      (async () => {
+        router.push('/dashboard/settings/billing')
+        return { success: true }
+      })(),
+      {
+        loading: 'Navigating to billing settings...',
+        success: 'Redirected to billing settings. Add your payment method there.',
+        error: 'Failed to navigate to billing settings'
+      }
+    )
   }, [router])
 
   const handleConnectService = useCallback(async (serviceName: string, serviceId?: string) => {
@@ -1203,17 +1284,22 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             {/* Browse Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Search, label: 'Search', color: 'text-rose-600 dark:text-rose-400' },
-                { icon: Star, label: 'Top Rated', color: 'text-yellow-600 dark:text-yellow-400' },
-                { icon: Clock, label: 'New', color: 'text-blue-600 dark:text-blue-400' },
-                { icon: TrendingUp, label: 'Trending', color: 'text-green-600 dark:text-green-400' },
-                { icon: Bookmark, label: 'Saved', color: 'text-purple-600 dark:text-purple-400' },
-                { icon: Award, label: 'Certified', color: 'text-amber-600 dark:text-amber-400' },
-                { icon: Users, label: 'Popular', color: 'text-cyan-600 dark:text-cyan-400' },
-                { icon: Filter, label: 'Filter', color: 'text-gray-600 dark:text-gray-400' }
+                { icon: Search, label: 'Search', color: 'text-rose-600 dark:text-rose-400', active: searchQuery.length > 0 },
+                { icon: Star, label: 'Top Rated', color: 'text-yellow-600 dark:text-yellow-400', active: sortBy === 'top-rated' },
+                { icon: Clock, label: 'New', color: 'text-blue-600 dark:text-blue-400', active: sortBy === 'newest' },
+                { icon: TrendingUp, label: 'Trending', color: 'text-green-600 dark:text-green-400', active: sortBy === 'trending' },
+                { icon: Bookmark, label: 'Saved', color: 'text-purple-600 dark:text-purple-400', active: showOnlySaved },
+                { icon: Award, label: 'Certified', color: 'text-amber-600 dark:text-amber-400', active: showOnlyCertified },
+                { icon: Users, label: 'Popular', color: 'text-cyan-600 dark:text-cyan-400', active: sortBy === 'popular' },
+                { icon: Filter, label: 'Filter', color: 'text-gray-600 dark:text-gray-400', active: selectedCategory !== 'all' || levelFilter !== 'all' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={() => handleQuickAction(action.label)}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                <Button
+                  key={i}
+                  variant={action.active ? 'default' : 'outline'}
+                  className={`flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 ${action.active ? 'bg-rose-600 hover:bg-rose-700 text-white' : ''}`}
+                  onClick={() => handleQuickAction(action.label)}
+                >
+                  <action.icon className={`h-5 w-5 ${action.active ? 'text-white' : action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -1231,6 +1317,58 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                 ))}
               </div>
             </section>
+
+            {/* Active Filters Indicator */}
+            {(sortBy !== 'default' || showOnlySaved || showOnlyCertified || searchQuery || selectedCategory !== 'all' || levelFilter !== 'all') && (
+              <div className="flex items-center gap-2 flex-wrap mb-4 p-3 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
+                <span className="text-sm font-medium text-rose-700 dark:text-rose-400">Active Filters:</span>
+                {searchQuery && (
+                  <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 cursor-pointer" onClick={() => setSearchQuery('')}>
+                    Search: "{searchQuery}" <span className="ml-1">x</span>
+                  </Badge>
+                )}
+                {sortBy !== 'default' && (
+                  <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 cursor-pointer" onClick={() => setSortBy('default')}>
+                    Sort: {sortBy.replace('-', ' ')} <span className="ml-1">x</span>
+                  </Badge>
+                )}
+                {showOnlySaved && (
+                  <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 cursor-pointer" onClick={() => setShowOnlySaved(false)}>
+                    Saved Only <span className="ml-1">x</span>
+                  </Badge>
+                )}
+                {showOnlyCertified && (
+                  <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-200 cursor-pointer" onClick={() => setShowOnlyCertified(false)}>
+                    Certified Only <span className="ml-1">x</span>
+                  </Badge>
+                )}
+                {selectedCategory !== 'all' && (
+                  <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 cursor-pointer" onClick={() => setSelectedCategory('all')}>
+                    Category: {categories.find(c => c.id === selectedCategory)?.name} <span className="ml-1">x</span>
+                  </Badge>
+                )}
+                {levelFilter !== 'all' && (
+                  <Badge className="bg-green-100 text-green-700 hover:bg-green-200 cursor-pointer" onClick={() => setLevelFilter('all')}>
+                    Level: {levelFilter} <span className="ml-1">x</span>
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-rose-600 hover:text-rose-700 hover:bg-rose-100"
+                  onClick={() => {
+                    setSearchQuery('')
+                    setSortBy('default')
+                    setShowOnlySaved(false)
+                    setShowOnlyCertified(false)
+                    setSelectedCategory('all')
+                    setLevelFilter('all')
+                  }}
+                >
+                  Clear All
+                </Button>
+              </div>
+            )}
 
             {/* Course Grid */}
             <section>
@@ -2505,6 +2643,251 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Advanced Search Dialog */}
+      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-rose-600" />
+              Advanced Search
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Main search input */}
+            <div className="space-y-2">
+              <Label>Search Courses</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search by title, description, skills, or tags..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Quick filters */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={(value) => setSelectedCategory(value as CourseCategory | 'all')}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Level</Label>
+                <Select
+                  value={levelFilter}
+                  onValueChange={(value) => setLevelFilter(value as CourseLevel | 'all')}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="all-levels">All Levels (Course)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Search results preview */}
+            {searchQuery && (
+              <div className="space-y-2">
+                <Label>Results ({filteredCourses.length} courses found)</Label>
+                <ScrollArea className="h-48 border rounded-lg">
+                  <div className="p-2 space-y-2">
+                    {filteredCourses.slice(0, 5).map(course => (
+                      <div
+                        key={course.id}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                        onClick={() => {
+                          setShowSearchDialog(false)
+                          setSelectedCourse(course)
+                        }}
+                      >
+                        <div className="w-12 h-8 bg-gradient-to-br from-rose-500 to-pink-600 rounded flex items-center justify-center">
+                          <GraduationCap className="w-4 h-4 text-white/70" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{course.title}</p>
+                          <p className="text-xs text-gray-500">{course.instructor.name} - {course.level}</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm">
+                          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                          {course.metrics.rating}
+                        </div>
+                      </div>
+                    ))}
+                    {filteredCourses.length > 5 && (
+                      <p className="text-xs text-gray-500 text-center py-2">
+                        +{filteredCourses.length - 5} more courses
+                      </p>
+                    )}
+                    {filteredCourses.length === 0 && (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        No courses found matching your search
+                      </p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setSearchQuery('')
+              setSelectedCategory('all')
+              setLevelFilter('all')
+            }}>
+              Clear Filters
+            </Button>
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => setShowSearchDialog(false)}>
+              Apply Search
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Advanced Filter Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-rose-600" />
+              Filter Courses
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* Sort options */}
+            <div className="space-y-3">
+              <Label>Sort By</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: 'default', label: 'Default', icon: Grid3X3 },
+                  { value: 'top-rated', label: 'Top Rated', icon: Star },
+                  { value: 'newest', label: 'Newest', icon: Clock },
+                  { value: 'popular', label: 'Most Popular', icon: Users },
+                  { value: 'trending', label: 'Trending', icon: TrendingUp },
+                ].map((option) => (
+                  <Button
+                    key={option.value}
+                    variant={sortBy === option.value ? 'default' : 'outline'}
+                    className={`justify-start ${sortBy === option.value ? 'bg-rose-600 hover:bg-rose-700' : ''}`}
+                    onClick={() => setSortBy(option.value as typeof sortBy)}
+                  >
+                    <option.icon className="w-4 h-4 mr-2" />
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Category filter */}
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select
+                value={selectedCategory}
+                onValueChange={(value) => setSelectedCategory(value as CourseCategory | 'all')}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map(cat => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Level filter */}
+            <div className="space-y-2">
+              <Label>Difficulty Level</Label>
+              <Select
+                value={levelFilter}
+                onValueChange={(value) => setLevelFilter(value as CourseLevel | 'all')}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Toggle filters */}
+            <div className="space-y-3">
+              <Label>Additional Filters</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-600" />
+                    <span className="text-sm font-medium">Certificate Included</span>
+                  </div>
+                  <Switch
+                    checked={showOnlyCertified}
+                    onCheckedChange={setShowOnlyCertified}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                  <div className="flex items-center gap-2">
+                    <Bookmark className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm font-medium">Saved Courses Only</span>
+                  </div>
+                  <Switch
+                    checked={showOnlySaved}
+                    onCheckedChange={setShowOnlySaved}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Results count */}
+            <div className="p-3 rounded-lg bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800">
+              <p className="text-sm text-rose-700 dark:text-rose-400">
+                <strong>{filteredCourses.length}</strong> courses match your filters
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setSortBy('default')
+              setSelectedCategory('all')
+              setLevelFilter('all')
+              setShowOnlyCertified(false)
+              setShowOnlySaved(false)
+            }}>
+              Reset All
+            </Button>
+            <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => setShowFilterDialog(false)}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

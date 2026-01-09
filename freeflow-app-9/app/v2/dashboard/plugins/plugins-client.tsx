@@ -495,6 +495,134 @@ const mockPluginsQuickActions = [
   }, variant: 'outline' as const },
 ]
 
+// Mock update history data
+const mockUpdateHistory = [
+  { id: '1', pluginName: 'WooCommerce', fromVersion: '8.3.0', toVersion: '8.4.0', date: '2024-01-15', status: 'success' as const, changes: ['New block editor support', 'Performance improvements', 'Bug fixes'] },
+  { id: '2', pluginName: 'Yoast SEO', fromVersion: '21.6', toVersion: '21.7', date: '2024-01-10', status: 'success' as const, changes: ['AI content analysis', 'Schema updates'] },
+  { id: '3', pluginName: 'Elementor', fromVersion: '3.18.0', toVersion: '3.18.3', date: '2024-01-08', status: 'success' as const, changes: ['Container improvements', 'Bug fixes'] },
+  { id: '4', pluginName: 'Wordfence', fromVersion: '7.10.0', toVersion: '7.11.0', date: '2024-01-05', status: 'success' as const, changes: ['New threat signatures', 'Performance improvements'] },
+  { id: '5', pluginName: 'Contact Form 7', fromVersion: '5.8.5', toVersion: '5.8.6', date: '2024-01-03', status: 'rollback' as const, changes: ['Reverted due to compatibility issue'] },
+]
+
+// Developer tool content
+const devToolContent: Record<string, { title: string; description: string; content: string; code?: string }> = {
+  'CLI Tools': {
+    title: 'CLI Tools',
+    description: 'Command-line interface tools for plugin development',
+    content: 'Use these CLI commands to manage your plugins from the terminal.',
+    code: `# Install a plugin
+freeflow plugin install <plugin-name>
+
+# Update all plugins
+freeflow plugin update --all
+
+# Create a new plugin
+freeflow plugin create <plugin-name>
+
+# List installed plugins
+freeflow plugin list
+
+# Check plugin status
+freeflow plugin status <plugin-name>`
+  },
+  'API Docs': {
+    title: 'Plugin API Documentation',
+    description: 'Complete reference for the Plugin API',
+    content: 'The Plugin API provides hooks, filters, and functions for extending functionality.',
+    code: `// Register a plugin hook
+registerPluginHook('beforeSave', async (data) => {
+  // Your logic here
+  return modifiedData;
+});
+
+// Add a filter
+addPluginFilter('content', (content) => {
+  return content.toUpperCase();
+});
+
+// Access plugin settings
+const settings = await getPluginSettings('my-plugin');`
+  },
+  'SDK': {
+    title: 'Plugin SDK',
+    description: 'Software Development Kit for building plugins',
+    content: 'Download the SDK to start building your own plugins with TypeScript support.',
+    code: `import { PluginBase, PluginContext } from '@freeflow/sdk';
+
+export class MyPlugin extends PluginBase {
+  name = 'My Plugin';
+  version = '1.0.0';
+
+  async onActivate(ctx: PluginContext) {
+    console.log('Plugin activated!');
+  }
+
+  async onDeactivate() {
+    console.log('Plugin deactivated');
+  }
+}`
+  },
+  'Webhooks': {
+    title: 'Webhook Configuration',
+    description: 'Set up webhooks to receive plugin events',
+    content: 'Configure webhooks to receive real-time notifications for plugin events.',
+    code: `// Webhook payload example
+{
+  "event": "plugin.installed",
+  "plugin": "my-plugin",
+  "version": "1.0.0",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "user": {
+    "id": "user_123",
+    "email": "dev@example.com"
+  }
+}`
+  },
+  'Database': {
+    title: 'Database Schema',
+    description: 'Database structure and migration tools',
+    content: 'Manage your plugin database tables and migrations.',
+    code: `-- Plugin tables schema
+CREATE TABLE plugin_settings (
+  id UUID PRIMARY KEY,
+  plugin_id VARCHAR(255) NOT NULL,
+  key VARCHAR(255) NOT NULL,
+  value JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Add migration
+freeflow db:migrate create add_custom_field`
+  },
+  'Debug': {
+    title: 'Debug Console',
+    description: 'Real-time debugging and error monitoring',
+    content: 'Monitor plugin performance, errors, and logs in real-time.',
+    code: `// Enable debug mode
+setPluginDebug(true);
+
+// Log performance metrics
+pluginPerf.start('my-operation');
+// ... your code
+pluginPerf.end('my-operation');
+
+// View logs
+freeflow plugin logs <plugin-name> --tail 100`
+  },
+  'Guides': {
+    title: 'Developer Guides',
+    description: 'Step-by-step tutorials and best practices',
+    content: 'Learn how to build, test, and deploy plugins with our comprehensive guides.',
+    code: ''
+  },
+  'Support': {
+    title: 'Developer Support',
+    description: 'Get help with plugin development',
+    content: 'Access our developer community, documentation, and support channels.',
+    code: ''
+  }
+}
+
 export default function PluginsClient() {
   const [activeTab, setActiveTab] = useState('discover')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -506,6 +634,29 @@ export default function PluginsClient() {
   const [installing, setInstalling] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [showUploadDialog, setShowUploadDialog] = useState(false)
+
+  // New dialog states for real functionality
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showBulkActionsDialog, setShowBulkActionsDialog] = useState(false)
+  const [showUpdateHistoryDialog, setShowUpdateHistoryDialog] = useState(false)
+  const [showChangelogDialog, setShowChangelogDialog] = useState(false)
+  const [changelogPlugin, setChangelogPlugin] = useState<Plugin | null>(null)
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false)
+  const [selectedCollection, setSelectedCollection] = useState<PluginCollection | null>(null)
+  const [showDevToolDialog, setShowDevToolDialog] = useState(false)
+  const [selectedDevTool, setSelectedDevTool] = useState<string | null>(null)
+  const [showQuickFilterDialog, setShowQuickFilterDialog] = useState(false)
+  const [quickFilterType, setQuickFilterType] = useState<string>('')
+  const [selectedBulkPlugins, setSelectedBulkPlugins] = useState<string[]>([])
+
+  // Filter state for advanced filtering
+  const [filterSettings, setFilterSettings] = useState({
+    status: 'all' as 'all' | PluginStatus,
+    minRating: 0,
+    hasProVersion: false,
+    verifiedOnly: false,
+    sortBy: 'name' as 'name' | 'rating' | 'downloads' | 'updated'
+  })
   const [newPluginForm, setNewPluginForm] = useState({
     name: '',
     description: '',
@@ -569,17 +720,67 @@ export default function PluginsClient() {
     fetchPlugins()
   }, [fetchPlugins])
 
-  // Filter plugins
+  // Filter plugins with advanced filtering
   const filteredPlugins = useMemo(() => {
-    return mockPlugins.filter(plugin => {
+    let result = mockPlugins.filter(plugin => {
       const matchesSearch = plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            plugin.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            plugin.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesCategory = selectedCategory === 'all' || plugin.category === selectedCategory
       const matchesTier = selectedTier === 'all' || plugin.tier === selectedTier
-      return matchesSearch && matchesCategory && matchesTier
+      const matchesStatus = filterSettings.status === 'all' || plugin.status === filterSettings.status
+      const matchesRating = plugin.rating >= filterSettings.minRating
+      const matchesProVersion = !filterSettings.hasProVersion || plugin.hasProVersion
+      const matchesVerified = !filterSettings.verifiedOnly || plugin.author.verified
+
+      // Quick filter type
+      let matchesQuickFilter = true
+      if (quickFilterType) {
+        switch (quickFilterType) {
+          case 'Top Rated':
+            matchesQuickFilter = plugin.rating >= 4.5
+            break
+          case 'Trending':
+            matchesQuickFilter = plugin.activeInstalls >= 5000000
+            break
+          case 'Premium':
+            matchesQuickFilter = plugin.tier === 'premium' || plugin.tier === 'enterprise'
+            break
+          case 'New':
+            matchesQuickFilter = new Date(plugin.lastUpdated) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+            break
+          case 'Security':
+            matchesQuickFilter = plugin.category === 'security'
+            break
+          case 'Dev Tools':
+            matchesQuickFilter = plugin.category === 'developer-tools'
+            break
+          case 'AI Plugins':
+            matchesQuickFilter = plugin.tags.some(t => t.toLowerCase().includes('ai'))
+            break
+        }
+      }
+
+      return matchesSearch && matchesCategory && matchesTier && matchesStatus && matchesRating && matchesProVersion && matchesVerified && matchesQuickFilter
     })
-  }, [searchQuery, selectedCategory, selectedTier])
+
+    // Apply sorting
+    switch (filterSettings.sortBy) {
+      case 'rating':
+        result = result.sort((a, b) => b.rating - a.rating)
+        break
+      case 'downloads':
+        result = result.sort((a, b) => b.activeInstalls - a.activeInstalls)
+        break
+      case 'updated':
+        result = result.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
+        break
+      default:
+        result = result.sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    return result
+  }, [searchQuery, selectedCategory, selectedTier, filterSettings, quickFilterType])
 
   const installedPlugins = mockPlugins.filter(p => p.isInstalled)
   const activePlugins = installedPlugins.filter(p => p.isActivated)
@@ -1132,9 +1333,12 @@ export default function PluginsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => toast.info('Filter panel opened', { description: 'You can now filter plugins by category, tier, and status.' })}>
+            <Button variant="outline" onClick={() => setShowFilterDialog(true)}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
+              {(filterSettings.status !== 'all' || filterSettings.minRating > 0 || filterSettings.hasProVersion || filterSettings.verifiedOnly) && (
+                <Badge className="ml-2 bg-green-500 text-white text-xs">Active</Badge>
+              )}
             </Button>
             <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700" onClick={() => setShowUploadDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -1235,12 +1439,44 @@ export default function PluginsClient() {
                 { icon: Code, label: 'Dev Tools', color: 'text-cyan-500' },
                 { icon: Bot, label: 'AI Plugins', color: 'text-orange-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => toast.info(`Showing ${action.label.toLowerCase()} plugins`, { description: `Browse our collection of ${action.label.toLowerCase()} plugins below.` })}>
-                  <action.icon className={`w-5 h-5 ${action.color}`} />
-                  <span className="text-xs">{action.label}</span>
+                <Button
+                  key={i}
+                  variant={quickFilterType === action.label ? 'default' : 'outline'}
+                  className={`flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 ${quickFilterType === action.label ? 'bg-green-600' : 'bg-white/50 dark:bg-gray-800/50'}`}
+                  onClick={() => {
+                    if (action.label === 'Search') {
+                      // Focus on search input
+                      const searchInput = document.querySelector('input[placeholder="Search plugins..."]') as HTMLInputElement
+                      if (searchInput) {
+                        searchInput.focus()
+                        toast.info('Search focused', { description: 'Type to search for plugins' })
+                      }
+                    } else {
+                      // Toggle quick filter
+                      if (quickFilterType === action.label) {
+                        setQuickFilterType('')
+                        toast.info('Filter cleared', { description: 'Showing all plugins' })
+                      } else {
+                        setQuickFilterType(action.label)
+                        toast.success(`Showing ${action.label} plugins`, { description: `Filtered to display ${action.label.toLowerCase()} plugins` })
+                      }
+                    }
+                  }}
+                >
+                  <action.icon className={`w-5 h-5 ${quickFilterType === action.label ? 'text-white' : action.color}`} />
+                  <span className={`text-xs ${quickFilterType === action.label ? 'text-white' : ''}`}>{action.label}</span>
                 </Button>
               ))}
             </div>
+            {quickFilterType && (
+              <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <Badge className="bg-green-600 text-white">{quickFilterType}</Badge>
+                <span className="text-sm text-green-700 dark:text-green-300">filter active - showing {filteredPlugins.length} plugins</span>
+                <Button size="sm" variant="ghost" className="ml-auto text-green-700" onClick={() => setQuickFilterType('')}>
+                  Clear Filter
+                </Button>
+              </div>
+            )}
 
             <div className="grid grid-cols-12 gap-6">
               {/* Categories Sidebar */}
@@ -1282,7 +1518,10 @@ export default function PluginsClient() {
                       <div className="text-2xl mb-2">🛡️</div>
                       <h3 className="font-semibold mb-1">Essential Security</h3>
                       <p className="text-sm text-green-100 mb-3">Must-have security plugins for any site</p>
-                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => toast.info('Essential Security collection loaded', { description: 'Browse must-have security plugins below.' })}>
+                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => {
+                        setSelectedCollection(mockCollections[0])
+                        setShowCollectionDialog(true)
+                      }}>
                         View Collection
                       </Button>
                     </div>
@@ -1429,11 +1668,19 @@ export default function PluginsClient() {
                     <p className="text-sm text-gray-500 mt-1">Sample plugins for demonstration</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.success('All plugins are up to date!', { description: 'Your plugins are running the latest versions.' })}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const hasUpdates = needsUpdatePlugins.length > 0
+                      if (hasUpdates) {
+                        setActiveTab('updates')
+                        toast.warning(`${needsUpdatePlugins.length} plugin(s) need updating`, { description: 'Navigated to Updates tab' })
+                      } else {
+                        toast.success('All plugins are up to date!', { description: 'Your plugins are running the latest versions.' })
+                      }
+                    }}>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Check Updates
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Bulk actions menu opened', { description: 'Select plugins to perform batch operations.' })}>
+                    <Button variant="outline" size="sm" onClick={() => setShowBulkActionsDialog(true)}>
                       Bulk Actions
                     </Button>
                   </div>
@@ -1485,8 +1732,55 @@ export default function PluginsClient() {
                 { icon: Settings, label: 'Settings', color: 'text-gray-500' }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => {
-                  const messages: Record<string, string> = { 'Update All': 'Updating all plugins to latest versions', 'View History': 'Plugin update history loaded', 'Backup First': 'Plugin backup created successfully', 'Security Scan': 'Security scan completed', 'Schedule': 'Update schedule configured', 'Notifications': 'Notification settings opened', 'Changelogs': 'Plugin changelogs loaded', 'Settings': 'Update settings opened' }
-                  toast.success(messages[action.label] || `${action.label} action completed`, { description: 'Operation completed successfully.' })
+                  switch (action.label) {
+                    case 'Update All':
+                      handleUpdateAllPlugins()
+                      break
+                    case 'View History':
+                      setShowUpdateHistoryDialog(true)
+                      break
+                    case 'Backup First':
+                      toast.loading('Creating backup...')
+                      setTimeout(() => {
+                        toast.dismiss()
+                        const backupData = {
+                          timestamp: new Date().toISOString(),
+                          plugins: installedPlugins.map(p => ({ name: p.name, version: p.version }))
+                        }
+                        downloadAsJson(backupData, `plugin-backup-${new Date().toISOString().split('T')[0]}.json`)
+                        toast.success('Backup created successfully', { description: 'Plugin backup file has been downloaded' })
+                      }, 1000)
+                      break
+                    case 'Security Scan':
+                      toast.loading('Running security scan...')
+                      setTimeout(() => {
+                        toast.dismiss()
+                        toast.success('Security scan completed', { description: 'No vulnerabilities detected in installed plugins' })
+                      }, 2000)
+                      break
+                    case 'Schedule':
+                      setSettingsTab('updates')
+                      setActiveTab('settings')
+                      toast.info('Update schedule settings', { description: 'Configure your update schedule below' })
+                      break
+                    case 'Notifications':
+                      setSettingsTab('notifications')
+                      setActiveTab('settings')
+                      toast.info('Notification settings', { description: 'Configure your notification preferences below' })
+                      break
+                    case 'Changelogs':
+                      if (needsUpdatePlugins.length > 0) {
+                        setChangelogPlugin(needsUpdatePlugins[0])
+                        setShowChangelogDialog(true)
+                      } else {
+                        toast.info('No changelogs available', { description: 'All plugins are up to date' })
+                      }
+                      break
+                    case 'Settings':
+                      setSettingsTab('updates')
+                      setActiveTab('settings')
+                      break
+                  }
                 }}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1529,7 +1823,10 @@ export default function PluginsClient() {
                           <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => handleUpdatePlugin(plugin.id, plugin.name, plugin.latestVersion)}>
                             Update Now
                           </Button>
-                          <button className="block text-xs text-blue-600 hover:underline mt-1" onClick={() => toast.info(`Changelog for "${plugin.name}"`, { description: `View changes in version ${plugin.latestVersion}.` })}>View Changelog</button>
+                          <button className="block text-xs text-blue-600 hover:underline mt-1" onClick={() => {
+                            setChangelogPlugin(plugin)
+                            setShowChangelogDialog(true)
+                          }}>View Changelog</button>
                         </div>
                       </div>
                     ))}
@@ -1564,7 +1861,10 @@ export default function PluginsClient() {
 
             <div className="grid grid-cols-2 gap-6">
               {mockCollections.map(collection => (
-                <Card key={collection.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
+                <Card key={collection.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
+                  setSelectedCollection(collection)
+                  setShowCollectionDialog(true)
+                }}>
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 flex items-center justify-center text-3xl">
@@ -1575,7 +1875,11 @@ export default function PluginsClient() {
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{collection.description}</p>
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">{collection.plugins.length} plugins</Badge>
-                          <Button size="sm" variant="outline" onClick={() => toast.info(`"${collection.name}" collection loaded`, { description: `Browse ${collection.plugins.length} plugins in this collection.` })}>
+                          <Button size="sm" variant="outline" onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedCollection(collection)
+                            setShowCollectionDialog(true)
+                          }}>
                             <Eye className="h-4 w-4 mr-2" />
                             View Collection
                           </Button>
@@ -1628,8 +1932,8 @@ export default function PluginsClient() {
                 { icon: MessageSquare, label: 'Support', color: 'text-pink-500' }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => {
-                  const messages: Record<string, string> = { 'CLI Tools': 'CLI tools documentation opened', 'API Docs': 'API documentation opened', 'SDK': 'SDK files available for download', 'Webhooks': 'Webhook documentation loaded', 'Database': 'Database schema documentation opened', 'Debug': 'Debug tools and console opened', 'Guides': 'Developer guides and tutorials loaded', 'Support': 'Developer support opened' }
-                  toast.info(messages[action.label] || `${action.label} opened successfully`, { description: `${action.label} resources are now available.` })
+                  setSelectedDevTool(action.label)
+                  setShowDevToolDialog(true)
                 }}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1644,22 +1948,34 @@ export default function PluginsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => {
+                      setSelectedDevTool('CLI Tools')
+                      setShowDevToolDialog(true)
+                    }}>
                       <Terminal className="h-8 w-8 text-green-600 mb-3" />
                       <h3 className="font-medium mb-1">Plugin Boilerplate</h3>
                       <p className="text-sm text-gray-500">Generate a starter plugin template</p>
                     </div>
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => {
+                      setSelectedDevTool('API Docs')
+                      setShowDevToolDialog(true)
+                    }}>
                       <Code className="h-8 w-8 text-blue-600 mb-3" />
                       <h3 className="font-medium mb-1">API Documentation</h3>
                       <p className="text-sm text-gray-500">Explore hooks, filters, and functions</p>
                     </div>
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => {
+                      setSelectedDevTool('Debug')
+                      setShowDevToolDialog(true)
+                    }}>
                       <Activity className="h-8 w-8 text-purple-600 mb-3" />
                       <h3 className="font-medium mb-1">Debug Console</h3>
                       <p className="text-sm text-gray-500">Monitor plugin performance and errors</p>
                     </div>
-                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer" onClick={() => {
+                      setSelectedDevTool('Database')
+                      setShowDevToolDialog(true)
+                    }}>
                       <Database className="h-8 w-8 text-amber-600 mb-3" />
                       <h3 className="font-medium mb-1">Database Manager</h3>
                       <p className="text-sm text-gray-500">Manage plugin database tables</p>
@@ -2435,6 +2751,501 @@ export default function PluginsClient() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-green-500" />
+                Advanced Filters
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                  value={filterSettings.status}
+                  onChange={(e) => setFilterSettings(prev => ({ ...prev, status: e.target.value as typeof filterSettings.status }))}
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="needs-update">Needs Update</option>
+                  <option value="error">Error</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Minimum Rating: {filterSettings.minRating}</Label>
+                <input
+                  type="range"
+                  min="0"
+                  max="5"
+                  step="0.5"
+                  value={filterSettings.minRating}
+                  onChange={(e) => setFilterSettings(prev => ({ ...prev, minRating: parseFloat(e.target.value) }))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Any</span>
+                  <span>5 Stars</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Sort By</Label>
+                <select
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                  value={filterSettings.sortBy}
+                  onChange={(e) => setFilterSettings(prev => ({ ...prev, sortBy: e.target.value as typeof filterSettings.sortBy }))}
+                >
+                  <option value="name">Name (A-Z)</option>
+                  <option value="rating">Rating (High to Low)</option>
+                  <option value="downloads">Downloads (Most Popular)</option>
+                  <option value="updated">Recently Updated</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Pro Version Available</p>
+                  <p className="text-xs text-gray-500">Only show plugins with Pro versions</p>
+                </div>
+                <Switch
+                  checked={filterSettings.hasProVersion}
+                  onCheckedChange={(checked) => setFilterSettings(prev => ({ ...prev, hasProVersion: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Verified Developers Only</p>
+                  <p className="text-xs text-gray-500">Only show plugins from verified authors</p>
+                </div>
+                <Switch
+                  checked={filterSettings.verifiedOnly}
+                  onCheckedChange={(checked) => setFilterSettings(prev => ({ ...prev, verifiedOnly: checked }))}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => {
+                  setFilterSettings({ status: 'all', minRating: 0, hasProVersion: false, verifiedOnly: false, sortBy: 'name' })
+                  toast.info('Filters cleared', { description: 'All filters have been reset' })
+                }}>
+                  Clear All
+                </Button>
+                <Button className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => {
+                  setShowFilterDialog(false)
+                  toast.success('Filters applied', { description: `Showing ${filteredPlugins.length} plugins` })
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Actions Dialog */}
+        <Dialog open={showBulkActionsDialog} onOpenChange={setShowBulkActionsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-blue-500" />
+                Bulk Actions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Select plugins to perform bulk actions:</p>
+                <ScrollArea className="h-48">
+                  <div className="space-y-2">
+                    {installedPlugins.map(plugin => (
+                      <div key={plugin.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                        <input
+                          type="checkbox"
+                          checked={selectedBulkPlugins.includes(plugin.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedBulkPlugins(prev => [...prev, plugin.id])
+                            } else {
+                              setSelectedBulkPlugins(prev => prev.filter(id => id !== plugin.id))
+                            }
+                          }}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-xl">{plugin.icon}</span>
+                        <span className="flex-1">{plugin.name}</span>
+                        <Badge className={getStatusColor(plugin.status)} variant="secondary">{plugin.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+                <div className="flex gap-2 mt-3">
+                  <Button size="sm" variant="outline" onClick={() => setSelectedBulkPlugins(installedPlugins.map(p => p.id))}>
+                    Select All
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setSelectedBulkPlugins([])}>
+                    Deselect All
+                  </Button>
+                </div>
+              </div>
+
+              {selectedBulkPlugins.length > 0 && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-sm font-medium mb-3">{selectedBulkPlugins.length} plugin(s) selected</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button size="sm" variant="outline" className="gap-1" onClick={() => {
+                      selectedBulkPlugins.forEach(id => {
+                        const plugin = installedPlugins.find(p => p.id === id)
+                        if (plugin) {
+                          setLocalPluginState(prev => ({ ...prev, [id]: { isActivated: true } }))
+                        }
+                      })
+                      toast.success(`Activated ${selectedBulkPlugins.length} plugins`)
+                      setShowBulkActionsDialog(false)
+                      setSelectedBulkPlugins([])
+                    }}>
+                      <Play className="h-3 w-3" />
+                      Activate
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1" onClick={() => {
+                      selectedBulkPlugins.forEach(id => {
+                        setLocalPluginState(prev => ({ ...prev, [id]: { isActivated: false } }))
+                      })
+                      toast.success(`Deactivated ${selectedBulkPlugins.length} plugins`)
+                      setShowBulkActionsDialog(false)
+                      setSelectedBulkPlugins([])
+                    }}>
+                      <Pause className="h-3 w-3" />
+                      Deactivate
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1" onClick={() => {
+                      toast.loading('Updating plugins...')
+                      setTimeout(() => {
+                        toast.dismiss()
+                        toast.success(`Updated ${selectedBulkPlugins.length} plugins`)
+                        setShowBulkActionsDialog(false)
+                        setSelectedBulkPlugins([])
+                      }, 1500)
+                    }}>
+                      <RefreshCw className="h-3 w-3" />
+                      Update
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1 text-red-600" onClick={() => {
+                      if (confirm(`Are you sure you want to delete ${selectedBulkPlugins.length} plugins?`)) {
+                        setLocalPluginState(prev => {
+                          const newState = { ...prev }
+                          selectedBulkPlugins.forEach(id => delete newState[id])
+                          return newState
+                        })
+                        toast.success(`Deleted ${selectedBulkPlugins.length} plugins`)
+                        setShowBulkActionsDialog(false)
+                        setSelectedBulkPlugins([])
+                      }
+                    }}>
+                      <Trash2 className="h-3 w-3" />
+                      Delete
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1" onClick={() => {
+                      const exportData = installedPlugins.filter(p => selectedBulkPlugins.includes(p.id))
+                      downloadAsJson(exportData, 'selected-plugins-export.json')
+                      toast.success('Export downloaded')
+                    }}>
+                      <Download className="h-3 w-3" />
+                      Export
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => {
+                  setShowBulkActionsDialog(false)
+                  setSelectedBulkPlugins([])
+                }}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Update History Dialog */}
+        <Dialog open={showUpdateHistoryDialog} onOpenChange={setShowUpdateHistoryDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5 text-purple-500" />
+                Update History
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-96">
+              <div className="space-y-4">
+                {mockUpdateHistory.map(update => (
+                  <div key={update.id} className={`p-4 rounded-lg border ${update.status === 'success' ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : 'border-red-200 bg-red-50 dark:bg-red-900/20'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-medium">{update.pluginName}</h4>
+                        <Badge className={update.status === 'success' ? 'bg-green-500' : 'bg-red-500'}>
+                          {update.status === 'success' ? 'Success' : 'Rolled Back'}
+                        </Badge>
+                      </div>
+                      <span className="text-sm text-gray-500">{update.date}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      v{update.fromVersion} → v{update.toVersion}
+                    </p>
+                    <div className="space-y-1">
+                      {update.changes.map((change, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="h-3 w-3 text-green-500" />
+                          <span>{change}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-between pt-4 border-t">
+              <Button variant="outline" size="sm" onClick={() => {
+                downloadAsJson(mockUpdateHistory, 'update-history.json')
+                toast.success('History exported')
+              }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export History
+              </Button>
+              <Button variant="outline" onClick={() => setShowUpdateHistoryDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Changelog Dialog */}
+        <Dialog open={showChangelogDialog} onOpenChange={setShowChangelogDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-cyan-500" />
+                Changelog: {changelogPlugin?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {changelogPlugin && (
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">{changelogPlugin.icon}</span>
+                    <div>
+                      <h4 className="font-medium">{changelogPlugin.name}</h4>
+                      <p className="text-sm text-gray-500">v{changelogPlugin.version} → v{changelogPlugin.latestVersion}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <ScrollArea className="h-64">
+                  <div className="space-y-4">
+                    {changelogPlugin.changelog.map((entry, i) => (
+                      <div key={i} className="p-3 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge className="bg-blue-500">v{entry.version}</Badge>
+                          <span className="text-sm text-gray-500">{entry.date}</span>
+                        </div>
+                        <ul className="space-y-1">
+                          {entry.changes.map((change, j) => (
+                            <li key={j} className="flex items-start gap-2 text-sm">
+                              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                              <span>{change}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowChangelogDialog(false)}>
+                    Close
+                  </Button>
+                  <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                    if (changelogPlugin) {
+                      handleUpdatePlugin(changelogPlugin.id, changelogPlugin.name, changelogPlugin.latestVersion)
+                      setShowChangelogDialog(false)
+                    }
+                  }}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Update Now
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Collection Dialog */}
+        <Dialog open={showCollectionDialog} onOpenChange={setShowCollectionDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <span className="text-2xl">{selectedCollection?.icon}</span>
+                {selectedCollection?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedCollection && (
+              <div className="space-y-4">
+                <p className="text-gray-600 dark:text-gray-400">{selectedCollection.description}</p>
+
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-medium mb-3">Plugins in this collection:</h4>
+                  <div className="space-y-3">
+                    {selectedCollection.plugins.map(pluginId => {
+                      const plugin = mockPlugins.find(p => p.id === pluginId)
+                      if (!plugin) return null
+                      return (
+                        <div key={plugin.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-700 rounded-lg">
+                          <span className="text-xl">{plugin.icon}</span>
+                          <div className="flex-1">
+                            <h5 className="font-medium">{plugin.name}</h5>
+                            <p className="text-sm text-gray-500">{plugin.shortDescription}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                              <span className="text-sm">{plugin.rating}</span>
+                            </div>
+                            {plugin.isInstalled ? (
+                              <Badge className={getStatusColor(plugin.status)}>{plugin.status}</Badge>
+                            ) : (
+                              <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => {
+                                setSelectedPlugin(plugin)
+                                setShowInstallDialog(true)
+                              }}>
+                                <Download className="h-3 w-3 mr-1" />
+                                Install
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowCollectionDialog(false)}>
+                    Close
+                  </Button>
+                  <Button className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => {
+                    const notInstalled = selectedCollection.plugins.filter(id => {
+                      const plugin = mockPlugins.find(p => p.id === id)
+                      return plugin && !plugin.isInstalled
+                    })
+                    if (notInstalled.length === 0) {
+                      toast.info('All plugins in this collection are already installed')
+                    } else {
+                      toast.loading(`Installing ${notInstalled.length} plugins...`)
+                      setTimeout(() => {
+                        toast.dismiss()
+                        toast.success(`Installed ${notInstalled.length} plugins from ${selectedCollection.name}`)
+                        setShowCollectionDialog(false)
+                      }, 2000)
+                    }
+                  }}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Install All
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Developer Tool Dialog */}
+        <Dialog open={showDevToolDialog} onOpenChange={setShowDevToolDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="h-5 w-5 text-green-500" />
+                {selectedDevTool && devToolContent[selectedDevTool]?.title}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedDevTool && devToolContent[selectedDevTool] && (
+              <div className="space-y-4">
+                <p className="text-gray-600 dark:text-gray-400">
+                  {devToolContent[selectedDevTool].description}
+                </p>
+
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm mb-4">{devToolContent[selectedDevTool].content}</p>
+
+                  {devToolContent[selectedDevTool].code && (
+                    <div className="relative">
+                      <pre className="p-4 bg-gray-900 text-gray-100 rounded-lg text-sm overflow-x-auto">
+                        <code>{devToolContent[selectedDevTool].code}</code>
+                      </pre>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          navigator.clipboard.writeText(devToolContent[selectedDevTool].code || '')
+                          toast.success('Code copied to clipboard')
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {selectedDevTool === 'Guides' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {['Getting Started', 'Building Your First Plugin', 'Testing Plugins', 'Publishing Guide'].map((guide, i) => (
+                      <Button key={i} variant="outline" className="justify-start" onClick={() => {
+                        window.open(`/docs/guides/${guide.toLowerCase().replace(/ /g, '-')}`, '_blank')
+                        toast.success(`Opening ${guide}`)
+                      }}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        {guide}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+
+                {selectedDevTool === 'Support' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button variant="outline" className="justify-start" onClick={() => window.open('https://discord.com', '_blank')}>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Discord Community
+                    </Button>
+                    <Button variant="outline" className="justify-start" onClick={() => window.open('https://github.com', '_blank')}>
+                      <GitBranch className="h-4 w-4 mr-2" />
+                      GitHub Issues
+                    </Button>
+                    <Button variant="outline" className="justify-start" onClick={() => window.open('/docs', '_blank')}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Documentation
+                    </Button>
+                    <Button variant="outline" className="justify-start" onClick={() => window.open('/support/ticket', '_blank')}>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Submit Ticket
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-4 border-t">
+                  <Button variant="outline" onClick={() => setShowDevToolDialog(false)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

@@ -5,7 +5,10 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -883,8 +886,72 @@ export default function MarketingClient() {
   const [showSequenceBuilder, setShowSequenceBuilder] = useState(false)
   const [showContentEditor, setShowContentEditor] = useState(false)
   const [showWorkflowBuilder, setShowWorkflowBuilder] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showSegmentsDialog, setShowSegmentsDialog] = useState(false)
+  const [showABTestDialog, setShowABTestDialog] = useState(false)
+  const [showTargetingDialog, setShowTargetingDialog] = useState(false)
+  const [showBudgetDialog, setShowBudgetDialog] = useState(false)
+  const [showScoreDialog, setShowScoreDialog] = useState(false)
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [showTriggersDialog, setShowTriggersDialog] = useState(false)
+  const [showBranchesDialog, setShowBranchesDialog] = useState(false)
+  const [showDashboardsDialog, setShowDashboardsDialog] = useState(false)
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showAudiencesDialog, setShowAudiencesDialog] = useState(false)
+  const [showGoalsDialog, setShowGoalsDialog] = useState(false)
+  const [showChannelsDialog, setShowChannelsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
+  const [showFiltersDialog, setShowFiltersDialog] = useState(false)
   const [emailRecipient, setEmailRecipient] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Form data states
+  const [campaignFormData, setCampaignFormData] = useState({
+    name: '',
+    description: '',
+    type: 'email' as CampaignType,
+    budget: '',
+    startDate: '',
+    endDate: '',
+    channels: [] as string[]
+  })
+  const [leadFormData, setLeadFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    title: '',
+    location: '',
+    value: '',
+    source: 'website' as LeadSource
+  })
+  const [emailFormData, setEmailFormData] = useState({
+    subject: '',
+    body: '',
+    template: ''
+  })
+  const [sequenceFormData, setSequenceFormData] = useState({
+    name: '',
+    description: '',
+    emailCount: '5',
+    trigger: 'subscription'
+  })
+  const [contentFormData, setContentFormData] = useState({
+    title: '',
+    type: 'blog' as ContentType,
+    platform: '',
+    scheduledDate: '',
+    content: ''
+  })
+  const [workflowFormData, setWorkflowFormData] = useState({
+    name: '',
+    description: '',
+    trigger: '',
+    steps: '5'
+  })
 
   // Computed stats
   const stats = useMemo(() => {
@@ -932,7 +999,6 @@ export default function MarketingClient() {
   // Handlers - Real functionality
   const handleCreateCampaign = () => {
     setShowCampaignBuilder(true)
-    toast.success('Campaign builder ready!')
   }
 
   const handleLaunchCampaign = async (campaignName: string) => {
@@ -1003,28 +1069,23 @@ export default function MarketingClient() {
 
   const handleAddLead = () => {
     setShowLeadForm(true)
-    toast.success('Lead form ready!')
   }
 
   const handleNewSequence = () => {
     setShowSequenceBuilder(true)
-    toast.success('Sequence builder ready!')
   }
 
   const handleCreateContent = () => {
     setShowContentEditor(true)
-    toast.success('Content editor ready!')
   }
 
   const handleCreateWorkflow = () => {
     setShowWorkflowBuilder(true)
-    toast.success('Workflow builder ready!')
   }
 
   const handleSendEmail = (leadName: string) => {
     setEmailRecipient(leadName)
     setShowEmailComposer(true)
-    toast.success(`Email composer ready for ${leadName}!`)
   }
 
   const handleLogCall = async (leadName: string) => {
@@ -1065,105 +1126,96 @@ export default function MarketingClient() {
     // Route to appropriate handler based on action label
     switch (label.toLowerCase()) {
       case 'targeting':
-        setActiveTab('campaigns')
-        toast.success('Targeting settings opened')
+        setShowTargetingDialog(true)
         break
       case 'budget':
-        setActiveTab('analytics')
-        toast.success('Budget overview opened')
+        setShowBudgetDialog(true)
         break
       case 'analytics':
         setActiveTab('analytics')
-        toast.success('Analytics opened')
         break
       case 'schedule':
-        setActiveTab('content')
-        toast.success('Schedule view opened')
+        setShowScheduleDialog(true)
         break
       case 'settings':
-        toast.success('Settings opened')
+        setShowSettingsDialog(true)
         break
       case 'assign':
-        setActiveTab('leads')
-        toast.success('Lead assignment ready')
+        setShowAssignDialog(true)
         break
       case 'score':
-        setActiveTab('leads')
-        toast.success('Lead scoring opened')
+        setShowScoreDialog(true)
         break
       case 'workflow':
         setActiveTab('automation')
-        toast.success('Workflow view opened')
         break
       case 'reports':
-        setActiveTab('analytics')
-        toast.success('Reports opened')
+        setShowReportsDialog(true)
         break
       case 'send now':
         setShowEmailComposer(true)
-        toast.success('Email composer ready')
         break
       case 'templates':
-        toast.success('Templates library opened')
+        setShowTemplatesDialog(true)
         break
       case 'segments':
-        toast.success('Audience segments opened')
+        setShowSegmentsDialog(true)
         break
       case 'a/b test':
-        toast.success('A/B test setup opened')
+        setShowABTestDialog(true)
         break
       case 'blog post':
+        setContentFormData({ ...contentFormData, type: 'blog' })
         setShowContentEditor(true)
-        toast.success('Blog editor opened')
         break
       case 'video':
+        setContentFormData({ ...contentFormData, type: 'video' })
         setShowContentEditor(true)
-        toast.success('Video editor opened')
         break
       case 'graphic':
+        setContentFormData({ ...contentFormData, type: 'infographic' })
         setShowContentEditor(true)
-        toast.success('Graphic designer opened')
         break
       case 'social post':
+        setContentFormData({ ...contentFormData, type: 'social' })
         setShowContentEditor(true)
-        toast.success('Social post editor opened')
         break
       case 'preview':
-        toast.success('Preview mode activated')
+        setShowPreviewDialog(true)
         break
       case 'triggers':
-        setActiveTab('automation')
-        toast.success('Workflow triggers opened')
+        setShowTriggersDialog(true)
         break
       case 'branches':
-        setActiveTab('automation')
-        toast.success('Workflow branches opened')
+        setShowBranchesDialog(true)
         break
       case 'sync':
-        window.location.reload()
+        setIsProcessing(true)
+        setTimeout(() => {
+          setIsProcessing(false)
+          toast.success('Data synchronized successfully')
+        }, 1500)
         break
       case 'more filters':
-        toast.success('Filter panel expanded')
+        setShowFiltersDialog(true)
         break
       case 'dashboards':
-        setActiveTab('analytics')
-        toast.success('Dashboards opened')
+        setShowDashboardsDialog(true)
         break
       case 'trends':
-        setActiveTab('analytics')
-        toast.success('Trends view opened')
+        setShowTrendsDialog(true)
         break
       case 'audiences':
-        toast.success('Audiences opened')
+        setShowAudiencesDialog(true)
         break
       case 'goals':
-        toast.success('Goals tracking opened')
+        setShowGoalsDialog(true)
         break
       case 'channels':
-        toast.success('Channel performance opened')
+        setShowChannelsDialog(true)
         break
       default:
-        toast.success(`${label} activated`)
+        toast.info(`${label} - Feature coming soon`)
     }
   }
 
@@ -1176,7 +1228,6 @@ export default function MarketingClient() {
       shortcut: '⌘N',
       action: () => {
         setShowCampaignBuilder(true)
-        toast.success('Campaign builder ready')
       },
       category: 'Create'
     },
@@ -1187,7 +1238,6 @@ export default function MarketingClient() {
       shortcut: '⌘L',
       action: () => {
         setShowLeadForm(true)
-        toast.success('Lead form ready')
       },
       category: 'Create'
     },
@@ -1199,7 +1249,6 @@ export default function MarketingClient() {
       action: () => {
         setShowAIInsights(true)
         setActiveTab('analytics')
-        toast.success('AI insights generated')
       },
       category: 'AI'
     },
@@ -1210,7 +1259,6 @@ export default function MarketingClient() {
       shortcut: '⌘E',
       action: () => {
         setShowEmailComposer(true)
-        toast.success('Email composer ready')
       },
       category: 'Actions'
     },
@@ -1220,8 +1268,7 @@ export default function MarketingClient() {
       icon: <BarChart3 className="h-5 w-5" />,
       shortcut: '⌘R',
       action: () => {
-        setActiveTab('analytics')
-        toast.success('Reports loaded')
+        setShowReportsDialog(true)
       },
       category: 'Navigate'
     },
@@ -1231,9 +1278,7 @@ export default function MarketingClient() {
       icon: <Calendar className="h-5 w-5" />,
       shortcut: '⌘S',
       action: () => {
-        setShowContentEditor(true)
-        setActiveTab('content')
-        toast.success('Post scheduler ready')
+        setShowScheduleDialog(true)
       },
       category: 'Create'
     },
@@ -2410,6 +2455,1716 @@ export default function MarketingClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Campaign Builder Dialog */}
+        <Dialog open={showCampaignBuilder} onOpenChange={setShowCampaignBuilder}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Megaphone className="w-5 h-5 text-pink-500" />
+                Create New Campaign
+              </DialogTitle>
+              <DialogDescription>
+                Set up a new marketing campaign with targeting, budget, and scheduling options.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-name">Campaign Name</Label>
+                  <Input
+                    id="campaign-name"
+                    placeholder="e.g., Summer Product Launch"
+                    value={campaignFormData.name}
+                    onChange={(e) => setCampaignFormData({ ...campaignFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-type">Campaign Type</Label>
+                  <Select
+                    value={campaignFormData.type}
+                    onValueChange={(value: CampaignType) => setCampaignFormData({ ...campaignFormData, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="email">Email Campaign</SelectItem>
+                      <SelectItem value="social">Social Media</SelectItem>
+                      <SelectItem value="ppc">PPC / Paid Ads</SelectItem>
+                      <SelectItem value="content">Content Marketing</SelectItem>
+                      <SelectItem value="event">Event / Webinar</SelectItem>
+                      <SelectItem value="influencer">Influencer Marketing</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="campaign-description">Description</Label>
+                <Textarea
+                  id="campaign-description"
+                  placeholder="Describe your campaign goals and strategy..."
+                  value={campaignFormData.description}
+                  onChange={(e) => setCampaignFormData({ ...campaignFormData, description: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-budget">Budget ($)</Label>
+                  <Input
+                    id="campaign-budget"
+                    type="number"
+                    placeholder="50000"
+                    value={campaignFormData.budget}
+                    onChange={(e) => setCampaignFormData({ ...campaignFormData, budget: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-start">Start Date</Label>
+                  <Input
+                    id="campaign-start"
+                    type="date"
+                    value={campaignFormData.startDate}
+                    onChange={(e) => setCampaignFormData({ ...campaignFormData, startDate: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-end">End Date</Label>
+                  <Input
+                    id="campaign-end"
+                    type="date"
+                    value={campaignFormData.endDate}
+                    onChange={(e) => setCampaignFormData({ ...campaignFormData, endDate: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Channels</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['Email', 'Facebook', 'Instagram', 'LinkedIn', 'Twitter', 'Google Ads', 'TikTok', 'YouTube'].map((channel) => (
+                    <Badge
+                      key={channel}
+                      variant={campaignFormData.channels.includes(channel) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        const channels = campaignFormData.channels.includes(channel)
+                          ? campaignFormData.channels.filter(c => c !== channel)
+                          : [...campaignFormData.channels, channel]
+                        setCampaignFormData({ ...campaignFormData, channels })
+                      }}
+                    >
+                      {channel}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCampaignBuilder(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                onClick={() => {
+                  toast.success(`Campaign "${campaignFormData.name || 'New Campaign'}" created successfully!`)
+                  setShowCampaignBuilder(false)
+                  setCampaignFormData({ name: '', description: '', type: 'email', budget: '', startDate: '', endDate: '', channels: [] })
+                }}
+              >
+                Create Campaign
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Lead Form Dialog */}
+        <Dialog open={showLeadForm} onOpenChange={setShowLeadForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-amber-500" />
+                Add New Lead
+              </DialogTitle>
+              <DialogDescription>
+                Enter contact details and lead information to add to your CRM.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lead-name">Full Name</Label>
+                  <Input
+                    id="lead-name"
+                    placeholder="e.g., John Smith"
+                    value={leadFormData.name}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lead-email">Email</Label>
+                  <Input
+                    id="lead-email"
+                    type="email"
+                    placeholder="john@company.com"
+                    value={leadFormData.email}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lead-phone">Phone</Label>
+                  <Input
+                    id="lead-phone"
+                    placeholder="+1 (555) 123-4567"
+                    value={leadFormData.phone}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lead-company">Company</Label>
+                  <Input
+                    id="lead-company"
+                    placeholder="Company Name"
+                    value={leadFormData.company}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, company: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lead-title">Job Title</Label>
+                  <Input
+                    id="lead-title"
+                    placeholder="VP of Marketing"
+                    value={leadFormData.title}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, title: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lead-location">Location</Label>
+                  <Input
+                    id="lead-location"
+                    placeholder="San Francisco, CA"
+                    value={leadFormData.location}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, location: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="lead-value">Estimated Value ($)</Label>
+                  <Input
+                    id="lead-value"
+                    type="number"
+                    placeholder="50000"
+                    value={leadFormData.value}
+                    onChange={(e) => setLeadFormData({ ...leadFormData, value: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lead-source">Lead Source</Label>
+                  <Select
+                    value={leadFormData.source}
+                    onValueChange={(value: LeadSource) => setLeadFormData({ ...leadFormData, source: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="website">Website</SelectItem>
+                      <SelectItem value="referral">Referral</SelectItem>
+                      <SelectItem value="social">Social Media</SelectItem>
+                      <SelectItem value="email">Email Campaign</SelectItem>
+                      <SelectItem value="ads">Paid Ads</SelectItem>
+                      <SelectItem value="event">Event</SelectItem>
+                      <SelectItem value="cold">Cold Outreach</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLeadForm(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                onClick={() => {
+                  toast.success(`Lead "${leadFormData.name || 'New Lead'}" added successfully!`)
+                  setShowLeadForm(false)
+                  setLeadFormData({ name: '', email: '', phone: '', company: '', title: '', location: '', value: '', source: 'website' })
+                }}
+              >
+                Add Lead
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Composer Dialog */}
+        <Dialog open={showEmailComposer} onOpenChange={setShowEmailComposer}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-purple-500" />
+                Compose Email
+                {emailRecipient && <Badge variant="secondary">To: {emailRecipient}</Badge>}
+              </DialogTitle>
+              <DialogDescription>
+                Create and send a personalized email to your contact.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="email-template">Template (Optional)</Label>
+                <Select
+                  value={emailFormData.template}
+                  onValueChange={(value) => setEmailFormData({ ...emailFormData, template: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a template or write from scratch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="welcome">Welcome Email</SelectItem>
+                    <SelectItem value="followup">Follow-up</SelectItem>
+                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="meeting">Meeting Request</SelectItem>
+                    <SelectItem value="thank-you">Thank You</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email-subject">Subject Line</Label>
+                <Input
+                  id="email-subject"
+                  placeholder="Enter email subject..."
+                  value={emailFormData.subject}
+                  onChange={(e) => setEmailFormData({ ...emailFormData, subject: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email-body">Message</Label>
+                <Textarea
+                  id="email-body"
+                  placeholder="Write your email message here..."
+                  value={emailFormData.body}
+                  onChange={(e) => setEmailFormData({ ...emailFormData, body: e.target.value })}
+                  rows={8}
+                />
+              </div>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  <Sparkles className="w-4 h-4" />
+                  AI suggestions available
+                </span>
+                <span className="flex items-center gap-1">
+                  <FileText className="w-4 h-4" />
+                  Attach files
+                </span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailComposer(false)}>Cancel</Button>
+              <Button variant="outline">
+                <Calendar className="w-4 h-4 mr-2" />
+                Schedule
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-violet-600 text-white"
+                onClick={() => {
+                  toast.success(`Email sent to ${emailRecipient || 'recipient'} successfully!`)
+                  setShowEmailComposer(false)
+                  setEmailFormData({ subject: '', body: '', template: '' })
+                  setEmailRecipient('')
+                }}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Send Email
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sequence Builder Dialog */}
+        <Dialog open={showSequenceBuilder} onOpenChange={setShowSequenceBuilder}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-violet-500" />
+                Create Email Sequence
+              </DialogTitle>
+              <DialogDescription>
+                Build an automated email sequence to nurture your leads.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sequence-name">Sequence Name</Label>
+                  <Input
+                    id="sequence-name"
+                    placeholder="e.g., Welcome Series"
+                    value={sequenceFormData.name}
+                    onChange={(e) => setSequenceFormData({ ...sequenceFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sequence-trigger">Trigger</Label>
+                  <Select
+                    value={sequenceFormData.trigger}
+                    onValueChange={(value) => setSequenceFormData({ ...sequenceFormData, trigger: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select trigger" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="subscription">New Subscription</SelectItem>
+                      <SelectItem value="signup">User Signup</SelectItem>
+                      <SelectItem value="purchase">After Purchase</SelectItem>
+                      <SelectItem value="abandoned">Cart Abandoned</SelectItem>
+                      <SelectItem value="manual">Manual Enrollment</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sequence-description">Description</Label>
+                <Textarea
+                  id="sequence-description"
+                  placeholder="Describe the purpose of this email sequence..."
+                  value={sequenceFormData.description}
+                  onChange={(e) => setSequenceFormData({ ...sequenceFormData, description: e.target.value })}
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sequence-emails">Number of Emails</Label>
+                <Select
+                  value={sequenceFormData.emailCount}
+                  onValueChange={(value) => setSequenceFormData({ ...sequenceFormData, emailCount: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[3, 4, 5, 6, 7, 8, 10, 12].map((n) => (
+                      <SelectItem key={n} value={n.toString()}>{n} emails</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-violet-500" />
+                  AI-Powered Sequence Builder
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Our AI will help you create optimized email content with personalization, timing recommendations, and A/B testing suggestions.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSequenceBuilder(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success(`Sequence "${sequenceFormData.name || 'New Sequence'}" created successfully!`)
+                  setShowSequenceBuilder(false)
+                  setSequenceFormData({ name: '', description: '', emailCount: '5', trigger: 'subscription' })
+                }}
+              >
+                Create Sequence
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Content Editor Dialog */}
+        <Dialog open={showContentEditor} onOpenChange={setShowContentEditor}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-cyan-500" />
+                Create Content
+              </DialogTitle>
+              <DialogDescription>
+                Create and schedule content for your marketing channels.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="content-title">Title</Label>
+                  <Input
+                    id="content-title"
+                    placeholder="Enter content title..."
+                    value={contentFormData.title}
+                    onChange={(e) => setContentFormData({ ...contentFormData, title: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="content-type">Content Type</Label>
+                  <Select
+                    value={contentFormData.type}
+                    onValueChange={(value: ContentType) => setContentFormData({ ...contentFormData, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="blog">Blog Post</SelectItem>
+                      <SelectItem value="social">Social Post</SelectItem>
+                      <SelectItem value="email">Email Newsletter</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="infographic">Infographic</SelectItem>
+                      <SelectItem value="ebook">E-Book</SelectItem>
+                      <SelectItem value="webinar">Webinar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="content-platform">Platform</Label>
+                  <Select
+                    value={contentFormData.platform}
+                    onValueChange={(value) => setContentFormData({ ...contentFormData, platform: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select platform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="blog">Blog</SelectItem>
+                      <SelectItem value="linkedin">LinkedIn</SelectItem>
+                      <SelectItem value="twitter">Twitter/X</SelectItem>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="facebook">Facebook</SelectItem>
+                      <SelectItem value="youtube">YouTube</SelectItem>
+                      <SelectItem value="tiktok">TikTok</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="content-schedule">Schedule Date</Label>
+                  <Input
+                    id="content-schedule"
+                    type="datetime-local"
+                    value={contentFormData.scheduledDate}
+                    onChange={(e) => setContentFormData({ ...contentFormData, scheduledDate: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="content-body">Content</Label>
+                <Textarea
+                  id="content-body"
+                  placeholder="Write your content here..."
+                  value={contentFormData.content}
+                  onChange={(e) => setContentFormData({ ...contentFormData, content: e.target.value })}
+                  rows={6}
+                />
+              </div>
+              <div className="flex items-center gap-4 text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  <Image className="w-4 h-4" />
+                  Add media
+                </span>
+                <span className="flex items-center gap-1">
+                  <Sparkles className="w-4 h-4" />
+                  AI assist
+                </span>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowContentEditor(false)}>Cancel</Button>
+              <Button variant="outline">Save as Draft</Button>
+              <Button
+                className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white"
+                onClick={() => {
+                  toast.success(`Content "${contentFormData.title || 'New Content'}" created successfully!`)
+                  setShowContentEditor(false)
+                  setContentFormData({ title: '', type: 'blog', platform: '', scheduledDate: '', content: '' })
+                }}
+              >
+                {contentFormData.scheduledDate ? 'Schedule' : 'Publish'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Builder Dialog */}
+        <Dialog open={showWorkflowBuilder} onOpenChange={setShowWorkflowBuilder}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-orange-500" />
+                Create Automation Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Build an automated marketing workflow with triggers, conditions, and actions.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="workflow-name">Workflow Name</Label>
+                  <Input
+                    id="workflow-name"
+                    placeholder="e.g., Lead Nurturing Flow"
+                    value={workflowFormData.name}
+                    onChange={(e) => setWorkflowFormData({ ...workflowFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="workflow-trigger">Trigger Event</Label>
+                  <Select
+                    value={workflowFormData.trigger}
+                    onValueChange={(value) => setWorkflowFormData({ ...workflowFormData, trigger: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select trigger" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="form_submit">Form Submission</SelectItem>
+                      <SelectItem value="page_visit">Page Visit</SelectItem>
+                      <SelectItem value="email_open">Email Opened</SelectItem>
+                      <SelectItem value="link_click">Link Clicked</SelectItem>
+                      <SelectItem value="purchase">Purchase Made</SelectItem>
+                      <SelectItem value="cart_abandon">Cart Abandoned</SelectItem>
+                      <SelectItem value="tag_added">Tag Added</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="workflow-description">Description</Label>
+                <Textarea
+                  id="workflow-description"
+                  placeholder="Describe what this workflow does..."
+                  value={workflowFormData.description}
+                  onChange={(e) => setWorkflowFormData({ ...workflowFormData, description: e.target.value })}
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Workflow Steps Preview</Label>
+                <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-bold">1</div>
+                    <span className="text-sm">Trigger: {workflowFormData.trigger || 'Select trigger'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-3 ml-4">
+                    <div className="w-6 h-6 rounded-full bg-orange-300 text-white flex items-center justify-center text-xs font-bold">2</div>
+                    <span className="text-sm text-gray-600">Wait 1 day</span>
+                  </div>
+                  <div className="flex items-center gap-2 mb-3 ml-4">
+                    <div className="w-6 h-6 rounded-full bg-orange-300 text-white flex items-center justify-center text-xs font-bold">3</div>
+                    <span className="text-sm text-gray-600">Send email</span>
+                  </div>
+                  <div className="flex items-center gap-2 ml-4">
+                    <div className="w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center text-xs font-bold">+</div>
+                    <span className="text-sm text-gray-400">Add more steps in builder</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWorkflowBuilder(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+                onClick={() => {
+                  toast.success(`Workflow "${workflowFormData.name || 'New Workflow'}" created successfully!`)
+                  setShowWorkflowBuilder(false)
+                  setWorkflowFormData({ name: '', description: '', trigger: '', steps: '5' })
+                }}
+              >
+                Create Workflow
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-500" />
+                Marketing Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure your marketing hub preferences and integrations.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <h4 className="font-medium">Email Settings</h4>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Default sender name</span>
+                  <Input className="w-48" placeholder="Marketing Team" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Reply-to email</span>
+                  <Input className="w-48" placeholder="marketing@company.com" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="font-medium">Notifications</h4>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Campaign alerts</span>
+                  <Badge variant="outline" className="cursor-pointer">Enabled</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Lead notifications</span>
+                  <Badge variant="outline" className="cursor-pointer">Enabled</Badge>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h4 className="font-medium">Integrations</h4>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Google Analytics</span>
+                  <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <span className="text-sm">Mailchimp</span>
+                  <Button size="sm" variant="outline">Connect</Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Settings saved successfully!')
+                setShowSettingsDialog(false)
+              }}>Save Settings</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-500" />
+                Email Templates
+              </DialogTitle>
+              <DialogDescription>
+                Browse and manage your email templates library.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { name: 'Welcome Email', category: 'Onboarding', uses: 245 },
+                  { name: 'Newsletter', category: 'Updates', uses: 189 },
+                  { name: 'Product Announcement', category: 'Marketing', uses: 156 },
+                  { name: 'Follow-up', category: 'Sales', uses: 312 },
+                  { name: 'Meeting Request', category: 'Sales', uses: 98 },
+                  { name: 'Thank You', category: 'Support', uses: 167 },
+                ].map((template, idx) => (
+                  <Card key={idx} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="w-full h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-lg mb-3 flex items-center justify-center">
+                        <Mail className="w-8 h-8 text-blue-500" />
+                      </div>
+                      <h4 className="font-medium">{template.name}</h4>
+                      <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
+                        <Badge variant="secondary">{template.category}</Badge>
+                        <span>{template.uses} uses</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Segments Dialog */}
+        <Dialog open={showSegmentsDialog} onOpenChange={setShowSegmentsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-cyan-500" />
+                Audience Segments
+              </DialogTitle>
+              <DialogDescription>
+                Create and manage audience segments for targeted campaigns.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {[
+                  { name: 'High-Value Leads', count: 1234, criteria: 'Score > 80, Value > $50K' },
+                  { name: 'Newsletter Subscribers', count: 8945, criteria: 'Subscribed = true' },
+                  { name: 'Inactive Users', count: 2156, criteria: 'Last activity > 30 days' },
+                  { name: 'Enterprise Prospects', count: 456, criteria: 'Company size > 500' },
+                ].map((segment, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <h4 className="font-medium">{segment.name}</h4>
+                      <p className="text-sm text-gray-500">{segment.criteria}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary">{segment.count.toLocaleString()} contacts</Badge>
+                      <Button size="sm" variant="outline">Edit</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Segment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* A/B Test Dialog */}
+        <Dialog open={showABTestDialog} onOpenChange={setShowABTestDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-teal-500" />
+                A/B Test Setup
+              </DialogTitle>
+              <DialogDescription>
+                Create an A/B test to optimize your campaign performance.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Test Name</Label>
+                <Input placeholder="e.g., Subject Line Test" />
+              </div>
+              <div className="space-y-2">
+                <Label>Test Type</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select what to test" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="subject">Subject Line</SelectItem>
+                    <SelectItem value="content">Email Content</SelectItem>
+                    <SelectItem value="cta">Call to Action</SelectItem>
+                    <SelectItem value="sendtime">Send Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Variant A</Label>
+                  <Input placeholder="Control version" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Variant B</Label>
+                  <Input placeholder="Test version" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Test Duration</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="24h">24 hours</SelectItem>
+                    <SelectItem value="48h">48 hours</SelectItem>
+                    <SelectItem value="72h">72 hours</SelectItem>
+                    <SelectItem value="1w">1 week</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowABTestDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white"
+                onClick={() => {
+                  toast.success('A/B test created successfully!')
+                  setShowABTestDialog(false)
+                }}
+              >
+                Start Test
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Targeting Dialog */}
+        <Dialog open={showTargetingDialog} onOpenChange={setShowTargetingDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-purple-500" />
+                Campaign Targeting
+              </DialogTitle>
+              <DialogDescription>
+                Define your target audience for this campaign.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Demographics</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['Age 25-34', 'Age 35-44', 'Age 45-54', 'Male', 'Female'].map((item) => (
+                    <Badge key={item} variant="outline" className="cursor-pointer hover:bg-purple-100">{item}</Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Interests</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['Technology', 'Business', 'Marketing', 'Finance', 'E-commerce'].map((item) => (
+                    <Badge key={item} variant="outline" className="cursor-pointer hover:bg-purple-100">{item}</Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Location</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select regions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="us">United States</SelectItem>
+                    <SelectItem value="eu">European Union</SelectItem>
+                    <SelectItem value="apac">Asia Pacific</SelectItem>
+                    <SelectItem value="global">Global</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTargetingDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-violet-600 text-white"
+                onClick={() => {
+                  toast.success('Targeting settings saved!')
+                  setShowTargetingDialog(false)
+                }}
+              >
+                Apply Targeting
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Budget Dialog */}
+        <Dialog open={showBudgetDialog} onOpenChange={setShowBudgetDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-500" />
+                Budget Management
+              </DialogTitle>
+              <DialogDescription>
+                Set and manage your campaign budgets.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Total Budget</span>
+                  <span className="text-2xl font-bold text-green-600">$205,000</span>
+                </div>
+                <Progress value={42} className="h-2" />
+                <p className="text-xs text-gray-500 mt-1">42% allocated across campaigns</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Daily Spend Limit</Label>
+                <Input type="number" placeholder="1000" />
+              </div>
+              <div className="space-y-2">
+                <Label>Monthly Budget Cap</Label>
+                <Input type="number" placeholder="30000" />
+              </div>
+              <div className="space-y-2">
+                <Label>Budget Alerts</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Alert threshold" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="50">At 50% spent</SelectItem>
+                    <SelectItem value="75">At 75% spent</SelectItem>
+                    <SelectItem value="90">At 90% spent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBudgetDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                onClick={() => {
+                  toast.success('Budget settings updated!')
+                  setShowBudgetDialog(false)
+                }}
+              >
+                Save Budget
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Score Dialog */}
+        <Dialog open={showScoreDialog} onOpenChange={setShowScoreDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-yellow-500" />
+                Lead Scoring Rules
+              </DialogTitle>
+              <DialogDescription>
+                Configure how leads are scored based on their behavior and attributes.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <h4 className="font-medium">Behavior Scoring</h4>
+                {[
+                  { action: 'Website visit', points: '+5' },
+                  { action: 'Email open', points: '+10' },
+                  { action: 'Link click', points: '+15' },
+                  { action: 'Form submission', points: '+25' },
+                  { action: 'Demo request', points: '+50' },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm">{item.action}</span>
+                    <Badge className="bg-yellow-100 text-yellow-700">{item.points}</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-3">
+                <h4 className="font-medium">Attribute Scoring</h4>
+                {[
+                  { attribute: 'Enterprise company', points: '+30' },
+                  { attribute: 'Decision maker title', points: '+20' },
+                  { attribute: 'Target industry', points: '+15' },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm">{item.attribute}</span>
+                    <Badge className="bg-yellow-100 text-yellow-700">{item.points}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScoreDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white"
+                onClick={() => {
+                  toast.success('Scoring rules updated!')
+                  setShowScoreDialog(false)
+                }}
+              >
+                Save Rules
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Dialog */}
+        <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-rose-500" />
+                Assign Leads
+              </DialogTitle>
+              <DialogDescription>
+                Assign leads to team members for follow-up.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Team Member</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose assignee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sarah">Sarah Chen</SelectItem>
+                    <SelectItem value="mike">Mike Johnson</SelectItem>
+                    <SelectItem value="emily">Emily Davis</SelectItem>
+                    <SelectItem value="alex">Alex Thompson</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Assignment Type</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">Manual Assignment</SelectItem>
+                    <SelectItem value="roundrobin">Round Robin</SelectItem>
+                    <SelectItem value="territory">By Territory</SelectItem>
+                    <SelectItem value="load">By Workload</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High Priority</SelectItem>
+                    <SelectItem value="medium">Medium Priority</SelectItem>
+                    <SelectItem value="low">Low Priority</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-rose-500 to-pink-600 text-white"
+                onClick={() => {
+                  toast.success('Leads assigned successfully!')
+                  setShowAssignDialog(false)
+                }}
+              >
+                Assign Leads
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Dialog */}
+        <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-500" />
+                Schedule Content
+              </DialogTitle>
+              <DialogDescription>
+                Schedule your content for optimal publishing times.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Date</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>Time</Label>
+                <Input type="time" />
+              </div>
+              <div className="space-y-2">
+                <Label>Timezone</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select timezone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pst">Pacific Time (PST)</SelectItem>
+                    <SelectItem value="est">Eastern Time (EST)</SelectItem>
+                    <SelectItem value="utc">UTC</SelectItem>
+                    <SelectItem value="gmt">GMT</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-500" />
+                  AI Recommendation
+                </h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Based on your audience, the optimal send time is Tuesday at 10:00 AM EST for 23% higher engagement.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+                onClick={() => {
+                  toast.success('Content scheduled successfully!')
+                  setShowScheduleDialog(false)
+                }}
+              >
+                Schedule
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Preview Dialog */}
+        <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-amber-500" />
+                Content Preview
+              </DialogTitle>
+              <DialogDescription>
+                Preview how your content will appear across different devices.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Button variant="outline" size="sm">Desktop</Button>
+                <Button variant="outline" size="sm">Tablet</Button>
+                <Button variant="outline" size="sm">Mobile</Button>
+              </div>
+              <div className="border rounded-lg p-8 bg-white dark:bg-gray-800 min-h-[300px] flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Select content to preview</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>Close</Button>
+              <Button>Send Test Email</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Triggers Dialog */}
+        <Dialog open={showTriggersDialog} onOpenChange={setShowTriggersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-amber-500" />
+                Workflow Triggers
+              </DialogTitle>
+              <DialogDescription>
+                Configure events that start your automation workflows.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {[
+                  { trigger: 'Form Submission', status: 'Active', workflows: 3 },
+                  { trigger: 'Email Subscription', status: 'Active', workflows: 2 },
+                  { trigger: 'Page Visit', status: 'Paused', workflows: 1 },
+                  { trigger: 'Cart Abandonment', status: 'Active', workflows: 1 },
+                  { trigger: 'Purchase Completed', status: 'Active', workflows: 2 },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Zap className="w-4 h-4 text-amber-500" />
+                      <span className="font-medium">{item.trigger}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{item.workflows} workflows</Badge>
+                      <Badge className={item.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                        {item.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTriggersDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Trigger
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Branches Dialog */}
+        <Dialog open={showBranchesDialog} onOpenChange={setShowBranchesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-yellow-500" />
+                Workflow Branches
+              </DialogTitle>
+              <DialogDescription>
+                Add conditional branches to personalize your automation flows.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Branch Type</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select branch type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ifelse">If/Else Condition</SelectItem>
+                      <SelectItem value="split">A/B Split</SelectItem>
+                      <SelectItem value="wait">Wait Until</SelectItem>
+                      <SelectItem value="goal">Goal Check</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Condition</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="opened">Email Opened</SelectItem>
+                      <SelectItem value="clicked">Link Clicked</SelectItem>
+                      <SelectItem value="visited">Page Visited</SelectItem>
+                      <SelectItem value="score">Lead Score Above</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <GitBranch className="w-5 h-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium">Branch Preview</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                        If condition is TRUE: Continue to next step<br />
+                        If condition is FALSE: Skip to alternate path
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBranchesDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-yellow-500 to-amber-600 text-white"
+                onClick={() => {
+                  toast.success('Branch added to workflow!')
+                  setShowBranchesDialog(false)
+                }}
+              >
+                Add Branch
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dashboards Dialog */}
+        <Dialog open={showDashboardsDialog} onOpenChange={setShowDashboardsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-indigo-500" />
+                Analytics Dashboards
+              </DialogTitle>
+              <DialogDescription>
+                Create and manage your custom analytics dashboards.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { name: 'Campaign Overview', widgets: 8, lastViewed: '2 hours ago' },
+                  { name: 'Lead Pipeline', widgets: 6, lastViewed: '1 day ago' },
+                  { name: 'Email Performance', widgets: 5, lastViewed: '3 hours ago' },
+                  { name: 'ROI Tracker', widgets: 4, lastViewed: '5 hours ago' },
+                ].map((dashboard, idx) => (
+                  <Card key={idx} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="w-full h-20 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg mb-3 flex items-center justify-center">
+                        <BarChart3 className="w-8 h-8 text-indigo-500" />
+                      </div>
+                      <h4 className="font-medium">{dashboard.name}</h4>
+                      <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
+                        <span>{dashboard.widgets} widgets</span>
+                        <span>Viewed {dashboard.lastViewed}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDashboardsDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Dashboard
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trends Dialog */}
+        <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-500" />
+                Marketing Trends
+              </DialogTitle>
+              <DialogDescription>
+                View trending metrics and performance insights.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {[
+                  { metric: 'Email Open Rates', trend: '+12%', direction: 'up', period: 'vs last month' },
+                  { metric: 'Lead Conversion', trend: '+8%', direction: 'up', period: 'vs last month' },
+                  { metric: 'Social Engagement', trend: '+25%', direction: 'up', period: 'vs last month' },
+                  { metric: 'Cost per Lead', trend: '-15%', direction: 'down', period: 'vs last month' },
+                  { metric: 'Website Traffic', trend: '+18%', direction: 'up', period: 'vs last month' },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <TrendingUp className={`w-5 h-5 ${item.direction === 'up' ? 'text-green-500' : 'text-red-500'}`} />
+                      <span className="font-medium">{item.metric}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className={`text-lg font-bold ${item.direction === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                        {item.trend}
+                      </span>
+                      <p className="text-xs text-gray-500">{item.period}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button>
+              <Button>Export Report</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audiences Dialog */}
+        <Dialog open={showAudiencesDialog} onOpenChange={setShowAudiencesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-cyan-500" />
+                Audience Insights
+              </DialogTitle>
+              <DialogDescription>
+                Understand your audience demographics and behavior.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <h4 className="font-medium mb-3">Top Locations</h4>
+                    <div className="space-y-2">
+                      {[
+                        { location: 'United States', percent: 45 },
+                        { location: 'United Kingdom', percent: 18 },
+                        { location: 'Canada', percent: 12 },
+                        { location: 'Germany', percent: 8 },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between">
+                          <span className="text-sm">{item.location}</span>
+                          <span className="text-sm font-medium">{item.percent}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <h4 className="font-medium mb-3">Industry Breakdown</h4>
+                    <div className="space-y-2">
+                      {[
+                        { industry: 'Technology', percent: 35 },
+                        { industry: 'Finance', percent: 22 },
+                        { industry: 'Healthcare', percent: 18 },
+                        { industry: 'Retail', percent: 15 },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between">
+                          <span className="text-sm">{item.industry}</span>
+                          <span className="text-sm font-medium">{item.percent}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAudiencesDialog(false)}>Close</Button>
+              <Button>View Full Report</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Goals Dialog */}
+        <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-teal-500" />
+                Marketing Goals
+              </DialogTitle>
+              <DialogDescription>
+                Track progress toward your marketing objectives.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {[
+                  { goal: 'Generate 500 MQLs', current: 342, target: 500, percent: 68 },
+                  { goal: 'Achieve 25% conversion rate', current: 18.8, target: 25, percent: 75 },
+                  { goal: 'Grow email list to 100K', current: 89.5, target: 100, percent: 90 },
+                  { goal: '$2M pipeline value', current: 1.87, target: 2, percent: 94 },
+                ].map((item, idx) => (
+                  <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{item.goal}</span>
+                      <span className="text-sm text-gray-500">{item.percent}%</span>
+                    </div>
+                    <Progress value={item.percent} className="h-2" />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {typeof item.current === 'number' && item.current < 100 ? item.current.toFixed(1) : item.current} / {item.target}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Goal
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Channels Dialog */}
+        <Dialog open={showChannelsDialog} onOpenChange={setShowChannelsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-emerald-500" />
+                Channel Performance
+              </DialogTitle>
+              <DialogDescription>
+                Compare performance across your marketing channels.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-3">
+                {[
+                  { channel: 'Email Marketing', revenue: 450000, leads: 2340, roi: 580, icon: <Mail className="w-5 h-5" /> },
+                  { channel: 'Social Media', revenue: 320000, leads: 1890, roi: 420, icon: <Share2 className="w-5 h-5" /> },
+                  { channel: 'Paid Search', revenue: 280000, leads: 1560, roi: 350, icon: <Target className="w-5 h-5" /> },
+                  { channel: 'Content Marketing', revenue: 180000, leads: 980, roi: 890, icon: <FileText className="w-5 h-5" /> },
+                  { channel: 'Organic Search', revenue: 290000, leads: 2100, roi: 1200, icon: <Globe className="w-5 h-5" /> },
+                ].map((ch, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center text-white">
+                        {ch.icon}
+                      </div>
+                      <span className="font-medium">{ch.channel}</span>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm">
+                      <div className="text-right">
+                        <p className="font-semibold">${(ch.revenue / 1000).toFixed(0)}K</p>
+                        <p className="text-xs text-gray-500">Revenue</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">{ch.leads.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">Leads</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-green-600">{ch.roi}%</p>
+                        <p className="text-xs text-gray-500">ROI</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowChannelsDialog(false)}>Close</Button>
+              <Button>Export Data</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PieChart className="w-5 h-5 text-sky-500" />
+                Marketing Reports
+              </DialogTitle>
+              <DialogDescription>
+                Generate and download marketing performance reports.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { name: 'Campaign Performance', type: 'PDF', lastGenerated: '2 hours ago' },
+                  { name: 'Lead Funnel Analysis', type: 'Excel', lastGenerated: '1 day ago' },
+                  { name: 'Email Metrics', type: 'PDF', lastGenerated: '3 hours ago' },
+                  { name: 'ROI Summary', type: 'PDF', lastGenerated: '5 hours ago' },
+                  { name: 'Channel Attribution', type: 'Excel', lastGenerated: '1 day ago' },
+                  { name: 'Monthly Overview', type: 'PDF', lastGenerated: '6 hours ago' },
+                ].map((report, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div>
+                      <h4 className="font-medium">{report.name}</h4>
+                      <p className="text-xs text-gray-500">Generated {report.lastGenerated}</p>
+                    </div>
+                    <Button size="sm" variant="outline">
+                      <ExternalLink className="w-4 h-4 mr-1" />
+                      {report.type}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                Generate Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Dialog */}
+        <Dialog open={showFiltersDialog} onOpenChange={setShowFiltersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-gray-500" />
+                Advanced Filters
+              </DialogTitle>
+              <DialogDescription>
+                Apply filters to refine your campaign and lead views.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" placeholder="Start date" />
+                  <Input type="date" placeholder="End date" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Campaign Type</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="social">Social</SelectItem>
+                    <SelectItem value="ppc">PPC</SelectItem>
+                    <SelectItem value="content">Content</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Performance</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All performance levels" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="high">High Performers (&gt;100% ROI)</SelectItem>
+                    <SelectItem value="medium">Medium (50-100% ROI)</SelectItem>
+                    <SelectItem value="low">Low Performers (&lt;50% ROI)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Owner</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All team members" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Team Members</SelectItem>
+                    <SelectItem value="sarah">Sarah Chen</SelectItem>
+                    <SelectItem value="mike">Mike Johnson</SelectItem>
+                    <SelectItem value="emily">Emily Davis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>Clear All</Button>
+              <Button onClick={() => {
+                toast.success('Filters applied!')
+                setShowFiltersDialog(false)
+              }}>Apply Filters</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Insights Dialog */}
+        <Dialog open={showAIInsights} onOpenChange={setShowAIInsights}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-purple-500" />
+                AI-Powered Insights
+              </DialogTitle>
+              <DialogDescription>
+                Intelligent recommendations based on your marketing data.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="space-y-4">
+                {mockAIInsights.map((insight) => (
+                  <div key={insight.id} className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium">{insight.title}</h4>
+                          <Badge variant="outline" className={
+                            insight.impact === 'high' ? 'text-red-600 border-red-200' :
+                            insight.impact === 'medium' ? 'text-yellow-600 border-yellow-200' :
+                            'text-green-600 border-green-200'
+                          }>
+                            {insight.impact} impact
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{insight.description}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Progress value={insight.confidence * 100} className="h-1 flex-1" />
+                          <span className="text-xs text-gray-500">{Math.round(insight.confidence * 100)}% confidence</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAIInsights(false)}>Close</Button>
+              <Button className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">
+                Apply Recommendations
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

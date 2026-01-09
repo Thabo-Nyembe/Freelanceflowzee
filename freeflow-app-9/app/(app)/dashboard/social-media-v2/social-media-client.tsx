@@ -386,9 +386,47 @@ export default function SocialMediaClient() {
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isPostOptionsOpen, setIsPostOptionsOpen] = useState(false)
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
+  const [isIntegrationsDialogOpen, setIsIntegrationsDialogOpen] = useState(false)
   const [selectedPostForOptions, setSelectedPostForOptions] = useState<string | null>(null)
   const [analyticsPostId, setAnalyticsPostId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('posts')
+
+  // Composer form state
+  const [composerContent, setComposerContent] = useState('')
+  const [composerPlatforms, setComposerPlatforms] = useState<Platform[]>(['twitter', 'facebook'])
+  const [composerContentType, setComposerContentType] = useState<ContentType>('text')
+  const [composerHashtags, setComposerHashtags] = useState('')
+
+  // Scheduler state
+  const [schedulerDate, setSchedulerDate] = useState('')
+  const [schedulerTime, setSchedulerTime] = useState('09:00')
+  const [schedulerPostId, setSchedulerPostId] = useState<string | null>(null)
+
+  // Invite state
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('publisher')
+
+  // Notifications mock data
+  const notifications = [
+    { id: '1', title: 'Post went viral!', message: 'Your product launch post reached 50K impressions', time: '5 min ago', type: 'success' as const, read: false },
+    { id: '2', title: 'Pending approval', message: '3 posts are waiting for review', time: '1 hour ago', type: 'warning' as const, read: false },
+    { id: '3', title: 'New mention', message: '@techreviewer mentioned you in a tweet', time: '2 hours ago', type: 'info' as const, read: true },
+    { id: '4', title: 'Scheduled post published', message: 'Your webinar announcement is now live', time: '3 hours ago', type: 'success' as const, read: true },
+    { id: '5', title: 'Account sync complete', message: 'All social accounts synced successfully', time: '5 hours ago', type: 'info' as const, read: true },
+  ]
+
+  // Available integrations
+  const availableIntegrations = [
+    { id: '1', name: 'Canva', description: 'Design graphics and visuals', category: 'Design', connected: true, icon: PenTool },
+    { id: '2', name: 'Google Analytics', description: 'Track website traffic from social', category: 'Analytics', connected: true, icon: BarChart3 },
+    { id: '3', name: 'Slack', description: 'Get notifications in Slack channels', category: 'Communication', connected: false, icon: MessageSquare },
+    { id: '4', name: 'Shopify', description: 'Sync products for social commerce', category: 'E-commerce', connected: false, icon: Link2 },
+    { id: '5', name: 'Zapier', description: 'Connect with 5000+ apps', category: 'Automation', connected: false, icon: Zap },
+    { id: '6', name: 'HubSpot', description: 'CRM integration for leads', category: 'CRM', connected: false, icon: Users },
+    { id: '7', name: 'Mailchimp', description: 'Email marketing integration', category: 'Marketing', connected: false, icon: Send },
+    { id: '8', name: 'Unsplash', description: 'Free stock photos', category: 'Media', connected: false, icon: Image },
+  ]
 
   // Stats
   const stats = useMemo(() => {
@@ -524,8 +562,81 @@ export default function SocialMediaClient() {
 
   // Handlers with real functionality
   const handleCreatePost = () => {
+    setComposerContent('')
+    setComposerPlatforms(['twitter', 'facebook'])
+    setComposerContentType('text')
+    setComposerHashtags('')
     setIsComposerOpen(true)
-    toast.success('Composer ready! Create content for multiple platforms')
+  }
+
+  const handleSaveComposerPost = (asDraft: boolean = true) => {
+    if (!composerContent.trim()) {
+      toast.error('Please enter post content')
+      return
+    }
+    const newPost: SocialPost = {
+      id: `post-${Date.now()}`,
+      content: composerContent,
+      contentType: composerContentType,
+      platforms: composerPlatforms,
+      status: asDraft ? 'draft' : 'pending_approval',
+      scheduledAt: null,
+      publishedAt: null,
+      mediaUrls: [],
+      hashtags: composerHashtags.split(' ').filter(h => h.startsWith('#')).map(h => h.slice(1)),
+      mentions: [],
+      link: null,
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      saves: 0,
+      views: 0,
+      clicks: 0,
+      engagementRate: 0,
+      reach: 0,
+      impressions: 0,
+      isTrending: false,
+      createdBy: 'Current User',
+      approvedBy: null
+    }
+    setPosts(prev => [newPost, ...prev])
+    setIsComposerOpen(false)
+    toast.success(asDraft ? 'Post saved as draft!' : 'Post submitted for approval!')
+  }
+
+  const handlePublishFromComposer = () => {
+    if (!composerContent.trim()) {
+      toast.error('Please enter post content')
+      return
+    }
+    const newPost: SocialPost = {
+      id: `post-${Date.now()}`,
+      content: composerContent,
+      contentType: composerContentType,
+      platforms: composerPlatforms,
+      status: 'published',
+      scheduledAt: null,
+      publishedAt: new Date().toISOString(),
+      mediaUrls: [],
+      hashtags: composerHashtags.split(' ').filter(h => h.startsWith('#')).map(h => h.slice(1)),
+      mentions: [],
+      link: null,
+      likes: Math.floor(Math.random() * 100),
+      comments: Math.floor(Math.random() * 20),
+      shares: Math.floor(Math.random() * 10),
+      saves: Math.floor(Math.random() * 5),
+      views: Math.floor(Math.random() * 1000),
+      clicks: Math.floor(Math.random() * 50),
+      engagementRate: parseFloat((Math.random() * 5).toFixed(1)),
+      reach: Math.floor(Math.random() * 5000),
+      impressions: Math.floor(Math.random() * 8000),
+      isTrending: false,
+      createdBy: 'Current User',
+      approvedBy: 'Current User'
+    }
+    setPosts(prev => [newPost, ...prev])
+    setIsComposerOpen(false)
+    toast.success('Post published to all selected platforms!')
   }
 
   const handleSchedulePost = (postId: string, postContent: string) => {
@@ -720,21 +831,46 @@ export default function SocialMediaClient() {
   }
 
   const handleInviteTeamMember = () => {
-    const inviteOperation = async () => {
-      // In real app, this would open a modal to enter email
-      const email = 'team@example.com'
-      return `Invitation sent to ${email}!`
+    setInviteEmail('')
+    setInviteRole('publisher')
+    setIsInviteDialogOpen(true)
+  }
+
+  const handleSendInvite = () => {
+    if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
     }
-    toast.promise(inviteOperation(), {
-      loading: 'Sending team invitation...',
-      success: (msg) => msg,
+    const sendOperation = async () => {
+      // Simulate sending invitation
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return `Invitation sent to ${inviteEmail} as ${inviteRole}!`
+    }
+    toast.promise(sendOperation(), {
+      loading: 'Sending invitation...',
+      success: (msg) => {
+        setIsInviteDialogOpen(false)
+        setInviteEmail('')
+        return msg
+      },
       error: 'Failed to send invitation'
     })
   }
 
   const handleBrowseIntegrations = () => {
-    setSettingsTab('integrations')
-    toast.success('Browse available integrations below')
+    setIsIntegrationsDialogOpen(true)
+  }
+
+  const handleConnectIntegration = (integrationName: string) => {
+    const connectOperation = async () => {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      return `${integrationName} connected successfully!`
+    }
+    toast.promise(connectOperation(), {
+      loading: `Connecting ${integrationName}...`,
+      success: (msg) => msg,
+      error: `Failed to connect ${integrationName}`
+    })
   }
 
   const handleRegenerateKey = () => {
@@ -877,7 +1013,6 @@ export default function SocialMediaClient() {
 
   const handleLoadNotifications = () => {
     setIsNotificationsOpen(true)
-    toast.success('3 new notifications')
   }
 
   const handlePostOptions = (postId: string) => {
@@ -2471,6 +2606,346 @@ export default function SocialMediaClient() {
                 </div>
               )
             })()}
+          </DialogContent>
+        </Dialog>
+
+        {/* Post Composer Dialog */}
+        <Dialog open={isComposerOpen} onOpenChange={setIsComposerOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PenTool className="w-5 h-5" />
+                Create New Post
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Post Content</Label>
+                <textarea
+                  value={composerContent}
+                  onChange={(e) => setComposerContent(e.target.value)}
+                  placeholder="What's on your mind? Write your post content here..."
+                  className="w-full h-32 mt-1 p-3 border rounded-lg resize-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700"
+                />
+                <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
+                  <span>{composerContent.length} characters</span>
+                  <span>Twitter limit: 280</span>
+                </div>
+              </div>
+
+              <div>
+                <Label>Content Type</Label>
+                <Select value={composerContentType} onValueChange={(v) => setComposerContentType(v as ContentType)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text Post</SelectItem>
+                    <SelectItem value="image">Image Post</SelectItem>
+                    <SelectItem value="video">Video Post</SelectItem>
+                    <SelectItem value="carousel">Carousel</SelectItem>
+                    <SelectItem value="story">Story</SelectItem>
+                    <SelectItem value="reel">Reel</SelectItem>
+                    <SelectItem value="poll">Poll</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Platforms</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {(['twitter', 'facebook', 'instagram', 'linkedin', 'tiktok', 'youtube'] as Platform[]).map(platform => (
+                    <Badge
+                      key={platform}
+                      variant={composerPlatforms.includes(platform) ? 'default' : 'outline'}
+                      className={`cursor-pointer ${composerPlatforms.includes(platform) ? getPlatformColor(platform) : ''}`}
+                      onClick={() => {
+                        if (composerPlatforms.includes(platform)) {
+                          setComposerPlatforms(prev => prev.filter(p => p !== platform))
+                        } else {
+                          setComposerPlatforms(prev => [...prev, platform])
+                        }
+                      }}
+                    >
+                      {platform}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label>Hashtags</Label>
+                <Input
+                  value={composerHashtags}
+                  onChange={(e) => setComposerHashtags(e.target.value)}
+                  placeholder="#trending #socialmedia #marketing"
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => handleSaveComposerPost(true)} className="flex-1">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Save as Draft
+                </Button>
+                <Button variant="outline" onClick={() => handleSaveComposerPost(false)} className="flex-1">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Submit for Approval
+                </Button>
+                <Button onClick={handlePublishFromComposer} className="flex-1 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white">
+                  <Send className="w-4 h-4 mr-2" />
+                  Publish Now
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Scheduler Dialog */}
+        <Dialog open={isSchedulerOpen} onOpenChange={setIsSchedulerOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5" />
+                Schedule Posts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Select Post to Schedule</Label>
+                <Select value={schedulerPostId || ''} onValueChange={setSchedulerPostId}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose a post..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {posts.filter(p => p.status === 'draft' || p.status === 'pending_approval').map(post => (
+                      <SelectItem key={post.id} value={post.id}>
+                        {post.content.slice(0, 50)}...
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Schedule Date</Label>
+                <Input
+                  type="date"
+                  value={schedulerDate}
+                  onChange={(e) => setSchedulerDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label>Schedule Time</Label>
+                <Select value={schedulerTime} onValueChange={setSchedulerTime}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="06:00">6:00 AM</SelectItem>
+                    <SelectItem value="09:00">9:00 AM</SelectItem>
+                    <SelectItem value="12:00">12:00 PM</SelectItem>
+                    <SelectItem value="15:00">3:00 PM</SelectItem>
+                    <SelectItem value="18:00">6:00 PM</SelectItem>
+                    <SelectItem value="21:00">9:00 PM</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="text-sm font-medium">AI Suggestion</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  Best time to post today: 6:00 PM based on your audience engagement patterns.
+                </p>
+              </div>
+
+              <Button
+                className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white"
+                onClick={() => {
+                  if (!schedulerPostId || !schedulerDate) {
+                    toast.error('Please select a post and date')
+                    return
+                  }
+                  const post = posts.find(p => p.id === schedulerPostId)
+                  if (post) {
+                    handleSchedulePost(post.id, post.content)
+                    setIsSchedulerOpen(false)
+                  }
+                }}
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Schedule Post
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notifications Dialog */}
+        <Dialog open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Notifications
+                <Badge className="ml-2 bg-red-500 text-white">{notifications.filter(n => !n.read).length} new</Badge>
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-80">
+              <div className="space-y-3 pr-4">
+                {notifications.map(notification => (
+                  <div
+                    key={notification.id}
+                    className={`p-3 rounded-lg border transition-colors ${
+                      notification.read
+                        ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                        : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        {notification.type === 'success' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                        {notification.type === 'warning' && <Bell className="w-4 h-4 text-yellow-500" />}
+                        {notification.type === 'info' && <MessageSquare className="w-4 h-4 text-blue-500" />}
+                        <span className="font-medium text-sm">{notification.title}</span>
+                      </div>
+                      <span className="text-xs text-gray-500">{notification.time}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1 ml-6">
+                      {notification.message}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex gap-2 pt-4 border-t">
+              <Button variant="outline" className="flex-1" onClick={() => toast.success('All notifications marked as read')}>
+                Mark All Read
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={() => setIsNotificationsOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Team Member Dialog */}
+        <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Invite Team Member
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Email Address</Label>
+                <Input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="colleague@company.com"
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label>Role</Label>
+                <Select value={inviteRole} onValueChange={setInviteRole}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin - Full access</SelectItem>
+                    <SelectItem value="publisher">Publisher - Can create & publish</SelectItem>
+                    <SelectItem value="analyst">Analyst - View only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 className="font-medium text-sm mb-2">Role Permissions</h4>
+                {inviteRole === 'admin' && (
+                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                    <li>- Manage team members</li>
+                    <li>- Access all settings</li>
+                    <li>- Create, edit, publish posts</li>
+                    <li>- View all analytics</li>
+                  </ul>
+                )}
+                {inviteRole === 'publisher' && (
+                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                    <li>- Create and schedule posts</li>
+                    <li>- Publish to connected accounts</li>
+                    <li>- View own analytics</li>
+                  </ul>
+                )}
+                {inviteRole === 'analyst' && (
+                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                    <li>- View all analytics</li>
+                    <li>- Export reports</li>
+                    <li>- Read-only access</li>
+                  </ul>
+                )}
+              </div>
+
+              <Button className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white" onClick={handleSendInvite}>
+                <Send className="w-4 h-4 mr-2" />
+                Send Invitation
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integrations Browser Dialog */}
+        <Dialog open={isIntegrationsDialogOpen} onOpenChange={setIsIntegrationsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="w-5 h-5" />
+                Browse Integrations
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-96">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-4">
+                {availableIntegrations.map(integration => (
+                  <div
+                    key={integration.id}
+                    className="p-4 border rounded-lg hover:border-violet-300 transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-100 to-fuchsia-100 dark:from-violet-900/30 dark:to-fuchsia-900/30 flex items-center justify-center">
+                        <integration.icon className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium">{integration.name}</h4>
+                          {integration.connected ? (
+                            <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleConnectIntegration(integration.name)}
+                            >
+                              Connect
+                            </Button>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">{integration.description}</p>
+                        <Badge variant="secondary" className="mt-2">{integration.category}</Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           </DialogContent>
         </Dialog>
       </div>
