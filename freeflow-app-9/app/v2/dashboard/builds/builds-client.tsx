@@ -835,8 +835,16 @@ export default function BuildsClient() {
   const [showDeleteSecretDialog, setShowDeleteSecretDialog] = useState(false)
   const [showCopySecretDialog, setShowCopySecretDialog] = useState(false)
   const [showDeleteCacheDialog, setShowDeleteCacheDialog] = useState(false)
+  const [showAddScheduleDialog, setShowAddScheduleDialog] = useState(false)
+  const [showAddVariableDialog, setShowAddVariableDialog] = useState(false)
+  const [showAddReviewerDialog, setShowAddReviewerDialog] = useState(false)
   const [selectedSecret, setSelectedSecret] = useState<string | null>(null)
   const [selectedCache, setSelectedCache] = useState<string | null>(null)
+  const [newScheduleName, setNewScheduleName] = useState('')
+  const [newScheduleCron, setNewScheduleCron] = useState('')
+  const [newVariableKey, setNewVariableKey] = useState('')
+  const [newVariableValue, setNewVariableValue] = useState('')
+  const [newReviewerEmail, setNewReviewerEmail] = useState('')
 
   // Build detail dialog states
   const [showBuildLogsDialog, setShowBuildLogsDialog] = useState(false)
@@ -2594,7 +2602,7 @@ export default function BuildsClient() {
                 </div>
                 <p className="text-sm text-gray-500">Every Sunday at 12:00 PM UTC</p>
               </div>
-              <Button variant="outline" className="w-full" onClick={() => toast.success('Add schedule dialog')}>
+              <Button variant="outline" className="w-full" onClick={() => setShowAddScheduleDialog(true)}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Add Schedule
               </Button>
@@ -2629,7 +2637,7 @@ export default function BuildsClient() {
                   <Badge variant="secondary">Encrypted</Badge>
                 </div>
               ))}
-              <Button variant="outline" className="w-full" onClick={() => toast.success('Add secret dialog')}>
+              <Button variant="outline" className="w-full" onClick={() => setShowAddSecretDialog(true)}>
                 <Key className="w-4 h-4 mr-2" />
                 Add Secret
               </Button>
@@ -2882,7 +2890,7 @@ export default function BuildsClient() {
                   </Button>
                 </div>
               ))}
-              <Button variant="outline" className="w-full" onClick={() => toast.success('Add secret dialog')}>
+              <Button variant="outline" className="w-full" onClick={() => setShowAddSecretDialog(true)}>
                 <Key className="w-4 h-4 mr-2" />
                 Add Secret
               </Button>
@@ -2924,7 +2932,7 @@ export default function BuildsClient() {
                   </Button>
                 </div>
               ))}
-              <Button variant="outline" className="w-full" onClick={() => toast.success('Add variable dialog')}>
+              <Button variant="outline" className="w-full" onClick={() => setShowAddVariableDialog(true)}>
                 <Database className="w-4 h-4 mr-2" />
                 Add Variable
               </Button>
@@ -2963,7 +2971,7 @@ export default function BuildsClient() {
                   </Button>
                 </div>
               ))}
-              <Button variant="outline" className="w-full" onClick={() => toast.success('Add reviewer dialog')}>
+              <Button variant="outline" className="w-full" onClick={() => setShowAddReviewerDialog(true)}>
                 <Users className="w-4 h-4 mr-2" />
                 Add Reviewer
               </Button>
@@ -3621,6 +3629,189 @@ export default function BuildsClient() {
                 setSelectedCache(null)
               }}>
                 Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Schedule Dialog */}
+        <Dialog open={showAddScheduleDialog} onOpenChange={setShowAddScheduleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-blue-600" />
+                Add Schedule
+              </DialogTitle>
+              <DialogDescription>
+                Create a new scheduled workflow trigger
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schedule Name</label>
+                <Input
+                  placeholder="e.g., Nightly Build"
+                  value={newScheduleName}
+                  onChange={(e) => setNewScheduleName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Cron Expression</label>
+                <Input
+                  placeholder="e.g., 0 0 * * * (daily at midnight)"
+                  value={newScheduleCron}
+                  onChange={(e) => setNewScheduleCron(e.target.value)}
+                />
+                <p className="text-xs text-gray-500">Use standard cron format: minute hour day month weekday</p>
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-400">
+                  Common schedules: 0 0 * * * (daily), 0 0 * * 0 (weekly), 0 */6 * * * (every 6 hours)
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowAddScheduleDialog(false)
+                setNewScheduleName('')
+                setNewScheduleCron('')
+              }}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                if (!newScheduleName || !newScheduleCron) {
+                  toast.error('Please fill in all fields')
+                  return
+                }
+                toast.success('Schedule created', { description: `${newScheduleName} will run on schedule` })
+                setShowAddScheduleDialog(false)
+                setNewScheduleName('')
+                setNewScheduleCron('')
+              }}>
+                Add Schedule
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Variable Dialog */}
+        <Dialog open={showAddVariableDialog} onOpenChange={setShowAddVariableDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-pink-600" />
+                Add Environment Variable
+              </DialogTitle>
+              <DialogDescription>
+                Create a new environment variable
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Variable Name</label>
+                <Input
+                  placeholder="e.g., NODE_ENV"
+                  value={newVariableKey}
+                  onChange={(e) => setNewVariableKey(e.target.value.toUpperCase())}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Value</label>
+                <Input
+                  placeholder="e.g., production"
+                  value={newVariableValue}
+                  onChange={(e) => setNewVariableValue(e.target.value)}
+                />
+              </div>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  Environment variables are available to all workflows in this repository.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowAddVariableDialog(false)
+                setNewVariableKey('')
+                setNewVariableValue('')
+              }}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                if (!newVariableKey || !newVariableValue) {
+                  toast.error('Please fill in all fields')
+                  return
+                }
+                toast.success('Variable added', { description: `${newVariableKey} has been created` })
+                setShowAddVariableDialog(false)
+                setNewVariableKey('')
+                setNewVariableValue('')
+              }}>
+                Add Variable
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Reviewer Dialog */}
+        <Dialog open={showAddReviewerDialog} onOpenChange={setShowAddReviewerDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-fuchsia-600" />
+                Add Reviewer
+              </DialogTitle>
+              <DialogDescription>
+                Add a required reviewer for deployments
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Reviewer Email or Username</label>
+                <Input
+                  placeholder="e.g., john@company.com or @johndoe"
+                  value={newReviewerEmail}
+                  onChange={(e) => setNewReviewerEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Suggested Reviewers</label>
+                <div className="space-y-2">
+                  {['Alice Chen', 'Bob Wilson', 'Carol Zhang'].map(reviewer => (
+                    <div
+                      key={reviewer}
+                      className="flex items-center justify-between p-2 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                      onClick={() => setNewReviewerEmail(reviewer.toLowerCase().replace(' ', '.'))}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback className="text-xs">{reviewer.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm">{reviewer}</span>
+                      </div>
+                      <Badge variant="outline">Team Lead</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowAddReviewerDialog(false)
+                setNewReviewerEmail('')
+              }}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={() => {
+                if (!newReviewerEmail) {
+                  toast.error('Please enter a reviewer')
+                  return
+                }
+                toast.success('Reviewer added', { description: `${newReviewerEmail} is now a required reviewer` })
+                setShowAddReviewerDialog(false)
+                setNewReviewerEmail('')
+              }}>
+                Add Reviewer
               </Button>
             </div>
           </DialogContent>

@@ -990,7 +990,6 @@ export default function KnowledgeBaseClient() {
   // Create Space Handler
   const handleCreateSpace = () => {
     setShowCreateSpaceDialog(true)
-    toast.success('Create space dialog opened')
   }
 
   // Comment Handlers
@@ -1002,7 +1001,6 @@ export default function KnowledgeBaseClient() {
   const handleReplyToComment = (comment: Comment) => {
     setReplyToComment(comment)
     setShowReplyDialog(true)
-    toast.success('Reply box opened')
   }
 
   const handleResolveComment = async (commentId: string) => {
@@ -1045,7 +1043,6 @@ export default function KnowledgeBaseClient() {
   const handleEditPage = (page: Page) => {
     setEditingPage(page)
     setShowEditDialog(true)
-    toast.success('Editor opened', { description: 'Edit mode enabled' })
   }
 
   // Settings Export Handler
