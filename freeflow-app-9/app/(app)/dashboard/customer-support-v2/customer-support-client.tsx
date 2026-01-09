@@ -1851,7 +1851,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                               {integration.connected ? (
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
                               ) : (
-                                <Button size="sm" variant="outline" onClick={() => toast.success(`Connecting to ${integration.name}...`, { description: 'Redirecting to authorization page' })}>Connect</Button>
+                                <Button size="sm" variant="outline" onClick={() => { /* TODO: Implement OAuth connection flow */ }}>Connect</Button>
                               )}
                             </div>
                             {integration.connected && (
@@ -1876,7 +1876,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm" onClick={() => toast.success('API key regenerated', { description: 'New key will be shown below' })}>Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement API key regeneration with confirmation */ }}>Regenerate</Button>
                           </div>
                           <Input type="password" value="cs_live_••••••••••••••••" readOnly className="font-mono" />
                         </div>
@@ -2544,7 +2544,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <Label>Create New Tag</Label>
               <div className="flex gap-2 mt-1">
                 <Input placeholder="Enter tag name" />
-                <Button onClick={() => toast.success('Tag created')}>Add</Button>
+                <Button onClick={() => { /* TODO: Implement tag creation */ }}>Add</Button>
               </div>
             </div>
           </div>
@@ -2715,8 +2715,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div>
               <Label>Quick Actions</Label>
               <div className="flex gap-2 mt-2">
-                <Button variant="outline" size="sm" onClick={() => toast.success('PTO request submitted')}>Request PTO</Button>
-                <Button variant="outline" size="sm" onClick={() => toast.success('Shift swap requested')}>Swap Shift</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement PTO request form */ }}>Request PTO</Button>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement shift swap request */ }}>Swap Shift</Button>
               </div>
             </div>
           </div>
@@ -2809,7 +2809,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Progress value={course.progress} className="h-2" />
               </div>
             ))}
-            <Button className="w-full" onClick={() => toast.success('Opening training portal...')}>
+            <Button className="w-full" onClick={() => window.open('/training', '_blank')}>
               <Headphones className="h-4 w-4 mr-2" />
               Open Training Portal
             </Button>
@@ -2964,7 +2964,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Badge className="bg-yellow-500">VIP</Badge>
               </div>
             ))}
-            <Button variant="outline" className="w-full" onClick={() => toast.info('Select a customer to add to VIP')}>+ Add VIP Customer</Button>
+            <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement VIP customer selector */ }}>+ Add VIP Customer</Button>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowVIPDialog(false)}>Close</Button>
@@ -3739,9 +3739,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div>
               <h4 className="font-medium mb-2">Quick Links</h4>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Opening full documentation...')}>Full Docs</Button>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Opening API reference...')}>API Reference</Button>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Opening examples...')}>Examples</Button>
+                <Button variant="outline" size="sm" onClick={() => window.open('/docs', '_blank')}>Full Docs</Button>
+                <Button variant="outline" size="sm" onClick={() => window.open('/docs/api', '_blank')}>API Reference</Button>
+                <Button variant="outline" size="sm" onClick={() => window.open('/docs/examples', '_blank')}>Examples</Button>
               </div>
             </div>
           </div>

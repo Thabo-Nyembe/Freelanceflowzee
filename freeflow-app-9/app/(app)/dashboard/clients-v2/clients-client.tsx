@@ -1106,7 +1106,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Recent Activities</CardTitle>
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Activity logging coming soon')}>
+                  <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement activity logging */ }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Log Activity
                   </Button>
@@ -1166,7 +1166,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
           <TabsContent value="tasks" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Pending Tasks</h3>
-              <Button variant="outline" size="sm" onClick={() => toast.info('Task creation coming soon')}>
+              <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement task creation */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Task
               </Button>
@@ -1379,7 +1379,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Switch defaultChecked />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Custom field creation coming soon')}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement custom field creation */ }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Custom Field
                         </Button>
@@ -1449,11 +1449,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </div>
                             <div className="flex items-center gap-4">
                               <span className="text-sm text-gray-500">{stage.prob}% probability</span>
-                              <Button variant="ghost" size="sm" onClick={() => toast.info(`Edit ${stage.name} stage settings`)}>Edit</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement stage editor */ }}>Edit</Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Stage creation coming soon')}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement stage creation */ }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1577,7 +1577,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Workflow builder coming soon')}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement workflow builder */ }}>
                           Create Custom Workflow
                         </Button>
                       </CardContent>
@@ -1602,7 +1602,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Switch defaultChecked={seq.active} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Sequence creation coming soon')}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement sequence creation */ }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create Sequence
                         </Button>
@@ -1707,7 +1707,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </Badge>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('App marketplace coming soon')}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement app marketplace */ }}>
                           Browse App Marketplace
                         </Button>
                       </CardContent>
@@ -1844,7 +1844,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => toast.info('Import functionality coming soon')}>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => { /* TODO: Implement import functionality */ }}>
                             <Upload className="w-5 h-5" />
                             <span>Import Data</span>
                           </Button>
@@ -1896,7 +1896,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('API key regeneration requires confirmation')}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement API key regeneration with confirmation */ }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1928,7 +1928,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Audit log viewer coming soon')}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement audit log viewer */ }}>
                           View Audit Log
                         </Button>
                       </CardContent>
@@ -1968,7 +1968,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Button
                               variant="outline"
                               className="text-red-600 border-red-300 hover:bg-red-50"
-                              onClick={() => toast.info('Duplicate detection coming soon')}
+                              onClick={() => { /* TODO: Implement duplicate detection */ }}
                             >
                               Merge
                             </Button>

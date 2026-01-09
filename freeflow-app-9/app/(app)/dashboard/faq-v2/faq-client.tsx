@@ -1620,7 +1620,7 @@ export default function FAQClient() {
                   <p className="text-sm text-blue-100 mb-4">
                     Let AI analyze your knowledge base and suggest improvements
                   </p>
-                  <button onClick={() => toast.success('AI Insights Generated', { description: 'Analyzed 83 articles: 5 need updates, 3 trending topics identified' })} className="w-full py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors">
+                  <button onClick={() => { /* TODO: Implement AI insights generation */ }} className="w-full py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors">
                     Generate Insights
                   </button>
                 </div>
@@ -1649,7 +1649,7 @@ export default function FAQClient() {
                   >
                     Export Data
                   </button>
-                  <button onClick={() => toast.success('Settings Saved', { description: 'Your knowledge base settings have been updated' })} className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-medium transition-colors">
+                  <button onClick={() => { /* TODO: Implement settings save */ }} className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-medium transition-colors">
                     Save Changes
                   </button>
                 </div>
@@ -1729,7 +1729,7 @@ export default function FAQClient() {
                               placeholder="help.yourdomain.com"
                               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
                             />
-                            <button onClick={() => toast.success('Domain Verified', { description: 'Your custom domain has been verified and is active' })} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                            <button onClick={() => { /* TODO: Implement domain verification */ }} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
                               Verify
                             </button>
                           </div>
@@ -1888,7 +1888,7 @@ export default function FAQClient() {
                           <Languages className="w-5 h-5 text-green-600" />
                           Supported Languages
                         </h3>
-                        <button onClick={() => toast.success('Add Language', { description: 'Select a language to add from the dropdown' })} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                        <button onClick={() => { /* TODO: Implement language selector dropdown */ }} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
                           <Plus className="w-4 h-4" />
                           Add Language
                         </button>
@@ -1911,11 +1911,11 @@ export default function FAQClient() {
                                   Default
                                 </span>
                               ) : (
-                                <button onClick={() => toast.success('Default Language Updated', { description: `${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'} is now the default language` })} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-medium hover:bg-gray-200">
+                                <button onClick={() => { /* TODO: Implement set default language */ }} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-medium hover:bg-gray-200">
                                   Set as Default
                                 </button>
                               )}
-                              <button onClick={() => toast.success(`Edit ${lang === 'en' ? 'English' : lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}`, { description: 'Language settings editor would open here' })} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
+                              <button onClick={() => { /* TODO: Implement language settings editor */ }} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
                                 <Edit className="w-4 h-4 text-gray-500" />
                               </button>
                               {lang !== helpCenterSettings.defaultLanguage && (
@@ -1985,7 +1985,7 @@ export default function FAQClient() {
                                 <p className="text-xs text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <button onClick={() => toast.success(integration.connected ? `${integration.name} Settings` : `${integration.name} Connected`, { description: integration.connected ? `Configure your ${integration.name} integration settings` : `Successfully connected to ${integration.name}` })} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
+                            <button onClick={() => { /* TODO: Implement integration connection/settings */ }} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
                               integration.connected
                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                 : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -2127,12 +2127,12 @@ export default function FAQClient() {
                           <p className="font-medium">Export All Data</p>
                           <p className="text-xs text-gray-500">Download all articles as CSV</p>
                         </button>
-                        <button onClick={() => toast.success('Import Ready', { description: 'Drag and drop a CSV or JSON file to import articles' })} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                        <button onClick={() => { /* TODO: Implement import file dialog */ }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
                           <Upload className="w-5 h-5 text-green-600 mb-2" />
                           <p className="font-medium">Import Data</p>
                           <p className="text-xs text-gray-500">Bulk import articles</p>
                         </button>
-                        <button onClick={() => toast.success('Version History', { description: 'View revision history for all articles in the timeline view' })} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                        <button onClick={() => { /* TODO: Implement version history timeline view */ }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
                           <History className="w-5 h-5 text-purple-600 mb-2" />
                           <p className="font-medium">Version History</p>
                           <p className="text-xs text-gray-500">View all article revisions</p>

@@ -869,7 +869,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       <option value="suspended">Suspended</option>
                       <option value="locked">Locked</option>
                     </select>
-                    <Button variant="outline" className="gap-2" onClick={() => toast.success('Filters panel', { description: 'Use the status dropdown for filtering' })}>
+                    <Button variant="outline" className="gap-2" onClick={() => { /* TODO: Implement advanced filters panel */ }}>
                       <Filter className="w-4 h-4" />
                       More Filters
                     </Button>
@@ -1033,7 +1033,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Security Policies</h3>
-                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => toast.info('Create Policy', { description: 'Policy creation wizard coming soon' })}>
+                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => { /* TODO: Implement policy creation wizard */ }}>
                   <Plus className="w-4 h-4" />
                   Create Policy
                 </Button>
@@ -1079,7 +1079,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Applications</h3>
-                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => toast.info('Add Application', { description: 'Application catalog coming soon' })}>
+                <Button className="bg-purple-600 hover:bg-purple-700 gap-2" onClick={() => { /* TODO: Implement application catalog */ }}>
                   <Plus className="w-4 h-4" />
                   Add Application
                 </Button>
@@ -1631,7 +1631,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                             {mapping.required && <Badge variant="outline" className="flex-shrink-0">Required</Badge>}
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Mapping', { description: 'Attribute mapping editor coming soon' })}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement attribute mapping editor */ }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Mapping
                         </Button>
@@ -1731,7 +1731,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                           </div>
                           <p className="text-xs text-gray-500">Events: user.created, user.updated, user.deleted</p>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Webhook', { description: 'Webhook configuration coming soon' })}>
+                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement webhook configuration */ }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1771,7 +1771,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                               <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'}>
                                 {integration.status}
                               </Badge>
-                              <Button variant="outline" size="sm" onClick={() => toast.info(integration.status === 'connected' ? 'Configure Directory' : 'Connect Directory', { description: integration.status === 'connected' ? `${integration.name} configuration panel coming soon` : `${integration.name} connection wizard coming soon` })}>
+                              <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement directory configuration/connection wizard */ }}>
                                 {integration.status === 'connected' ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1794,7 +1794,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         ].map(hr => (
                           <div key={hr.name} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <span className="font-medium">{hr.name}</span>
-                            <Button variant={hr.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.info(hr.connected ? 'Configure HR System' : 'Connect HR System', { description: hr.connected ? `${hr.name} configuration panel coming soon` : `${hr.name} connection wizard coming soon` })}>
+                            <Button variant={hr.connected ? 'outline' : 'default'} size="sm" onClick={() => { /* TODO: Implement HR system configuration/connection */ }}>
                               {hr.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -2172,7 +2172,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 )}
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.info('Edit User', { description: 'User editor coming soon' })}>
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => { /* TODO: Implement user editor */ }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit User
                   </Button>
@@ -2218,11 +2218,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.info('Add Members', { description: 'Member selector coming soon' })}>
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => { /* TODO: Implement member selector */ }}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Add Members
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Group', { description: 'Group editor coming soon' })}>
+                  <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Implement group editor */ }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2264,12 +2264,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => toast.info('Assign Users', { description: 'User assignment coming soon' })}>
+                  <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => { /* TODO: Implement user assignment */ }}>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Assign Users
                   </Button>
                   {selectedRole.isEditable && (
-                    <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Role', { description: 'Role editor coming soon' })}>
+                    <Button variant="outline" className="flex-1" onClick={() => { /* TODO: Implement role editor */ }}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>

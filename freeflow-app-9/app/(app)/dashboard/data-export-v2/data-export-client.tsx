@@ -819,7 +819,7 @@ export default function DataExportClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Filter options: Active, Paused, Error, Running')}>
+                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement filter dropdown for Active, Paused, Error, Running */ }}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1022,7 +1022,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Connected Data Sources</h2>
-              <Button onClick={() => toast.info('Add new data source: PostgreSQL, MySQL, MongoDB, Salesforce, HubSpot, S3, BigQuery, Snowflake, or API')}>
+              <Button onClick={() => { /* TODO: Implement data source selection dialog */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Source
               </Button>
@@ -1311,7 +1311,7 @@ export default function DataExportClient() {
                             <Download className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => toast.info(`Viewing ${job.name}: ${job.recordsExported.toLocaleString()} records, ${formatBytes(job.fileSizeMb)}`)}>
+                        <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement job details view */ }}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         {job.status === 'running' && (
@@ -1380,7 +1380,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Data Transformations</h2>
-              <Button onClick={() => toast.info('Create new data transformation: Filter, Map, Aggregate, Join, Dedupe, or Custom SQL')}>
+              <Button onClick={() => { /* TODO: Implement transformation creation wizard */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Transform
               </Button>
@@ -1517,7 +1517,7 @@ export default function DataExportClient() {
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => toast.info(`Configure mapping: ${mapping.sourceColumn} -> ${mapping.destinationColumn}`)}>
+                        <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement mapping configuration panel */ }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={async () => {
@@ -1725,7 +1725,7 @@ export default function DataExportClient() {
                 <h2 className="text-lg font-semibold">Data Destinations</h2>
                 <p className="text-sm text-gray-500">Configure where your data flows to</p>
               </div>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => toast.info('Add new destination: Snowflake, BigQuery, Redshift, S3, GCS, Kafka, or Webhook')}>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => { /* TODO: Implement destination selection dialog */ }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Destination
               </Button>
@@ -1772,7 +1772,7 @@ export default function DataExportClient() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.info(`${dest.name}: ${(dest.recordsWritten / 1000000).toFixed(1)}M records, ${dest.dataVolume}`)}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { /* TODO: Implement destination details view */ }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
@@ -1794,7 +1794,7 @@ export default function DataExportClient() {
                   <p className="text-sm text-gray-500">Send data to your favorite tools</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter by: Analytics, Marketing, CRM, Support, Advertising, Product')}>
+                  <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement category filter dropdown */ }}>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -1956,7 +1956,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
                           <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => toast.info('IP Allowlist: Configure allowed IP addresses for API access')}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement IP allowlist configuration */ }}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -2040,7 +2040,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">Webhook URL</p>
                           <p className="text-sm text-gray-500">Receive pipeline events</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Webhook: Configure endpoint URL to receive pipeline events')}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement webhook URL configuration */ }}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -2168,7 +2168,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">15.8 GB archived exports</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Archive Manager: View and manage archived exports (15.8 GB)')}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement archive manager */ }}>Manage</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
