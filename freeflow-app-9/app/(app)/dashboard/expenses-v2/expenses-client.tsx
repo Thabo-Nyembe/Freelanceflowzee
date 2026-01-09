@@ -224,7 +224,6 @@ const getExpensesQuickActions = (
     icon: 'plus',
     action: () => {
       setShowNewExpenseDialog(true)
-      toast.success('Expense form opened', { description: 'Enter expense details and attach receipt' })
     },
     variant: 'default' as const
   },

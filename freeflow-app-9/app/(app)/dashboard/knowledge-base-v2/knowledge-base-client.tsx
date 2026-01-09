@@ -1135,7 +1135,6 @@ export default function KnowledgeBaseClient() {
     }, variant: 'default' as const },
     { id: '3', label: 'Search All', icon: 'search', action: () => {
       setShowSearchDialog(true)
-      toast.success('Search ready', { description: `Search across ${pages.length} articles` })
     }, variant: 'outline' as const },
   ]
 

@@ -1020,7 +1020,6 @@ export default function HelpDocsClient() {
                     </div>
                     <Button variant="outline" className="w-full" size="sm" onClick={() => {
                       window.location.href = 'mailto:support@freeflow.app?subject=Help%20Request'
-                      toast.success('Email client opened')
                     }}>Send Email</Button>
                   </Card>
                   <Card className="p-4">
