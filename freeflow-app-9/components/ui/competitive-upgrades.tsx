@@ -65,6 +65,8 @@ interface AIInsight {
 interface AIInsightsPanelProps {
   insights?: AIInsight[]
   onQuery?: (query: string) => Promise<string>
+  onInsightAction?: (insight: AIInsight) => void
+  title?: string
   className?: string
 }
 
@@ -1156,6 +1158,7 @@ interface Prediction {
 interface PredictiveAnalyticsProps {
   predictions: Prediction[]
   onRefresh?: () => void
+  title?: string
   className?: string
 }
 

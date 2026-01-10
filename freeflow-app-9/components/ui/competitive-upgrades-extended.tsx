@@ -84,6 +84,8 @@ interface ActivityFeedProps {
   onPin?: (id: string) => void
   onArchive?: (id: string) => void
   filters?: string[]
+  title?: string
+  maxItems?: number
   className?: string
 }
 
