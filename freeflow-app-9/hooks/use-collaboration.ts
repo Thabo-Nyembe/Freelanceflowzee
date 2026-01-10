@@ -73,7 +73,7 @@ export function useCollaboration({
           setState(prev => ({ ...prev, users }))
         })
         .on('presence', { event: 'join' }, ({ newPresences }) => {
-          const newUsers = newUsers.map((p) => ({
+          const newUsers = newPresences.map((p) => ({
             ...p,
             lastActive: new Date().toISOString()
           }))

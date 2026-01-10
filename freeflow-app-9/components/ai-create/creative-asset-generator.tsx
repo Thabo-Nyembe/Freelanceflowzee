@@ -11,8 +11,8 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
-// TODO: Re-enable when UPS component syntax is fixed
-// import { UniversalPinpointFeedbackSystem } from '@/components/projects-hub/universal-pinpoint-feedback-system'
+// UPS component - now using enhanced version
+// import { UniversalPinpointFeedbackSystemEnhanced } from '@/components/projects-hub/universal-pinpoint-feedback-system-enhanced'
 
 // A+++ SUPABASE INTEGRATION
 import { createClient } from '@/lib/supabase/client'

@@ -1,4 +1,4 @@
-import { Comment, CommentPriority, CommentStatus } from '@/components/projects-hub/universal-pinpoint-feedback-system'
+import { Comment, CommentPriority, CommentStatus } from '@/components/projects-hub/universal-pinpoint-feedback-system-enhanced'
 import { AICommentAnalysis } from '@/lib/ai/comment-analysis-service'
 import { ExportOptions } from '@/components/projects-hub/comment-export-system'
 import { UPSProject, UPSUser, UPSNotification, UPSActivity } from '@/lib/ups/integration-service'

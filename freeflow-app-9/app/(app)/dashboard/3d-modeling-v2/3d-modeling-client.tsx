@@ -2028,7 +2028,7 @@ export default function ThreeDModelingClient() {
             <AIInsightsPanel
               insights={mock3DAIInsights}
               title="3D Modeling Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

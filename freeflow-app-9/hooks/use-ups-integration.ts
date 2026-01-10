@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useUPS } from '@/components/providers/ups-provider'
-import { Comment, CommentPriority, CommentStatus } from '@/components/projects-hub/universal-pinpoint-feedback-system'
+import { Comment, CommentPriority, CommentStatus } from '@/components/projects-hub/universal-pinpoint-feedback-system-enhanced'
 import { AICommentAnalysis } from '@/lib/ai/comment-analysis-service'
 import { ExportOptions } from '@/components/projects-hub/comment-export-system'
 import { UPSEvent } from '@/lib/ups/communication-bus'

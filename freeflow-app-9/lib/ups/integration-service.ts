@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { Comment, CommentPriority, CommentStatus } from '@/components/projects-hub/universal-pinpoint-feedback-system'
+import { Comment, CommentPriority, CommentStatus } from '@/components/projects-hub/universal-pinpoint-feedback-system-enhanced'
 import { AICommentAnalysis } from '@/lib/ai/comment-analysis-service'
 import { DrawingState } from '@/components/projects-hub/enhanced-drawing-tools'
 import { ExportOptions } from '@/components/projects-hub/comment-export-system'

@@ -64,18 +64,18 @@ import {
   Loader2,
 } from "lucide-react"
 
-// Define types
-type CommentPosition =
+// Define types - exported for use in other modules
+export type CommentPosition =
   | { type: "image" | "design"; x: number; y: number; zoom?: number }
   | { type: "video" | "audio"; timestamp: number }
   | { type: "document"; page: number; highlight?: [number, number] }
   | { type: "code"; line: number; character?: number }
 
-type CommentStatus = "open" | "resolved" | "in_progress" | "wont_fix"
+export type CommentStatus = "open" | "resolved" | "in_progress" | "wont_fix"
 
-type CommentType = "text" | "voice" | "screen" | "drawing"
+export type CommentType = "text" | "voice" | "screen" | "drawing"
 
-type CommentPriority = "low" | "medium" | "high" | "critical"
+export type CommentPriority = "low" | "medium" | "high" | "critical"
 
 interface User {
   id: string
@@ -115,7 +115,7 @@ interface Attachment {
   thumbnail?: string
 }
 
-interface Comment {
+export interface Comment {
   id: string
   position: CommentPosition
   content: string

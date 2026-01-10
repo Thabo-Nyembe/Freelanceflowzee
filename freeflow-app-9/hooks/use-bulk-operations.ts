@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useSupabase } from '@/components/supabase/supabase-provider';
+import { useSupabase } from '@/components/providers';
 import { BulkOperation, CreateBulkOperationInput } from '@/lib/types/bulk-operations';
 import { useToast } from '@/components/ui/use-toast';
 
