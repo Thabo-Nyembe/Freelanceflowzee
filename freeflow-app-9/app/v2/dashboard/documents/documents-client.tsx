@@ -2323,7 +2323,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <AIInsightsPanel
               insights={mockDocumentsAIInsights}
               title="Document Intelligence"
-              onInsightAction={(insight) => {
+              onInsightAction={(insight: AIInsight) => {
                 if (insight.type === 'warning') {
                   setStatusFilter('archived')
                   setActiveTab('documents')

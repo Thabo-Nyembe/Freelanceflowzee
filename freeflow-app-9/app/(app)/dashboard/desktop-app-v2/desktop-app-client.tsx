@@ -2994,7 +2994,7 @@ Date: ${new Date().toISOString().split('T')[0]}
             <AIInsightsPanel
               insights={mockDesktopAppAIInsights}
               title="Desktop App Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

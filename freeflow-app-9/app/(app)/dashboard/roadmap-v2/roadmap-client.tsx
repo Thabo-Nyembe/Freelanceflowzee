@@ -1467,7 +1467,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {insights.map((insight) => (
+                    {insights.map((insight: AIInsight) => (
                       <div key={insight.id} className="p-4 rounded-lg border">
                         <div className="flex items-start justify-between mb-2">
                           <div>
@@ -1912,7 +1912,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             <AIInsightsPanel
               insights={mockRoadmapAIInsights}
               title="Roadmap Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

@@ -2400,7 +2400,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <AIInsightsPanel
               insights={mockBudgetsAIInsights}
               title="Budget Intelligence"
-              onInsightAction={(insight) => {
+              onInsightAction={(insight: AIInsight) => {
                 toast.success(`${insight.title}: ${insight.description}`, {
                   description: `Category: ${insight.category || 'General'}`
                 })

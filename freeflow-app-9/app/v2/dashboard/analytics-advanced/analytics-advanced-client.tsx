@@ -320,7 +320,7 @@ export default function AnalyticsAdvancedClient() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">Recent Insights</h3>
           <div className="space-y-3">
-            {insights.slice(0, 3).map((insight) => (
+            {insights.slice(0, 3).map((insight: AIInsight) => (
               <div key={insight.id} className="flex items-start gap-3 p-4 rounded-lg bg-muted/30">
                 <div className="text-2xl">{getInsightIcon(insight.type)}</div>
                 <div className="flex-1">
@@ -585,7 +585,7 @@ export default function AnalyticsAdvancedClient() {
       </div>
 
       <div className="space-y-4">
-        {insights.map((insight) => (
+        {insights.map((insight: AIInsight) => (
           <LiquidGlassCard key={insight.id}>
             <div className="p-6">
               <div className="flex items-start gap-4">

@@ -1850,7 +1850,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integration Intelligence"
-              onInsightAction={(insight) => toast.success(`${insight.title} action completed`)}
+              onInsightAction={(insight: AIInsight) => toast.success(`${insight.title} action completed`)}
             />
           </div>
           <div className="space-y-6">

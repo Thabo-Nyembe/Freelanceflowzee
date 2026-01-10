@@ -2231,7 +2231,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             <AIInsightsPanel
               insights={mockDependenciesAIInsights}
               title="Dependencies Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

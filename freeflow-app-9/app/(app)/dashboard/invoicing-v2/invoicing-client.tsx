@@ -1959,7 +1959,7 @@ export default function InvoicingClient() {
             <AIInsightsPanel
               insights={mockInvoicingAIInsights}
               title="Invoicing Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

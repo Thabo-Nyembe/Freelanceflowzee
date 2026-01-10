@@ -4179,7 +4179,7 @@ export default function MarketingClient() {
             </DialogHeader>
             <div className="py-4">
               <div className="space-y-4">
-                {mockAIInsights.map((insight) => (
+                {mockAIInsights.map((insight: AIInsight) => (
                   <div key={insight.id} className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center">

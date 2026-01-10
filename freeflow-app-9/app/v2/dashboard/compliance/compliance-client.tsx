@@ -2231,7 +2231,7 @@ export default function ComplianceClient() {
             <AIInsightsPanel
               insights={mockComplianceAIInsights}
               title="Compliance Intelligence"
-              onInsightAction={(insight) => toast.promise(
+              onInsightAction={(insight: AIInsight) => toast.promise(
                 new Promise(resolve => setTimeout(resolve, 800)),
                 { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
               )}

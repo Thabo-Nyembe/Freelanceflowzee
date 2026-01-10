@@ -2141,7 +2141,7 @@ export default function SecurityClient() {
             <AIInsightsPanel
               insights={mockSecurityAIInsights}
               title="Security Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

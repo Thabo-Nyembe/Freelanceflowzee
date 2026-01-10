@@ -2257,7 +2257,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
             <AIInsightsPanel
               insights={mockContractsAIInsights}
               title="Contract Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

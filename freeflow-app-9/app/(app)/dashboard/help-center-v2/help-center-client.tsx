@@ -2455,7 +2455,7 @@ export default function HelpCenterClient() {
             <AIInsightsPanel
               insights={mockHelpCenterAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

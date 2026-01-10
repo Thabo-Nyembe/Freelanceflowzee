@@ -2494,7 +2494,7 @@ export default function MaintenanceClient() {
               <AIInsightsPanel
                 insights={mockMaintenanceAIInsights}
                 title="Maintenance Intelligence"
-                onInsightAction={(insight) => handleInsightAction({ title: insight?.title || 'Insight Action', description: insight?.description || '' })}
+                onInsightAction={(insight: AIInsight) => handleInsightAction({ title: insight?.title || 'Insight Action', description: insight?.description || '' })}
               />
             </div>
             <div className="space-y-6">

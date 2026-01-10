@@ -2245,7 +2245,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
             <AIInsightsPanel
               insights={mockThemeStoreAIInsights}
               title="Theme Store Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

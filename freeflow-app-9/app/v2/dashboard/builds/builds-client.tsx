@@ -1783,7 +1783,7 @@ export default function BuildsClient() {
             <AIInsightsPanel
               insights={mockBuildsAIInsights}
               title="Build Intelligence"
-              onInsightAction={(insight) => toast.promise(
+              onInsightAction={(insight: AIInsight) => toast.promise(
                 new Promise(resolve => setTimeout(resolve, 800)),
                 { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
               )}

@@ -1878,7 +1878,7 @@ export default function ApiKeysClient() {
             <AIInsightsPanel
               insights={mockApiKeysAIInsights}
               title="API Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

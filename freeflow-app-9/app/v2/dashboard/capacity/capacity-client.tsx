@@ -2253,7 +2253,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             <AIInsightsPanel
               insights={mockCapacityAIInsights}
               title="Capacity Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

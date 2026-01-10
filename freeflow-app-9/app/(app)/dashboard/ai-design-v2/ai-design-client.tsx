@@ -1968,7 +1968,7 @@ export default function AIDesignClient() {
             <AIInsightsPanel
               insights={mockAIDesignInsights}
               title="AI Design Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

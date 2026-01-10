@@ -1851,7 +1851,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
             <AIInsightsPanel
               insights={mockInvoicesAIInsights}
               title="Invoice Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
 

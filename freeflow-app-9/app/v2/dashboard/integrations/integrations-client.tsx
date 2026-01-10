@@ -2055,7 +2055,7 @@ export default function IntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integrations Intelligence"
-              onInsightAction={(insight) => handleAiInsightAction(insight)}
+              onInsightAction={(insight: AIInsight) => handleAiInsightAction(insight)}
             />
           </div>
           <div className="space-y-6">

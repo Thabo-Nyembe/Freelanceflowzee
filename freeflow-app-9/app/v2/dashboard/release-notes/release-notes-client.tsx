@@ -2080,7 +2080,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             <AIInsightsPanel
               insights={mockReleaseNotesAIInsights}
               title="Release Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">
