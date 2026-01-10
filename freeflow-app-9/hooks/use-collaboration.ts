@@ -53,6 +53,9 @@ export function useCollaboration({
     COLORS[Math.floor(Math.random() * COLORS.length)]
   )
 
+  // Track mounted state to prevent setState after unmount
+  const isMountedRef = useRef(true)
+
   const connect = useCallback(async () => {
     try {
       channel.current = supabase.current.channel(`project-${projectId}`, {
@@ -171,6 +174,8 @@ export function useCollaboration({
         })
 
       await channel.current.subscribe(async (status: string) => {
+        if (!isMountedRef.current) return
+
         const isConnected = status === 'SUBSCRIBED'
         setState(prev => ({
           ...prev,
@@ -180,7 +185,7 @@ export function useCollaboration({
         }))
         onConnectionStateChange?.(isConnected)
 
-        if (isConnected) {
+        if (isConnected && isMountedRef.current) {
           reconnectAttempts.current = 0
           await channel.current.track({
             id: userId,
@@ -195,7 +200,7 @@ export function useCollaboration({
 
       // Start presence heartbeat
       presenceInterval.current = setInterval(async () => {
-        if (channel.current && state.isConnected) {
+        if (channel.current && state.isConnected && isMountedRef.current) {
           await channel.current.track({
             id: userId,
             status: 'online',
@@ -212,6 +217,8 @@ export function useCollaboration({
   }, [projectId, userId, userName, userEmail, userAvatar])
 
   const handleReconnect = useCallback(() => {
+    if (!isMountedRef.current) return
+
     if (reconnectAttempts.current >= MAX_RECONNECT_ATTEMPTS) {
       console.error('Max reconnection attempts reached')
       onError?.(new Error('Failed to reconnect after maximum attempts'))
@@ -222,7 +229,9 @@ export function useCollaboration({
     reconnectAttempts.current++
 
     reconnectTimeout.current = setTimeout(() => {
-      connect()
+      if (isMountedRef.current) {
+        connect()
+      }
     }, RECONNECT_INTERVAL)
   }, [connect])
 
@@ -382,8 +391,10 @@ export function useCollaboration({
   }, [userId, sendMessage])
 
   useEffect(() => {
+    isMountedRef.current = true
     connect()
     return () => {
+      isMountedRef.current = false
       disconnect()
     }
   }, [connect, disconnect])
