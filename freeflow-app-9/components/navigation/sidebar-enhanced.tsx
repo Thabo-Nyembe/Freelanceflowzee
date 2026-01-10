@@ -451,7 +451,7 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         name: 'Operations',
         visible: true,
         items: [
-          { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' },
+          { id: 'user-management', name: 'User Management', href: '/dashboard/user-management-v2', icon: UserPlus, description: 'Team & permissions', badge: 'New' },
           { id: 'system-insights', name: 'System Insights', href: '/dashboard/system-insights-v2', icon: Gauge, description: 'System analytics', badge: 'New' },
           { id: 'investor-metrics', name: 'Investor Metrics', href: '/dashboard/investor-metrics-v2', icon: TrendingUp, description: 'Investor dashboard', badge: 'New' },
           { id: 'roles', name: 'Roles & Permissions', href: '/dashboard/roles-v2', icon: Shield, description: 'Access control', badge: 'New' },

@@ -198,8 +198,10 @@ export function useScreenRecorder({ onRecordingComplete, onUploadComplete }: Use
         }));
 
         if (onRecordingComplete) {
+          // Calculate duration from start time ref to avoid stale closure
+          const finalDuration = Math.floor((Date.now() - startTimeRef.current) / 1000);
           onRecordingComplete(recordingBlob, {
-            duration: recordingState.duration,
+            duration: finalDuration,
             size: recordingBlob.size,
             mimeType,
             options
@@ -246,7 +248,7 @@ export function useScreenRecorder({ onRecordingComplete, onUploadComplete }: Use
       }));
       toast.error('Failed to start recording');
     }
-  }, [getSupportedMimeType, getVideoBitrate, onRecordingComplete, recordingState.duration]);
+  }, [getSupportedMimeType, getVideoBitrate, onRecordingComplete]);
 
   // Stop recording
   const stopRecording = useCallback(() => {

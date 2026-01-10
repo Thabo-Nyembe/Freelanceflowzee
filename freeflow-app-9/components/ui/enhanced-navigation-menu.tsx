@@ -173,19 +173,19 @@ const quickActions: NavItem[] = [
   },
   {
     title: 'Import Assets',
-    href: '/dashboard/import',
+    href: '/dashboard/files-hub-v2',
     description: 'Upload and organize your media files',
     icon: Database,
   },
   {
     title: 'Team Settings',
-    href: '/dashboard/team',
+    href: '/dashboard/team-hub-v2',
     description: 'Manage team members and permissions',
     icon: Shield,
   },
   {
     title: 'Workflows',
-    href: '/dashboard/workflows',
+    href: '/dashboard/workflows-v2',
     description: 'Automate repetitive tasks',
     icon: Workflow,
     isNew: true,

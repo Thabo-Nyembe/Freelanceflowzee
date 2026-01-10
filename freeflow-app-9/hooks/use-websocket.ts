@@ -128,6 +128,14 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current)
       }
+      // Remove all event listeners before closing to prevent accumulation
+      newSocket.off('connect')
+      newSocket.off('disconnect')
+      newSocket.off('connect_error')
+      newSocket.off('reconnect')
+      newSocket.off('reconnect_failed')
+      newSocket.off('authenticated')
+      newSocket.off('error')
       newSocket.close()
     }
   }, [autoConnect, reconnect, user])

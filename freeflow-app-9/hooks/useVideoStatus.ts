@@ -168,11 +168,11 @@ export function useVideoStatus({
     }
   }, []);
 
-  // Manual refetch
+  // Manual refetch - returns the status for chaining
   const refetch = useCallback(async () => {
     setIsLoading(true);
     try {
-      await fetchVideoStatus();
+      return await fetchVideoStatus();
     } finally {
       setIsLoading(false);
     }
@@ -181,9 +181,9 @@ export function useVideoStatus({
   // Auto-start polling when enabled
   useEffect(() => {
     if (enabled && videoId) {
-      refetch().then(() => {
-        // Only start polling if video is not already ready
-        if (status?.processing_status && !['ready', 'errored'].includes(status.processing_status)) {
+      refetch().then((currentStatus) => {
+        // Only start polling if video is not already ready - use returned status, not state
+        if (currentStatus?.processing_status && !['ready', 'errored'].includes(currentStatus.processing_status)) {
           startPolling();
         }
       });
@@ -192,7 +192,7 @@ export function useVideoStatus({
     return () => {
       stopPolling();
     };
-  }, [videoId, enabled]); // Only depend on videoId and enabled
+  }, [videoId, enabled, refetch, startPolling, stopPolling]);
 
   // Cleanup on unmount
   useEffect(() => {
