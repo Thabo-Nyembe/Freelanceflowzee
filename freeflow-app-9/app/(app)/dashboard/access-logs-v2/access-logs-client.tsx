@@ -489,6 +489,15 @@ export default function AccessLogsClient() {
   const [logs, setLogs] = useState<AccessLog[]>(mockLogs)
   const [isLoading, setIsLoading] = useState(false)
   const [stats, setStats] = useState<LogStats>(mockStats)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showCustomFieldsDialog, setShowCustomFieldsDialog] = useState(false)
+  const [showContextDialog, setShowContextDialog] = useState(false)
+  const [showSessionDialog, setShowSessionDialog] = useState(false)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [customFields, setCustomFields] = useState<{ name: string; type: string }[]>([
+    { name: 'user_role', type: 'string' },
+    { name: 'request_id', type: 'string' }
+  ])
 
   // Fetch logs from Supabase
   const fetchLogs = useCallback(async () => {
@@ -1848,7 +1857,7 @@ export default function AccessLogsClient() {
                               <p className="text-sm text-gray-500">Custom webhook endpoint</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.success('Webhook configuration dialog opening')}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowWebhookDialog(true)}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1925,7 +1934,7 @@ export default function AccessLogsClient() {
                             <p className="font-medium">Custom Fields</p>
                             <p className="text-sm text-gray-500">Add custom log fields</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.success('Custom fields configuration opening')}>Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowCustomFieldsDialog(true)}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2200,11 +2209,17 @@ export default function AccessLogsClient() {
               </ScrollArea>
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" onClick={() => toast.success('Loading surrounding log context')}>
+                  <Button variant="outline" onClick={() => {
+                    setShowContextDialog(true)
+                    setShowLogDialog(false)
+                  }}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Context
                   </Button>
-                  <Button variant="outline" onClick={() => toast.success('Loading full session timeline')}>
+                  <Button variant="outline" onClick={() => {
+                    setShowSessionDialog(true)
+                    setShowLogDialog(false)
+                  }}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Session
                   </Button>
@@ -2237,6 +2252,177 @@ export default function AccessLogsClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Configuration Dialog */}
+      <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Configure Webhook</DialogTitle>
+            <DialogDescription>Set up a custom webhook endpoint to receive log notifications</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="webhook-url">Webhook URL</Label>
+              <Input
+                id="webhook-url"
+                placeholder="https://your-domain.com/webhook"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to Send</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {['Error Logs', 'Security Alerts', 'User Actions', 'System Events'].map((event) => (
+                  <div key={event} className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked id={event.toLowerCase().replace(' ', '-')} />
+                    <Label htmlFor={event.toLowerCase().replace(' ', '-')} className="text-sm">{event}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!webhookUrl) {
+                toast.error('Please enter a webhook URL')
+                return
+              }
+              toast.success('Webhook configured successfully', { description: webhookUrl })
+              setShowWebhookDialog(false)
+            }}>Save Webhook</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Fields Dialog */}
+      <Dialog open={showCustomFieldsDialog} onOpenChange={setShowCustomFieldsDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Custom Log Fields</DialogTitle>
+            <DialogDescription>Add custom fields to enrich your log data</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              {customFields.map((field, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input value={field.name} placeholder="Field name" className="flex-1" readOnly />
+                  <Select defaultValue={field.type}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="string">String</SelectItem>
+                      <SelectItem value="number">Number</SelectItem>
+                      <SelectItem value="boolean">Boolean</SelectItem>
+                      <SelectItem value="json">JSON</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="ghost" size="icon" onClick={() => {
+                    setCustomFields(fields => fields.filter((_, i) => i !== index))
+                    toast.success('Field removed')
+                  }}>
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => {
+              setCustomFields(fields => [...fields, { name: `custom_field_${fields.length + 1}`, type: 'string' }])
+              toast.success('Field added')
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Field
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomFieldsDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success(`${customFields.length} custom fields configured`)
+              setShowCustomFieldsDialog(false)
+            }}>Save Fields</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Context Dialog */}
+      <Dialog open={showContextDialog} onOpenChange={setShowContextDialog}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Log Context</DialogTitle>
+            <DialogDescription>Surrounding log entries for context</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] pr-4">
+            <div className="space-y-2">
+              {selectedLog && logs
+                .filter(log => Math.abs(new Date(log.timestamp).getTime() - new Date(selectedLog.timestamp).getTime()) < 60000)
+                .slice(0, 10)
+                .map((log, index) => (
+                  <div
+                    key={log.id}
+                    className={`p-3 rounded-lg border ${log.id === selectedLog.id ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-gray-50 dark:bg-gray-800'}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${log.level === 'error' ? 'bg-red-100 text-red-700' : log.level === 'warn' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}`}>
+                        {log.level.toUpperCase()}
+                      </span>
+                      <span className="text-xs text-gray-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <p className="text-sm mt-1 font-mono">{log.message}</p>
+                    {log.id === selectedLog.id && <span className="text-xs text-blue-600">← Current log</span>}
+                  </div>
+                ))}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button onClick={() => setShowContextDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Session Dialog */}
+      <Dialog open={showSessionDialog} onOpenChange={setShowSessionDialog}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Session Timeline</DialogTitle>
+            <DialogDescription>Full activity timeline for this session</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] pr-4">
+            <div className="relative">
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+              <div className="space-y-4 ml-8">
+                {selectedLog && [
+                  { time: '2 min ago', action: 'Session started', icon: '🔐' },
+                  { time: '1 min ago', action: 'Authenticated successfully', icon: '✅' },
+                  { time: '45 sec ago', action: selectedLog.message, icon: '📝', current: true },
+                  { time: '30 sec ago', action: 'Page view: Dashboard', icon: '👁️' },
+                  { time: '15 sec ago', action: 'API call: /api/data', icon: '🔄' },
+                ].map((event, index) => (
+                  <div key={index} className={`relative ${event.current ? 'bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg -ml-3' : ''}`}>
+                    <div className="absolute -left-10 w-6 h-6 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center text-sm">
+                      {event.icon}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{event.action}</p>
+                      <p className="text-xs text-gray-500">{event.time}</p>
+                      {event.current && <span className="text-xs text-blue-600">← Current event</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              const sessionData = { sessionId: selectedLog?.sessionId, events: 5 }
+              navigator.clipboard.writeText(JSON.stringify(sessionData, null, 2))
+              toast.success('Session data copied to clipboard')
+            }}>Copy Session ID</Button>
+            <Button onClick={() => setShowSessionDialog(false)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

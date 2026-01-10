@@ -759,6 +759,12 @@ export default function AllocationClient() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [timeEntryData, setTimeEntryData] = useState({ hours: 0, description: '', date: '' })
   const [transferData, setTransferData] = useState({ targetProject: '', notes: '' })
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [alertSettings, setAlertSettings] = useState({
+    overAllocation: true,
+    pendingApprovals: true,
+    capacityWarnings: true
+  })
 
   // Filtered data
   const filteredAllocations = useMemo(() => {
@@ -1509,11 +1515,21 @@ export default function AllocationClient() {
                     <CardDescription>Timeline view of all projects and allocations</CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.success('Navigating to previous month')}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const prevMonth = new Date(currentMonth)
+                      prevMonth.setMonth(prevMonth.getMonth() - 1)
+                      setCurrentMonth(prevMonth)
+                      toast.success(`Viewing ${prevMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`)
+                    }}>
                       <ChevronRight className="w-4 h-4 rotate-180" />
                     </Button>
-                    <span className="text-sm font-medium">February 2024</span>
-                    <Button variant="outline" size="sm" onClick={() => toast.success('Navigating to next month')}>
+                    <span className="text-sm font-medium">{currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const nextMonth = new Date(currentMonth)
+                      nextMonth.setMonth(nextMonth.getMonth() + 1)
+                      setCurrentMonth(nextMonth)
+                      toast.success(`Viewing ${nextMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`)
+                    }}>
                       <ChevronRight className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1925,21 +1941,51 @@ export default function AllocationClient() {
                         <p className="font-medium">Over-allocation Alerts</p>
                         <p className="text-sm text-gray-500">Notify when resources are over-booked</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Over-allocation alerts toggled')}>Enabled</Button>
+                      <Button
+                        variant={alertSettings.overAllocation ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          const newValue = !alertSettings.overAllocation
+                          setAlertSettings(prev => ({ ...prev, overAllocation: newValue }))
+                          toast.success(newValue ? 'Over-allocation alerts enabled' : 'Over-allocation alerts disabled')
+                        }}
+                      >
+                        {alertSettings.overAllocation ? 'Enabled' : 'Disabled'}
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Pending Approvals</p>
                         <p className="text-sm text-gray-500">Daily digest of pending requests</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Pending approvals alerts toggled')}>Enabled</Button>
+                      <Button
+                        variant={alertSettings.pendingApprovals ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          const newValue = !alertSettings.pendingApprovals
+                          setAlertSettings(prev => ({ ...prev, pendingApprovals: newValue }))
+                          toast.success(newValue ? 'Pending approvals digest enabled' : 'Pending approvals digest disabled')
+                        }}
+                      >
+                        {alertSettings.pendingApprovals ? 'Enabled' : 'Disabled'}
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Capacity Warnings</p>
                         <p className="text-sm text-gray-500">Alert when capacity runs low</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Capacity warnings toggled')}>Enabled</Button>
+                      <Button
+                        variant={alertSettings.capacityWarnings ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          const newValue = !alertSettings.capacityWarnings
+                          setAlertSettings(prev => ({ ...prev, capacityWarnings: newValue }))
+                          toast.success(newValue ? 'Capacity warnings enabled' : 'Capacity warnings disabled')
+                        }}
+                      >
+                        {alertSettings.capacityWarnings ? 'Enabled' : 'Disabled'}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

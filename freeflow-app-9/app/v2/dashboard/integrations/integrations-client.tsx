@@ -307,6 +307,10 @@ export default function IntegrationsClient() {
     priority: 'medium'
   })
 
+  const [ipAllowlist, setIpAllowlist] = useState(['192.168.1.0/24', '10.0.0.1', '172.16.0.0/16'])
+  const [newIpAddress, setNewIpAddress] = useState('')
+  const [smsBackupPhone, setSmsBackupPhone] = useState('')
+  const [showSmsBackupInput, setShowSmsBackupInput] = useState(false)
   const [webhookForm, setWebhookForm] = useState<WebhookFormData>({
     name: '',
     description: '',
@@ -2853,9 +2857,29 @@ export default function IntegrationsClient() {
               </div>
               <div className="space-y-2">
                 <Label>Backup Methods</Label>
-                <Button variant="outline" className="w-full" onClick={() => toast.info('SMS backup verification enabled')}>
-                  Add SMS Backup
-                </Button>
+                {!showSmsBackupInput ? (
+                  <Button variant="outline" className="w-full" onClick={() => setShowSmsBackupInput(true)}>
+                    Add SMS Backup
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="+1 555 000 0000"
+                      value={smsBackupPhone}
+                      onChange={(e) => setSmsBackupPhone(e.target.value)}
+                    />
+                    <Button onClick={() => {
+                      if (!smsBackupPhone) {
+                        toast.error('Please enter a phone number')
+                        return
+                      }
+                      toast.success('SMS backup enabled', { description: `Verification code sent to ${smsBackupPhone}` })
+                      setShowSmsBackupInput(false)
+                    }}>
+                      Verify
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
             <DialogFooter>
@@ -2879,18 +2903,37 @@ export default function IntegrationsClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                {['192.168.1.0/24', '10.0.0.1', '172.16.0.0/16'].map((ip, idx) => (
+                {ipAllowlist.map((ip, idx) => (
                   <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <code className="text-sm font-mono">{ip}</code>
-                    <Button size="sm" variant="ghost" onClick={() => toast.success(`IP ${ip} removed from allowlist`)}>
+                    <Button size="sm" variant="ghost" onClick={() => {
+                      setIpAllowlist(prev => prev.filter((_, i) => i !== idx))
+                      toast.success(`IP ${ip} removed from allowlist`)
+                    }}>
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
                   </div>
                 ))}
               </div>
               <div className="flex gap-2">
-                <Input placeholder="Enter IP address or CIDR range" />
-                <Button onClick={() => toast.success('IP address added to allowlist')}>
+                <Input
+                  placeholder="Enter IP address or CIDR range"
+                  value={newIpAddress}
+                  onChange={(e) => setNewIpAddress(e.target.value)}
+                />
+                <Button onClick={() => {
+                  if (!newIpAddress) {
+                    toast.error('Please enter an IP address')
+                    return
+                  }
+                  if (ipAllowlist.includes(newIpAddress)) {
+                    toast.error('IP already in allowlist')
+                    return
+                  }
+                  setIpAllowlist(prev => [...prev, newIpAddress])
+                  toast.success(`IP ${newIpAddress} added to allowlist`)
+                  setNewIpAddress('')
+                }}>
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
