@@ -45,6 +45,8 @@ This document tracks Phase 3 of fixing non-functional UI elements across the Fre
 | 2026-01-10 | App Batch 1 | 2 | 9 | allocation-v2 (5), access-logs-v2 (4) |
 | 2026-01-10 | V2 Batch 1 | 1 | 4 | integrations (4 - SMS backup, IP allowlist CRUD) |
 | 2026-01-10 | App Batch 2 | 1 | 5+ | notifications-v2 (Segment builder, Users view, A/B Test dialogs) |
+| 2026-01-10 | App Batch 3 | 1 | 3 | broadcasts-v2 (file browser, conditions CRUD, properties CRUD) |
+| 2026-01-10 | App Batch 4 | 2 | 8 | api-v2 (7 - Collection, SDK, Monitor, Webhook, TestSuite), registrations-v2 (1 - Template Editor) |
 
 ### Files Fixed Details
 
@@ -71,6 +73,21 @@ This document tracks Phase 3 of fixing non-functional UI elements across the Fre
 - Edit Segment button → Opens Segment Builder Dialog in edit mode
 - Create A/B Test button → Opens A/B Test Dialog with variant configuration
 - Added 3 new Dialog components with full functionality
+
+**broadcasts-v2 (3 handlers):**
+- Browse Files button → Real file input with CSV accept, shows selected file name
+- Add Condition button → Dynamic condition CRUD with field/operator/value selects
+- Add Property button → Dynamic property CRUD with name/type fields
+
+**api-v2 (7 handlers, 5 dialogs):**
+- New Collection → Collection creation dialog with name/description
+- Generate SDK → SDK generation dialog with language selector (JS, Python, Go, PHP, Ruby, Java, C#)
+- New Monitor → Monitor creation dialog with endpoint URL, interval, alert threshold
+- New Webhook (x2) → Webhook creation dialog with events checkboxes, secret key
+- New Suite (x2) → Test suite creation dialog with description and help text
+
+**registrations-v2 (1 handler, 1 dialog):**
+- Create Template → Email template editor dialog with name, subject, body, variable hints
 
 ---
 

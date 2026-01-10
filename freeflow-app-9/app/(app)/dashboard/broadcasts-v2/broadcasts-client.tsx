@@ -445,6 +445,19 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const [showCloseAccountDialog, setShowCloseAccountDialog] = useState(false)
   const [scheduleDateTime, setScheduleDateTime] = useState('')
 
+  // Segment conditions for dynamic filter builder
+  const [segmentConditions, setSegmentConditions] = useState<{ field: string; operator: string; value: string }[]>([
+    { field: '', operator: 'equals', value: '' }
+  ])
+
+  // Event properties for custom event definition
+  const [eventProperties, setEventProperties] = useState<{ name: string; type: string }[]>([
+    { name: '', type: 'string' }
+  ])
+
+  // File import state
+  const [importedFile, setImportedFile] = useState<File | null>(null)
+
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -2788,7 +2801,25 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <div className="text-4xl mb-4">📁</div>
               <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your CSV file here</p>
               <p className="text-sm text-gray-500 dark:text-gray-500">or</p>
-              <Button variant="outline" className="mt-4" onClick={() => toast.info('File browser opened', { description: 'Select a CSV file to import' })}>Browse Files</Button>
+              <input
+                type="file"
+                accept=".csv"
+                className="hidden"
+                id="csv-file-input"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    setImportedFile(file)
+                    toast.success('File selected', { description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)` })
+                  }
+                }}
+              />
+              <Button variant="outline" className="mt-4" onClick={() => document.getElementById('csv-file-input')?.click()}>Browse Files</Button>
+              {importedFile && (
+                <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                  Selected: {importedFile.name}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Import Options</Label>
@@ -3045,33 +3076,79 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="space-y-2">
               <Label>Filter Conditions</Label>
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-3">
-                <div className="grid grid-cols-3 gap-2">
-                  <Select defaultValue="status">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Field" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="status">Status</SelectItem>
-                      <SelectItem value="last_activity">Last Activity</SelectItem>
-                      <SelectItem value="signup_date">Signup Date</SelectItem>
-                      <SelectItem value="purchase_count">Purchase Count</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select defaultValue="equals">
-                    <SelectTrigger>
-                      <SelectValue placeholder="Operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="equals">Equals</SelectItem>
-                      <SelectItem value="not_equals">Not Equals</SelectItem>
-                      <SelectItem value="greater">Greater Than</SelectItem>
-                      <SelectItem value="less">Less Than</SelectItem>
-                      <SelectItem value="within">Within</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input placeholder="Value" />
-                </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Condition added', { description: 'New filter condition row added' })}>+ Add Condition</Button>
+                {segmentConditions.map((condition, index) => (
+                  <div key={index} className="grid grid-cols-4 gap-2 items-center">
+                    <Select
+                      value={condition.field || 'status'}
+                      onValueChange={(value) => {
+                        const updated = [...segmentConditions]
+                        updated[index].field = value
+                        setSegmentConditions(updated)
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Field" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="status">Status</SelectItem>
+                        <SelectItem value="last_activity">Last Activity</SelectItem>
+                        <SelectItem value="signup_date">Signup Date</SelectItem>
+                        <SelectItem value="purchase_count">Purchase Count</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select
+                      value={condition.operator}
+                      onValueChange={(value) => {
+                        const updated = [...segmentConditions]
+                        updated[index].operator = value
+                        setSegmentConditions(updated)
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Operator" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="equals">Equals</SelectItem>
+                        <SelectItem value="not_equals">Not Equals</SelectItem>
+                        <SelectItem value="greater">Greater Than</SelectItem>
+                        <SelectItem value="less">Less Than</SelectItem>
+                        <SelectItem value="within">Within</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      placeholder="Value"
+                      value={condition.value}
+                      onChange={(e) => {
+                        const updated = [...segmentConditions]
+                        updated[index].value = e.target.value
+                        setSegmentConditions(updated)
+                      }}
+                    />
+                    {segmentConditions.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => {
+                          setSegmentConditions(segmentConditions.filter((_, i) => i !== index))
+                          toast.info('Condition removed')
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSegmentConditions([...segmentConditions, { field: '', operator: 'equals', value: '' }])
+                    toast.success('Condition added', { description: `${segmentConditions.length + 1} conditions total` })
+                  }}
+                >
+                  + Add Condition
+                </Button>
               </div>
             </div>
             <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
@@ -3108,21 +3185,60 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="space-y-2">
               <Label>Event Properties</Label>
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
-                <div className="grid grid-cols-2 gap-2">
-                  <Input placeholder="Property name" />
-                  <Select defaultValue="string">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="string">String</SelectItem>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="boolean">Boolean</SelectItem>
-                      <SelectItem value="date">Date</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Property added', { description: 'New event property field added' })}>+ Add Property</Button>
+                {eventProperties.map((prop, index) => (
+                  <div key={index} className="grid grid-cols-3 gap-2 items-center">
+                    <Input
+                      placeholder="Property name"
+                      value={prop.name}
+                      onChange={(e) => {
+                        const updated = [...eventProperties]
+                        updated[index].name = e.target.value
+                        setEventProperties(updated)
+                      }}
+                    />
+                    <Select
+                      value={prop.type}
+                      onValueChange={(value) => {
+                        const updated = [...eventProperties]
+                        updated[index].type = value
+                        setEventProperties(updated)
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="string">String</SelectItem>
+                        <SelectItem value="number">Number</SelectItem>
+                        <SelectItem value="boolean">Boolean</SelectItem>
+                        <SelectItem value="date">Date</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {eventProperties.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => {
+                          setEventProperties(eventProperties.filter((_, i) => i !== index))
+                          toast.info('Property removed')
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setEventProperties([...eventProperties, { name: '', type: 'string' }])
+                    toast.success('Property added', { description: `${eventProperties.length + 1} properties total` })
+                  }}
+                >
+                  + Add Property
+                </Button>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">

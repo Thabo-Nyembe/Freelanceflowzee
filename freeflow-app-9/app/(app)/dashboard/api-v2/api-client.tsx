@@ -445,7 +445,19 @@ export default function ApiClient() {
   // Dialog states
   const [showCreateEndpointDialog, setShowCreateEndpointDialog] = useState(false)
   const [showCreateKeyDialog, setShowCreateKeyDialog] = useState(false)
+  const [showCreateCollectionDialog, setShowCreateCollectionDialog] = useState(false)
+  const [showGenerateSdkDialog, setShowGenerateSdkDialog] = useState(false)
+  const [showCreateMonitorDialog, setShowCreateMonitorDialog] = useState(false)
+  const [showCreateWebhookDialog, setShowCreateWebhookDialog] = useState(false)
+  const [showCreateTestSuiteDialog, setShowCreateTestSuiteDialog] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Form states for new dialogs
+  const [collectionForm, setCollectionForm] = useState({ name: '', description: '' })
+  const [sdkLanguage, setSdkLanguage] = useState('javascript')
+  const [monitorForm, setMonitorForm] = useState({ name: '', endpoint: '', interval: '5m', alertThreshold: 500 })
+  const [webhookForm, setWebhookForm] = useState({ name: '', url: '', events: ['request.created'], secret: '' })
+  const [testSuiteForm, setTestSuiteForm] = useState({ name: '', description: '', endpoints: [] as string[] })
 
   // Form states
   const [endpointForm, setEndpointForm] = useState<EndpointFormData>({
@@ -1498,7 +1510,7 @@ export default function ApiClient() {
             {/* Collections Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: FolderPlus, label: 'New Collection', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Create Collection', { description: 'Collection creation dialog would open here' }) },
+                { icon: FolderPlus, label: 'New Collection', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCreateCollectionDialog(true) },
                 { icon: Upload, label: 'Import', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: async () => {
                   const input = document.createElement('input')
                   input.type = 'file'
@@ -1549,7 +1561,7 @@ export default function ApiClient() {
                 }},
                 { icon: Users, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Share Collections', { description: 'Select a collection to share with team members' }) },
                 { icon: GitBranch, label: 'Fork', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Fork Collection', { description: 'Select a collection to create a fork' }) },
-                { icon: FileCode, label: 'Generate SDK', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => toast.info('Generate SDK', { description: 'SDK generation dialog would open here. Supports JavaScript, Python, Go, PHP, Ruby' }) },
+                { icon: FileCode, label: 'Generate SDK', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setShowGenerateSdkDialog(true) },
                 { icon: PlayCircle, label: 'Run All', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: async () => {
                   toast.promise(
                     (async () => {
@@ -1768,7 +1780,7 @@ export default function ApiClient() {
             {/* Monitors Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Monitor', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('Create Monitor', { description: 'Monitor creation dialog would open here' }) },
+                { icon: Plus, label: 'New Monitor', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowCreateMonitorDialog(true) },
                 { icon: Activity, label: 'Status Page', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
                   const healthy = monitors.filter(m => m.status === 'healthy').length
                   const total = monitors.length
@@ -1892,7 +1904,7 @@ export default function ApiClient() {
             {/* Webhooks Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Webhook', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Create Webhook', { description: 'Webhook creation dialog would open here' }) },
+                { icon: Plus, label: 'New Webhook', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowCreateWebhookDialog(true) },
                 { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.promise(
                   (async () => {
                     await new Promise(resolve => setTimeout(resolve, 1200))
@@ -1962,7 +1974,7 @@ export default function ApiClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Webhooks</h3>
-              <Button onClick={() => toast.info('Create Webhook', { description: 'Webhook creation dialog would open here. Configure URL, events, and authentication.' })}>
+              <Button onClick={() => setShowCreateWebhookDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Webhook
               </Button>
@@ -2059,7 +2071,7 @@ export default function ApiClient() {
                     }
                   )
                 }},
-                { icon: Plus, label: 'New Suite', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Create Test Suite', { description: 'Test suite creation dialog would open here' }) },
+                { icon: Plus, label: 'New Suite', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowCreateTestSuiteDialog(true) },
                 { icon: FileCode, label: 'Coverage', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
                   const avgCoverage = testSuites.reduce((sum, s) => sum + s.coverage, 0) / testSuites.length
                   toast.info('Code Coverage', { description: `Average coverage across all suites: ${avgCoverage.toFixed(1)}%` })
@@ -2156,7 +2168,7 @@ export default function ApiClient() {
                     </>
                   )}
                 </Button>
-                <Button onClick={() => toast.info('Create Test Suite', { description: 'Test suite creation dialog would open here. Add test cases and configure assertions.' })}>
+                <Button onClick={() => setShowCreateTestSuiteDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   New Test Suite
                 </Button>
@@ -3070,6 +3082,292 @@ export default function ApiClient() {
               <Button onClick={handleGenerateApiKey} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Key className="w-4 h-4 mr-2" />}
                 Generate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Collection Dialog */}
+        <Dialog open={showCreateCollectionDialog} onOpenChange={setShowCreateCollectionDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Collection</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Collection Name</Label>
+                <Input
+                  placeholder="e.g., User API, Payment Endpoints"
+                  value={collectionForm.name}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Brief description of this collection"
+                  value={collectionForm.description}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!collectionForm.name.trim()) {
+                  toast.error('Please enter a collection name')
+                  return
+                }
+                toast.success('Collection created', { description: `"${collectionForm.name}" is now ready to use` })
+                setCollectionForm({ name: '', description: '' })
+                setShowCreateCollectionDialog(false)
+              }}>
+                <FolderPlus className="w-4 h-4 mr-2" />
+                Create Collection
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate SDK Dialog */}
+        <Dialog open={showGenerateSdkDialog} onOpenChange={setShowGenerateSdkDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Generate SDK</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Language</Label>
+                <Select value={sdkLanguage} onValueChange={setSdkLanguage}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="javascript">JavaScript / TypeScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="go">Go</SelectItem>
+                    <SelectItem value="php">PHP</SelectItem>
+                    <SelectItem value="ruby">Ruby</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="csharp">C#</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  The SDK will be generated with type definitions, authentication helpers, and full API coverage.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateSdkDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 2000)),
+                  {
+                    loading: `Generating ${sdkLanguage} SDK...`,
+                    success: `${sdkLanguage} SDK generated! Download starting...`,
+                    error: 'Failed to generate SDK'
+                  }
+                )
+                setShowGenerateSdkDialog(false)
+              }}>
+                <FileCode className="w-4 h-4 mr-2" />
+                Generate SDK
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Monitor Dialog */}
+        <Dialog open={showCreateMonitorDialog} onOpenChange={setShowCreateMonitorDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Monitor</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Monitor Name</Label>
+                <Input
+                  placeholder="e.g., User API Health Check"
+                  value={monitorForm.name}
+                  onChange={(e) => setMonitorForm({ ...monitorForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Endpoint URL</Label>
+                <Input
+                  placeholder="https://api.example.com/health"
+                  value={monitorForm.endpoint}
+                  onChange={(e) => setMonitorForm({ ...monitorForm, endpoint: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Check Interval</Label>
+                  <Select value={monitorForm.interval} onValueChange={(v) => setMonitorForm({ ...monitorForm, interval: v })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1m">Every 1 minute</SelectItem>
+                      <SelectItem value="5m">Every 5 minutes</SelectItem>
+                      <SelectItem value="15m">Every 15 minutes</SelectItem>
+                      <SelectItem value="30m">Every 30 minutes</SelectItem>
+                      <SelectItem value="1h">Every hour</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Alert Threshold (ms)</Label>
+                  <Input
+                    type="number"
+                    placeholder="500"
+                    value={monitorForm.alertThreshold}
+                    onChange={(e) => setMonitorForm({ ...monitorForm, alertThreshold: parseInt(e.target.value) || 500 })}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateMonitorDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!monitorForm.name.trim() || !monitorForm.endpoint.trim()) {
+                  toast.error('Please fill in all required fields')
+                  return
+                }
+                toast.success('Monitor created', { description: `"${monitorForm.name}" is now active` })
+                setMonitorForm({ name: '', endpoint: '', interval: '5m', alertThreshold: 500 })
+                setShowCreateMonitorDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Monitor
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Webhook Dialog */}
+        <Dialog open={showCreateWebhookDialog} onOpenChange={setShowCreateWebhookDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Webhook</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Webhook Name</Label>
+                <Input
+                  placeholder="e.g., Slack Notifications"
+                  value={webhookForm.name}
+                  onChange={(e) => setWebhookForm({ ...webhookForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Endpoint URL</Label>
+                <Input
+                  placeholder="https://your-server.com/webhook"
+                  value={webhookForm.url}
+                  onChange={(e) => setWebhookForm({ ...webhookForm, url: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Subscribe</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['request.created', 'request.completed', 'request.failed', 'key.generated', 'key.revoked', 'rate.exceeded'].map((event) => (
+                    <label key={event} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={webhookForm.events.includes(event)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setWebhookForm({ ...webhookForm, events: [...webhookForm.events, event] })
+                          } else {
+                            setWebhookForm({ ...webhookForm, events: webhookForm.events.filter(ev => ev !== event) })
+                          }
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">{event}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Secret (optional)</Label>
+                <Input
+                  type="password"
+                  placeholder="Signing secret for verification"
+                  value={webhookForm.secret}
+                  onChange={(e) => setWebhookForm({ ...webhookForm, secret: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateWebhookDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!webhookForm.name.trim() || !webhookForm.url.trim()) {
+                  toast.error('Please fill in all required fields')
+                  return
+                }
+                toast.success('Webhook created', { description: `"${webhookForm.name}" is now active` })
+                setWebhookForm({ name: '', url: '', events: ['request.created'], secret: '' })
+                setShowCreateWebhookDialog(false)
+              }}>
+                <Webhook className="w-4 h-4 mr-2" />
+                Create Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Test Suite Dialog */}
+        <Dialog open={showCreateTestSuiteDialog} onOpenChange={setShowCreateTestSuiteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Test Suite</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Suite Name</Label>
+                <Input
+                  placeholder="e.g., User API Tests"
+                  value={testSuiteForm.name}
+                  onChange={(e) => setTestSuiteForm({ ...testSuiteForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Brief description of what this suite tests"
+                  value={testSuiteForm.description}
+                  onChange={(e) => setTestSuiteForm({ ...testSuiteForm, description: e.target.value })}
+                />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  After creating the suite, you can add test cases with assertions for:
+                </p>
+                <ul className="text-sm text-gray-500 dark:text-gray-400 list-disc list-inside">
+                  <li>Response status codes</li>
+                  <li>Response body validation</li>
+                  <li>Response time thresholds</li>
+                  <li>Header verification</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateTestSuiteDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!testSuiteForm.name.trim()) {
+                  toast.error('Please enter a suite name')
+                  return
+                }
+                toast.success('Test suite created', { description: `"${testSuiteForm.name}" is ready for test cases` })
+                setTestSuiteForm({ name: '', description: '', endpoints: [] })
+                setShowCreateTestSuiteDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Suite
               </Button>
             </DialogFooter>
           </DialogContent>

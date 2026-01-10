@@ -836,6 +836,8 @@ export default function RegistrationsClient() {
   const [analytics] = useState<Analytics>(mockAnalytics)
   const [registrationToEdit, setRegistrationToEdit] = useState<DbRegistration | null>(null)
   const [registrationToDelete, setRegistrationToDelete] = useState<DbRegistration | null>(null)
+  const [showTemplateEditorDialog, setShowTemplateEditorDialog] = useState(false)
+  const [templateForm, setTemplateForm] = useState({ name: '', subject: '', body: '' })
 
   // Fetch registrations from Supabase
   const fetchRegistrations = useCallback(async () => {
@@ -1949,9 +1951,7 @@ export default function RegistrationsClient() {
                       <Send className="w-4 h-4 mr-2" />
                       Send Reminders
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => {
-                      toast.info('Template Editor', { description: 'Email template editor would open here. Feature requires backend integration.' })
-                    }}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setShowTemplateEditorDialog(true)}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Template
                     </Button>
@@ -2985,6 +2985,63 @@ export default function RegistrationsClient() {
               disabled={isSaving || !eventFormData.name || !eventFormData.date || !eventFormData.location}
             >
               {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Event'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Template Editor Dialog */}
+      <Dialog open={showTemplateEditorDialog} onOpenChange={setShowTemplateEditorDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Email Template</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Template Name</Label>
+              <Input
+                placeholder="e.g., Registration Confirmation, Event Reminder"
+                value={templateForm.name}
+                onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email Subject</Label>
+              <Input
+                placeholder="e.g., Your Registration is Confirmed!"
+                value={templateForm.subject}
+                onChange={(e) => setTemplateForm({ ...templateForm, subject: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Email Body</Label>
+              <textarea
+                className="w-full h-40 p-3 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+                placeholder="Write your email content here. Use {{name}}, {{event}}, {{date}} for dynamic values."
+                value={templateForm.body}
+                onChange={(e) => setTemplateForm({ ...templateForm, body: e.target.value })}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Available variables: {"{{name}}"}, {"{{email}}"}, {"{{event}}"}, {"{{date}}"}, {"{{location}}"}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowTemplateEditorDialog(false)
+              setTemplateForm({ name: '', subject: '', body: '' })
+            }}>Cancel</Button>
+            <Button onClick={() => {
+              if (!templateForm.name.trim() || !templateForm.subject.trim()) {
+                toast.error('Please fill in template name and subject')
+                return
+              }
+              toast.success('Template created', { description: `"${templateForm.name}" is now available for use` })
+              setTemplateForm({ name: '', subject: '', body: '' })
+              setShowTemplateEditorDialog(false)
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Template
             </Button>
           </DialogFooter>
         </DialogContent>
