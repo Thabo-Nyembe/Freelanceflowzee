@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -40,7 +40,11 @@ import {
 
 
 
-import { useCustomers, useCustomerMutations, type Customer, type CustomerSegment, type CustomerStatus } from '@/lib/hooks/use-customers'
+import { useClients, type Client } from '@/lib/hooks/use-clients'
+
+// Map client status/segment to display types for backward compatibility
+type CustomerSegment = 'vip' | 'active' | 'new' | 'inactive' | 'churned' | 'at_risk' | 'prospect'
+type CustomerStatus = 'active' | 'inactive' | 'suspended' | 'deleted' | 'pending' | 'verified'
 
 // ============================================================================
 // TYPES - SALESFORCE CRM LEVEL
@@ -444,7 +448,7 @@ const mockCustomersQuickActions = [
 // MAIN COMPONENT
 // ============================================================================
 
-export default function CustomersClient({ initialCustomers }: { initialCustomers: Customer[] }) {
+export default function CustomersClient({ initialCustomers: _initialCustomers }: { initialCustomers?: Client[] }) {
   const [activeTab, setActiveTab] = useState('contacts')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -466,21 +470,35 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [showLeadScoringRuleDialog, setShowLeadScoringRuleDialog] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [showEmailDialog, setShowEmailDialog] = useState(false)
-  const [emailRecipient, setEmailRecipient] = useState<Contact | Customer | null>(null)
+  const [emailRecipient, setEmailRecipient] = useState<Contact | Client | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
 
-  // Supabase hooks
-  const { customers: dbCustomers, stats: dbStats, isLoading, error, refetch } = useCustomers({ segment: 'all' })
+  // Supabase hooks - using clients table
   const {
-    createCustomer,
-    updateCustomer,
-    deleteCustomer,
-    updateCustomerStatus,
-    updateCustomerSegment,
-    isCreating,
-    isUpdating,
-    isDeleting
-  } = useCustomerMutations()
+    clients: dbClients,
+    stats: dbStats,
+    isLoading,
+    error,
+    fetchClients: refetch,
+    addClient: createClient,
+    updateClient,
+    deleteClient
+  } = useClients()
+
+  // Alias for backward compatibility
+  const dbCustomers = dbClients
+  const createCustomer = createClient
+  const updateCustomer = updateClient
+  const deleteCustomer = deleteClient
+  const isCreating = isLoading
+  const isUpdating = isLoading
+  const isDeleting = isLoading
+
+  // Fetch clients on mount
+  useEffect(() => {
+    refetch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Form state for new contact
   const [newContactForm, setNewContactForm] = useState({
@@ -515,27 +533,21 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     }
     try {
       const result = await createCustomer({
-        customer_name: `${newContactForm.firstName} ${newContactForm.lastName}`,
-        first_name: newContactForm.firstName,
-        last_name: newContactForm.lastName,
+        name: `${newContactForm.firstName} ${newContactForm.lastName}`,
         email: newContactForm.email,
-        phone: newContactForm.phone || undefined,
-        job_title: newContactForm.title || undefined,
-        company_name: newContactForm.company || undefined,
-        notes: newContactForm.notes || undefined,
+        phone: newContactForm.phone || null,
+        company: newContactForm.company || null,
+        notes: newContactForm.notes || null,
         status: 'active',
-        segment: 'new',
-        total_orders: 0,
-        total_spent: 0,
-        lifetime_value: 0,
-        avg_order_value: 0,
-        join_date: new Date().toISOString(),
-        loyalty_points: 0,
-        referral_count: 0,
-        email_opt_in: true,
-        sms_opt_in: false,
-        churn_risk_score: 0,
-        support_ticket_count: 0
+        type: 'individual',
+        tags: [],
+        total_revenue: 0,
+        total_projects: 0,
+        metadata: {
+          first_name: newContactForm.firstName,
+          last_name: newContactForm.lastName,
+          title: newContactForm.title || null
+        }
       })
       if (result) {
         setShowAddContact(false)
@@ -550,18 +562,22 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   // Handle editing a customer
-  const handleOpenEditDialog = (customer: Customer) => {
-    setEditingCustomer(customer)
+  const handleOpenEditDialog = (customer: Client) => {
+    setEditingCustomer(customer as any)
+    // Parse name into first/last if stored in metadata, otherwise split by space
+    const nameParts = customer.name.split(' ')
+    const firstName = customer.metadata?.first_name || nameParts[0] || ''
+    const lastName = customer.metadata?.last_name || nameParts.slice(1).join(' ') || ''
     setEditContactForm({
-      firstName: customer.first_name || '',
-      lastName: customer.last_name || '',
+      firstName,
+      lastName,
       email: customer.email || '',
       phone: customer.phone || '',
-      title: customer.job_title || '',
-      company: customer.company_name || '',
+      title: customer.metadata?.title || '',
+      company: customer.company || '',
       notes: customer.notes || '',
-      segment: customer.segment,
-      status: customer.status
+      segment: (customer.status === 'prospect' ? 'prospect' : 'active') as CustomerSegment,
+      status: customer.status as CustomerStatus
     })
     setShowEditDialog(true)
   }
@@ -573,18 +589,19 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
       return
     }
     try {
-      const result = await updateCustomer({
-        id: editingCustomer.id,
-        customer_name: `${editContactForm.firstName} ${editContactForm.lastName}`,
-        first_name: editContactForm.firstName,
-        last_name: editContactForm.lastName,
+      const result = await updateCustomer(editingCustomer.id, {
+        name: `${editContactForm.firstName} ${editContactForm.lastName}`,
         email: editContactForm.email,
-        phone: editContactForm.phone || undefined,
-        job_title: editContactForm.title || undefined,
-        company_name: editContactForm.company || undefined,
-        notes: editContactForm.notes || undefined,
-        segment: editContactForm.segment,
-        status: editContactForm.status
+        phone: editContactForm.phone || null,
+        company: editContactForm.company || null,
+        notes: editContactForm.notes || null,
+        status: editContactForm.status as 'active' | 'inactive' | 'prospect' | 'archived',
+        metadata: {
+          ...((editingCustomer as any).metadata || {}),
+          first_name: editContactForm.firstName,
+          last_name: editContactForm.lastName,
+          title: editContactForm.title || null
+        }
       })
       if (result) {
         setShowEditDialog(false)
@@ -624,7 +641,11 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   // Handle status change
   const handleStatusChange = async (customerId: string, newStatus: CustomerStatus) => {
     try {
-      const result = await updateCustomer({ id: customerId, status: newStatus })
+      // Map CustomerStatus to Client status
+      const clientStatus = ['active', 'inactive', 'prospect', 'archived'].includes(newStatus)
+        ? newStatus as 'active' | 'inactive' | 'prospect' | 'archived'
+        : 'active'
+      const result = await updateCustomer(customerId, { status: clientStatus })
       if (result) {
         toast.success('Status Updated', { description: `Contact status changed to ${newStatus}` })
         refetch()
@@ -634,10 +655,20 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     }
   }
 
-  // Handle segment change
+  // Handle segment change - maps to status for clients table
   const handleSegmentChange = async (customerId: string, newSegment: CustomerSegment) => {
     try {
-      const result = await updateCustomer({ id: customerId, segment: newSegment })
+      // Map segment to client status (clients table uses status field)
+      const statusMap: Record<CustomerSegment, 'active' | 'inactive' | 'prospect' | 'archived'> = {
+        'vip': 'active',
+        'active': 'active',
+        'new': 'active',
+        'inactive': 'inactive',
+        'churned': 'archived',
+        'at_risk': 'active',
+        'prospect': 'prospect'
+      }
+      const result = await updateCustomer(customerId, { status: statusMap[newSegment] })
       if (result) {
         toast.success('Segment Updated', { description: `Contact moved to ${newSegment} segment` })
         refetch()
@@ -737,21 +768,24 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   // Handlers
   const handleExportCustomers = () => {
     // Export customers to CSV
-    const customersToExport = dbCustomers || MOCK_CONTACTS
-    const csvContent = customersToExport.map((c: any) =>
-      `${c.customer_name || `${c.firstName} ${c.lastName}`},${c.email},${c.phone || ''},${c.status || ''},${c.segment || ''}`
+    if (!dbCustomers || dbCustomers.length === 0) {
+      toast.error('No customers to export')
+      return
+    }
+    const csvContent = dbCustomers.map((c: Client) =>
+      `${c.name},${c.email || ''},${c.phone || ''},${c.status || ''},${c.company || ''}`
     ).join('\n')
 
-    const header = 'Name,Email,Phone,Status,Segment\n'
+    const header = 'Name,Email,Phone,Status,Company\n'
     const blob = new Blob([header + csvContent], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `customers-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `clients-export-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete', { description: 'Customer data exported to CSV file' })
+    toast.success('Export Complete', { description: 'Client data exported to CSV file' })
   }
 
   const handleCreateOpportunity = () => {
@@ -866,68 +900,63 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
           {/* Contacts Tab */}
           <TabsContent value="contacts" className="space-y-4">
-            {/* Real Database Customers */}
+            {/* Real Database Clients */}
             {dbCustomers && dbCustomers.length > 0 && (
               <>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Your Customers ({dbCustomers.length})</h3>
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Your Clients ({dbCustomers.length})</h3>
                   <Badge className="bg-green-100 text-green-700">From Database</Badge>
                 </div>
-                {dbCustomers.map(customer => (
-                  <Card key={customer.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
+                {dbCustomers.map((client: Client) => (
+                  <Card key={client.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={customer.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${customer.customer_name}`} />
+                          <AvatarImage src={client.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${client.name}`} />
                           <AvatarFallback className="bg-gradient-to-r from-violet-500 to-purple-500 text-white">
-                            {customer.first_name?.[0] || customer.customer_name?.[0] || 'C'}{customer.last_name?.[0] || ''}
+                            {client.name?.[0] || 'C'}{client.name?.split(' ')[1]?.[0] || ''}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-lg">{customer.customer_name}</h3>
+                            <h3 className="font-semibold text-lg">{client.name}</h3>
                             <Badge className={
-                              customer.segment === 'vip' ? 'bg-purple-100 text-purple-700' :
-                              customer.segment === 'active' ? 'bg-green-100 text-green-700' :
-                              customer.segment === 'new' ? 'bg-blue-100 text-blue-700' :
-                              customer.segment === 'at_risk' ? 'bg-red-100 text-red-700' :
-                              'bg-gray-100 text-gray-700'
-                            }>{customer.segment}</Badge>
-                            <Badge variant="outline" className={
-                              customer.status === 'active' ? 'text-green-600' :
-                              customer.status === 'inactive' ? 'text-gray-500' :
-                              'text-yellow-600'
-                            }>{customer.status}</Badge>
+                              client.status === 'active' ? 'bg-green-100 text-green-700' :
+                              client.status === 'prospect' ? 'bg-blue-100 text-blue-700' :
+                              client.status === 'inactive' ? 'bg-gray-100 text-gray-700' :
+                              'bg-red-100 text-red-700'
+                            }>{client.status}</Badge>
+                            <Badge variant="outline">{client.type}</Badge>
                           </div>
-                          <p className="text-gray-600 dark:text-gray-300">{customer.job_title ? `${customer.job_title}` : ''}{customer.company_name ? ` at ${customer.company_name}` : ''}</p>
+                          <p className="text-gray-600 dark:text-gray-300">{client.metadata?.title ? `${client.metadata.title}` : ''}{client.company ? ` at ${client.company}` : ''}</p>
                           <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                            {customer.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{customer.email}</span>}
-                            {customer.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{customer.phone}</span>}
-                            {(customer.city || customer.state) && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{customer.city}{customer.city && customer.state ? ', ' : ''}{customer.state}</span>}
+                            {client.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{client.email}</span>}
+                            {client.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{client.phone}</span>}
+                            {(client.city || client.country) && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{client.city}{client.city && client.country ? ', ' : ''}{client.country}</span>}
                           </div>
                           <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-                            <span>Lifetime Value: {formatCurrency(customer.lifetime_value || 0)}</span>
-                            <span>Orders: {customer.total_orders || 0}</span>
-                            <span>Points: {customer.loyalty_points || 0}</span>
+                            <span>Revenue: {formatCurrency(client.total_revenue || 0)}</span>
+                            <span>Projects: {client.total_projects || 0}</span>
+                            {client.industry && <span>Industry: {client.industry}</span>}
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <div className="flex items-center gap-1">
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(customer) }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(client) }}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (customer.email) { window.location.href = `mailto:${customer.email}`; toast.success('Opening Email', { description: `Composing email to ${customer.email}` }) } else { toast.error('No email address available') } }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.email) { window.location.href = `mailto:${client.email}`; toast.success('Opening Email', { description: `Composing email to ${client.email}` }) } else { toast.error('No email address available') } }}>
                               <Mail className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (customer.phone) { window.location.href = `tel:${customer.phone}`; toast.success('Initiating Call', { description: `Calling ${customer.customer_name}` }) } else { toast.error('No phone number available') } }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.phone) { window.location.href = `tel:${client.phone}`; toast.success('Initiating Call', { description: `Calling ${client.name}` }) } else { toast.error('No phone number available') } }}>
                               <PhoneCall className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(customer.id) }}>
+                            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(client.id) }}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                           <span className="text-xs text-gray-500">
-                            {customer.last_activity_date ? `Last activity: ${formatTimeAgo(customer.last_activity_date)}` : `Joined: ${formatDate(customer.join_date || customer.created_at)}`}
+                            {client.last_contact_at ? `Last contact: ${formatTimeAgo(client.last_contact_at)}` : `Created: ${formatDate(client.created_at)}`}
                           </span>
                         </div>
                       </div>
@@ -937,49 +966,32 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               </>
             )}
 
-            {/* Mock Contacts (Demo Data) */}
-            {(!dbCustomers || dbCustomers.length === 0) && (
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Sample Contacts (Demo Data)</h3>
-                <Badge variant="outline">Demo Data</Badge>
-              </div>
+            {/* Empty State - No Clients */}
+            {(!dbCustomers || dbCustomers.length === 0) && !isLoading && (
+              <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                <CardContent className="p-12 text-center">
+                  <Users className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No Clients Yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">
+                    Start building your client database by adding your first client.
+                  </p>
+                  <Button onClick={() => setShowAddContact(true)} className="gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Add Your First Client
+                  </Button>
+                </CardContent>
+              </Card>
             )}
-            {MOCK_CONTACTS.map(contact => {
-              const account = MOCK_ACCOUNTS.find(a => a.id === contact.accountId)
-              return (
-                <Card key={contact.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedContact(contact)}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${contact.firstName}${contact.lastName}`} />
-                        <AvatarFallback className="bg-gradient-to-r from-violet-500 to-purple-500 text-white">{contact.firstName[0]}{contact.lastName[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-lg">{contact.firstName} {contact.lastName}</h3>
-                          <Badge className={getLeadScoreColor(contact.leadScore)}>{contact.leadScore}</Badge>
-                          {contact.tags.map(tag => <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>)}
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300">{contact.title} at {account?.name}</p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                          <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{contact.email}</span>
-                          <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{contact.phone}</span>
-                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{contact.mailingAddress.city}, {contact.mailingAddress.state}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${contact.email}`; toast.success('Opening Email', { description: `Composing email to ${contact.email}` }) }}><Mail className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); window.location.href = `tel:${contact.phone}`; toast.success('Initiating Call', { description: `Calling ${contact.firstName} ${contact.lastName}` }) }}><PhoneCall className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleScheduleMeeting(`${contact.firstName} ${contact.lastName}`) }}><Calendar className="h-4 w-4" /></Button>
-                        </div>
-                        <span className="text-xs text-gray-500">Last activity: {formatTimeAgo(contact.lastActivityDate)}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
+
+            {/* Loading State */}
+            {isLoading && (
+              <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                <CardContent className="p-12 text-center">
+                  <RefreshCw className="h-8 w-8 mx-auto text-violet-500 animate-spin mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400">Loading clients...</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Accounts Tab */}

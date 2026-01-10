@@ -396,7 +396,7 @@ export default function ProjectsHubClient() {
         tasksCompleted: 0
       })) as Project[]
     }
-    return mockProjects
+    return [] // Return empty array instead of mock data - real projects from Supabase
   }, [dbProjects])
 
   // Handle creating a new project - writes to Supabase
@@ -573,7 +573,7 @@ export default function ProjectsHubClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.length}</p>
+                    <p className="text-3xl font-bold">{allProjects.length}</p>
                     <p className="text-violet-200 text-sm">Projects</p>
                   </div>
                 </div>
@@ -587,7 +587,25 @@ export default function ProjectsHubClient() {
 
             {viewType === 'board' && (
               <div className="grid grid-cols-5 gap-4 overflow-x-auto pb-4">
-                {statusColumns.map(column => (
+                {projectsLoading && (
+                  <div className="col-span-5 flex items-center justify-center py-12">
+                    <div className="flex items-center gap-2 text-gray-500">
+                      <RefreshCw className="h-5 w-5 animate-spin" />
+                      <span>Loading projects...</span>
+                    </div>
+                  </div>
+                )}
+                {!projectsLoading && allProjects.length === 0 && (
+                  <div className="col-span-5 flex flex-col items-center justify-center py-12 text-gray-500">
+                    <FolderOpen className="h-12 w-12 mb-4 text-gray-300" />
+                    <p className="text-lg font-medium mb-2">No projects yet</p>
+                    <p className="text-sm mb-4">Create your first project to get started</p>
+                    <Button onClick={() => setShowNewProjectDialog(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                      <Plus className="h-4 w-4 mr-2" />Create Project
+                    </Button>
+                  </div>
+                )}
+                {!projectsLoading && allProjects.length > 0 && statusColumns.map(column => (
                   <div key={column.id} className="min-w-[280px]">
                     <div className="flex items-center justify-between mb-3 px-2">
                       <div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${column.color}`} /><h3 className="font-semibold">{column.label}</h3><Badge variant="secondary" className="text-xs">{projectsByStatus[column.id]?.length || 0}</Badge></div>
@@ -776,8 +794,8 @@ export default function ProjectsHubClient() {
                 <CardContent>
                   <div className="space-y-4">
                     {statusColumns.map(col => {
-                      const count = mockProjects.filter(p => p.status === col.id).length
-                      const percentage = (count / mockProjects.length) * 100
+                      const count = allProjects.filter(p => p.status === col.id).length
+                      const percentage = allProjects.length > 0 ? (count / allProjects.length) * 100 : 0
                       return (
                         <div key={col.id}>
                           <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${col.color}`} /><span className="text-sm">{col.label}</span></div><span className="text-sm font-medium">{count}</span></div>
@@ -1743,7 +1761,7 @@ export default function ProjectsHubClient() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockProjects.length}</div>
+                            <div className="text-2xl font-bold">{allProjects.length}</div>
                             <div className="text-sm text-gray-500">Projects</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
