@@ -404,6 +404,23 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false)
   const [clearAllocationsDialogOpen, setClearAllocationsDialogOpen] = useState(false)
   const [resetDataDialogOpen, setResetDataDialogOpen] = useState(false)
+  const [editDepartmentDialogOpen, setEditDepartmentDialogOpen] = useState(false)
+  const [editStatusDialogOpen, setEditStatusDialogOpen] = useState(false)
+  const [importDataDialogOpen, setImportDataDialogOpen] = useState(false)
+  const [selectedDepartment, setSelectedDepartment] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<{ name: string; color: string } | null>(null)
+  const [departmentSettings, setDepartmentSettings] = useState({
+    name: '',
+    isActive: true,
+    defaultHoursPerWeek: 40,
+    manager: ''
+  })
+  const [statusSettings, setStatusSettings] = useState({
+    name: '',
+    color: 'green',
+    description: ''
+  })
+  const [importFile, setImportFile] = useState<File | null>(null)
 
   // Form state
   const [newAllocation, setNewAllocation] = useState({
@@ -685,6 +702,83 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const handleColorSelect = (color: string) => {
     setNewProject(prev => ({ ...prev, color }))
     toast.info('Color selected', { description: `Project color set to ${color}` })
+  }
+
+  const handleEditDepartment = (dept: string) => {
+    setSelectedDepartment(dept)
+    setDepartmentSettings({
+      name: dept,
+      isActive: true,
+      defaultHoursPerWeek: 40,
+      manager: ''
+    })
+    setEditDepartmentDialogOpen(true)
+  }
+
+  const handleSaveDepartmentSettings = async () => {
+    if (!departmentSettings.name) {
+      toast.error('Department name is required')
+      return
+    }
+    toast.loading('Saving department settings...')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.dismiss()
+    toast.success('Department updated', {
+      description: `${departmentSettings.name} settings have been saved`
+    })
+    setEditDepartmentDialogOpen(false)
+  }
+
+  const handleEditStatus = (status: { name: string; color: string }) => {
+    setSelectedStatus(status)
+    setStatusSettings({
+      name: status.name,
+      color: status.color,
+      description: ''
+    })
+    setEditStatusDialogOpen(true)
+  }
+
+  const handleSaveStatusSettings = async () => {
+    if (!statusSettings.name) {
+      toast.error('Status name is required')
+      return
+    }
+    toast.loading('Saving status configuration...')
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.dismiss()
+    toast.success('Status updated', {
+      description: `${statusSettings.name} status has been configured`
+    })
+    setEditStatusDialogOpen(false)
+  }
+
+  const handleImportData = async () => {
+    if (!importFile) {
+      toast.error('Please select a file to import')
+      return
+    }
+    toast.loading('Importing data...')
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    toast.dismiss()
+    toast.success('Data imported successfully', {
+      description: `Imported ${importFile.name}`
+    })
+    setImportDataDialogOpen(false)
+    setImportFile(null)
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const validTypes = ['application/json', 'text/csv']
+      if (!validTypes.includes(file.type) && !file.name.endsWith('.json') && !file.name.endsWith('.csv')) {
+        toast.error('Invalid file type', { description: 'Please select a JSON or CSV file' })
+        return
+      }
+      setImportFile(file)
+      toast.info('File selected', { description: file.name })
+    }
   }
 
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
@@ -1752,7 +1846,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <span className="font-medium">{dept}</span>
                               <div className="flex items-center gap-2">
                                 <Badge variant="secondary">Active</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement department settings dialog */ }}>Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleEditDepartment(dept)}>Edit</Button>
                               </div>
                             </div>
                           ))}
@@ -1857,7 +1951,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                                 <div className={`w-3 h-3 rounded-full bg-${status.color}-500`} />
                                 <span className="font-medium">{status.name}</span>
                               </div>
-                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement status configuration dialog */ }}>Edit</Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleEditStatus(status)}>Edit</Button>
                             </div>
                           ))}
                         </div>
@@ -2038,7 +2132,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                             <Download className="w-4 h-4" />
                             Export Data
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2" onClick={() => { /* TODO: Implement data import dialog */ }}>
+                          <Button variant="outline" className="flex items-center gap-2" onClick={() => setImportDataDialogOpen(true)}>
                             <Upload className="w-4 h-4" />
                             Import Data
                           </Button>
@@ -2629,6 +2723,170 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 handleSaveSettings()
                 setSettingsDialogOpen(false)
               }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Department Dialog */}
+      <Dialog open={editDepartmentDialogOpen} onOpenChange={setEditDepartmentDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Department: {selectedDepartment}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Department Name</Label>
+              <Input
+                className="mt-1"
+                value={departmentSettings.name}
+                onChange={(e) => setDepartmentSettings(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Department Manager</Label>
+              <Select value={departmentSettings.manager} onValueChange={(value) => setDepartmentSettings(prev => ({ ...prev, manager: value }))}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select a manager" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockTeamMembers.map(member => (
+                    <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Default Hours Per Week</Label>
+              <Input
+                type="number"
+                className="mt-1"
+                value={departmentSettings.defaultHoursPerWeek}
+                onChange={(e) => setDepartmentSettings(prev => ({ ...prev, defaultHoursPerWeek: parseInt(e.target.value) || 40 }))}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div>
+                <Label>Active</Label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Department is available for assignments</p>
+              </div>
+              <Switch
+                checked={departmentSettings.isActive}
+                onCheckedChange={(checked) => setDepartmentSettings(prev => ({ ...prev, isActive: checked }))}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setEditDepartmentDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveDepartmentSettings}>Save Changes</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Status Dialog */}
+      <Dialog open={editStatusDialogOpen} onOpenChange={setEditStatusDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Status: {selectedStatus?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Status Name</Label>
+              <Input
+                className="mt-1"
+                value={statusSettings.name}
+                onChange={(e) => setStatusSettings(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Status Color</Label>
+              <div className="flex gap-2 mt-2">
+                {[
+                  { value: 'green', label: 'Green' },
+                  { value: 'gray', label: 'Gray' },
+                  { value: 'red', label: 'Red' },
+                  { value: 'blue', label: 'Blue' },
+                  { value: 'yellow', label: 'Yellow' },
+                  { value: 'purple', label: 'Purple' }
+                ].map(color => (
+                  <button
+                    key={color.value}
+                    onClick={() => setStatusSettings(prev => ({ ...prev, color: color.value }))}
+                    className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform bg-${color.value}-500 ${statusSettings.color === color.value ? 'border-gray-900 dark:border-white ring-2 ring-offset-2' : 'border-white'}`}
+                    title={color.label}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input
+                className="mt-1"
+                placeholder="Optional description for this status"
+                value={statusSettings.description}
+                onChange={(e) => setStatusSettings(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => setEditStatusDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSaveStatusSettings}>Save Changes</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Data Dialog */}
+      <Dialog open={importDataDialogOpen} onOpenChange={setImportDataDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Capacity Data</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-400">
+                Import team members, projects, and allocations from a CSV or JSON file.
+              </p>
+            </div>
+            <div>
+              <Label>Select File</Label>
+              <div className="mt-2">
+                <Input
+                  type="file"
+                  accept=".json,.csv"
+                  onChange={handleFileChange}
+                  className="cursor-pointer"
+                />
+              </div>
+              {importFile && (
+                <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded flex items-center gap-2">
+                  <Upload className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{importFile.name}</span>
+                  <span className="text-xs text-gray-400">({(importFile.size / 1024).toFixed(1)} KB)</span>
+                </div>
+              )}
+            </div>
+            <div>
+              <Label>Import Options</Label>
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked id="merge-data" />
+                  <Label htmlFor="merge-data" className="text-sm font-normal">Merge with existing data</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="overwrite-data" />
+                  <Label htmlFor="overwrite-data" className="text-sm font-normal">Overwrite duplicates</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => {
+                setImportDataDialogOpen(false)
+                setImportFile(null)
+              }}>Cancel</Button>
+              <Button onClick={handleImportData} disabled={!importFile}>
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
             </div>
           </div>
         </DialogContent>

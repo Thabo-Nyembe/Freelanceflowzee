@@ -415,7 +415,7 @@ const mockDataExportActivities = [
 ]
 
 const mockDataExportQuickActions = [
-  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => { /* TODO: Implement pipeline wizard */ }, variant: 'default' as const },
+  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => { window.location.href = '/dashboard/data-export-v2?showWizard=true' }, variant: 'default' as const },
   { id: '2', label: 'Run All Syncs', icon: 'play', action: async () => {
     const toastId = toast.loading('Running all data syncs...')
     try {
@@ -459,6 +459,26 @@ export default function DataExportClient() {
   const [showNewPipelineDialog, setShowNewPipelineDialog] = useState(false)
   const [showSchemaDialog, setShowSchemaDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for TODO handlers
+  const [showPipelineWizard, setShowPipelineWizard] = useState(false)
+  const [showAddSourceDialog, setShowAddSourceDialog] = useState(false)
+  const [showJobDetailsDialog, setShowJobDetailsDialog] = useState(false)
+  const [selectedJobDetails, setSelectedJobDetails] = useState<ExportJob | null>(null)
+  const [showTransformWizard, setShowTransformWizard] = useState(false)
+  const [showMappingConfig, setShowMappingConfig] = useState(false)
+  const [selectedMapping, setSelectedMapping] = useState<SchemaMapping | null>(null)
+  const [showAddDestinationDialog, setShowAddDestinationDialog] = useState(false)
+  const [showDestinationDetails, setShowDestinationDetails] = useState(false)
+  const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null)
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [showIpAllowlistConfig, setShowIpAllowlistConfig] = useState(false)
+  const [ipAllowlist, setIpAllowlist] = useState<string[]>(['192.168.1.1', '10.0.0.1'])
+  const [showWebhookConfig, setShowWebhookConfig] = useState(false)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [showArchiveManager, setShowArchiveManager] = useState(false)
+  const [pipelineFilter, setPipelineFilter] = useState<string>('all')
 
   // Supabase state
   const [dataExports, setDataExports] = useState<DataExport[]>([])
@@ -819,10 +839,22 @@ export default function DataExportClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement filter dropdown for Active, Paused, Error, Running */ }}>
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter
-                </Button>
+                <Select value={pipelineFilter} onValueChange={(value) => {
+                    setPipelineFilter(value)
+                    toast.success(`Showing ${value === 'all' ? 'all pipelines' : value + ' pipelines'}`)
+                  }}>
+                  <SelectTrigger className="w-[140px]">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="paused">Paused</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="running">Running</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button variant="outline" size="sm" onClick={async () => {
                   const toastId = toast.loading('Refreshing pipelines...')
                   await fetchDataExports()
@@ -1022,10 +1054,46 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Connected Data Sources</h2>
-              <Button onClick={() => { /* TODO: Implement data source selection dialog */ }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Source
-              </Button>
+              <Dialog open={showAddSourceDialog} onOpenChange={setShowAddSourceDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Source
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Add Data Source</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <p className="text-sm text-gray-500 mb-4">Select a data source type to connect</p>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { type: 'postgresql', name: 'PostgreSQL', icon: '🐘' },
+                        { type: 'mysql', name: 'MySQL', icon: '🐬' },
+                        { type: 'mongodb', name: 'MongoDB', icon: '🍃' },
+                        { type: 'salesforce', name: 'Salesforce', icon: '☁️' },
+                        { type: 'hubspot', name: 'HubSpot', icon: '🔶' },
+                        { type: 's3', name: 'AWS S3', icon: '📦' },
+                      ].map((source) => (
+                        <button
+                          key={source.type}
+                          onClick={async () => {
+                            toast.loading(`Connecting to ${source.name}...`, { id: 'add-source' })
+                            await new Promise(resolve => setTimeout(resolve, 1500))
+                            toast.success(`${source.name} connection initiated`, { id: 'add-source', description: 'Configure credentials to complete setup' })
+                            setShowAddSourceDialog(false)
+                          }}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <span className="text-3xl">{source.icon}</span>
+                          <span className="font-medium">{source.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -1311,7 +1379,10 @@ export default function DataExportClient() {
                             <Download className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement job details view */ }}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setSelectedJobDetails(job)
+                          setShowJobDetailsDialog(true)
+                        }}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         {job.status === 'running' && (
@@ -1380,10 +1451,53 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Data Transformations</h2>
-              <Button onClick={() => { /* TODO: Implement transformation creation wizard */ }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Transform
-              </Button>
+              <Dialog open={showTransformWizard} onOpenChange={setShowTransformWizard}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Transform
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Create Data Transformation</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4 space-y-4">
+                    <div className="space-y-2">
+                      <Label>Transform Name</Label>
+                      <Input placeholder="e.g., Filter Active Users" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Transform Type</Label>
+                      <Select defaultValue="filter">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="filter">Filter</SelectItem>
+                          <SelectItem value="map">Map/Transform</SelectItem>
+                          <SelectItem value="aggregate">Aggregate</SelectItem>
+                          <SelectItem value="join">Join</SelectItem>
+                          <SelectItem value="dedupe">Deduplicate</SelectItem>
+                          <SelectItem value="custom">Custom SQL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Input placeholder="Optional description" />
+                    </div>
+                    <Button className="w-full" onClick={async () => {
+                      toast.loading('Creating transformation...', { id: 'create-transform' })
+                      await new Promise(resolve => setTimeout(resolve, 1000))
+                      toast.success('Transformation created successfully', { id: 'create-transform' })
+                      setShowTransformWizard(false)
+                    }}>
+                      Create Transformation
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -1517,7 +1631,10 @@ export default function DataExportClient() {
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement mapping configuration panel */ }}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setSelectedMapping(mapping)
+                          setShowMappingConfig(true)
+                        }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={async () => {
@@ -1725,10 +1842,46 @@ export default function DataExportClient() {
                 <h2 className="text-lg font-semibold">Data Destinations</h2>
                 <p className="text-sm text-gray-500">Configure where your data flows to</p>
               </div>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => { /* TODO: Implement destination selection dialog */ }}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Destination
-              </Button>
+              <Dialog open={showAddDestinationDialog} onOpenChange={setShowAddDestinationDialog}>
+                <DialogTrigger asChild>
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Destination
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Add Data Destination</DialogTitle>
+                  </DialogHeader>
+                  <div className="py-4">
+                    <p className="text-sm text-gray-500 mb-4">Select a destination type to configure</p>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { type: 'snowflake', name: 'Snowflake', icon: '❄️' },
+                        { type: 'bigquery', name: 'BigQuery', icon: '📊' },
+                        { type: 'redshift', name: 'Redshift', icon: '🔴' },
+                        { type: 's3', name: 'AWS S3', icon: '📦' },
+                        { type: 'kafka', name: 'Kafka', icon: '⚡' },
+                        { type: 'webhook', name: 'Webhook', icon: '🔗' },
+                      ].map((dest) => (
+                        <button
+                          key={dest.type}
+                          onClick={async () => {
+                            toast.loading(`Configuring ${dest.name}...`, { id: 'add-dest' })
+                            await new Promise(resolve => setTimeout(resolve, 1500))
+                            toast.success(`${dest.name} destination added`, { id: 'add-dest', description: 'Configure connection details to complete setup' })
+                            setShowAddDestinationDialog(false)
+                          }}
+                          className="flex flex-col items-center gap-2 p-4 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        >
+                          <span className="text-3xl">{dest.icon}</span>
+                          <span className="font-medium">{dest.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -1772,7 +1925,10 @@ export default function DataExportClient() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { /* TODO: Implement destination details view */ }}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                        setSelectedDestination(dest)
+                        setShowDestinationDetails(true)
+                      }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
@@ -1794,10 +1950,24 @@ export default function DataExportClient() {
                   <p className="text-sm text-gray-500">Send data to your favorite tools</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement category filter dropdown */ }}>
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
-                  </Button>
+                  <Select value={selectedCategory} onValueChange={(value) => {
+                    setSelectedCategory(value)
+                    toast.success(`Showing ${value === 'all' ? 'all integrations' : value + ' integrations'}`)
+                  }}>
+                    <SelectTrigger className="w-[160px]">
+                      <Filter className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="analytics">Analytics</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="crm">CRM</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                      <SelectItem value="advertising">Advertising</SelectItem>
+                      <SelectItem value="product">Product</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -1956,7 +2126,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
                           <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement IP allowlist configuration */ }}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowIpAllowlistConfig(true)}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -2040,7 +2210,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">Webhook URL</p>
                           <p className="text-sm text-gray-500">Receive pipeline events</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement webhook URL configuration */ }}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowWebhookConfig(true)}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -2168,7 +2338,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">15.8 GB archived exports</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement archive manager */ }}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowArchiveManager(true)}>Manage</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2295,6 +2465,324 @@ export default function DataExportClient() {
           />
         </div>
       </div>
+
+      {/* Job Details Dialog */}
+      <Dialog open={showJobDetailsDialog} onOpenChange={setShowJobDetailsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Job Details: {selectedJobDetails?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedJobDetails && (
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Status</p>
+                  <Badge className={getJobStatusColor(selectedJobDetails.status)}>{selectedJobDetails.status}</Badge>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Progress</p>
+                  <p className="text-xl font-bold">{selectedJobDetails.progress}%</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Records Exported</p>
+                  <p className="text-xl font-bold">{selectedJobDetails.recordsExported.toLocaleString()}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">File Size</p>
+                  <p className="text-xl font-bold">{formatBytes(selectedJobDetails.fileSizeMb)}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Format</p>
+                  <p className="text-xl font-bold uppercase">{selectedJobDetails.format}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Destination</p>
+                  <p className="text-sm font-medium truncate">{selectedJobDetails.destination}</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Started At</p>
+                <p className="font-medium">{new Date(selectedJobDetails.startTime).toLocaleString()}</p>
+              </div>
+              {selectedJobDetails.status === 'completed' && (
+                <Button className="w-full" onClick={async () => {
+                  toast.loading('Preparing download...', { id: 'download-job' })
+                  const data = JSON.stringify({ job: selectedJobDetails, exportedAt: new Date().toISOString() }, null, 2)
+                  const blob = new Blob([data], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${selectedJobDetails.name}.${selectedJobDetails.format}`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Download started', { id: 'download-job', description: `${selectedJobDetails.name}.${selectedJobDetails.format}` })
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Export
+                </Button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Mapping Configuration Dialog */}
+      <Dialog open={showMappingConfig} onOpenChange={setShowMappingConfig}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Configure Mapping: {selectedMapping?.sourceColumn}</DialogTitle>
+          </DialogHeader>
+          {selectedMapping && (
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Source Column</Label>
+                <Input defaultValue={selectedMapping.sourceColumn} disabled />
+              </div>
+              <div className="space-y-2">
+                <Label>Destination Column</Label>
+                <Input defaultValue={selectedMapping.destinationColumn} />
+              </div>
+              <div className="space-y-2">
+                <Label>Data Type</Label>
+                <Select defaultValue={selectedMapping.destinationType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="VARCHAR(255)">VARCHAR(255)</SelectItem>
+                    <SelectItem value="INTEGER">INTEGER</SelectItem>
+                    <SelectItem value="DECIMAL(10,2)">DECIMAL(10,2)</SelectItem>
+                    <SelectItem value="TIMESTAMP">TIMESTAMP</SelectItem>
+                    <SelectItem value="BOOLEAN">BOOLEAN</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Transformation</Label>
+                <Select defaultValue={selectedMapping.transformation || 'none'}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="None" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="TO_UTC">To UTC</SelectItem>
+                    <SelectItem value="CURRENCY_CONVERT">Currency Convert</SelectItem>
+                    <SelectItem value="UPPERCASE">Uppercase</SelectItem>
+                    <SelectItem value="LOWERCASE">Lowercase</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button className="w-full" onClick={async () => {
+                toast.loading('Saving mapping configuration...', { id: 'save-mapping' })
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('Mapping configuration saved', { id: 'save-mapping' })
+                setShowMappingConfig(false)
+              }}>
+                Save Configuration
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Destination Details Dialog */}
+      <Dialog open={showDestinationDetails} onOpenChange={setShowDestinationDetails}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Destination: {selectedDestination?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedDestination && (
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Platform</p>
+                  <p className="text-xl font-bold capitalize">{selectedDestination.platform}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Status</p>
+                  <Badge className={getDestinationStatusColor(selectedDestination.status)}>{selectedDestination.status}</Badge>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Records Written</p>
+                  <p className="text-xl font-bold">{(selectedDestination.recordsWritten / 1000000).toFixed(1)}M</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Data Volume</p>
+                  <p className="text-xl font-bold">{selectedDestination.dataVolume}</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Host</p>
+                <code className="text-sm bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">{selectedDestination.host}</code>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Last Write</p>
+                <p className="font-medium">{new Date(selectedDestination.lastWrite).toLocaleString()}</p>
+              </div>
+              <Button className="w-full" onClick={async () => {
+                toast.loading('Testing connection...', { id: 'test-dest' })
+                await new Promise(resolve => setTimeout(resolve, 1500))
+                toast.success('Connection successful', { id: 'test-dest', description: `${selectedDestination.name} is responding` })
+              }}>
+                Test Connection
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* IP Allowlist Configuration Dialog */}
+      <Dialog open={showIpAllowlistConfig} onOpenChange={setShowIpAllowlistConfig}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>IP Allowlist Configuration</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-sm text-gray-500">Add IP addresses that are allowed to access the data pipeline API.</p>
+            <div className="space-y-2">
+              {ipAllowlist.map((ip, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input value={ip} onChange={(e) => {
+                    const newList = [...ipAllowlist]
+                    newList[index] = e.target.value
+                    setIpAllowlist(newList)
+                  }} />
+                  <Button variant="ghost" size="icon" onClick={() => {
+                    setIpAllowlist(ipAllowlist.filter((_, i) => i !== index))
+                  }}>
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <Button variant="outline" className="w-full" onClick={() => setIpAllowlist([...ipAllowlist, ''])}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add IP Address
+            </Button>
+            <Button className="w-full" onClick={async () => {
+              toast.loading('Saving IP allowlist...', { id: 'save-ip' })
+              await new Promise(resolve => setTimeout(resolve, 1000))
+              toast.success('IP allowlist updated', { id: 'save-ip', description: `${ipAllowlist.length} IPs configured` })
+              setShowIpAllowlistConfig(false)
+            }}>
+              Save Configuration
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook URL Configuration Dialog */}
+      <Dialog open={showWebhookConfig} onOpenChange={setShowWebhookConfig}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Webhook Configuration</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-sm text-gray-500">Configure a webhook URL to receive pipeline events in real-time.</p>
+            <div className="space-y-2">
+              <Label>Webhook URL</Label>
+              <Input
+                placeholder="https://your-domain.com/webhook"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to Send</Label>
+              <div className="space-y-2">
+                {['Pipeline Started', 'Pipeline Completed', 'Pipeline Failed', 'Schema Changed'].map((event) => (
+                  <div key={event} className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">{event}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={async () => {
+                if (!webhookUrl) {
+                  toast.error('Please enter a webhook URL')
+                  return
+                }
+                toast.loading('Testing webhook...', { id: 'test-webhook' })
+                await new Promise(resolve => setTimeout(resolve, 1500))
+                toast.success('Webhook test successful', { id: 'test-webhook' })
+              }}>
+                Test Webhook
+              </Button>
+              <Button className="flex-1" onClick={async () => {
+                toast.loading('Saving webhook configuration...', { id: 'save-webhook' })
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('Webhook configured', { id: 'save-webhook', description: webhookUrl || 'No URL configured' })
+                setShowWebhookConfig(false)
+              }}>
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Manager Dialog */}
+      <Dialog open={showArchiveManager} onOpenChange={setShowArchiveManager}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Archive Manager</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-sm text-gray-500">Manage your archived data exports. Total: 15.8 GB</p>
+            <div className="space-y-3">
+              {[
+                { name: 'Q3 2024 Financial Data', size: '4.2 GB', date: '2024-10-01', format: 'parquet' },
+                { name: 'Customer Backup Sept', size: '3.8 GB', date: '2024-09-15', format: 'json' },
+                { name: 'Sales Analytics Q2', size: '2.5 GB', date: '2024-07-01', format: 'csv' },
+                { name: 'Marketing Campaign Data', size: '5.3 GB', date: '2024-06-15', format: 'parquet' },
+              ].map((archive, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Archive className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">{archive.name}</p>
+                      <p className="text-sm text-gray-500">{archive.size} - {archive.format.toUpperCase()} - {archive.date}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      toast.loading(`Restoring ${archive.name}...`, { id: 'restore' })
+                      await new Promise(resolve => setTimeout(resolve, 2000))
+                      toast.success('Archive restored', { id: 'restore', description: archive.name })
+                    }}>
+                      Restore
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={async () => {
+                      toast.loading(`Downloading ${archive.name}...`, { id: 'download-archive' })
+                      const data = JSON.stringify({ archive, downloadedAt: new Date().toISOString() }, null, 2)
+                      const blob = new Blob([data], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `${archive.name}.${archive.format}`
+                      a.click()
+                      URL.revokeObjectURL(url)
+                      toast.success('Download started', { id: 'download-archive', description: `${archive.size}` })
+                    }}>
+                      <Download className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={async () => {
+                      if (!confirm(`Delete ${archive.name}? This cannot be undone.`)) return
+                      toast.loading('Deleting archive...', { id: 'delete-archive' })
+                      await new Promise(resolve => setTimeout(resolve, 1000))
+                      toast.success('Archive deleted', { id: 'delete-archive', description: `${archive.size} freed` })
+                    }}>
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

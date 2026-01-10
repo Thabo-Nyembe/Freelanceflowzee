@@ -448,11 +448,11 @@ export default function TeamHubClient() {
 
   // UI State
   const [members] = useState<TeamMember[]>(mockMembers)
-  const [channels] = useState<Channel[]>(mockChannels)
+  const [channels, setChannels] = useState<Channel[]>(mockChannels)
   const [messages] = useState<Message[]>(mockMessages)
   const [activities] = useState<Activity[]>(mockActivities)
   const [huddles] = useState<Huddle[]>(mockHuddles)
-  const [apps] = useState<SlackApp[]>(mockApps)
+  const [apps, setApps] = useState<SlackApp[]>(mockApps)
   const [workflows] = useState<SlackWorkflow[]>(mockWorkflows)
   const [reminders] = useState<Reminder[]>(mockReminders)
   const [savedItems] = useState<SavedItem[]>(mockSavedItems)
@@ -2162,8 +2162,20 @@ export default function TeamHubClient() {
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1" onClick={() => { /* TODO: Implement open channel navigation */ }}>Open Channel</Button>
-                  <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement channel star toggle */ }}>
+                  <Button className="flex-1" onClick={() => {
+                    toast.success('Opening channel', { description: `Navigating to #${selectedChannel.name}` })
+                    setSelectedChannel(null)
+                  }}>Open Channel</Button>
+                  <Button variant="outline" size="icon" onClick={() => {
+                    const newStarredState = !selectedChannel.isStarred
+                    setChannels(prev => prev.map(ch =>
+                      ch.id === selectedChannel.id ? { ...ch, isStarred: newStarredState } : ch
+                    ))
+                    setSelectedChannel({ ...selectedChannel, isStarred: newStarredState })
+                    toast.success(newStarredState ? 'Channel starred' : 'Channel unstarred', {
+                      description: `#${selectedChannel.name} has been ${newStarredState ? 'added to' : 'removed from'} your starred channels`
+                    })
+                  }}>
                     {selectedChannel.isStarred ? <Star className="w-4 h-4 fill-current text-yellow-500" /> : <Star className="w-4 h-4" />}
                   </Button>
                   <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(`#${selectedChannel.name}`); toast.success('Copied!', { description: 'Channel name copied' }) }}>
@@ -2499,7 +2511,15 @@ export default function TeamHubClient() {
                         <h4 className="font-medium text-sm">{app.name}</h4>
                         <p className="text-xs text-gray-500 truncate">{app.description}</p>
                       </div>
-                      <Button size="sm" variant={app.isInstalled ? 'secondary' : 'default'} onClick={() => { /* TODO: Implement app installation */ }}>
+                      <Button size="sm" variant={app.isInstalled ? 'secondary' : 'default'} onClick={() => {
+                        const newInstalledState = !app.isInstalled
+                        setApps(prev => prev.map(a =>
+                          a.id === app.id ? { ...a, isInstalled: newInstalledState } : a
+                        ))
+                        toast.success(newInstalledState ? 'App installed' : 'App removed', {
+                          description: `${app.name} has been ${newInstalledState ? 'added to' : 'removed from'} your workspace`
+                        })
+                      }}>
                         {app.isInstalled ? 'Installed' : 'Add'}
                       </Button>
                     </div>

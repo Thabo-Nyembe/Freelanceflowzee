@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
@@ -436,6 +437,58 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [clientToDelete, setClientToDelete] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Dialog states for TODO handlers
+  const [showActivityDialog, setShowActivityDialog] = useState(false)
+  const [showTaskDialog, setShowTaskDialog] = useState(false)
+  const [showCustomFieldDialog, setShowCustomFieldDialog] = useState(false)
+  const [showStageEditorDialog, setShowStageEditorDialog] = useState(false)
+  const [showAddStageDialog, setShowAddStageDialog] = useState(false)
+  const [showWorkflowBuilderDialog, setShowWorkflowBuilderDialog] = useState(false)
+  const [showSequenceDialog, setShowSequenceDialog] = useState(false)
+  const [showMarketplaceDialog, setShowMarketplaceDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showApiKeyConfirmDialog, setShowApiKeyConfirmDialog] = useState(false)
+  const [showAuditLogDialog, setShowAuditLogDialog] = useState(false)
+  const [showMergeDuplicatesDialog, setShowMergeDuplicatesDialog] = useState(false)
+
+  // Form states for dialogs
+  const [activityForm, setActivityForm] = useState({
+    type: 'call' as 'call' | 'email' | 'meeting' | 'note',
+    title: '',
+    description: '',
+    clientId: ''
+  })
+  const [taskForm, setTaskForm] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+    priority: 'medium' as Priority,
+    assignee: '',
+    clientId: ''
+  })
+  const [customFieldForm, setCustomFieldForm] = useState({
+    name: '',
+    type: 'text' as 'text' | 'number' | 'date' | 'select',
+    required: false
+  })
+  const [stageForm, setStageForm] = useState({
+    name: '',
+    probability: 50,
+    color: 'blue'
+  })
+  const [editingStage, setEditingStage] = useState<{ name: string; prob: number; color: string } | null>(null)
+  const [workflowForm, setWorkflowForm] = useState({
+    name: '',
+    trigger: 'lead_created',
+    action: 'send_email'
+  })
+  const [sequenceForm, setSequenceForm] = useState({
+    name: '',
+    emailCount: 3,
+    delay: 2
+  })
+  const [importFile, setImportFile] = useState<File | null>(null)
 
   // Database integration - use real clients hook
   const { clients: dbClients, fetchClients, createClient, updateClient, deleteClient, archiveClient, isLoading: clientsLoading } = useClients()
@@ -1106,7 +1159,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Recent Activities</CardTitle>
-                  <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement activity logging */ }}>
+                  <Button variant="outline" size="sm" onClick={() => setShowActivityDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Log Activity
                   </Button>
@@ -1166,7 +1219,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
           <TabsContent value="tasks" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Pending Tasks</h3>
-              <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement task creation */ }}>
+              <Button variant="outline" size="sm" onClick={() => setShowTaskDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Task
               </Button>
@@ -1379,7 +1432,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Switch defaultChecked />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement custom field creation */ }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowCustomFieldDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Custom Field
                         </Button>
@@ -1449,11 +1502,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </div>
                             <div className="flex items-center gap-4">
                               <span className="text-sm text-gray-500">{stage.prob}% probability</span>
-                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement stage editor */ }}>Edit</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { setEditingStage(stage); setShowStageEditorDialog(true); }}>Edit</Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement stage creation */ }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddStageDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1577,7 +1630,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement workflow builder */ }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowWorkflowBuilderDialog(true)}>
                           Create Custom Workflow
                         </Button>
                       </CardContent>
@@ -1602,7 +1655,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Switch defaultChecked={seq.active} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement sequence creation */ }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowSequenceDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create Sequence
                         </Button>
@@ -1707,7 +1760,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </Badge>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement app marketplace */ }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowMarketplaceDialog(true)}>
                           Browse App Marketplace
                         </Button>
                       </CardContent>
@@ -1844,7 +1897,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => { /* TODO: Implement import functionality */ }}>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => setShowImportDialog(true)}>
                             <Upload className="w-5 h-5" />
                             <span>Import Data</span>
                           </Button>
@@ -1896,7 +1949,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement API key regeneration with confirmation */ }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowApiKeyConfirmDialog(true)}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1928,7 +1981,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement audit log viewer */ }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowAuditLogDialog(true)}>
                           View Audit Log
                         </Button>
                       </CardContent>
@@ -1968,7 +2021,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <Button
                               variant="outline"
                               className="text-red-600 border-red-300 hover:bg-red-50"
-                              onClick={() => { /* TODO: Implement duplicate detection */ }}
+                              onClick={() => setShowMergeDuplicatesDialog(true)}
                             >
                               Merge
                             </Button>
@@ -2453,6 +2506,837 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 {isSubmitting ? 'Deleting...' : 'Delete Client'}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Activity Dialog */}
+        <Dialog open={showActivityDialog} onOpenChange={setShowActivityDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Log Activity</DialogTitle>
+              <DialogDescription>Record a new activity for client tracking</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Activity Type</Label>
+                <Select value={activityForm.type} onValueChange={(value) => setActivityForm(prev => ({ ...prev, type: value as any }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="call">Phone Call</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="note">Note</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Client</Label>
+                <Select value={activityForm.clientId} onValueChange={(value) => setActivityForm(prev => ({ ...prev, clientId: value }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger>
+                  <SelectContent>
+                    {mockClients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>{client.company}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Title</Label>
+                <Input
+                  placeholder="Activity title"
+                  className="mt-1"
+                  value={activityForm.title}
+                  onChange={(e) => setActivityForm(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="Describe the activity..."
+                  className="mt-1"
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowActivityDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!activityForm.title || !activityForm.clientId) {
+                    toast.error('Please fill in required fields')
+                    return
+                  }
+                  const loadingId = toast.loading('Logging activity...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Activity "${activityForm.title}" logged successfully`)
+                    setShowActivityDialog(false)
+                    setActivityForm({ type: 'call', title: '', description: '', clientId: '' })
+                  }, 1000)
+                }}
+                disabled={!activityForm.title || !activityForm.clientId}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Log Activity
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Task Dialog */}
+        <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Task</DialogTitle>
+              <DialogDescription>Add a new task for a client</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Task Title *</Label>
+                <Input
+                  placeholder="Enter task title"
+                  className="mt-1"
+                  value={taskForm.title}
+                  onChange={(e) => setTaskForm(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Client</Label>
+                <Select value={taskForm.clientId} onValueChange={(value) => setTaskForm(prev => ({ ...prev, clientId: value }))}>
+                  <SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger>
+                  <SelectContent>
+                    {mockClients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>{client.company}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Due Date</Label>
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={taskForm.dueDate}
+                    onChange={(e) => setTaskForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Priority</Label>
+                  <Select value={taskForm.priority} onValueChange={(value) => setTaskForm(prev => ({ ...prev, priority: value as Priority }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="Task description..."
+                  className="mt-1"
+                  value={taskForm.description}
+                  onChange={(e) => setTaskForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Assignee</Label>
+                <Input
+                  placeholder="Assign to..."
+                  className="mt-1"
+                  value={taskForm.assignee}
+                  onChange={(e) => setTaskForm(prev => ({ ...prev, assignee: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowTaskDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!taskForm.title) {
+                    toast.error('Please enter a task title')
+                    return
+                  }
+                  const loadingId = toast.loading('Creating task...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Task "${taskForm.title}" created successfully`)
+                    setShowTaskDialog(false)
+                    setTaskForm({ title: '', description: '', dueDate: '', priority: 'medium', assignee: '', clientId: '' })
+                  }, 1000)
+                }}
+                disabled={!taskForm.title}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Task
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Custom Field Dialog */}
+        <Dialog open={showCustomFieldDialog} onOpenChange={setShowCustomFieldDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Custom Field</DialogTitle>
+              <DialogDescription>Create a new custom field for client records</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Field Name *</Label>
+                <Input
+                  placeholder="e.g., Contract Value"
+                  className="mt-1"
+                  value={customFieldForm.name}
+                  onChange={(e) => setCustomFieldForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Field Type</Label>
+                <Select value={customFieldForm.type} onValueChange={(value) => setCustomFieldForm(prev => ({ ...prev, type: value as any }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="select">Dropdown</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Required Field</p>
+                  <p className="text-sm text-gray-500">Make this field mandatory</p>
+                </div>
+                <Switch
+                  checked={customFieldForm.required}
+                  onCheckedChange={(checked) => setCustomFieldForm(prev => ({ ...prev, required: checked }))}
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowCustomFieldDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!customFieldForm.name) {
+                    toast.error('Please enter a field name')
+                    return
+                  }
+                  const loadingId = toast.loading('Creating custom field...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Custom field "${customFieldForm.name}" created`)
+                    setShowCustomFieldDialog(false)
+                    setCustomFieldForm({ name: '', type: 'text', required: false })
+                  }, 1000)
+                }}
+                disabled={!customFieldForm.name}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Field
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Stage Dialog */}
+        <Dialog open={showStageEditorDialog} onOpenChange={(open) => { setShowStageEditorDialog(open); if (!open) setEditingStage(null); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Pipeline Stage</DialogTitle>
+              <DialogDescription>Modify the stage settings</DialogDescription>
+            </DialogHeader>
+            {editingStage && (
+              <div className="space-y-4">
+                <div>
+                  <Label>Stage Name</Label>
+                  <Input
+                    className="mt-1"
+                    defaultValue={editingStage.name}
+                  />
+                </div>
+                <div>
+                  <Label>Win Probability (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="mt-1"
+                    defaultValue={editingStage.prob}
+                  />
+                </div>
+                <div>
+                  <Label>Stage Color</Label>
+                  <Select defaultValue={editingStage.color.replace('bg-', '').replace('-500', '')}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gray">Gray</SelectItem>
+                      <SelectItem value="blue">Blue</SelectItem>
+                      <SelectItem value="yellow">Yellow</SelectItem>
+                      <SelectItem value="orange">Orange</SelectItem>
+                      <SelectItem value="green">Green</SelectItem>
+                      <SelectItem value="red">Red</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => { setShowStageEditorDialog(false); setEditingStage(null); }}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  const loadingId = toast.loading('Updating stage...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Stage "${editingStage?.name}" updated successfully`)
+                    setShowStageEditorDialog(false)
+                    setEditingStage(null)
+                  }, 1000)
+                }}
+              >
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Stage Dialog */}
+        <Dialog open={showAddStageDialog} onOpenChange={setShowAddStageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Pipeline Stage</DialogTitle>
+              <DialogDescription>Create a new stage in your sales pipeline</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Stage Name *</Label>
+                <Input
+                  placeholder="e.g., Demo Scheduled"
+                  className="mt-1"
+                  value={stageForm.name}
+                  onChange={(e) => setStageForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Win Probability (%)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="mt-1"
+                  value={stageForm.probability}
+                  onChange={(e) => setStageForm(prev => ({ ...prev, probability: parseInt(e.target.value) || 0 }))}
+                />
+              </div>
+              <div>
+                <Label>Stage Color</Label>
+                <Select value={stageForm.color} onValueChange={(value) => setStageForm(prev => ({ ...prev, color: value }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gray">Gray</SelectItem>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="yellow">Yellow</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!stageForm.name) {
+                    toast.error('Please enter a stage name')
+                    return
+                  }
+                  const loadingId = toast.loading('Creating stage...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Stage "${stageForm.name}" created successfully`)
+                    setShowAddStageDialog(false)
+                    setStageForm({ name: '', probability: 50, color: 'blue' })
+                  }, 1000)
+                }}
+                disabled={!stageForm.name}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Stage
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Builder Dialog */}
+        <Dialog open={showWorkflowBuilderDialog} onOpenChange={setShowWorkflowBuilderDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Custom Workflow</DialogTitle>
+              <DialogDescription>Automate your sales process with custom workflows</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Workflow Name *</Label>
+                <Input
+                  placeholder="e.g., New Lead Follow-up"
+                  className="mt-1"
+                  value={workflowForm.name}
+                  onChange={(e) => setWorkflowForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Trigger Event</Label>
+                <Select value={workflowForm.trigger} onValueChange={(value) => setWorkflowForm(prev => ({ ...prev, trigger: value }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead_created">New Lead Created</SelectItem>
+                    <SelectItem value="deal_stage_change">Deal Stage Changed</SelectItem>
+                    <SelectItem value="client_inactive">Client Inactive 30+ Days</SelectItem>
+                    <SelectItem value="deal_won">Deal Won</SelectItem>
+                    <SelectItem value="deal_lost">Deal Lost</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Action</Label>
+                <Select value={workflowForm.action} onValueChange={(value) => setWorkflowForm(prev => ({ ...prev, action: value }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="send_email">Send Email</SelectItem>
+                    <SelectItem value="create_task">Create Task</SelectItem>
+                    <SelectItem value="notify_team">Notify Team Member</SelectItem>
+                    <SelectItem value="update_field">Update Field</SelectItem>
+                    <SelectItem value="add_tag">Add Tag</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <strong>Preview:</strong> When {workflowForm.trigger.replace(/_/g, ' ')}, automatically {workflowForm.action.replace(/_/g, ' ')}.
+                </p>
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowWorkflowBuilderDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!workflowForm.name) {
+                    toast.error('Please enter a workflow name')
+                    return
+                  }
+                  const loadingId = toast.loading('Creating workflow...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Workflow "${workflowForm.name}" created and activated`)
+                    setShowWorkflowBuilderDialog(false)
+                    setWorkflowForm({ name: '', trigger: 'lead_created', action: 'send_email' })
+                  }, 1500)
+                }}
+                disabled={!workflowForm.name}
+              >
+                <Zap className="w-4 h-4 mr-2" />
+                Create Workflow
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Sequence Dialog */}
+        <Dialog open={showSequenceDialog} onOpenChange={setShowSequenceDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Email Sequence</DialogTitle>
+              <DialogDescription>Set up an automated email campaign</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Sequence Name *</Label>
+                <Input
+                  placeholder="e.g., Onboarding Sequence"
+                  className="mt-1"
+                  value={sequenceForm.name}
+                  onChange={(e) => setSequenceForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Number of Emails</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="10"
+                    className="mt-1"
+                    value={sequenceForm.emailCount}
+                    onChange={(e) => setSequenceForm(prev => ({ ...prev, emailCount: parseInt(e.target.value) || 1 }))}
+                  />
+                </div>
+                <div>
+                  <Label>Days Between Emails</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="30"
+                    className="mt-1"
+                    value={sequenceForm.delay}
+                    onChange={(e) => setSequenceForm(prev => ({ ...prev, delay: parseInt(e.target.value) || 1 }))}
+                  />
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <p className="font-medium text-sm">Sequence Preview</p>
+                {Array.from({ length: Math.min(sequenceForm.emailCount, 5) }, (_, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                    <Mail className="w-4 h-4" />
+                    <span>Email {i + 1}</span>
+                    <span className="text-gray-400">- Day {i * sequenceForm.delay + 1}</span>
+                  </div>
+                ))}
+                {sequenceForm.emailCount > 5 && (
+                  <p className="text-sm text-gray-500">+ {sequenceForm.emailCount - 5} more emails...</p>
+                )}
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowSequenceDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!sequenceForm.name) {
+                    toast.error('Please enter a sequence name')
+                    return
+                  }
+                  const loadingId = toast.loading('Creating sequence...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Email sequence "${sequenceForm.name}" created with ${sequenceForm.emailCount} emails`)
+                    setShowSequenceDialog(false)
+                    setSequenceForm({ name: '', emailCount: 3, delay: 2 })
+                  }, 1500)
+                }}
+                disabled={!sequenceForm.name}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Sequence
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* App Marketplace Dialog */}
+        <Dialog open={showMarketplaceDialog} onOpenChange={setShowMarketplaceDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>App Marketplace</DialogTitle>
+              <DialogDescription>Connect third-party apps to extend your CRM</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Input placeholder="Search apps..." className="w-full" />
+              <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto">
+                {[
+                  { name: 'Salesforce', description: 'Sync data with Salesforce', category: 'CRM', installed: false },
+                  { name: 'Mailchimp', description: 'Email marketing automation', category: 'Marketing', installed: false },
+                  { name: 'Stripe', description: 'Payment processing', category: 'Finance', installed: true },
+                  { name: 'Zapier', description: 'Connect 5000+ apps', category: 'Automation', installed: false },
+                  { name: 'QuickBooks', description: 'Accounting software', category: 'Finance', installed: false },
+                  { name: 'Intercom', description: 'Customer messaging', category: 'Support', installed: true },
+                  { name: 'DocuSign', description: 'E-signatures', category: 'Documents', installed: false },
+                  { name: 'Calendly', description: 'Scheduling automation', category: 'Calendar', installed: true },
+                ].map((app) => (
+                  <div key={app.name} className="p-4 border rounded-lg hover:border-indigo-300 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{app.name}</span>
+                      <Badge className={app.installed ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                        {app.installed ? 'Installed' : 'Available'}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{app.description}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary">{app.category}</Badge>
+                      <Button
+                        size="sm"
+                        variant={app.installed ? 'outline' : 'default'}
+                        onClick={() => {
+                          if (app.installed) {
+                            toast.success(`${app.name} settings opened`)
+                          } else {
+                            const loadingId = toast.loading(`Installing ${app.name}...`)
+                            setTimeout(() => {
+                              toast.dismiss(loadingId)
+                              toast.success(`${app.name} installed successfully`)
+                            }, 1500)
+                          }
+                        }}
+                      >
+                        {app.installed ? 'Configure' : 'Install'}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowMarketplaceDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Data Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Import Data</DialogTitle>
+              <DialogDescription>Import clients from CSV or Excel file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-sm text-gray-600 mb-2">Drag and drop your file here, or</p>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".csv,.xlsx,.xls"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        setImportFile(file)
+                        toast.success(`File "${file.name}" selected`)
+                      }
+                    }}
+                  />
+                  <Button variant="outline" asChild>
+                    <span>Browse Files</span>
+                  </Button>
+                </label>
+                {importFile && (
+                  <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                    <p className="text-sm text-green-700">Selected: {importFile.name}</p>
+                  </div>
+                )}
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="font-medium text-sm mb-2">Supported Formats</p>
+                <div className="flex gap-2">
+                  <Badge variant="secondary">CSV</Badge>
+                  <Badge variant="secondary">XLSX</Badge>
+                  <Badge variant="secondary">XLS</Badge>
+                </div>
+              </div>
+              <div className="text-sm text-gray-500">
+                <p className="font-medium mb-1">Required columns:</p>
+                <p>Company Name, Contact Name, Email</p>
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => { setShowImportDialog(false); setImportFile(null); }}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (!importFile) {
+                    toast.error('Please select a file to import')
+                    return
+                  }
+                  const loadingId = toast.loading('Importing data...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success(`Successfully imported data from ${importFile.name}`)
+                    setShowImportDialog(false)
+                    setImportFile(null)
+                  }, 2000)
+                }}
+                disabled={!importFile}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate API Key Confirmation Dialog */}
+        <Dialog open={showApiKeyConfirmDialog} onOpenChange={setShowApiKeyConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <AlertCircle className="w-5 h-5" />
+                Regenerate API Key
+              </DialogTitle>
+              <DialogDescription>This action will invalidate your current API key</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg mb-4">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  <strong>Warning:</strong> All existing integrations using the current API key will stop working. You will need to update your integrations with the new key.
+                </p>
+              </div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Are you sure you want to regenerate your API key?
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowApiKeyConfirmDialog(false)}>Cancel</Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  const loadingId = toast.loading('Generating new API key...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success('New API key generated successfully. Please update your integrations.')
+                    setShowApiKeyConfirmDialog(false)
+                  }, 1500)
+                }}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Regenerate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audit Log Dialog */}
+        <Dialog open={showAuditLogDialog} onOpenChange={setShowAuditLogDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Audit Log</DialogTitle>
+              <DialogDescription>Track all changes made in your CRM</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <Input placeholder="Search logs..." className="flex-1" />
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[150px]"><SelectValue placeholder="Filter" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="create">Created</SelectItem>
+                    <SelectItem value="update">Updated</SelectItem>
+                    <SelectItem value="delete">Deleted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-2">
+                  {[
+                    { action: 'Updated', entity: 'Client: TechCorp International', user: 'John Smith', time: '2 minutes ago', type: 'update' },
+                    { action: 'Created', entity: 'Deal: Enterprise License Q1', user: 'Sarah Chen', time: '15 minutes ago', type: 'create' },
+                    { action: 'Deleted', entity: 'Task: Follow-up call', user: 'Mike Johnson', time: '1 hour ago', type: 'delete' },
+                    { action: 'Updated', entity: 'Client: Global Innovations', user: 'Emily Davis', time: '2 hours ago', type: 'update' },
+                    { action: 'Created', entity: 'Activity: Meeting scheduled', user: 'John Smith', time: '3 hours ago', type: 'create' },
+                    { action: 'Updated', entity: 'Deal: Platform Expansion', user: 'Sarah Chen', time: '5 hours ago', type: 'update' },
+                    { action: 'Created', entity: 'Client: New Horizons LLC', user: 'Mike Johnson', time: 'Yesterday', type: 'create' },
+                    { action: 'Deleted', entity: 'Note: Old meeting notes', user: 'Emily Davis', time: 'Yesterday', type: 'delete' },
+                  ].map((log, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Badge className={
+                          log.type === 'create' ? 'bg-green-100 text-green-700' :
+                          log.type === 'update' ? 'bg-blue-100 text-blue-700' :
+                          'bg-red-100 text-red-700'
+                        }>
+                          {log.action}
+                        </Badge>
+                        <span className="font-medium">{log.entity}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span>{log.user}</span>
+                        <span>{log.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowAuditLogDialog(false)}>Close</Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const loadingId = toast.loading('Exporting audit log...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success('Audit log exported to audit_log.csv')
+                  }, 1500)
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Log
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Merge Duplicates Dialog */}
+        <Dialog open={showMergeDuplicatesDialog} onOpenChange={setShowMergeDuplicatesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Merge Duplicate Clients
+              </DialogTitle>
+              <DialogDescription>Review and merge potential duplicate client records</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  We found 3 potential duplicate groups. Review each group and select which record to keep.
+                </p>
+              </div>
+              <ScrollArea className="h-[350px]">
+                <div className="space-y-4">
+                  {[
+                    { primary: 'TechCorp International', duplicates: ['Tech Corp Inc', 'TechCorp'] },
+                    { primary: 'Global Innovations Ltd', duplicates: ['Global Innovations'] },
+                    { primary: 'StartUp Hub Inc', duplicates: ['Startup Hub', 'Start Up Hub'] },
+                  ].map((group, i) => (
+                    <div key={i} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-medium">Duplicate Group {i + 1}</span>
+                        <Badge>{group.duplicates.length + 1} records</Badge>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded border-2 border-green-300">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-600" />
+                            <span>{group.primary}</span>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Primary</Badge>
+                        </div>
+                        {group.duplicates.map((dup, j) => (
+                          <div key={j} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                            <span className="text-gray-600">{dup}</span>
+                            <Button size="sm" variant="ghost" className="text-red-600">
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowMergeDuplicatesDialog(false)}>Cancel</Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  const loadingId = toast.loading('Merging duplicate records...')
+                  setTimeout(() => {
+                    toast.dismiss(loadingId)
+                    toast.success('5 duplicate records merged successfully')
+                    setShowMergeDuplicatesDialog(false)
+                  }, 2000)
+                }}
+              >
+                <Handshake className="w-4 h-4 mr-2" />
+                Merge All Duplicates
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

@@ -697,8 +697,19 @@ export default function MilestonesClient() {
   const [showDeliverableDialog, setShowDeliverableDialog] = useState(false)
   const [showBudgetDialog, setShowBudgetDialog] = useState(false)
   const [showNotificationsDialog, setShowNotificationsDialog] = useState(false)
+  const [showArchiveOldDialog, setShowArchiveOldDialog] = useState(false)
+  const [showPurgeCompletedDialog, setShowPurgeCompletedDialog] = useState(false)
   const [milestoneToComplete, setMilestoneToComplete] = useState<Milestone | DbMilestone | null>(null)
   const [milestoneToDelete, setMilestoneToDelete] = useState<DbMilestone | null>(null)
+  const [milestoneToEdit, setMilestoneToEdit] = useState<Milestone | null>(null)
+  const [notifications, setNotifications] = useState([
+    { id: '1', title: 'Milestone completed', description: 'Infrastructure Upgrade has been completed', time: '2 hours ago', type: 'success', read: false },
+    { id: '2', title: 'At risk alert', description: 'Platform V2.0 Launch is now at risk', time: '4 hours ago', type: 'warning', read: false },
+    { id: '3', title: 'New comment', description: 'Sarah added a comment on Mobile App Beta', time: '1 day ago', type: 'info', read: false },
+    { id: '4', title: 'Budget alert', description: 'Security Compliance is over budget', time: '2 days ago', type: 'error', read: false },
+    { id: '5', title: 'Deadline reminder', description: 'Data Analytics Platform due in 7 days', time: '3 days ago', type: 'info', read: false },
+  ])
+  const [archiveThresholdDays, setArchiveThresholdDays] = useState(90)
 
   // Filter form state
   const [filterForm, setFilterForm] = useState({
@@ -1140,6 +1151,102 @@ export default function MilestonesClient() {
     toast.success('Data synced')
   }
 
+  // Open edit dialog for a mock milestone (convert to form state)
+  const handleOpenMilestoneEditDialog = (milestone: Milestone) => {
+    setMilestoneToEdit(milestone)
+    setFormState({
+      name: milestone.name,
+      description: milestone.description || '',
+      type: milestone.type,
+      status: milestone.status,
+      priority: milestone.priority,
+      due_date: milestone.due_date || '',
+      owner_name: milestone.owner?.name || '',
+      owner_email: milestone.owner?.email || '',
+      team_name: milestone.project_name || '',
+      budget: milestone.budget?.total?.toString() || '0',
+    })
+    setShowEditDialog(true)
+  }
+
+  // Archive old milestones (completed milestones older than threshold)
+  const handleArchiveOldMilestones = async () => {
+    try {
+      const thresholdDate = new Date()
+      thresholdDate.setDate(thresholdDate.getDate() - archiveThresholdDays)
+
+      const milestonesToArchive = dbMilestones.filter(m => {
+        if (m.status !== 'completed') return false
+        const completedDate = new Date(m.updated_at)
+        return completedDate < thresholdDate
+      })
+
+      if (milestonesToArchive.length === 0) {
+        toast.info('No milestones to archive', {
+          description: `No completed milestones older than ${archiveThresholdDays} days found`
+        })
+        setShowArchiveOldDialog(false)
+        return
+      }
+
+      const { error } = await supabase
+        .from('milestones')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .in('id', milestonesToArchive.map(m => m.id))
+
+      if (error) throw error
+
+      toast.success(`${milestonesToArchive.length} milestone(s) archived`, {
+        description: `Archived milestones completed more than ${archiveThresholdDays} days ago`
+      })
+      setShowArchiveOldDialog(false)
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error archiving milestones:', error)
+      toast.error('Failed to archive milestones')
+    }
+  }
+
+  // Purge all completed milestones
+  const handlePurgeCompletedMilestones = async () => {
+    try {
+      const completedMilestones = dbMilestones.filter(m => m.status === 'completed')
+
+      if (completedMilestones.length === 0) {
+        toast.info('No completed milestones to purge')
+        setShowPurgeCompletedDialog(false)
+        return
+      }
+
+      const { error } = await supabase
+        .from('milestones')
+        .delete()
+        .in('id', completedMilestones.map(m => m.id))
+
+      if (error) throw error
+
+      toast.success(`${completedMilestones.length} completed milestone(s) purged`, {
+        description: 'All completed milestones have been permanently deleted'
+      })
+      setShowPurgeCompletedDialog(false)
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error purging milestones:', error)
+      toast.error('Failed to purge milestones')
+    }
+  }
+
+  // Mark all notifications as read
+  const handleMarkAllNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+    toast.success('All notifications marked as read')
+  }
+
+  // Get unread notification count
+  const unreadNotificationCount = useMemo(() => {
+    return notifications.filter(n => !n.read).length
+  }, [notifications])
+
   // Calculate stats
   const stats = useMemo(() => {
     const total = mockMilestones.length
@@ -1334,9 +1441,11 @@ export default function MilestonesClient() {
                 className="relative"
               >
                 <Bell className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
+                {unreadNotificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadNotificationCount}
+                  </span>
+                )}
               </Button>
               <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
                 <button
@@ -1450,7 +1559,7 @@ export default function MilestonesClient() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                              <DropdownMenuItem onClick={() => { /* TODO: Implement milestone editor dialog */ }}>
+                              <DropdownMenuItem onClick={() => handleOpenMilestoneEditDialog(milestone)}>
                                 <Edit2 className="w-4 h-4 mr-2" />
                                 Edit Milestone
                               </DropdownMenuItem>
@@ -2261,7 +2370,7 @@ export default function MilestonesClient() {
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => { /* TODO: Implement milestone archival */ }}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => setShowArchiveOldDialog(true)}>
                             <Archive className="w-5 h-5" />
                             <span>Archive Old</span>
                           </Button>
@@ -2269,7 +2378,7 @@ export default function MilestonesClient() {
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Stats</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => { if (confirm('Purge all completed milestones? This cannot be undone.')) { /* TODO: Implement milestone purge */ } }}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => setShowPurgeCompletedDialog(true)}>
                             <Trash2 className="w-5 h-5" />
                             <span>Purge Completed</span>
                           </Button>
@@ -3516,16 +3625,10 @@ export default function MilestonesClient() {
             </DialogHeader>
             <ScrollArea className="max-h-[400px] pr-4">
               <div className="space-y-3 py-4">
-                {[
-                  { title: 'Milestone completed', description: 'Infrastructure Upgrade has been completed', time: '2 hours ago', type: 'success' },
-                  { title: 'At risk alert', description: 'Platform V2.0 Launch is now at risk', time: '4 hours ago', type: 'warning' },
-                  { title: 'New comment', description: 'Sarah added a comment on Mobile App Beta', time: '1 day ago', type: 'info' },
-                  { title: 'Budget alert', description: 'Security Compliance is over budget', time: '2 days ago', type: 'error' },
-                  { title: 'Deadline reminder', description: 'Data Analytics Platform due in 7 days', time: '3 days ago', type: 'info' },
-                ].map((notification, i) => (
+                {notifications.map((notification) => (
                   <div
-                    key={i}
-                    className={`p-3 rounded-lg border ${
+                    key={notification.id}
+                    className={`p-3 rounded-lg border transition-opacity ${notification.read ? 'opacity-60' : ''} ${
                       notification.type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' :
                       notification.type === 'warning' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
                       notification.type === 'error' ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' :
@@ -3533,22 +3636,121 @@ export default function MilestonesClient() {
                     }`}
                   >
                     <div className="flex items-start justify-between">
-                      <div>
-                        <p className="font-medium text-sm">{notification.title}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{notification.description}</p>
+                      <div className="flex items-start gap-2">
+                        {!notification.read && (
+                          <span className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                        )}
+                        <div>
+                          <p className="font-medium text-sm">{notification.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{notification.description}</p>
+                        </div>
                       </div>
-                      <span className="text-xs text-muted-foreground">{notification.time}</span>
+                      <span className="text-xs text-muted-foreground flex-shrink-0">{notification.time}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </ScrollArea>
             <div className="flex justify-between">
-              <Button variant="ghost" onClick={() => { /* TODO: Implement mark all notifications as read */ }}>
+              <Button variant="ghost" onClick={handleMarkAllNotificationsRead} disabled={unreadNotificationCount === 0}>
                 Mark all as read
               </Button>
               <Button variant="outline" onClick={() => setShowNotificationsDialog(false)}>
                 Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Old Milestones Dialog */}
+        <Dialog open={showArchiveOldDialog} onOpenChange={setShowArchiveOldDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-amber-500" />
+                Archive Old Milestones
+              </DialogTitle>
+              <DialogDescription>
+                Archive completed milestones that are older than the specified threshold.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="archiveThreshold">Archive milestones completed more than:</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="archiveThreshold"
+                    type="number"
+                    min={1}
+                    max={365}
+                    value={archiveThresholdDays}
+                    onChange={(e) => setArchiveThresholdDays(parseInt(e.target.value) || 90)}
+                    className="w-24"
+                  />
+                  <span className="text-sm text-muted-foreground">days ago</span>
+                </div>
+              </div>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  This will move all completed milestones older than {archiveThresholdDays} days to the archived state.
+                  Archived milestones can still be viewed but will be hidden from the main list.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowArchiveOldDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleArchiveOldMilestones}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 text-white"
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                Archive Milestones
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Purge Completed Milestones Dialog */}
+        <Dialog open={showPurgeCompletedDialog} onOpenChange={setShowPurgeCompletedDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Purge Completed Milestones
+              </DialogTitle>
+              <DialogDescription>
+                Permanently delete all completed milestones from the database.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-700 dark:text-red-400">Warning: This action cannot be undone</p>
+                    <p className="text-sm text-red-600 dark:text-red-500 mt-1">
+                      This will permanently delete all milestones with "completed" status.
+                      All associated data including deliverables, dependencies, and history will be lost.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <p>Currently, there are <strong>{dbMilestones.filter(m => m.status === 'completed').length}</strong> completed milestone(s) that will be purged.</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowPurgeCompletedDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handlePurgeCompletedMilestones}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Purge All Completed
               </Button>
             </div>
           </DialogContent>
