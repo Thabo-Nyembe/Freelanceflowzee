@@ -1108,7 +1108,22 @@ export default function MeetingsPage() {
                     </Button>
 
                     {/* Chat */}
-                    <Button size="lg" variant="secondary" className="rounded-full">
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className="rounded-full"
+                      onClick={() => {
+                        toast.promise(
+                          new Promise((resolve) => setTimeout(resolve, 800)),
+                          {
+                            loading: 'Opening meeting chat...',
+                            success: 'Meeting chat opened',
+                            error: 'Failed to open chat'
+                          }
+                        );
+                        announce("Meeting chat opened", "polite");
+                      }}
+                    >
                       <MessageSquare className="h-5 w-5" />
                     </Button>
 

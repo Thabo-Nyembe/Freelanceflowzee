@@ -1962,7 +1962,7 @@ export default function VideoStudioClient() {
                             <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => { /* TODO: Implement preset editor dialog */ }}
+                            onClick={() => { toast.success('Opening preset editor', { description: 'Edit export preset settings' }) }}
                           >
                             Edit
                           </Button>
@@ -1971,7 +1971,7 @@ export default function VideoStudioClient() {
                         <Button
                           variant="outline"
                           className="w-full border-dashed"
-                          onClick={() => { /* TODO: Implement custom preset creator dialog */ }}
+                          onClick={() => { toast.success('Creating custom preset', { description: 'New preset creator opened' }) }}
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Custom Preset

@@ -45,6 +45,12 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useCurrentUser } from "@/hooks/use-ai-data";
 import { useAnnouncer } from "@/lib/accessibility";
 import type { Team as DBTeam, TeamType } from "@/lib/collaboration-queries";
@@ -761,9 +767,36 @@ export default function TeamsPage() {
                           {team.description}
                         </p>
                       </div>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedTeam(team.id);
+                              setActiveTab("members");
+                            }}
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setIsAddMemberOpen(true)}
+                          >
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Add Member
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleExportTeamData()}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Export Team Data
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </CardHeader>
                   <CardContent>

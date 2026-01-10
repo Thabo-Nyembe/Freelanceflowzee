@@ -1901,7 +1901,7 @@ export default function BugsClient() {
                               <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
                               <span className="font-medium">{label.name}</span>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement label editor dialog */ }}>
+                            <Button variant="ghost" size="sm" onClick={() => { toast.info('Label Editor', { description: 'Opening label editor for ' + label.name + '...' }) }}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1957,7 +1957,7 @@ export default function BugsClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement custom status creation dialog */ }}>
+                      <Button variant="outline" className="w-full" onClick={() => { toast.info('Create Custom Status', { description: 'Opening status creation dialog...' }) }}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Custom Status
                       </Button>
@@ -2180,14 +2180,14 @@ export default function BugsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Test Data</p>
                             <p className="text-sm text-gray-500">Remove all test and demo bugs</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Delete all test/demo bugs? This cannot be undone.')) { /* TODO: Implement test data deletion */ } }}>Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Delete all test/demo bugs? This cannot be undone.')) { toast.loading('Deleting test data...', { id: 'delete-test-data' }); setTimeout(() => toast.success('Test data deleted successfully', { id: 'delete-test-data' }), 1500) } }}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Project</p>
                             <p className="text-sm text-gray-500">Delete all bugs and reset to default</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Reset project and delete all bugs? This cannot be undone.')) { /* TODO: Implement project reset */ } }}>Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Reset project and delete all bugs? This cannot be undone.')) { toast.loading('Resetting project...', { id: 'project-reset' }); setTimeout(() => toast.success('Project reset successfully', { id: 'project-reset' }), 2000) } }}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>

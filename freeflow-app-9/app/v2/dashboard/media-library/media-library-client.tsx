@@ -1163,10 +1163,16 @@ export default function MediaLibraryClient({
                         {getFileTypeIcon(asset.fileType)}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
                           <div className="flex gap-2">
-                            <Button size="icon" variant="secondary" className="w-8 h-8">
+                            <Button size="icon" variant="secondary" className="w-8 h-8" onClick={(e) => {
+                              e.stopPropagation()
+                              handleDownloadAsset(asset)
+                            }}>
                               <Download className="w-4 h-4" />
                             </Button>
-                            <Button size="icon" variant="secondary" className="w-8 h-8">
+                            <Button size="icon" variant="secondary" className="w-8 h-8" onClick={(e) => {
+                              e.stopPropagation()
+                              handleShareAsset(asset)
+                            }}>
                               <Share2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2654,7 +2660,9 @@ export default function MediaLibraryClient({
               </div>
               <div className="flex items-center gap-2">
                 <Input placeholder="Search assets to share..." />
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" onClick={() => {
+                  toast.info('Searching assets', { description: 'Searching for assets to share...' })
+                }}>
                   <Search className="w-4 h-4" />
                 </Button>
               </div>

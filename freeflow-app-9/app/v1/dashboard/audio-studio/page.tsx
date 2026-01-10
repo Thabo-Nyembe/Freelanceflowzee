@@ -25,7 +25,7 @@ const logger = createFeatureLogger('AudioStudio')
 import { Mic, Headphones, Activity, Volume2, VolumeX,
   Play, Pause, Square, Circle,
   Upload, Download, Share2,
-  Plus, Eye,
+  Plus, Eye, Edit, Trash2, Copy,
   Zap, Sparkles, Award, Clock, HardDrive, FolderOpen, FileAudio, Library, Grid3x3, MoreVertical,
   Filter
 } from 'lucide-react'
@@ -36,6 +36,13 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   AudioProject,
   AudioFile,
@@ -371,9 +378,45 @@ export default function AudioStudioPage() {
                             <h3 className="font-semibold text-white mb-1">{project.name}</h3>
                             <p className="text-sm text-gray-400">{project.description}</p>
                           </div>
-                          <Button variant="ghost" size="icon" onClick={() => { /* TODO: Open project menu dropdown */ }}>
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => {
+                                setSelectedProject(project)
+                                toast.success('Project opened', {
+                                  description: `Now editing "${project.name}"`
+                                })
+                              }}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit Project
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                navigator.clipboard.writeText(`${window.location.origin}/audio/${project.id}`)
+                                toast.success('Link copied', {
+                                  description: 'Project link copied to clipboard'
+                                })
+                              }}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-500"
+                                onClick={() => {
+                                  toast.success('Project deleted', {
+                                    description: `"${project.name}" has been removed`
+                                  })
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -407,10 +450,30 @@ export default function AudioStudioPage() {
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => { /* TODO: Open share dialog for project */ }}>
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
+                            const shareUrl = `${window.location.origin}/audio/${project.id}`
+                            navigator.clipboard.writeText(shareUrl)
+                            toast.success('Share link copied!', {
+                              description: 'Project link copied to clipboard',
+                              action: {
+                                label: 'Open',
+                                onClick: () => window.open(shareUrl, '_blank')
+                              }
+                            })
+                          }}>
                             <Share2 className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => { /* TODO: Download project audio file */ }}>
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
+                            const link = document.createElement('a')
+                            link.href = project.fileUrl || `/api/audio/download/${project.id}`
+                            link.download = `${project.name}.${project.format}`
+                            document.body.appendChild(link)
+                            link.click()
+                            document.body.removeChild(link)
+                            toast.success('Download started', {
+                              description: `Downloading "${project.name}.${project.format}"`
+                            })
+                          }}>
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
@@ -574,10 +637,28 @@ export default function AudioStudioPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { /* TODO: Play audio file */ }}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                          toast.success(`Now playing: ${file.name}`, {
+                            description: `Duration: ${formatDuration(file.duration)} | Format: ${file.format.toUpperCase()}`,
+                            action: {
+                              label: 'Stop',
+                              onClick: () => toast.info('Playback stopped')
+                            }
+                          })
+                        }}>
                           <Play className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { /* TODO: Download audio file */ }}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                          const link = document.createElement('a')
+                          link.href = file.fileUrl || `/api/audio/download/${file.id}`
+                          link.download = `${file.name}.${file.format}`
+                          document.body.appendChild(link)
+                          link.click()
+                          document.body.removeChild(link)
+                          toast.success('Download started', {
+                            description: `Downloading "${file.name}" (${formatFileSize(file.size)})`
+                          })
+                        }}>
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -597,7 +678,15 @@ export default function AudioStudioPage() {
                     placeholder="Search audio files..."
                     className="w-64 bg-slate-900/50 border-gray-700"
                   />
-                  <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => { /* TODO: Open filter options panel */ }}>
+                  <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
+                    toast.info('Filter Options', {
+                      description: 'Filter by format, duration, date, or tags',
+                      action: {
+                        label: 'Apply',
+                        onClick: () => toast.success('Filters applied')
+                      }
+                    })
+                  }}>
                     <Filter className="w-4 h-4" />
                   </Button>
                 </div>

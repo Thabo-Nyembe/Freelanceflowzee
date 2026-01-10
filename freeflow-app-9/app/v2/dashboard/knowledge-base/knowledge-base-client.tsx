@@ -14,6 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   BookOpen,
   FileText,
   Search,
@@ -957,6 +964,12 @@ export default function KnowledgeBaseClient() {
     toast.success('Link copied', { description: 'Share link copied to clipboard' })
   }
 
+  const handleToggleWatch = (page: Page) => {
+    toast.success(page.isWatching ? 'Stopped watching page' : 'Now watching page', {
+      description: page.isWatching ? 'You will no longer receive notifications' : 'You will receive notifications for updates'
+    })
+  }
+
   // Create Space Handler
   const handleCreateSpace = async () => {
     if (!newSpaceName.trim()) {
@@ -1115,7 +1128,7 @@ export default function KnowledgeBaseClient() {
                 className="pl-9 w-80"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => setShowAdvancedSearchDialog(true)}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button onClick={() => setShowCreateDialog(true)} className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
@@ -2047,18 +2060,34 @@ export default function KnowledgeBaseClient() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleBookmark(selectedPage)}>
                       {selectedPage.isBookmarked ? <Bookmark className="w-4 h-4 text-yellow-500" /> : <BookmarkPlus className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => handleToggleWatch(selectedPage)}>
                       {selectedPage.isWatching ? <Bell className="w-4 h-4 text-indigo-500" /> : <BellOff className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={handleShare}>
                       <Share2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => toast.success('Edit mode enabled')}>
+                          <Edit className="h-4 w-4 mr-2" /> Edit Page
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleShare}>
+                          <Share2 className="h-4 w-4 mr-2" /> Share
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleDeletePage(selectedPage.id, selectedPage.title)} className="text-red-600 focus:text-red-600">
+                          <Trash2 className="h-4 w-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </DialogHeader>

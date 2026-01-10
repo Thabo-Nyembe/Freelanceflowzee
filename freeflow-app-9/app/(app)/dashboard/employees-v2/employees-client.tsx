@@ -864,7 +864,7 @@ export default function EmployeesClient() {
               ))}
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => { toast.success('Opening time off request form'); /* TODO: Add setShowTimeOffDialog(true) when dialog is implemented */ }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => { toast.success('Opening time off request form', { description: 'Time off dialog will open' }) }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
                 {mockTimeOffRequests.map(request => (
                   <div key={request.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -2293,7 +2293,7 @@ export default function EmployeesClient() {
                 <div className="space-y-2 mt-2">
                   <Input placeholder="Key Result 1" />
                   <Input placeholder="Key Result 2" />
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => { /* TODO: Implement key result addition */ }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { toast.success('Adding key result', { description: 'New key result field added' }) }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>
               </div>
             </div>

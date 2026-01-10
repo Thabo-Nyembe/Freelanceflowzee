@@ -783,10 +783,10 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 </div>
               )}
             </div>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={handleUndoAction} title="Undo (Ctrl+Z)">
               <Undo className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={handleRedoAction} title="Redo (Ctrl+Shift+Z)">
               <Redo className="h-4 w-4" />
             </Button>
             <div className="w-px h-6 bg-gray-700 mx-2"></div>
@@ -800,7 +800,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </Button>
             </div>
             <div className="w-px h-6 bg-gray-700 mx-2"></div>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white" onClick={handlePlayPresentation} title="Presentation Mode">
               <Play className="h-4 w-4" />
             </Button>
             <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleShareCanvas}>
@@ -830,7 +830,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </Button>
             ))}
             <div className="flex-1"></div>
-            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700" onClick={handleEditorSettings} title="Editor Settings">
               <Settings className="h-5 w-5" />
             </Button>
           </div>
@@ -1582,7 +1582,15 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                         <p className="text-sm text-gray-500">Last active: {member.last_active}</p>
                         <p className="text-xs text-gray-400">{member.boards_access} boards</p>
                       </div>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setSelectedMember(member)
+                          setShowMemberActionsDialog(true)
+                        }}
+                        title="Member Actions"
+                      >
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1590,6 +1598,58 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 </div>
               </CardContent>
             </Card>
+
+            {/* Member Actions Dialog */}
+            <Dialog open={showMemberActionsDialog} onOpenChange={setShowMemberActionsDialog}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Member Actions</DialogTitle>
+                </DialogHeader>
+                {selectedMember && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+                          {selectedMember.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{selectedMember.name}</p>
+                        <p className="text-sm text-gray-500">{selectedMember.email}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => handleMemberAction('change-role', selectedMember)}
+                      >
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Change Role
+                      </Button>
+                      {selectedMember.status === 'pending' && (
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                          onClick={() => handleMemberAction('resend-invite', selectedMember)}
+                        >
+                          <Share2 className="h-4 w-4 mr-2" />
+                          Resend Invitation
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                        onClick={() => handleMemberAction('remove', selectedMember)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Remove Member
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           {/* Settings Tab */}

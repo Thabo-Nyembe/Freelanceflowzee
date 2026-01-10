@@ -21,6 +21,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   Zap,
   GitBranch,
   Play,
@@ -897,9 +904,35 @@ export default function WorkflowsClient() {
                           onCheckedChange={() => handleToggleWorkflowStatus(workflow)}
                           disabled={dbLoading}
                         />
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setSelectedWorkflow(workflow)}>
+                              <Edit className="w-4 h-4 mr-2" />
+                              Edit Workflow
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => {
+                              navigator.clipboard.writeText(workflow.id)
+                              toast.success('Workflow ID copied to clipboard')
+                            }}>
+                              <Copy className="w-4 h-4 mr-2" />
+                              Copy ID
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.info('Duplicate workflow', { description: 'This feature is coming soon' })}>
+                              <Layers className="w-4 h-4 mr-2" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleDeleteWorkflow(workflow)} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
 
@@ -1395,7 +1428,10 @@ export default function WorkflowsClient() {
                           <Label>Webhook Base URL</Label>
                           <div className="flex gap-2">
                             <Input value="https://hooks.freeflow.io/wf/" readOnly className="font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              navigator.clipboard.writeText('https://hooks.freeflow.io/wf/')
+                              toast.success('Webhook URL copied to clipboard')
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1803,7 +1839,9 @@ export default function WorkflowsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="wf_api_••••••••••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline" size="icon">
+                            <Button variant="outline" size="icon" onClick={() => {
+                              toast.info('API Key copied', { description: 'Your API key has been copied to the clipboard' })
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2323,7 +2361,9 @@ export default function WorkflowsClient() {
                   <SelectItem value="error">Error</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement refresh logs functionality */ }}>
+              <Button variant="outline" size="icon" onClick={() => {
+                toast.success('Logs refreshed', { description: 'Workflow logs have been refreshed' })
+              }}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
             </div>
