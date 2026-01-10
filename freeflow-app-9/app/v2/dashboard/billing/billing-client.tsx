@@ -2244,7 +2244,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <AIInsightsPanel
               insights={mockBillingAIInsights}
               title="Billing Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

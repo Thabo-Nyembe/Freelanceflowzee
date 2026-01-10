@@ -1822,7 +1822,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
             <AIInsightsPanel
               insights={mockSEOAIInsights}
               title="SEO Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

@@ -2022,7 +2022,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           <AIInsightsPanel
             insights={chatAIInsights}
             title="Chat Intelligence"
-            onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+            onInsightAction={(_insight) => console.log('Insight action:', insight)}
           />
         </div>
         <div className="space-y-6">

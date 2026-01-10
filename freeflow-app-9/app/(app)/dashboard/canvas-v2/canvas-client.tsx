@@ -2141,7 +2141,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             <AIInsightsPanel
               insights={mockCanvasAIInsights}
               title="Canvas Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

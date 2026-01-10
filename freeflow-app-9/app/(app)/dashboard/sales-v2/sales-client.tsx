@@ -2253,7 +2253,7 @@ export default function SalesClient() {
             <AIInsightsPanel
               insights={mockSalesAIInsights}
               title="Sales Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
 

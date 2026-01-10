@@ -2244,7 +2244,7 @@ export default function WebinarsClient() {
             <AIInsightsPanel
               insights={mockWebinarsAIInsights}
               title="Webinar Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

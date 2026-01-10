@@ -1911,7 +1911,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             <AIInsightsPanel
               insights={calendarAIInsights}
               title="Calendar Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

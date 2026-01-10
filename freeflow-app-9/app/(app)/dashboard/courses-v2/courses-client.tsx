@@ -2532,7 +2532,7 @@ export default function CoursesClient() {
             <AIInsightsPanel
               insights={mockCoursesAIInsights}
               title="Course Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

@@ -1606,7 +1606,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             <AIInsightsPanel
               insights={mockInvoicesAIInsights}
               title="Invoice Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
 

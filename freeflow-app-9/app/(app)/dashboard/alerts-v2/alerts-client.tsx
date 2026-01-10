@@ -2220,7 +2220,7 @@ export default function AlertsClient() {
             <AIInsightsPanel
               insights={mockAlertsAIInsights}
               title="Alert Intelligence"
-              onInsightAction={(insight: AIInsight) => {
+              onInsightAction={(_insight) => {
                 toast.success(`Insight: ${insight.title}`, { description: insight.description })
               }}
             />

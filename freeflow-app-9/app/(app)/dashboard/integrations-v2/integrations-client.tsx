@@ -1921,7 +1921,7 @@ export default function IntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integrations Intelligence"
-              onInsightAction={(insight: AIInsight) => toast.info(`Processing: ${insight.title}`)}
+              onInsightAction={(_insight) => toast.info(`Processing: ${insight.title}`)}
             />
           </div>
           <div className="space-y-6">

@@ -2028,7 +2028,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
             <AIInsightsPanel
               insights={mockAudioAIInsights}
               title="Audio Intelligence"
-              onInsightAction={(insight: AIInsight) => {
+              onInsightAction={(_insight) => {
                 // Apply AI insight based on type
                 if (insight.type === 'warning') {
                   // For warnings like clipping, apply limiter

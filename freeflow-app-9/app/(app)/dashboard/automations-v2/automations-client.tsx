@@ -2484,7 +2484,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             <AIInsightsPanel
               insights={mockAutomationsAIInsights}
               title="Automation Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

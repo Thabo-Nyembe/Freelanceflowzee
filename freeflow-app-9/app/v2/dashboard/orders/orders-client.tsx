@@ -1885,7 +1885,7 @@ export default function OrdersClient() {
             <AIInsightsPanel
               insights={mockOrdersAIInsights}
               title="Order Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

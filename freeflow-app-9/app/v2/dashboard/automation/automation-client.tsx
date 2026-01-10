@@ -2129,7 +2129,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             <AIInsightsPanel
               insights={mockAutomationAIInsights}
               title="Automation Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

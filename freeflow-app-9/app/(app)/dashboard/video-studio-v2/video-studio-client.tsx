@@ -2277,7 +2277,7 @@ export default function VideoStudioClient() {
             <AIInsightsPanel
               insights={mockVideoStudioAIInsights}
               title="Studio Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

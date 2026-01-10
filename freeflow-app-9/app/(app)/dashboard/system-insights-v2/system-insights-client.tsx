@@ -2733,7 +2733,7 @@ docker run -d --name kazi-agent \\
             <AIInsightsPanel
               insights={mockSystemInsightsAIInsights}
               title="System Intelligence"
-              onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+              onInsightAction={(_insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

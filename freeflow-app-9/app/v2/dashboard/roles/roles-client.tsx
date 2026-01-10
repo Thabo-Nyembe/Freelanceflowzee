@@ -2154,7 +2154,7 @@ export default function RolesClient() {
               <AIInsightsPanel
                 insights={mockRolesAIInsights}
                 title="Role Intelligence"
-                onInsightAction={(insight: AIInsight) => console.log('Insight action:', insight)}
+                onInsightAction={(_insight) => console.log('Insight action:', insight)}
               />
             </div>
             <div className="space-y-6">
