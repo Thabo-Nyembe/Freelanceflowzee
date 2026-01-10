@@ -2743,7 +2743,18 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 Drag and drop your IPA or APK file here
               </p>
               <p className="text-xs text-gray-500">or</p>
-              <Button variant="outline" className="mt-2" onClick={() => { /* TODO: Implement file browser for build upload */ }}>
+              <Button variant="outline" className="mt-2" onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = '.apk,.ipa,.aab'
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) {
+                    toast.success(`Selected: ${file.name}`)
+                  }
+                }
+                input.click()
+              }}>
                 Browse Files
               </Button>
             </div>

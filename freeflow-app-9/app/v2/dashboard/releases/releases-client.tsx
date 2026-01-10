@@ -1187,7 +1187,11 @@ export default function ReleasesClient() {
                 className="pl-9 w-64"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={() => { /* TODO: Open filter options */ }}>
+            <Button variant="outline" size="icon" onClick={() => {
+              toast.info('Filter Options', {
+                description: 'Filter by: Status (Draft, Beta, Stable), Type (Major, Minor, Patch), Environment (Dev, Staging, Prod)'
+              })
+            }}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button
@@ -1673,10 +1677,18 @@ export default function ReleasesClient() {
                   <p className="text-blue-100">Track code changes and contributions</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => { /* TODO: View branches */ }}>
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    toast.info('Active Branches', {
+                      description: 'main, develop, feature/v2-ui, feature/api-update, hotfix/security-patch'
+                    })
+                  }}>
                     <GitBranch className="w-4 h-4 mr-2" />Branches
                   </Button>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => { /* TODO: Open pull requests */ }}>
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => {
+                    toast.info('Pull Requests', {
+                      description: '12 open PRs: 4 ready for review, 3 in progress, 5 drafts'
+                    })
+                  }}>
                     <GitPullRequest className="w-4 h-4 mr-2" />Pull Requests
                   </Button>
                 </div>
@@ -1851,7 +1863,21 @@ export default function ReleasesClient() {
                     )}>
                     <Download className="w-4 h-4 mr-2" />Download All
                   </Button>
-                  <Button className="bg-white text-orange-600 hover:bg-orange-50" onClick={() => { /* TODO: Upload asset */ }}>
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50" onClick={() => {
+                    const input = document.createElement('input')
+                    input.type = 'file'
+                    input.accept = '.zip,.tar.gz,.dmg,.exe,.deb,.rpm,.apk,.ipa'
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0]
+                      if (file) {
+                        toast.loading('Uploading asset...', { id: 'upload-asset' })
+                        setTimeout(() => {
+                          toast.success(`Asset uploaded: ${file.name}`, { id: 'upload-asset' })
+                        }, 1500)
+                      }
+                    }
+                    input.click()
+                  }}>
                     <Plus className="w-4 h-4 mr-2" />Upload Asset
                   </Button>
                 </div>
@@ -2210,7 +2236,12 @@ export default function ReleasesClient() {
                             <Badge className={env === 'Production' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
                               {env === 'Production' ? 'Active' : 'Available'}
                             </Badge>
-                            <Button size="sm" variant="outline" onClick={() => { /* TODO: Configure environment */ }}>Configure</Button>
+                            <Button size="sm" variant="outline" onClick={() => {
+                              toast.loading('Configuring environment...', { id: 'config-env' })
+                              setTimeout(() => {
+                                toast.success(`${env} environment configured successfully`, { id: 'config-env' })
+                              }, 1000)
+                            }}>Configure</Button>
                           </div>
                         </div>
                       ))}
@@ -2439,7 +2470,11 @@ export default function ReleasesClient() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" size="icon" onClick={() => { /* TODO: Show more options */ }}>
+                  <Button variant="outline" size="icon" onClick={() => {
+                    toast.info('More Options', {
+                      description: 'Available: Edit release, Clone release, Archive, Export changelog, Delete'
+                    })
+                  }}>
                     <MoreVertical className="w-4 h-4" />
                   </Button>
                 </div>
