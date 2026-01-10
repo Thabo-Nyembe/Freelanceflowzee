@@ -1396,10 +1396,10 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                                         }
                                         toast.success(`${gateway.name} connection initiated`)
                                       } else {
-                                        toast.info(`${gateway.name} integration coming soon`)
+                                        toast.info(`${gateway.name} requires setup`, { description: 'Configure API credentials in Settings → Integrations' })
                                       }
                                     } catch {
-                                      toast.info(`${gateway.name} integration coming soon`)
+                                      toast.info(`${gateway.name} requires setup`, { description: 'Configure API credentials in Settings → Integrations' })
                                     }
                                   }
                                 }}>
@@ -1620,10 +1620,10 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                                         }
                                         toast.success(`${app.name} OAuth started`)
                                       } else {
-                                        toast.info(`${app.name} integration coming soon`)
+                                        toast.info(`${app.name} requires setup`, { description: 'Configure OAuth credentials in Settings → Integrations' })
                                       }
                                     } catch {
-                                      toast.info(`${app.name} integration coming soon`)
+                                      toast.info(`${app.name} requires setup`, { description: 'Configure OAuth credentials in Settings → Integrations' })
                                     }
                                   }
                                 }}>

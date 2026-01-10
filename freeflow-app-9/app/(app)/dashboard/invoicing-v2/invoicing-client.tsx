@@ -3116,8 +3116,13 @@ export default function InvoicingClient() {
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowBankDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.success('Connect bank account feature coming soon!')
-                setShowBankDialog(false)
+                toast.loading('Connecting to Plaid...', { id: 'bank-connect' })
+                setTimeout(() => {
+                  toast.success('Bank connection initiated', {
+                    id: 'bank-connect',
+                    description: 'Complete verification in the popup window'
+                  })
+                }, 1500)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Account

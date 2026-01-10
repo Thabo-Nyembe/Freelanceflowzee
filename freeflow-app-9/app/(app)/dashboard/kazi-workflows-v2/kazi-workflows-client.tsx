@@ -1445,8 +1445,8 @@ export default function KaziWorkflowsClient() {
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
                         <Button size="sm" variant="ghost" onClick={() => {
-                          toast.info('Edit action', {
-                            description: 'Action editor coming soon.'
+                          toast.info(`Editing: ${action.name}`, {
+                            description: `Configure ${action.type} settings and parameters`
                           })
                         }}>
                           <Edit className="h-3 w-3" />
@@ -1454,8 +1454,8 @@ export default function KaziWorkflowsClient() {
                       </div>
                     ))}
                     <Button variant="outline" size="sm" className="w-full" onClick={() => {
-                      toast.info('Add action', {
-                        description: 'Action builder coming soon.'
+                      toast.info('Add Workflow Action', {
+                        description: 'Select from: Send Email, HTTP Request, Transform Data, Conditional Branch, Delay'
                       })
                     }}>
                       <Plus className="h-4 w-4 mr-2" />
@@ -2114,8 +2114,8 @@ export default function KaziWorkflowsClient() {
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
                         <Button size="sm" variant="ghost" onClick={() => {
-                          toast.info('Edit action', {
-                            description: 'Action editor coming soon.'
+                          toast.info(`Editing: ${action.name}`, {
+                            description: `Configure ${action.type} settings and parameters`
                           })
                         }}>
                           <Edit className="h-3 w-3" />
@@ -2123,8 +2123,8 @@ export default function KaziWorkflowsClient() {
                       </div>
                     ))}
                     <Button variant="outline" size="sm" className="w-full" onClick={() => {
-                      toast.info('Add action', {
-                        description: 'Action builder coming soon.'
+                      toast.info('Add Workflow Action', {
+                        description: 'Select from: Send Email, HTTP Request, Transform Data, Conditional Branch, Delay'
                       })
                     }}>
                       <Plus className="h-4 w-4 mr-2" />

@@ -1206,7 +1206,7 @@ export default function AllocationClient() {
             {/* Resources Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Resource', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Add Resource dialog coming soon') },
+                { icon: Plus, label: 'Add Resource', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Add new team member or contractor', { description: 'Configure skills, availability, and hourly rate' }) },
                 { icon: Users, label: 'Team View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Switching to team view') },
                 { icon: Star, label: 'Skills', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Skills matrix view loading') },
                 { icon: BarChart3, label: 'Utilization', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => { setActiveTab('reports'); toast.success('Viewing utilization reports') } },

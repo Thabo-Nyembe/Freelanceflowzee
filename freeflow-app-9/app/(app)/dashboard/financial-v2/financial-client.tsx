@@ -2107,7 +2107,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                                 if (!response.ok) throw new Error('Failed')
                                 toast.success('QuickBooks export configured successfully', { id: 'quickbooks' })
                               } catch {
-                                toast.info('QuickBooks integration setup - coming soon', { id: 'quickbooks' })
+                                toast.info('QuickBooks setup required', { id: 'quickbooks', description: 'Configure API credentials in Settings → Integrations' })
                               }
                             }}
                           >
@@ -2141,7 +2141,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                                   setActiveTab('settings')
                                 }
                               } catch {
-                                toast.info('Xero integration - OAuth setup coming soon', { id: 'xero' })
+                                toast.info('Xero setup required', { id: 'xero', description: 'Configure OAuth credentials in Settings → Integrations' })
                               }
                             }}
                           >

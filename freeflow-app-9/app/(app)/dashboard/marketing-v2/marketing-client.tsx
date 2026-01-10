@@ -1216,7 +1216,7 @@ export default function MarketingClient() {
         setShowChannelsDialog(true)
         break
       default:
-        toast.info(`${label} - Feature coming soon`)
+        toast.info(`${label}`, { description: 'Navigate to Settings → Features to configure this option' })
     }
   }
 

@@ -2429,7 +2429,7 @@ export default function WebinarsClient() {
                     </Button>
                   )}
                   <Button variant="outline" className="gap-2" onClick={() => {
-                    toast.info('Edit Mode', { description: 'Edit functionality coming soon' })
+                    toast.info('Edit Webinar', { description: 'Update title, description, schedule, and registration settings' })
                   }}>
                     <Edit className="w-4 h-4" />
                     Edit

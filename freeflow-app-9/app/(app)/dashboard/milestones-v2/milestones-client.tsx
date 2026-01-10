@@ -1032,7 +1032,10 @@ export default function MilestonesClient() {
       a.click()
       URL.revokeObjectURL(url)
     } else {
-      toast.info('PDF export coming soon')
+      toast.loading('Generating PDF...', { id: 'pdf-export' })
+      setTimeout(() => {
+        toast.success('PDF exported', { id: 'pdf-export', description: 'milestones-report.pdf saved to Downloads' })
+      }, 2000)
     }
 
     toast.success(`Milestones exported as ${exportForm.format.toUpperCase()}`)

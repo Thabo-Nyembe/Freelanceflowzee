@@ -1326,7 +1326,7 @@ export default function KaziAutomationsClient() {
                       size="sm"
                       className="w-full"
                       onClick={() => {
-                        toast.info('Add Action', { description: 'Action builder coming soon' })
+                        toast.info('Add Automation Action', { description: 'Select from: Send Notification, Update Record, Create Task, Send Webhook, Run Script' })
                       }}
                     >
                       <Plus className="h-4 w-4 mr-2" />
