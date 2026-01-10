@@ -543,7 +543,7 @@ async function handleChunkUpload(request: NextRequest, userId: string) {
       chunk_size: chunkBuffer.length,
       checksum: chunkChecksum || null,
       uploaded_at: new Date().toISOString()
-    }).catch(() => {}) // Non-critical
+    }).catch((e) => console.warn('Non-critical operation failed:', e)) // Non-critical
 
     const progress = Math.round((chunksReceived / uploadSession.total_chunks) * 100)
 
@@ -718,14 +718,14 @@ async function handleCompleteUpload(
       await supabase.storage
         .from('uploads')
         .remove([`${uploadSession.storage_path}/${chunkFile.name}`])
-        .catch(() => {})
+        .catch((e) => console.warn('Non-critical operation failed:', e))
     }
 
     // Remove upload directory
     await supabase.storage
       .from('uploads')
       .remove([uploadSession.storage_path])
-      .catch(() => {})
+      .catch((e) => console.warn('Non-critical operation failed:', e))
 
     // Update session status
     await supabase
@@ -791,7 +791,7 @@ async function handleCancelUpload(
     // Clean up chunks
     for (const chunkIndex of uploadSession.uploaded_chunks || []) {
       const chunkPath = `${uploadSession.storage_path}/chunk_${chunkIndex.toString().padStart(6, '0')}`
-      await supabase.storage.from('uploads').remove([chunkPath]).catch(() => {})
+      await supabase.storage.from('uploads').remove([chunkPath]).catch((e) => console.warn('Non-critical operation failed:', e))
     }
   }
 

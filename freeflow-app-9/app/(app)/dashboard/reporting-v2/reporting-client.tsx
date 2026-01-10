@@ -187,6 +187,11 @@ export default function ReportingClient() {
   const [showCreateWorksheet, setShowCreateWorksheet] = useState(false)
   const [showDataSourceDialog, setShowDataSourceDialog] = useState(false)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+
+  // Export data handler
+  const handleExportData = () => {
+    toast.success('Exporting dashboard data...')
+  }
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filterFavorites, setFilterFavorites] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')

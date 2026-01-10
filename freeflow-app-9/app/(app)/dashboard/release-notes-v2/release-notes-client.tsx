@@ -2112,7 +2112,7 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
                           keysToRemove.forEach(k => localStorage.removeItem(k))
 
                           // Also try to clear via API
-                          await fetch('/api/release-notes/cache', { method: 'DELETE' }).catch(() => {})
+                          await fetch('/api/release-notes/cache', { method: 'DELETE' }).catch((e) => console.warn('Non-critical operation failed:', e))
 
                           toast.dismiss()
                           toast.success('Cache cleared successfully')

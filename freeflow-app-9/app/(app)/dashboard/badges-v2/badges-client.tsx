@@ -563,7 +563,7 @@ export function BadgesClient() {
             action: 'share',
             user_badge_id: userBadge.id
           })
-        }).catch(() => {})
+        }).catch((e) => console.warn('Non-critical operation failed:', e))
 
         // Update local state
         setUserBadges(prev => prev.map(ub =>
@@ -600,7 +600,7 @@ export function BadgesClient() {
           action: 'share',
           user_badge_id: userBadge.id
         })
-      }).catch(() => {})
+      }).catch((e) => console.warn('Non-critical operation failed:', e))
 
       setUserBadges(prev => prev.map(ub =>
         ub.id === userBadge.id

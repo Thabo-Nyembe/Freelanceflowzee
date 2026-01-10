@@ -536,7 +536,12 @@ const mockReleasesActivities = [
   { id: '3', user: 'QA Team', action: 'Approved', target: 'v2.5.1 release candidate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-// Quick actions are now defined inside the component to access state and handlers
+const mockReleasesQuickActions = [
+  { id: '1', label: 'New Release', icon: 'Plus', action: () => {}, shortcut: 'N' },
+  { id: '2', label: 'Deploy', icon: 'Rocket', action: () => {}, shortcut: 'D' },
+  { id: '3', label: 'Rollback', icon: 'RotateCcw', action: () => {}, shortcut: 'R' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
+]
 
 // Initial form state
 const initialFormData: ReleaseFormData = {

@@ -295,6 +295,21 @@ export default function FilesPage() {
   // LOAD DATA
   // ============================================================================
 
+  const refreshFiles = useCallback(async () => {
+    logger.info('Refreshing files')
+    try {
+      const response = await fetch('/api/files')
+      const result = await response.json()
+      if (result.success) {
+        const mockFiles = generateMockFiles()
+        dispatch({ type: 'SET_FILES', files: mockFiles })
+        announce('Files refreshed', 'polite')
+      }
+    } catch (err) {
+      logger.error('Error refreshing files', { error: err })
+    }
+  }, [announce])
+
   useEffect(() => {
     const loadFilesData = async () => {
       logger.info('Loading files from API')

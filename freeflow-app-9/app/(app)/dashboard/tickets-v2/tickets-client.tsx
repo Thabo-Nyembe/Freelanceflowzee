@@ -435,7 +435,12 @@ const mockTicketsActivities = [
   { id: '3', user: 'Mike Johnson', action: 'Escalated', target: '#TKT-1235 to Tier 2', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-// Quick actions are now defined inside the component to access state
+const mockTicketsQuickActions = [
+  { id: '1', label: 'New Ticket', icon: 'Plus', action: () => {}, shortcut: 'N' },
+  { id: '2', label: 'Assign', icon: 'Users', action: () => {}, shortcut: 'A' },
+  { id: '3', label: 'Resolve', icon: 'CheckCircle', action: () => {}, shortcut: 'R' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
+]
 
 export default function TicketsClient() {
   const [activeTab, setActiveTab] = useState('tickets')

@@ -662,7 +662,12 @@ const mockAuditActivities = [
   { id: '3', user: 'Compliance', action: 'Generated', target: 'quarterly compliance report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
 ]
 
-// Quick actions are now defined inside the component to use real handlers
+const mockAuditQuickActions = [
+  { id: '1', label: 'Search Logs', icon: 'Search', action: () => {}, shortcut: 'S' },
+  { id: '2', label: 'Export Logs', icon: 'Download', action: () => {}, shortcut: 'E' },
+  { id: '3', label: 'Create Alert', icon: 'Bell', action: () => {}, shortcut: 'A' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'T' },
+]
 
 // ============================================================================
 // MAIN COMPONENT

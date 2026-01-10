@@ -533,6 +533,7 @@ export default function ComplianceClient() {
   const [selectedControl, setSelectedControl] = useState<Control | null>(null)
   const [showControlDialog, setShowControlDialog] = useState(false)
   const [showEvidenceDialog, setShowEvidenceDialog] = useState(false)
+  const [showFrameworkDialog, setShowFrameworkDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
   // State for controls and risks to enable real updates

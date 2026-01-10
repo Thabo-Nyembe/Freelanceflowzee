@@ -566,7 +566,12 @@ const mockGrowthActivities = [
   { id: '3', user: 'System', action: 'Completed', target: 'weekly growth metrics sync', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-// mockGrowthQuickActions will be defined inside the component to use state setters
+const mockGrowthQuickActions = [
+  { id: '1', label: 'New Experiment', icon: 'Beaker', action: () => {}, shortcut: 'N' },
+  { id: '2', label: 'View Metrics', icon: 'BarChart3', action: () => {}, shortcut: 'M' },
+  { id: '3', label: 'Export Data', icon: 'Download', action: () => {}, shortcut: 'E' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
+]
 
 // ============================================================================
 // MAIN COMPONENT

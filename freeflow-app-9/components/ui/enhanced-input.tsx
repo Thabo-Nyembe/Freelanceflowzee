@@ -77,4 +77,4 @@ const EnhancedInput = forwardRef<HTMLInputElement, EnhancedInputProps>(
 )
 EnhancedInput.displayName = 'EnhancedInput'
 
-export { EnhancedInput }
+export { EnhancedInput, EnhancedInput as Input }

@@ -7,6 +7,17 @@ export interface DeepgramConfig {
   apiKey?: string
 }
 
+export interface DeepgramTranscriptionOptions {
+  model?: 'nova-2' | 'nova' | 'enhanced' | 'base'
+  language?: string
+  punctuate?: boolean
+  diarize?: boolean
+  smart_format?: boolean
+  utterances?: boolean
+  paragraphs?: boolean
+  keywords?: string[]
+}
+
 export interface DeepgramResult {
   transcript: string
   confidence: number

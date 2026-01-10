@@ -212,6 +212,13 @@ const mockExpensesActivities = [
   { id: '3', user: 'Accountant', action: 'Processed', target: '$8,500 reimbursement batch', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
+const mockExpensesQuickActions = [
+  { id: '1', label: 'New Expense', icon: 'Plus', action: () => {}, shortcut: 'N' },
+  { id: '2', label: 'Scan Receipt', icon: 'Camera', action: () => {}, shortcut: 'S' },
+  { id: '3', label: 'Generate Report', icon: 'FileText', action: () => {}, shortcut: 'R' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'T' },
+]
+
 // Quick actions will be defined inside the component to access state setters
 const getExpensesQuickActions = (
   setShowNewExpenseDialog: (show: boolean) => void,

@@ -476,7 +476,12 @@ const mockAuditActivities = [
   { id: '3', user: 'Security Analyst', action: 'Investigated', target: 'failed login attempts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-// Quick actions are now handled by real handler functions in the component
+const mockAuditQuickActions = [
+  { id: '1', label: 'Run Audit', icon: 'Play', action: () => {}, shortcut: 'A' },
+  { id: '2', label: 'Generate Report', icon: 'FileText', action: () => {}, shortcut: 'R' },
+  { id: '3', label: 'View Alerts', icon: 'Bell', action: () => {}, shortcut: 'L' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
+]
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
   const [activeTab, setActiveTab] = useState('events')

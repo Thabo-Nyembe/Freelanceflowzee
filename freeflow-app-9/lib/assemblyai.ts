@@ -3,6 +3,18 @@
  * Speech-to-text and audio intelligence
  */
 
+export type TranscriptStatus = 'queued' | 'processing' | 'completed' | 'error'
+
+export interface TranscriptResponse {
+  id: string
+  status: TranscriptStatus
+  text: string | null
+  error: string | null
+  audio_url: string
+  created_at: string
+  completed_at: string | null
+}
+
 export interface TranscriptionResult {
   id: string
   text: string

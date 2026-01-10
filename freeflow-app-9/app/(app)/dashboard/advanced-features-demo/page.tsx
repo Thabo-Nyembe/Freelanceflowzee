@@ -31,7 +31,7 @@ import { toast } from 'sonner'
 // Import our new utilities
 // import { VirtualList } from '@/components/ui/virtual-list' // Temporarily disabled for build
 import { useAISuggestions, useContentGeneration, type ContentType, type ToneType } from '@/lib/ai-suggestions'
-import { usePresence, useBroadcast } from '@/hooks/use-realtime'
+import { usePresence, useBroadcast, type PresenceState } from '@/hooks/use-realtime'
 
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'

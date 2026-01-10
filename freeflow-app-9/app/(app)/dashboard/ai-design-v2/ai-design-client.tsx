@@ -374,6 +374,9 @@ export default function AIDesignClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedGeneration, setSelectedGeneration] = useState<Generation | null>(null)
   const [showGenerationDialog, setShowGenerationDialog] = useState(false)
+  const [showGenerateDialog, setShowGenerateDialog] = useState(false)
+  const [showUpscaleDialog, setShowUpscaleDialog] = useState(false)
+  const [showStyleEditor, setShowStyleEditor] = useState(false)
 
   // Generation form state
   const [prompt, setPrompt] = useState('')

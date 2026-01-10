@@ -446,7 +446,7 @@ export async function createApplication(
 
     // Increment application count on job posting (non-blocking)
     await supabase.rpc('increment_job_count', { job_id: input.job_id, count_field: 'applications_count' })
-      .catch(() => {}) // Ignore if RPC doesn't exist
+      .catch((e) => console.warn('Non-critical operation failed:', e)) // Ignore if RPC doesn't exist
 
     logger.info('Application created successfully', {
       userId: user.id,

@@ -573,6 +573,7 @@ export default function WorkflowBuilderClient() {
 
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showCreateWorkflowDialog, setShowCreateWorkflowDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showFilterDialog, setShowFilterDialog] = useState(false)
 

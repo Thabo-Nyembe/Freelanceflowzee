@@ -76,4 +76,4 @@ const EnhancedBadge = forwardRef<HTMLDivElement, EnhancedBadgeProps>(
 )
 EnhancedBadge.displayName = 'EnhancedBadge'
 
-export { EnhancedBadge, enhancedBadgeVariants }
+export { EnhancedBadge, EnhancedBadge as Badge, enhancedBadgeVariants }

@@ -268,7 +268,12 @@ const mockFormsActivities = [
   { id: '3', user: 'System', action: 'Received', target: '45 new responses', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-// Quick actions are now defined inside the component to access state setters - see getQuickActions()
+const mockFormsQuickActions = [
+  { id: '1', label: 'New Form', icon: 'Plus', action: () => {}, shortcut: 'N' },
+  { id: '2', label: 'Templates', icon: 'FileText', action: () => {}, shortcut: 'T' },
+  { id: '3', label: 'Analytics', icon: 'BarChart3', action: () => {}, shortcut: 'A' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
+]
 
 // ============================================================================
 // MAIN COMPONENT

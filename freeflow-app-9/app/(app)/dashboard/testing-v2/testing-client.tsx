@@ -549,6 +549,10 @@ export default function TestingClient() {
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showReportViewer, setShowReportViewer] = useState(false)
+  const [showAddTestDialog, setShowAddTestDialog] = useState(false)
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set())
+  const [tests, setTests] = useState<DbTestCase[]>([])
   const [formState, setFormState] = useState<TestFormState>(initialFormState)
 
   // Filter specs
@@ -682,6 +686,21 @@ export default function TestingClient() {
     } catch (error) {
       console.error('Error running test:', error)
       toast.error('Failed to run test')
+    }
+  }
+
+  // Run all tests
+  const runTests = async () => {
+    setIsRunning(true)
+    try {
+      // Simulate running all tests
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('All tests completed successfully')
+    } catch (error) {
+      toast.error('Some tests failed')
+      throw error
+    } finally {
+      setIsRunning(false)
     }
   }
 

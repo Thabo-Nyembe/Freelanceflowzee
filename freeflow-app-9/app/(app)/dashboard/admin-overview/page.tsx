@@ -238,7 +238,7 @@ export default function AdminOverviewPage() {
       announce('Alert acknowledged', 'polite')
 
       // Refresh dashboard data to update alerts list
-      await handleRefresh()
+      await handleRefreshDashboard()
     } catch (error: any) {
       logger.error('Failed to acknowledge alert', { error, alertId, userId })
       toast.error('Failed to mark alert as read', {
@@ -260,7 +260,7 @@ export default function AdminOverviewPage() {
       announce('Alert dismissed', 'polite')
 
       // Refresh dashboard data to update alerts list
-      await handleRefresh()
+      await handleRefreshDashboard()
     } catch (error: any) {
       logger.error('Failed to dismiss alert', { error, alertId, userId })
       toast.error('Failed to dismiss alert', {

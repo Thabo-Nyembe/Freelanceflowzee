@@ -437,7 +437,12 @@ const mockAIAssistantActivities = [
   { id: '3', user: 'Data Scientist', action: 'analyzed', target: 'conversation patterns', timestamp: '1h ago', type: 'info' as const },
 ]
 
-// Quick actions will be defined inside the component to access state setters
+const mockAIAssistantQuickActions = [
+  { id: '1', label: 'New Chat', icon: 'MessageSquare', action: () => {}, shortcut: 'N' },
+  { id: '2', label: 'New Assistant', icon: 'Bot', action: () => {}, shortcut: 'A' },
+  { id: '3', label: 'Prompt Library', icon: 'Library', action: () => {}, shortcut: 'P' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
+]
 
 export default function AIAssistantClient() {
   const supabase = createClient()

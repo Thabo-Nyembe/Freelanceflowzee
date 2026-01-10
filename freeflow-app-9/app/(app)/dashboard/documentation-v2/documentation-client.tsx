@@ -346,6 +346,13 @@ const mockDocsActivities = [
   { id: '3', user: 'System', action: 'Generated', target: 'changelog from commits', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
+const mockDocsQuickActions = [
+  { id: '1', label: 'New Page', icon: 'Plus', action: () => {}, shortcut: 'N' },
+  { id: '2', label: 'Search', icon: 'Search', action: () => {}, shortcut: 'S' },
+  { id: '3', label: 'Export', icon: 'Download', action: () => {}, shortcut: 'E' },
+  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'T' },
+]
+
 // Quick actions are defined as a function to allow access to component state
 const getDocsQuickActions = (
   setShowCreateDocDialog: (v: boolean) => void,

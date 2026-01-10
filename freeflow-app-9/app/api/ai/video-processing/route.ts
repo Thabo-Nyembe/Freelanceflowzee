@@ -27,6 +27,7 @@ import {
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 const RATE_LIMIT_REQUESTS = 10;
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'default-webhook-secret';
 
 // Lazy-loaded clients (to avoid build-time initialization)
 let _supabase: any = null;
@@ -304,7 +305,7 @@ async function createProcessingJob(
 ): Promise<string> {
   const jobId = uuidv4();
   
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('processing_jobs')
     .insert({
       id: jobId,
@@ -353,7 +354,7 @@ async function updateProcessingStatus(
     updateData.completed_at = new Date().toISOString();
   }
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await getSupabase()
     .from('processing_jobs')
     .update(updateData)
     .eq('id', jobId);
@@ -394,7 +395,7 @@ function sendStatusUpdate(jobId: string, update: any): void {
 async function sendWebhookUpdate(jobId: string, data: any): Promise<void> {
   try {
     // Get job details to check if webhook is configured
-    const { data: job } = await supabase
+    const { data: job } = await getSupabase()
       .from('processing_jobs')
       .select('options')
       .eq('id', jobId)
@@ -449,7 +450,7 @@ async function transcribeWithAssemblyAI(
   videoUrl: string,
   options: VideoProcessingOptions
 ): Promise<{ segments: TranscriptionSegment[]; error?: string }> {
-  if (!assemblyai) {
+  if (!getAssemblyAI()) {
     return { segments: [], error: 'AssemblyAI client not initialized' };
   }
 
@@ -534,7 +535,7 @@ async function transcribeWithOpenAI(
   videoFile: File,
   options: VideoProcessingOptions
 ): Promise<{ segments: TranscriptionSegment[]; error?: string }> {
-  if (!openai) {
+  if (!getOpenAI()) {
     return { segments: [], error: 'OpenAI client not initialized' };
   }
 
@@ -576,7 +577,7 @@ async function transcribeWithDeepgram(
   videoUrl: string,
   options: VideoProcessingOptions
 ): Promise<{ segments: TranscriptionSegment[]; error?: string }> {
-  if (!deepgram) {
+  if (!getDeepgram()) {
     return { segments: [], error: 'Deepgram client not initialized' };
   }
 
@@ -644,7 +645,7 @@ function extractKeywords(text: string): string[] {
  * @returns Sentiment analysis result
  */
 async function analyzeSentiment(text: string): Promise<'positive' | 'neutral' | 'negative' | 'mixed'> {
-  if (!openai) {
+  if (!getOpenAI()) {
     return 'neutral'; // Default if no AI available
   }
 
@@ -849,7 +850,7 @@ async function trackCost(
     timestamp: new Date().toISOString()
   };
 
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from('cost_tracking')
     .insert(costTracking);
 
@@ -868,7 +869,7 @@ async function trackCost(
  */
 async function updateUserQuota(userId: string, cost: number): Promise<void> {
   // Get current user quota
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('user_quotas')
     .select('remaining_quota')
     .eq('user_id', userId)
@@ -882,7 +883,7 @@ async function updateUserQuota(userId: string, cost: number): Promise<void> {
   // Update quota
   const remainingQuota = Math.max(0, (data?.remaining_quota || 0) - cost);
   
-  const { error: updateError } = await supabase
+  const { error: updateError } = await getSupabase()
     .from('user_quotas')
     .update({ remaining_quota: remainingQuota })
     .eq('user_id', userId);
@@ -899,7 +900,7 @@ async function updateUserQuota(userId: string, cost: number): Promise<void> {
  * @returns Whether user has sufficient quota
  */
 async function checkUserQuota(userId: string, estimatedCost: number): Promise<boolean> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('user_quotas')
     .select('remaining_quota')
     .eq('user_id', userId)
@@ -923,7 +924,7 @@ async function processVideo(jobId: string): Promise<void> {
 
   try {
     // Get job details
-    const { data: job, error } = await supabase
+    const { data: job, error } = await getSupabase()
       .from('processing_jobs')
       .select('*')
       .eq('id', jobId)
@@ -1046,7 +1047,7 @@ async function processVideo(jobId: string): Promise<void> {
       provider
     };
     
-    const { error: saveError } = await supabase
+    const { error: saveError } = await getSupabase()
       .from('processing_results')
       .insert(processingResult);
       

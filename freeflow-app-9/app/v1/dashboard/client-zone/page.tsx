@@ -372,7 +372,7 @@ export default function ClientZonePage() {
     })
 
     // Navigate to notifications page
-    router.push('/v1/dashboard/notifications')
+    router.push('/dashboard/notifications-v2')
     toast.success('Opening notifications center')
   }
 
@@ -667,18 +667,18 @@ export default function ClientZonePage() {
           toast.success(`Payment portal opened for ${invoiceNumber}`)
         } else {
           // Fallback: navigate to billing page
-          router.push(`/v1/dashboard/billing?invoice=${invoiceNumber}`)
+          router.push(`/dashboard/billing-v2?invoice=${invoiceNumber}`)
           toast.success(`Navigating to billing for ${invoiceNumber}`)
         }
       } else {
         // Fallback: navigate to billing page
-        router.push(`/v1/dashboard/billing?invoice=${invoiceNumber}`)
+        router.push(`/dashboard/billing-v2?invoice=${invoiceNumber}`)
         toast.success(`Navigating to billing for ${invoiceNumber}`)
       }
     } catch (error) {
       toast.dismiss()
       // Fallback: navigate to billing page
-      router.push(`/v1/dashboard/billing?invoice=${invoiceNumber}`)
+      router.push(`/dashboard/billing-v2?invoice=${invoiceNumber}`)
       toast.info(`Opening billing page for ${invoiceNumber}`)
     }
   }
@@ -738,7 +738,7 @@ export default function ClientZonePage() {
     })
 
     // Navigate to onboarding page
-    router.push('/v1/dashboard/onboarding')
+    router.push('/dashboard/onboarding-v2')
     toast.success('Starting client onboarding tour')
   }, [userId, projects, router])
 
@@ -795,7 +795,7 @@ export default function ClientZonePage() {
     })
 
     // Navigate to contracts page
-    router.push('/v1/dashboard/contracts')
+    router.push('/dashboard/contracts-v2')
     toast.success('Opening contract management')
   }, [userId, dashboardData, router])
 

@@ -1165,7 +1165,7 @@ export default function AIAssistantPage() {
     })
 
     // Navigate to AI settings page
-    router.push('/v1/dashboard/ai-settings')
+    router.push('/dashboard/settings-v2')
     toast.success(`Opening AI configuration - Model: ${selectedModel}`)
   }
 

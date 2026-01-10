@@ -441,6 +441,7 @@ export default function ApiClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpoint | null>(null)
   const [selectedTestSuite, setSelectedTestSuite] = useState<TestSuite | null>(null)
+  const [activeTab, setActiveTab] = useState('endpoints')
 
   // Dialog states
   const [showCreateEndpointDialog, setShowCreateEndpointDialog] = useState(false)
