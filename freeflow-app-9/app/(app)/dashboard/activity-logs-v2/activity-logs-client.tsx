@@ -367,27 +367,27 @@ interface ActivityLogsClientProps {
 
 // Enhanced Competitive Upgrade Mock Data - Activity Logs Context
 const mockLogsAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Error Spike Detected', description: 'Error rate increased 150% in the last hour. Investigating root cause.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Errors' },
-  { id: '2', type: 'info' as const, title: 'Pattern Detected', description: 'Unusual login activity from new geographic region. Review recommended.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'success' as const, title: 'System Healthy', description: 'All critical services running normally. Uptime: 99.98%', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '1', type: 'alert' as const, title: 'Error Spike Detected', description: 'Error rate increased 150% in the last hour. Investigating root cause.', impact: 'high' as const, createdAt: new Date() },
+  { id: '2', type: 'prediction' as const, title: 'Pattern Detected', description: 'Unusual login activity from new geographic region. Review recommended.', impact: 'medium' as const, createdAt: new Date() },
+  { id: '3', type: 'opportunity' as const, title: 'System Healthy', description: 'All critical services running normally. Uptime: 99.98%', impact: 'low' as const, createdAt: new Date() },
 ]
 
 const mockLogsCollaborators = [
-  { id: '1', name: 'DevOps Admin', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Platform Engineer', lastActive: 'Now' },
-  { id: '2', name: 'SRE Team', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'Site Reliability', lastActive: '3m ago' },
-  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support', lastActive: '15m ago' },
+  { id: '1', name: 'DevOps Admin', avatar: '/avatars/devops.jpg', color: '#f97316', status: 'online' as const },
+  { id: '2', name: 'SRE Team', avatar: '/avatars/sre.jpg', color: '#22c55e', status: 'online' as const },
+  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', color: '#3b82f6', status: 'away' as const },
 ]
 
 const mockLogsPredictions = [
-  { id: '1', label: 'Error Rate', current: 2.3, target: 1.0, predicted: 1.5, confidence: 78, trend: 'down' as const },
-  { id: '2', label: 'Log Volume', current: 45000, target: 50000, predicted: 48000, confidence: 85, trend: 'up' as const },
-  { id: '3', label: 'Anomaly Detection', current: 94, target: 99, predicted: 97, confidence: 80, trend: 'up' as const },
+  { label: 'Error Rate', currentValue: 2.3, predictedValue: 1.5, confidence: 78, trend: 'down' as const, timeframe: '24 hours', factors: [{ name: 'Bug fixes deployed', impact: 'positive' as const, weight: 0.6 }, { name: 'Traffic increase', impact: 'negative' as const, weight: 0.4 }] },
+  { label: 'Log Volume', currentValue: 45000, predictedValue: 48000, confidence: 85, trend: 'up' as const, timeframe: '7 days', factors: [{ name: 'User growth', impact: 'positive' as const, weight: 0.7 }, { name: 'New features', impact: 'positive' as const, weight: 0.3 }] },
+  { label: 'Anomaly Detection', currentValue: 94, predictedValue: 97, confidence: 80, trend: 'up' as const, timeframe: '30 days', factors: [{ name: 'ML model improvements', impact: 'positive' as const, weight: 0.8 }, { name: 'Data quality', impact: 'neutral' as const, weight: 0.2 }] },
 ]
 
 const mockLogsActivities = [
-  { id: '1', user: 'System', action: 'detected', target: 'memory spike on node-3', timestamp: '5m ago', type: 'warning' as const },
-  { id: '2', user: 'DevOps Admin', action: 'acknowledged', target: 'alert #2847', timestamp: '12m ago', type: 'info' as const },
-  { id: '3', user: 'SRE Team', action: 'resolved', target: 'database connection issue', timestamp: '30m ago', type: 'success' as const },
+  { id: '1', type: 'milestone' as const, title: 'Detected memory spike on node-3', user: { id: '1', name: 'System' }, timestamp: new Date(Date.now() - 300000) },
+  { id: '2', type: 'status_change' as const, title: 'Acknowledged alert #2847', user: { id: '2', name: 'DevOps Admin' }, timestamp: new Date(Date.now() - 720000) },
+  { id: '3', type: 'update' as const, title: 'Resolved database connection issue', user: { id: '3', name: 'SRE Team' }, timestamp: new Date(Date.now() - 1800000) },
 ]
 
 // Quick actions are now defined inside the component to access state setters

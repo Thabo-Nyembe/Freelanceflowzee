@@ -100,20 +100,20 @@ export default function AnalyticsPage() {
           getInsights(userId, 50)
         ])
 
-        setRevenueData(revenueResult.data || [])
-        setConversionFunnel(conversionResult.data || [])
-        setTrafficSources(trafficResult.data || [])
-        setInsights(insightsResult.data || [])
+        setRevenueData(revenueResult || [])
+        setConversionFunnel(conversionResult || [])
+        setTrafficSources(trafficResult || [])
+        setInsights(insightsResult || [])
 
         setIsLoading(false)
         announce('Analytics data loaded successfully', 'polite')
         toast.success('Analytics loaded', {
-          description: `${revenueResult.data?.length || 0} revenue records loaded`
+          description: `${revenueResult?.length || 0} revenue records loaded`
         })
         logger.info('Analytics loaded', {
           success: true,
-          revenueCount: revenueResult.data?.length || 0,
-          conversionCount: conversionResult.data?.length || 0
+          revenueCount: revenueResult?.length || 0,
+          conversionCount: conversionResult?.length || 0
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load analytics'
@@ -152,21 +152,16 @@ export default function AnalyticsPage() {
       getInsights(userId, 50)
     ])
 
-    if (revenueResult.error) throw revenueResult.error
-    if (conversionResult.error) throw conversionResult.error
-    if (trafficResult.error) throw trafficResult.error
-    if (insightsResult.error) throw insightsResult.error
-
-    setRevenueData(revenueResult.data || [])
-    setConversionFunnel(conversionResult.data || [])
-    setTrafficSources(trafficResult.data || [])
-    setInsights(insightsResult.data || [])
+    setRevenueData(revenueResult || [])
+    setConversionFunnel(conversionResult || [])
+    setTrafficSources(trafficResult || [])
+    setInsights(insightsResult || [])
 
     setIsLoading(false)
 
     return {
-      revenueCount: revenueResult.data?.length || 0,
-      insightsCount: insightsResult.data?.length || 0
+      revenueCount: revenueResult?.length || 0,
+      insightsCount: insightsResult?.length || 0
     }
   }
 

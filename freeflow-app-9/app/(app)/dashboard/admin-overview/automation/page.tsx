@@ -109,9 +109,25 @@ export default function AutomationPage() {
         logger.info('Loading automation data', { userId })
 
         const { getWorkflows } = await import('@/lib/automation-queries')
-        const workflowsResult = await getWorkflows(userId)
+        const workflowsResult = await getWorkflows()
 
-        setWorkflows(workflowsResult || [])
+        // Map automation-queries Workflow type to admin-overview-utils Workflow type
+        const mappedWorkflows: Workflow[] = (workflowsResult || []).map((w: any) => ({
+          id: w.id,
+          name: w.name,
+          description: w.description || '',
+          status: w.status as AutomationStatus,
+          trigger: w.trigger_type || 'manual',
+          actions: [],
+          runsCount: w.run_count || 0,
+          successRate: w.success_rate || 0,
+          lastRun: w.updated_at,
+          createdBy: 'System',
+          createdAt: w.created_at,
+          tags: w.tags || [],
+          timeSaved: 0
+        }))
+        setWorkflows(mappedWorkflows)
         // Note: Integrations will be loaded when integration queries are available
         setIntegrations([])
 
@@ -152,8 +168,8 @@ export default function AutomationPage() {
       const newWorkflowId = await createWorkflow({
         name: 'New Workflow',
         description: 'Automated workflow',
-        trigger: 'manual',
-        userId
+        trigger_type: 'manual',
+        trigger_config: {}
       })
 
       toast.success('Workflow Created', {
@@ -164,8 +180,23 @@ export default function AutomationPage() {
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
-      const workflowsResult = await getWorkflows(userId)
-      setWorkflows(workflowsResult || [])
+      const workflowsResult = await getWorkflows()
+      const mappedWorkflows: Workflow[] = (workflowsResult || []).map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description || '',
+        status: w.status as AutomationStatus,
+        trigger: w.trigger_type || 'manual',
+        actions: [],
+        runsCount: w.run_count || 0,
+        successRate: w.success_rate || 0,
+        lastRun: w.updated_at,
+        createdBy: 'System',
+        createdAt: w.created_at,
+        tags: w.tags || [],
+        timeSaved: 0
+      }))
+      setWorkflows(mappedWorkflows)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Create failed'
       toast.error('Create Failed', { description: message })
@@ -198,8 +229,23 @@ export default function AutomationPage() {
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
-      const workflowsResult = await getWorkflows(userId)
-      setWorkflows(workflowsResult || [])
+      const workflowsResult = await getWorkflows()
+      const mapped: Workflow[] = (workflowsResult || []).map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description || '',
+        status: w.status as AutomationStatus,
+        trigger: w.trigger_type || 'manual',
+        actions: [],
+        runsCount: w.run_count || 0,
+        successRate: w.success_rate || 0,
+        lastRun: w.updated_at,
+        createdBy: 'System',
+        createdAt: w.created_at,
+        tags: w.tags || [],
+        timeSaved: 0
+      }))
+      setWorkflows(mapped)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
@@ -234,8 +280,23 @@ export default function AutomationPage() {
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
-      const workflowsResult = await getWorkflows(userId)
-      setWorkflows(workflowsResult || [])
+      const workflowsResult = await getWorkflows()
+      const mapped: Workflow[] = (workflowsResult || []).map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description || '',
+        status: w.status as AutomationStatus,
+        trigger: w.trigger_type || 'manual',
+        actions: [],
+        runsCount: w.run_count || 0,
+        successRate: w.success_rate || 0,
+        lastRun: w.updated_at,
+        createdBy: 'System',
+        createdAt: w.created_at,
+        tags: w.tags || [],
+        timeSaved: 0
+      }))
+      setWorkflows(mapped)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
@@ -267,8 +328,23 @@ export default function AutomationPage() {
       announce('Workflow enabled successfully', 'polite')
 
       // Reload workflows
-      const workflowsResult = await getWorkflows(userId)
-      setWorkflows(workflowsResult || [])
+      const workflowsResult = await getWorkflows()
+      const mapped: Workflow[] = (workflowsResult || []).map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description || '',
+        status: w.status as AutomationStatus,
+        trigger: w.trigger_type || 'manual',
+        actions: [],
+        runsCount: w.run_count || 0,
+        successRate: w.success_rate || 0,
+        lastRun: w.updated_at,
+        createdBy: 'System',
+        createdAt: w.created_at,
+        tags: w.tags || [],
+        timeSaved: 0
+      }))
+      setWorkflows(mapped)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Enable failed'
       toast.error('Enable Failed', { description: message })
@@ -298,8 +374,23 @@ export default function AutomationPage() {
       announce('Workflow disabled successfully', 'polite')
 
       // Reload workflows
-      const workflowsResult = await getWorkflows(userId)
-      setWorkflows(workflowsResult || [])
+      const workflowsResult = await getWorkflows()
+      const mapped: Workflow[] = (workflowsResult || []).map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description || '',
+        status: w.status as AutomationStatus,
+        trigger: w.trigger_type || 'manual',
+        actions: [],
+        runsCount: w.run_count || 0,
+        successRate: w.success_rate || 0,
+        lastRun: w.updated_at,
+        createdBy: 'System',
+        createdAt: w.created_at,
+        tags: w.tags || [],
+        timeSaved: 0
+      }))
+      setWorkflows(mapped)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Disable failed'
       toast.error('Disable Failed', { description: message })
@@ -481,8 +572,23 @@ export default function AutomationPage() {
       logger.info('Refreshing automation data', { userId })
 
       const { getWorkflows } = await import('@/lib/automation-queries')
-      const workflowsResult = await getWorkflows(userId)
-      setWorkflows(workflowsResult || [])
+      const workflowsResult = await getWorkflows()
+      const mapped: Workflow[] = (workflowsResult || []).map((w: any) => ({
+        id: w.id,
+        name: w.name,
+        description: w.description || '',
+        status: w.status as AutomationStatus,
+        trigger: w.trigger_type || 'manual',
+        actions: [],
+        runsCount: w.run_count || 0,
+        successRate: w.success_rate || 0,
+        lastRun: w.updated_at,
+        createdBy: 'System',
+        createdAt: w.created_at,
+        tags: w.tags || [],
+        timeSaved: 0
+      }))
+      setWorkflows(mapped)
 
       // Note: Integrations would be loaded from integration queries when available
       setIntegrations([])

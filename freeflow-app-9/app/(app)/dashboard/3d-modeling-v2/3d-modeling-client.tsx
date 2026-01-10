@@ -324,26 +324,26 @@ const mockSceneHierarchy: SceneObject[] = [
 
 // Competitive Upgrade Mock Data - Blender/Maya-level 3D Modeling Intelligence
 const mock3DAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Render Optimization', description: 'GPU utilization at 95% - optimal performance!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'High Poly Count', description: 'Scene exceeds 5M polygons - consider LOD optimization.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-  { id: '3', type: 'info' as const, title: 'AI Mesh Suggestion', description: 'Topology flow could improve with edge loop adjustments.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Assist' },
+  { id: '1', type: 'opportunity' as const, title: 'Render Optimization', description: 'GPU utilization at 95% - optimal performance!', impact: 'low' as const, createdAt: new Date() },
+  { id: '2', type: 'alert' as const, title: 'High Poly Count', description: 'Scene exceeds 5M polygons - consider LOD optimization.', impact: 'high' as const, createdAt: new Date() },
+  { id: '3', type: 'recommendation' as const, title: 'AI Mesh Suggestion', description: 'Topology flow could improve with edge loop adjustments.', impact: 'medium' as const, createdAt: new Date() },
 ]
 
 const mock3DCollaborators = [
-  { id: '1', name: '3D Lead', avatar: '/avatars/3d-lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Texture Artist', avatar: '/avatars/texture.jpg', status: 'online' as const, role: 'Artist' },
-  { id: '3', name: 'Rigger', avatar: '/avatars/rigger.jpg', status: 'away' as const, role: 'Animator' },
+  { id: '1', name: '3D Lead', avatar: '/avatars/3d-lead.jpg', color: '#8b5cf6', status: 'online' as const },
+  { id: '2', name: 'Texture Artist', avatar: '/avatars/texture.jpg', color: '#3b82f6', status: 'online' as const },
+  { id: '3', name: 'Rigger', avatar: '/avatars/rigger.jpg', color: '#22c55e', status: 'away' as const },
 ]
 
 const mock3DPredictions = [
-  { id: '1', title: 'Render Completion', prediction: 'Final render will complete in 4 hours at current settings', confidence: 92, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Asset Pipeline', prediction: 'LOD generation can reduce load time by 40%', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+  { label: 'Render Completion', currentValue: 45, predictedValue: 100, confidence: 92, trend: 'up' as const, timeframe: '4 hours', factors: [{ name: 'GPU utilization', impact: 'positive' as const, weight: 0.7 }, { name: 'Scene complexity', impact: 'negative' as const, weight: 0.3 }] },
+  { label: 'Asset Pipeline', currentValue: 60, predictedValue: 100, confidence: 85, trend: 'up' as const, timeframe: '2 hours', factors: [{ name: 'LOD generation', impact: 'positive' as const, weight: 0.6 }, { name: 'Texture streaming', impact: 'positive' as const, weight: 0.4 }] },
 ]
 
 const mock3DActivities = [
-  { id: '1', user: 'Texture Artist', action: 'Updated', target: '4K PBR materials for hero model', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: '3D Lead', action: 'Approved', target: 'character animation rig', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Rigger', action: 'Started', target: 'facial blend shapes', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+  { id: '1', type: 'update' as const, title: 'Updated 4K PBR materials for hero model', user: { id: '1', name: 'Texture Artist' }, timestamp: new Date() },
+  { id: '2', type: 'status_change' as const, title: 'Approved character animation rig', user: { id: '2', name: '3D Lead' }, timestamp: new Date(Date.now() - 3600000) },
+  { id: '3', type: 'create' as const, title: 'Started facial blend shapes', user: { id: '3', name: 'Rigger' }, timestamp: new Date(Date.now() - 7200000) },
 ]
 
 export default function ThreeDModelingClient() {

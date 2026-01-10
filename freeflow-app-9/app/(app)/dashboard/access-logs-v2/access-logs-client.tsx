@@ -426,26 +426,26 @@ const mockStats: LogStats = {
 
 // Enhanced Competitive Upgrade Mock Data
 const mockLogsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Security Status', description: 'No suspicious activity detected in last 24 hours.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '2', type: 'warning' as const, title: 'Failed Logins', description: '15 failed login attempts from unknown IPs. Review needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Authentication' },
-  { id: '3', type: 'info' as const, title: 'Traffic Pattern', description: 'API usage 40% higher during business hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
+  { id: '1', type: 'opportunity' as const, title: 'Security Status', description: 'No suspicious activity detected in last 24 hours.', impact: 'low' as const, createdAt: new Date() },
+  { id: '2', type: 'alert' as const, title: 'Failed Logins', description: '15 failed login attempts from unknown IPs. Review needed.', impact: 'high' as const, createdAt: new Date() },
+  { id: '3', type: 'prediction' as const, title: 'Traffic Pattern', description: 'API usage 40% higher during business hours.', impact: 'medium' as const, createdAt: new Date() },
 ]
 
 const mockLogsCollaborators = [
-  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
-  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'away' as const, role: 'Compliance' },
+  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', color: '#ef4444', status: 'online' as const },
+  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', color: '#f97316', status: 'online' as const },
+  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', color: '#8b5cf6', status: 'away' as const },
 ]
 
 const mockLogsPredictions = [
-  { id: '1', title: 'Traffic Forecast', prediction: 'Peak traffic expected Monday 9-11 AM', confidence: 91, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Storage Usage', prediction: 'Log storage reaching 80% in 2 weeks', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
+  { label: 'Traffic Forecast', currentValue: 1200, predictedValue: 1800, confidence: 91, trend: 'up' as const, timeframe: 'Monday 9-11 AM', factors: [{ name: 'Weekly pattern', impact: 'positive' as const, weight: 0.6 }, { name: 'User growth', impact: 'positive' as const, weight: 0.4 }] },
+  { label: 'Storage Usage', currentValue: 65, predictedValue: 80, confidence: 85, trend: 'up' as const, timeframe: '2 weeks', factors: [{ name: 'Log retention policy', impact: 'negative' as const, weight: 0.5 }, { name: 'Traffic increase', impact: 'negative' as const, weight: 0.5 }] },
 ]
 
 const mockLogsActivities = [
-  { id: '1', user: 'System', action: 'Blocked', target: '3 suspicious IP addresses', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Admin', action: 'Reviewed', target: 'authentication logs', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'DevOps', action: 'Archived', target: 'logs older than 90 days', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+  { id: '1', type: 'update' as const, title: 'Blocked 3 suspicious IP addresses', user: { id: '1', name: 'System' }, timestamp: new Date() },
+  { id: '2', type: 'comment' as const, title: 'Reviewed authentication logs', user: { id: '2', name: 'Admin' }, timestamp: new Date(Date.now() - 3600000) },
+  { id: '3', type: 'delete' as const, title: 'Archived logs older than 90 days', user: { id: '3', name: 'DevOps' }, timestamp: new Date(Date.now() - 7200000) },
 ]
 
 // mockLogsQuickActions is defined inside the component with real handlers

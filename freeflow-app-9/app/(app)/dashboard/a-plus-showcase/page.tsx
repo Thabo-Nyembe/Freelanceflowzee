@@ -248,9 +248,12 @@ function generateMockComponents(): ComponentShowcase[] {
   const authors = ['Sarah Johnson', 'Michael Chen', 'Emma Davis', 'Alex Rodriguez', 'David Kim']
 
   const components: ComponentShowcase[] = componentNames.map((name, index) => {
-    const category = categories[index % categories.length]
-    const difficulty = difficulties[index % difficulties.length]
-    const language = languages[index % languages.length]
+    const category = categories[index % categories.length] as ComponentCategory
+    const difficulty = difficulties[index % difficulties.length] as DifficultyLevel
+    const language = languages[index % languages.length] as CodeLanguage
+    const author = authors[index % authors.length] as string
+    const tagStyles = ['modern', 'responsive', 'accessible', 'customizable', 'animated'] as const
+    const tagFeatures = ['dark-mode', 'theme-support', 'mobile-friendly', 'interactive'] as const
 
     return {
       id: `COMP-${String(index + 1).padStart(3, '0')}`,
@@ -264,8 +267,8 @@ function generateMockComponents(): ComponentShowcase[] {
       tags: [
         category,
         difficulty,
-        ['modern', 'responsive', 'accessible', 'customizable', 'animated'][Math.floor(Math.random() * 5)],
-        ['dark-mode', 'theme-support', 'mobile-friendly', 'interactive'][Math.floor(Math.random() * 4)]
+        tagStyles[Math.floor(Math.random() * tagStyles.length)] ?? 'modern',
+        tagFeatures[Math.floor(Math.random() * tagFeatures.length)] ?? 'interactive'
       ],
       popularity: Math.floor(Math.random() * 10000) + 100,
       examples: Math.floor(Math.random() * 20) + 1,
@@ -274,7 +277,7 @@ function generateMockComponents(): ComponentShowcase[] {
       isPremium: Math.random() > 0.7,
       createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      author: authors[index % authors.length],
+      author,
       version: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
       dependencies: ['react', 'typescript', 'tailwindcss'].slice(0, Math.floor(Math.random() * 3) + 1)
     }
@@ -666,13 +669,7 @@ export default function APlusShowcasePage() {
       <div className="p-6 space-y-6 min-h-screen relative">
         <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
         <div className="max-w-[1920px] mx-auto">
-          <ErrorEmptyState
-            error={error}
-            action={{
-              label: 'Retry',
-              onClick: () => window.location.reload()
-            }}
-          />
+          <ErrorEmptyState error={error} />
         </div>
       </div>
     )
@@ -774,7 +771,7 @@ export default function APlusShowcasePage() {
                     {(stats.mostPopular / 1000).toFixed(1)}k
                   </div>
                 </div>
-                <FloatingParticle color="pink" size="sm">
+                <FloatingParticle color="purple" size="sm">
                   <div className="p-3 bg-pink-500/20 rounded-xl">
                     <TrendingUp className="h-6 w-6 text-pink-400" />
                   </div>
@@ -790,7 +787,7 @@ export default function APlusShowcasePage() {
                   <p className="text-sm text-gray-400">Your Favorites</p>
                   <NumberFlow value={stats.favorites} className="text-2xl font-bold text-white" />
                 </div>
-                <FloatingParticle color="red" size="sm">
+                <FloatingParticle color="amber" size="sm">
                   <div className="p-3 bg-red-500/20 rounded-xl">
                     <Heart className="h-6 w-6 text-red-400" />
                   </div>
@@ -1140,7 +1137,7 @@ export default function APlusShowcasePage() {
         </div>
 
         {filteredAndSortedComponents.length === 0 && (
-          <NoDataEmptyState message="No components found" />
+          <NoDataEmptyState entityName="components" />
         )}
       </ScrollReveal>
 
@@ -1176,14 +1173,18 @@ export default function APlusShowcasePage() {
                 <div className="flex justify-end">
                   <Button
                     size="sm"
-                    onClick={() => handleCopyCode(state.selectedComponent.code, state.selectedComponent.name)}
+                    onClick={() => {
+                      if (state.selectedComponent) {
+                        handleCopyCode(state.selectedComponent.code, state.selectedComponent.name)
+                      }
+                    }}
                   >
                     <Copy className="h-4 w-4 mr-2" />
                     Copy Code
                   </Button>
                 </div>
                 <pre className="p-4 bg-slate-900 rounded-lg overflow-x-auto">
-                  <code className="text-gray-300">{state.selectedComponent.code}</code>
+                  <code className="text-gray-300">{state.selectedComponent?.code}</code>
                 </pre>
               </TabsContent>
 

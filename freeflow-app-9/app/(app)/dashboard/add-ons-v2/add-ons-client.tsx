@@ -426,26 +426,26 @@ const formatDate = (date: string) => {
 
 // Enhanced Competitive Upgrade Mock Data
 const mockAddOnsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Add-On Performance', description: 'Slack integration saving 4 hours/week in communication overhead.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
-  { id: '2', type: 'info' as const, title: 'New Releases', description: '3 new add-ons available matching your workflow patterns.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
-  { id: '3', type: 'warning' as const, title: 'Update Required', description: 'Security update available for 2 installed add-ons.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '1', type: 'opportunity' as const, title: 'Add-On Performance', description: 'Slack integration saving 4 hours/week in communication overhead.', impact: 'low' as const, createdAt: new Date() },
+  { id: '2', type: 'recommendation' as const, title: 'New Releases', description: '3 new add-ons available matching your workflow patterns.', impact: 'medium' as const, createdAt: new Date() },
+  { id: '3', type: 'alert' as const, title: 'Update Required', description: 'Security update available for 2 installed add-ons.', impact: 'high' as const, createdAt: new Date() },
 ]
 
 const mockAddOnsCollaborators = [
-  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
-  { id: '3', name: 'Product Owner', avatar: '/avatars/po.jpg', status: 'away' as const, role: 'Product' },
+  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', color: '#ef4444', status: 'online' as const },
+  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', color: '#8b5cf6', status: 'online' as const },
+  { id: '3', name: 'Product Owner', avatar: '/avatars/po.jpg', color: '#22c55e', status: 'away' as const },
 ]
 
 const mockAddOnsPredictions = [
-  { id: '1', title: 'Cost Savings', prediction: '$500/mo savings with recommended add-ons', confidence: 76, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Adoption Rate', prediction: '85% team adoption expected', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
+  { label: 'Cost Savings', currentValue: 0, predictedValue: 500, confidence: 76, trend: 'up' as const, timeframe: 'Monthly', factors: [{ name: 'Bundle discounts', impact: 'positive' as const, weight: 0.5 }, { name: 'Usage optimization', impact: 'positive' as const, weight: 0.5 }] },
+  { label: 'Adoption Rate', currentValue: 60, predictedValue: 85, confidence: 82, trend: 'up' as const, timeframe: '3 months', factors: [{ name: 'Team training', impact: 'positive' as const, weight: 0.6 }, { name: 'Integration ease', impact: 'positive' as const, weight: 0.4 }] },
 ]
 
 const mockAddOnsActivities = [
-  { id: '1', user: 'System', action: 'Installed', target: 'Slack Integration', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Auto-Update', action: 'Updated', target: 'GitHub Connector v2.1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Admin', action: 'Configured', target: 'Jira Sync settings', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
+  { id: '1', type: 'create' as const, title: 'Installed Slack Integration', user: { id: '1', name: 'System' }, timestamp: new Date() },
+  { id: '2', type: 'update' as const, title: 'Updated GitHub Connector v2.1', user: { id: '2', name: 'Auto-Update' }, timestamp: new Date(Date.now() - 3600000) },
+  { id: '3', type: 'integration' as const, title: 'Configured Jira Sync settings', user: { id: '3', name: 'Admin' }, timestamp: new Date(Date.now() - 7200000) },
 ]
 
 export default function AddOnsClient() {

@@ -49,6 +49,43 @@ import {
 
 const logger = createFeatureLogger('admin-crm')
 
+// Helper function to map AdminCrmDeal to Deal type
+const mapDeal = (d: any): Deal => ({
+  id: d.id,
+  title: d.company_name,
+  company: d.company_name,
+  contactName: '',
+  contactEmail: '',
+  value: d.deal_value,
+  stage: d.stage,
+  priority: d.priority,
+  probability: d.probability,
+  expectedCloseDate: d.expected_close_date || '',
+  lastContact: d.updated_at || d.created_at,
+  nextAction: '',
+  assignedTo: '',
+  tags: d.tags || [],
+  notes: d.notes,
+  createdAt: d.created_at,
+  source: ''
+})
+
+// Helper function to map AdminCrmContact to Contact type
+const mapContact = (c: any): Contact => ({
+  id: c.id,
+  name: `${c.first_name} ${c.last_name}`,
+  email: c.email,
+  phone: c.phone || '',
+  company: c.company || '',
+  position: c.position || '',
+  linkedDeals: [],
+  totalValue: 0,
+  lastContact: c.updated_at || c.created_at,
+  status: c.status === 'customer' || c.status === 'qualified' || c.status === 'contacted' ? 'active' : 'inactive',
+  tags: c.tags || [],
+  source: ''
+})
+
 const STAGES: { id: DealStage; label: string; color: string }[] = [
   { id: 'lead', label: 'Lead', color: 'bg-blue-500' },
   { id: 'qualified', label: 'Qualified', color: 'bg-purple-500' },
@@ -122,8 +159,8 @@ export default function CRMPage() {
           getContacts(userId)
         ])
 
-        setDeals(dealsResult || [])
-        setContacts(contactsResult || [])
+        setDeals((dealsResult || []).map(mapDeal))
+        setContacts((contactsResult || []).map(mapContact))
 
         setIsLoading(false)
         announce('CRM data loaded successfully', 'polite')
@@ -178,7 +215,7 @@ export default function CRMPage() {
 
       // Reload deals
       const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
+      setDeals((dealsResult || []).map(mapDeal))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -208,7 +245,7 @@ export default function CRMPage() {
 
       // Reload deals from database
       const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
+      setDeals((dealsResult || []).map(mapDeal))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
@@ -235,7 +272,7 @@ export default function CRMPage() {
 
       // Reload deals from database
       const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
+      setDeals((dealsResult || []).map(mapDeal))
       setDeleteDeal(null)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
@@ -268,7 +305,7 @@ export default function CRMPage() {
 
       // Reload deals
       const dealsResult = await getDeals(userId)
-      setDeals(dealsResult || [])
+      setDeals((dealsResult || []).map(mapDeal))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Move failed'
       toast.error('Move Failed', { description: message })
@@ -308,7 +345,7 @@ export default function CRMPage() {
 
       // Reload contacts
       const contactsResult = await getContacts(userId)
-      setContacts(contactsResult || [])
+      setContacts((contactsResult || []).map(mapContact))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -338,7 +375,7 @@ export default function CRMPage() {
 
       // Reload contacts from database
       const contactsResult = await getContacts(userId)
-      setContacts(contactsResult || [])
+      setContacts((contactsResult || []).map(mapContact))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
@@ -365,7 +402,7 @@ export default function CRMPage() {
 
       // Reload contacts from database
       const contactsResult = await getContacts(userId)
-      setContacts(contactsResult || [])
+      setContacts((contactsResult || []).map(mapContact))
       setDeleteContact(null)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
@@ -534,8 +571,8 @@ export default function CRMPage() {
         getContacts(userId)
       ])
 
-      setDeals(dealsResult || [])
-      setContacts(contactsResult || [])
+      setDeals((dealsResult || []).map(mapDeal))
+      setContacts((contactsResult || []).map(mapContact))
 
       toast.success('CRM Refreshed', {
         description: `Reloaded ${dealsResult?.length || 0} deals and ${contactsResult?.length || 0} contacts`
