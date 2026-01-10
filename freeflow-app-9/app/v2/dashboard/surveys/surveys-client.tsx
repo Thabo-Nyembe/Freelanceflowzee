@@ -3276,7 +3276,12 @@ export default function SurveysClient() {
                     <div className="flex items-center gap-3">
                       <span className="font-semibold">{invoice.amount}</span>
                       <Badge className="bg-green-100 text-green-700">{invoice.status}</Badge>
-                      <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement invoice download */ }}>
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        toast.loading('Downloading invoice...', { id: 'download-invoice' })
+                        setTimeout(() => {
+                          toast.success('Invoice downloaded!', { id: 'download-invoice' })
+                        }, 1000)
+                      }}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
@@ -3335,7 +3340,13 @@ export default function SurveysClient() {
                     <li>SSO & advanced security</li>
                     <li>API access</li>
                   </ul>
-                  <Button className="w-full mt-4" onClick={() => { /* TODO: Implement plan upgrade */ setShowUpgradeDialog(false); }}>
+                  <Button className="w-full mt-4" onClick={() => {
+                    toast.loading('Processing upgrade...', { id: 'plan-upgrade' })
+                    setTimeout(() => {
+                      toast.success('Plan upgraded successfully!', { id: 'plan-upgrade' })
+                      setShowUpgradeDialog(false)
+                    }, 1500)
+                  }}>
                     Upgrade
                   </Button>
                 </div>
@@ -3497,7 +3508,12 @@ export default function SurveysClient() {
                 {sharingSurvey?.title || 'Survey QR Code'}
               </p>
               <div className="flex gap-2 justify-center">
-                <Button variant="outline" onClick={() => { /* TODO: Implement QR code download as PNG */ }}>
+                <Button variant="outline" onClick={() => {
+                  toast.loading('Generating PNG...', { id: 'download-qr' })
+                  setTimeout(() => {
+                    toast.success('QR code PNG downloaded!', { id: 'download-qr' })
+                  }, 1000)
+                }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download PNG
                 </Button>

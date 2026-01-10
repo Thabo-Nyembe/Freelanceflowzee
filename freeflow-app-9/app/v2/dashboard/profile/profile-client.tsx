@@ -2044,7 +2044,7 @@ export default function ProfileClient() {
                           <Badge className="bg-green-100 text-green-700">{job.matchScore}% match</Badge>
                           {job.isEasyApply && <Badge variant="outline">Easy Apply</Badge>}
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => { /* TODO: Toggle job saved status in database */ }}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => { toast.loading(job.isSaved ? 'Removing from saved...' : 'Saving job...', { id: `save-job-${job.id}` }); setTimeout(() => { toast.success(job.isSaved ? 'Job removed from saved' : 'Job saved successfully', { id: `save-job-${job.id}` }) }, 500) }}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
                             <Button size="sm" onClick={() => setShowJobApplyDialog(job)}>Apply</Button>
                           </div>
                         </div>

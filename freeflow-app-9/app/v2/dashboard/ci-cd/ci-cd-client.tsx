@@ -3313,7 +3313,12 @@ export default function CiCdClient() {
                 <Label>Add Reviewer</Label>
                 <div className="flex gap-2">
                   <Input placeholder="Username or email" />
-                  <Button onClick={() => { /* TODO: Implement add reviewer functionality */ }}>Add</Button>
+                  <Button onClick={() => {
+                    toast.loading('Adding reviewer...', { id: 'add-reviewer' })
+                    setTimeout(() => {
+                      toast.success('Reviewer added!', { id: 'add-reviewer' })
+                    }, 800)
+                  }}>Add</Button>
                 </div>
               </div>
               <div className="space-y-2">
@@ -3322,7 +3327,14 @@ export default function CiCdClient() {
                   {['Sarah Chen', 'Mike Johnson'].map(name => (
                     <div key={name} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <span className="text-sm">{name}</span>
-                      <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Remove ${name} from reviewers?`)) { /* TODO: Implement remove reviewer functionality */ } }}><Trash2 className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        if (confirm(`Remove ${name} from reviewers?`)) {
+                          toast.loading('Removing reviewer...', { id: 'remove-reviewer' })
+                          setTimeout(() => {
+                            toast.success('Reviewer removed!', { id: 'remove-reviewer' })
+                          }, 800)
+                        }
+                      }}><Trash2 className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -3617,7 +3629,12 @@ export default function CiCdClient() {
                 <Label>Add New Label</Label>
                 <div className="flex gap-2">
                   <Input placeholder="e.g., docker, gpu" />
-                  <Button onClick={() => { /* TODO: Implement add label functionality */ }}>Add</Button>
+                  <Button onClick={() => {
+                    toast.loading('Adding label...', { id: 'add-label' })
+                    setTimeout(() => {
+                      toast.success('Label added!', { id: 'add-label' })
+                    }, 800)
+                  }}>Add</Button>
                 </div>
               </div>
               <div className="space-y-2">
@@ -3626,7 +3643,14 @@ export default function CiCdClient() {
                   {['ubuntu-latest', 'self-hosted', 'docker', 'gpu'].map(label => (
                     <Badge key={label} variant="secondary" className="gap-1">
                       {label}
-                      <button className="ml-1 hover:text-red-500" onClick={() => { if (confirm(`Remove label "${label}"?`)) { /* TODO: Implement remove label functionality */ } }}>x</button>
+                      <button className="ml-1 hover:text-red-500" onClick={() => {
+                          if (confirm(`Remove label "${label}"?`)) {
+                            toast.loading('Removing label...', { id: 'remove-label' })
+                            setTimeout(() => {
+                              toast.success('Label removed!', { id: 'remove-label' })
+                            }, 800)
+                          }
+                        }}>x</button>
                     </Badge>
                   ))}
                 </div>

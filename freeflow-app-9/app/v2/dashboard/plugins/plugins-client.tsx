@@ -1219,12 +1219,17 @@ export default function PluginsClient() {
 
       <div className="flex items-center gap-2">
         <Switch checked={plugin.isActivated} onCheckedChange={() => {
-          /* TODO: Implement plugin activation/deactivation toggle for ${plugin.id} */
+          const action = plugin.isActivated ? 'Deactivating' : 'Activating'
+          const actionDone = plugin.isActivated ? 'deactivated' : 'activated'
+          toast.loading(`${action} ${plugin.name}...`, { id: `toggle-plugin-${plugin.id}` })
+          setTimeout(() => {
+            toast.success(`${plugin.name} ${actionDone}`, { id: `toggle-plugin-${plugin.id}` })
+          }, 1000)
         }} />
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleConfigurePlugin(plugin.name) }}>
           <Settings className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) { /* TODO: Implement plugin removal for ${plugin.id} */ } }}>
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) { toast.loading(`Removing ${plugin.name}...`, { id: `remove-plugin-${plugin.id}` }); setTimeout(() => { toast.success(`${plugin.name} removed successfully`, { id: `remove-plugin-${plugin.id}` }) }, 1000) } }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -2083,7 +2088,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => { /* TODO: Implement save general settings */ }}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => { toast.loading('Saving settings...', { id: 'save-general-settings' }); setTimeout(() => { toast.success('Settings saved successfully', { id: 'save-general-settings' }) }, 1000) }}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>

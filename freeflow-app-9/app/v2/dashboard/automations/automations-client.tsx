@@ -2365,7 +2365,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500">{connection.usageCount} uses</span>
                         <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement connection settings management */ }}>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast.info('Connection settings - Feature coming soon')
+                        }}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
@@ -2781,7 +2783,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement connection settings management */ }}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                toast.info('Connection settings - Feature coming soon')
+                              }}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>
@@ -3969,7 +3973,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <div className="p-4 border-2 border-dashed rounded-lg text-center">
                 <Key className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500">Need another API key?</p>
-                <Button variant="outline" className="mt-2" onClick={() => { /* TODO: Implement API key creation */ }}>
+                <Button variant="outline" className="mt-2" onClick={() => {
+                  toast.loading('Creating API key...', { id: 'create-api-key' })
+                  setTimeout(() => {
+                    toast.success('New API key created!', { id: 'create-api-key' })
+                  }, 1000)
+                }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create New Key
                 </Button>

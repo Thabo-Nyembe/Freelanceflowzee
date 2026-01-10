@@ -1628,7 +1628,9 @@ export default function KaziAutomationsClient() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => { /* TODO: Implement log details dialog */ }}
+                          onClick={() => {
+                            toast.info('Log entry details: Automation executed with status ' + (success ? 'SUCCESS' : 'FAILED'))
+                          }}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>

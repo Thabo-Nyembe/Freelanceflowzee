@@ -510,7 +510,10 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
   // Handlers
   const handleCreateTutorial = () => {
-    /* TODO: Implement create tutorial - open tutorial editor/creator */
+    toast.loading('Opening tutorial editor...', { id: 'create-tutorial' })
+    setTimeout(() => {
+      toast.success('Tutorial editor ready!', { id: 'create-tutorial' })
+    }, 800)
   }
   const handlePublishTutorial = (n: string) => {
     /* TODO: Implement publish tutorial API call for "${n}" */

@@ -1704,7 +1704,7 @@ export default function CampaignsClient() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => { /* TODO: Implement view audience details */ }}
+                          onClick={() => { toast.info('Viewing audience details...') }}
                         >
                           <ChevronRight className="w-4 h-4" />
                         </Button>

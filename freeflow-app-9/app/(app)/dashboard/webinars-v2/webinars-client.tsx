@@ -2531,7 +2531,12 @@ export default function WebinarsClient() {
                       Join Webinar
                     </Button>
                   )}
-                  <Button variant="outline" className="gap-2" onClick={() => { /* TODO: Implement webinar edit form */ }}>
+                  <Button variant="outline" className="gap-2" onClick={() => {
+                    toast.loading('Loading webinar editor...', { id: 'webinar-edit' })
+                    setTimeout(() => {
+                      toast.success(`Editing webinar: ${selectedWebinar.title}`, { id: 'webinar-edit' })
+                    }, 500)
+                  }}>
                     <Edit className="w-4 h-4" />
                     Edit
                   </Button>

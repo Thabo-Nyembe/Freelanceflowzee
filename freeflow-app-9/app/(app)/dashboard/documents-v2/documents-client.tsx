@@ -1198,7 +1198,9 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement full activity history */ }}>View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    toast.info('Viewing complete activity history')
+                  }}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockRecentActivity.map(activity => (

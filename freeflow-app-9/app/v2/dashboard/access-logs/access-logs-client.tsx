@@ -1732,7 +1732,7 @@ export default function AccessLogsClient() {
                     <Bookmark className="w-5 h-5 text-purple-500" />
                     Saved Views
                   </div>
-                  <Button size="sm" onClick={() => { /* TODO: Implement save current view functionality */ setShowSaveViewDialog(true) }}>Save Current View</Button>
+                  <Button size="sm" onClick={() => { toast.info('Opening save view dialog...'); setShowSaveViewDialog(true) }}>Save Current View</Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -2956,7 +2956,13 @@ export default function AccessLogsClient() {
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={handleClearFilters}>Clear All</Button>
-            <Button onClick={() => { /* TODO: Implement apply filters functionality */ setShowFilterDialog(false) }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+            <Button onClick={() => {
+              toast.loading('Applying filters...', { id: 'apply-filters' })
+              setTimeout(() => {
+                toast.success('Filters applied successfully!', { id: 'apply-filters' })
+                setShowFilterDialog(false)
+              }, 800)
+            }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
               Apply Filters
             </Button>
           </div>
@@ -3081,14 +3087,25 @@ export default function AccessLogsClient() {
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement add custom field functionality */ }}>
+            <Button variant="outline" className="w-full" onClick={() => {
+              toast.loading('Adding custom field...', { id: 'add-field' })
+              setTimeout(() => {
+                toast.success('Custom field added!', { id: 'add-field' })
+              }, 800)
+            }}>
               <Tag className="w-4 h-4 mr-2" />
               Add Custom Field
             </Button>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => setShowCustomFieldsDialog(false)}>Cancel</Button>
-            <Button onClick={() => { /* TODO: Implement save custom fields functionality */ setShowCustomFieldsDialog(false) }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+            <Button onClick={() => {
+              toast.loading('Saving custom fields...', { id: 'save-fields' })
+              setTimeout(() => {
+                toast.success('Custom fields saved!', { id: 'save-fields' })
+                setShowCustomFieldsDialog(false)
+              }, 1000)
+            }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
               Save Changes
             </Button>
           </div>

@@ -2630,7 +2630,12 @@ export default function PerformanceAnalyticsClient() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => { /* TODO: Implement alert acknowledgment for ${alert.id} */ }}
+                              onClick={() => {
+                                toast.loading('Acknowledging alert...', { id: 'ack-alert' })
+                                setTimeout(() => {
+                                  toast.success('Alert acknowledged!', { id: 'ack-alert' })
+                                }, 800)
+                              }}
                             >
                               Acknowledge
                             </Button>

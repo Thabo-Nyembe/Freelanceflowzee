@@ -2120,7 +2120,9 @@ export default function KnowledgeBaseClient() {
                     <Button variant="outline" size="icon" onClick={handleShare}>
                       <Share2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement more options dropdown */ }}>
+                    <Button variant="outline" size="icon" onClick={() => {
+                      toast.info('Options: Duplicate, Move, Archive, Delete')
+                    }}>
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </div>

@@ -2232,7 +2232,9 @@ export default function ContentClient() {
                 <div className="border-t dark:border-gray-700 pt-4">
                   <div className="flex items-center justify-between mb-3">
                     <Label>Fields ({selectedContentType.fields.length})</Label>
-                    <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement field builder to add fields to content type */ }}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast.info('Field builder coming soon')
+                    }}>
                       <Plus className="w-4 h-4 mr-1" />
                       Add Field
                     </Button>
@@ -2246,7 +2248,9 @@ export default function ContentClient() {
                           {field.required && <Badge variant="outline" className="text-xs">Required</Badge>}
                           {field.localized && <Badge variant="outline" className="text-xs"><GlobeIcon className="w-3 h-3 mr-1" />i18n</Badge>}
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement field editor for content type field */ }}>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast.info('Field editor coming soon')
+                        }}>
                           <Edit2 className="w-4 h-4" />
                         </Button>
                       </div>

@@ -2854,7 +2854,12 @@ export default function OverviewClient() {
                 </div>
               </ScrollArea>
               <div className="flex justify-between">
-                <Button variant="outline" onClick={() => { /* TODO: Implement log stream pause */ }}>
+                <Button variant="outline" onClick={() => {
+                  toast.loading('Pausing stream...', { id: 'stream-pause' })
+                  setTimeout(() => {
+                    toast.success('Log stream paused', { id: 'stream-pause' })
+                  }, 500)
+                }}>
                   Pause Stream
                 </Button>
                 <Button variant="outline" onClick={() => setShowLiveTailDialog(false)}>

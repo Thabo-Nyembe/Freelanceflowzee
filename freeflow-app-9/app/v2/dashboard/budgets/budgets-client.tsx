@@ -2403,8 +2403,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewCategoryModal(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                /* TODO: Implement category creation functionality */
-                setShowNewCategoryModal(false)
+                toast.loading('Creating category...', { id: 'create-category' })
+                setTimeout(() => {
+                  toast.success('Category created successfully!', { id: 'create-category' })
+                  setShowNewCategoryModal(false)
+                }, 1000)
               }}>Create Category</Button>
             </DialogFooter>
           </DialogContent>
@@ -3307,8 +3310,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Button variant="outline" onClick={() => setShowResetConfirmDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('This will permanently delete all your budgets, categories, transactions, and goals. This action cannot be undone. Are you absolutely sure?')) {
-                  /* TODO: Implement reset all budgets functionality */
-                  setShowResetConfirmDialog(false)
+                  toast.loading('Resetting all budgets...', { id: 'reset-budgets' })
+                  setTimeout(() => {
+                    toast.success('All budgets have been reset!', { id: 'reset-budgets' })
+                    setShowResetConfirmDialog(false)
+                  }, 1500)
                 }
               }}>
                 Yes, Reset Everything

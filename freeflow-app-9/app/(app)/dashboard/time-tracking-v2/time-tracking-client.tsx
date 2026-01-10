@@ -1658,7 +1658,9 @@ export default function TimeTrackingClient() {
 
             {teamTab === 'timeoff' && (
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => { /* TODO: Implement time off request dialog */ }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => {
+                  toast.info('Time off request form: Select dates, type, and reason to submit a request')
+                }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
                 <CardContent className="p-0">
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>

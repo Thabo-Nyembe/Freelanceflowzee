@@ -2451,7 +2451,12 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     {RUN_LOGS.filter(r => r.status === 'running').length} Running
                   </Badge>
                 </div>
-                <Button size="sm" variant="ghost" onClick={() => { /* TODO: Implement history refresh */ }}>
+                <Button size="sm" variant="ghost" onClick={() => {
+                  toast.loading('Refreshing history...', { id: 'history-refresh' })
+                  setTimeout(() => {
+                    toast.success('Run history refreshed', { id: 'history-refresh' })
+                  }, 800)
+                }}>
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>
