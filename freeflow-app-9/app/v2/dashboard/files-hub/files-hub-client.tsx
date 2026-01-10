@@ -41,6 +41,7 @@ import {
   Link2,
   Lock,
   Eye,
+  EyeOff,
   Edit,
   Copy,
   ChevronRight,
@@ -473,6 +474,10 @@ export default function FilesHubClient() {
   const [showSearchDialog, setShowSearchDialog] = useState(false)
   const [shareLink, setShareLink] = useState('')
   const [quickSearchQuery, setQuickSearchQuery] = useState('')
+
+  // Security reveal toggles
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [showEncryptionKey, setShowEncryptionKey] = useState(false)
 
   // Fetch files and folders
   const fetchData = useCallback(async () => {
@@ -1722,8 +1727,24 @@ export default function FilesHubClient() {
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">API Key</Label>
                         <div className="flex gap-2">
-                          <Input value="fh_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => { toast.info('API key revealed - hidden for security') }}><Eye className="w-4 h-4" /></Button>
+                          <Input
+                            value="fh_live_xxxxxxxxxxxxxxxxxxxxx"
+                            readOnly
+                            className="flex-1 font-mono text-sm"
+                            type={showApiKey ? "text" : "password"}
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              setShowApiKey(!showApiKey)
+                              toast.success(showApiKey ? 'API key hidden' : 'API key revealed', {
+                                description: 'Remember to keep your API key secure'
+                              })
+                            }}
+                          >
+                            {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </Button>
                           <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('Key copied'); }}><Copy className="w-4 h-4" /></Button>
                         </div>
                       </div>
@@ -1829,8 +1850,23 @@ export default function FilesHubClient() {
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Encryption Key</Label>
                         <div className="flex gap-2">
-                          <Input value="•••••••••••••••••••••" readOnly className="flex-1 font-mono" />
-                          <Button variant="outline" size="icon" onClick={() => { toast.info('Encryption key revealed - keep it secure!') }}><Eye className="w-4 h-4" /></Button>
+                          <Input
+                            value={showEncryptionKey ? "e2e-aes256-k7x9m2p4q8r1s5t3" : "•••••••••••••••••••••"}
+                            readOnly
+                            className="flex-1 font-mono"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              setShowEncryptionKey(!showEncryptionKey)
+                              toast.success(showEncryptionKey ? 'Encryption key hidden' : 'Encryption key revealed', {
+                                description: 'Never share your encryption key - it cannot be recovered if lost'
+                              })
+                            }}
+                          >
+                            {showEncryptionKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </Button>
                         </div>
                       </div>
                     </CardContent>

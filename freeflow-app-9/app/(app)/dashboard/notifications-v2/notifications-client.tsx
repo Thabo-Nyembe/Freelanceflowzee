@@ -326,6 +326,23 @@ export default function NotificationsClient() {
   const [selectedAutomation, setSelectedAutomation] = useState<{ name: string } | null>(null)
   const [showABTestDialog, setShowABTestDialog] = useState(false)
 
+  // New state for functional handlers
+  const [segments, setSegments] = useState(mockSegments)
+  const [templates, setTemplates] = useState(mockTemplates)
+  const [automations, setAutomations] = useState(mockAutomations)
+  const [abTests, setAbTests] = useState(mockABTests)
+  const [webhooks, setWebhooks] = useState(mockWebhooks)
+  const [showPreviewTemplateDialog, setShowPreviewTemplateDialog] = useState(false)
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
+  const [showAutomationAnalyticsDialog, setShowAutomationAnalyticsDialog] = useState(false)
+  const [selectedAutomationForAnalytics, setSelectedAutomationForAnalytics] = useState<Automation | null>(null)
+  const [showAutomationHistoryDialog, setShowAutomationHistoryDialog] = useState(false)
+  const [selectedAutomationForHistory, setSelectedAutomationForHistory] = useState<Automation | null>(null)
+  const [showTestDetailsDialog, setShowTestDetailsDialog] = useState(false)
+  const [selectedTestForDetails, setSelectedTestForDetails] = useState<ABTest | null>(null)
+  const [showWebhookLogsDialog, setShowWebhookLogsDialog] = useState(false)
+  const [selectedWebhookForLogs, setSelectedWebhookForLogs] = useState<WebhookEndpoint | null>(null)
+
   // Campaign form state
   const [campaignForm, setCampaignForm] = useState({
     name: '',
@@ -790,7 +807,7 @@ export default function NotificationsClient() {
               <Button onClick={() => setShowSegmentDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Segment</Button>
             </div>
             <div className="grid grid-cols-3 gap-6">
-              {mockSegments.map(segment => (
+              {segments.map(segment => (
                 <Card key={segment.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -822,7 +839,21 @@ export default function NotificationsClient() {
                       }}>
                         <Edit className="h-4 w-4 mr-1" />Edit
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Segment', { description: `"${segment.name}" duplicated as "${segment.name} (Copy)"` })}>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.loading('Duplicating segment...', { id: 'dup-segment' })
+                        setTimeout(() => {
+                          const duplicatedSegment: Segment = {
+                            ...segment,
+                            id: `s${Date.now()}`,
+                            name: `${segment.name} (Copy)`,
+                            isDefault: false,
+                            createdAt: new Date().toISOString().split('T')[0],
+                            lastUpdated: new Date().toISOString().split('T')[0]
+                          }
+                          setSegments(prev => [...prev, duplicatedSegment])
+                          toast.success('Segment duplicated', { id: 'dup-segment', description: `"${segment.name}" duplicated as "${duplicatedSegment.name}"` })
+                        }, 800)
+                      }}>
                         <Copy className="h-4 w-4" />
                       </Button>
                       {!segment.isDefault && (
@@ -850,7 +881,7 @@ export default function NotificationsClient() {
               }}><Plus className="h-4 w-4 mr-2" />Create Template</Button>
             </div>
             <div className="grid grid-cols-2 gap-6">
-              {mockTemplates.map(template => {
+              {templates.map(template => {
                 const ChannelIcon = getChannelIcon(template.channel)
                 return (
                   <Card key={template.id} className="border-gray-200 dark:border-gray-700">
@@ -879,13 +910,34 @@ export default function NotificationsClient() {
                         }}>
                           <Send className="h-4 w-4 mr-1" />Use Template
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => toast.success('Edit Template', { description: `Opening editor for "${template.name}"` })}>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setSelectedTemplate({ name: template.name, type: template.channel })
+                          setShowEditTemplateDialog(true)
+                          toast.info('Opening editor...', { description: `Editing "${template.name}"` })
+                        }}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('Preview Template', { description: `Previewing "${template.name}"` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setPreviewTemplate(template)
+                          setShowPreviewTemplateDialog(true)
+                          toast.info('Loading preview...', { description: `Previewing "${template.name}"` })
+                        }}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Template', { description: `"${template.name}" duplicated` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.loading('Duplicating template...', { id: 'dup-template' })
+                          setTimeout(() => {
+                            const duplicatedTemplate: Template = {
+                              ...template,
+                              id: `t${Date.now()}`,
+                              name: `${template.name} (Copy)`,
+                              isDefault: false,
+                              usageCount: 0
+                            }
+                            setTemplates(prev => [...prev, duplicatedTemplate])
+                            toast.success('Template duplicated', { id: 'dup-template', description: `"${template.name}" duplicated as "${duplicatedTemplate.name}"` })
+                          }, 800)
+                        }}>
                           <Copy className="h-4 w-4" />
                         </Button>
                         {!template.isDefault && (
@@ -911,7 +963,7 @@ export default function NotificationsClient() {
               <Button onClick={() => setShowCreateAutomation(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button>
             </div>
             <div className="space-y-4">
-              {mockAutomations.map(automation => (
+              {automations.map(automation => (
                 <Card key={automation.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -952,10 +1004,29 @@ export default function NotificationsClient() {
                             { loading: `Resuming automation "${automation.name}"...`, success: `Automation "${automation.name}" resumed`, error: 'Failed to resume automation' }
                           )
                         }}><Play className="h-4 w-4 mr-1" />Resume</Button>}
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('Edit Automation', { description: `Opening workflow editor for "${automation.name}"` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setSelectedAutomation({ name: automation.name })
+                          setShowEditAutomationDialog(true)
+                          toast.info('Opening workflow editor...', { description: `Editing "${automation.name}"` })
+                        }}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Automation', { description: `"${automation.name}" duplicated` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.loading('Duplicating automation...', { id: 'dup-automation' })
+                          setTimeout(() => {
+                            const duplicatedAutomation: Automation = {
+                              ...automation,
+                              id: `a${Date.now()}`,
+                              name: `${automation.name} (Copy)`,
+                              status: 'draft',
+                              stats: { totalTriggered: 0, totalCompleted: 0, totalFailed: 0, conversionRate: 0 },
+                              createdAt: new Date().toISOString().split('T')[0],
+                              lastTriggered: undefined
+                            }
+                            setAutomations(prev => [...prev, duplicatedAutomation])
+                            toast.success('Automation duplicated', { id: 'dup-automation', description: `"${automation.name}" duplicated as "${duplicatedAutomation.name}"` })
+                          }, 800)
+                        }}>
                           <Copy className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
@@ -978,13 +1049,26 @@ export default function NotificationsClient() {
                       <div><p className="text-lg font-bold text-violet-600">{automation.stats.conversionRate}%</p><p className="text-xs text-gray-500">Conversion</p></div>
                     </div>
                     <div className="flex items-center gap-2 mt-4 pt-4 border-t">
-                      <Button variant="outline" size="sm" onClick={() => toast.success('View Analytics', { description: `Opening detailed analytics for "${automation.name}"` })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedAutomationForAnalytics(automation)
+                        setShowAutomationAnalyticsDialog(true)
+                        toast.info('Loading analytics...', { description: `Opening detailed analytics for "${automation.name}"` })
+                      }}>
                         <BarChart3 className="h-4 w-4 mr-1" />Analytics
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Test Automation', { description: `Sending test trigger for "${automation.name}"` })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        toast.loading('Sending test trigger...', { id: 'test-automation' })
+                        setTimeout(() => {
+                          toast.success('Test trigger sent!', { id: 'test-automation', description: `Test trigger for "${automation.name}" executed successfully. Check logs for results.` })
+                        }, 1500)
+                      }}>
                         <TestTube className="h-4 w-4 mr-1" />Test
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('View History', { description: `Viewing execution history for "${automation.name}"` })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedAutomationForHistory(automation)
+                        setShowAutomationHistoryDialog(true)
+                        toast.info('Loading history...', { description: `Viewing execution history for "${automation.name}"` })
+                      }}>
                         <RefreshCw className="h-4 w-4 mr-1" />History
                       </Button>
                     </div>
@@ -1001,7 +1085,7 @@ export default function NotificationsClient() {
               <Button onClick={() => setShowABTestDialog(true)}><Plus className="h-4 w-4 mr-2" />Create A/B Test</Button>
             </div>
             <div className="space-y-6">
-              {mockABTests.map(test => (
+              {abTests.map(test => (
                 <Card key={test.id} className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1013,14 +1097,49 @@ export default function NotificationsClient() {
                         <Badge className={getStatusColor(test.status)}>{test.status}</Badge>
                         {test.status === 'completed' && test.winner && <Badge className="bg-green-100 text-green-700">Winner: {test.variants.find(v => v.id === test.winner)?.name}</Badge>}
                         {test.status === 'running' && (
-                          <Button size="sm" variant="outline" onClick={() => toast.success('Test Stopped', { description: `A/B test "${test.name}" has been stopped` })}>
+                          <Button size="sm" variant="outline" onClick={() => {
+                            if (confirm(`Are you sure you want to stop the A/B test "${test.name}"? This action cannot be undone.`)) {
+                              toast.loading('Stopping test...', { id: 'stop-test' })
+                              setTimeout(() => {
+                                setAbTests(prev => prev.map(t =>
+                                  t.id === test.id ? { ...t, status: 'completed' as const, endDate: new Date().toISOString().split('T')[0] } : t
+                                ))
+                                toast.success('Test stopped', { id: 'stop-test', description: `A/B test "${test.name}" has been stopped` })
+                              }, 800)
+                            }
+                          }}>
                             <Pause className="h-4 w-4 mr-1" />Stop Test
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('View Details', { description: `Opening detailed report for "${test.name}"` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setSelectedTestForDetails(test)
+                          setShowTestDetailsDialog(true)
+                          toast.info('Loading details...', { description: `Opening detailed report for "${test.name}"` })
+                        }}>
                           <BarChart3 className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Test', { description: `"${test.name}" duplicated` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.loading('Duplicating test...', { id: 'dup-test' })
+                          setTimeout(() => {
+                            const duplicatedTest: ABTest = {
+                              ...test,
+                              id: `ab${Date.now()}`,
+                              name: `${test.name} (Copy)`,
+                              status: 'scheduled',
+                              winner: undefined,
+                              startDate: new Date().toISOString().split('T')[0],
+                              endDate: undefined,
+                              confidenceLevel: 0,
+                              variants: test.variants.map(v => ({
+                                ...v,
+                                id: `v${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                                stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 }
+                              }))
+                            }
+                            setAbTests(prev => [...prev, duplicatedTest])
+                            toast.success('Test duplicated', { id: 'dup-test', description: `"${test.name}" duplicated as "${duplicatedTest.name}"` })
+                          }, 800)
+                        }}>
                           <Copy className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
@@ -1094,7 +1213,7 @@ export default function NotificationsClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockWebhooks.map(webhook => (
+                  {webhooks.map(webhook => (
                     <div key={webhook.id} className="flex items-center gap-4 p-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${webhook.status === 'active' ? 'bg-green-100' : webhook.status === 'failed' ? 'bg-red-100' : 'bg-gray-100'}`}>
                         <Webhook className={`h-5 w-5 ${webhook.status === 'active' ? 'text-green-600' : webhook.status === 'failed' ? 'text-red-600' : 'text-gray-600'}`} />
@@ -1112,10 +1231,19 @@ export default function NotificationsClient() {
                         <p className="text-xs text-gray-500">Success rate</p>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('Test Webhook', { description: `Sending test payload to "${webhook.name}"` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.loading('Sending test payload...', { id: 'test-webhook' })
+                          setTimeout(() => {
+                            toast.success('Test sent successfully!', { id: 'test-webhook', description: `Test payload sent to "${webhook.name}". Check your endpoint for the delivery.` })
+                          }, 1500)
+                        }}>
                           <TestTube className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.success('View Logs', { description: `Opening delivery logs for "${webhook.name}"` })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setSelectedWebhookForLogs(webhook)
+                          setShowWebhookLogsDialog(true)
+                          toast.info('Loading logs...', { description: `Opening delivery logs for "${webhook.name}"` })
+                        }}>
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => {
@@ -1125,7 +1253,15 @@ export default function NotificationsClient() {
                           <Edit className="h-4 w-4" />
                         </Button>
                         {webhook.status === 'failed' && (
-                          <Button variant="ghost" size="icon" onClick={() => toast.success('Retry Webhook', { description: `Retrying failed deliveries for "${webhook.name}"` })}>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            toast.loading('Retrying failed deliveries...', { id: 'retry-webhook' })
+                            setTimeout(() => {
+                              setWebhooks(prev => prev.map(w =>
+                                w.id === webhook.id ? { ...w, status: 'active' as const, lastDelivery: new Date().toISOString() } : w
+                              ))
+                              toast.success('Retry successful!', { id: 'retry-webhook', description: `Failed deliveries for "${webhook.name}" have been retried` })
+                            }, 1200)
+                          }}>
                             <RefreshCw className="h-4 w-4" />
                           </Button>
                         )}
@@ -2631,7 +2767,7 @@ export default function NotificationsClient() {
               <div><Label>Campaign Name</Label><Input placeholder="e.g., Product Launch" value={campaignForm.name} onChange={(e) => setCampaignForm(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><Label>Channel</Label><Select value={campaignForm.channel} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, channel: v }))}><SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger><SelectContent><SelectItem value="push">Push</SelectItem><SelectItem value="email">Email</SelectItem><SelectItem value="sms">SMS</SelectItem><SelectItem value="slack">Slack</SelectItem></SelectContent></Select></div>
-                <div><Label>Segment</Label><Select value={campaignForm.segment} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, segment: v }))}><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{mockSegments.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
+                <div><Label>Segment</Label><Select value={campaignForm.segment} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, segment: v }))}><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{segments.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
               </div>
               <div><Label>Title</Label><Input placeholder="Notification title" value={campaignForm.title} onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))} /></div>
               <div><Label>Message</Label><Textarea placeholder="Notification message..." rows={3} value={campaignForm.message} onChange={(e) => setCampaignForm(prev => ({ ...prev, message: e.target.value }))} /></div>
@@ -3099,6 +3235,276 @@ export default function NotificationsClient() {
                 toast.success('A/B Test created', { description: 'Test will start sending to users' })
                 setShowABTestDialog(false)
               }}>Start Test</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Template Preview Dialog */}
+        <Dialog open={showPreviewTemplateDialog} onOpenChange={setShowPreviewTemplateDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Template Preview</DialogTitle>
+              <DialogDescription>Preview how this template will appear to users</DialogDescription>
+            </DialogHeader>
+            {previewTemplate && (
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                  <Badge variant="outline" className="mb-3">{previewTemplate.channel}</Badge>
+                  <h4 className="font-semibold text-lg mb-2">{previewTemplate.title}</h4>
+                  <p className="text-gray-600 dark:text-gray-400">{previewTemplate.message}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Variables Used</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {previewTemplate.variables.map(v => (
+                      <Badge key={v} variant="outline">{`{{${v}}}`}</Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Category:</span>
+                    <span className="ml-2 font-medium">{previewTemplate.category}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Usage:</span>
+                    <span className="ml-2 font-medium">{previewTemplate.usageCount.toLocaleString()} times</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPreviewTemplateDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                if (previewTemplate) {
+                  setCampaignForm(prev => ({ ...prev, title: previewTemplate.title, message: previewTemplate.message }))
+                  setShowCreateCampaign(true)
+                  setShowPreviewTemplateDialog(false)
+                  toast.success('Template selected for new campaign')
+                }
+              }}>Use Template</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Analytics Dialog */}
+        <Dialog open={showAutomationAnalyticsDialog} onOpenChange={setShowAutomationAnalyticsDialog}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Automation Analytics</DialogTitle>
+              <DialogDescription>
+                {selectedAutomationForAnalytics?.name} - Detailed performance metrics
+              </DialogDescription>
+            </DialogHeader>
+            {selectedAutomationForAnalytics && (
+              <div className="space-y-6 py-4">
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-blue-600">{selectedAutomationForAnalytics.stats.totalTriggered.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Total Triggered</p>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedAutomationForAnalytics.stats.totalCompleted.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Completed</p>
+                  </div>
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-red-600">{selectedAutomationForAnalytics.stats.totalFailed}</p>
+                    <p className="text-sm text-gray-500">Failed</p>
+                  </div>
+                  <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-violet-600">{selectedAutomationForAnalytics.stats.conversionRate}%</p>
+                    <p className="text-sm text-gray-500">Conversion Rate</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Success Rate</Label>
+                  <Progress value={(selectedAutomationForAnalytics.stats.totalCompleted / Math.max(selectedAutomationForAnalytics.stats.totalTriggered, 1)) * 100} />
+                  <p className="text-sm text-gray-500">
+                    {((selectedAutomationForAnalytics.stats.totalCompleted / Math.max(selectedAutomationForAnalytics.stats.totalTriggered, 1)) * 100).toFixed(1)}% of triggered automations completed successfully
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Status:</span>
+                    <Badge className={`ml-2 ${getStatusColor(selectedAutomationForAnalytics.status)}`}>{selectedAutomationForAnalytics.status}</Badge>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Last Triggered:</span>
+                    <span className="ml-2 font-medium">{selectedAutomationForAnalytics.lastTriggered ? formatTimeAgo(selectedAutomationForAnalytics.lastTriggered) : 'Never'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationAnalyticsDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                const dataStr = JSON.stringify(selectedAutomationForAnalytics, null, 2)
+                const blob = new Blob([dataStr], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `automation-analytics-${selectedAutomationForAnalytics?.id}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Analytics exported')
+              }}>
+                <Download className="h-4 w-4 mr-2" />Export
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation History Dialog */}
+        <Dialog open={showAutomationHistoryDialog} onOpenChange={setShowAutomationHistoryDialog}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Execution History</DialogTitle>
+              <DialogDescription>
+                {selectedAutomationForHistory?.name} - Recent execution logs
+              </DialogDescription>
+            </DialogHeader>
+            {selectedAutomationForHistory && (
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3 py-4">
+                  {[...Array(10)].map((_, i) => {
+                    const isSuccess = Math.random() > 0.1
+                    const timeAgo = `${i * 2 + 1}h ago`
+                    return (
+                      <div key={i} className={`p-3 rounded-lg border ${isSuccess ? 'bg-green-50 dark:bg-green-900/10 border-green-200' : 'bg-red-50 dark:bg-red-900/10 border-red-200'}`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge className={isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                              {isSuccess ? 'Success' : 'Failed'}
+                            </Badge>
+                            <span className="text-sm font-medium">Trigger #{1000 - i}</span>
+                          </div>
+                          <span className="text-xs text-gray-500">{timeAgo}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          {isSuccess ? 'Notification delivered successfully' : 'Failed to deliver: Timeout error'}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationHistoryDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* A/B Test Details Dialog */}
+        <Dialog open={showTestDetailsDialog} onOpenChange={setShowTestDetailsDialog}>
+          <DialogContent className="sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>A/B Test Details</DialogTitle>
+              <DialogDescription>
+                {selectedTestForDetails?.name} - Detailed test report
+              </DialogDescription>
+            </DialogHeader>
+            {selectedTestForDetails && (
+              <div className="space-y-6 py-4">
+                <div className="flex items-center justify-between">
+                  <Badge className={getStatusColor(selectedTestForDetails.status)}>{selectedTestForDetails.status}</Badge>
+                  <div className="text-sm text-gray-500">
+                    Started: {new Date(selectedTestForDetails.startDate).toLocaleDateString()}
+                    {selectedTestForDetails.endDate && ` - Ended: ${new Date(selectedTestForDetails.endDate).toLocaleDateString()}`}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Confidence Level</Label>
+                  <Progress value={selectedTestForDetails.confidenceLevel} />
+                  <p className="text-sm text-gray-500">{selectedTestForDetails.confidenceLevel}% statistical confidence</p>
+                </div>
+                <div className="grid grid-cols-2 gap-6">
+                  {selectedTestForDetails.variants.map(variant => (
+                    <div key={variant.id} className={`p-4 rounded-lg border ${selectedTestForDetails.winner === variant.id ? 'border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-gray-200'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-semibold">{variant.name}</h4>
+                        {selectedTestForDetails.winner === variant.id && <Badge className="bg-green-500">Winner</Badge>}
+                      </div>
+                      <p className="text-sm mb-3">{variant.title}</p>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div><span className="text-gray-500">Sent:</span> <span className="font-medium">{variant.stats.sent.toLocaleString()}</span></div>
+                        <div><span className="text-gray-500">Delivered:</span> <span className="font-medium">{variant.stats.delivered.toLocaleString()}</span></div>
+                        <div><span className="text-gray-500">Opened:</span> <span className="font-medium text-blue-600">{variant.stats.opened.toLocaleString()}</span></div>
+                        <div><span className="text-gray-500">Clicked:</span> <span className="font-medium text-green-600">{variant.stats.clicked.toLocaleString()}</span></div>
+                        <div><span className="text-gray-500">Open Rate:</span> <span className="font-medium">{((variant.stats.opened / Math.max(variant.stats.delivered, 1)) * 100).toFixed(1)}%</span></div>
+                        <div><span className="text-gray-500">Click Rate:</span> <span className="font-medium">{((variant.stats.clicked / Math.max(variant.stats.opened, 1)) * 100).toFixed(1)}%</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTestDetailsDialog(false)}>Close</Button>
+              <Button onClick={() => {
+                const dataStr = JSON.stringify(selectedTestForDetails, null, 2)
+                const blob = new Blob([dataStr], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `ab-test-report-${selectedTestForDetails?.id}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Report exported')
+              }}>
+                <Download className="h-4 w-4 mr-2" />Export Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Logs Dialog */}
+        <Dialog open={showWebhookLogsDialog} onOpenChange={setShowWebhookLogsDialog}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Webhook Delivery Logs</DialogTitle>
+              <DialogDescription>
+                {selectedWebhookForLogs?.name} - Recent delivery attempts
+              </DialogDescription>
+            </DialogHeader>
+            {selectedWebhookForLogs && (
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3 py-4">
+                  {[...Array(15)].map((_, i) => {
+                    const isSuccess = selectedWebhookForLogs.status !== 'failed' || Math.random() > 0.6
+                    const statusCode = isSuccess ? 200 : [400, 500, 502, 503][Math.floor(Math.random() * 4)]
+                    const timeAgo = `${i * 30 + 5} min ago`
+                    return (
+                      <div key={i} className={`p-3 rounded-lg border ${isSuccess ? 'bg-green-50 dark:bg-green-900/10 border-green-200' : 'bg-red-50 dark:bg-red-900/10 border-red-200'}`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge className={isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                              {statusCode}
+                            </Badge>
+                            <span className="text-sm font-mono text-gray-600">{selectedWebhookForLogs.url}</span>
+                          </div>
+                          <span className="text-xs text-gray-500">{timeAgo}</span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                          <span>Event: notification.sent</span>
+                          <span>Duration: {Math.floor(Math.random() * 200 + 50)}ms</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </ScrollArea>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookLogsDialog(false)}>Close</Button>
+              <Button variant="outline" onClick={() => {
+                toast.loading('Retrying failed deliveries...', { id: 'retry-all' })
+                setTimeout(() => {
+                  toast.success('Retry complete', { id: 'retry-all', description: 'Failed deliveries have been queued for retry' })
+                }, 1000)
+              }}>
+                <RefreshCw className="h-4 w-4 mr-2" />Retry Failed
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

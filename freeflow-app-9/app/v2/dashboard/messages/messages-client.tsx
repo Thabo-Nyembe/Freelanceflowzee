@@ -292,6 +292,12 @@ export default function MessagesClient() {
   const [filterChannel, setFilterChannel] = useState<string>('all')
   const [sidebarThemeColor, setSidebarThemeColor] = useState('#4a154b')
 
+  // Channel state tracking
+  const [mutedChannels, setMutedChannels] = useState<Set<string>>(new Set())
+  const [archivedChannels, setArchivedChannels] = useState<Set<string>>(new Set())
+  const [activeCallChannel, setActiveCallChannel] = useState<string | null>(null)
+  const [callType, setCallType] = useState<'audio' | 'video' | null>(null)
+
   // Stats
   const stats = useMemo(() => {
     const totalMessages = mockMessages.length * 150
@@ -481,16 +487,97 @@ export default function MessagesClient() {
     })
   }
 
-  const handleStartCall = (contactName: string) => {
-    toast.info('Starting call', {
-      description: `Calling ${contactName}...`
-    })
+  const handleStartCall = (contactName: string, type: 'audio' | 'video' = 'audio') => {
+    // Show loading state
+    toast.loading('Initiating call...', { id: 'call' })
+
+    // Set active call state
+    setActiveCallChannel(contactName)
+    setCallType(type)
+
+    // Store call initiation data
+    const callData = {
+      channel: contactName,
+      type,
+      initiated_at: new Date().toISOString(),
+      status: 'connecting'
+    }
+    sessionStorage.setItem('active_call', JSON.stringify(callData))
+
+    // Simulate connection delay
+    setTimeout(() => {
+      // Update call status to connected
+      sessionStorage.setItem('active_call', JSON.stringify({
+        ...callData,
+        status: 'connected',
+        connected_at: new Date().toISOString()
+      }))
+
+      toast.success(`${type === 'video' ? 'Video' : 'Audio'} call started with ${contactName}`, {
+        id: 'call',
+        description: type === 'video' ? 'Connecting to video stream...' : 'Connecting to audio...',
+        action: {
+          label: 'End Call',
+          onClick: () => handleEndCall()
+        }
+      })
+    }, 1500)
+  }
+
+  const handleEndCall = () => {
+    if (activeCallChannel) {
+      toast.info('Call ended', {
+        description: `Call with ${activeCallChannel} has ended`
+      })
+      sessionStorage.removeItem('active_call')
+      setActiveCallChannel(null)
+      setCallType(null)
+    }
   }
 
   const handleMuteChannel = (channelName: string) => {
-    toast.info('Channel muted', {
-      description: `#${channelName} notifications muted`
-    })
+    // Show loading state
+    toast.loading('Updating preferences...', { id: 'mute' })
+
+    // Toggle mute state
+    const isMuted = mutedChannels.has(channelName)
+    const newMutedChannels = new Set(mutedChannels)
+
+    setTimeout(() => {
+      if (isMuted) {
+        // Unmute the channel
+        newMutedChannels.delete(channelName)
+        setMutedChannels(newMutedChannels)
+
+        // Store in session
+        sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
+
+        toast.success(`${channelName} unmuted`, {
+          id: 'mute',
+          description: 'You will now receive notifications from this channel',
+          action: {
+            label: 'Undo',
+            onClick: () => handleMuteChannel(channelName)
+          }
+        })
+      } else {
+        // Mute the channel
+        newMutedChannels.add(channelName)
+        setMutedChannels(newMutedChannels)
+
+        // Store in session
+        sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
+
+        toast.success(`${channelName} muted`, {
+          id: 'mute',
+          description: 'You will not receive notifications from this channel',
+          action: {
+            label: 'Undo',
+            onClick: () => handleMuteChannel(channelName)
+          }
+        })
+      }
+    }, 800)
   }
 
   const handleInvitePeople = () => {
@@ -554,42 +641,126 @@ export default function MessagesClient() {
   }
 
   const handleViewPinnedMessages = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Filter and load pinned messages
-      const pinnedMessages = supabaseMessages?.filter(m => m.is_pinned) || []
-      sessionStorage.setItem('pinned_messages_view', JSON.stringify({
-        messages: pinnedMessages,
-        count: pinnedMessages.length
-      }))
+    // Show loading state
+    toast.loading('Loading pinned messages...', { id: 'pinned' })
+
+    const promise = new Promise<{ count: number }>((resolve) => {
       setTimeout(() => {
-        resolve()
+        // Filter and load pinned messages from both mock and Supabase
+        const supabasePinned = supabaseMessages?.filter(m => m.is_pinned) || []
+        const mockPinned = mockMessages.filter(m => m.isPinned)
+
+        // Combine and dedupe
+        const allPinned = [...supabasePinned, ...mockPinned]
+
+        // Store in session with metadata
+        sessionStorage.setItem('pinned_messages_view', JSON.stringify({
+          messages: allPinned,
+          count: allPinned.length,
+          channel: selectedChannel?.name || 'all',
+          loaded_at: new Date().toISOString()
+        }))
+
+        resolve({ count: allPinned.length })
       }, 400)
     })
 
-    await toast.promise(promise, {
-      loading: 'Loading pinned messages...',
-      success: 'Showing pinned messages in this channel',
-      error: 'Failed to load pinned items'
-    })
+    const result = await promise
+
+    if (result.count === 0) {
+      toast.info('No pinned messages', {
+        id: 'pinned',
+        description: selectedChannel
+          ? `No messages are pinned in #${selectedChannel.name}`
+          : 'No pinned messages found'
+      })
+    } else {
+      toast.success(`${result.count} pinned message${result.count === 1 ? '' : 's'} found`, {
+        id: 'pinned',
+        description: selectedChannel
+          ? `Viewing pinned messages in #${selectedChannel.name}`
+          : 'Viewing all pinned messages',
+        action: {
+          label: 'Clear Filter',
+          onClick: () => {
+            sessionStorage.removeItem('pinned_messages_view')
+            toast.info('Pinned filter cleared')
+          }
+        }
+      })
+    }
   }
 
   const handleArchiveChannel = async (channelName: string) => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Mark channel as archived
-      sessionStorage.setItem(`channel_${channelName}_archived`, JSON.stringify({
-        archived_at: new Date().toISOString(),
-        visible: false
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 800)
-    })
+    // Check if already archived (to toggle)
+    const isArchived = archivedChannels.has(channelName)
 
-    await toast.promise(promise, {
-      loading: 'Archiving channel...',
-      success: 'Channel archived and hidden from sidebar',
-      error: 'Failed to archive channel'
-    })
+    if (isArchived) {
+      // Unarchive the channel
+      toast.loading('Restoring channel...', { id: 'archive' })
+
+      const promise = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          const newArchivedChannels = new Set(archivedChannels)
+          newArchivedChannels.delete(channelName)
+          setArchivedChannels(newArchivedChannels)
+
+          // Update session storage
+          sessionStorage.removeItem(`channel_${channelName}_archived`)
+          sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
+
+          resolve()
+        }, 600)
+      })
+
+      await promise
+
+      toast.success(`#${channelName} restored`, {
+        id: 'archive',
+        description: 'Channel is now visible in your sidebar',
+        action: {
+          label: 'Undo',
+          onClick: () => handleArchiveChannel(channelName)
+        }
+      })
+    } else {
+      // Archive the channel
+      toast.loading('Archiving channel...', { id: 'archive' })
+
+      const promise = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          const newArchivedChannels = new Set(archivedChannels)
+          newArchivedChannels.add(channelName)
+          setArchivedChannels(newArchivedChannels)
+
+          // Store archive data with timestamp
+          sessionStorage.setItem(`channel_${channelName}_archived`, JSON.stringify({
+            archived_at: new Date().toISOString(),
+            archived_by: 'current_user',
+            visible: false
+          }))
+          sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
+
+          // If the archived channel is selected, clear selection
+          if (selectedChannel?.name === channelName) {
+            setSelectedChannel(null)
+          }
+
+          resolve()
+        }, 800)
+      })
+
+      await promise
+
+      toast.success(`#${channelName} archived`, {
+        id: 'archive',
+        description: 'Channel hidden from sidebar. You can restore it from archived channels.',
+        action: {
+          label: 'Undo',
+          onClick: () => handleArchiveChannel(channelName)
+        }
+      })
+    }
   }
 
   const handleViewCallDetails = async (callDate: string) => {
@@ -1436,11 +1607,11 @@ export default function MessagesClient() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Phone className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Video className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={handleViewPinnedMessages}><Pin className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)}><BellOff className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleArchiveChannel(selectedChannel.name)}><Archive className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name, 'audio')} title="Start audio call"><Phone className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name, 'video')} title="Start video call"><Video className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={handleViewPinnedMessages} title="View pinned messages"><Pin className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)} title={mutedChannels.has(selectedChannel.name) ? 'Unmute channel' : 'Mute channel'}>{mutedChannels.has(selectedChannel.name) ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}</Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleArchiveChannel(selectedChannel.name)} title={archivedChannels.has(selectedChannel.name) ? 'Restore channel' : 'Archive channel'}><Archive className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </CardHeader>
@@ -1617,8 +1788,8 @@ export default function MessagesClient() {
             {/* Calls Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleStartCall('New Call') },
-                { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleStartCall('Video Call') },
+                { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleStartCall(selectedChannel?.name || 'New Call', 'audio') },
+                { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleStartCall(selectedChannel?.name || 'Video Call', 'video') },
                 { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => toast.info('Start Huddle', { description: 'Starting a quick huddle session...' }) },
                 { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Screen Share', { description: 'Starting screen share...' }) },
                 { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => toast.info('Schedule Call', { description: 'Opening call scheduler...' }) },
