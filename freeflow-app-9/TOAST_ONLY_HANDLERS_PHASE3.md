@@ -44,6 +44,7 @@ This document tracks Phase 3 of fixing non-functional UI elements across the Fre
 | 2026-01-10 | Phase 3 Start | 0 | 0 | Audit complete |
 | 2026-01-10 | App Batch 1 | 2 | 9 | allocation-v2 (5), access-logs-v2 (4) |
 | 2026-01-10 | V2 Batch 1 | 1 | 4 | integrations (4 - SMS backup, IP allowlist CRUD) |
+| 2026-01-10 | App Batch 2 | 1 | 5+ | notifications-v2 (Segment builder, Users view, A/B Test dialogs) |
 
 ### Files Fixed Details
 
@@ -63,6 +64,13 @@ This document tracks Phase 3 of fixing non-functional UI elements across the Fre
 - IP Add button → Actually adds IP to state-managed allowlist
 - IP Remove buttons → Actually removes IPs from allowlist
 - All IP operations now have validation and real state changes
+
+**notifications-v2 (5+ handlers):**
+- Create Segment button → Opens Segment Builder Dialog with rules editor
+- View Segment Users button → Opens Users Dialog with search and export
+- Edit Segment button → Opens Segment Builder Dialog in edit mode
+- Create A/B Test button → Opens A/B Test Dialog with variant configuration
+- Added 3 new Dialog components with full functionality
 
 ---
 

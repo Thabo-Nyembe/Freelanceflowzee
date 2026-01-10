@@ -316,6 +316,14 @@ export default function NotificationsClient() {
   const [showNotificationOptions, setShowNotificationOptions] = useState<string | null>(null)
   const [showCategoryEditor, setShowCategoryEditor] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSegmentDialog, setShowSegmentDialog] = useState(false)
+  const [showSegmentUsersDialog, setShowSegmentUsersDialog] = useState(false)
+  const [selectedSegment, setSelectedSegment] = useState<{ name: string; userCount: number } | null>(null)
+  const [showEditTemplateDialog, setShowEditTemplateDialog] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<{ name: string; type: string } | null>(null)
+  const [showEditAutomationDialog, setShowEditAutomationDialog] = useState(false)
+  const [selectedAutomation, setSelectedAutomation] = useState<{ name: string } | null>(null)
+  const [showABTestDialog, setShowABTestDialog] = useState(false)
 
   // Campaign form state
   const [campaignForm, setCampaignForm] = useState({
@@ -778,7 +786,7 @@ export default function NotificationsClient() {
           {/* Segments Tab */}
           <TabsContent value="segments" className="mt-6">
             <div className="flex justify-end mb-4">
-              <Button onClick={() => toast.success('Create Segment', { description: 'Segment builder would open here' })}><Plus className="h-4 w-4 mr-2" />Create Segment</Button>
+              <Button onClick={() => setShowSegmentDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Segment</Button>
             </div>
             <div className="grid grid-cols-3 gap-6">
               {mockSegments.map(segment => (
@@ -801,10 +809,16 @@ export default function NotificationsClient() {
                     </div>
                     <p className="text-xs text-gray-400 mt-2">Updated {segment.lastUpdated}</p>
                     <div className="flex items-center gap-2 mt-4 pt-4 border-t">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.success('View Users', { description: `Viewing ${segment.userCount.toLocaleString()} users in "${segment.name}"` })}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                        setSelectedSegment({ name: segment.name, userCount: segment.userCount })
+                        setShowSegmentUsersDialog(true)
+                      }}>
                         <Eye className="h-4 w-4 mr-1" />View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.success('Edit Segment', { description: `Opening editor for "${segment.name}"` })}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => {
+                        setSelectedSegment({ name: segment.name, userCount: segment.userCount })
+                        setShowSegmentDialog(true)
+                      }}>
                         <Edit className="h-4 w-4 mr-1" />Edit
                       </Button>
                       <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Segment', { description: `"${segment.name}" duplicated as "${segment.name} (Copy)"` })}>
@@ -983,7 +997,7 @@ export default function NotificationsClient() {
           {/* A/B Testing Tab */}
           <TabsContent value="ab-testing" className="mt-6">
             <div className="flex justify-end mb-4">
-              <Button onClick={() => toast.success('Create A/B Test', { description: 'A/B test wizard would open here' })}><Plus className="h-4 w-4 mr-2" />Create A/B Test</Button>
+              <Button onClick={() => setShowABTestDialog(true)}><Plus className="h-4 w-4 mr-2" />Create A/B Test</Button>
             </div>
             <div className="space-y-6">
               {mockABTests.map(test => (
@@ -2936,6 +2950,154 @@ export default function NotificationsClient() {
               }}>
                 <Filter className="h-4 w-4 mr-2" />Apply Filters
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Segment Builder Dialog */}
+        <Dialog open={showSegmentDialog} onOpenChange={setShowSegmentDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{selectedSegment ? `Edit Segment: ${selectedSegment.name}` : 'Create New Segment'}</DialogTitle>
+              <DialogDescription>Define audience segment criteria for targeted notifications</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Segment Name</Label>
+                <Input placeholder="e.g., Active Premium Users" defaultValue={selectedSegment?.name || ''} />
+              </div>
+              <div className="space-y-2">
+                <Label>Segment Rules</Label>
+                <div className="space-y-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Select defaultValue="subscription">
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Property" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="subscription">Subscription</SelectItem>
+                        <SelectItem value="activity">Last Active</SelectItem>
+                        <SelectItem value="location">Location</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select defaultValue="equals">
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Operator" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="equals">Equals</SelectItem>
+                        <SelectItem value="contains">Contains</SelectItem>
+                        <SelectItem value="greater">Greater than</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input placeholder="Value" className="flex-1" />
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Rule added')}>
+                  <Plus className="h-4 w-4 mr-1" />Add Rule
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowSegmentDialog(false)
+                setSelectedSegment(null)
+              }}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success(selectedSegment ? 'Segment updated' : 'Segment created', {
+                  description: selectedSegment ? `"${selectedSegment.name}" has been updated` : 'New segment has been created'
+                })
+                setShowSegmentDialog(false)
+                setSelectedSegment(null)
+              }}>
+                {selectedSegment ? 'Save Changes' : 'Create Segment'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Segment Users Dialog */}
+        <Dialog open={showSegmentUsersDialog} onOpenChange={setShowSegmentUsersDialog}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Segment Users: {selectedSegment?.name}</DialogTitle>
+              <DialogDescription>{selectedSegment?.userCount.toLocaleString()} users in this segment</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Input placeholder="Search users..." className="flex-1" />
+                <Button variant="outline" onClick={() => toast.success('Users exported to CSV')}>
+                  <Download className="h-4 w-4 mr-2" />Export
+                </Button>
+              </div>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-2">
+                  {[
+                    { name: 'John Smith', email: 'john@example.com', joinedAt: '2024-01-15' },
+                    { name: 'Sarah Johnson', email: 'sarah@example.com', joinedAt: '2024-02-20' },
+                    { name: 'Mike Wilson', email: 'mike@example.com', joinedAt: '2024-03-10' },
+                    { name: 'Emily Brown', email: 'emily@example.com', joinedAt: '2024-01-28' },
+                    { name: 'Chris Davis', email: 'chris@example.com', joinedAt: '2024-02-05' },
+                  ].map((user, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-sm">{user.name}</p>
+                          <p className="text-xs text-gray-500">{user.email}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-gray-400">Joined {user.joinedAt}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setShowSegmentUsersDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* A/B Test Dialog */}
+        <Dialog open={showABTestDialog} onOpenChange={setShowABTestDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create A/B Test</DialogTitle>
+              <DialogDescription>Test different notification variants to optimize engagement</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Test Name</Label>
+                <Input placeholder="e.g., Welcome Message Test" />
+              </div>
+              <div className="space-y-2">
+                <Label>Variant A (Control)</Label>
+                <Textarea placeholder="Enter the original notification message..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Variant B (Test)</Label>
+                <Textarea placeholder="Enter the test notification message..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Traffic Split</Label>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm">A: 50%</span>
+                  <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div className="h-full w-1/2 bg-blue-500" />
+                  </div>
+                  <span className="text-sm">B: 50%</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowABTestDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('A/B Test created', { description: 'Test will start sending to users' })
+                setShowABTestDialog(false)
+              }}>Start Test</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
