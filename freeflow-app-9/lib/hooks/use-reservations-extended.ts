@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useReservation(reservationId?: string) {
   const [reservation, setReservation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!reservationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reservations').select('*, reservation_items(*), reservation_resources(*), users(*), reservation_history(*)').eq('id', reservationId).single(); setReservation(data) } finally { setIsLoading(false) }
-  }, [reservationId, supabase])
+  }, [reservationId])
   useEffect(() => { fetch() }, [fetch])
   return { reservation, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useReservation(reservationId?: string) {
 export function useReservations(options?: { resource_id?: string; user_id?: string; status?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [reservations, setReservations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('reservations').select('*, reservation_resources(*), users(*), reservation_items(count)')
@@ -46,8 +46,8 @@ export function useReservations(options?: { resource_id?: string; user_id?: stri
 export function useMyReservations(userId?: string, options?: { status?: string; upcoming_only?: boolean; limit?: number }) {
   const [reservations, setReservations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -65,12 +65,12 @@ export function useMyReservations(userId?: string, options?: { status?: string; 
 export function useReservationByCode(confirmationCode?: string) {
   const [reservation, setReservation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!confirmationCode) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reservations').select('*, reservation_resources(*), users(*), reservation_items(*)').eq('confirmation_code', confirmationCode.toUpperCase()).single(); setReservation(data) } finally { setIsLoading(false) }
-  }, [confirmationCode, supabase])
+  }, [confirmationCode])
   useEffect(() => { fetch() }, [fetch])
   return { reservation, isLoading, refresh: fetch }
 }
@@ -78,8 +78,8 @@ export function useReservationByCode(confirmationCode?: string) {
 export function useReservationResources(options?: { category?: string; is_available?: boolean; location?: string }) {
   const [resources, setResources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('reservation_resources').select('*')
@@ -97,8 +97,8 @@ export function useReservationResources(options?: { category?: string; is_availa
 export function useAvailableSlots(resourceId?: string, date?: string, options?: { duration?: number }) {
   const [slots, setSlots] = useState<{ start: string; end: string; available: boolean }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!resourceId || !date) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -137,12 +137,12 @@ export function useAvailableSlots(resourceId?: string, date?: string, options?: 
 export function useReservationHistory(reservationId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!reservationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reservation_history').select('*, users(*)').eq('reservation_id', reservationId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [reservationId, supabase])
+  }, [reservationId])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -150,8 +150,8 @@ export function useReservationHistory(reservationId?: string) {
 export function useTodayReservations(resourceId?: string) {
   const [reservations, setReservations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const today = new Date()
@@ -162,7 +162,7 @@ export function useTodayReservations(resourceId?: string) {
       const { data } = await query.order('start_time', { ascending: true })
       setReservations(data || [])
     } finally { setIsLoading(false) }
-  }, [resourceId, supabase])
+  }, [resourceId])
   useEffect(() => { fetch() }, [fetch])
   return { reservations, isLoading, refresh: fetch }
 }
@@ -170,8 +170,8 @@ export function useTodayReservations(resourceId?: string) {
 export function useUpcomingReservations(options?: { resource_id?: string; days?: number; limit?: number }) {
   const [reservations, setReservations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date()
@@ -189,8 +189,8 @@ export function useUpcomingReservations(options?: { resource_id?: string; days?:
 export function useReservationStats(options?: { resource_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; pending: number; confirmed: number; completed: number; cancelled: number; totalGuests: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('reservations').select('status, guests')

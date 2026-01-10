@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useConversation(conversationId?: string) {
   const [conversation, setConversation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversations').select('*, conversation_participants(*)').eq('id', conversationId).single(); setConversation(data) } finally { setIsLoading(false) }
-  }, [conversationId, supabase])
+  }, [conversationId])
   useEffect(() => { fetch() }, [fetch])
   return { conversation, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useConversation(conversationId?: string) {
 export function useConversations(userId?: string, options?: { type?: string; limit?: number }) {
   const [conversations, setConversations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useConversations(userId?: string, options?: { type?: string; lim
 export function useConversationMessages(conversationId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversation_messages').select('*').eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages((data || []).reverse()) } finally { setIsLoading(false) }
@@ -66,19 +66,19 @@ export function useConversationMessagesRealtime(conversationId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [conversationId, supabase])
+  }, [conversationId])
   return { messages }
 }
 
 export function useConversationParticipants(conversationId?: string) {
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversation_participants').select('*').eq('conversation_id', conversationId).is('left_at', null).order('joined_at', { ascending: true }); setParticipants(data || []) } finally { setIsLoading(false) }
-  }, [conversationId, supabase])
+  }, [conversationId])
   useEffect(() => { fetch() }, [fetch])
   return { participants, isLoading, refresh: fetch }
 }
@@ -86,8 +86,8 @@ export function useConversationParticipants(conversationId?: string) {
 export function useUnreadConversations(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -100,7 +100,7 @@ export function useUnreadConversations(userId?: string) {
       }
       setCount(unread)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -108,8 +108,8 @@ export function useUnreadConversations(userId?: string) {
 export function useArchivedConversations(userId?: string) {
   const [conversations, setConversations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,7 +118,7 @@ export function useArchivedConversations(userId?: string) {
       const { data } = await supabase.from('conversations').select('*').in('id', archived.map(a => a.conversation_id)).order('last_message_at', { ascending: false })
       setConversations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { conversations, isLoading, refresh: fetch }
 }

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useVersion(versionId?: string) {
   const [version, setVersion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!versionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('versions').select('*').eq('id', versionId).single()
       setVersion(data)
     } finally { setIsLoading(false) }
-  }, [versionId, supabase])
+  }, [versionId])
   useEffect(() => { fetch() }, [fetch])
   return { version, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useVersion(versionId?: string) {
 export function useVersionHistory(entityType?: string, entityId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -42,8 +42,8 @@ export function useVersionHistory(entityType?: string, entityId?: string, limit 
 export function useCurrentVersion(entityType?: string, entityId?: string) {
   const [version, setVersion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -58,8 +58,8 @@ export function useCurrentVersion(entityType?: string, entityId?: string) {
 export function useVersionCount(entityType?: string, entityId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

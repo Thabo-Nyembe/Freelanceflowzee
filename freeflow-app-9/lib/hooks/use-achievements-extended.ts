@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useAchievement(achievementId?: string) {
   const [achievement, setAchievement] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!achievementId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('achievements').select('*').eq('id', achievementId).single()
       setAchievement(data)
     } finally { setIsLoading(false) }
-  }, [achievementId, supabase])
+  }, [achievementId])
   useEffect(() => { fetch() }, [fetch])
   return { achievement, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useAchievement(achievementId?: string) {
 export function useAchievements(options?: { category?: string; isActive?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('achievements').select('*')
@@ -46,8 +46,8 @@ export function useUserAchievements(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [totalPoints, setTotalPoints] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -56,7 +56,7 @@ export function useUserAchievements(userId?: string) {
       const points = result?.reduce((sum, ua) => sum + (ua.achievements?.points || 0), 0) || 0
       setTotalPoints(points)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, totalPoints, isLoading, refresh: fetch }
 }
@@ -64,8 +64,8 @@ export function useUserAchievements(userId?: string) {
 export function useAchievementProgress(userId?: string, achievementId?: string) {
   const [progress, setProgress] = useState<{ isEarned: boolean; requirements: any } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !achievementId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -83,8 +83,8 @@ export function useAchievementProgress(userId?: string, achievementId?: string) 
 export function useAchievementsByCategory() {
   const [categories, setCategories] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('achievements').select('*').eq('is_active', true).order('category')
@@ -96,7 +96,7 @@ export function useAchievementsByCategory() {
       })
       setCategories(grouped)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -104,8 +104,8 @@ export function useAchievementsByCategory() {
 export function useRecentAchievements(userId?: string, limit?: number) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -135,6 +135,6 @@ export function useAchievementsRealtime(userId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return { achievements, newAchievement }
 }

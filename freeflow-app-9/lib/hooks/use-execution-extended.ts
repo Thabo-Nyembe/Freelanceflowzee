@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useExecution(executionId?: string) {
   const [execution, setExecution] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('executions').select('*, execution_steps(*), execution_logs(*)').eq('id', executionId).single(); setExecution(data) } finally { setIsLoading(false) }
-  }, [executionId, supabase])
+  }, [executionId])
   useEffect(() => { fetch() }, [fetch])
   return { execution, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useExecution(executionId?: string) {
 export function useExecutions(options?: { type?: string; status?: string; workflow_id?: string; triggered_by?: string; limit?: number }) {
   const [executions, setExecutions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('executions').select('*')
@@ -44,12 +44,12 @@ export function useExecutions(options?: { type?: string; status?: string; workfl
 export function useExecutionSteps(executionId?: string) {
   const [steps, setSteps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('execution_steps').select('*').eq('execution_id', executionId).order('order', { ascending: true }); setSteps(data || []) } finally { setIsLoading(false) }
-  }, [executionId, supabase])
+  }, [executionId])
   useEffect(() => { fetch() }, [fetch])
   return { steps, isLoading, refresh: fetch }
 }
@@ -57,8 +57,8 @@ export function useExecutionSteps(executionId?: string) {
 export function useExecutionLogs(executionId?: string, options?: { step_id?: string; level?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -76,12 +76,12 @@ export function useExecutionLogs(executionId?: string, options?: { step_id?: str
 export function useExecutionResult(executionId?: string) {
   const [result, setResult] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('execution_results').select('*').eq('execution_id', executionId).single(); setResult(data) } finally { setIsLoading(false) }
-  }, [executionId, supabase])
+  }, [executionId])
   useEffect(() => { fetch() }, [fetch])
   return { result, isLoading, refresh: fetch }
 }
@@ -89,8 +89,8 @@ export function useExecutionResult(executionId?: string) {
 export function useActiveExecutions(options?: { type?: string }) {
   const [executions, setExecutions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('executions').select('*').in('status', ['pending', 'running'])
@@ -98,7 +98,7 @@ export function useActiveExecutions(options?: { type?: string }) {
       const { data } = await query.order('started_at', { ascending: false })
       setExecutions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, supabase])
+  }, [options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { executions, isLoading, refresh: fetch }
 }
@@ -106,8 +106,8 @@ export function useActiveExecutions(options?: { type?: string }) {
 export function useExecutionStats(options?: { type?: string; days?: number }) {
   const [stats, setStats] = useState<{ total: number; successful: number; failed: number; avgDuration: number; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const daysAgo = options?.days || 7
@@ -132,11 +132,11 @@ export function useExecutionStats(options?: { type?: string; days?: number }) {
 export function useRecentExecutions(limit?: number) {
   const [executions, setExecutions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('executions').select('*').order('started_at', { ascending: false }).limit(limit || 10); setExecutions(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { executions, isLoading, refresh: fetch }
 }

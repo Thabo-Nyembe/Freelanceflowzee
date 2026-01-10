@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useActivations(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('activations').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useActivations(userId?: string, status?: string) {
 export function useActivationCodes(isUsed?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('activation_codes').select('*').order('created_at', { ascending: false })
@@ -37,7 +37,7 @@ export function useActivationCodes(isUsed?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [isUsed, supabase])
+  }, [isUsed])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

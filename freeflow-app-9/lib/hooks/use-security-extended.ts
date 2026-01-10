@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSecurityAudits(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('security_audits').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useSecurityAudits(userId?: string) {
 export function useSecurityEmailEvents(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('security_email_events').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,11 +36,11 @@ export function useSecurityEmailEvents(userId?: string) {
 export function useSecurityEmailTemplates() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('security_email_templates').select('*').order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -48,8 +48,8 @@ export function useSecurityEmailTemplates() {
 export function useSecurityEvents(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('security_events').select('*').order('created_at', { ascending: false }).limit(100)
@@ -57,7 +57,7 @@ export function useSecurityEvents(userId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -65,12 +65,12 @@ export function useSecurityEvents(userId?: string) {
 export function useSecuritySettings(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('security_settings').select('*').eq('user_id', userId).single(); setData(result) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useShipment(shipmentId?: string) {
   const [shipment, setShipment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!shipmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('logistics_shipments').select('*, logistics_carriers(*), logistics_tracking(*)').eq('id', shipmentId).single(); setShipment(data) } finally { setIsLoading(false) }
-  }, [shipmentId, supabase])
+  }, [shipmentId])
   useEffect(() => { fetch() }, [fetch])
   return { shipment, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useShipment(shipmentId?: string) {
 export function useShipments(options?: { status?: string; carrier_id?: string; limit?: number }) {
   const [shipments, setShipments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('logistics_shipments').select('*, logistics_carriers(*)')
@@ -42,12 +42,12 @@ export function useShipments(options?: { status?: string; carrier_id?: string; l
 export function useTrackingHistory(shipmentId?: string) {
   const [tracking, setTracking] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!shipmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('logistics_tracking').select('*').eq('shipment_id', shipmentId).order('timestamp', { ascending: false }); setTracking(data || []) } finally { setIsLoading(false) }
-  }, [shipmentId, supabase])
+  }, [shipmentId])
   useEffect(() => { fetch() }, [fetch])
   return { tracking, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useTrackByNumber(trackingNumber?: string) {
     if (!trackingNumber) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('logistics_shipments').select('*, logistics_carriers(*), logistics_tracking(*)').eq('tracking_number', trackingNumber).single(); setShipment(data) } finally { setIsLoading(false) }
-  }, [trackingNumber, supabase])
+  }, [trackingNumber])
   useEffect(() => { track() }, [track])
   return { shipment, isLoading, track }
 }
@@ -68,8 +68,8 @@ export function useTrackByNumber(trackingNumber?: string) {
 export function useCarriers(options?: { is_active?: boolean }) {
   const [carriers, setCarriers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('logistics_carriers').select('*')
@@ -77,7 +77,7 @@ export function useCarriers(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setCarriers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { carriers, isLoading, refresh: fetch }
 }
@@ -85,8 +85,8 @@ export function useCarriers(options?: { is_active?: boolean }) {
 export function useWarehouses(options?: { is_active?: boolean; region?: string }) {
   const [warehouses, setWarehouses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('logistics_warehouses').select('*')
@@ -103,12 +103,12 @@ export function useWarehouses(options?: { is_active?: boolean; region?: string }
 export function useWarehouse(warehouseId?: string) {
   const [warehouse, setWarehouse] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!warehouseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('logistics_warehouses').select('*').eq('id', warehouseId).single(); setWarehouse(data) } finally { setIsLoading(false) }
-  }, [warehouseId, supabase])
+  }, [warehouseId])
   useEffect(() => { fetch() }, [fetch])
   return { warehouse, isLoading, refresh: fetch }
 }
@@ -116,8 +116,8 @@ export function useWarehouse(warehouseId?: string) {
 export function useWarehouseInventory(warehouseId?: string, options?: { low_stock?: boolean }) {
   const [inventory, setInventory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!warehouseId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -137,8 +137,8 @@ export function useWarehouseInventory(warehouseId?: string, options?: { low_stoc
 export function useRoutes(options?: { origin_id?: string; destination_id?: string }) {
   const [routes, setRoutes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('logistics_routes').select('*').eq('is_active', true)
@@ -155,11 +155,11 @@ export function useRoutes(options?: { origin_id?: string; destination_id?: strin
 export function usePendingShipments(options?: { limit?: number }) {
   const [shipments, setShipments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('logistics_shipments').select('*, logistics_carriers(*)').in('status', ['pending', 'processing']).order('created_at', { ascending: true }).limit(options?.limit || 20); setShipments(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { shipments, isLoading, refresh: fetch }
 }
@@ -167,8 +167,8 @@ export function usePendingShipments(options?: { limit?: number }) {
 export function useShipmentStats(options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('logistics_shipments').select('status')

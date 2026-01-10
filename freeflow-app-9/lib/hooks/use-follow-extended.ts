@@ -11,8 +11,8 @@ export function useFollowers(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -20,7 +20,7 @@ export function useFollowers(userId?: string) {
       setData(result || [])
       setTotal(count || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, total, isLoading, refresh: fetch }
 }
@@ -29,8 +29,8 @@ export function useFollowing(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -38,7 +38,7 @@ export function useFollowing(userId?: string) {
       setData(result || [])
       setTotal(count || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, total, isLoading, refresh: fetch }
 }
@@ -63,8 +63,8 @@ export function useFollowCounts(userId?: string) {
   const [followers, setFollowers] = useState(0)
   const [following, setFollowing] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -75,7 +75,7 @@ export function useFollowCounts(userId?: string) {
       setFollowers(followersRes.count || 0)
       setFollowing(followingRes.count || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { followers, following, isLoading, refresh: fetch }
 }

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useArchives(userId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('archives').select('*').order('archived_at', { ascending: false }).limit(50)
@@ -28,15 +28,15 @@ export function useArchives(userId?: string, entityType?: string) {
 export function useArchiveById(archiveId?: string) {
   const [archive, setArchive] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!archiveId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('archives').select('*').eq('id', archiveId).single()
       setArchive(data)
     } finally { setIsLoading(false) }
-  }, [archiveId, supabase])
+  }, [archiveId])
   useEffect(() => { fetch() }, [fetch])
   return { archive, isLoading, refresh: fetch }
 }
@@ -44,8 +44,8 @@ export function useArchiveById(archiveId?: string) {
 export function useArchiveStats(entityType?: string) {
   const [stats, setStats] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('archives').select('entity_type, status')
@@ -60,7 +60,7 @@ export function useArchiveStats(entityType?: string) {
       })
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [entityType, supabase])
+  }, [entityType])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

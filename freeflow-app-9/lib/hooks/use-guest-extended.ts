@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useGuests(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('guests').select('*').eq('host_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useGuests(userId?: string) {
 export function useGuestAccess(guestId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!guestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('guest_access').select('*').eq('guest_id', guestId).order('granted_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [guestId, supabase])
+  }, [guestId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTenant(tenantId?: string) {
   const [tenant, setTenant] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tenants').select('*, tenant_settings(*), tenant_subscriptions(*), tenant_domains(*)').eq('id', tenantId).single(); setTenant(data) } finally { setIsLoading(false) }
-  }, [tenantId, supabase])
+  }, [tenantId])
   useEffect(() => { fetch() }, [fetch])
   return { tenant, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function useTenant(tenantId?: string) {
 export function useTenantBySlug(slug?: string) {
   const [tenant, setTenant] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tenants').select('*, tenant_settings(*), tenant_domains(*)').eq('slug', slug).single(); setTenant(data) } finally { setIsLoading(false) }
-  }, [slug, supabase])
+  }, [slug])
   useEffect(() => { fetch() }, [fetch])
   return { tenant, isLoading, refresh: fetch }
 }
@@ -37,8 +37,8 @@ export function useTenantBySlug(slug?: string) {
 export function useTenants(options?: { status?: string; plan?: string; owner_id?: string; search?: string; limit?: number }) {
   const [tenants, setTenants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tenants').select('*')
@@ -57,8 +57,8 @@ export function useTenants(options?: { status?: string; plan?: string; owner_id?
 export function useTenantUsers(tenantId?: string, options?: { role?: string; is_active?: boolean }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -76,8 +76,8 @@ export function useTenantUsers(tenantId?: string, options?: { role?: string; is_
 export function useUserTenants(userId?: string, options?: { role?: string; is_active?: boolean }) {
   const [tenants, setTenants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -95,8 +95,8 @@ export function useUserTenants(userId?: string, options?: { role?: string; is_ac
 export function useTenantMembership(tenantId?: string, userId?: string) {
   const [membership, setMembership] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tenantId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tenant_users').select('*').eq('tenant_id', tenantId).eq('user_id', userId).single(); setMembership(data) } finally { setIsLoading(false) }
@@ -108,8 +108,8 @@ export function useTenantMembership(tenantId?: string, userId?: string) {
 export function useTenantSettings(tenantId?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,7 +118,7 @@ export function useTenantSettings(tenantId?: string) {
       data?.forEach(s => { settingsMap[s.setting_key] = s.setting_value })
       setSettings(settingsMap)
     } finally { setIsLoading(false) }
-  }, [tenantId, supabase])
+  }, [tenantId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -126,12 +126,12 @@ export function useTenantSettings(tenantId?: string) {
 export function useTenantSubscription(tenantId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tenant_subscriptions').select('*').eq('tenant_id', tenantId).eq('status', 'active').order('created_at', { ascending: false }).limit(1).single(); setSubscription(data) } finally { setIsLoading(false) }
-  }, [tenantId, supabase])
+  }, [tenantId])
   useEffect(() => { fetch() }, [fetch])
   return { subscription, isLoading, refresh: fetch }
 }
@@ -139,8 +139,8 @@ export function useTenantSubscription(tenantId?: string) {
 export function useTenantInvitations(tenantId?: string, options?: { status?: string }) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -158,8 +158,8 @@ export function useTenantDomains(tenantId?: string) {
   const [domains, setDomains] = useState<any[]>([])
   const [primaryDomain, setPrimaryDomain] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tenantId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -167,7 +167,7 @@ export function useTenantDomains(tenantId?: string) {
       setDomains(data || [])
       setPrimaryDomain(data?.find(d => d.is_primary) || null)
     } finally { setIsLoading(false) }
-  }, [tenantId, supabase])
+  }, [tenantId])
   useEffect(() => { fetch() }, [fetch])
   return { domains, primaryDomain, isLoading, refresh: fetch }
 }
@@ -175,15 +175,15 @@ export function useTenantDomains(tenantId?: string) {
 export function useMyPendingTenantInvitations(email?: string) {
   const [invitations, setInvitations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('tenant_invitations').select('*, tenants(*)').eq('email', email).eq('status', 'pending').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false })
       setInvitations(data || [])
     } finally { setIsLoading(false) }
-  }, [email, supabase])
+  }, [email])
   useEffect(() => { fetch() }, [fetch])
   return { invitations, isLoading, refresh: fetch }
 }

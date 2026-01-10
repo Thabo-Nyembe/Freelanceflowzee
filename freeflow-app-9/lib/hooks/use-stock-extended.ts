@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useStockItems(warehouseId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('stock_items').select('*').order('name', { ascending: true })
@@ -19,7 +19,7 @@ export function useStockItems(warehouseId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [warehouseId, supabase])
+  }, [warehouseId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,12 +27,12 @@ export function useStockItems(warehouseId?: string) {
 export function useStockMovements(itemId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('stock_movements').select('*').eq('item_id', itemId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useExpense(expenseId?: string) {
   const [expense, setExpense] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!expenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('expenses').select('*, expense_categories(*), expense_receipts(*)').eq('id', expenseId).single(); setExpense(data) } finally { setIsLoading(false) }
-  }, [expenseId, supabase])
+  }, [expenseId])
   useEffect(() => { fetch() }, [fetch])
   return { expense, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useExpense(expenseId?: string) {
 export function useExpenses(options?: { user_id?: string; category_id?: string; status?: string; date_from?: string; date_to?: string; is_billable?: boolean; limit?: number }) {
   const [expenses, setExpenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('expenses').select('*, expense_categories(*)')
@@ -46,8 +46,8 @@ export function useExpenses(options?: { user_id?: string; category_id?: string; 
 export function useExpenseCategories(options?: { is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('expense_categories').select('*')
@@ -55,7 +55,7 @@ export function useExpenseCategories(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -63,12 +63,12 @@ export function useExpenseCategories(options?: { is_active?: boolean }) {
 export function useExpenseReceipts(expenseId?: string) {
   const [receipts, setReceipts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!expenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('expense_receipts').select('*').eq('expense_id', expenseId).order('uploaded_at', { ascending: false }); setReceipts(data || []) } finally { setIsLoading(false) }
-  }, [expenseId, supabase])
+  }, [expenseId])
   useEffect(() => { fetch() }, [fetch])
   return { receipts, isLoading, refresh: fetch }
 }
@@ -76,8 +76,8 @@ export function useExpenseReceipts(expenseId?: string) {
 export function useExpenseReports(userId?: string, options?: { status?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -94,12 +94,12 @@ export function useExpenseReports(userId?: string, options?: { status?: string; 
 export function usePendingExpenses(userId?: string) {
   const [expenses, setExpenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('expenses').select('*, expense_categories(*)').eq('user_id', userId).eq('status', 'pending').order('date', { ascending: false }); setExpenses(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { expenses, isLoading, refresh: fetch }
 }
@@ -107,8 +107,8 @@ export function usePendingExpenses(userId?: string) {
 export function useExpenseStats(userId?: string, options?: { date_from?: string; date_to?: string }) {
   const [stats, setStats] = useState<{ total: number; approved: number; pending: number; rejected: number; byCategory: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -133,8 +133,8 @@ export function useBillableExpenses(projectId?: string) {
   const [expenses, setExpenses] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -142,7 +142,7 @@ export function useBillableExpenses(projectId?: string) {
       setExpenses(data || [])
       setTotal(data?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { expenses, total, isLoading, refresh: fetch }
 }
@@ -150,8 +150,8 @@ export function useBillableExpenses(projectId?: string) {
 export function useExpensePolicies(options?: { is_active?: boolean }) {
   const [policies, setPolicies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('expense_policies').select('*')
@@ -159,7 +159,7 @@ export function useExpensePolicies(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setPolicies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { policies, isLoading, refresh: fetch }
 }

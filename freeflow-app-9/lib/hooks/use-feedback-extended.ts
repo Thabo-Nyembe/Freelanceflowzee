@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useFeedback(feedbackId?: string) {
   const [feedback, setFeedback] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('feedback').select('*, feedback_replies(*), feedback_votes(*)').eq('id', feedbackId).single()
       setFeedback(data)
     } finally { setIsLoading(false) }
-  }, [feedbackId, supabase])
+  }, [feedbackId])
   useEffect(() => { fetch() }, [fetch])
   return { feedback, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useFeedback(feedbackId?: string) {
 export function useFeedbacks(options?: { user_id?: string; target_type?: string; target_id?: string; category?: string; status?: string; priority?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('feedback').select('*')
@@ -49,8 +49,8 @@ export function useFeedbacks(options?: { user_id?: string; target_type?: string;
 export function useFeedbackReplies(feedbackId?: string, options?: { limit?: number }) {
   const [replies, setReplies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -73,15 +73,15 @@ export function useFeedbackRepliesRealtime(feedbackId?: string) {
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'feedback_replies', filter: `feedback_id=eq.${feedbackId}` }, (payload) => setReplies(prev => prev.filter(r => r.id !== (payload.old as any).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [feedbackId, supabase])
+  }, [feedbackId])
   return { replies }
 }
 
 export function useFeedbackVotes(feedbackId?: string) {
   const [votes, setVotes] = useState<{ upvotes: number; downvotes: number; total: number }>({ upvotes: 0, downvotes: 0, total: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!feedbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -90,7 +90,7 @@ export function useFeedbackVotes(feedbackId?: string) {
       const downvotes = (data || []).filter(v => v.vote_type === 'down').length
       setVotes({ upvotes, downvotes, total: upvotes - downvotes })
     } finally { setIsLoading(false) }
-  }, [feedbackId, supabase])
+  }, [feedbackId])
   useEffect(() => { fetch() }, [fetch])
   return { votes, isLoading, refresh: fetch }
 }
@@ -98,8 +98,8 @@ export function useFeedbackVotes(feedbackId?: string) {
 export function useUserFeedbackVote(feedbackId?: string, userId?: string) {
   const [vote, setVote] = useState<'up' | 'down' | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!feedbackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -114,8 +114,8 @@ export function useUserFeedbackVote(feedbackId?: string, userId?: string) {
 export function useFeedbackStats(options?: { user_id?: string; target_type?: string }) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; byPriority: Record<string, number>; byCategory: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('feedback').select('status, priority, category')
@@ -136,8 +136,8 @@ export function useFeedbackStats(options?: { user_id?: string; target_type?: str
 export function usePopularFeedback(options?: { target_type?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('feedback').select('*').eq('status', 'pending')
@@ -174,8 +174,8 @@ export function useFeedbackSearch(searchTerm: string, options?: { target_type?: 
 export function useStarredFeedback(options?: { user_id?: string; target_type?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('feedback').select('*').eq('is_starred', true)
@@ -192,8 +192,8 @@ export function useStarredFeedback(options?: { user_id?: string; target_type?: s
 export function useAssignedFeedback(assigneeId?: string, options?: { status?: string; limit?: number }) {
   const [feedbacks, setFeedbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!assigneeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -217,6 +217,6 @@ export function useFeedbackRealtime(feedbackId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'feedback', filter: `id=eq.${feedbackId}` }, (payload) => setFeedback(payload.new))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [feedbackId, supabase])
+  }, [feedbackId])
   return { feedback }
 }

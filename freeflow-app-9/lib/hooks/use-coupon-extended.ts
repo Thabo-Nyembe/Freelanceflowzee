@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useCoupons(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('coupons').select('*').order('created_at', { ascending: false })
@@ -19,7 +19,7 @@ export function useCoupons(isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [isActive, supabase])
+  }, [isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,12 +27,12 @@ export function useCoupons(isActive?: boolean) {
 export function useCouponUsage(couponId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!couponId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('coupon_usage').select('*').eq('coupon_id', couponId).order('used_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [couponId, supabase])
+  }, [couponId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useCreateCoupon() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   return { create, isLoading, error }
 }

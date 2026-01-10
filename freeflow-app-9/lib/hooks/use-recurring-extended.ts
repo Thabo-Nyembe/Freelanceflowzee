@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRecurringPayment(paymentId?: string) {
   const [payment, setPayment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!paymentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('recurring_payments').select('*').eq('id', paymentId).single(); setPayment(data) } finally { setIsLoading(false) }
-  }, [paymentId, supabase])
+  }, [paymentId])
   useEffect(() => { fetch() }, [fetch])
   return { payment, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRecurringPayment(paymentId?: string) {
 export function useRecurringPayments(options?: { user_id?: string; status?: string; frequency?: string; limit?: number }) {
   const [payments, setPayments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('recurring_payments').select('*')
@@ -43,8 +43,8 @@ export function useRecurringPayments(options?: { user_id?: string; status?: stri
 export function useRecurringInvoices(options?: { user_id?: string; client_id?: string; status?: string; limit?: number }) {
   const [invoices, setInvoices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('recurring_invoices').select('*')
@@ -62,8 +62,8 @@ export function useRecurringInvoices(options?: { user_id?: string; client_id?: s
 export function useRecurringTasks(options?: { user_id?: string; project_id?: string; is_active?: boolean; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('recurring_tasks').select('*')
@@ -81,8 +81,8 @@ export function useRecurringTasks(options?: { user_id?: string; project_id?: str
 export function useRecurringSchedules(options?: { type?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('recurring_schedules').select('*')

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRegistration(registrationId?: string) {
   const [registration, setRegistration] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!registrationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('registrations').select('*, registration_responses(*), users(*), events(*)').eq('id', registrationId).single(); setRegistration(data) } finally { setIsLoading(false) }
-  }, [registrationId, supabase])
+  }, [registrationId])
   useEffect(() => { fetch() }, [fetch])
   return { registration, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRegistration(registrationId?: string) {
 export function useRegistrations(options?: { event_id?: string; entity_type?: string; entity_id?: string; user_id?: string; status?: string; search?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('registrations').select('*, registration_responses(count), users(*)')
@@ -46,12 +46,12 @@ export function useRegistrations(options?: { event_id?: string; entity_type?: st
 export function useRegistrationByCode(confirmationCode?: string) {
   const [registration, setRegistration] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!confirmationCode) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('registrations').select('*, registration_responses(*), users(*), events(*)').eq('confirmation_code', confirmationCode.toUpperCase()).single(); setRegistration(data) } finally { setIsLoading(false) }
-  }, [confirmationCode, supabase])
+  }, [confirmationCode])
   useEffect(() => { fetch() }, [fetch])
   return { registration, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useRegistrationByCode(confirmationCode?: string) {
 export function useRegistrationFields(entityType?: string, entityId?: string) {
   const [fields, setFields] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -77,12 +77,12 @@ export function useRegistrationFields(entityType?: string, entityId?: string) {
 export function useRegistrationResponses(registrationId?: string) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!registrationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('registration_responses').select('*, registration_fields(*)').eq('registration_id', registrationId); setResponses(data || []) } finally { setIsLoading(false) }
-  }, [registrationId, supabase])
+  }, [registrationId])
   useEffect(() => { fetch() }, [fetch])
   return { responses, isLoading, refresh: fetch }
 }
@@ -90,8 +90,8 @@ export function useRegistrationResponses(registrationId?: string) {
 export function useMyRegistrations(userId?: string, options?: { status?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -108,8 +108,8 @@ export function useMyRegistrations(userId?: string, options?: { status?: string;
 export function useWaitlist(options?: { event_id?: string; entity_type?: string; entity_id?: string; status?: string; limit?: number }) {
   const [waitlist, setWaitlist] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('registration_waitlists').select('*')
@@ -128,8 +128,8 @@ export function useWaitlist(options?: { event_id?: string; entity_type?: string;
 export function useRegistrationStats(options?: { event_id?: string; entity_type?: string; entity_id?: string }) {
   const [stats, setStats] = useState<{ total: number; pending: number; confirmed: number; checkedIn: number; cancelled: number; checkInRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('registrations').select('status')
@@ -154,8 +154,8 @@ export function useRegistrationStats(options?: { event_id?: string; entity_type?
 export function useConfirmedRegistrations(options?: { event_id?: string; entity_id?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('registrations').select('*, users(*)').eq('status', 'confirmed')
@@ -172,8 +172,8 @@ export function useConfirmedRegistrations(options?: { event_id?: string; entity_
 export function usePendingRegistrations(options?: { event_id?: string; entity_id?: string; limit?: number }) {
   const [registrations, setRegistrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('registrations').select('*, users(*)').eq('status', 'pending')

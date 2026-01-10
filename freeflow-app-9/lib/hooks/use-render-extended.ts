@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRenderJob(jobId?: string) {
   const [job, setJob] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_jobs').select('*').eq('id', jobId).single(); setJob(data) } finally { setIsLoading(false) }
-  }, [jobId, supabase])
+  }, [jobId])
   useEffect(() => { fetch() }, [fetch])
   return { job, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRenderJob(jobId?: string) {
 export function useRenderJobs(options?: { user_id?: string; status?: string; template_id?: string; limit?: number }) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('render_jobs').select('*')
@@ -43,8 +43,8 @@ export function useRenderJobs(options?: { user_id?: string; status?: string; tem
 export function useRenderTemplates(options?: { type?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('render_templates').select('*')
@@ -61,12 +61,12 @@ export function useRenderTemplates(options?: { type?: string; is_active?: boolea
 export function useRenderOutputs(jobId?: string) {
   const [outputs, setOutputs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_outputs').select('*').eq('job_id', jobId).order('created_at', { ascending: false }); setOutputs(data || []) } finally { setIsLoading(false) }
-  }, [jobId, supabase])
+  }, [jobId])
   useEffect(() => { fetch() }, [fetch])
   return { outputs, isLoading, refresh: fetch }
 }
@@ -74,12 +74,12 @@ export function useRenderOutputs(jobId?: string) {
 export function useRenderSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_settings').select('*').eq('user_id', userId).single(); setSettings(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -87,12 +87,12 @@ export function useRenderSettings(userId?: string) {
 export function usePendingRenderJobs(userId?: string) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('render_jobs').select('*').eq('user_id', userId).in('status', ['pending', 'processing']).order('created_at', { ascending: true }); setJobs(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function usePendingItems(userId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -28,8 +28,8 @@ export function usePendingItems(userId?: string, itemType?: string) {
 export function usePendingCount(userId?: string, itemType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,8 +46,8 @@ export function usePendingCount(userId?: string, itemType?: string) {
 export function usePendingStats(userId?: string) {
   const [stats, setStats] = useState<Record<string, Record<string, number>>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -59,7 +59,7 @@ export function usePendingStats(userId?: string) {
       })
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

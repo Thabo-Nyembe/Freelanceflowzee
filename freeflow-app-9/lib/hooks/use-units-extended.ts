@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useUnit(unitId?: string) {
   const [unit, setUnit] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!unitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('units').select('*, unit_groups(*), unit_conversions(*), unit_aliases(*)').eq('id', unitId).single(); setUnit(data) } finally { setIsLoading(false) }
-  }, [unitId, supabase])
+  }, [unitId])
   useEffect(() => { fetch() }, [fetch])
   return { unit, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useUnit(unitId?: string) {
 export function useUnitBySymbol(symbol?: string) {
   const [unit, setUnit] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!symbol) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -34,7 +34,7 @@ export function useUnitBySymbol(symbol?: string) {
       const { data: aliasData } = await supabase.from('unit_aliases').select('units(*, unit_groups(*))').eq('alias', symbol).single()
       setUnit(aliasData?.units || null)
     } finally { setIsLoading(false) }
-  }, [symbol, supabase])
+  }, [symbol])
   useEffect(() => { fetch() }, [fetch])
   return { unit, isLoading, refresh: fetch }
 }
@@ -42,8 +42,8 @@ export function useUnitBySymbol(symbol?: string) {
 export function useUnits(options?: { group_id?: string; is_si?: boolean; is_active?: boolean; search?: string; limit?: number }) {
   const [units, setUnits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('units').select('*, unit_groups(*)')
@@ -62,8 +62,8 @@ export function useUnits(options?: { group_id?: string; is_si?: boolean; is_acti
 export function useUnitGroups(options?: { is_active?: boolean; search?: string }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('unit_groups').select('*, units(count)')
@@ -80,12 +80,12 @@ export function useUnitGroups(options?: { is_active?: boolean; search?: string }
 export function useUnitConversions(unitId?: string) {
   const [conversions, setConversions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!unitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('unit_conversions').select('*, from_unit:units!from_unit_id(*), to_unit:units!to_unit_id(*)').or(`from_unit_id.eq.${unitId},to_unit_id.eq.${unitId}`); setConversions(data || []) } finally { setIsLoading(false) }
-  }, [unitId, supabase])
+  }, [unitId])
   useEffect(() => { fetch() }, [fetch])
   return { conversions, isLoading, refresh: fetch }
 }
@@ -93,12 +93,12 @@ export function useUnitConversions(unitId?: string) {
 export function useUnitAliases(unitId?: string) {
   const [aliases, setAliases] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!unitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('unit_aliases').select('*').eq('unit_id', unitId).order('alias', { ascending: true }); setAliases(data || []) } finally { setIsLoading(false) }
-  }, [unitId, supabase])
+  }, [unitId])
   useEffect(() => { fetch() }, [fetch])
   return { aliases, isLoading, refresh: fetch }
 }
@@ -106,8 +106,8 @@ export function useUnitAliases(unitId?: string) {
 export function useUnitFormat(unitId?: string, locale?: string) {
   const [format, setFormat] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!unitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('unit_formats').select('*').eq('unit_id', unitId).eq('locale', locale || 'default').single(); setFormat(data) } finally { setIsLoading(false) }
@@ -119,12 +119,12 @@ export function useUnitFormat(unitId?: string, locale?: string) {
 export function useUnitPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('unit_preferences').select('*, unit_groups(*), units(*)').eq('user_id', userId); setPreferences(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }
 }
@@ -132,8 +132,8 @@ export function useUnitPreferences(userId?: string) {
 export function usePreferredUnit(userId?: string, groupId?: string) {
   const [unit, setUnit] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !groupId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -179,8 +179,8 @@ export function useUnitConversion(value: number, fromUnitId?: string, toUnitId?:
 export function useBaseUnits(options?: { is_active?: boolean }) {
   const [units, setUnits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('units').select('*, unit_groups(*)').eq('base_unit', true)
@@ -188,7 +188,7 @@ export function useBaseUnits(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setUnits(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { units, isLoading, refresh: fetch }
 }
@@ -196,8 +196,8 @@ export function useBaseUnits(options?: { is_active?: boolean }) {
 export function useSIUnits(options?: { group_id?: string }) {
   const [units, setUnits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('units').select('*, unit_groups(*)').eq('is_si', true).eq('is_active', true)
@@ -205,7 +205,7 @@ export function useSIUnits(options?: { group_id?: string }) {
       const { data } = await query.order('name', { ascending: true })
       setUnits(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.group_id, supabase])
+  }, [options?.group_id])
   useEffect(() => { fetch() }, [fetch])
   return { units, isLoading, refresh: fetch }
 }

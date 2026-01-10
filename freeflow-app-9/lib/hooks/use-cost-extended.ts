@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCost(costId?: string) {
   const [cost, setCost] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!costId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('costs').select('*, cost_allocations(*)').eq('id', costId).single(); setCost(data) } finally { setIsLoading(false) }
-  }, [costId, supabase])
+  }, [costId])
   useEffect(() => { fetch() }, [fetch])
   return { cost, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCost(costId?: string) {
 export function useCosts(options?: { user_id?: string; category_id?: string; cost_center_id?: string; status?: string; date_from?: string; date_to?: string; limit?: number }) {
   const [costs, setCosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('costs').select('*')
@@ -46,8 +46,8 @@ export function useCosts(options?: { user_id?: string; category_id?: string; cos
 export function useCostCenters(options?: { is_active?: boolean }) {
   const [centers, setCenters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('cost_centers').select('*')
@@ -55,7 +55,7 @@ export function useCostCenters(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setCenters(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { centers, isLoading, refresh: fetch }
 }
@@ -63,8 +63,8 @@ export function useCostCenters(options?: { is_active?: boolean }) {
 export function useCostCategories(options?: { is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('cost_categories').select('*')
@@ -72,7 +72,7 @@ export function useCostCategories(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -80,12 +80,12 @@ export function useCostCategories(options?: { is_active?: boolean }) {
 export function usePendingCosts(userId?: string) {
   const [costs, setCosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('costs').select('*').eq('user_id', userId).eq('status', 'pending').order('date', { ascending: false }); setCosts(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { costs, isLoading, refresh: fetch }
 }
@@ -93,8 +93,8 @@ export function usePendingCosts(userId?: string) {
 export function useCostSummary(options?: { user_id?: string; date_from?: string; date_to?: string }) {
   const [summary, setSummary] = useState<{ total: number; byCategory: Record<string, number>; byCostCenter: Record<string, number>; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('costs').select('amount, category_id, cost_center_id, status')
@@ -117,12 +117,12 @@ export function useCostSummary(options?: { user_id?: string; date_from?: string;
 export function useCostAllocations(costId?: string) {
   const [allocations, setAllocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!costId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cost_allocations').select('*').eq('cost_id', costId).order('created_at', { ascending: true }); setAllocations(data || []) } finally { setIsLoading(false) }
-  }, [costId, supabase])
+  }, [costId])
   useEffect(() => { fetch() }, [fetch])
   return { allocations, isLoading, refresh: fetch }
 }

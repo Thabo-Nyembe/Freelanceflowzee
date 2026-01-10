@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCloudProvider(providerId?: string) {
   const [provider, setProvider] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cloud_providers').select('*, cloud_resources(*)').eq('id', providerId).single(); setProvider(data) } finally { setIsLoading(false) }
-  }, [providerId, supabase])
+  }, [providerId])
   useEffect(() => { fetch() }, [fetch])
   return { provider, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCloudProvider(providerId?: string) {
 export function useCloudProviders(options?: { user_id?: string; type?: string; status?: string }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('cloud_providers').select('*')
@@ -43,8 +43,8 @@ export function useCloudProviders(options?: { user_id?: string; type?: string; s
 export function useCloudResources(providerId?: string, options?: { type?: string; status?: string }) {
   const [resources, setResources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useCloudResources(providerId?: string, options?: { type?: string
 export function useCloudCosts(providerId?: string, options?: { date_from?: string; date_to?: string }) {
   const [costs, setCosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -81,12 +81,12 @@ export function useCloudCosts(providerId?: string, options?: { date_from?: strin
 export function useCloudMonitoring(resourceId?: string) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!resourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cloud_monitoring').select('*').eq('resource_id', resourceId).eq('is_active', true).order('created_at', { ascending: false }); setAlerts(data || []) } finally { setIsLoading(false) }
-  }, [resourceId, supabase])
+  }, [resourceId])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -94,8 +94,8 @@ export function useCloudMonitoring(resourceId?: string) {
 export function useCloudCostSummary(userId?: string, period?: string) {
   const [summary, setSummary] = useState<{ total: number; byProvider: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -130,15 +130,15 @@ export function useResourceStatus(resourceId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [resourceId, supabase])
+  }, [resourceId])
   return { resource }
 }
 
 export function useActiveResources(userId?: string) {
   const [resources, setResources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -147,7 +147,7 @@ export function useActiveResources(userId?: string) {
       const { data } = await supabase.from('cloud_resources').select('*, cloud_providers(name)').in('provider_id', providers.map(p => p.id)).eq('status', 'running').order('name', { ascending: true })
       setResources(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { resources, isLoading, refresh: fetch }
 }

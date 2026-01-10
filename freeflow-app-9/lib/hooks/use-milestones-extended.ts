@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useMilestone(milestoneId?: string) {
   const [milestone, setMilestone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestones').select('*, milestone_tasks(*), milestone_dependencies(*), milestone_updates(*)').eq('id', milestoneId).single(); setMilestone(data) } finally { setIsLoading(false) }
-  }, [milestoneId, supabase])
+  }, [milestoneId])
   useEffect(() => { fetch() }, [fetch])
   return { milestone, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useMilestone(milestoneId?: string) {
 export function useMilestones(projectId?: string, options?: { status?: string; owner_id?: string; priority?: string; limit?: number }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useMilestones(projectId?: string, options?: { status?: string; o
 export function useMilestoneTasks(milestoneId?: string, options?: { status?: string; assignee_id?: string }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,12 +63,12 @@ export function useMilestoneTasks(milestoneId?: string, options?: { status?: str
 export function useMilestoneDependencies(milestoneId?: string) {
   const [dependencies, setDependencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_dependencies').select('*, milestones!depends_on_id(*)').eq('milestone_id', milestoneId); setDependencies(data || []) } finally { setIsLoading(false) }
-  }, [milestoneId, supabase])
+  }, [milestoneId])
   useEffect(() => { fetch() }, [fetch])
   return { dependencies, isLoading, refresh: fetch }
 }
@@ -76,8 +76,8 @@ export function useMilestoneDependencies(milestoneId?: string) {
 export function useMilestoneProgress(milestoneId?: string, options?: { limit?: number }) {
   const [progress, setProgress] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_progress').select('*').eq('milestone_id', milestoneId).order('recorded_at', { ascending: false }).limit(options?.limit || 50); setProgress(data || []) } finally { setIsLoading(false) }
@@ -89,8 +89,8 @@ export function useMilestoneProgress(milestoneId?: string, options?: { limit?: n
 export function useMilestoneUpdates(milestoneId?: string, options?: { limit?: number }) {
   const [updates, setUpdates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_updates').select('*').eq('milestone_id', milestoneId).order('created_at', { ascending: false }).limit(options?.limit || 20); setUpdates(data || []) } finally { setIsLoading(false) }
@@ -102,8 +102,8 @@ export function useMilestoneUpdates(milestoneId?: string, options?: { limit?: nu
 export function useUpcomingMilestones(projectId?: string, options?: { days?: number; limit?: number }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -121,12 +121,12 @@ export function useUpcomingMilestones(projectId?: string, options?: { days?: num
 export function useOverdueMilestones(projectId?: string) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestones').select('*, milestone_tasks(*)').eq('project_id', projectId).in('status', ['pending', 'in_progress']).lt('due_date', new Date().toISOString()).order('due_date', { ascending: true }); setMilestones(data || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }
@@ -134,8 +134,8 @@ export function useOverdueMilestones(projectId?: string) {
 export function useProjectMilestoneStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; completed: number; inProgress: number; pending: number; overdue: number; avgProgress: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -149,7 +149,7 @@ export function useProjectMilestoneStats(projectId?: string) {
       const avgProgress = total ? (data?.reduce((sum, m) => sum + (m.progress || 0), 0) || 0) / total : 0
       setStats({ total, completed, inProgress, pending, overdue, avgProgress })
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

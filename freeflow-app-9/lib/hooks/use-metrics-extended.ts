@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useMetric(metricId?: string) {
   const [metric, setMetric] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('metrics').select('*, metric_thresholds(*), metric_alerts(*)').eq('id', metricId).single(); setMetric(data) } finally { setIsLoading(false) }
-  }, [metricId, supabase])
+  }, [metricId])
   useEffect(() => { fetch() }, [fetch])
   return { metric, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useMetric(metricId?: string) {
 export function useMetrics(options?: { category?: string; organization_id?: string; is_active?: boolean; limit?: number }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('metrics').select('*')
@@ -43,8 +43,8 @@ export function useMetrics(options?: { category?: string; organization_id?: stri
 export function useMetricValues(metricId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [values, setValues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,12 +62,12 @@ export function useMetricValues(metricId?: string, options?: { from_date?: strin
 export function useMetricThresholds(metricId?: string) {
   const [thresholds, setThresholds] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('metric_thresholds').select('*').eq('metric_id', metricId).eq('is_active', true); setThresholds(data || []) } finally { setIsLoading(false) }
-  }, [metricId, supabase])
+  }, [metricId])
   useEffect(() => { fetch() }, [fetch])
   return { thresholds, isLoading, refresh: fetch }
 }
@@ -75,8 +75,8 @@ export function useMetricThresholds(metricId?: string) {
 export function useMetricAlerts(options?: { metric_id?: string; status?: string; severity?: string; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('metric_alerts').select('*, metrics(*)')
@@ -94,8 +94,8 @@ export function useMetricAlerts(options?: { metric_id?: string; status?: string;
 export function useActiveAlerts(organizationId?: string) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('metric_alerts').select('*, metrics(*)').eq('status', 'active')
@@ -103,7 +103,7 @@ export function useActiveAlerts(organizationId?: string) {
       const { data } = await query.order('triggered_at', { ascending: false })
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -111,8 +111,8 @@ export function useActiveAlerts(organizationId?: string) {
 export function useMetricDashboards(userId?: string, options?: { organization_id?: string }) {
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -130,8 +130,8 @@ export function useDashboard(dashboardId?: string) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [widgets, setWidgets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -142,7 +142,7 @@ export function useDashboard(dashboardId?: string) {
       setDashboard(dashRes.data)
       setWidgets(widgetsRes.data || [])
     } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { dashboard, widgets, isLoading, refresh: fetch }
 }
@@ -150,8 +150,8 @@ export function useDashboard(dashboardId?: string) {
 export function useMetricSummary(metricId?: string, options?: { period?: 'day' | 'week' | 'month' }) {
   const [summary, setSummary] = useState<{ current: number; previous: number; change: number; min: number; max: number; avg: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!metricId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

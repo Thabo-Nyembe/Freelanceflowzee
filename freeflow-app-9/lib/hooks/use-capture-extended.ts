@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCapture(captureId?: string) {
   const [capture, setCapture] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!captureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('captures').select('*, capture_frames(*)').eq('id', captureId).single(); setCapture(data) } finally { setIsLoading(false) }
-  }, [captureId, supabase])
+  }, [captureId])
   useEffect(() => { fetch() }, [fetch])
   return { capture, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCapture(captureId?: string) {
 export function useCaptures(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [captures, setCaptures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('captures').select('*')
@@ -43,8 +43,8 @@ export function useCaptures(options?: { user_id?: string; type?: string; status?
 export function useCaptureFrames(captureId?: string, options?: { limit?: number }) {
   const [frames, setFrames] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!captureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('capture_frames').select('*').eq('capture_id', captureId).order('frame_number', { ascending: true }).limit(options?.limit || 100); setFrames(data || []) } finally { setIsLoading(false) }
@@ -56,12 +56,12 @@ export function useCaptureFrames(captureId?: string, options?: { limit?: number 
 export function useCaptureSessions(captureId?: string) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!captureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('capture_sessions').select('*').eq('capture_id', captureId).order('started_at', { ascending: false }); setSessions(data || []) } finally { setIsLoading(false) }
-  }, [captureId, supabase])
+  }, [captureId])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }
@@ -69,12 +69,12 @@ export function useCaptureSessions(captureId?: string) {
 export function useActiveCaptures(userId?: string) {
   const [captures, setCaptures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('captures').select('*').eq('user_id', userId).eq('status', 'capturing').order('created_at', { ascending: false }); setCaptures(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { captures, isLoading, refresh: fetch }
 }
@@ -95,6 +95,6 @@ export function useCaptureRealtime(captureId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [captureId, supabase])
+  }, [captureId])
   return { capture, latestFrame }
 }

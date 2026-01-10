@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useBugReports(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('bug_reports').select('*').order('created_at', { ascending: false })
@@ -19,7 +19,7 @@ export function useBugReports(projectId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,12 +27,12 @@ export function useBugReports(projectId?: string) {
 export function useBugComments(bugId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!bugId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('bug_comments').select('*').eq('bug_id', bugId).order('created_at', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [bugId, supabase])
+  }, [bugId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

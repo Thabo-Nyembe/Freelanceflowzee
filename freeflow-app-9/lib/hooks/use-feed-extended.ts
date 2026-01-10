@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useFeedItems(userId?: string, feedType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -28,8 +28,8 @@ export function useFeedItems(userId?: string, feedType?: string) {
 export function useUnreadFeedCount(userId?: string, feedType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,15 +46,15 @@ export function useUnreadFeedCount(userId?: string, feedType?: string) {
 export function useFeedSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('feed_settings').select('*').eq('user_id', userId).single()
       setSettings(data)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useSprints(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sprints').select('*').order('start_date', { ascending: false })
@@ -19,7 +19,7 @@ export function useSprints(projectId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,12 +27,12 @@ export function useSprints(projectId?: string) {
 export function useSprintTasks(sprintId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!sprintId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('sprint_tasks').select('*').eq('sprint_id', sprintId).order('priority', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [sprintId, supabase])
+  }, [sprintId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

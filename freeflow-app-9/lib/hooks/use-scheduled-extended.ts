@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useScheduledTask(taskId?: string) {
   const [task, setTask] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('scheduled_tasks').select('*').eq('id', taskId).single(); setTask(data) } finally { setIsLoading(false) }
-  }, [taskId, supabase])
+  }, [taskId])
   useEffect(() => { fetch() }, [fetch])
   return { task, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useScheduledTask(taskId?: string) {
 export function useScheduledTasks(options?: { is_active?: boolean; handler?: string; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scheduled_tasks').select('*')
@@ -42,8 +42,8 @@ export function useScheduledTasks(options?: { is_active?: boolean; handler?: str
 export function useScheduledJobs(options?: { task_id?: string; status?: string; limit?: number }) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scheduled_jobs').select('*')
@@ -60,8 +60,8 @@ export function useScheduledJobs(options?: { task_id?: string; status?: string; 
 export function useScheduledReports(options?: { user_id?: string; report_type?: string; is_active?: boolean }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scheduled_reports').select('*')
@@ -79,8 +79,8 @@ export function useScheduledReports(options?: { user_id?: string; report_type?: 
 export function useScheduledNotifications(options?: { user_id?: string; is_sent?: boolean; limit?: number }) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scheduled_notifications').select('*')
@@ -97,12 +97,12 @@ export function useScheduledNotifications(options?: { user_id?: string; is_sent?
 export function usePendingScheduledNotifications(userId?: string) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('scheduled_notifications').select('*').eq('user_id', userId).eq('is_sent', false).lte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }); setNotifications(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { notifications, isLoading, refresh: fetch }
 }

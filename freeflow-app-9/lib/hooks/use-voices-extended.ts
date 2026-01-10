@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useVoice(voiceId?: string) {
   const [voice, setVoice] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!voiceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('voices').select('*, voice_samples(*)').eq('id', voiceId).single(); setVoice(data) } finally { setIsLoading(false) }
-  }, [voiceId, supabase])
+  }, [voiceId])
   useEffect(() => { fetch() }, [fetch])
   return { voice, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useVoice(voiceId?: string) {
 export function useVoices(options?: { user_id?: string; type?: string; language?: string; status?: string; limit?: number }) {
   const [voices, setVoices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('voices').select('*')
@@ -44,12 +44,12 @@ export function useVoices(options?: { user_id?: string; type?: string; language?
 export function useVoiceSamples(voiceId?: string) {
   const [samples, setSamples] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!voiceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('voice_samples').select('*').eq('voice_id', voiceId).order('created_at', { ascending: false }); setSamples(data || []) } finally { setIsLoading(false) }
-  }, [voiceId, supabase])
+  }, [voiceId])
   useEffect(() => { fetch() }, [fetch])
   return { samples, isLoading, refresh: fetch }
 }
@@ -57,12 +57,12 @@ export function useVoiceSamples(voiceId?: string) {
 export function useVoiceSettings(voiceId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!voiceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('voice_settings').select('*').eq('voice_id', voiceId).single(); setSettings(data) } finally { setIsLoading(false) }
-  }, [voiceId, supabase])
+  }, [voiceId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -70,8 +70,8 @@ export function useVoiceSettings(voiceId?: string) {
 export function useVoiceGenerations(options?: { voice_id?: string; user_id?: string; limit?: number }) {
   const [generations, setGenerations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('voice_generations').select('*')

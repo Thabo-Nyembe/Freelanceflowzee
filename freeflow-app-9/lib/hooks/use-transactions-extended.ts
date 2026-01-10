@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTransaction(transactionId?: string) {
   const [transaction, setTransaction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transactions').select('*, transaction_items(*), transaction_fees(*), transaction_refunds(*)').eq('id', transactionId).single(); setTransaction(data) } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { transaction, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTransaction(transactionId?: string) {
 export function useTransactions(options?: { transaction_type?: string; status?: string; sender_id?: string; recipient_id?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('transactions').select('*, transaction_items(count)')
@@ -46,8 +46,8 @@ export function useTransactions(options?: { transaction_type?: string; status?: 
 export function useMyTransactions(userId?: string, options?: { role?: 'sender' | 'recipient' | 'both'; status?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -68,12 +68,12 @@ export function useMyTransactions(userId?: string, options?: { role?: 'sender' |
 export function useTransactionItems(transactionId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transaction_items').select('*').eq('transaction_id', transactionId).order('created_at', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -82,8 +82,8 @@ export function useTransactionFees(transactionId?: string) {
   const [fees, setFees] = useState<any[]>([])
   const [totalFees, setTotalFees] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -91,7 +91,7 @@ export function useTransactionFees(transactionId?: string) {
       setFees(data || [])
       setTotalFees(data?.reduce((sum, f) => sum + (f.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { fees, totalFees, isLoading, refresh: fetch }
 }
@@ -100,8 +100,8 @@ export function useTransactionRefunds(transactionId?: string) {
   const [refunds, setRefunds] = useState<any[]>([])
   const [totalRefunded, setTotalRefunded] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -109,7 +109,7 @@ export function useTransactionRefunds(transactionId?: string) {
       setRefunds(data || [])
       setTotalRefunded(data?.reduce((sum, r) => sum + (r.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { refunds, totalRefunded, isLoading, refresh: fetch }
 }
@@ -118,8 +118,8 @@ export function useTransactionDisputes(transactionId?: string) {
   const [disputes, setDisputes] = useState<any[]>([])
   const [activeDispute, setActiveDispute] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -127,7 +127,7 @@ export function useTransactionDisputes(transactionId?: string) {
       setDisputes(data || [])
       setActiveDispute(data?.find(d => d.status === 'open') || null)
     } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { disputes, activeDispute, hasActiveDispute: !!activeDispute, isLoading, refresh: fetch }
 }
@@ -135,8 +135,8 @@ export function useTransactionDisputes(transactionId?: string) {
 export function useTransactionLogs(transactionId?: string, options?: { action?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -153,8 +153,8 @@ export function useTransactionLogs(transactionId?: string, options?: { action?: 
 export function useTransactionStats(options?: { from_date?: string; to_date?: string; transaction_type?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('transactions').select('status, amount, net_amount')
@@ -180,8 +180,8 @@ export function useTransactionStats(options?: { from_date?: string; to_date?: st
 export function usePendingTransactions(options?: { sender_id?: string; recipient_id?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('transactions').select('*, transaction_items(count)').eq('status', 'pending')

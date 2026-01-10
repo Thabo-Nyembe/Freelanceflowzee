@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSlot(slotId?: string) {
   const [slot, setSlot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('slots').select('*, slot_bookings(*), slot_templates(*), slot_rules(*)').eq('id', slotId).single(); setSlot(data) } finally { setIsLoading(false) }
-  }, [slotId, supabase])
+  }, [slotId])
   useEffect(() => { fetch() }, [fetch])
   return { slot, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSlot(slotId?: string) {
 export function useSlots(options?: { entity_type?: string; entity_id?: string; from_date?: string; to_date?: string; is_available?: boolean; has_capacity?: boolean; limit?: number }) {
   const [slots, setSlots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('slots').select('*, slot_bookings(count)')
@@ -46,8 +46,8 @@ export function useSlots(options?: { entity_type?: string; entity_id?: string; f
 export function useSlotBookings(slotId?: string, options?: { status?: string; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slotId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,8 +64,8 @@ export function useSlotBookings(slotId?: string, options?: { status?: string; li
 export function useUserSlotBookings(userId?: string, options?: { status?: string; from_date?: string; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -86,8 +86,8 @@ export function useUserSlotBookings(userId?: string, options?: { status?: string
 export function useAvailableSlots(entityType?: string, entityId?: string, date?: string) {
   const [slots, setSlots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId || !date) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,8 +102,8 @@ export function useAvailableSlots(entityType?: string, entityId?: string, date?:
 export function useSlotTemplates(options?: { entity_type?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('slot_templates').select('*')
@@ -120,8 +120,8 @@ export function useSlotTemplates(options?: { entity_type?: string; is_active?: b
 export function useSlotBlocks(entityType?: string, entityId?: string, options?: { from_date?: string; to_date?: string }) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -139,8 +139,8 @@ export function useSlotBlocks(entityType?: string, entityId?: string, options?: 
 export function useSlotStats(entityType?: string, entityId?: string, options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; available: number; booked: number; bookings: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

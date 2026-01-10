@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useJob(jobId?: string) {
   const [job, setJob] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('jobs').select('*, job_requirements(*), job_benefits(*)').eq('id', jobId).single(); setJob(data) } finally { setIsLoading(false) }
-  }, [jobId, supabase])
+  }, [jobId])
   useEffect(() => { fetch() }, [fetch])
   return { job, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useJob(jobId?: string) {
 export function useJobs(options?: { company_id?: string; status?: string; type?: string; location?: string; experience_level?: string; category_id?: string; search?: string; limit?: number }) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('jobs').select('*')
@@ -47,8 +47,8 @@ export function useJobs(options?: { company_id?: string; status?: string; type?:
 export function usePublishedJobs(options?: { type?: string; location?: string; limit?: number }) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('jobs').select('*').eq('status', 'published')
@@ -65,8 +65,8 @@ export function usePublishedJobs(options?: { type?: string; location?: string; l
 export function useJobApplications(jobId?: string, options?: { status?: string; limit?: number }) {
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -83,8 +83,8 @@ export function useJobApplications(jobId?: string, options?: { status?: string; 
 export function useUserApplications(userId?: string, options?: { status?: string }) {
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -101,12 +101,12 @@ export function useUserApplications(userId?: string, options?: { status?: string
 export function useJobRequirements(jobId?: string) {
   const [requirements, setRequirements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('job_requirements').select('*').eq('job_id', jobId).order('order', { ascending: true }); setRequirements(data || []) } finally { setIsLoading(false) }
-  }, [jobId, supabase])
+  }, [jobId])
   useEffect(() => { fetch() }, [fetch])
   return { requirements, isLoading, refresh: fetch }
 }
@@ -114,12 +114,12 @@ export function useJobRequirements(jobId?: string) {
 export function useJobBenefits(jobId?: string) {
   const [benefits, setBenefits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('job_benefits').select('*').eq('job_id', jobId); setBenefits(data || []) } finally { setIsLoading(false) }
-  }, [jobId, supabase])
+  }, [jobId])
   useEffect(() => { fetch() }, [fetch])
   return { benefits, isLoading, refresh: fetch }
 }
@@ -127,11 +127,11 @@ export function useJobBenefits(jobId?: string) {
 export function useJobCategories() {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('job_categories').select('*').order('name', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -153,8 +153,8 @@ export function useHasApplied(jobId?: string, userId?: string) {
 export function useCompanyJobs(companyId?: string, options?: { status?: string }) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!companyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

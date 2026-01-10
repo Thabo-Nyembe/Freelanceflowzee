@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useTransaction(transactionId?: string) {
   const [transaction, setTransaction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('transactions').select('*').eq('id', transactionId).single()
       setTransaction(data)
     } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { transaction, isLoading, refresh: fetch }
 }
@@ -28,8 +28,8 @@ export function useTransactions(userId?: string, options?: { type?: string; stat
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -48,8 +48,8 @@ export function useTransactions(userId?: string, options?: { type?: string; stat
 export function useTransactionsByReference(referenceType?: string, referenceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!referenceType || !referenceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,8 +64,8 @@ export function useTransactionsByReference(referenceType?: string, referenceId?:
 export function useTransactionStats(userId?: string, options?: { startDate?: string; endDate?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -90,15 +90,15 @@ export function useTransactionStats(userId?: string, options?: { startDate?: str
 export function useTransactionFees(transactionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('transaction_fees').select('*').eq('transaction_id', transactionId).order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -106,15 +106,15 @@ export function useTransactionFees(transactionId?: string) {
 export function useTransactionWebhooks(transactionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('transaction_webhooks').select('*').eq('transaction_id', transactionId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -130,7 +130,7 @@ export function useTransactionsRealtime(userId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'transactions', filter: `user_id=eq.${userId}` }, (payload) => setTransactions(prev => prev.map(tx => tx.id === (payload.new as any).id ? payload.new : tx)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return { transactions }
 }
 
@@ -139,8 +139,8 @@ export function useTransactionWithDetails(transactionId?: string) {
   const [fees, setFees] = useState<any[]>([])
   const [webhooks, setWebhooks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -153,7 +153,7 @@ export function useTransactionWithDetails(transactionId?: string) {
       setFees(feesRes.data || [])
       setWebhooks(webhooksRes.data || [])
     } finally { setIsLoading(false) }
-  }, [transactionId, supabase])
+  }, [transactionId])
   useEffect(() => { fetch() }, [fetch])
   return { transaction, fees, webhooks, isLoading, refresh: fetch }
 }

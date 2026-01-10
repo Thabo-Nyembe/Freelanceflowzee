@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useDigitalAsset(assetId?: string) {
   const [asset, setAsset] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!assetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('digital_assets').select('*, digital_licenses(*)').eq('id', assetId).single(); setAsset(data) } finally { setIsLoading(false) }
-  }, [assetId, supabase])
+  }, [assetId])
   useEffect(() => { fetch() }, [fetch])
   return { asset, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useDigitalAsset(assetId?: string) {
 export function useDigitalAssets(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [assets, setAssets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('digital_assets').select('*')
@@ -43,8 +43,8 @@ export function useDigitalAssets(options?: { user_id?: string; type?: string; st
 export function useDownloadHistory(assetId?: string, options?: { limit?: number }) {
   const [downloads, setDownloads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!assetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('digital_downloads').select('*').eq('asset_id', assetId).order('downloaded_at', { ascending: false }).limit(options?.limit || 100); setDownloads(data || []) } finally { setIsLoading(false) }
@@ -56,8 +56,8 @@ export function useDownloadHistory(assetId?: string, options?: { limit?: number 
 export function useUserDownloads(userId?: string, options?: { limit?: number }) {
   const [downloads, setDownloads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('digital_downloads').select('*, digital_assets(*)').eq('user_id', userId).order('downloaded_at', { ascending: false }).limit(options?.limit || 50); setDownloads(data || []) } finally { setIsLoading(false) }
@@ -69,8 +69,8 @@ export function useUserDownloads(userId?: string, options?: { limit?: number }) 
 export function useDigitalLicenses(userId?: string, options?: { status?: string }) {
   const [licenses, setLicenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -87,8 +87,8 @@ export function useDigitalLicenses(userId?: string, options?: { status?: string 
 export function useDigitalProducts(options?: { category?: string; is_active?: boolean; limit?: number }) {
   const [products, setProducts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('digital_products').select('*')
@@ -106,8 +106,8 @@ export function useAssetLicense(assetId?: string, userId?: string) {
   const [license, setLicense] = useState<any>(null)
   const [hasLicense, setHasLicense] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!assetId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('digital_licenses').select('*').eq('asset_id', assetId).eq('user_id', userId).eq('status', 'active').single(); setLicense(data); setHasLicense(!!data) } finally { setIsLoading(false) }
@@ -119,8 +119,8 @@ export function useAssetLicense(assetId?: string, userId?: string) {
 export function useDigitalAssetStats(userId?: string) {
   const [stats, setStats] = useState<{ totalAssets: number; totalDownloads: number; totalLicenses: number; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -131,7 +131,7 @@ export function useDigitalAssetStats(userId?: string) {
       const byType = assets?.reduce((acc: Record<string, number>, a) => { if (a.type) acc[a.type] = (acc[a.type] || 0) + 1; return acc }, {}) || {}
       setStats({ totalAssets, totalDownloads, totalLicenses: licenses || 0, byType })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

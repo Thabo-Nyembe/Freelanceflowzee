@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSchedulingSlot(slotId?: string) {
   const [slot, setSlot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('scheduling_slots').select('*').eq('id', slotId).single(); setSlot(data) } finally { setIsLoading(false) }
-  }, [slotId, supabase])
+  }, [slotId])
   useEffect(() => { fetch() }, [fetch])
   return { slot, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSchedulingSlot(slotId?: string) {
 export function useSchedulingSlots(options?: { user_id?: string; is_available?: boolean; date?: string; limit?: number }) {
   const [slots, setSlots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scheduling_slots').select('*')
@@ -43,8 +43,8 @@ export function useSchedulingSlots(options?: { user_id?: string; is_available?: 
 export function useSchedulingRules(options?: { user_id?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scheduling_rules').select('*')
@@ -61,8 +61,8 @@ export function useSchedulingRules(options?: { user_id?: string; is_active?: boo
 export function useSchedulingBlocks(options?: { user_id?: string; block_type?: string }) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scheduling_blocks').select('*')
@@ -79,12 +79,12 @@ export function useSchedulingBlocks(options?: { user_id?: string; block_type?: s
 export function useSchedulingPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('scheduling_preferences').select('*').eq('user_id', userId).single(); setPreferences(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSavedItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('saved_items').select('*').eq('id', itemId).single(); setItem(data) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { item, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSavedItem(itemId?: string) {
 export function useSavedItems(options?: { user_id?: string; item_type?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('saved_items').select('*')
@@ -42,8 +42,8 @@ export function useSavedItems(options?: { user_id?: string; item_type?: string; 
 export function useSavedSearches(options?: { user_id?: string; search_type?: string }) {
   const [searches, setSearches] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('saved_searches').select('*')
@@ -60,8 +60,8 @@ export function useSavedSearches(options?: { user_id?: string; search_type?: str
 export function useSavedFilters(options?: { user_id?: string; filter_type?: string }) {
   const [filters, setFilters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('saved_filters').select('*')
@@ -78,8 +78,8 @@ export function useSavedFilters(options?: { user_id?: string; filter_type?: stri
 export function useSavedViews(options?: { user_id?: string; view_type?: string; is_default?: boolean }) {
   const [views, setViews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('saved_views').select('*')

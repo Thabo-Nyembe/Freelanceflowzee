@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSmsMessage(messageId?: string) {
   const [message, setMessage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('sms_messages').select('*').eq('id', messageId).single(); setMessage(data) } finally { setIsLoading(false) }
-  }, [messageId, supabase])
+  }, [messageId])
   useEffect(() => { fetch() }, [fetch])
   return { message, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSmsMessage(messageId?: string) {
 export function useSmsMessages(options?: { status?: string; to?: string; campaign_id?: string; limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sms_messages').select('*')
@@ -43,8 +43,8 @@ export function useSmsMessages(options?: { status?: string; to?: string; campaig
 export function useSmsTemplates(options?: { is_active?: boolean; category?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sms_templates').select('*')
@@ -61,8 +61,8 @@ export function useSmsTemplates(options?: { is_active?: boolean; category?: stri
 export function useSmsCampaigns(options?: { status?: string; is_active?: boolean; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sms_campaigns').select('*')
@@ -79,8 +79,8 @@ export function useSmsCampaigns(options?: { status?: string; is_active?: boolean
 export function useSmsLogs(options?: { message_id?: string; status?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sms_logs').select('*')

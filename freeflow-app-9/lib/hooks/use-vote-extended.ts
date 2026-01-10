@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useVotes(itemId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('votes').select('*').order('created_at', { ascending: false })
@@ -30,8 +30,8 @@ export function useVoteScore(itemId?: string, itemType?: string) {
   const [upvotes, setUpvotes] = useState(0)
   const [downvotes, setDownvotes] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -50,8 +50,8 @@ export function useVoteScore(itemId?: string, itemType?: string) {
 export function useUserVote(userId?: string, itemId?: string, itemType?: string) {
   const [vote, setVote] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

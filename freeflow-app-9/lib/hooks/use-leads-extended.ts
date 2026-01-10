@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLead(leadId?: string) {
   const [lead, setLead] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!leadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('leads').select('*, lead_sources(*), lead_stages(*), lead_activities(*), lead_scores(*)').eq('id', leadId).single(); setLead(data) } finally { setIsLoading(false) }
-  }, [leadId, supabase])
+  }, [leadId])
   useEffect(() => { fetch() }, [fetch])
   return { lead, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLead(leadId?: string) {
 export function useLeads(options?: { owner_id?: string; stage_id?: string; source_id?: string; status?: string; limit?: number }) {
   const [leads, setLeads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('leads').select('*, lead_sources(*), lead_stages(*)')
@@ -44,12 +44,12 @@ export function useLeads(options?: { owner_id?: string; stage_id?: string; sourc
 export function useLeadsByStage(stageId?: string) {
   const [leads, setLeads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('leads').select('*, lead_sources(*)').eq('stage_id', stageId).order('score', { ascending: false }); setLeads(data || []) } finally { setIsLoading(false) }
-  }, [stageId, supabase])
+  }, [stageId])
   useEffect(() => { fetch() }, [fetch])
   return { leads, isLoading, refresh: fetch }
 }
@@ -57,8 +57,8 @@ export function useLeadsByStage(stageId?: string) {
 export function useLeadActivities(leadId?: string, options?: { type?: string; limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!leadId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -75,11 +75,11 @@ export function useLeadActivities(leadId?: string, options?: { type?: string; li
 export function useLeadSources() {
   const [sources, setSources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('lead_sources').select('*').order('name', { ascending: true }); setSources(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { sources, isLoading, refresh: fetch }
 }
@@ -87,11 +87,11 @@ export function useLeadSources() {
 export function useLeadStages() {
   const [stages, setStages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('lead_stages').select('*').order('order', { ascending: true }); setStages(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stages, isLoading, refresh: fetch }
 }
@@ -117,8 +117,8 @@ export function useLeadSearch(query?: string, options?: { owner_id?: string; lim
 export function useLeadPipeline() {
   const [pipeline, setPipeline] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data: stages } = await supabase.from('lead_stages').select('*').order('order', { ascending: true })
@@ -127,7 +127,7 @@ export function useLeadPipeline() {
       stages?.forEach(stage => { pipelineData[stage.id] = leads?.filter(l => l.stage_id === stage.id) || [] })
       setPipeline(pipelineData)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { pipeline, isLoading, refresh: fetch }
 }
@@ -135,12 +135,12 @@ export function useLeadPipeline() {
 export function useLeadScoreHistory(leadId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!leadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('lead_scores').select('*').eq('lead_id', leadId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [leadId, supabase])
+  }, [leadId])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -148,8 +148,8 @@ export function useLeadScoreHistory(leadId?: string) {
 export function useMyLeads(userId?: string, options?: { status?: string }) {
   const [leads, setLeads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

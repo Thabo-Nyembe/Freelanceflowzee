@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useStorageAnalytics(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_analytics').select('*').eq('user_id', userId).single(); setData(result) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useStorageAnalytics(userId?: string) {
 export function useStorageConnections(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_connections').select('*').eq('user_id', userId).eq('is_active', true); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,12 +36,12 @@ export function useStorageConnections(userId?: string) {
 export function useStorageFiles(folderId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!folderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_files').select('*').eq('folder_id', folderId).order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [folderId, supabase])
+  }, [folderId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -49,12 +49,12 @@ export function useStorageFiles(folderId?: string) {
 export function useStorageFilesCache(fileId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_files_cache').select('*').eq('file_id', fileId).single(); setData(result) } finally { setIsLoading(false) }
-  }, [fileId, supabase])
+  }, [fileId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -62,8 +62,8 @@ export function useStorageFilesCache(fileId?: string) {
 export function useStorageFolders(userId?: string, parentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -84,12 +84,12 @@ export function useStorageFolders(userId?: string, parentId?: string) {
 export function useStorageOptimizationJobs(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_optimization_jobs').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -97,11 +97,11 @@ export function useStorageOptimizationJobs(userId?: string) {
 export function useStorageProviders() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_providers').select('*').eq('is_active', true).order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -109,12 +109,12 @@ export function useStorageProviders() {
 export function useStorageQuotas(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_quotas').select('*').eq('user_id', userId).single(); setData(result) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -122,12 +122,12 @@ export function useStorageQuotas(userId?: string) {
 export function useStorageShares(fileId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_shares').select('*').eq('file_id', fileId).eq('is_active', true); setData(result || []) } finally { setIsLoading(false) }
-  }, [fileId, supabase])
+  }, [fileId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -135,11 +135,11 @@ export function useStorageShares(fileId?: string) {
 export function useStorageTiers() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('storage_tiers').select('*').order('storage_limit', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

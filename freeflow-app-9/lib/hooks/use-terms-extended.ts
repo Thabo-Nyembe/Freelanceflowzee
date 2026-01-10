@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTerm(termId?: string) {
   const [term, setTerm] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!termId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('terms').select('*, term_versions(*), term_categories(*), term_translations(*)').eq('id', termId).single(); setTerm(data) } finally { setIsLoading(false) }
-  }, [termId, supabase])
+  }, [termId])
   useEffect(() => { fetch() }, [fetch])
   return { term, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function useTerm(termId?: string) {
 export function useTermBySlug(slug?: string) {
   const [term, setTerm] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('terms').select('*, term_versions(*), term_categories(*)').eq('slug', slug).eq('status', 'published').single(); setTerm(data) } finally { setIsLoading(false) }
-  }, [slug, supabase])
+  }, [slug])
   useEffect(() => { fetch() }, [fetch])
   return { term, isLoading, refresh: fetch }
 }
@@ -37,8 +37,8 @@ export function useTermBySlug(slug?: string) {
 export function useTerms(options?: { term_type?: string; category_id?: string; status?: string; is_required?: boolean; search?: string; limit?: number }) {
   const [terms, setTerms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('terms').select('*, term_categories(*)')
@@ -59,8 +59,8 @@ export function useTermVersions(termId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [currentVersion, setCurrentVersion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!termId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -68,7 +68,7 @@ export function useTermVersions(termId?: string) {
       setVersions(data || [])
       setCurrentVersion(data?.[0] || null)
     } finally { setIsLoading(false) }
-  }, [termId, supabase])
+  }, [termId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, currentVersion, isLoading, refresh: fetch }
 }
@@ -78,8 +78,8 @@ export function useTermAcceptance(termId?: string, userId?: string) {
   const [isAccepted, setIsAccepted] = useState(false)
   const [needsUpdate, setNeedsUpdate] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!termId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,8 +102,8 @@ export function useTermAcceptances(termId?: string, options?: { version?: number
   const [acceptances, setAcceptances] = useState<any[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!termId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -121,8 +121,8 @@ export function useTermAcceptances(termId?: string, options?: { version?: number
 export function useRequiredTerms(userId?: string) {
   const [pendingTerms, setPendingTerms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -137,7 +137,7 @@ export function useRequiredTerms(userId?: string) {
       })
       setPendingTerms(pending)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { pendingTerms, hasPending: pendingTerms.length > 0, isLoading, refresh: fetch }
 }
@@ -146,8 +146,8 @@ export function useTermTranslations(termId?: string) {
   const [translations, setTranslations] = useState<any[]>([])
   const [availableLocales, setAvailableLocales] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!termId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -155,7 +155,7 @@ export function useTermTranslations(termId?: string) {
       setTranslations(data || [])
       setAvailableLocales((data || []).map(t => t.locale))
     } finally { setIsLoading(false) }
-  }, [termId, supabase])
+  }, [termId])
   useEffect(() => { fetch() }, [fetch])
   return { translations, availableLocales, isLoading, refresh: fetch }
 }
@@ -163,11 +163,11 @@ export function useTermTranslations(termId?: string) {
 export function useTermCategories() {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('term_categories').select('*').order('name', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -175,8 +175,8 @@ export function useTermCategories() {
 export function useUserTermAcceptances(userId?: string, options?: { term_type?: string }) {
   const [acceptances, setAcceptances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

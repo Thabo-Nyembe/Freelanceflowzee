@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useSeverity(severityId?: string) {
   const [severity, setSeverity] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!severityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('severities').select('*').eq('id', severityId).single()
       setSeverity(data)
     } finally { setIsLoading(false) }
-  }, [severityId, supabase])
+  }, [severityId])
   useEffect(() => { fetch() }, [fetch])
   return { severity, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useSeverity(severityId?: string) {
 export function useSeverities(options?: { entityType?: string; workspaceId?: string; isCritical?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('severities').select('*')
@@ -45,8 +45,8 @@ export function useSeverities(options?: { entityType?: string; workspaceId?: str
 export function useEntitySeverity(entityType?: string, entityId?: string) {
   const [severity, setSeverity] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,8 +61,8 @@ export function useEntitySeverity(entityType?: string, entityId?: string) {
 export function useCriticalSeverities(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('severities').select('*').eq('is_critical', true)
@@ -70,7 +70,7 @@ export function useCriticalSeverities(entityType?: string) {
       const { data: result } = await query.order('level', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, supabase])
+  }, [entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

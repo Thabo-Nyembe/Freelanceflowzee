@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useProcess(processId?: string) {
   const [process, setProcess] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!processId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('processes').select('*, process_steps(*), process_variables(*), process_instances(count)').eq('id', processId).single(); setProcess(data) } finally { setIsLoading(false) }
-  }, [processId, supabase])
+  }, [processId])
   useEffect(() => { fetch() }, [fetch])
   return { process, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useProcess(processId?: string) {
 export function useProcesses(options?: { organization_id?: string; status?: string; category?: string; owner_id?: string; search?: string; limit?: number }) {
   const [processes, setProcesses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('processes').select('*, process_steps(count), process_instances(count)')
@@ -45,12 +45,12 @@ export function useProcesses(options?: { organization_id?: string; status?: stri
 export function useProcessSteps(processId?: string) {
   const [steps, setSteps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!processId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('process_steps').select('*').eq('process_id', processId).eq('is_active', true).order('order', { ascending: true }); setSteps(data || []) } finally { setIsLoading(false) }
-  }, [processId, supabase])
+  }, [processId])
   useEffect(() => { fetch() }, [fetch])
   return { steps, isLoading, refresh: fetch }
 }
@@ -58,12 +58,12 @@ export function useProcessSteps(processId?: string) {
 export function useProcessInstance(instanceId?: string) {
   const [instance, setInstance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('process_instances').select('*, processes(*), process_steps(*), process_tasks(*)').eq('id', instanceId).single(); setInstance(data) } finally { setIsLoading(false) }
-  }, [instanceId, supabase])
+  }, [instanceId])
   useEffect(() => { fetch() }, [fetch])
   return { instance, isLoading, refresh: fetch }
 }
@@ -71,8 +71,8 @@ export function useProcessInstance(instanceId?: string) {
 export function useProcessInstances(options?: { process_id?: string; status?: string; started_by?: string; limit?: number }) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('process_instances').select('*, processes(*), process_steps(*)')
@@ -90,8 +90,8 @@ export function useProcessInstances(options?: { process_id?: string; status?: st
 export function useProcessTasks(options?: { instance_id?: string; assignee_id?: string; status?: string; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('process_tasks').select('*, processes(*), process_instances(*), process_steps(*)')
@@ -109,8 +109,8 @@ export function useProcessTasks(options?: { instance_id?: string; assignee_id?: 
 export function useMyProcessTasks(userId?: string, options?: { status?: string; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -127,12 +127,12 @@ export function useMyProcessTasks(userId?: string, options?: { status?: string; 
 export function useProcessHistory(instanceId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('process_history').select('*, process_steps(*), users(*)').eq('instance_id', instanceId).order('performed_at', { ascending: true }); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [instanceId, supabase])
+  }, [instanceId])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -140,12 +140,12 @@ export function useProcessHistory(instanceId?: string) {
 export function useProcessVariables(processId?: string) {
   const [variables, setVariables] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!processId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('process_variables').select('*').eq('process_id', processId).order('name', { ascending: true }); setVariables(data || []) } finally { setIsLoading(false) }
-  }, [processId, supabase])
+  }, [processId])
   useEffect(() => { fetch() }, [fetch])
   return { variables, isLoading, refresh: fetch }
 }
@@ -153,8 +153,8 @@ export function useProcessVariables(processId?: string) {
 export function useProcessTemplates(options?: { category?: string; search?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('process_templates').select('*')
@@ -171,8 +171,8 @@ export function useProcessTemplates(options?: { category?: string; search?: stri
 export function useRunningInstances(processId?: string) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('process_instances').select('*, processes(*), process_steps(*)').eq('status', 'running')
@@ -180,7 +180,7 @@ export function useRunningInstances(processId?: string) {
       const { data } = await query.order('started_at', { ascending: false })
       setInstances(data || [])
     } finally { setIsLoading(false) }
-  }, [processId, supabase])
+  }, [processId])
   useEffect(() => { fetch() }, [fetch])
   return { instances, isLoading, refresh: fetch }
 }
@@ -188,8 +188,8 @@ export function useRunningInstances(processId?: string) {
 export function useProcessStats(processId?: string) {
   const [stats, setStats] = useState<{ total: number; running: number; completed: number; failed: number; avgDuration: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('process_instances').select('status, started_at, completed_at')
@@ -205,7 +205,7 @@ export function useProcessStats(processId?: string) {
         : 0
       setStats({ total, running, completed, failed, avgDuration })
     } finally { setIsLoading(false) }
-  }, [processId, supabase])
+  }, [processId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

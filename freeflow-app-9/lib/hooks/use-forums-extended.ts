@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useForum(forumId?: string) {
   const [forum, setForum] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!forumId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forums').select('*, forum_categories(*), forum_moderators(*)').eq('id', forumId).single(); setForum(data) } finally { setIsLoading(false) }
-  }, [forumId, supabase])
+  }, [forumId])
   useEffect(() => { fetch() }, [fetch])
   return { forum, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useForum(forumId?: string) {
 export function useForums(options?: { is_active?: boolean; is_private?: boolean; limit?: number }) {
   const [forums, setForums] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('forums').select('*')
@@ -42,12 +42,12 @@ export function useForums(options?: { is_active?: boolean; is_private?: boolean;
 export function useForumCategories(forumId?: string) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!forumId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_categories').select('*').eq('forum_id', forumId).order('order', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
-  }, [forumId, supabase])
+  }, [forumId])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -55,12 +55,12 @@ export function useForumCategories(forumId?: string) {
 export function useTopic(topicId?: string) {
   const [topic, setTopic] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!topicId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_topics').select('*, forum_posts(*)').eq('id', topicId).single(); setTopic(data) } finally { setIsLoading(false) }
-  }, [topicId, supabase])
+  }, [topicId])
   useEffect(() => { fetch() }, [fetch])
   return { topic, isLoading, refresh: fetch }
 }
@@ -68,8 +68,8 @@ export function useTopic(topicId?: string) {
 export function useTopics(options?: { forum_id?: string; category_id?: string; author_id?: string; is_pinned?: boolean; limit?: number }) {
   const [topics, setTopics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('forum_topics').select('*')
@@ -88,8 +88,8 @@ export function useTopics(options?: { forum_id?: string; category_id?: string; a
 export function useTopicPosts(topicId?: string, options?: { limit?: number; offset?: number }) {
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!topicId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -104,12 +104,12 @@ export function useTopicPosts(topicId?: string, options?: { limit?: number; offs
 export function useForumModerators(forumId?: string) {
   const [moderators, setModerators] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!forumId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_moderators').select('*').eq('forum_id', forumId); setModerators(data || []) } finally { setIsLoading(false) }
-  }, [forumId, supabase])
+  }, [forumId])
   useEffect(() => { fetch() }, [fetch])
   return { moderators, isLoading, refresh: fetch }
 }
@@ -131,11 +131,11 @@ export function useIsModerator(forumId?: string, userId?: string) {
 export function useRecentTopics(limit?: number) {
   const [topics, setTopics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_topics').select('*, forums(*)').order('created_at', { ascending: false }).limit(limit || 20); setTopics(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { topics, isLoading, refresh: fetch }
 }
@@ -143,11 +143,11 @@ export function useRecentTopics(limit?: number) {
 export function usePopularTopics(limit?: number) {
   const [topics, setTopics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_topics').select('*, forums(*)').order('view_count', { ascending: false }).limit(limit || 10); setTopics(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { topics, isLoading, refresh: fetch }
 }
@@ -155,8 +155,8 @@ export function usePopularTopics(limit?: number) {
 export function useUserTopics(userId?: string, options?: { limit?: number }) {
   const [topics, setTopics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_topics').select('*, forums(*)').eq('author_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 20); setTopics(data || []) } finally { setIsLoading(false) }

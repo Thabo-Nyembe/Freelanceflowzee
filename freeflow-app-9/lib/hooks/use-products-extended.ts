@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useProduct(productId?: string) {
   const [product, setProduct] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('products').select('*, product_variants(*), product_categories(*), product_images(*), product_reviews(count), product_inventory(*), product_pricing(*), product_attributes(*)').eq('id', productId).single(); setProduct(data) } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { product, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function useProduct(productId?: string) {
 export function useProductBySlug(slug?: string) {
   const [product, setProduct] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('products').select('*, product_variants(*), product_categories(*), product_images(*), product_reviews(count), product_pricing(*)').eq('slug', slug).eq('is_active', true).single(); setProduct(data) } finally { setIsLoading(false) }
-  }, [slug, supabase])
+  }, [slug])
   useEffect(() => { fetch() }, [fetch])
   return { product, isLoading, refresh: fetch }
 }
@@ -37,8 +37,8 @@ export function useProductBySlug(slug?: string) {
 export function useProducts(options?: { category_id?: string; organization_id?: string; is_active?: boolean; is_featured?: boolean; min_price?: number; max_price?: number; search?: string; sort_by?: string; limit?: number }) {
   const [products, setProducts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('products').select('*, product_images(*), product_variants(*), product_reviews(count), product_inventory(*)')
@@ -64,12 +64,12 @@ export function useProducts(options?: { category_id?: string; organization_id?: 
 export function useProductVariants(productId?: string) {
   const [variants, setVariants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('product_variants').select('*').eq('product_id', productId).eq('is_active', true).order('name', { ascending: true }); setVariants(data || []) } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { variants, isLoading, refresh: fetch }
 }
@@ -77,12 +77,12 @@ export function useProductVariants(productId?: string) {
 export function useProductImages(productId?: string) {
   const [images, setImages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('product_images').select('*').eq('product_id', productId).order('order', { ascending: true }); setImages(data || []) } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { images, isLoading, refresh: fetch }
 }
@@ -91,8 +91,8 @@ export function useProductReviews(productId?: string, options?: { is_approved?: 
   const [reviews, setReviews] = useState<any[]>([])
   const [averageRating, setAverageRating] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -115,12 +115,12 @@ export function useProductReviews(productId?: string, options?: { is_approved?: 
 export function useProductInventory(productId?: string) {
   const [inventory, setInventory] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('product_inventory').select('*').eq('product_id', productId).single(); setInventory(data) } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { inventory, isLoading, refresh: fetch }
 }
@@ -128,8 +128,8 @@ export function useProductInventory(productId?: string) {
 export function useProductCategories(options?: { parent_id?: string; is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('product_categories').select('*, products(count)')
@@ -146,8 +146,8 @@ export function useProductCategories(options?: { parent_id?: string; is_active?:
 export function useFeaturedProducts(options?: { category_id?: string; limit?: number }) {
   const [products, setProducts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('products').select('*, product_images(*), product_reviews(count)').eq('is_active', true).eq('is_featured', true)
@@ -181,12 +181,12 @@ export function useProductSearch(searchTerm?: string, options?: { category_id?: 
 export function useProductAttributes(productId?: string) {
   const [attributes, setAttributes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('product_attributes').select('*').eq('product_id', productId).order('name', { ascending: true }); setAttributes(data || []) } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { attributes, isLoading, refresh: fetch }
 }
@@ -194,8 +194,8 @@ export function useProductAttributes(productId?: string) {
 export function useLowStockProducts(options?: { threshold?: number; limit?: number }) {
   const [products, setProducts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const threshold = options?.threshold || 10

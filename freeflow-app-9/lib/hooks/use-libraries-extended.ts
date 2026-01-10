@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLibrary(libraryId?: string) {
   const [library, setLibrary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!libraryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('libraries').select('*, library_collections(*)').eq('id', libraryId).single(); setLibrary(data) } finally { setIsLoading(false) }
-  }, [libraryId, supabase])
+  }, [libraryId])
   useEffect(() => { fetch() }, [fetch])
   return { library, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLibrary(libraryId?: string) {
 export function useUserLibraries(userId?: string, options?: { type?: string; is_public?: boolean }) {
   const [libraries, setLibraries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,8 +43,8 @@ export function useUserLibraries(userId?: string, options?: { type?: string; is_
 export function useLibraryItems(libraryId?: string, options?: { type?: string; collection_id?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!libraryId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,12 +62,12 @@ export function useLibraryItems(libraryId?: string, options?: { type?: string; c
 export function useLibraryItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_items').select('*, libraries(*), library_tags(*)').eq('id', itemId).single(); setItem(data) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { item, isLoading, refresh: fetch }
 }
@@ -75,12 +75,12 @@ export function useLibraryItem(itemId?: string) {
 export function useLibraryCollections(libraryId?: string) {
   const [collections, setCollections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!libraryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_collections').select('*').eq('library_id', libraryId).order('name', { ascending: true }); setCollections(data || []) } finally { setIsLoading(false) }
-  }, [libraryId, supabase])
+  }, [libraryId])
   useEffect(() => { fetch() }, [fetch])
   return { collections, isLoading, refresh: fetch }
 }
@@ -88,12 +88,12 @@ export function useLibraryCollections(libraryId?: string) {
 export function useSharedLibraries(userId?: string) {
   const [libraries, setLibraries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_shares').select('*, libraries(*)').eq('shared_with', userId).order('shared_at', { ascending: false }); setLibraries(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { libraries, isLoading, refresh: fetch }
 }
@@ -101,8 +101,8 @@ export function useSharedLibraries(userId?: string) {
 export function useLibraryFavorites(userId?: string, options?: { limit?: number }) {
   const [favorites, setFavorites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_favorites').select('*, library_items(*, libraries(*))').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setFavorites(data || []) } finally { setIsLoading(false) }
@@ -140,8 +140,8 @@ export function useLibrarySearch(libraryId?: string, query?: string, options?: {
 export function usePublicLibraries(options?: { type?: string; limit?: number }) {
   const [libraries, setLibraries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('libraries').select('*').eq('is_public', true)
@@ -157,12 +157,12 @@ export function usePublicLibraries(options?: { type?: string; limit?: number }) 
 export function useLibraryTags(libraryId?: string) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!libraryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_tags').select('tag, count').eq('library_id', libraryId).order('count', { ascending: false }); setTags(data || []) } finally { setIsLoading(false) }
-  }, [libraryId, supabase])
+  }, [libraryId])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }

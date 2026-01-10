@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useNotification(notificationId?: string) {
   const [notification, setNotification] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!notificationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('notifications').select('*').eq('id', notificationId).single()
       setNotification(data)
     } finally { setIsLoading(false) }
-  }, [notificationId, supabase])
+  }, [notificationId])
   useEffect(() => { fetch() }, [fetch])
   return { notification, isLoading, refresh: fetch }
 }
@@ -28,8 +28,8 @@ export function useNotifications(userId?: string, options?: { type?: string; isR
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -48,15 +48,15 @@ export function useNotifications(userId?: string, options?: { type?: string; isR
 export function useUnreadNotificationCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { count: result } = await supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false)
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -64,8 +64,8 @@ export function useUnreadNotificationCount(userId?: string) {
 export function useNotificationPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -74,7 +74,7 @@ export function useNotificationPreferences(userId?: string) {
       data?.forEach(p => { prefs[p.notification_type] = { email: p.email_enabled, push: p.push_enabled, in_app: p.in_app_enabled }; })
       setPreferences(prefs)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }
 }
@@ -82,15 +82,15 @@ export function useNotificationPreferences(userId?: string) {
 export function useNotificationSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('notification_settings').select('*').eq('user_id', userId).single()
       setSettings(data)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -98,8 +98,8 @@ export function useNotificationSettings(userId?: string) {
 export function useNotificationTemplates(options?: { type?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('notification_templates').select('*')
@@ -140,15 +140,15 @@ export function useNotificationsRealtime(userId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return { notifications, unreadCount }
 }
 
 export function useNotificationStats(userId?: string, options?: { startDate?: string; endDate?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -177,6 +177,6 @@ export function useNotificationBadge(userId?: string) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, updateBadge)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return badge
 }

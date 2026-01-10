@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useTimeEntries(userId?: string, projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('time_entries').select('*').order('start_time', { ascending: false })
@@ -28,8 +28,8 @@ export function useTimeEntries(userId?: string, projectId?: string) {
 export function useTimeSheets(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('time_sheets').select('*').order('period_start', { ascending: false })

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useAssets(userId?: string, assetType?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('assets').select('*').order('created_at', { ascending: false })
@@ -29,8 +29,8 @@ export function useAssets(userId?: string, assetType?: string, status?: string) 
 export function useAssetLibrary(libraryId?: string, assetType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!libraryId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -47,15 +47,15 @@ export function useAssetLibrary(libraryId?: string, assetType?: string) {
 export function useAssetVersions(assetId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!assetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('asset_versions').select('*').eq('asset_id', assetId).order('version_number', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [assetId, supabase])
+  }, [assetId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

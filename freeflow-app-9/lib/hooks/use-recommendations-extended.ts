@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRecommendation(recommendationId?: string) {
   const [recommendation, setRecommendation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!recommendationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('recommendations').select('*, recommendation_models(*), users(*), recommendation_feedback(*)').eq('id', recommendationId).single(); setRecommendation(data) } finally { setIsLoading(false) }
-  }, [recommendationId, supabase])
+  }, [recommendationId])
   useEffect(() => { fetch() }, [fetch])
   return { recommendation, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRecommendation(recommendationId?: string) {
 export function useRecommendations(options: { user_id: string; entity_type?: string; model_id?: string; status?: string; min_score?: number; limit?: number }) {
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!options.user_id) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,8 +46,8 @@ export function useRecommendations(options: { user_id: string; entity_type?: str
 export function useTopRecommendations(userId?: string, entityType?: string, limit?: number) {
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useTopRecommendations(userId?: string, entityType?: string, limi
 export function useRecommendationModels(options?: { type?: string; is_active?: boolean }) {
   const [models, setModels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('recommendation_models').select('*')
@@ -80,12 +80,12 @@ export function useRecommendationModels(options?: { type?: string; is_active?: b
 export function useRecommendationFeedback(recommendationId?: string) {
   const [feedback, setFeedback] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!recommendationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('recommendation_feedback').select('*, users(*)').eq('recommendation_id', recommendationId).order('created_at', { ascending: false }); setFeedback(data || []) } finally { setIsLoading(false) }
-  }, [recommendationId, supabase])
+  }, [recommendationId])
   useEffect(() => { fetch() }, [fetch])
   return { feedback, isLoading, refresh: fetch }
 }
@@ -93,8 +93,8 @@ export function useRecommendationFeedback(recommendationId?: string) {
 export function useRecommendationStats(options?: { model_id?: string; entity_type?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; accepted: number; dismissed: number; converted: number; acceptanceRate: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('recommendations').select('status, entity_type')
@@ -121,8 +121,8 @@ export function useRecommendationStats(options?: { model_id?: string; entity_typ
 export function useSimilarItems(entityType?: string, entityId?: string, limit?: number) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -137,8 +137,8 @@ export function useSimilarItems(entityType?: string, entityId?: string, limit?: 
 export function useMyRecommendationHistory(userId?: string, options?: { entity_type?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -155,8 +155,8 @@ export function useMyRecommendationHistory(userId?: string, options?: { entity_t
 export function usePersonalizedRecommendations(userId?: string, options?: { categories?: string[]; limit?: number }) {
   const [recommendations, setRecommendations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useEmbed(embedId?: string) {
   const [embed, setEmbed] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!embedId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('embeds').select('*').eq('id', embedId).single()
       setEmbed(data)
     } finally { setIsLoading(false) }
-  }, [embedId, supabase])
+  }, [embedId])
   useEffect(() => { fetch() }, [fetch])
   return { embed, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useEmbed(embedId?: string) {
 export function useEmbeds(options?: { embedType?: string; workspaceId?: string; userId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('embeds').select('*')
@@ -45,8 +45,8 @@ export function useEmbeds(options?: { embedType?: string; workspaceId?: string; 
 export function useEntityEmbeds(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,15 +61,15 @@ export function useEntityEmbeds(entityType?: string, entityId?: string) {
 export function useEmbedsByType(embedType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!embedType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('embeds').select('*').eq('embed_type', embedType).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [embedType, supabase])
+  }, [embedType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

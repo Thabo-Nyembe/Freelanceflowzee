@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useReward(rewardId?: string) {
   const [reward, setReward] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!rewardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rewards').select('*, reward_types(*), reward_tiers(*), reward_programs(*)').eq('id', rewardId).single(); setReward(data) } finally { setIsLoading(false) }
-  }, [rewardId, supabase])
+  }, [rewardId])
   useEffect(() => { fetch() }, [fetch])
   return { reward, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useReward(rewardId?: string) {
 export function useRewards(options?: { program_id?: string; type_id?: string; tier_id?: string; is_active?: boolean; min_points?: number; max_points?: number; search?: string; limit?: number }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('rewards').select('*, reward_types(*), reward_tiers(*), reward_programs(*)')
@@ -47,8 +47,8 @@ export function useRewards(options?: { program_id?: string; type_id?: string; ti
 export function useRewardTypes(options?: { is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('reward_types').select('*')
@@ -56,7 +56,7 @@ export function useRewardTypes(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -64,8 +64,8 @@ export function useRewardTypes(options?: { is_active?: boolean }) {
 export function useRewardPrograms(options?: { is_active?: boolean }) {
   const [programs, setPrograms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('reward_programs').select('*, reward_tiers(*)')
@@ -73,7 +73,7 @@ export function useRewardPrograms(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setPrograms(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { programs, isLoading, refresh: fetch }
 }
@@ -81,8 +81,8 @@ export function useRewardPrograms(options?: { is_active?: boolean }) {
 export function useUserPoints(userId?: string, programId?: string) {
   const [points, setPoints] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -99,8 +99,8 @@ export function useUserPoints(userId?: string, programId?: string) {
 export function useUserRedemptions(userId?: string, options?: { status?: string; limit?: number }) {
   const [redemptions, setRedemptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -117,8 +117,8 @@ export function useUserRedemptions(userId?: string, options?: { status?: string;
 export function useUserTier(userId?: string, programId?: string) {
   const [tier, setTier] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !programId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -135,12 +135,12 @@ export function useUserTier(userId?: string, programId?: string) {
 export function useRewardTiers(programId?: string) {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('reward_tiers').select('*').eq('program_id', programId).order('points_threshold', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
-  }, [programId, supabase])
+  }, [programId])
   useEffect(() => { fetch() }, [fetch])
   return { tiers, isLoading, refresh: fetch }
 }
@@ -149,8 +149,8 @@ export function useAvailableRewards(userId?: string, programId?: string) {
   const [rewards, setRewards] = useState<any[]>([])
   const [userPoints, setUserPoints] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !programId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -168,8 +168,8 @@ export function useAvailableRewards(userId?: string, programId?: string) {
 export function useRewardStats(programId?: string) {
   const [stats, setStats] = useState<{ totalMembers: number; totalPointsIssued: number; totalRedemptions: number; activeRewards: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -181,7 +181,7 @@ export function useRewardStats(programId?: string) {
       const totalPointsIssued = (members.data || []).reduce((sum, m) => sum + (m.lifetime_earned || 0), 0)
       setStats({ totalMembers: members.count || 0, totalPointsIssued, totalRedemptions: redemptions.count || 0, activeRewards: rewards.count || 0 })
     } finally { setIsLoading(false) }
-  }, [programId, supabase])
+  }, [programId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

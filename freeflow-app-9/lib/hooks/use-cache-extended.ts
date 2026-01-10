@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useCacheEntry(key?: string, namespace?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!key) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -32,8 +32,8 @@ export function useCacheEntry(key?: string, namespace?: string) {
 export function useCacheStats(namespace?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('cache_entries').select('*', { count: 'exact', head: true })
@@ -41,7 +41,7 @@ export function useCacheStats(namespace?: string) {
       const { count: result } = await query
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [namespace, supabase])
+  }, [namespace])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -49,8 +49,8 @@ export function useCacheStats(namespace?: string) {
 export function useCacheKeys(namespace?: string) {
   const [keys, setKeys] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('cache_entries').select('cache_key, namespace, expires_at').limit(100)
@@ -58,7 +58,7 @@ export function useCacheKeys(namespace?: string) {
       const { data } = await query
       setKeys(data || [])
     } finally { setIsLoading(false) }
-  }, [namespace, supabase])
+  }, [namespace])
   useEffect(() => { fetch() }, [fetch])
   return { keys, isLoading, refresh: fetch }
 }

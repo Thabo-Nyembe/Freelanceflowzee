@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRealtimeConnection(connectionId?: string) {
   const [connection, setConnection] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('realtime_connections').select('*').eq('id', connectionId).single(); setConnection(data) } finally { setIsLoading(false) }
-  }, [connectionId, supabase])
+  }, [connectionId])
   useEffect(() => { fetch() }, [fetch])
   return { connection, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRealtimeConnection(connectionId?: string) {
 export function useRealtimeConnections(options?: { user_id?: string; channel_id?: string; status?: string; limit?: number }) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('realtime_connections').select('*')
@@ -43,8 +43,8 @@ export function useRealtimeConnections(options?: { user_id?: string; channel_id?
 export function useRealtimeChannels(options?: { type?: string; is_active?: boolean; limit?: number }) {
   const [channels, setChannels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('realtime_channels').select('*')
@@ -61,8 +61,8 @@ export function useRealtimeChannels(options?: { type?: string; is_active?: boole
 export function useRealtimeMessages(channelId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('realtime_messages').select('*').eq('channel_id', channelId).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages(data || []) } finally { setIsLoading(false) }
@@ -74,12 +74,12 @@ export function useRealtimeMessages(channelId?: string, options?: { limit?: numb
 export function useRealtimePresence(channelId?: string) {
   const [presence, setPresence] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('realtime_presence').select('*').eq('channel_id', channelId).eq('is_online', true).order('last_seen_at', { ascending: false }); setPresence(data || []) } finally { setIsLoading(false) }
-  }, [channelId, supabase])
+  }, [channelId])
   useEffect(() => { fetch() }, [fetch])
   return { presence, isLoading, refresh: fetch }
 }
@@ -87,12 +87,12 @@ export function useRealtimePresence(channelId?: string) {
 export function useActiveConnections(userId?: string) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('realtime_connections').select('*').eq('user_id', userId).eq('status', 'connected').order('connected_at', { ascending: false }); setConnections(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { connections, isLoading, refresh: fetch }
 }

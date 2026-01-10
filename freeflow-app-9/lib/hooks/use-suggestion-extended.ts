@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useSuggestion(suggestionId?: string) {
   const [suggestion, setSuggestion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!suggestionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('suggestions').select('*').eq('id', suggestionId).single()
       setSuggestion(data)
     } finally { setIsLoading(false) }
-  }, [suggestionId, supabase])
+  }, [suggestionId])
   useEffect(() => { fetch() }, [fetch])
   return { suggestion, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useSuggestion(suggestionId?: string) {
 export function useSuggestions(options?: { user_id?: string; type?: string; status?: string; target_id?: string; target_type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('suggestions').select('*')
@@ -48,8 +48,8 @@ export function useSuggestions(options?: { user_id?: string; type?: string; stat
 export function usePendingSuggestions(userId?: string, options?: { type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -66,8 +66,8 @@ export function usePendingSuggestions(userId?: string, options?: { type?: string
 export function useTopSuggestions(userId?: string, options?: { type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -84,8 +84,8 @@ export function useTopSuggestions(userId?: string, options?: { type?: string; li
 export function useSuggestionsByType(userId?: string, type?: string, options?: { status?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !type) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,8 +102,8 @@ export function useSuggestionsByType(userId?: string, type?: string, options?: {
 export function useSuggestionStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; byType: Record<string, number>; byStatus: Record<string, number>; acceptanceRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -116,7 +116,7 @@ export function useSuggestionStats(userId?: string) {
       const acceptanceRate = total > 0 ? (accepted / total) * 100 : 0
       setStats({ total, byType, byStatus, acceptanceRate })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -124,8 +124,8 @@ export function useSuggestionStats(userId?: string) {
 export function useSuggestionTypes(userId?: string) {
   const [types, setTypes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -133,7 +133,7 @@ export function useSuggestionTypes(userId?: string) {
       const uniqueTypes = [...new Set((data || []).map(s => s.type).filter(Boolean))]
       setTypes(uniqueTypes)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -141,8 +141,8 @@ export function useSuggestionTypes(userId?: string) {
 export function useAcceptedSuggestions(userId?: string, options?: { type?: string; limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -179,15 +179,15 @@ export function useSuggestionsRealtime(userId?: string) {
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'suggestions', filter: `user_id=eq.${userId}` }, (payload) => setSuggestions(prev => prev.filter(s => s.id !== (payload.old as any).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return { suggestions }
 }
 
 export function useSuggestionCount(userId?: string, options?: { type?: string; status?: string }) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -205,8 +205,8 @@ export function useSuggestionCount(userId?: string, options?: { type?: string; s
 export function useRelatedSuggestions(suggestionId?: string, options?: { limit?: number }) {
   const [suggestions, setSuggestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!suggestionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

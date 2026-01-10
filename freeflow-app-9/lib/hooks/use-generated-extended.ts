@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useGeneratedContent(contentId?: string) {
   const [content, setContent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generated_content').select('*').eq('id', contentId).single(); setContent(data) } finally { setIsLoading(false) }
-  }, [contentId, supabase])
+  }, [contentId])
   useEffect(() => { fetch() }, [fetch])
   return { content, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useGeneratedContent(contentId?: string) {
 export function useGeneratedContentList(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [contents, setContents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('generated_content').select('*')
@@ -43,8 +43,8 @@ export function useGeneratedContentList(options?: { user_id?: string; type?: str
 export function useGeneratedImages(userId?: string, options?: { limit?: number }) {
   const [images, setImages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generated_images').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setImages(data || []) } finally { setIsLoading(false) }
@@ -56,8 +56,8 @@ export function useGeneratedImages(userId?: string, options?: { limit?: number }
 export function useGeneratedCode(userId?: string, options?: { language?: string; limit?: number }) {
   const [code, setCode] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -74,8 +74,8 @@ export function useGeneratedCode(userId?: string, options?: { language?: string;
 export function useGeneratedReports(userId?: string, options?: { type?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

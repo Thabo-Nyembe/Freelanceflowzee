@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useIssue(issueId?: string) {
   const [issue, setIssue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!issueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('issues').select('*, issue_comments(*), issue_labels(*), issue_assignees(*), issue_attachments(*)').eq('id', issueId).single(); setIssue(data) } finally { setIsLoading(false) }
-  }, [issueId, supabase])
+  }, [issueId])
   useEffect(() => { fetch() }, [fetch])
   return { issue, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useIssue(issueId?: string) {
 export function useIssues(options?: { project_id?: string; status?: string; priority?: string; type?: string; milestone_id?: string; created_by?: string; limit?: number }) {
   const [issues, setIssues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('issues').select('*, issue_labels(*), issue_assignees(*)')
@@ -46,8 +46,8 @@ export function useIssues(options?: { project_id?: string; status?: string; prio
 export function useProjectIssues(projectId?: string, options?: { status?: string }) {
   const [issues, setIssues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,12 +64,12 @@ export function useProjectIssues(projectId?: string, options?: { status?: string
 export function useIssueComments(issueId?: string) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!issueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('issue_comments').select('*').eq('issue_id', issueId).order('created_at', { ascending: true }); setComments(data || []) } finally { setIsLoading(false) }
-  }, [issueId, supabase])
+  }, [issueId])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -77,12 +77,12 @@ export function useIssueComments(issueId?: string) {
 export function useIssueLabels(issueId?: string) {
   const [labels, setLabels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!issueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('issue_labels').select('*, labels(*)').eq('issue_id', issueId); setLabels(data || []) } finally { setIsLoading(false) }
-  }, [issueId, supabase])
+  }, [issueId])
   useEffect(() => { fetch() }, [fetch])
   return { labels, isLoading, refresh: fetch }
 }
@@ -90,12 +90,12 @@ export function useIssueLabels(issueId?: string) {
 export function useIssueAssignees(issueId?: string) {
   const [assignees, setAssignees] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!issueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('issue_assignees').select('*').eq('issue_id', issueId); setAssignees(data || []) } finally { setIsLoading(false) }
-  }, [issueId, supabase])
+  }, [issueId])
   useEffect(() => { fetch() }, [fetch])
   return { assignees, isLoading, refresh: fetch }
 }
@@ -103,8 +103,8 @@ export function useIssueAssignees(issueId?: string) {
 export function useIssueMilestones(projectId?: string, options?: { is_open?: boolean }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -121,12 +121,12 @@ export function useIssueMilestones(projectId?: string, options?: { is_open?: boo
 export function useIssueAttachments(issueId?: string) {
   const [attachments, setAttachments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!issueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('issue_attachments').select('*').eq('issue_id', issueId).order('uploaded_at', { ascending: false }); setAttachments(data || []) } finally { setIsLoading(false) }
-  }, [issueId, supabase])
+  }, [issueId])
   useEffect(() => { fetch() }, [fetch])
   return { attachments, isLoading, refresh: fetch }
 }
@@ -134,12 +134,12 @@ export function useIssueAttachments(issueId?: string) {
 export function useOpenIssues(projectId?: string) {
   const [issues, setIssues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('issues').select('*, issue_labels(*), issue_assignees(*)').eq('project_id', projectId).eq('status', 'open').order('created_at', { ascending: false }); setIssues(data || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { issues, isLoading, refresh: fetch }
 }
@@ -147,8 +147,8 @@ export function useOpenIssues(projectId?: string) {
 export function useMyAssignedIssues(userId?: string, options?: { status?: string }) {
   const [issues, setIssues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

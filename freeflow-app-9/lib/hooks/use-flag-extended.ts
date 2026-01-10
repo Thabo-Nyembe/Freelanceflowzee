@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useFlag(flagId?: string) {
   const [flag, setFlag] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!flagId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('flags').select('*').eq('id', flagId).single()
       setFlag(data)
     } finally { setIsLoading(false) }
-  }, [flagId, supabase])
+  }, [flagId])
   useEffect(() => { fetch() }, [fetch])
   return { flag, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useFlagByKey(flagKey?: string) {
   const [flag, setFlag] = useState<any>(null)
   const [isEnabled, setIsEnabled] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!flagKey) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -36,7 +36,7 @@ export function useFlagByKey(flagKey?: string) {
       setFlag(data)
       setIsEnabled(data?.is_enabled ?? false)
     } finally { setIsLoading(false) }
-  }, [flagKey, supabase])
+  }, [flagKey])
   useEffect(() => { fetch() }, [fetch])
   return { flag, isEnabled, isLoading, refresh: fetch }
 }
@@ -44,8 +44,8 @@ export function useFlagByKey(flagKey?: string) {
 export function useFlags(options?: { environment?: string; isEnabled?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('flags').select('*')

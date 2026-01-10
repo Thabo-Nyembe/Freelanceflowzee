@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useTaxRates(country?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tax_rates').select('*').order('name', { ascending: true })
@@ -28,8 +28,8 @@ export function useTaxRates(country?: string, isActive?: boolean) {
 export function useTaxCategories(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tax_categories').select('*').order('name', { ascending: true })
@@ -37,7 +37,7 @@ export function useTaxCategories(isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [isActive, supabase])
+  }, [isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -45,8 +45,8 @@ export function useTaxCategories(isActive?: boolean) {
 export function useTaxExemptions(userId?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tax_exemptions').select('*').order('created_at', { ascending: false })
@@ -63,8 +63,8 @@ export function useTaxExemptions(userId?: string, isActive?: boolean) {
 export function useApplicableTaxRate(country?: string, state?: string, categoryId?: string) {
   const [rate, setRate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!country) { setIsLoading(false); return }
     setIsLoading(true)
     try {

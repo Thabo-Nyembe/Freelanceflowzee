@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSurvey(surveyId?: string) {
   const [survey, setSurvey] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!surveyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('surveys').select('*, survey_questions(*)').eq('id', surveyId).single(); setSurvey(data) } finally { setIsLoading(false) }
-  }, [surveyId, supabase])
+  }, [surveyId])
   useEffect(() => { fetch() }, [fetch])
   return { survey, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSurvey(surveyId?: string) {
 export function useSurveys(options?: { survey_type?: string; category?: string; status?: string; created_by?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [surveys, setSurveys] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('surveys').select('*, survey_questions(count), survey_responses(count)')
@@ -46,12 +46,12 @@ export function useSurveys(options?: { survey_type?: string; category?: string; 
 export function useSurveyQuestions(surveyId?: string) {
   const [questions, setQuestions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!surveyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('survey_questions').select('*').eq('survey_id', surveyId).order('order_index', { ascending: true }); setQuestions(data || []) } finally { setIsLoading(false) }
-  }, [surveyId, supabase])
+  }, [surveyId])
   useEffect(() => { fetch() }, [fetch])
   return { questions, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useSurveyQuestions(surveyId?: string) {
 export function useSurveyResponses(surveyId?: string, options?: { respondent_id?: string; status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!surveyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,8 +80,8 @@ export function useSurveyResponses(surveyId?: string, options?: { respondent_id?
 export function useSurveyAnalytics(surveyId?: string) {
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!surveyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -113,7 +113,7 @@ export function useSurveyAnalytics(surveyId?: string) {
         questionAnalytics
       })
     } finally { setIsLoading(false) }
-  }, [surveyId, supabase])
+  }, [surveyId])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -121,8 +121,8 @@ export function useSurveyAnalytics(surveyId?: string) {
 export function useMyResponses(userId?: string, options?: { status?: string; limit?: number }) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -139,8 +139,8 @@ export function useMyResponses(userId?: string, options?: { status?: string; lim
 export function useActiveSurveys(options?: { category?: string; limit?: number }) {
   const [surveys, setSurveys] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
@@ -157,15 +157,15 @@ export function useActiveSurveys(options?: { category?: string; limit?: number }
 export function useSurveyCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('surveys').select('category').not('category', 'is', null)
       const unique = [...new Set(data?.map(s => s.category).filter(Boolean))]
       setCategories(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -173,8 +173,8 @@ export function useSurveyCategories() {
 export function useHasRespondedToSurvey(surveyId?: string, userId?: string) {
   const [hasResponded, setHasResponded] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!surveyId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

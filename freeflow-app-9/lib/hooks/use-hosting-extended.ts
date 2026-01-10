@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSite(siteId?: string) {
   const [site, setSite] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!siteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('hosting_sites').select('*, hosting_domains(*), hosting_deployments(*), hosting_ssl(*)').eq('id', siteId).single(); setSite(data) } finally { setIsLoading(false) }
-  }, [siteId, supabase])
+  }, [siteId])
   useEffect(() => { fetch() }, [fetch])
   return { site, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSite(siteId?: string) {
 export function useSites(options?: { owner_id?: string; status?: string; framework?: string; limit?: number }) {
   const [sites, setSites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('hosting_sites').select('*')
@@ -43,12 +43,12 @@ export function useSites(options?: { owner_id?: string; status?: string; framewo
 export function useUserSites(userId?: string) {
   const [sites, setSites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('hosting_sites').select('*').eq('owner_id', userId).order('created_at', { ascending: false }); setSites(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { sites, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useUserSites(userId?: string) {
 export function useDeployments(siteId?: string, options?: { status?: string; limit?: number }) {
   const [deployments, setDeployments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!siteId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -74,12 +74,12 @@ export function useDeployments(siteId?: string, options?: { status?: string; lim
 export function useLatestDeployment(siteId?: string) {
   const [deployment, setDeployment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!siteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('hosting_deployments').select('*').eq('site_id', siteId).order('started_at', { ascending: false }).limit(1).single(); setDeployment(data) } finally { setIsLoading(false) }
-  }, [siteId, supabase])
+  }, [siteId])
   useEffect(() => { fetch() }, [fetch])
   return { deployment, isLoading, refresh: fetch }
 }
@@ -87,12 +87,12 @@ export function useLatestDeployment(siteId?: string) {
 export function useDomains(siteId?: string) {
   const [domains, setDomains] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!siteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('hosting_domains').select('*').eq('site_id', siteId).order('is_primary', { ascending: false }); setDomains(data || []) } finally { setIsLoading(false) }
-  }, [siteId, supabase])
+  }, [siteId])
   useEffect(() => { fetch() }, [fetch])
   return { domains, isLoading, refresh: fetch }
 }
@@ -100,12 +100,12 @@ export function useDomains(siteId?: string) {
 export function useSSLCertificates(siteId?: string) {
   const [certificates, setCertificates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!siteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('hosting_ssl').select('*').eq('site_id', siteId).order('created_at', { ascending: false }); setCertificates(data || []) } finally { setIsLoading(false) }
-  }, [siteId, supabase])
+  }, [siteId])
   useEffect(() => { fetch() }, [fetch])
   return { certificates, isLoading, refresh: fetch }
 }
@@ -113,8 +113,8 @@ export function useSSLCertificates(siteId?: string) {
 export function useSiteAnalytics(siteId?: string, options?: { from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!siteId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -132,11 +132,11 @@ export function useSiteAnalytics(siteId?: string, options?: { from_date?: string
 export function useHostingPlans() {
   const [plans, setPlans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('hosting_plans').select('*').eq('is_active', true).order('price', { ascending: true }); setPlans(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { plans, isLoading, refresh: fetch }
 }
@@ -144,12 +144,12 @@ export function useHostingPlans() {
 export function useLiveSites(userId?: string) {
   const [sites, setSites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('hosting_sites').select('*').eq('owner_id', userId).eq('status', 'live').order('updated_at', { ascending: false }); setSites(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { sites, isLoading, refresh: fetch }
 }

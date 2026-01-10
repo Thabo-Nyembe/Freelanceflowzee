@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useWebhook(webhookId?: string) {
   const [webhook, setWebhook] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!webhookId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('webhooks').select('*').eq('id', webhookId).single(); setWebhook(data) } finally { setIsLoading(false) }
-  }, [webhookId, supabase])
+  }, [webhookId])
   useEffect(() => { fetch() }, [fetch])
   return { webhook, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useWebhook(webhookId?: string) {
 export function useWebhooks(options?: { user_id?: string; is_active?: boolean; limit?: number }) {
   const [webhooks, setWebhooks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('webhooks').select('*')
@@ -42,8 +42,8 @@ export function useWebhooks(options?: { user_id?: string; is_active?: boolean; l
 export function useWebhookEvents(options?: { event_type?: string; limit?: number }) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('webhook_events').select('*')
@@ -59,8 +59,8 @@ export function useWebhookEvents(options?: { event_type?: string; limit?: number
 export function useWebhookDeliveries(webhookId?: string, options?: { status?: string; limit?: number }) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!webhookId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('webhook_deliveries').select('*').eq('webhook_id', webhookId); if (options?.status) query = query.eq('status', options.status); const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50); setDeliveries(data || []) } finally { setIsLoading(false) }
@@ -72,8 +72,8 @@ export function useWebhookDeliveries(webhookId?: string, options?: { status?: st
 export function useWebhookLogs(webhookId?: string, options?: { limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!webhookId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('webhook_logs').select('*').eq('webhook_id', webhookId).order('created_at', { ascending: false }).limit(options?.limit || 100); setLogs(data || []) } finally { setIsLoading(false) }
@@ -85,12 +85,12 @@ export function useWebhookLogs(webhookId?: string, options?: { limit?: number })
 export function useUserWebhooks(userId?: string) {
   const [webhooks, setWebhooks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('webhooks').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setWebhooks(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { webhooks, isLoading, refresh: fetch }
 }

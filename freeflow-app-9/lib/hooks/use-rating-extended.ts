@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useRatings(itemId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('ratings').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useRatings(itemId?: string, itemType?: string) {
 export function useUserRating(userId?: string, itemId?: string, itemType?: string) {
   const [rating, setRating] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -45,8 +45,8 @@ export function useAverageRating(itemId?: string, itemType?: string) {
   const [average, setAverage] = useState<number>(0)
   const [count, setCount] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -68,8 +68,8 @@ export function useAverageRating(itemId?: string, itemType?: string) {
 export function useRatingDistribution(itemId?: string, itemType?: string) {
   const [distribution, setDistribution] = useState<Record<number, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

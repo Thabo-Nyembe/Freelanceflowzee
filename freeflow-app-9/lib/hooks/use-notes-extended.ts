@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useNote(noteId?: string) {
   const [note, setNote] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!noteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('notes').select('*, note_folders(*), note_tags(*), note_attachments(*)').eq('id', noteId).single(); setNote(data) } finally { setIsLoading(false) }
-  }, [noteId, supabase])
+  }, [noteId])
   useEffect(() => { fetch() }, [fetch])
   return { note, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useNote(noteId?: string) {
 export function useNotes(userId?: string, options?: { folder_id?: string; is_archived?: boolean; is_pinned?: boolean; search?: string; limit?: number }) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -45,8 +45,8 @@ export function useNotes(userId?: string, options?: { folder_id?: string; is_arc
 export function useNoteFolders(userId?: string, parentId?: string | null) {
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,12 +63,12 @@ export function useNoteFolders(userId?: string, parentId?: string | null) {
 export function useNoteTags(noteId?: string) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!noteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('note_tags').select('*').eq('note_id', noteId).order('name', { ascending: true }); setTags(data || []) } finally { setIsLoading(false) }
-  }, [noteId, supabase])
+  }, [noteId])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }
@@ -76,12 +76,12 @@ export function useNoteTags(noteId?: string) {
 export function useNoteShares(noteId?: string) {
   const [shares, setShares] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!noteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('note_shares').select('*').eq('note_id', noteId); setShares(data || []) } finally { setIsLoading(false) }
-  }, [noteId, supabase])
+  }, [noteId])
   useEffect(() => { fetch() }, [fetch])
   return { shares, isLoading, refresh: fetch }
 }
@@ -89,8 +89,8 @@ export function useNoteShares(noteId?: string) {
 export function useNoteVersions(noteId?: string, options?: { limit?: number }) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!noteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('note_versions').select('*').eq('note_id', noteId).order('created_at', { ascending: false }).limit(options?.limit || 20); setVersions(data || []) } finally { setIsLoading(false) }
@@ -102,12 +102,12 @@ export function useNoteVersions(noteId?: string, options?: { limit?: number }) {
 export function useNoteAttachments(noteId?: string) {
   const [attachments, setAttachments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!noteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('note_attachments').select('*').eq('note_id', noteId).order('created_at', { ascending: false }); setAttachments(data || []) } finally { setIsLoading(false) }
-  }, [noteId, supabase])
+  }, [noteId])
   useEffect(() => { fetch() }, [fetch])
   return { attachments, isLoading, refresh: fetch }
 }
@@ -115,8 +115,8 @@ export function useNoteAttachments(noteId?: string) {
 export function useSharedNotes(userId?: string) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -126,7 +126,7 @@ export function useSharedNotes(userId?: string) {
       const { data } = await supabase.from('notes').select('*, note_folders(*), note_tags(*)').in('id', noteIds).order('updated_at', { ascending: false })
       setNotes(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }
@@ -134,12 +134,12 @@ export function useSharedNotes(userId?: string) {
 export function usePinnedNotes(userId?: string) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('notes').select('*, note_folders(*), note_tags(*)').eq('user_id', userId).eq('is_pinned', true).eq('is_archived', false).order('updated_at', { ascending: false }); setNotes(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }
@@ -147,8 +147,8 @@ export function usePinnedNotes(userId?: string) {
 export function useRecentNotes(userId?: string, options?: { limit?: number }) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('notes').select('*, note_folders(*)').eq('user_id', userId).eq('is_archived', false).order('updated_at', { ascending: false }).limit(options?.limit || 10); setNotes(data || []) } finally { setIsLoading(false) }
@@ -160,8 +160,8 @@ export function useRecentNotes(userId?: string, options?: { limit?: number }) {
 export function useAllUserTags(userId?: string) {
   const [tags, setTags] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -172,7 +172,7 @@ export function useAllUserTags(userId?: string) {
       const uniqueTags = [...new Set(data?.map(t => t.name) || [])]
       setTags(uniqueTags.sort())
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }

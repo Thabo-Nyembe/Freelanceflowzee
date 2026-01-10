@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useCountry(countryId?: string) {
   const [country, setCountry] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!countryId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('countries').select('*').eq('id', countryId).single()
       setCountry(data)
     } finally { setIsLoading(false) }
-  }, [countryId, supabase])
+  }, [countryId])
   useEffect(() => { fetch() }, [fetch])
   return { country, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useCountry(countryId?: string) {
 export function useCountries(options?: { continent?: string; region?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('countries').select('*')
@@ -45,15 +45,15 @@ export function useCountries(options?: { continent?: string; region?: string; is
 export function useCountryStates(countryCode?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!countryCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('country_states').select('*').eq('country_code', countryCode).order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [countryCode, supabase])
+  }, [countryCode])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -61,8 +61,8 @@ export function useCountryStates(countryCode?: string) {
 export function useCountryCities(countryCode?: string, stateCode?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!countryCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -87,7 +87,7 @@ export function useCountrySearch(searchTerm: string) {
       const { data: result } = await supabase.from('countries').select('*').or(`name.ilike.%${searchTerm}%,native_name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%`).eq('is_active', true).order('name', { ascending: true }).limit(20)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, supabase])
+  }, [searchTerm])
   useEffect(() => { const timer = setTimeout(search, 300); return () => clearTimeout(timer) }, [search])
   return { data, isLoading }
 }

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useTasks(projectId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useTasks(projectId?: string, status?: string) {
 export function useTaskAssignments(taskId?: string, userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('task_assignments').select('*').order('assigned_at', { ascending: false })

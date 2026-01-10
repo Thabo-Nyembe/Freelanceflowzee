@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useModule(moduleId?: string) {
   const [module, setModule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!moduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('modules').select('*, module_versions(*), module_dependencies(*), module_configs(*)').eq('id', moduleId).single(); setModule(data) } finally { setIsLoading(false) }
-  }, [moduleId, supabase])
+  }, [moduleId])
   useEffect(() => { fetch() }, [fetch])
   return { module, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useModule(moduleId?: string) {
 export function useModules(options?: { category?: string; status?: string; is_published?: boolean; author_id?: string; search?: string; limit?: number }) {
   const [modules, setModules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('modules').select('*')
@@ -45,12 +45,12 @@ export function useModules(options?: { category?: string; status?: string; is_pu
 export function useModuleVersions(moduleId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!moduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('module_versions').select('*').eq('module_id', moduleId).order('created_at', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [moduleId, supabase])
+  }, [moduleId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -58,8 +58,8 @@ export function useModuleVersions(moduleId?: string) {
 export function useModuleInstallations(options?: { organization_id?: string; user_id?: string; status?: string }) {
   const [installations, setInstallations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('module_installations').select('*, modules(*), module_versions(*)')
@@ -77,12 +77,12 @@ export function useModuleInstallations(options?: { organization_id?: string; use
 export function useModuleDependencies(moduleId?: string) {
   const [dependencies, setDependencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!moduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('module_dependencies').select('*, modules!depends_on_id(*)').eq('module_id', moduleId); setDependencies(data || []) } finally { setIsLoading(false) }
-  }, [moduleId, supabase])
+  }, [moduleId])
   useEffect(() => { fetch() }, [fetch])
   return { dependencies, isLoading, refresh: fetch }
 }
@@ -90,12 +90,12 @@ export function useModuleDependencies(moduleId?: string) {
 export function useModuleConfig(installationId?: string) {
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!installationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('module_configs').select('*').eq('installation_id', installationId).single(); setConfig(data) } finally { setIsLoading(false) }
-  }, [installationId, supabase])
+  }, [installationId])
   useEffect(() => { fetch() }, [fetch])
   return { config, isLoading, refresh: fetch }
 }
@@ -103,12 +103,12 @@ export function useModuleConfig(installationId?: string) {
 export function useModulePermissions(moduleId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!moduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('module_permissions').select('*').eq('module_id', moduleId); setPermissions(data || []) } finally { setIsLoading(false) }
-  }, [moduleId, supabase])
+  }, [moduleId])
   useEffect(() => { fetch() }, [fetch])
   return { permissions, isLoading, refresh: fetch }
 }
@@ -116,8 +116,8 @@ export function useModulePermissions(moduleId?: string) {
 export function useInstalledModules(userId?: string, organizationId?: string) {
   const [modules, setModules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId && !organizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -135,8 +135,8 @@ export function useInstalledModules(userId?: string, organizationId?: string) {
 export function usePublishedModules(options?: { category?: string; limit?: number }) {
   const [modules, setModules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('modules').select('*').eq('is_published', true)
@@ -152,8 +152,8 @@ export function usePublishedModules(options?: { category?: string; limit?: numbe
 export function useModuleStats(moduleId?: string) {
   const [stats, setStats] = useState<{ totalInstalls: number; activeInstalls: number; versions: number; avgRating: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!moduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -166,7 +166,7 @@ export function useModuleStats(moduleId?: string) {
       const versions = versionsRes.data?.length || 0
       setStats({ totalInstalls, activeInstalls, versions, avgRating: 0 })
     } finally { setIsLoading(false) }
-  }, [moduleId, supabase])
+  }, [moduleId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -174,15 +174,15 @@ export function useModuleStats(moduleId?: string) {
 export function useModuleCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('modules').select('category').eq('is_published', true).not('category', 'is', null)
       const uniqueCategories = [...new Set(data?.map(m => m.category) || [])]
       setCategories(uniqueCategories.sort())
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }

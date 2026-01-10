@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useInventoryItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('inventory_items').select('*').eq('id', itemId).single(); setItem(data) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { item, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useInventoryItem(itemId?: string) {
 export function useInventoryItems(options?: { location_id?: string; category?: string; status?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('inventory_items').select('*')
@@ -43,8 +43,8 @@ export function useInventoryItems(options?: { location_id?: string; category?: s
 export function useInventoryMovements(itemId?: string, options?: { type?: string; limit?: number }) {
   const [movements, setMovements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,11 +61,11 @@ export function useInventoryMovements(itemId?: string, options?: { type?: string
 export function useInventoryLocations() {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('inventory_locations').select('*').order('name', { ascending: true }); setLocations(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { locations, isLoading, refresh: fetch }
 }
@@ -73,11 +73,11 @@ export function useInventoryLocations() {
 export function useLowStockItems(options?: { limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('inventory_items').select('*').filter('quantity', 'lte', 'reorder_point').order('quantity', { ascending: true }).limit(options?.limit || 50); setItems(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -85,12 +85,12 @@ export function useLowStockItems(options?: { limit?: number }) {
 export function useInventoryByCategory(category?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!category) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('inventory_items').select('*').eq('category', category).order('name', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [category, supabase])
+  }, [category])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }

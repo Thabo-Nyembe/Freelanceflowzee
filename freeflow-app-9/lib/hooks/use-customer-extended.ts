@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useCustomer(customerId?: string) {
   const [customer, setCustomer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('customers').select('*, customer_notes(*), customer_activities(*)').eq('id', customerId).single()
       setCustomer(data)
     } finally { setIsLoading(false) }
-  }, [customerId, supabase])
+  }, [customerId])
   useEffect(() => { fetch() }, [fetch])
   return { customer, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useCustomer(customerId?: string) {
 export function useCustomers(userId?: string, options?: { status?: string; segment_id?: string; tag?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -66,8 +66,8 @@ export function useCustomerSearch(userId: string, searchTerm: string) {
 export function useCustomerNotes(customerId?: string, options?: { limit?: number }) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -82,8 +82,8 @@ export function useCustomerNotes(customerId?: string, options?: { limit?: number
 export function useCustomerActivities(customerId?: string, options?: { activity_type?: string; limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -100,15 +100,15 @@ export function useCustomerActivities(customerId?: string, options?: { activity_
 export function useCustomerSegments(userId?: string) {
   const [segments, setSegments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('customer_segments').select('*').eq('user_id', userId).order('name', { ascending: true })
       setSegments(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { segments, isLoading, refresh: fetch }
 }
@@ -116,15 +116,15 @@ export function useCustomerSegments(userId?: string) {
 export function useCustomerSegment(segmentId?: string) {
   const [segment, setSegment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!segmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('customer_segments').select('*').eq('id', segmentId).single()
       setSegment(data)
     } finally { setIsLoading(false) }
-  }, [segmentId, supabase])
+  }, [segmentId])
   useEffect(() => { fetch() }, [fetch])
   return { segment, isLoading, refresh: fetch }
 }
@@ -132,8 +132,8 @@ export function useCustomerSegment(segmentId?: string) {
 export function useCustomerStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number; totalLifetimeValue: number; totalOrders: number; avgLifetimeValue: number; newThisMonth: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -150,7 +150,7 @@ export function useCustomerStats(userId?: string) {
       const newThisMonth = customers.filter(c => new Date(c.created_at) >= thisMonth).length
       setStats({ total, active, inactive, totalLifetimeValue, totalOrders, avgLifetimeValue, newThisMonth })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -158,8 +158,8 @@ export function useCustomerStats(userId?: string) {
 export function useTopCustomers(userId?: string, options?: { by?: 'lifetime_value' | 'total_orders'; limit?: number }) {
   const [customers, setCustomers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -175,8 +175,8 @@ export function useTopCustomers(userId?: string, options?: { by?: 'lifetime_valu
 export function useRecentCustomers(userId?: string, options?: { limit?: number }) {
   const [customers, setCustomers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -191,8 +191,8 @@ export function useRecentCustomers(userId?: string, options?: { limit?: number }
 export function useCustomersBySegment(userId?: string) {
   const [bySegment, setBySegment] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -210,7 +210,7 @@ export function useCustomersBySegment(userId?: string) {
       }, {})
       setBySegment(counts)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { bySegment, isLoading, refresh: fetch }
 }

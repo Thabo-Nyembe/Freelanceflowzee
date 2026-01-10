@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function usePayment(paymentId?: string) {
   const [payment, setPayment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!paymentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('payments').select('*').eq('id', paymentId).single()
       setPayment(data)
     } finally { setIsLoading(false) }
-  }, [paymentId, supabase])
+  }, [paymentId])
   useEffect(() => { fetch() }, [fetch])
   return { payment, isLoading, refresh: fetch }
 }
@@ -28,8 +28,8 @@ export function usePayments(userId?: string, options?: { status?: string; limit?
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -47,15 +47,15 @@ export function usePayments(userId?: string, options?: { status?: string; limit?
 export function usePaymentMethod(methodId?: string) {
   const [method, setMethod] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!methodId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('payment_methods').select('*').eq('id', methodId).single()
       setMethod(data)
     } finally { setIsLoading(false) }
-  }, [methodId, supabase])
+  }, [methodId])
   useEffect(() => { fetch() }, [fetch])
   return { method, isLoading, refresh: fetch }
 }
@@ -63,8 +63,8 @@ export function usePaymentMethod(methodId?: string) {
 export function usePaymentMethods(userId?: string, options?: { type?: string; isVerified?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -82,15 +82,15 @@ export function usePaymentMethods(userId?: string, options?: { type?: string; is
 export function useDefaultPaymentMethod(userId?: string) {
   const [method, setMethod] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('payment_methods').select('*').eq('user_id', userId).eq('is_default', true).single()
       setMethod(data)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { method, isLoading, refresh: fetch }
 }
@@ -98,8 +98,8 @@ export function useDefaultPaymentMethod(userId?: string) {
 export function usePaymentLinks(userId?: string, options?: { isActive?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -116,15 +116,15 @@ export function usePaymentLinks(userId?: string, options?: { isActive?: boolean;
 export function usePaymentLink(linkId?: string) {
   const [link, setLink] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('payment_links').select('*').eq('id', linkId).single()
       setLink(data)
     } finally { setIsLoading(false) }
-  }, [linkId, supabase])
+  }, [linkId])
   useEffect(() => { fetch() }, [fetch])
   return { link, isLoading, refresh: fetch }
 }
@@ -134,8 +134,8 @@ export function usePaymentLinkByCode(code?: string) {
   const [isValid, setIsValid] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
     setError(null)
@@ -147,7 +147,7 @@ export function usePaymentLinkByCode(code?: string) {
       setLink(data)
       setIsValid(true)
     } finally { setIsLoading(false) }
-  }, [code, supabase])
+  }, [code])
   useEffect(() => { fetch() }, [fetch])
   return { link, isValid, error, isLoading, refresh: fetch }
 }
@@ -155,8 +155,8 @@ export function usePaymentLinkByCode(code?: string) {
 export function usePaymentConfigs() {
   const [configs, setConfigs] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('payment_configs').select('*')
@@ -164,7 +164,7 @@ export function usePaymentConfigs() {
       data?.forEach(c => { configMap[c.key] = c.value })
       setConfigs(configMap)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { configs, isLoading, refresh: fetch }
 }
@@ -172,8 +172,8 @@ export function usePaymentConfigs() {
 export function usePaymentAnalytics(options?: { period?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('payment_analytics_snapshots').select('*')
@@ -197,6 +197,6 @@ export function usePaymentsRealtime(userId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'payments', filter: `user_id=eq.${userId}` }, (payload) => setPayments(prev => prev.map(p => p.id === (payload.new as any).id ? payload.new : p)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return { payments }
 }

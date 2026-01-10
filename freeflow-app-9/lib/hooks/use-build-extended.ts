@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useBuild(buildId?: string) {
   const [build, setBuild] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!buildId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('builds').select('*, build_logs(*), build_artifacts(*)').eq('id', buildId).single()
       setBuild(data)
     } finally { setIsLoading(false) }
-  }, [buildId, supabase])
+  }, [buildId])
   useEffect(() => { fetch() }, [fetch])
   return { build, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useBuild(buildId?: string) {
 export function useBuilds(projectId?: string, options?: { status?: string; branch?: string; environment?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -47,8 +47,8 @@ export function useBuilds(projectId?: string, options?: { status?: string; branc
 export function useLatestBuild(projectId?: string, options?: { branch?: string; environment?: string }) {
   const [build, setBuild] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -66,8 +66,8 @@ export function useLatestBuild(projectId?: string, options?: { branch?: string; 
 export function useBuildLogs(buildId?: string, options?: { level?: string; step?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!buildId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -92,15 +92,15 @@ export function useBuildLogsRealtime(buildId?: string) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'build_logs', filter: `build_id=eq.${buildId}` }, (payload) => setLogs(prev => [...prev, payload.new]))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [buildId, supabase])
+  }, [buildId])
   return { logs }
 }
 
 export function useBuildArtifacts(buildId?: string, options?: { type?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!buildId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -117,15 +117,15 @@ export function useBuildArtifacts(buildId?: string, options?: { type?: string })
 export function useBuildConfig(projectId?: string) {
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('build_configs').select('*').eq('project_id', projectId).single()
       setConfig(data)
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { config, isLoading, refresh: fetch }
 }
@@ -133,8 +133,8 @@ export function useBuildConfig(projectId?: string) {
 export function useBuildStats(projectId?: string, options?: { startDate?: string; endDate?: string }) {
   const [stats, setStats] = useState<{ total: number; success: number; failed: number; cancelled: number; avgDuration: number; successRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -167,22 +167,22 @@ export function useBuildRealtime(buildId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'builds', filter: `id=eq.${buildId}` }, (payload) => setBuild(payload.new))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [buildId, supabase])
+  }, [buildId])
   return { build }
 }
 
 export function useRunningBuilds(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('builds').select('*').eq('project_id', projectId).in('status', ['pending', 'running']).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -190,8 +190,8 @@ export function useRunningBuilds(projectId?: string) {
 export function useBuildsByBranch(projectId?: string) {
   const [branches, setBranches] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -204,7 +204,7 @@ export function useBuildsByBranch(projectId?: string) {
       }, {})
       setBranches(grouped)
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { branches, isLoading, refresh: fetch }
 }

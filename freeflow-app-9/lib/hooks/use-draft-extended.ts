@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useDrafts(userId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -28,8 +28,8 @@ export function useDrafts(userId?: string, entityType?: string) {
 export function useDraft(draftId?: string, userId?: string) {
   const [draft, setDraft] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!draftId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useDraft(draftId?: string, userId?: string) {
 export function useDraftCount(userId?: string, entityType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

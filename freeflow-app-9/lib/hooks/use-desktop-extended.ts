@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useDesktopApp(appId?: string) {
   const [app, setApp] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!appId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('desktop_apps').select('*').eq('id', appId).single()
       setApp(data)
     } finally { setIsLoading(false) }
-  }, [appId, supabase])
+  }, [appId])
   useEffect(() => { fetch() }, [fetch])
   return { app, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useDesktopApp(appId?: string) {
 export function useDesktopApps(userId?: string, options?: { app_type?: string; is_installed?: boolean; limit?: number }) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,15 +46,15 @@ export function useDesktopApps(userId?: string, options?: { app_type?: string; i
 export function useInstalledApps(userId?: string) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('desktop_apps').select('*').eq('user_id', userId).eq('is_installed', true).order('name', { ascending: true })
       setApps(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { apps, isLoading, refresh: fetch }
 }
@@ -62,15 +62,15 @@ export function useInstalledApps(userId?: string) {
 export function useRunningApps(userId?: string) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('desktop_apps').select('*').eq('user_id', userId).eq('is_running', true).order('last_launched_at', { ascending: false })
       setApps(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { apps, isLoading, refresh: fetch }
 }
@@ -78,8 +78,8 @@ export function useRunningApps(userId?: string) {
 export function useDesktopNotifications(userId?: string, options?: { is_read?: boolean; priority?: string; limit?: number }) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -97,15 +97,15 @@ export function useDesktopNotifications(userId?: string, options?: { is_read?: b
 export function useUnreadNotificationCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { count: total } = await supabase.from('desktop_notifications').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false)
       setCount(total || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -122,15 +122,15 @@ export function useDesktopNotificationsRealtime(userId?: string) {
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'desktop_notifications', filter: `user_id=eq.${userId}` }, (payload) => setNotifications(prev => prev.filter(n => n.id !== (payload.old as any).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return { notifications }
 }
 
 export function useDesktopShortcuts(userId?: string, options?: { folder_id?: string | null }) {
   const [shortcuts, setShortcuts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -151,15 +151,15 @@ export function useDesktopShortcuts(userId?: string, options?: { folder_id?: str
 export function useDesktopPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('desktop_preferences').select('*').eq('user_id', userId).single()
       setPreferences(data)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }
 }
@@ -167,8 +167,8 @@ export function useDesktopPreferences(userId?: string) {
 export function useRecentApps(userId?: string, options?: { limit?: number }) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -183,8 +183,8 @@ export function useRecentApps(userId?: string, options?: { limit?: number }) {
 export function useFrequentApps(userId?: string, options?: { limit?: number }) {
   const [apps, setApps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

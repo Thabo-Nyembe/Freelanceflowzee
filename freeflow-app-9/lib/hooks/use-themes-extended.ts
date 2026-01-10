@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTheme(themeId?: string) {
   const [theme, setTheme] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('themes').select('*, theme_settings(*), theme_assets(*), theme_versions(*)').eq('id', themeId).single(); setTheme(data) } finally { setIsLoading(false) }
-  }, [themeId, supabase])
+  }, [themeId])
   useEffect(() => { fetch() }, [fetch])
   return { theme, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTheme(themeId?: string) {
 export function useThemes(options?: { category?: string; author_id?: string; status?: string; is_public?: boolean; is_free?: boolean; search?: string; limit?: number }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('themes').select('*')
@@ -46,8 +46,8 @@ export function useThemes(options?: { category?: string; author_id?: string; sta
 export function useMyThemes(userId?: string, options?: { status?: string }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,8 +64,8 @@ export function useMyThemes(userId?: string, options?: { status?: string }) {
 export function useThemeInstallations(options?: { theme_id?: string; user_id?: string; entity_type?: string; entity_id?: string }) {
   const [installations, setInstallations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('theme_installations').select('*, themes(*)')
@@ -85,8 +85,8 @@ export function useActiveTheme(entityType?: string, entityId?: string) {
   const [installation, setInstallation] = useState<any>(null)
   const [theme, setTheme] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -103,8 +103,8 @@ export function useThemeVersions(themeId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [latestVersion, setLatestVersion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -112,7 +112,7 @@ export function useThemeVersions(themeId?: string) {
       setVersions(data || [])
       setLatestVersion(data?.[0] || null)
     } finally { setIsLoading(false) }
-  }, [themeId, supabase])
+  }, [themeId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, latestVersion, isLoading, refresh: fetch }
 }
@@ -120,8 +120,8 @@ export function useThemeVersions(themeId?: string) {
 export function useThemeAssets(themeId?: string, options?: { asset_type?: string }) {
   const [assets, setAssets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -139,8 +139,8 @@ export function useThemeCustomizations(installationId?: string) {
   const [customizations, setCustomizations] = useState<any[]>([])
   const [latestCustomization, setLatestCustomization] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!installationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -148,7 +148,7 @@ export function useThemeCustomizations(installationId?: string) {
       setCustomizations(data || [])
       setLatestCustomization(data?.[0] || null)
     } finally { setIsLoading(false) }
-  }, [installationId, supabase])
+  }, [installationId])
   useEffect(() => { fetch() }, [fetch])
   return { customizations, latestCustomization, isLoading, refresh: fetch }
 }
@@ -156,15 +156,15 @@ export function useThemeCustomizations(installationId?: string) {
 export function useThemeCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('themes').select('category').not('category', 'is', null).eq('status', 'published')
       const unique = [...new Set(data?.map(t => t.category).filter(Boolean))]
       setCategories(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -172,8 +172,8 @@ export function useThemeCategories() {
 export function usePopularThemes(options?: { category?: string; limit?: number }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('themes').select('*').eq('status', 'published').eq('is_public', true)

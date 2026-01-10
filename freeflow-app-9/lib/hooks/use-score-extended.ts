@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useScore(entityId?: string, entityType?: string, scoreType?: string) {
   const [score, setScore] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !scoreType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useScore(entityId?: string, entityType?: string, scoreType?: str
 export function useScores(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -42,8 +42,8 @@ export function useScores(entityId?: string, entityType?: string) {
 export function useLeaderboard(scoreType?: string, entityType?: string, limit = 10) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!scoreType || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -59,8 +59,8 @@ export function useRank(entityId?: string, entityType?: string, scoreType?: stri
   const [rank, setRank] = useState<number | null>(null)
   const [score, setScore] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !scoreType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

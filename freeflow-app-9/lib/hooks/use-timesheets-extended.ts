@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTimesheet(timesheetId?: string) {
   const [timesheet, setTimesheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timesheets').select('*, timesheet_entries(*, timesheet_projects(*), timesheet_categories(*)), timesheet_approvals(*, users(*))').eq('id', timesheetId).single(); setTimesheet(data) } finally { setIsLoading(false) }
-  }, [timesheetId, supabase])
+  }, [timesheetId])
   useEffect(() => { fetch() }, [fetch])
   return { timesheet, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTimesheet(timesheetId?: string) {
 export function useTimesheets(options?: { user_id?: string; status?: string; period_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timesheets').select('*, users(*)')
@@ -45,8 +45,8 @@ export function useTimesheets(options?: { user_id?: string; status?: string; per
 export function useMyTimesheets(userId?: string, options?: { status?: string; limit?: number }) {
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,8 +64,8 @@ export function useTimesheetEntries(timesheetId?: string, options?: { date?: str
   const [entries, setEntries] = useState<any[]>([])
   const [totals, setTotals] = useState<{ total: number; billable: number; nonBillable: number }>({ total: 0, billable: 0, nonBillable: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -87,12 +87,12 @@ export function useTimesheetEntries(timesheetId?: string, options?: { date?: str
 export function useTimesheetApprovals(timesheetId?: string) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timesheet_approvals').select('*, users(*)').eq('timesheet_id', timesheetId).order('created_at', { ascending: false }); setApprovals(data || []) } finally { setIsLoading(false) }
-  }, [timesheetId, supabase])
+  }, [timesheetId])
   useEffect(() => { fetch() }, [fetch])
   return { approvals, isLoading, refresh: fetch }
 }
@@ -100,8 +100,8 @@ export function useTimesheetApprovals(timesheetId?: string) {
 export function usePendingApprovals(approverId?: string, options?: { limit?: number }) {
   const [timesheets, setTimesheets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!approverId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -116,8 +116,8 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
 export function useTimesheetProjects(options?: { is_active?: boolean; search?: string }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timesheet_projects').select('*')
@@ -134,8 +134,8 @@ export function useTimesheetProjects(options?: { is_active?: boolean; search?: s
 export function useTimesheetCategories(options?: { is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timesheet_categories').select('*')
@@ -143,7 +143,7 @@ export function useTimesheetCategories(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -151,8 +151,8 @@ export function useTimesheetCategories(options?: { is_active?: boolean }) {
 export function useTimesheetStats(userId?: string, options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -183,8 +183,8 @@ export function useTimesheetStats(userId?: string, options?: { from_date?: strin
 export function useCurrentTimesheet(userId?: string, periodType: string = 'weekly') {
   const [timesheet, setTimesheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -209,8 +209,8 @@ export function useCurrentTimesheet(userId?: string, periodType: string = 'weekl
 export function useDailyHours(timesheetId?: string) {
   const [dailyHours, setDailyHours] = useState<Record<string, { total: number; billable: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timesheetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -223,7 +223,7 @@ export function useDailyHours(timesheetId?: string) {
       })
       setDailyHours(daily)
     } finally { setIsLoading(false) }
-  }, [timesheetId, supabase])
+  }, [timesheetId])
   useEffect(() => { fetch() }, [fetch])
   return { dailyHours, isLoading, refresh: fetch }
 }

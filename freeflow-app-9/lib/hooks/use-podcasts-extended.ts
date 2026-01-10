@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePodcast(podcastId?: string) {
   const [podcast, setPodcast] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!podcastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('podcasts').select('*, podcast_episodes(*), podcast_categories(*)').eq('id', podcastId).single(); setPodcast(data) } finally { setIsLoading(false) }
-  }, [podcastId, supabase])
+  }, [podcastId])
   useEffect(() => { fetch() }, [fetch])
   return { podcast, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePodcast(podcastId?: string) {
 export function usePodcasts(options?: { author_id?: string; category_id?: string; status?: string; search?: string; limit?: number }) {
   const [podcasts, setPodcasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('podcasts').select('*, podcast_categories(*)')
@@ -44,8 +44,8 @@ export function usePodcasts(options?: { author_id?: string; category_id?: string
 export function usePodcastEpisodes(podcastId?: string, options?: { status?: string; season_number?: number; limit?: number }) {
   const [episodes, setEpisodes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!podcastId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,12 +63,12 @@ export function usePodcastEpisodes(podcastId?: string, options?: { status?: stri
 export function useEpisode(episodeId?: string) {
   const [episode, setEpisode] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!episodeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('podcast_episodes').select('*, podcasts(*)').eq('id', episodeId).single(); setEpisode(data) } finally { setIsLoading(false) }
-  }, [episodeId, supabase])
+  }, [episodeId])
   useEffect(() => { fetch() }, [fetch])
   return { episode, isLoading, refresh: fetch }
 }
@@ -76,12 +76,12 @@ export function useEpisode(episodeId?: string) {
 export function usePodcastSubscriptions(userId?: string) {
   const [subscriptions, setSubscriptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('podcast_subscriptions').select('*, podcasts(*)').eq('user_id', userId).order('subscribed_at', { ascending: false }); setSubscriptions(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { subscriptions, isLoading, refresh: fetch }
 }
@@ -89,8 +89,8 @@ export function usePodcastSubscriptions(userId?: string) {
 export function useIsSubscribed(podcastId?: string, userId?: string) {
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!podcastId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('podcast_subscriptions').select('id').eq('podcast_id', podcastId).eq('user_id', userId).single(); setIsSubscribed(!!data) } finally { setIsLoading(false) }
@@ -102,11 +102,11 @@ export function useIsSubscribed(podcastId?: string, userId?: string) {
 export function usePodcastCategories() {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('podcast_categories').select('*').order('name', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -114,11 +114,11 @@ export function usePodcastCategories() {
 export function useLatestEpisodes(options?: { limit?: number }) {
   const [episodes, setEpisodes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('podcast_episodes').select('*, podcasts(*)').eq('status', 'published').order('publish_date', { ascending: false }).limit(options?.limit || 20); setEpisodes(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { episodes, isLoading, refresh: fetch }
 }
@@ -126,11 +126,11 @@ export function useLatestEpisodes(options?: { limit?: number }) {
 export function useTrendingPodcasts(options?: { limit?: number }) {
   const [podcasts, setPodcasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('podcasts').select('*, podcast_categories(*)').eq('status', 'active').order('subscriber_count', { ascending: false }).limit(options?.limit || 20); setPodcasts(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { podcasts, isLoading, refresh: fetch }
 }
@@ -138,8 +138,8 @@ export function useTrendingPodcasts(options?: { limit?: number }) {
 export function usePodcastAnalytics(podcastId?: string, options?: { from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<{ totalPlays: number; totalDownloads: number; uniqueListeners: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!podcastId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -154,7 +154,7 @@ export function usePodcastAnalytics(podcastId?: string, options?: { from_date?: 
       }
       setAnalytics({ totalPlays, totalDownloads, uniqueListeners })
     } finally { setIsLoading(false) }
-  }, [podcastId, supabase])
+  }, [podcastId])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -162,8 +162,8 @@ export function usePodcastAnalytics(podcastId?: string, options?: { from_date?: 
 export function useSubscribedEpisodes(userId?: string, options?: { limit?: number }) {
   const [episodes, setEpisodes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCollabSpace(spaceId?: string) {
   const [space, setSpace] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!spaceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collab_spaces').select('*, collab_documents(*)').eq('id', spaceId).single(); setSpace(data) } finally { setIsLoading(false) }
-  }, [spaceId, supabase])
+  }, [spaceId])
   useEffect(() => { fetch() }, [fetch])
   return { space, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCollabSpace(spaceId?: string) {
 export function useCollabSpaces(options?: { owner_id?: string; visibility?: string; type?: string; limit?: number }) {
   const [spaces, setSpaces] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('collab_spaces').select('*')
@@ -43,12 +43,12 @@ export function useCollabSpaces(options?: { owner_id?: string; visibility?: stri
 export function useCollabDocument(docId?: string) {
   const [document, setDocument] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collab_documents').select('*').eq('id', docId).single(); setDocument(data) } finally { setIsLoading(false) }
-  }, [docId, supabase])
+  }, [docId])
   useEffect(() => { fetch() }, [fetch])
   return { document, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useCollabDocument(docId?: string) {
 export function useCollabDocuments(spaceId?: string, options?: { type?: string; limit?: number }) {
   const [documents, setDocuments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!spaceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -88,19 +88,19 @@ export function useCollabDocumentRealtime(docId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [docId, supabase])
+  }, [docId])
   return { document, cursors }
 }
 
 export function useCollabComments(docId?: string) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('collab_comments').select('*').eq('document_id', docId).order('created_at', { ascending: true }); setComments(data || []) } finally { setIsLoading(false) }
-  }, [docId, supabase])
+  }, [docId])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function useCollabCommentsRealtime(docId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [docId, supabase])
+  }, [docId])
   return { comments }
 }
 
@@ -133,6 +133,6 @@ export function useActiveCollaborators(docId?: string) {
       supabase.from('collab_cursors').select('*').eq('document_id', docId).gte('last_seen', ago).then(({ data }) => setCollaborators(data || []))
     }, 10000)
     return () => clearInterval(interval)
-  }, [docId, supabase])
+  }, [docId])
   return { collaborators }
 }

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useRegion(regionId?: string) {
   const [region, setRegion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('regions').select('*').eq('id', regionId).single()
       setRegion(data)
     } finally { setIsLoading(false) }
-  }, [regionId, supabase])
+  }, [regionId])
   useEffect(() => { fetch() }, [fetch])
   return { region, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useRegion(regionId?: string) {
 export function useRegions(options?: { regionType?: string; countryCode?: string; parentId?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('regions').select('*')
@@ -46,15 +46,15 @@ export function useRegions(options?: { regionType?: string; countryCode?: string
 export function useSubRegions(parentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('regions').select('*').eq('parent_id', parentId).eq('is_active', true).order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [parentId, supabase])
+  }, [parentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -62,8 +62,8 @@ export function useSubRegions(parentId?: string) {
 export function useRegionSettings(regionId?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!regionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -71,7 +71,7 @@ export function useRegionSettings(regionId?: string) {
       const settingsMap = data?.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {}) || {}
       setSettings(settingsMap)
     } finally { setIsLoading(false) }
-  }, [regionId, supabase])
+  }, [regionId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }

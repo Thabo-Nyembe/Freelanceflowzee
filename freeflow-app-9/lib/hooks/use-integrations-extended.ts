@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useIntegration(integrationId?: string) {
   const [integration, setIntegration] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!integrationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('integrations').select('*').eq('id', integrationId).single(); setIntegration(data) } finally { setIsLoading(false) }
-  }, [integrationId, supabase])
+  }, [integrationId])
   useEffect(() => { fetch() }, [fetch])
   return { integration, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useIntegration(integrationId?: string) {
 export function useIntegrations(options?: { user_id?: string; type?: string; provider?: string; status?: string; is_active?: boolean; limit?: number }) {
   const [integrations, setIntegrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('integrations').select('*')
@@ -45,8 +45,8 @@ export function useIntegrations(options?: { user_id?: string; type?: string; pro
 export function useIntegrationLogs(integrationId?: string, options?: { level?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!integrationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,12 +63,12 @@ export function useIntegrationLogs(integrationId?: string, options?: { level?: s
 export function useActiveIntegrations(userId?: string) {
   const [integrations, setIntegrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('integrations').select('*').eq('user_id', userId).eq('is_active', true).order('name', { ascending: true }); setIntegrations(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { integrations, isLoading, refresh: fetch }
 }
@@ -76,12 +76,12 @@ export function useActiveIntegrations(userId?: string) {
 export function useIntegrationsByProvider(provider?: string) {
   const [integrations, setIntegrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!provider) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('integrations').select('*').eq('provider', provider).eq('is_active', true).order('name', { ascending: true }); setIntegrations(data || []) } finally { setIsLoading(false) }
-  }, [provider, supabase])
+  }, [provider])
   useEffect(() => { fetch() }, [fetch])
   return { integrations, isLoading, refresh: fetch }
 }

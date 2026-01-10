@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCohort(cohortId?: string) {
   const [cohort, setCohort] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cohorts').select('*, cohort_members(*)').eq('id', cohortId).single(); setCohort(data) } finally { setIsLoading(false) }
-  }, [cohortId, supabase])
+  }, [cohortId])
   useEffect(() => { fetch() }, [fetch])
   return { cohort, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCohort(cohortId?: string) {
 export function useCohorts(options?: { type?: string; date_from?: string; date_to?: string; limit?: number }) {
   const [cohorts, setCohorts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('cohorts').select('*')
@@ -43,8 +43,8 @@ export function useCohorts(options?: { type?: string; date_from?: string; date_t
 export function useCohortMembers(cohortId?: string, options?: { limit?: number }) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cohort_members').select('*').eq('cohort_id', cohortId).order('joined_at', { ascending: true }).limit(options?.limit || 100); setMembers(data || []) } finally { setIsLoading(false) }
@@ -56,8 +56,8 @@ export function useCohortMembers(cohortId?: string, options?: { limit?: number }
 export function useCohortMetrics(cohortId?: string, options?: { metric_name?: string; period_from?: string; period_to?: string }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -76,12 +76,12 @@ export function useCohortMetrics(cohortId?: string, options?: { metric_name?: st
 export function useCohortAnalysis(cohortId?: string) {
   const [analysis, setAnalysis] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cohort_analysis').select('*').eq('cohort_id', cohortId).order('analysis_date', { ascending: false }); setAnalysis(data || []) } finally { setIsLoading(false) }
-  }, [cohortId, supabase])
+  }, [cohortId])
   useEffect(() => { fetch() }, [fetch])
   return { analysis, isLoading, refresh: fetch }
 }
@@ -89,12 +89,12 @@ export function useCohortAnalysis(cohortId?: string) {
 export function useCohortRetention(cohortId?: string) {
   const [retention, setRetention] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cohort_metrics').select('*').eq('cohort_id', cohortId).eq('metric_name', 'retention').order('period', { ascending: true }); setRetention(data || []) } finally { setIsLoading(false) }
-  }, [cohortId, supabase])
+  }, [cohortId])
   useEffect(() => { fetch() }, [fetch])
   return { retention, isLoading, refresh: fetch }
 }
@@ -102,8 +102,8 @@ export function useCohortRetention(cohortId?: string) {
 export function useCohortComparison(cohortIds: string[], metricName: string) {
   const [comparison, setComparison] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cohortIds.length) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePoll(pollId?: string) {
   const [poll, setPoll] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('polls').select('*, poll_options(*), poll_settings(*)').eq('id', pollId).single(); setPoll(data) } finally { setIsLoading(false) }
-  }, [pollId, supabase])
+  }, [pollId])
   useEffect(() => { fetch() }, [fetch])
   return { poll, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePoll(pollId?: string) {
 export function usePolls(options?: { creator_id?: string; status?: string; visibility?: string; search?: string; limit?: number }) {
   const [polls, setPolls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('polls').select('*, poll_options(*)')
@@ -44,12 +44,12 @@ export function usePolls(options?: { creator_id?: string; status?: string; visib
 export function usePollOptions(pollId?: string) {
   const [options, setOptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('poll_options').select('*').eq('poll_id', pollId).order('order', { ascending: true }); setOptions(data || []) } finally { setIsLoading(false) }
-  }, [pollId, supabase])
+  }, [pollId])
   useEffect(() => { fetch() }, [fetch])
   return { options, isLoading, refresh: fetch }
 }
@@ -57,8 +57,8 @@ export function usePollOptions(pollId?: string) {
 export function usePollResults(pollId?: string) {
   const [results, setResults] = useState<{ options: any[]; totalVotes: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -71,7 +71,7 @@ export function usePollResults(pollId?: string) {
       })) || []
       setResults({ options: resultsData, totalVotes })
     } finally { setIsLoading(false) }
-  }, [pollId, supabase])
+  }, [pollId])
   useEffect(() => { fetch() }, [fetch])
   return { results, isLoading, refresh: fetch }
 }
@@ -80,8 +80,8 @@ export function useHasVoted(pollId?: string, userId?: string) {
   const [hasVoted, setHasVoted] = useState(false)
   const [votedOptions, setVotedOptions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pollId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -97,8 +97,8 @@ export function useHasVoted(pollId?: string, userId?: string) {
 export function usePollComments(pollId?: string, options?: { limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('poll_comments').select('*, users(*)').eq('poll_id', pollId).is('parent_id', null).order('created_at', { ascending: false }).limit(options?.limit || 50); setComments(data || []) } finally { setIsLoading(false) }
@@ -110,12 +110,12 @@ export function usePollComments(pollId?: string, options?: { limit?: number }) {
 export function usePollSettings(pollId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('poll_settings').select('*').eq('poll_id', pollId).single(); setSettings(data || { allow_multiple: false, show_results_before_voting: false, anonymous: false }) } finally { setIsLoading(false) }
-  }, [pollId, supabase])
+  }, [pollId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -123,8 +123,8 @@ export function usePollSettings(pollId?: string) {
 export function useActivePolls(options?: { visibility?: string; limit?: number }) {
   const [polls, setPolls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('polls').select('*, poll_options(*)').eq('status', 'active').or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
@@ -140,8 +140,8 @@ export function useActivePolls(options?: { visibility?: string; limit?: number }
 export function useMyPolls(userId?: string, options?: { status?: string; limit?: number }) {
   const [polls, setPolls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -158,8 +158,8 @@ export function useMyPolls(userId?: string, options?: { status?: string; limit?:
 export function usePollVoters(pollId?: string, optionId?: string) {
   const [voters, setVoters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

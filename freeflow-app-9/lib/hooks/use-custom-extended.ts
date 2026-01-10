@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useCustomField(fieldId?: string) {
   const [field, setField] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fieldId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('custom_fields').select('*').eq('id', fieldId).single()
       setField(data)
     } finally { setIsLoading(false) }
-  }, [fieldId, supabase])
+  }, [fieldId])
   useEffect(() => { fetch() }, [fetch])
   return { field, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useCustomField(fieldId?: string) {
 export function useCustomFields(entityType?: string, workspaceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useCustomFields(entityType?: string, workspaceId?: string) {
 export function useCustomFieldValues(entityType?: string, entityId?: string) {
   const [values, setValues] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,8 +61,8 @@ export function useCustomFieldValues(entityType?: string, entityId?: string) {
 export function useEntityWithCustomFields(entityType?: string, entityId?: string) {
   const [data, setData] = useState<{ fields: any[]; values: Record<string, any> }>({ fields: [], values: {} })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

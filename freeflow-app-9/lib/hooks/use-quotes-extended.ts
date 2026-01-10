@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useQuote(quoteId?: string) {
   const [quote, setQuote] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('quotes').select('*, quote_items(*), quote_versions(*), quote_comments(*), clients(*), users(*)').eq('id', quoteId).single(); setQuote(data) } finally { setIsLoading(false) }
-  }, [quoteId, supabase])
+  }, [quoteId])
   useEffect(() => { fetch() }, [fetch])
   return { quote, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useQuote(quoteId?: string) {
 export function useQuotes(options?: { author_id?: string; client_id?: string; organization_id?: string; status?: string; search?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('quotes').select('*, clients(*), quote_items(count)')
@@ -45,12 +45,12 @@ export function useQuotes(options?: { author_id?: string; client_id?: string; or
 export function useQuoteItems(quoteId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('quote_items').select('*').eq('quote_id', quoteId).order('order', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [quoteId, supabase])
+  }, [quoteId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -58,12 +58,12 @@ export function useQuoteItems(quoteId?: string) {
 export function useQuoteVersions(quoteId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('quote_versions').select('*, users(*)').eq('quote_id', quoteId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [quoteId, supabase])
+  }, [quoteId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -71,8 +71,8 @@ export function useQuoteVersions(quoteId?: string) {
 export function useQuoteComments(quoteId?: string, options?: { is_internal?: boolean }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!quoteId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -89,8 +89,8 @@ export function useQuoteComments(quoteId?: string, options?: { is_internal?: boo
 export function useMyQuotes(userId?: string, options?: { status?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -107,8 +107,8 @@ export function useMyQuotes(userId?: string, options?: { status?: string; limit?
 export function useClientQuotes(clientId?: string, options?: { status?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!clientId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -125,8 +125,8 @@ export function useClientQuotes(clientId?: string, options?: { status?: string; 
 export function usePendingQuotes(options?: { author_id?: string; organization_id?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('quotes').select('*, clients(*), quote_items(count)').eq('status', 'sent')
@@ -143,8 +143,8 @@ export function usePendingQuotes(options?: { author_id?: string; organization_id
 export function useExpiringQuotes(options?: { days?: number; author_id?: string; limit?: number }) {
   const [quotes, setQuotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date()
@@ -162,8 +162,8 @@ export function useExpiringQuotes(options?: { days?: number; author_id?: string;
 export function useQuoteStats(options?: { author_id?: string; organization_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; draft: number; sent: number; accepted: number; declined: number; expired: number; totalValue: number; acceptedValue: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('quotes').select('status, total, valid_until')
@@ -194,8 +194,8 @@ export function useQuoteStats(options?: { author_id?: string; organization_id?: 
 export function useQuoteTemplates(options?: { category?: string; search?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('quote_templates').select('*')

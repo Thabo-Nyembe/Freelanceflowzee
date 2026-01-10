@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSkill(skillId?: string) {
   const [skill, setSkill] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!skillId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('skills').select('*, skill_categories(*), skill_levels(*)').eq('id', skillId).single(); setSkill(data) } finally { setIsLoading(false) }
-  }, [skillId, supabase])
+  }, [skillId])
   useEffect(() => { fetch() }, [fetch])
   return { skill, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSkill(skillId?: string) {
 export function useSkills(options?: { category_id?: string; type?: string; is_technical?: boolean; is_active?: boolean; search?: string; limit?: number }) {
   const [skills, setSkills] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('skills').select('*, skill_categories(*), skill_levels(count)')
@@ -45,8 +45,8 @@ export function useSkills(options?: { category_id?: string; type?: string; is_te
 export function useUserSkills(userId?: string, options?: { category_id?: string; min_level?: number }) {
   const [skills, setSkills] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -67,8 +67,8 @@ export function useUserSkills(userId?: string, options?: { category_id?: string;
 export function useSkillCategories(options?: { parent_id?: string | null; is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('skill_categories').select('*, skills(count)')
@@ -88,11 +88,11 @@ export function useSkillCategories(options?: { parent_id?: string | null; is_act
 export function useSkillLevels() {
   const [levels, setLevels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('skill_levels').select('*').order('level', { ascending: true }); setLevels(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { levels, isLoading, refresh: fetch }
 }
@@ -100,8 +100,8 @@ export function useSkillLevels() {
 export function useSkillAssessments(userId?: string, skillId?: string, options?: { limit?: number }) {
   const [assessments, setAssessments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,8 +118,8 @@ export function useSkillAssessments(userId?: string, skillId?: string, options?:
 export function useSkillEndorsements(userId?: string, skillId?: string) {
   const [endorsements, setEndorsements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -136,8 +136,8 @@ export function useSkillEndorsements(userId?: string, skillId?: string) {
 export function useSkillRequirements(entityType?: string, entityId?: string) {
   const [requirements, setRequirements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('skill_requirements').select('*, skills(*)').eq('entity_type', entityType).eq('entity_id', entityId); setRequirements(data || []) } finally { setIsLoading(false) }
@@ -149,8 +149,8 @@ export function useSkillRequirements(entityType?: string, entityId?: string) {
 export function useSkillMatch(userId?: string, entityType?: string, entityId?: string) {
   const [match, setMatch] = useState<{ requirements: any[]; userSkills: any[]; matchPercentage: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -177,8 +177,8 @@ export function useSkillMatch(userId?: string, entityType?: string, entityId?: s
 export function useSkillStats() {
   const [stats, setStats] = useState<{ total: number; categories: number; usersWithSkills: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const [total, categories, userSkills] = await Promise.all([
@@ -189,7 +189,7 @@ export function useSkillStats() {
       const uniqueUsers = new Set((userSkills.data || []).map(u => u.user_id)).size
       setStats({ total: total.count || 0, categories: categories.count || 0, usersWithSkills: uniqueUsers })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -197,8 +197,8 @@ export function useSkillStats() {
 export function useTopSkills(options?: { limit?: number }) {
   const [skills, setSkills] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('user_skills').select('skill_id, skills(*)').eq('skills.is_active', true)
@@ -212,7 +212,7 @@ export function useTopSkills(options?: { limit?: number }) {
       const sorted = Object.values(skillCounts).sort((a, b) => b.count - a.count).slice(0, options?.limit || 10)
       setSkills(sorted)
     } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { skills, isLoading, refresh: fetch }
 }

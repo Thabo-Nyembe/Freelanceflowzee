@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useStatistic(statisticId?: string) {
   const [statistic, setStatistic] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('statistics').select('*, statistic_snapshots(*), statistic_alerts(*)').eq('id', statisticId).single(); setStatistic(data) } finally { setIsLoading(false) }
-  }, [statisticId, supabase])
+  }, [statisticId])
   useEffect(() => { fetch() }, [fetch])
   return { statistic, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useStatistic(statisticId?: string) {
 export function useStatistics(options?: { category?: string; metric_type?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [statistics, setStatistics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('statistics').select('*')
@@ -44,8 +44,8 @@ export function useStatistics(options?: { category?: string; metric_type?: strin
 export function useStatisticSnapshots(statisticId?: string, options?: { from_date?: string; to_date?: string; period?: string; limit?: number }) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -65,8 +65,8 @@ export function useLatestStatisticValue(statisticId?: string) {
   const [value, setValue] = useState<number | null>(null)
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -74,7 +74,7 @@ export function useLatestStatisticValue(statisticId?: string) {
       setSnapshot(data)
       setValue(data?.value || null)
     } finally { setIsLoading(false) }
-  }, [statisticId, supabase])
+  }, [statisticId])
   useEffect(() => { fetch() }, [fetch])
   return { value, snapshot, isLoading, refresh: fetch }
 }
@@ -82,8 +82,8 @@ export function useLatestStatisticValue(statisticId?: string) {
 export function useStatisticAggregations(statisticId?: string, options?: { aggregation_type?: string; period?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [aggregations, setAggregations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -103,8 +103,8 @@ export function useStatisticAggregations(statisticId?: string, options?: { aggre
 export function useStatisticReports(options?: { report_type?: string; is_active?: boolean; created_by?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('statistic_reports').select('*')
@@ -122,8 +122,8 @@ export function useStatisticReports(options?: { report_type?: string; is_active?
 export function useStatisticAlerts(statisticId?: string, options?: { is_active?: boolean }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('statistic_alerts').select('*, statistics(*)')
@@ -140,8 +140,8 @@ export function useStatisticAlerts(statisticId?: string, options?: { is_active?:
 export function useStatisticTrend(statisticId?: string, days: number = 30) {
   const [trend, setTrend] = useState<{ current: number; previous: number; change: number; changePercent: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!statisticId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -166,15 +166,15 @@ export function useStatisticTrend(statisticId?: string, days: number = 30) {
 export function useStatisticCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('statistics').select('category').not('category', 'is', null)
       const unique = [...new Set(data?.map(s => s.category).filter(Boolean))]
       setCategories(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function usePriority(priorityId?: string) {
   const [priority, setPriority] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priorityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('priorities').select('*').eq('id', priorityId).single()
       setPriority(data)
     } finally { setIsLoading(false) }
-  }, [priorityId, supabase])
+  }, [priorityId])
   useEffect(() => { fetch() }, [fetch])
   return { priority, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function usePriority(priorityId?: string) {
 export function usePriorities(options?: { entityType?: string; workspaceId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('priorities').select('*')
@@ -44,8 +44,8 @@ export function usePriorities(options?: { entityType?: string; workspaceId?: str
 export function useEntityPriority(entityType?: string, entityId?: string) {
   const [priority, setPriority] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -60,8 +60,8 @@ export function useEntityPriority(entityType?: string, entityId?: string) {
 export function useDefaultPriority(entityType?: string) {
   const [priority, setPriority] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('priorities').select('*').eq('is_default', true)
@@ -69,7 +69,7 @@ export function useDefaultPriority(entityType?: string) {
       const { data } = await query.single()
       setPriority(data)
     } finally { setIsLoading(false) }
-  }, [entityType, supabase])
+  }, [entityType])
   useEffect(() => { fetch() }, [fetch])
   return { priority, isLoading, refresh: fetch }
 }

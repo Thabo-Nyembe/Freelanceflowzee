@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useCryptoWallet(walletId?: string) {
   const [wallet, setWallet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!walletId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('crypto_wallets').select('*').eq('id', walletId).single()
       setWallet(data)
     } finally { setIsLoading(false) }
-  }, [walletId, supabase])
+  }, [walletId])
   useEffect(() => { fetch() }, [fetch])
   return { wallet, isLoading, refresh: fetch }
 }
@@ -27,15 +27,15 @@ export function useCryptoWallet(walletId?: string) {
 export function useCryptoWallets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('crypto_wallets').select('*').eq('user_id', userId).order('is_default', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -43,15 +43,15 @@ export function useCryptoWallets(userId?: string) {
 export function useCryptoAddresses(walletId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!walletId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('crypto_addresses').select('*').eq('wallet_id', walletId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [walletId, supabase])
+  }, [walletId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useCryptoAddresses(walletId?: string) {
 export function useCryptoTransactions(walletId?: string, options?: { txType?: string; status?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!walletId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -78,8 +78,8 @@ export function useCryptoTransactions(walletId?: string, options?: { txType?: st
 export function useCryptoPrices(options?: { currencies?: string[]; networks?: string[] }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('crypto_prices').select('*')
@@ -96,8 +96,8 @@ export function useCryptoPrices(options?: { currencies?: string[]; networks?: st
 export function useCryptoPrice(currency?: string, network?: string) {
   const [price, setPrice] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!currency || !network) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -112,8 +112,8 @@ export function useCryptoPrice(currency?: string, network?: string) {
 export function useCryptoWalletBalance(walletId?: string) {
   const [balance, setBalance] = useState<{ balance: number; balanceUsd: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!walletId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -122,7 +122,7 @@ export function useCryptoWalletBalance(walletId?: string) {
       const balanceUsd = (wallet?.balance || 0) * (price?.price_usd || 0)
       setBalance({ balance: wallet?.balance || 0, balanceUsd })
     } finally { setIsLoading(false) }
-  }, [walletId, supabase])
+  }, [walletId])
   useEffect(() => { fetch() }, [fetch])
   return { balance, isLoading, refresh: fetch }
 }
@@ -145,7 +145,7 @@ export function useCryptoPricesRealtime(currencies?: string[]) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [currencies, supabase])
+  }, [currencies])
   return { prices }
 }
 
@@ -160,6 +160,6 @@ export function useCryptoTransactionsRealtime(walletId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'crypto_transactions', filter: `wallet_id=eq.${walletId}` }, (payload) => setTransactions(prev => prev.map(tx => tx.id === (payload.new as any).id ? payload.new : tx)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [walletId, supabase])
+  }, [walletId])
   return { transactions }
 }

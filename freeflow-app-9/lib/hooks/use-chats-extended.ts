@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useChat(chatId?: string) {
   const [chat, setChat] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!chatId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('chats').select('*, chat_participants(*)').eq('id', chatId).single(); setChat(data) } finally { setIsLoading(false) }
-  }, [chatId, supabase])
+  }, [chatId])
   useEffect(() => { fetch() }, [fetch])
   return { chat, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useChat(chatId?: string) {
 export function useChats(userId?: string, options?: { type?: string; limit?: number }) {
   const [chats, setChats] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useChats(userId?: string, options?: { type?: string; limit?: num
 export function useChatMessages(chatId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!chatId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('chat_messages').select('*').eq('chat_id', chatId).eq('is_deleted', false).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages((data || []).reverse()) } finally { setIsLoading(false) }
@@ -69,19 +69,19 @@ export function useChatMessagesRealtime(chatId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [chatId, supabase])
+  }, [chatId])
   return { messages }
 }
 
 export function useChatParticipants(chatId?: string) {
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!chatId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('chat_participants').select('*').eq('chat_id', chatId).order('joined_at', { ascending: true }); setParticipants(data || []) } finally { setIsLoading(false) }
-  }, [chatId, supabase])
+  }, [chatId])
   useEffect(() => { fetch() }, [fetch])
   return { participants, isLoading, refresh: fetch }
 }
@@ -89,8 +89,8 @@ export function useChatParticipants(chatId?: string) {
 export function useUnreadCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -99,7 +99,7 @@ export function useUnreadCount(userId?: string) {
       const { count: unreadCount } = await supabase.from('chat_messages').select('*', { count: 'exact', head: true }).in('chat_id', participantChats.map(p => p.chat_id)).neq('sender_id', userId).is('read_at', null)
       setCount(unreadCount || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

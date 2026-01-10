@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useRequests(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('requests').select('*').order('created_at', { ascending: false }).limit(50)
@@ -28,15 +28,15 @@ export function useRequests(userId?: string, status?: string) {
 export function useRequestById(requestId?: string) {
   const [request, setRequest] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('requests').select('*').eq('id', requestId).single()
       setRequest(data)
     } finally { setIsLoading(false) }
-  }, [requestId, supabase])
+  }, [requestId])
   useEffect(() => { fetch() }, [fetch])
   return { request, isLoading, refresh: fetch }
 }
@@ -44,8 +44,8 @@ export function useRequestById(requestId?: string) {
 export function useRequestCount(userId?: string, status?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

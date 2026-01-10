@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useBrowserInfo(infoId?: string) {
   const [info, setInfo] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!infoId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('browser_info').select('*').eq('id', infoId).single()
       setInfo(data)
     } finally { setIsLoading(false) }
-  }, [infoId, supabase])
+  }, [infoId])
   useEffect(() => { fetch() }, [fetch])
   return { info, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useBrowserInfo(infoId?: string) {
 export function useUserBrowserHistory(userId?: string, options?: { limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,8 +43,8 @@ export function useUserBrowserHistory(userId?: string, options?: { limit?: numbe
 export function useBrowserStats(options?: { startDate?: string; endDate?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('browser_info').select('browser_name, os, device_type')
@@ -87,15 +87,15 @@ export function useCurrentBrowserInfo() {
 export function useExtensionInstallation(installationId?: string) {
   const [installation, setInstallation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!installationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('browser_extension_installations').select('*').eq('id', installationId).single()
       setInstallation(data)
     } finally { setIsLoading(false) }
-  }, [installationId, supabase])
+  }, [installationId])
   useEffect(() => { fetch() }, [fetch])
   return { installation, isLoading, refresh: fetch }
 }
@@ -103,8 +103,8 @@ export function useExtensionInstallation(installationId?: string) {
 export function useUserExtensions(userId?: string, options?: { isActive?: boolean; browser?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -122,8 +122,8 @@ export function useUserExtensions(userId?: string, options?: { isActive?: boolea
 export function useExtensionStats(extensionId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -132,7 +132,7 @@ export function useExtensionStats(extensionId?: string) {
       data?.forEach(e => { result.byBrowser[e.browser] = (result.byBrowser[e.browser] || 0) + 1 })
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [extensionId, supabase])
+  }, [extensionId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -140,15 +140,15 @@ export function useExtensionStats(extensionId?: string) {
 export function useActiveExtensions(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('browser_extension_installations').select('*').eq('user_id', userId).eq('is_active', true).order('last_used_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useLocale(localeId?: string) {
   const [locale, setLocale] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!localeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('locales').select('*').eq('id', localeId).single()
       setLocale(data)
     } finally { setIsLoading(false) }
-  }, [localeId, supabase])
+  }, [localeId])
   useEffect(() => { fetch() }, [fetch])
   return { locale, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useLocale(localeId?: string) {
 export function useLocales(options?: { languageCode?: string; isEnabled?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('locales').select('*')
@@ -44,14 +44,14 @@ export function useLocales(options?: { languageCode?: string; isEnabled?: boolea
 export function useDefaultLocale() {
   const [locale, setLocale] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('locales').select('*').eq('is_default', true).single()
       setLocale(data)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { locale, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useDefaultLocale() {
 export function useLocaleStrings(localeCode?: string, namespace?: string) {
   const [strings, setStrings] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!localeCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -78,14 +78,14 @@ export function useLocaleStrings(localeCode?: string, namespace?: string) {
 export function useEnabledLocales() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('locales').select('*').eq('is_enabled', true).order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

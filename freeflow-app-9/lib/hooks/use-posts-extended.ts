@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePost(postId?: string) {
   const [post, setPost] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!postId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('posts').select('*, users(*), post_comments(count), post_likes(count), post_shares(count), post_media(*), post_tags(*)').eq('id', postId).single(); setPost(data) } finally { setIsLoading(false) }
-  }, [postId, supabase])
+  }, [postId])
   useEffect(() => { fetch() }, [fetch])
   return { post, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePost(postId?: string) {
 export function usePosts(options?: { author_id?: string; type?: string; visibility?: string; status?: string; search?: string; limit?: number }) {
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('posts').select('*, users(*), post_comments(count), post_likes(count), post_media(*)')
@@ -45,8 +45,8 @@ export function usePosts(options?: { author_id?: string; type?: string; visibili
 export function usePostComments(postId?: string, options?: { parent_id?: string; limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!postId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,12 +63,12 @@ export function usePostComments(postId?: string, options?: { parent_id?: string;
 export function usePostLikes(postId?: string) {
   const [likes, setLikes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!postId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('post_likes').select('*, users(*)').eq('post_id', postId).order('created_at', { ascending: false }); setLikes(data || []) } finally { setIsLoading(false) }
-  }, [postId, supabase])
+  }, [postId])
   useEffect(() => { fetch() }, [fetch])
   return { likes, isLoading, refresh: fetch }
 }
@@ -76,8 +76,8 @@ export function usePostLikes(postId?: string) {
 export function useHasLiked(postId?: string, userId?: string) {
   const [hasLiked, setHasLiked] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!postId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('post_likes').select('id').eq('post_id', postId).eq('user_id', userId).single(); setHasLiked(!!data) } finally { setIsLoading(false) }
@@ -90,8 +90,8 @@ export function usePostReactions(postId?: string) {
   const [reactions, setReactions] = useState<{ [key: string]: number }>({})
   const [userReaction, setUserReaction] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!postId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -100,7 +100,7 @@ export function usePostReactions(postId?: string) {
       data?.forEach(r => { counts[r.reaction_type] = (counts[r.reaction_type] || 0) + 1 })
       setReactions(counts)
     } finally { setIsLoading(false) }
-  }, [postId, supabase])
+  }, [postId])
   useEffect(() => { fetch() }, [fetch])
   return { reactions, userReaction, isLoading, refresh: fetch }
 }
@@ -108,12 +108,12 @@ export function usePostReactions(postId?: string) {
 export function usePostShares(postId?: string) {
   const [shares, setShares] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!postId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('post_shares').select('*, users(*)').eq('post_id', postId).order('created_at', { ascending: false }); setShares(data || []) } finally { setIsLoading(false) }
-  }, [postId, supabase])
+  }, [postId])
   useEffect(() => { fetch() }, [fetch])
   return { shares, isLoading, refresh: fetch }
 }
@@ -121,12 +121,12 @@ export function usePostShares(postId?: string) {
 export function usePostDrafts(userId?: string) {
   const [drafts, setDrafts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('post_drafts').select('*').eq('author_id', userId).order('updated_at', { ascending: false }); setDrafts(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { drafts, isLoading, refresh: fetch }
 }
@@ -134,8 +134,8 @@ export function usePostDrafts(userId?: string) {
 export function useFeed(userId?: string, options?: { limit?: number }) {
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('posts').select('*, users(*), post_comments(count), post_likes(count), post_media(*)').eq('status', 'published').in('visibility', ['public', 'followers']).order('created_at', { ascending: false }).limit(options?.limit || 20)
@@ -149,8 +149,8 @@ export function useFeed(userId?: string, options?: { limit?: number }) {
 export function usePostsByTag(tag?: string, options?: { limit?: number }) {
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tag) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -168,8 +168,8 @@ export function usePostsByTag(tag?: string, options?: { limit?: number }) {
 export function useMyPosts(userId?: string, options?: { status?: string; limit?: number }) {
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePoints(userId?: string) {
   const [points, setPoints] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('points').select('*, point_tiers(*)').eq('user_id', userId).single(); setPoints(data || { balance: 0, lifetime_earned: 0, lifetime_spent: 0 }) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { points, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function usePoints(userId?: string) {
 export function usePointBalance(userId?: string) {
   const [balance, setBalance] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('points').select('balance').eq('user_id', userId).single(); setBalance(data?.balance || 0) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { balance, isLoading, refresh: fetch }
 }
@@ -37,8 +37,8 @@ export function usePointBalance(userId?: string) {
 export function usePointTransactions(userId?: string, options?: { type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -57,8 +57,8 @@ export function usePointTransactions(userId?: string, options?: { type?: string;
 export function usePointRules(options?: { action?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('point_rules').select('*')
@@ -75,8 +75,8 @@ export function usePointRules(options?: { action?: string; is_active?: boolean }
 export function usePointRewards(options?: { is_active?: boolean; reward_type?: string; affordable_for?: number }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('point_rewards').select('*')
@@ -94,8 +94,8 @@ export function usePointRewards(options?: { is_active?: boolean; reward_type?: s
 export function usePointRedemptions(userId?: string, options?: { status?: string; limit?: number }) {
   const [redemptions, setRedemptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -112,11 +112,11 @@ export function usePointRedemptions(userId?: string, options?: { status?: string
 export function usePointTiers() {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('point_tiers').select('*').order('min_points', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { tiers, isLoading, refresh: fetch }
 }
@@ -126,8 +126,8 @@ export function useCurrentTier(userId?: string) {
   const [nextTier, setNextTier] = useState<any>(null)
   const [progress, setProgress] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -146,7 +146,7 @@ export function useCurrentTier(userId?: string) {
         setProgress(100)
       }
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { tier, nextTier, progress, isLoading, refresh: fetch }
 }
@@ -154,8 +154,8 @@ export function useCurrentTier(userId?: string) {
 export function useAffordableRewards(userId?: string) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -164,7 +164,7 @@ export function useAffordableRewards(userId?: string) {
       const { data } = await supabase.from('point_rewards').select('*').eq('is_active', true).lte('points_required', balance).or(`quantity_available.is.null,quantity_available.gt.0`).order('points_required', { ascending: false })
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, isLoading, refresh: fetch }
 }
@@ -172,11 +172,11 @@ export function useAffordableRewards(userId?: string) {
 export function usePointsLeaderboard(options?: { limit?: number }) {
   const [leaderboard, setLeaderboard] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('points').select('*, users(*), point_tiers(*)').order('lifetime_earned', { ascending: false }).limit(options?.limit || 10); setLeaderboard(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { leaderboard, isLoading, refresh: fetch }
 }
@@ -184,8 +184,8 @@ export function usePointsLeaderboard(options?: { limit?: number }) {
 export function usePointStats(userId?: string) {
   const [stats, setStats] = useState<{ earnedThisMonth: number; spentThisMonth: number; transactionCount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -196,7 +196,7 @@ export function usePointStats(userId?: string) {
       const transactionCount = data?.length || 0
       setStats({ earnedThisMonth, spentThisMonth, transactionCount })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

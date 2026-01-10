@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useJournal(journalId?: string) {
   const [journal, setJournal] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!journalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('journals').select('*, journal_entries(*)').eq('id', journalId).single(); setJournal(data) } finally { setIsLoading(false) }
-  }, [journalId, supabase])
+  }, [journalId])
   useEffect(() => { fetch() }, [fetch])
   return { journal, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useJournal(journalId?: string) {
 export function useJournals(userId?: string, options?: { type?: string; is_archived?: boolean }) {
   const [journals, setJournals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,12 +43,12 @@ export function useJournals(userId?: string, options?: { type?: string; is_archi
 export function useJournalEntry(entryId?: string) {
   const [entry, setEntry] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('journal_entries').select('*, journal_moods(*), journal_tags(*)').eq('id', entryId).single(); setEntry(data) } finally { setIsLoading(false) }
-  }, [entryId, supabase])
+  }, [entryId])
   useEffect(() => { fetch() }, [fetch])
   return { entry, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useJournalEntry(entryId?: string) {
 export function useJournalEntries(journalId?: string, options?: { from_date?: string; to_date?: string; mood_id?: string; limit?: number }) {
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!journalId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -76,11 +76,11 @@ export function useJournalEntries(journalId?: string, options?: { from_date?: st
 export function useJournalMoods() {
   const [moods, setMoods] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('journal_moods').select('*').order('name', { ascending: true }); setMoods(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { moods, isLoading, refresh: fetch }
 }
@@ -88,8 +88,8 @@ export function useJournalMoods() {
 export function useJournalPrompts(options?: { category?: string; is_active?: boolean }) {
   const [prompts, setPrompts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('journal_prompts').select('*')
@@ -106,8 +106,8 @@ export function useJournalPrompts(options?: { category?: string; is_active?: boo
 export function useFavoriteEntries(userId?: string, options?: { limit?: number }) {
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('journal_entries').select('*, journals(*)').eq('user_id', userId).eq('is_favorite', true).order('created_at', { ascending: false }).limit(options?.limit || 20); setEntries(data || []) } finally { setIsLoading(false) }
@@ -119,8 +119,8 @@ export function useFavoriteEntries(userId?: string, options?: { limit?: number }
 export function useRecentEntries(userId?: string, limit?: number) {
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('journal_entries').select('*, journals(title)').eq('user_id', userId).order('created_at', { ascending: false }).limit(limit || 10); setEntries(data || []) } finally { setIsLoading(false) }
@@ -145,8 +145,8 @@ export function useJournalSearch(userId?: string, query?: string, options?: { li
 export function useJournalStats(userId?: string) {
   const [stats, setStats] = useState<{ totalEntries: number; totalWords: number; streakDays: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -155,7 +155,7 @@ export function useJournalStats(userId?: string) {
       const totalWords = entries?.reduce((sum, e) => sum + (e.word_count || 0), 0) || 0
       setStats({ totalEntries, totalWords, streakDays: 0 })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

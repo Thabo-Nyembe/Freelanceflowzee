@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useMassAction(actionId?: string) {
   const [action, setAction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!actionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('mass_actions').select('*').eq('id', actionId).single()
       setAction(data)
     } finally { setIsLoading(false) }
-  }, [actionId, supabase])
+  }, [actionId])
   useEffect(() => { fetch() }, [fetch])
   return { action, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useMassAction(actionId?: string) {
 export function useMassActions(options?: { actionType?: string; targetType?: string; status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('mass_actions').select('*')
@@ -45,8 +45,8 @@ export function useMassActions(options?: { actionType?: string; targetType?: str
 export function useMassNotifications(options?: { notificationType?: string; status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('mass_notifications').select('*')
@@ -63,14 +63,14 @@ export function useMassNotifications(options?: { notificationType?: string; stat
 export function useScheduledMassActions() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('mass_actions').select('*').eq('status', 'scheduled').not('scheduled_at', 'is', null).order('scheduled_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

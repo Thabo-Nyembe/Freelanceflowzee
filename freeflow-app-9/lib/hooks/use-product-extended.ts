@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useProducts(categoryId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('products').select('*').eq('is_active', true).order('name', { ascending: true })
@@ -19,7 +19,7 @@ export function useProducts(categoryId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [categoryId, supabase])
+  }, [categoryId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,12 +27,12 @@ export function useProducts(categoryId?: string) {
 export function useProductVariants(productId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('product_variants').select('*').eq('product_id', productId).order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

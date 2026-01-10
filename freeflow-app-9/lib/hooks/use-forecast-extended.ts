@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useForecast(forecastId?: string) {
   const [forecast, setForecast] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!forecastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forecasts').select('*').eq('id', forecastId).single(); setForecast(data) } finally { setIsLoading(false) }
-  }, [forecastId, supabase])
+  }, [forecastId])
   useEffect(() => { fetch() }, [fetch])
   return { forecast, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useForecast(forecastId?: string) {
 export function useForecasts(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [forecasts, setForecasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('forecasts').select('*')
@@ -43,8 +43,8 @@ export function useForecasts(options?: { user_id?: string; type?: string; status
 export function useForecastModels(options?: { type?: string; is_active?: boolean }) {
   const [models, setModels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('forecast_models').select('*')
@@ -61,12 +61,12 @@ export function useForecastModels(options?: { type?: string; is_active?: boolean
 export function useForecastScenarios(forecastId?: string) {
   const [scenarios, setScenarios] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!forecastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forecast_scenarios').select('*').eq('forecast_id', forecastId).order('name', { ascending: true }); setScenarios(data || []) } finally { setIsLoading(false) }
-  }, [forecastId, supabase])
+  }, [forecastId])
   useEffect(() => { fetch() }, [fetch])
   return { scenarios, isLoading, refresh: fetch }
 }
@@ -74,8 +74,8 @@ export function useForecastScenarios(forecastId?: string) {
 export function useRecentForecasts(userId?: string, options?: { limit?: number }) {
   const [forecasts, setForecasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forecasts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 10); setForecasts(data || []) } finally { setIsLoading(false) }

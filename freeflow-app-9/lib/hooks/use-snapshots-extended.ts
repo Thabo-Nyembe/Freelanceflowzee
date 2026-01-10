@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSnapshot(snapshotId?: string) {
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('snapshots').select('*, snapshot_items(*), snapshot_tags(*), users(*)').eq('id', snapshotId).single(); setSnapshot(data) } finally { setIsLoading(false) }
-  }, [snapshotId, supabase])
+  }, [snapshotId])
   useEffect(() => { fetch() }, [fetch])
   return { snapshot, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSnapshot(snapshotId?: string) {
 export function useSnapshots(options?: { entity_type?: string; entity_id?: string; snapshot_type?: string; created_by?: string; status?: string; tag?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('snapshots').select('*, snapshot_items(count), snapshot_tags(*), users(*)')
@@ -52,12 +52,12 @@ export function useSnapshots(options?: { entity_type?: string; entity_id?: strin
 export function useSnapshotItems(snapshotId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('snapshot_items').select('*').eq('snapshot_id', snapshotId); setItems(data || []) } finally { setIsLoading(false) }
-  }, [snapshotId, supabase])
+  }, [snapshotId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -65,8 +65,8 @@ export function useSnapshotItems(snapshotId?: string) {
 export function useSnapshotSchedules(options?: { entity_type?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('snapshot_schedules').select('*')
@@ -83,15 +83,15 @@ export function useSnapshotSchedules(options?: { entity_type?: string; is_active
 export function useSnapshotComparisons(snapshotId?: string) {
   const [comparisons, setComparisons] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('snapshot_comparisons').select('*, snapshot1:snapshot1_id(*), snapshot2:snapshot2_id(*)').or(`snapshot1_id.eq.${snapshotId},snapshot2_id.eq.${snapshotId}`).order('compared_at', { ascending: false })
       setComparisons(data || [])
     } finally { setIsLoading(false) }
-  }, [snapshotId, supabase])
+  }, [snapshotId])
   useEffect(() => { fetch() }, [fetch])
   return { comparisons, isLoading, refresh: fetch }
 }
@@ -99,12 +99,12 @@ export function useSnapshotComparisons(snapshotId?: string) {
 export function useSnapshotExports(snapshotId?: string) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('snapshot_exports').select('*').eq('snapshot_id', snapshotId).order('exported_at', { ascending: false }); setExports(data || []) } finally { setIsLoading(false) }
-  }, [snapshotId, supabase])
+  }, [snapshotId])
   useEffect(() => { fetch() }, [fetch])
   return { exports, isLoading, refresh: fetch }
 }
@@ -112,8 +112,8 @@ export function useSnapshotExports(snapshotId?: string) {
 export function useEntitySnapshots(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -128,8 +128,8 @@ export function useEntitySnapshots(entityType?: string, entityId?: string, optio
 export function useLatestSnapshot(entityType?: string, entityId?: string) {
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -144,8 +144,8 @@ export function useLatestSnapshot(entityType?: string, entityId?: string) {
 export function useSnapshotStats(options?: { entity_type?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; scheduled: number; manual: number; restored: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('snapshots').select('snapshot_type, restored_at')

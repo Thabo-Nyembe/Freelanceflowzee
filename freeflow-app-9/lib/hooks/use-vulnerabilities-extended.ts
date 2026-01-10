@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useVulnerability(vulnerabilityId?: string) {
   const [vulnerability, setVulnerability] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!vulnerabilityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vulnerabilities').select('*').eq('id', vulnerabilityId).single(); setVulnerability(data) } finally { setIsLoading(false) }
-  }, [vulnerabilityId, supabase])
+  }, [vulnerabilityId])
   useEffect(() => { fetch() }, [fetch])
   return { vulnerability, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useVulnerability(vulnerabilityId?: string) {
 export function useVulnerabilities(options?: { severity?: string; status?: string; affected_component?: string; limit?: number }) {
   const [vulnerabilities, setVulnerabilities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('vulnerabilities').select('*')
@@ -43,8 +43,8 @@ export function useVulnerabilities(options?: { severity?: string; status?: strin
 export function useVulnerabilityScans(options?: { status?: string; limit?: number }) {
   const [scans, setScans] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('vulnerability_scans').select('*')
@@ -60,12 +60,12 @@ export function useVulnerabilityScans(options?: { status?: string; limit?: numbe
 export function useVulnerabilityFixes(vulnerabilityId?: string) {
   const [fixes, setFixes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!vulnerabilityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vulnerability_fixes').select('*').eq('vulnerability_id', vulnerabilityId).order('created_at', { ascending: false }); setFixes(data || []) } finally { setIsLoading(false) }
-  }, [vulnerabilityId, supabase])
+  }, [vulnerabilityId])
   useEffect(() => { fetch() }, [fetch])
   return { fixes, isLoading, refresh: fetch }
 }
@@ -73,11 +73,11 @@ export function useVulnerabilityFixes(vulnerabilityId?: string) {
 export function useOpenVulnerabilities() {
   const [vulnerabilities, setVulnerabilities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('vulnerabilities').select('*').eq('status', 'open').order('severity', { ascending: false }); setVulnerabilities(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { vulnerabilities, isLoading, refresh: fetch }
 }
@@ -85,11 +85,11 @@ export function useOpenVulnerabilities() {
 export function useCriticalVulnerabilities() {
   const [vulnerabilities, setVulnerabilities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('vulnerabilities').select('*').in('severity', ['critical', 'high']).eq('status', 'open').order('created_at', { ascending: false }); setVulnerabilities(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { vulnerabilities, isLoading, refresh: fetch }
 }

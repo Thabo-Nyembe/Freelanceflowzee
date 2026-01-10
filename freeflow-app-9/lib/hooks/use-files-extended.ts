@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useFile(fileId?: string) {
   const [file, setFile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('files').select('*, file_versions(*), file_tags(*), file_metadata(*)').eq('id', fileId).single(); setFile(data) } finally { setIsLoading(false) }
-  }, [fileId, supabase])
+  }, [fileId])
   useEffect(() => { fetch() }, [fetch])
   return { file, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useFile(fileId?: string) {
 export function useFiles(options?: { owner_id?: string; folder_id?: string; mime_type?: string; is_starred?: boolean; is_deleted?: boolean; limit?: number }) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('files').select('*')
@@ -45,8 +45,8 @@ export function useFiles(options?: { owner_id?: string; folder_id?: string; mime
 export function useUserFiles(userId?: string, options?: { folder_id?: string; is_deleted?: boolean }) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,12 +64,12 @@ export function useUserFiles(userId?: string, options?: { folder_id?: string; is
 export function useFileVersions(fileId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('file_versions').select('*').eq('file_id', fileId).order('version_number', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [fileId, supabase])
+  }, [fileId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -77,12 +77,12 @@ export function useFileVersions(fileId?: string) {
 export function useFileShares(fileId?: string) {
   const [shares, setShares] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('file_shares').select('*').eq('file_id', fileId).order('shared_at', { ascending: false }); setShares(data || []) } finally { setIsLoading(false) }
-  }, [fileId, supabase])
+  }, [fileId])
   useEffect(() => { fetch() }, [fetch])
   return { shares, isLoading, refresh: fetch }
 }
@@ -90,12 +90,12 @@ export function useFileShares(fileId?: string) {
 export function useSharedWithMe(userId?: string) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('file_shares').select('*, files(*)').eq('shared_with', userId).order('shared_at', { ascending: false }); setFiles(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }
@@ -103,12 +103,12 @@ export function useSharedWithMe(userId?: string) {
 export function useStarredFiles(userId?: string) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('files').select('*').eq('owner_id', userId).eq('is_starred', true).eq('is_deleted', false).order('updated_at', { ascending: false }); setFiles(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }
@@ -116,8 +116,8 @@ export function useStarredFiles(userId?: string) {
 export function useRecentFiles(userId?: string, limit?: number) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('files').select('*').eq('owner_id', userId).eq('is_deleted', false).order('updated_at', { ascending: false }).limit(limit || 20); setFiles(data || []) } finally { setIsLoading(false) }
@@ -129,12 +129,12 @@ export function useRecentFiles(userId?: string, limit?: number) {
 export function useTrashFiles(userId?: string) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('files').select('*').eq('owner_id', userId).eq('is_deleted', true).order('deleted_at', { ascending: false }); setFiles(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }

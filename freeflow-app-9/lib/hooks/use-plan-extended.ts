@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlans(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('plans').select('*').order('sort_order', { ascending: true })
@@ -19,7 +19,7 @@ export function usePlans(isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [isActive, supabase])
+  }, [isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,12 +27,12 @@ export function usePlans(isActive?: boolean) {
 export function usePlanFeatures(planId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!planId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('plan_features').select('*').eq('plan_id', planId).order('sort_order', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [planId, supabase])
+  }, [planId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

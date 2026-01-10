@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useWasabiBucket(bucketId?: string) {
   const [bucket, setBucket] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!bucketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('wasabi_buckets').select('*').eq('id', bucketId).single(); setBucket(data) } finally { setIsLoading(false) }
-  }, [bucketId, supabase])
+  }, [bucketId])
   useEffect(() => { fetch() }, [fetch])
   return { bucket, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useWasabiBucket(bucketId?: string) {
 export function useWasabiBuckets(options?: { user_id?: string; is_public?: boolean; status?: string; limit?: number }) {
   const [buckets, setBuckets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('wasabi_buckets').select('*')
@@ -43,8 +43,8 @@ export function useWasabiBuckets(options?: { user_id?: string; is_public?: boole
 export function useWasabiObjects(bucketId?: string, options?: { prefix?: string; limit?: number }) {
   const [objects, setObjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!bucketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('wasabi_objects').select('*').eq('bucket_id', bucketId); if (options?.prefix) query = query.like('key', `${options.prefix}%`); const { data } = await query.order('key', { ascending: true }).limit(options?.limit || 100); setObjects(data || []) } finally { setIsLoading(false) }
@@ -56,8 +56,8 @@ export function useWasabiObjects(bucketId?: string, options?: { prefix?: string;
 export function useWasabiUploads(options?: { bucket_id?: string; user_id?: string; status?: string; limit?: number }) {
   const [uploads, setUploads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('wasabi_uploads').select('*')
@@ -75,12 +75,12 @@ export function useWasabiUploads(options?: { bucket_id?: string; user_id?: strin
 export function useWasabiAccessKeys(userId?: string) {
   const [accessKeys, setAccessKeys] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('wasabi_access_keys').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setAccessKeys(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { accessKeys, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useForm(formId?: string) {
   const [form, setForm] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!formId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forms').select('*, form_fields(*)').eq('id', formId).single(); setForm(data) } finally { setIsLoading(false) }
-  }, [formId, supabase])
+  }, [formId])
   useEffect(() => { fetch() }, [fetch])
   return { form, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useForm(formId?: string) {
 export function useForms(options?: { created_by?: string; status?: string; type?: string; limit?: number }) {
   const [forms, setForms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('forms').select('*')
@@ -43,12 +43,12 @@ export function useForms(options?: { created_by?: string; status?: string; type?
 export function useFormFields(formId?: string) {
   const [fields, setFields] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!formId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('form_fields').select('*').eq('form_id', formId).order('order', { ascending: true }); setFields(data || []) } finally { setIsLoading(false) }
-  }, [formId, supabase])
+  }, [formId])
   useEffect(() => { fetch() }, [fetch])
   return { fields, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useFormFields(formId?: string) {
 export function useFormSubmissions(formId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [submissions, setSubmissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!formId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -75,12 +75,12 @@ export function useFormSubmissions(formId?: string, options?: { from_date?: stri
 export function useFormSubmission(submissionId?: string) {
   const [submission, setSubmission] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!submissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('form_submissions').select('*, form_responses(*), forms(*)').eq('id', submissionId).single(); setSubmission(data) } finally { setIsLoading(false) }
-  }, [submissionId, supabase])
+  }, [submissionId])
   useEffect(() => { fetch() }, [fetch])
   return { submission, isLoading, refresh: fetch }
 }
@@ -88,8 +88,8 @@ export function useFormSubmission(submissionId?: string) {
 export function useFormTemplates(options?: { category?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('form_templates').select('*')
@@ -97,7 +97,7 @@ export function useFormTemplates(options?: { category?: string }) {
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, supabase])
+  }, [options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -105,12 +105,12 @@ export function useFormTemplates(options?: { category?: string }) {
 export function useFormAnalytics(formId?: string) {
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!formId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('form_analytics').select('*').eq('form_id', formId).order('date', { ascending: false }).limit(30); setAnalytics(data || []) } finally { setIsLoading(false) }
-  }, [formId, supabase])
+  }, [formId])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -118,8 +118,8 @@ export function useFormAnalytics(formId?: string) {
 export function useUserForms(userId?: string, options?: { status?: string }) {
   const [forms, setForms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -136,11 +136,11 @@ export function useUserForms(userId?: string, options?: { status?: string }) {
 export function usePublishedForms(limit?: number) {
   const [forms, setForms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('forms').select('*').eq('status', 'published').order('created_at', { ascending: false }).limit(limit || 20); setForms(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { forms, isLoading, refresh: fetch }
 }

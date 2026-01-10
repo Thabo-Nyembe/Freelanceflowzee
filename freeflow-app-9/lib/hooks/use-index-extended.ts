@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useIndexes(indexType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('indexes').select('*').order('created_at', { ascending: false })
@@ -19,7 +19,7 @@ export function useIndexes(indexType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [indexType, supabase])
+  }, [indexType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,15 +27,15 @@ export function useIndexes(indexType?: string) {
 export function useIndexById(indexId?: string) {
   const [index, setIndex] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!indexId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('indexes').select('*').eq('id', indexId).single()
       setIndex(data)
     } finally { setIsLoading(false) }
-  }, [indexId, supabase])
+  }, [indexId])
   useEffect(() => { fetch() }, [fetch])
   return { index, isLoading, refresh: fetch }
 }
@@ -43,15 +43,15 @@ export function useIndexById(indexId?: string) {
 export function useIndexStats(indexId?: string) {
   const [entryCount, setEntryCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!indexId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { count } = await supabase.from('index_entries').select('*', { count: 'exact', head: true }).eq('index_id', indexId)
       setEntryCount(count || 0)
     } finally { setIsLoading(false) }
-  }, [indexId, supabase])
+  }, [indexId])
   useEffect(() => { fetch() }, [fetch])
   return { entryCount, isLoading, refresh: fetch }
 }

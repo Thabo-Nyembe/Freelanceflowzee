@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTag(tagId?: string) {
   const [tag, setTag] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tagId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tags').select('*, tag_groups(*), tag_assignments(count)').eq('id', tagId).single(); setTag(data) } finally { setIsLoading(false) }
-  }, [tagId, supabase])
+  }, [tagId])
   useEffect(() => { fetch() }, [fetch])
   return { tag, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTag(tagId?: string) {
 export function useTags(options?: { group_id?: string; is_system?: boolean; search?: string; limit?: number }) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tags').select('*, tag_groups(*), tag_assignments(count)')
@@ -43,8 +43,8 @@ export function useTags(options?: { group_id?: string; is_system?: boolean; sear
 export function useTagGroups(options?: { is_exclusive?: boolean }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tag_groups').select('*, tags(count)')
@@ -52,7 +52,7 @@ export function useTagGroups(options?: { is_exclusive?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setGroups(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_exclusive, supabase])
+  }, [options?.is_exclusive])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -60,8 +60,8 @@ export function useTagGroups(options?: { is_exclusive?: boolean }) {
 export function useEntityTags(entityType?: string, entityId?: string) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -76,8 +76,8 @@ export function useEntityTags(entityType?: string, entityId?: string) {
 export function usePopularTags(options?: { entity_type?: string; limit?: number }) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('tags').select('*, tag_groups(*)').order('usage_count', { ascending: false }).limit(options?.limit || 20)
@@ -91,8 +91,8 @@ export function usePopularTags(options?: { entity_type?: string; limit?: number 
 export function useTagsByGroup() {
   const [groupedTags, setGroupedTags] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('tags').select('*, tag_groups(*)').order('name', { ascending: true })
@@ -104,7 +104,7 @@ export function useTagsByGroup() {
       })
       setGroupedTags(grouped)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { groupedTags, isLoading, refresh: fetch }
 }
@@ -112,8 +112,8 @@ export function useTagsByGroup() {
 export function useEntitiesByTag(tagId?: string, entityType?: string, options?: { limit?: number }) {
   const [entities, setEntities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tagId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -148,8 +148,8 @@ export function useTagSearch(searchTerm: string, options?: { group_id?: string; 
 export function useRecentlyUsedTags(userId?: string, options?: { limit?: number }) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

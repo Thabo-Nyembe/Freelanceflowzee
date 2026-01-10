@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useBanners(location?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('banners').select('*').order('priority', { ascending: false })
@@ -28,8 +28,8 @@ export function useBanners(location?: string, isActive?: boolean) {
 export function useActiveBanners(location?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
@@ -38,7 +38,7 @@ export function useActiveBanners(location?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [location, supabase])
+  }, [location])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -46,8 +46,8 @@ export function useActiveBanners(location?: string) {
 export function useBannerStats(bannerId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!bannerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -55,7 +55,7 @@ export function useBannerStats(bannerId?: string) {
       const ctr = result?.view_count > 0 ? (result.click_count / result.view_count) * 100 : 0
       setStats({ ...result, ctr })
     } finally { setIsLoading(false) }
-  }, [bannerId, supabase])
+  }, [bannerId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

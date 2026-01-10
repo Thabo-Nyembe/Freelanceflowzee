@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useContent(contentId?: string) {
   const [content, setContent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('content').select('*, content_blocks(*), content_categories(*)').eq('id', contentId).single()
       setContent(data)
     } finally { setIsLoading(false) }
-  }, [contentId, supabase])
+  }, [contentId])
   useEffect(() => { fetch() }, [fetch])
   return { content, isLoading, refresh: fetch }
 }
@@ -27,15 +27,15 @@ export function useContent(contentId?: string) {
 export function useContentBySlug(slug?: string) {
   const [content, setContent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('content').select('*, content_blocks(*), content_categories(*)').eq('slug', slug).single()
       setContent(data)
     } finally { setIsLoading(false) }
-  }, [slug, supabase])
+  }, [slug])
   useEffect(() => { fetch() }, [fetch])
   return { content, isLoading, refresh: fetch }
 }
@@ -43,8 +43,8 @@ export function useContentBySlug(slug?: string) {
 export function useContents(filters?: { user_id?: string; content_type?: string; status?: string; category_id?: string; tag?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('content').select('*, content_categories(*)')
@@ -64,8 +64,8 @@ export function useContents(filters?: { user_id?: string; content_type?: string;
 export function usePublishedContent(options?: { content_type?: string; category_id?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('content').select('*, content_categories(*)').eq('status', 'published')
@@ -82,15 +82,15 @@ export function usePublishedContent(options?: { content_type?: string; category_
 export function useContentBlocks(contentId?: string) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('content_blocks').select('*').eq('content_id', contentId).order('order', { ascending: true })
       setBlocks(data || [])
     } finally { setIsLoading(false) }
-  }, [contentId, supabase])
+  }, [contentId])
   useEffect(() => { fetch() }, [fetch])
   return { blocks, isLoading, refresh: fetch }
 }
@@ -98,8 +98,8 @@ export function useContentBlocks(contentId?: string) {
 export function useContentVersions(contentId?: string, options?: { limit?: number }) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -114,8 +114,8 @@ export function useContentVersions(contentId?: string, options?: { limit?: numbe
 export function useContentCategories(options?: { parent_id?: string | null }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('content_categories').select('*')
@@ -127,7 +127,7 @@ export function useContentCategories(options?: { parent_id?: string | null }) {
       const { data } = await query.order('name', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.parent_id, supabase])
+  }, [options?.parent_id])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -135,15 +135,15 @@ export function useContentCategories(options?: { parent_id?: string | null }) {
 export function useContentCategory(categoryId?: string) {
   const [category, setCategory] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!categoryId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('content_categories').select('*').eq('id', categoryId).single()
       setCategory(data)
     } finally { setIsLoading(false) }
-  }, [categoryId, supabase])
+  }, [categoryId])
   useEffect(() => { fetch() }, [fetch])
   return { category, isLoading, refresh: fetch }
 }
@@ -173,8 +173,8 @@ export function useContentSearch(searchTerm: string, options?: { content_type?: 
 export function useContentStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; published: number; draft: number; totalViews: number; totalLikes: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -187,7 +187,7 @@ export function useContentStats(userId?: string) {
       const totalLikes = contents.reduce((sum, c) => sum + (c.like_count || 0), 0)
       setStats({ total, published, draft, totalViews, totalLikes })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -195,8 +195,8 @@ export function useContentStats(userId?: string) {
 export function usePopularContent(options?: { content_type?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('content').select('*, content_categories(*)').eq('status', 'published')
@@ -212,8 +212,8 @@ export function usePopularContent(options?: { content_type?: string; limit?: num
 export function useRelatedContent(contentId?: string, options?: { limit?: number }) {
   const [related, setRelated] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

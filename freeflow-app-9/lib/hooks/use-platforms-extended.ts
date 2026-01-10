@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlatform(platformId?: string) {
   const [platform, setPlatform] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!platformId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platforms').select('*').eq('id', platformId).single(); setPlatform(data) } finally { setIsLoading(false) }
-  }, [platformId, supabase])
+  }, [platformId])
   useEffect(() => { fetch() }, [fetch])
   return { platform, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePlatform(platformId?: string) {
 export function usePlatforms(options?: { type?: string; is_active?: boolean }) {
   const [platforms, setPlatforms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('platforms').select('*')
@@ -42,12 +42,12 @@ export function usePlatforms(options?: { type?: string; is_active?: boolean }) {
 export function usePlatformConnection(connectionId?: string) {
   const [connection, setConnection] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_connections').select('*, platforms(*), platform_settings(*)').eq('id', connectionId).single(); setConnection(data) } finally { setIsLoading(false) }
-  }, [connectionId, supabase])
+  }, [connectionId])
   useEffect(() => { fetch() }, [fetch])
   return { connection, isLoading, refresh: fetch }
 }
@@ -55,8 +55,8 @@ export function usePlatformConnection(connectionId?: string) {
 export function usePlatformConnections(options?: { platform_id?: string; user_id?: string; organization_id?: string; status?: string }) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('platform_connections').select('*, platforms(*)')
@@ -75,12 +75,12 @@ export function usePlatformConnections(options?: { platform_id?: string; user_id
 export function useUserConnections(userId?: string) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_connections').select('*, platforms(*)').eq('user_id', userId).order('created_at', { ascending: false }); setConnections(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { connections, isLoading, refresh: fetch }
 }
@@ -88,8 +88,8 @@ export function useUserConnections(userId?: string) {
 export function usePlatformSyncLogs(connectionId?: string, options?: { status?: string; sync_type?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -107,12 +107,12 @@ export function usePlatformSyncLogs(connectionId?: string, options?: { status?: 
 export function usePlatformMappings(connectionId?: string) {
   const [mappings, setMappings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_mappings').select('*').eq('connection_id', connectionId).eq('is_active', true).order('local_entity', { ascending: true }); setMappings(data || []) } finally { setIsLoading(false) }
-  }, [connectionId, supabase])
+  }, [connectionId])
   useEffect(() => { fetch() }, [fetch])
   return { mappings, isLoading, refresh: fetch }
 }
@@ -120,12 +120,12 @@ export function usePlatformMappings(connectionId?: string) {
 export function usePlatformSettings(connectionId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('platform_settings').select('*').eq('connection_id', connectionId).single(); setSettings(data?.settings || {}) } finally { setIsLoading(false) }
-  }, [connectionId, supabase])
+  }, [connectionId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -133,8 +133,8 @@ export function usePlatformSettings(connectionId?: string) {
 export function useActiveConnections(organizationId?: string) {
   const [connections, setConnections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('platform_connections').select('*, platforms(*)').eq('status', 'active')
@@ -142,7 +142,7 @@ export function useActiveConnections(organizationId?: string) {
       const { data } = await query.order('last_sync_at', { ascending: false })
       setConnections(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { connections, isLoading, refresh: fetch }
 }
@@ -150,8 +150,8 @@ export function useActiveConnections(organizationId?: string) {
 export function useSyncStatus(connectionId?: string) {
   const [status, setStatus] = useState<{ lastSync: string | null; lastStatus: string | null; recentLogs: any[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -165,7 +165,7 @@ export function useSyncStatus(connectionId?: string) {
         recentLogs: logsRes.data || []
       })
     } finally { setIsLoading(false) }
-  }, [connectionId, supabase])
+  }, [connectionId])
   useEffect(() => { fetch() }, [fetch])
   return { status, isLoading, refresh: fetch }
 }

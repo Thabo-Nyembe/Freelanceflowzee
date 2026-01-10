@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useFocusSession(sessionId?: string) {
   const [session, setSession] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('focus_sessions').select('*, focus_blocks(*)').eq('id', sessionId).single(); setSession(data) } finally { setIsLoading(false) }
-  }, [sessionId, supabase])
+  }, [sessionId])
   useEffect(() => { fetch() }, [fetch])
   return { session, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useFocusSession(sessionId?: string) {
 export function useFocusSessions(userId?: string, options?: { status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,12 +44,12 @@ export function useFocusSessions(userId?: string, options?: { status?: string; f
 export function useActiveFocusSession(userId?: string) {
   const [session, setSession] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('focus_sessions').select('*').eq('user_id', userId).eq('status', 'active').order('started_at', { ascending: false }).limit(1).single(); setSession(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { session, isLoading, refresh: fetch }
 }
@@ -57,8 +57,8 @@ export function useActiveFocusSession(userId?: string) {
 export function useFocusGoals(userId?: string, options?: { status?: string }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -75,8 +75,8 @@ export function useFocusGoals(userId?: string, options?: { status?: string }) {
 export function useFocusBlocks(userId?: string, options?: { is_active?: boolean }) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -93,12 +93,12 @@ export function useFocusBlocks(userId?: string, options?: { is_active?: boolean 
 export function useFocusStreak(userId?: string) {
   const [streak, setStreak] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('focus_streaks').select('*').eq('user_id', userId).single(); setStreak(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { streak, isLoading, refresh: fetch }
 }
@@ -106,8 +106,8 @@ export function useFocusStreak(userId?: string) {
 export function useFocusStats(userId?: string, period?: string) {
   const [stats, setStats] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -124,8 +124,8 @@ export function useFocusStats(userId?: string, period?: string) {
 export function useTodaysFocusStats(userId?: string) {
   const [stats, setStats] = useState<{ sessions: any[]; totalMinutes: number; completedSessions: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -135,7 +135,7 @@ export function useTodaysFocusStats(userId?: string) {
       const completedSessions = data?.filter(s => s.status === 'completed').length || 0
       setStats({ sessions: data || [], totalMinutes, completedSessions })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -143,8 +143,8 @@ export function useTodaysFocusStats(userId?: string) {
 export function useWeeklyFocusStats(userId?: string) {
   const [stats, setStats] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -153,7 +153,7 @@ export function useWeeklyFocusStats(userId?: string) {
       const { data } = await supabase.from('focus_sessions').select('*').eq('user_id', userId).gte('started_at', weekAgo.toISOString()).order('started_at', { ascending: true })
       setStats(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

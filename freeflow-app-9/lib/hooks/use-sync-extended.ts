@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useSync(syncId?: string) {
   const [sync, setSync] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!syncId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('syncs').select('*').eq('id', syncId).single()
       setSync(data)
     } finally { setIsLoading(false) }
-  }, [syncId, supabase])
+  }, [syncId])
   useEffect(() => { fetch() }, [fetch])
   return { sync, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useSyncStatus(syncId?: string) {
     }).subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [syncId, supabase])
+  }, [syncId])
 
   return { status, lastSyncAt, lastSyncRecords, isActive, isRunning: status === 'running', isLoading }
 }
@@ -64,8 +64,8 @@ export function useSyncStatus(syncId?: string) {
 export function useUserSyncs(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -82,8 +82,8 @@ export function useUserSyncs(userId?: string, options?: { isActive?: boolean }) 
 export function useSyncLogs(syncId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!syncId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

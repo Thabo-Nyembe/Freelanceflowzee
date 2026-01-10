@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePage(pageId?: string) {
   const [page, setPage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pages').select('*, page_blocks(*), page_seo(*), page_versions(*)').eq('id', pageId).single(); setPage(data) } finally { setIsLoading(false) }
-  }, [pageId, supabase])
+  }, [pageId])
   useEffect(() => { fetch() }, [fetch])
   return { page, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePage(pageId?: string) {
 export function usePageBySlug(slug?: string, options?: { organization_id?: string }) {
   const [page, setPage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!slug) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -42,8 +42,8 @@ export function usePageBySlug(slug?: string, options?: { organization_id?: strin
 export function usePages(options?: { organization_id?: string; author_id?: string; type?: string; status?: string; parent_id?: string | null; search?: string; limit?: number }) {
   const [pages, setPages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('pages').select('*, page_seo(*)')
@@ -64,12 +64,12 @@ export function usePages(options?: { organization_id?: string; author_id?: strin
 export function usePageBlocks(pageId?: string) {
   const [blocks, setBlocks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_blocks').select('*').eq('page_id', pageId).order('order', { ascending: true }); setBlocks(data || []) } finally { setIsLoading(false) }
-  }, [pageId, supabase])
+  }, [pageId])
   useEffect(() => { fetch() }, [fetch])
   return { blocks, isLoading, refresh: fetch }
 }
@@ -77,8 +77,8 @@ export function usePageBlocks(pageId?: string) {
 export function usePageVersions(pageId?: string, options?: { limit?: number }) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_versions').select('*').eq('page_id', pageId).order('created_at', { ascending: false }).limit(options?.limit || 20); setVersions(data || []) } finally { setIsLoading(false) }
@@ -90,12 +90,12 @@ export function usePageVersions(pageId?: string, options?: { limit?: number }) {
 export function usePageSeo(pageId?: string) {
   const [seo, setSeo] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_seo').select('*').eq('page_id', pageId).single(); setSeo(data) } finally { setIsLoading(false) }
-  }, [pageId, supabase])
+  }, [pageId])
   useEffect(() => { fetch() }, [fetch])
   return { seo, isLoading, refresh: fetch }
 }
@@ -103,12 +103,12 @@ export function usePageSeo(pageId?: string) {
 export function usePagePermissions(pageId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_permissions').select('*').eq('page_id', pageId); setPermissions(data || []) } finally { setIsLoading(false) }
-  }, [pageId, supabase])
+  }, [pageId])
   useEffect(() => { fetch() }, [fetch])
   return { permissions, isLoading, refresh: fetch }
 }
@@ -116,8 +116,8 @@ export function usePagePermissions(pageId?: string) {
 export function usePageAnalytics(pageId?: string, options?: { from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -135,12 +135,12 @@ export function usePageAnalytics(pageId?: string, options?: { from_date?: string
 export function useChildPages(parentId?: string) {
   const [pages, setPages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pages').select('*').eq('parent_id', parentId).order('title', { ascending: true }); setPages(data || []) } finally { setIsLoading(false) }
-  }, [parentId, supabase])
+  }, [parentId])
   useEffect(() => { fetch() }, [fetch])
   return { pages, isLoading, refresh: fetch }
 }
@@ -148,8 +148,8 @@ export function useChildPages(parentId?: string) {
 export function usePublishedPages(organizationId?: string, options?: { type?: string; limit?: number }) {
   const [pages, setPages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('pages').select('*, page_seo(*)').eq('status', 'published')

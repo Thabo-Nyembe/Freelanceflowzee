@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useNavigations(navigationType?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('navigations').select('*').order('name', { ascending: true })
@@ -28,8 +28,8 @@ export function useNavigations(navigationType?: string, isActive?: boolean) {
 export function useNavigationItems(navigationId?: string, parentId?: string | null) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('navigation_items').select('*').order('sort_order', { ascending: true })
@@ -47,8 +47,8 @@ export function useNavigationItems(navigationId?: string, parentId?: string | nu
 export function useNavigationTree(navigationId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!navigationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -58,7 +58,7 @@ export function useNavigationTree(navigationId?: string) {
       }
       setData(buildTree(items || []))
     } finally { setIsLoading(false) }
-  }, [navigationId, supabase])
+  }, [navigationId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

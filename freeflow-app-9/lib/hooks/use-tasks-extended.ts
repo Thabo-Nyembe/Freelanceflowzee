@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTask(taskId?: string) {
   const [task, setTask] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*), task_dependencies(*), task_checklists(*), users(*), projects(*)').eq('id', taskId).single(); setTask(data) } finally { setIsLoading(false) }
-  }, [taskId, supabase])
+  }, [taskId])
   useEffect(() => { fetch() }, [fetch])
   return { task, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTask(taskId?: string) {
 export function useTasks(options?: { project_id?: string; status?: string; priority?: string; assignee_id?: string; parent_id?: string | null; overdue?: boolean; search?: string; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('*, task_assignments(*), users(*), projects(*)')
@@ -55,8 +55,8 @@ export function useTasks(options?: { project_id?: string; status?: string; prior
 export function useMyTasks(userId?: string, options?: { status?: string; priority?: string; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -77,12 +77,12 @@ export function useMyTasks(userId?: string, options?: { status?: string; priorit
 export function useSubtasks(taskId?: string) {
   const [subtasks, setSubtasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tasks').select('*, task_assignments(*)').eq('parent_id', taskId).order('created_at', { ascending: true }); setSubtasks(data || []) } finally { setIsLoading(false) }
-  }, [taskId, supabase])
+  }, [taskId])
   useEffect(() => { fetch() }, [fetch])
   return { subtasks, isLoading, refresh: fetch }
 }
@@ -91,8 +91,8 @@ export function useTaskDependencies(taskId?: string) {
   const [dependencies, setDependencies] = useState<any[]>([])
   const [dependents, setDependents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -103,7 +103,7 @@ export function useTaskDependencies(taskId?: string) {
       setDependencies(depsRes.data || [])
       setDependents(dependentsRes.data || [])
     } finally { setIsLoading(false) }
-  }, [taskId, supabase])
+  }, [taskId])
   useEffect(() => { fetch() }, [fetch])
   return { dependencies, dependents, isLoading, refresh: fetch }
 }
@@ -111,8 +111,8 @@ export function useTaskDependencies(taskId?: string) {
 export function useTaskComments(taskId?: string, options?: { limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('task_comments').select('*, users(*)').eq('task_id', taskId).is('parent_id', null).order('created_at', { ascending: true }).limit(options?.limit || 100); setComments(data || []) } finally { setIsLoading(false) }
@@ -125,8 +125,8 @@ export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; f
   const [timeLogs, setTimeLogs] = useState<any[]>([])
   const [totalHours, setTotalHours] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -148,8 +148,8 @@ export function useTaskChecklist(taskId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [progress, setProgress] = useState<{ completed: number; total: number; percentage: number }>({ completed: 0, total: 0, percentage: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -160,7 +160,7 @@ export function useTaskChecklist(taskId?: string) {
       const total = checklistItems.length
       setProgress({ completed, total, percentage: total > 0 ? (completed / total) * 100 : 0 })
     } finally { setIsLoading(false) }
-  }, [taskId, supabase])
+  }, [taskId])
   useEffect(() => { fetch() }, [fetch])
   return { items, progress, isLoading, refresh: fetch }
 }
@@ -168,8 +168,8 @@ export function useTaskChecklist(taskId?: string) {
 export function useOverdueTasks(options?: { project_id?: string; assignee_id?: string; limit?: number }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('*, task_assignments(*), projects(*)').lt('due_date', new Date().toISOString()).neq('status', 'done')
@@ -191,8 +191,8 @@ export function useOverdueTasks(options?: { project_id?: string; assignee_id?: s
 export function useTaskStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; todo: number; inProgress: number; done: number; overdue: number }>({ total: 0, todo: 0, inProgress: 0, done: 0, overdue: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tasks').select('status, due_date')
@@ -208,7 +208,7 @@ export function useTaskStats(projectId?: string) {
         overdue: tasks.filter(t => t.due_date && t.due_date < now && t.status !== 'done').length
       })
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

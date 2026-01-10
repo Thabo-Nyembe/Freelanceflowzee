@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useUPFAnalytics(projectId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_analytics').select('*').eq('project_id', projectId).single(); setData(result) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useUPFAnalytics(projectId?: string) {
 export function useUPFAttachments(commentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_attachments').select('*').eq('comment_id', commentId); setData(result || []) } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,12 +36,12 @@ export function useUPFAttachments(commentId?: string) {
 export function useUPFCommentAssignments(commentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_comment_assignments').select('*').eq('comment_id', commentId); setData(result || []) } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -49,12 +49,12 @@ export function useUPFCommentAssignments(commentId?: string) {
 export function useUPFCommentAttachments(commentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_comment_attachments').select('*').eq('comment_id', commentId); setData(result || []) } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -62,12 +62,12 @@ export function useUPFCommentAttachments(commentId?: string) {
 export function useUPFCommentReactions(commentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_comment_reactions').select('*').eq('comment_id', commentId); setData(result || []) } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -75,12 +75,12 @@ export function useUPFCommentReactions(commentId?: string) {
 export function useUPFComments(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_comments').select('*').eq('project_id', projectId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -88,12 +88,12 @@ export function useUPFComments(projectId?: string) {
 export function useUPFMediaFiles(projectId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_media_files').select('*').eq('project_id', projectId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -101,12 +101,12 @@ export function useUPFMediaFiles(projectId?: string) {
 export function useUPFReactions(mediaId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!mediaId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_reactions').select('*').eq('media_id', mediaId); setData(result || []) } finally { setIsLoading(false) }
-  }, [mediaId, supabase])
+  }, [mediaId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -114,12 +114,12 @@ export function useUPFReactions(mediaId?: string) {
 export function useUPFVoiceNotes(commentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('upf_voice_notes').select('*').eq('comment_id', commentId).order('created_at', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

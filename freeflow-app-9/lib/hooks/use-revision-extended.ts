@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useRevisions(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useRevisions(entityId?: string, entityType?: string) {
 export function useLatestRevision(entityId?: string, entityType?: string) {
   const [revision, setRevision] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -42,8 +42,8 @@ export function useLatestRevision(entityId?: string, entityType?: string) {
 export function useRevisionCount(entityId?: string, entityType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -58,8 +58,8 @@ export function useRevisionCount(entityId?: string, entityType?: string) {
 export function useRevisionByNumber(entityId?: string, entityType?: string, revisionNumber?: number) {
   const [revision, setRevision] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || revisionNumber === undefined) { setIsLoading(false); return }
     setIsLoading(true)
     try {

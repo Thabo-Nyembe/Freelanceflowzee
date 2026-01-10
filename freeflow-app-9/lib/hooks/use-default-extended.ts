@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useDefault(defaultId?: string) {
   const [defaultValue, setDefaultValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!defaultId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('defaults').select('*').eq('id', defaultId).single()
       setDefaultValue(data)
     } finally { setIsLoading(false) }
-  }, [defaultId, supabase])
+  }, [defaultId])
   useEffect(() => { fetch() }, [fetch])
   return { default: defaultValue, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useDefault(defaultId?: string) {
 export function useDefaults(options?: { defaultType?: string; entityType?: string; isSystem?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('defaults').select('*')
@@ -45,8 +45,8 @@ export function useDefaults(options?: { defaultType?: string; entityType?: strin
 export function useDefaultByKey(key?: string, workspaceId?: string) {
   const [value, setValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!key) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,8 +63,8 @@ export function useDefaultByKey(key?: string, workspaceId?: string) {
 export function useSystemDefaults(defaultType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('defaults').select('*').eq('is_system', true)
@@ -72,7 +72,7 @@ export function useSystemDefaults(defaultType?: string) {
       const { data: result } = await query.order('key', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [defaultType, supabase])
+  }, [defaultType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

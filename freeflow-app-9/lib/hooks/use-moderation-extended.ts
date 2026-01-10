@@ -11,8 +11,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useModerationQueue(options?: { status?: string; content_type?: string; priority?: string; assigned_to?: string; limit?: number }) {
   const [queue, setQueue] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('moderation_queue').select('*')
@@ -31,12 +31,12 @@ export function useModerationQueue(options?: { status?: string; content_type?: s
 export function useQueueItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('moderation_queue').select('*, moderation_actions(*), moderation_reports(*)').eq('id', itemId).single(); setItem(data) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { item, isLoading, refresh: fetch }
 }
@@ -44,8 +44,8 @@ export function useQueueItem(itemId?: string) {
 export function usePendingQueue(moderatorId?: string) {
   const [queue, setQueue] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('moderation_queue').select('*').eq('status', 'pending')
@@ -53,7 +53,7 @@ export function usePendingQueue(moderatorId?: string) {
       const { data } = await query.order('priority', { ascending: false }).order('created_at', { ascending: true })
       setQueue(data || [])
     } finally { setIsLoading(false) }
-  }, [moderatorId, supabase])
+  }, [moderatorId])
   useEffect(() => { fetch() }, [fetch])
   return { queue, isLoading, refresh: fetch }
 }
@@ -61,12 +61,12 @@ export function usePendingQueue(moderatorId?: string) {
 export function useModerationActions(itemId?: string) {
   const [actions, setActions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('moderation_actions').select('*').eq('queue_item_id', itemId).order('created_at', { ascending: false }); setActions(data || []) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { actions, isLoading, refresh: fetch }
 }
@@ -74,8 +74,8 @@ export function useModerationActions(itemId?: string) {
 export function useModerationRules(options?: { rule_type?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('moderation_rules').select('*')
@@ -92,8 +92,8 @@ export function useModerationRules(options?: { rule_type?: string; is_active?: b
 export function useModerationAppeals(options?: { status?: string; user_id?: string; limit?: number }) {
   const [appeals, setAppeals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('moderation_appeals').select('*, moderation_actions(*)')
@@ -110,8 +110,8 @@ export function useModerationAppeals(options?: { status?: string; user_id?: stri
 export function useModerationLogs(options?: { moderator_id?: string; action_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('moderation_logs').select('*')
@@ -130,8 +130,8 @@ export function useModerationLogs(options?: { moderator_id?: string; action_type
 export function useModerationReports(options?: { status?: string; report_type?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('moderation_reports').select('*')
@@ -148,8 +148,8 @@ export function useModerationReports(options?: { status?: string; report_type?: 
 export function useModerationStats() {
   const [stats, setStats] = useState<{ pending: number; inReview: number; resolved: number; appeals: number; todayActions: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const today = new Date()
@@ -164,7 +164,7 @@ export function useModerationStats() {
       const resolved = queueRes.data?.filter(q => q.status === 'resolved').length || 0
       setStats({ pending, inReview, resolved, appeals: appealsRes.data?.length || 0, todayActions: actionsRes.data?.length || 0 })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -172,15 +172,15 @@ export function useModerationStats() {
 export function useUserModerationHistory(userId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: reports } = await supabase.from('moderation_reports').select('*, moderation_queue(*, moderation_actions(*))').eq('reporter_id', userId).order('created_at', { ascending: false })
       setHistory(reports || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

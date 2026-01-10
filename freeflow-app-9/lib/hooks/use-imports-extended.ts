@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useImport(importId?: string) {
   const [importData, setImportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('imports').select('*, import_jobs(*), import_errors(*)').eq('id', importId).single(); setImportData(data) } finally { setIsLoading(false) }
-  }, [importId, supabase])
+  }, [importId])
   useEffect(() => { fetch() }, [fetch])
   return { importData, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useImport(importId?: string) {
 export function useImports(options?: { user_id?: string; type?: string; status?: string; limit?: number }) {
   const [imports, setImports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('imports').select('*')
@@ -43,8 +43,8 @@ export function useImports(options?: { user_id?: string; type?: string; status?:
 export function useUserImports(userId?: string, options?: { type?: string; status?: string }) {
   const [imports, setImports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,12 +62,12 @@ export function useUserImports(userId?: string, options?: { type?: string; statu
 export function useImportJobs(importId?: string) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('import_jobs').select('*').eq('import_id', importId).order('batch_number', { ascending: true }); setJobs(data || []) } finally { setIsLoading(false) }
-  }, [importId, supabase])
+  }, [importId])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }
@@ -75,12 +75,12 @@ export function useImportJobs(importId?: string) {
 export function useImportMappings(importId?: string) {
   const [mappings, setMappings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('import_mappings').select('*').eq('import_id', importId).order('source_field', { ascending: true }); setMappings(data || []) } finally { setIsLoading(false) }
-  }, [importId, supabase])
+  }, [importId])
   useEffect(() => { fetch() }, [fetch])
   return { mappings, isLoading, refresh: fetch }
 }
@@ -88,8 +88,8 @@ export function useImportMappings(importId?: string) {
 export function useImportErrors(importId?: string, options?: { limit?: number }) {
   const [errors, setErrors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('import_errors').select('*').eq('import_id', importId).order('created_at', { ascending: false }).limit(options?.limit || 100); setErrors(data || []) } finally { setIsLoading(false) }
@@ -101,8 +101,8 @@ export function useImportErrors(importId?: string, options?: { limit?: number })
 export function useImportTemplates(options?: { type?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('import_templates').select('*')
@@ -110,7 +110,7 @@ export function useImportTemplates(options?: { type?: string }) {
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, supabase])
+  }, [options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -118,8 +118,8 @@ export function useImportTemplates(options?: { type?: string }) {
 export function useImportHistory(userId?: string, options?: { type?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -136,12 +136,12 @@ export function useImportHistory(userId?: string, options?: { type?: string; lim
 export function useActiveImports(userId?: string) {
   const [imports, setImports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('imports').select('*').eq('user_id', userId).in('status', ['pending', 'processing']).order('created_at', { ascending: false }); setImports(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { imports, isLoading, refresh: fetch }
 }
@@ -149,8 +149,8 @@ export function useActiveImports(userId?: string) {
 export function useImportProgress(importId?: string) {
   const [progress, setProgress] = useState<{ total: number; processed: number; errors: number; percentage: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -160,7 +160,7 @@ export function useImportProgress(importId?: string) {
         setProgress({ total: data.total_records, processed: data.processed_records, errors: data.error_count, percentage })
       }
     } finally { setIsLoading(false) }
-  }, [importId, supabase])
+  }, [importId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }

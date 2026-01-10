@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTutorial(tutorialId?: string) {
   const [tutorial, setTutorial] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorials').select('*, tutorial_steps(*), users(*)').eq('id', tutorialId).single(); setTutorial(data) } finally { setIsLoading(false) }
-  }, [tutorialId, supabase])
+  }, [tutorialId])
   useEffect(() => { fetch() }, [fetch])
   return { tutorial, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTutorial(tutorialId?: string) {
 export function useTutorials(options?: { category?: string; difficulty?: string; is_published?: boolean; is_featured?: boolean; author_id?: string; search?: string; limit?: number }) {
   const [tutorials, setTutorials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tutorials').select('*, tutorial_steps(count), users(*)')
@@ -46,12 +46,12 @@ export function useTutorials(options?: { category?: string; difficulty?: string;
 export function useTutorialSteps(tutorialId?: string) {
   const [steps, setSteps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_steps').select('*').eq('tutorial_id', tutorialId).order('order_index', { ascending: true }); setSteps(data || []) } finally { setIsLoading(false) }
-  }, [tutorialId, supabase])
+  }, [tutorialId])
   useEffect(() => { fetch() }, [fetch])
   return { steps, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useTutorialSteps(tutorialId?: string) {
 export function useTutorialProgress(tutorialId?: string, userId?: string) {
   const [progress, setProgress] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_progress').select('*').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setProgress(data) } finally { setIsLoading(false) }
@@ -72,8 +72,8 @@ export function useTutorialProgress(tutorialId?: string, userId?: string) {
 export function useMyTutorialProgress(userId?: string, options?: { is_completed?: boolean; limit?: number }) {
   const [progress, setProgress] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -91,8 +91,8 @@ export function useMyTutorialProgress(userId?: string, options?: { is_completed?
 export function useTutorialCompletions(tutorialId?: string, options?: { limit?: number }) {
   const [completions, setCompletions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_completions').select('*, users(*)').eq('tutorial_id', tutorialId).order('completed_at', { ascending: false }).limit(options?.limit || 50); setCompletions(data || []) } finally { setIsLoading(false) }
@@ -104,8 +104,8 @@ export function useTutorialCompletions(tutorialId?: string, options?: { limit?: 
 export function useMyBookmarks(userId?: string, options?: { limit?: number }) {
   const [bookmarks, setBookmarks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_bookmarks').select('*, tutorials(*)').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setBookmarks(data || []) } finally { setIsLoading(false) }
@@ -117,8 +117,8 @@ export function useMyBookmarks(userId?: string, options?: { limit?: number }) {
 export function useIsBookmarked(tutorialId?: string, userId?: string) {
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_bookmarks').select('id').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setIsBookmarked(!!data) } finally { setIsLoading(false) }
@@ -131,8 +131,8 @@ export function useTutorialRatings(tutorialId?: string, options?: { limit?: numb
   const [ratings, setRatings] = useState<any[]>([])
   const [average, setAverage] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -149,8 +149,8 @@ export function useTutorialRatings(tutorialId?: string, options?: { limit?: numb
 export function useMyRating(tutorialId?: string, userId?: string) {
   const [rating, setRating] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_ratings').select('*').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setRating(data) } finally { setIsLoading(false) }
@@ -162,8 +162,8 @@ export function useMyRating(tutorialId?: string, userId?: string) {
 export function useFeaturedTutorials(options?: { category?: string; limit?: number }) {
   const [tutorials, setTutorials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tutorials').select('*, users(*)').eq('is_published', true).eq('is_featured', true)
@@ -179,8 +179,8 @@ export function useFeaturedTutorials(options?: { category?: string; limit?: numb
 export function usePopularTutorials(options?: { category?: string; limit?: number }) {
   const [tutorials, setTutorials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tutorials').select('*, users(*)').eq('is_published', true)
@@ -196,15 +196,15 @@ export function usePopularTutorials(options?: { category?: string; limit?: numbe
 export function useTutorialCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('tutorials').select('category').eq('is_published', true).not('category', 'is', null)
       const unique = [...new Set(data?.map(t => t.category).filter(Boolean))]
       setCategories(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useGoal(goalId?: string) {
   const [goal, setGoal] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('goals').select('*, goal_milestones(*), goal_progress(*), goal_collaborators(*)').eq('id', goalId).single(); setGoal(data) } finally { setIsLoading(false) }
-  }, [goalId, supabase])
+  }, [goalId])
   useEffect(() => { fetch() }, [fetch])
   return { goal, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useGoal(goalId?: string) {
 export function useGoals(options?: { user_id?: string; status?: string; category_id?: string; priority?: string; limit?: number }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('goals').select('*, goal_categories(*)')
@@ -44,8 +44,8 @@ export function useGoals(options?: { user_id?: string; status?: string; category
 export function useUserGoals(userId?: string, options?: { status?: string }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,12 +62,12 @@ export function useUserGoals(userId?: string, options?: { status?: string }) {
 export function useGoalMilestones(goalId?: string) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('goal_milestones').select('*').eq('goal_id', goalId).order('order', { ascending: true }); setMilestones(data || []) } finally { setIsLoading(false) }
-  }, [goalId, supabase])
+  }, [goalId])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }
@@ -75,8 +75,8 @@ export function useGoalMilestones(goalId?: string) {
 export function useGoalProgress(goalId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [progress, setProgress] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -94,11 +94,11 @@ export function useGoalProgress(goalId?: string, options?: { from_date?: string;
 export function useGoalCategories() {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('goal_categories').select('*').order('name', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -106,12 +106,12 @@ export function useGoalCategories() {
 export function useGoalReminders(goalId?: string) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('goal_reminders').select('*').eq('goal_id', goalId).eq('is_active', true).order('reminder_time', { ascending: true }); setReminders(data || []) } finally { setIsLoading(false) }
-  }, [goalId, supabase])
+  }, [goalId])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }
@@ -119,12 +119,12 @@ export function useGoalReminders(goalId?: string) {
 export function useGoalCollaborators(goalId?: string) {
   const [collaborators, setCollaborators] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('goal_collaborators').select('*').eq('goal_id', goalId); setCollaborators(data || []) } finally { setIsLoading(false) }
-  }, [goalId, supabase])
+  }, [goalId])
   useEffect(() => { fetch() }, [fetch])
   return { collaborators, isLoading, refresh: fetch }
 }
@@ -132,12 +132,12 @@ export function useGoalCollaborators(goalId?: string) {
 export function useActiveGoals(userId?: string) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('goals').select('*, goal_categories(*)').eq('user_id', userId).eq('status', 'active').order('target_date', { ascending: true }); setGoals(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }
@@ -145,8 +145,8 @@ export function useActiveGoals(userId?: string) {
 export function useUpcomingGoals(userId?: string, daysAhead?: number) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -163,8 +163,8 @@ export function useUpcomingGoals(userId?: string, daysAhead?: number) {
 export function useGoalsByStatus(userId?: string) {
   const [byStatus, setByStatus] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -173,7 +173,7 @@ export function useGoalsByStatus(userId?: string) {
       data?.forEach(g => { if (!grouped[g.status]) grouped[g.status] = []; grouped[g.status].push(g) })
       setByStatus(grouped)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { byStatus, isLoading, refresh: fetch }
 }

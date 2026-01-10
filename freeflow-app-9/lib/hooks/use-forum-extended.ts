@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useForums(parentId?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('forums').select('*').order('sort_order', { ascending: true })
@@ -29,8 +29,8 @@ export function useForums(parentId?: string, isActive?: boolean) {
 export function useForumTopics(forumId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!forumId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -47,15 +47,15 @@ export function useForumTopics(forumId?: string, status?: string) {
 export function useForumStats(forumId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!forumId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('forums').select('topic_count, post_count, member_count').eq('id', forumId).single()
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [forumId, supabase])
+  }, [forumId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

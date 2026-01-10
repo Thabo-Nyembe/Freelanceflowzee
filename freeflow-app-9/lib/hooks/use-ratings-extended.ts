@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRating(ratingId?: string) {
   const [rating, setRating] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!ratingId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ratings').select('*, rating_criteria(*), rating_responses(*), users(*)').eq('id', ratingId).single(); setRating(data) } finally { setIsLoading(false) }
-  }, [ratingId, supabase])
+  }, [ratingId])
   useEffect(() => { fetch() }, [fetch])
   return { rating, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRating(ratingId?: string) {
 export function useRatings(options: { entity_type: string; entity_id: string; min_rating?: number; verified_only?: boolean; sort_by?: string; limit?: number }) {
   const [ratings, setRatings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('ratings').select('*, rating_responses(*), users(*)').eq('entity_type', options.entity_type).eq('entity_id', options.entity_id)
@@ -47,8 +47,8 @@ export function useRatings(options: { entity_type: string; entity_id: string; mi
 export function useRatingSummary(entityType?: string, entityId?: string) {
   const [summary, setSummary] = useState<{ total_ratings: number; average_rating: number; distribution: { [key: number]: number } } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,12 +63,12 @@ export function useRatingSummary(entityType?: string, entityId?: string) {
 export function useRatingCriteria(entityType?: string) {
   const [criteria, setCriteria] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rating_criteria').select('*').eq('entity_type', entityType).eq('is_active', true).order('order', { ascending: true }); setCriteria(data || []) } finally { setIsLoading(false) }
-  }, [entityType, supabase])
+  }, [entityType])
   useEffect(() => { fetch() }, [fetch])
   return { criteria, isLoading, refresh: fetch }
 }
@@ -77,8 +77,8 @@ export function useUserRating(entityType?: string, entityId?: string, userId?: s
   const [rating, setRating] = useState<any>(null)
   const [hasRated, setHasRated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -94,8 +94,8 @@ export function useUserRating(entityType?: string, entityId?: string, userId?: s
 export function useMyRatings(userId?: string, options?: { entity_type?: string; limit?: number }) {
   const [ratings, setRatings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -112,8 +112,8 @@ export function useMyRatings(userId?: string, options?: { entity_type?: string; 
 export function useTopRated(entityType?: string, options?: { min_ratings?: number; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -130,8 +130,8 @@ export function useTopRated(entityType?: string, options?: { min_ratings?: numbe
 export function useRecentRatings(options?: { entity_type?: string; limit?: number }) {
   const [ratings, setRatings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('ratings').select('*, users(*)')
@@ -147,8 +147,8 @@ export function useRecentRatings(options?: { entity_type?: string; limit?: numbe
 export function useRatingReports(options?: { status?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('rating_reports').select('*, ratings(*), users(*)')
@@ -165,8 +165,8 @@ export function useAverageRating(entityType?: string, entityId?: string) {
   const [average, setAverage] = useState<number>(0)
   const [count, setCount] = useState<number>(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -182,8 +182,8 @@ export function useAverageRating(entityType?: string, entityId?: string) {
 export function useRatingDistribution(entityType?: string, entityId?: string) {
   const [distribution, setDistribution] = useState<{ [key: number]: number }>({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

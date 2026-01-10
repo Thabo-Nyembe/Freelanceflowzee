@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useUpdate(updateId?: string) {
   const [update, setUpdate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('updates').select('*, update_channels(*), users(*)').eq('id', updateId).single(); setUpdate(data) } finally { setIsLoading(false) }
-  }, [updateId, supabase])
+  }, [updateId])
   useEffect(() => { fetch() }, [fetch])
   return { update, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useUpdate(updateId?: string) {
 export function useUpdates(options?: { channel_id?: string; is_critical?: boolean; is_published?: boolean; search?: string; limit?: number }) {
   const [updates, setUpdates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('updates').select('*, update_channels(*), update_installations(count)')
@@ -45,8 +45,8 @@ export function useUpdateChannels(options?: { is_active?: boolean }) {
   const [channels, setChannels] = useState<any[]>([])
   const [defaultChannel, setDefaultChannel] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('update_channels').select('*, updates(count)')
@@ -55,7 +55,7 @@ export function useUpdateChannels(options?: { is_active?: boolean }) {
       setChannels(data || [])
       setDefaultChannel(data?.find(c => c.is_default) || null)
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { channels, defaultChannel, isLoading, refresh: fetch }
 }
@@ -63,8 +63,8 @@ export function useUpdateChannels(options?: { is_active?: boolean }) {
 export function useLatestUpdate(channelId?: string) {
   const [update, setUpdate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('updates').select('*').eq('is_published', true)
@@ -72,7 +72,7 @@ export function useLatestUpdate(channelId?: string) {
       const { data } = await query.order('version', { ascending: false }).limit(1).single()
       setUpdate(data)
     } finally { setIsLoading(false) }
-  }, [channelId, supabase])
+  }, [channelId])
   useEffect(() => { fetch() }, [fetch])
   return { update, isLoading, refresh: fetch }
 }
@@ -106,8 +106,8 @@ export function useCheckForUpdates(currentVersion?: string, channelId?: string) 
 export function useUpdateInstallations(updateId?: string, options?: { status?: string; limit?: number }) {
   const [installations, setInstallations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -124,8 +124,8 @@ export function useUpdateInstallations(updateId?: string, options?: { status?: s
 export function useUpdateRollbacks(updateId?: string, options?: { limit?: number }) {
   const [rollbacks, setRollbacks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('update_rollbacks').select('*').eq('update_id', updateId).order('rolled_back_at', { ascending: false }).limit(options?.limit || 50); setRollbacks(data || []) } finally { setIsLoading(false) }
@@ -137,8 +137,8 @@ export function useUpdateRollbacks(updateId?: string, options?: { limit?: number
 export function useUpdateStats(updateId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -155,7 +155,7 @@ export function useUpdateStats(updateId?: string) {
         rollbacks: rollbacks.length
       })
     } finally { setIsLoading(false) }
-  }, [updateId, supabase])
+  }, [updateId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -163,8 +163,8 @@ export function useUpdateStats(updateId?: string) {
 export function useCriticalUpdates(options?: { channel_id?: string; limit?: number }) {
   const [updates, setUpdates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('updates').select('*, update_channels(*)').eq('is_published', true).eq('is_critical', true)
@@ -180,8 +180,8 @@ export function useCriticalUpdates(options?: { channel_id?: string; limit?: numb
 export function useScheduledUpdates(options?: { channel_id?: string; limit?: number }) {
   const [updates, setUpdates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('updates').select('*, update_channels(*)').eq('is_published', false).not('scheduled_at', 'is', null).gt('scheduled_at', new Date().toISOString())
@@ -197,8 +197,8 @@ export function useScheduledUpdates(options?: { channel_id?: string; limit?: num
 export function useUpdateNotifications(updateId?: string, options?: { status?: string; limit?: number }) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -215,8 +215,8 @@ export function useUpdateNotifications(updateId?: string, options?: { status?: s
 export function useDeviceUpdateHistory(deviceId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!deviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('update_installations').select('*, updates(*)').eq('device_id', deviceId).order('installed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePermission(permissionId?: string) {
   const [permission, setPermission] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!permissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permissions').select('*').eq('id', permissionId).single(); setPermission(data) } finally { setIsLoading(false) }
-  }, [permissionId, supabase])
+  }, [permissionId])
   useEffect(() => { fetch() }, [fetch])
   return { permission, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePermission(permissionId?: string) {
 export function usePermissions(options?: { resource?: string; organization_id?: string; is_active?: boolean; limit?: number }) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('permissions').select('*')
@@ -43,8 +43,8 @@ export function usePermissions(options?: { resource?: string; organization_id?: 
 export function usePermissionGroups(options?: { organization_id?: string; is_active?: boolean }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('permission_groups').select('*')
@@ -61,8 +61,8 @@ export function usePermissionGroups(options?: { organization_id?: string; is_act
 export function useUserPermissions(userId?: string, options?: { organization_id?: string }) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -79,12 +79,12 @@ export function useUserPermissions(userId?: string, options?: { organization_id?
 export function useRolePermissions(roleId?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permission_assignments').select('*, permissions(*), permission_groups(*)').eq('role_id', roleId); setPermissions(data || []) } finally { setIsLoading(false) }
-  }, [roleId, supabase])
+  }, [roleId])
   useEffect(() => { fetch() }, [fetch])
   return { permissions, isLoading, refresh: fetch }
 }
@@ -92,12 +92,12 @@ export function useRolePermissions(roleId?: string) {
 export function usePermissionOverrides(userId?: string) {
   const [overrides, setOverrides] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permission_overrides').select('*, permissions(*)').eq('user_id', userId).or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`); setOverrides(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { overrides, isLoading, refresh: fetch }
 }
@@ -105,8 +105,8 @@ export function usePermissionOverrides(userId?: string) {
 export function usePermissionTemplates(options?: { organization_id?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('permission_templates').select('*')
@@ -114,7 +114,7 @@ export function usePermissionTemplates(options?: { organization_id?: string }) {
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, supabase])
+  }, [options?.organization_id])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -122,8 +122,8 @@ export function usePermissionTemplates(options?: { organization_id?: string }) {
 export function usePermissionCheck(userId?: string, permissionSlug?: string, resourceId?: string) {
   const [isAllowed, setIsAllowed] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !permissionSlug) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -140,8 +140,8 @@ export function usePermissionCheck(userId?: string, permissionSlug?: string, res
 export function usePermissionLogs(options?: { user_id?: string; action?: string; from_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('permission_logs').select('*')
@@ -158,12 +158,12 @@ export function usePermissionLogs(options?: { user_id?: string; action?: string;
 export function useResourcePermissions(resource?: string) {
   const [permissions, setPermissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!resource) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('permissions').select('*').eq('resource', resource).eq('is_active', true).order('action', { ascending: true }); setPermissions(data || []) } finally { setIsLoading(false) }
-  }, [resource, supabase])
+  }, [resource])
   useEffect(() => { fetch() }, [fetch])
   return { permissions, isLoading, refresh: fetch }
 }

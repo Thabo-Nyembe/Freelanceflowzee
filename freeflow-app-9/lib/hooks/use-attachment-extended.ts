@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useAttachments(parentId?: string, parentType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('attachments').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useAttachments(parentId?: string, parentType?: string) {
 export function useAttachmentsByUser(userId?: string, fileType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,8 +46,8 @@ export function useAttachmentsByUser(userId?: string, fileType?: string) {
 export function useAttachmentStats(userId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -56,7 +56,7 @@ export function useAttachmentStats(userId?: string) {
       data?.forEach(a => { stats.by_type[a.file_type] = (stats.by_type[a.file_type] || 0) + 1 })
       setStats(stats)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

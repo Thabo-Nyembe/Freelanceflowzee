@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useActivities(userId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('activities').select('*').order('created_at', { ascending: false }).limit(50)
@@ -28,8 +28,8 @@ export function useActivities(userId?: string, itemType?: string) {
 export function useActivityFeed(userId?: string, followingIds: string[] = []) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -45,8 +45,8 @@ export function useActivityFeed(userId?: string, followingIds: string[] = []) {
 export function useActivityStats(userId?: string) {
   const [stats, setStats] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -55,7 +55,7 @@ export function useActivityStats(userId?: string) {
       data?.forEach(a => { counts[a.action] = (counts[a.action] || 0) + 1 })
       setStats(counts)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

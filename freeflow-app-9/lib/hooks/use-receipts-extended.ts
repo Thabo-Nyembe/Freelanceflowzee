@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useReceipt(receiptId?: string) {
   const [receipt, setReceipt] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!receiptId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('receipts').select('*, receipt_items(*), transactions(*), users(*)').eq('id', receiptId).single(); setReceipt(data) } finally { setIsLoading(false) }
-  }, [receiptId, supabase])
+  }, [receiptId])
   useEffect(() => { fetch() }, [fetch])
   return { receipt, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useReceipt(receiptId?: string) {
 export function useReceipts(options?: { customer_id?: string; organization_id?: string; status?: string; payment_method?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [receipts, setReceipts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('receipts').select('*, receipt_items(count), users(*)')
@@ -47,12 +47,12 @@ export function useReceipts(options?: { customer_id?: string; organization_id?: 
 export function useReceiptItems(receiptId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!receiptId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('receipt_items').select('*').eq('receipt_id', receiptId).order('order', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [receiptId, supabase])
+  }, [receiptId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -60,8 +60,8 @@ export function useReceiptItems(receiptId?: string) {
 export function useCustomerReceipts(customerId?: string, options?: { status?: string; limit?: number }) {
   const [receipts, setReceipts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -78,12 +78,12 @@ export function useCustomerReceipts(customerId?: string, options?: { status?: st
 export function useReceiptByNumber(receiptNumber?: string) {
   const [receipt, setReceipt] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!receiptNumber) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('receipts').select('*, receipt_items(*), users(*)').eq('receipt_number', receiptNumber).single(); setReceipt(data) } finally { setIsLoading(false) }
-  }, [receiptNumber, supabase])
+  }, [receiptNumber])
   useEffect(() => { fetch() }, [fetch])
   return { receipt, isLoading, refresh: fetch }
 }
@@ -91,8 +91,8 @@ export function useReceiptByNumber(receiptNumber?: string) {
 export function useReceiptStats(options?: { organization_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; issued: number; voided: number; totalAmount: number; byPaymentMethod: { [key: string]: number } } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('receipts').select('status, total, payment_method')
@@ -120,8 +120,8 @@ export function useReceiptStats(options?: { organization_id?: string; from_date?
 export function useRecentReceipts(options?: { organization_id?: string; limit?: number }) {
   const [receipts, setReceipts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('receipts').select('*, users(*)')
@@ -137,8 +137,8 @@ export function useRecentReceipts(options?: { organization_id?: string; limit?: 
 export function useReceiptTemplates(options?: { organization_id?: string; category?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('receipt_templates').select('*')
@@ -155,12 +155,12 @@ export function useReceiptTemplates(options?: { organization_id?: string; catego
 export function useReceiptHistory(receiptId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!receiptId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('receipt_history').select('*, users(*)').eq('receipt_id', receiptId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [receiptId, supabase])
+  }, [receiptId])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

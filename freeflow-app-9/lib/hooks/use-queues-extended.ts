@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useQueue(queueId?: string) {
   const [queue, setQueue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('queues').select('*, queue_items(count), queue_workers(*), queue_schedules(*)').eq('id', queueId).single(); setQueue(data) } finally { setIsLoading(false) }
-  }, [queueId, supabase])
+  }, [queueId])
   useEffect(() => { fetch() }, [fetch])
   return { queue, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useQueue(queueId?: string) {
 export function useQueues(options?: { organization_id?: string; type?: string; status?: string; limit?: number }) {
   const [queues, setQueues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('queues').select('*, queue_items(count), queue_workers(count)')
@@ -43,8 +43,8 @@ export function useQueues(options?: { organization_id?: string; type?: string; s
 export function useQueueItems(queueId?: string, options?: { status?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,12 +61,12 @@ export function useQueueItems(queueId?: string, options?: { status?: string; lim
 export function useQueueWorkers(queueId?: string) {
   const [workers, setWorkers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('queue_workers').select('*').eq('queue_id', queueId).order('started_at', { ascending: false }); setWorkers(data || []) } finally { setIsLoading(false) }
-  }, [queueId, supabase])
+  }, [queueId])
   useEffect(() => { fetch() }, [fetch])
   return { workers, isLoading, refresh: fetch }
 }
@@ -74,8 +74,8 @@ export function useQueueWorkers(queueId?: string) {
 export function useActiveWorkers(queueId?: string) {
   const [workers, setWorkers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
@@ -84,7 +84,7 @@ export function useActiveWorkers(queueId?: string) {
       const { data } = await query.order('last_heartbeat', { ascending: false })
       setWorkers(data || [])
     } finally { setIsLoading(false) }
-  }, [queueId, supabase])
+  }, [queueId])
   useEffect(() => { fetch() }, [fetch])
   return { workers, isLoading, refresh: fetch }
 }
@@ -92,12 +92,12 @@ export function useActiveWorkers(queueId?: string) {
 export function useQueueSchedules(queueId?: string) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('queue_schedules').select('*').eq('queue_id', queueId).order('name', { ascending: true }); setSchedules(data || []) } finally { setIsLoading(false) }
-  }, [queueId, supabase])
+  }, [queueId])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -105,8 +105,8 @@ export function useQueueSchedules(queueId?: string) {
 export function useQueueStats(queueId?: string) {
   const [stats, setStats] = useState<{ pending: number; processing: number; completed: number; failed: number; totalProcessed: number; avgProcessingTime: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -125,7 +125,7 @@ export function useQueueStats(queueId?: string) {
         : 0
       setStats({ pending, processing, completed, failed, totalProcessed: queueRes.data?.processed_count || 0, avgProcessingTime })
     } finally { setIsLoading(false) }
-  }, [queueId, supabase])
+  }, [queueId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -133,8 +133,8 @@ export function useQueueStats(queueId?: string) {
 export function useQueueLogs(queueId?: string, options?: { limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('queue_logs').select('*').eq('queue_id', queueId).order('created_at', { ascending: false }).limit(options?.limit || 100); setLogs(data || []) } finally { setIsLoading(false) }
@@ -146,8 +146,8 @@ export function useQueueLogs(queueId?: string, options?: { limit?: number }) {
 export function useFailedItems(queueId?: string, options?: { limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('queue_items').select('*, queues(*)').eq('status', 'failed')
@@ -163,8 +163,8 @@ export function useFailedItems(queueId?: string, options?: { limit?: number }) {
 export function useQueueMetrics(queueId?: string, options?: { from_date?: string; to_date?: string }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -182,8 +182,8 @@ export function useQueueMetrics(queueId?: string, options?: { from_date?: string
 export function usePendingItems(options?: { queue_id?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('queue_items').select('*, queues(*)').eq('status', 'pending')

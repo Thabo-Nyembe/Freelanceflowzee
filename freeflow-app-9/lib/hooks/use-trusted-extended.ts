@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrustedDevice(deviceId?: string) {
   const [device, setDevice] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!deviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('trusted_devices').select('*').eq('id', deviceId).single()
       setDevice(data)
     } finally { setIsLoading(false) }
-  }, [deviceId, supabase])
+  }, [deviceId])
   useEffect(() => { fetch() }, [fetch])
   return { device, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useTrustedDevice(deviceId?: string) {
 export function useTrustedDevices(userId?: string, options?: { onlyActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,15 +63,15 @@ export function useDeviceTrustCheck(userId?: string, deviceFingerprint?: string)
 export function useTwoFactorBackupCodesCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('two_factor_backup_codes').select('id').eq('user_id', userId).eq('is_used', false)
       setCount(data?.length || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -79,15 +79,15 @@ export function useTwoFactorBackupCodesCount(userId?: string) {
 export function useSecureFileDelivery(deliveryId?: string) {
   const [delivery, setDelivery] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!deliveryId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('secure_file_deliveries').select('*').eq('id', deliveryId).single()
       setDelivery(data)
     } finally { setIsLoading(false) }
-  }, [deliveryId, supabase])
+  }, [deliveryId])
   useEffect(() => { fetch() }, [fetch])
   return { delivery, isLoading, refresh: fetch }
 }
@@ -95,8 +95,8 @@ export function useSecureFileDelivery(deliveryId?: string) {
 export function useSecureFileDeliveries(userId?: string, options?: { isActive?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

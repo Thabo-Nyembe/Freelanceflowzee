@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useVariable(variableId?: string) {
   const [variable, setVariable] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!variableId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('variables').select('*').eq('id', variableId).single(); setVariable(data) } finally { setIsLoading(false) }
-  }, [variableId, supabase])
+  }, [variableId])
   useEffect(() => { fetch() }, [fetch])
   return { variable, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useVariable(variableId?: string) {
 export function useVariables(options?: { group_id?: string; type?: string; is_active?: boolean; limit?: number }) {
   const [variables, setVariables] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('variables').select('*')
@@ -43,11 +43,11 @@ export function useVariables(options?: { group_id?: string; type?: string; is_ac
 export function useVariableGroups(options?: { limit?: number }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('variable_groups').select('*, variables(*)').order('name', { ascending: true }).limit(options?.limit || 50); setGroups(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -55,8 +55,8 @@ export function useVariableGroups(options?: { limit?: number }) {
 export function useVariableHistory(variableId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!variableId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('variable_history').select('*').eq('variable_id', variableId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
@@ -68,12 +68,12 @@ export function useVariableHistory(variableId?: string, options?: { limit?: numb
 export function useVariableValues(variableId?: string) {
   const [values, setValues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!variableId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('variable_values').select('*').eq('variable_id', variableId).order('created_at', { ascending: false }); setValues(data || []) } finally { setIsLoading(false) }
-  }, [variableId, supabase])
+  }, [variableId])
   useEffect(() => { fetch() }, [fetch])
   return { values, isLoading, refresh: fetch }
 }
@@ -81,8 +81,8 @@ export function useVariableValues(variableId?: string) {
 export function useActiveVariables(groupId?: string) {
   const [variables, setVariables] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('variables').select('*').eq('is_active', true)
@@ -90,7 +90,7 @@ export function useActiveVariables(groupId?: string) {
       const { data } = await query.order('name', { ascending: true })
       setVariables(data || [])
     } finally { setIsLoading(false) }
-  }, [groupId, supabase])
+  }, [groupId])
   useEffect(() => { fetch() }, [fetch])
   return { variables, isLoading, refresh: fetch }
 }

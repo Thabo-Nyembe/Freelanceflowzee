@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useProposal(proposalId?: string) {
   const [proposal, setProposal] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposals').select('*, proposal_items(*), proposal_versions(*), proposal_comments(*), proposal_signatures(*), users(*), clients(*)').eq('id', proposalId).single(); setProposal(data) } finally { setIsLoading(false) }
-  }, [proposalId, supabase])
+  }, [proposalId])
   useEffect(() => { fetch() }, [fetch])
   return { proposal, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useProposal(proposalId?: string) {
 export function useProposals(options?: { author_id?: string; client_id?: string; organization_id?: string; status?: string; search?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('proposals').select('*, clients(*), proposal_items(count)')
@@ -45,12 +45,12 @@ export function useProposals(options?: { author_id?: string; client_id?: string;
 export function useProposalItems(proposalId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposal_items').select('*').eq('proposal_id', proposalId).order('order', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [proposalId, supabase])
+  }, [proposalId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -58,12 +58,12 @@ export function useProposalItems(proposalId?: string) {
 export function useProposalVersions(proposalId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposal_versions').select('*, users(*)').eq('proposal_id', proposalId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [proposalId, supabase])
+  }, [proposalId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -71,8 +71,8 @@ export function useProposalVersions(proposalId?: string) {
 export function useProposalComments(proposalId?: string, options?: { is_internal?: boolean }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -89,12 +89,12 @@ export function useProposalComments(proposalId?: string, options?: { is_internal
 export function useProposalSignatures(proposalId?: string) {
   const [signatures, setSignatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!proposalId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('proposal_signatures').select('*').eq('proposal_id', proposalId).order('signed_at', { ascending: false }); setSignatures(data || []) } finally { setIsLoading(false) }
-  }, [proposalId, supabase])
+  }, [proposalId])
   useEffect(() => { fetch() }, [fetch])
   return { signatures, isLoading, refresh: fetch }
 }
@@ -102,8 +102,8 @@ export function useProposalSignatures(proposalId?: string) {
 export function useProposalTemplates(options?: { category?: string; search?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('proposal_templates').select('*')
@@ -120,8 +120,8 @@ export function useProposalTemplates(options?: { category?: string; search?: str
 export function useMyProposals(userId?: string, options?: { status?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -138,8 +138,8 @@ export function useMyProposals(userId?: string, options?: { status?: string; lim
 export function useClientProposals(clientId?: string, options?: { status?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!clientId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -156,8 +156,8 @@ export function useClientProposals(clientId?: string, options?: { status?: strin
 export function usePendingProposals(options?: { author_id?: string; organization_id?: string; limit?: number }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('proposals').select('*, clients(*), proposal_items(count)').eq('status', 'sent')
@@ -174,8 +174,8 @@ export function usePendingProposals(options?: { author_id?: string; organization
 export function useProposalStats(options?: { author_id?: string; organization_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; draft: number; sent: number; accepted: number; declined: number; totalValue: number; acceptedValue: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('proposals').select('status, total')
@@ -204,8 +204,8 @@ export function useProposalStats(options?: { author_id?: string; organization_id
 export function useExpiringProposals(options?: { days?: number; author_id?: string }) {
   const [proposals, setProposals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date()

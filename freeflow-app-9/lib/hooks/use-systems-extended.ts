@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSystem(systemId?: string) {
   const [system, setSystem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!systemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('systems').select('*, system_configs(*), system_health(*), system_alerts(*)').eq('id', systemId).single(); setSystem(data) } finally { setIsLoading(false) }
-  }, [systemId, supabase])
+  }, [systemId])
   useEffect(() => { fetch() }, [fetch])
   return { system, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSystem(systemId?: string) {
 export function useSystems(options?: { system_type?: string; environment?: string; status?: string; is_active?: boolean; owner_id?: string; search?: string; limit?: number }) {
   const [systems, setSystems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('systems').select('*, system_health(*)')
@@ -46,8 +46,8 @@ export function useSystems(options?: { system_type?: string; environment?: strin
 export function useSystemConfig(systemId?: string) {
   const [config, setConfig] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!systemId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -56,7 +56,7 @@ export function useSystemConfig(systemId?: string) {
       data?.forEach(c => { configMap[c.config_key] = c.config_value })
       setConfig(configMap)
     } finally { setIsLoading(false) }
-  }, [systemId, supabase])
+  }, [systemId])
   useEffect(() => { fetch() }, [fetch])
   return { config, isLoading, refresh: fetch }
 }
@@ -65,8 +65,8 @@ export function useSystemHealth(systemId?: string, options?: { from_date?: strin
   const [health, setHealth] = useState<any[]>([])
   const [latestHealth, setLatestHealth] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!systemId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -86,8 +86,8 @@ export function useSystemHealth(systemId?: string, options?: { from_date?: strin
 export function useSystemLogs(systemId?: string, options?: { level?: string; category?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!systemId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -108,8 +108,8 @@ export function useSystemLogs(systemId?: string, options?: { level?: string; cat
 export function useSystemMetrics(systemId?: string, options?: { metric_name?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!systemId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -128,8 +128,8 @@ export function useSystemMetrics(systemId?: string, options?: { metric_name?: st
 export function useSystemAlerts(options?: { system_id?: string; status?: string; severity?: string; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('system_alerts').select('*, systems(*)')
@@ -148,8 +148,8 @@ export function useActiveAlerts(options?: { severity?: string; limit?: number })
   const [alerts, setAlerts] = useState<any[]>([])
   const [counts, setCounts] = useState<{ critical: number; warning: number; info: number }>({ critical: 0, warning: 0, info: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('system_alerts').select('*, systems(*)').eq('status', 'active')
@@ -171,8 +171,8 @@ export function useActiveAlerts(options?: { severity?: string; limit?: number })
 export function useSystemStatus() {
   const [status, setStatus] = useState<{ total: number; healthy: number; degraded: number; unhealthy: number }>({ total: 0, healthy: 0, degraded: 0, unhealthy: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('systems').select('status').eq('is_active', true)
@@ -184,7 +184,7 @@ export function useSystemStatus() {
         unhealthy: systems.filter(s => s.status === 'error').length
       })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { status, isLoading, refresh: fetch }
 }

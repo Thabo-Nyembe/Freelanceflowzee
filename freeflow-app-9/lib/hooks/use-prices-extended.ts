@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePrice(priceId?: string) {
   const [price, setPrice] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('prices').select('*, price_tiers(*), price_rules(*), price_discounts(*)').eq('id', priceId).single(); setPrice(data) } finally { setIsLoading(false) }
-  }, [priceId, supabase])
+  }, [priceId])
   useEffect(() => { fetch() }, [fetch])
   return { price, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePrice(priceId?: string) {
 export function usePrices(options?: { product_id?: string; type?: string; currency?: string; is_active?: boolean; limit?: number }) {
   const [prices, setPrices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('prices').select('*, price_tiers(*), price_discounts(*)')
@@ -44,12 +44,12 @@ export function usePrices(options?: { product_id?: string; type?: string; curren
 export function usePriceTiers(priceId?: string) {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('price_tiers').select('*').eq('price_id', priceId).order('min_quantity', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
-  }, [priceId, supabase])
+  }, [priceId])
   useEffect(() => { fetch() }, [fetch])
   return { tiers, isLoading, refresh: fetch }
 }
@@ -57,12 +57,12 @@ export function usePriceTiers(priceId?: string) {
 export function usePriceRules(priceId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('price_rules').select('*').eq('price_id', priceId).eq('is_active', true).order('priority', { ascending: true }); setRules(data || []) } finally { setIsLoading(false) }
-  }, [priceId, supabase])
+  }, [priceId])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -70,8 +70,8 @@ export function usePriceRules(priceId?: string) {
 export function usePriceDiscounts(priceId?: string, options?: { is_active?: boolean }) {
   const [discounts, setDiscounts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -88,8 +88,8 @@ export function usePriceDiscounts(priceId?: string, options?: { is_active?: bool
 export function usePriceHistory(priceId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('price_history').select('*').eq('price_id', priceId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
@@ -101,12 +101,12 @@ export function usePriceHistory(priceId?: string, options?: { limit?: number }) 
 export function usePriceSchedules(priceId?: string) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('price_schedules').select('*').eq('price_id', priceId).order('starts_at', { ascending: true }); setSchedules(data || []) } finally { setIsLoading(false) }
-  }, [priceId, supabase])
+  }, [priceId])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -114,8 +114,8 @@ export function usePriceSchedules(priceId?: string) {
 export function useActiveSchedule(priceId?: string) {
   const [schedule, setSchedule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -123,7 +123,7 @@ export function useActiveSchedule(priceId?: string) {
       const { data } = await supabase.from('price_schedules').select('*').eq('price_id', priceId).eq('status', 'active').lte('starts_at', now).or(`ends_at.is.null,ends_at.gt.${now}`).single()
       setSchedule(data)
     } finally { setIsLoading(false) }
-  }, [priceId, supabase])
+  }, [priceId])
   useEffect(() => { fetch() }, [fetch])
   return { schedule, isLoading, refresh: fetch }
 }
@@ -131,8 +131,8 @@ export function useActiveSchedule(priceId?: string) {
 export function usePriceLists(options?: { is_active?: boolean; currency?: string }) {
   const [lists, setLists] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('price_lists').select('*, prices(count)')
@@ -149,12 +149,12 @@ export function usePriceLists(options?: { is_active?: boolean; currency?: string
 export function usePriceList(listId?: string) {
   const [list, setList] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!listId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('price_lists').select('*, prices(*, products(*))').eq('id', listId).single(); setList(data) } finally { setIsLoading(false) }
-  }, [listId, supabase])
+  }, [listId])
   useEffect(() => { fetch() }, [fetch])
   return { list, isLoading, refresh: fetch }
 }
@@ -162,8 +162,8 @@ export function usePriceList(listId?: string) {
 export function useCalculatedPrice(priceId?: string, quantity?: number, discountCode?: string) {
   const [calculation, setCalculation] = useState<{ unitPrice: number; quantity: number; subtotal: number; discount: number; total: number; currency: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priceId || !quantity) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -193,12 +193,12 @@ export function useCalculatedPrice(priceId?: string, quantity?: number, discount
 export function useProductPrices(productId?: string) {
   const [prices, setPrices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!productId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('prices').select('*, price_tiers(*), price_discounts(*)').eq('product_id', productId).eq('is_active', true).order('amount', { ascending: true }); setPrices(data || []) } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { prices, isLoading, refresh: fetch }
 }

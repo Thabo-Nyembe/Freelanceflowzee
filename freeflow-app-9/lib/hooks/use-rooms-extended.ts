@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRoom(roomId?: string) {
   const [room, setRoom] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rooms').select('*, room_types(*), room_amenities(*), room_rates(*), room_availability(*)').eq('id', roomId).single(); setRoom(data) } finally { setIsLoading(false) }
-  }, [roomId, supabase])
+  }, [roomId])
   useEffect(() => { fetch() }, [fetch])
   return { room, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRoom(roomId?: string) {
 export function useRooms(options?: { type_id?: string; location_id?: string; building?: string; floor?: number; min_capacity?: number; is_available?: boolean; search?: string; limit?: number }) {
   const [rooms, setRooms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('rooms').select('*, room_types(*), room_amenities(count), room_bookings(count)')
@@ -47,8 +47,8 @@ export function useRooms(options?: { type_id?: string; location_id?: string; bui
 export function useRoomTypes(options?: { is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('room_types').select('*, rooms(count)')
@@ -56,7 +56,7 @@ export function useRoomTypes(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -64,8 +64,8 @@ export function useRoomTypes(options?: { is_active?: boolean }) {
 export function useRoomBookings(roomId?: string, options?: { from_date?: string; to_date?: string; status?: string; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -84,8 +84,8 @@ export function useRoomBookings(roomId?: string, options?: { from_date?: string;
 export function useMyRoomBookings(userId?: string, options?: { status?: string; upcoming_only?: boolean; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -103,8 +103,8 @@ export function useMyRoomBookings(userId?: string, options?: { status?: string; 
 export function useRoomAvailability(roomId?: string, startTime?: string, endTime?: string) {
   const [availability, setAvailability] = useState<{ available: boolean; conflicts: any[] }>({ available: true, conflicts: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId || !startTime || !endTime) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -119,8 +119,8 @@ export function useRoomAvailability(roomId?: string, startTime?: string, endTime
 export function useAvailableRooms(startTime?: string, endTime?: string, options?: { type_id?: string; min_capacity?: number; location_id?: string }) {
   const [rooms, setRooms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!startTime || !endTime) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -142,12 +142,12 @@ export function useAvailableRooms(startTime?: string, endTime?: string, options?
 export function useRoomAmenities(roomId?: string) {
   const [amenities, setAmenities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('room_amenities').select('*, amenities(*)').eq('room_id', roomId); setAmenities(data || []) } finally { setIsLoading(false) }
-  }, [roomId, supabase])
+  }, [roomId])
   useEffect(() => { fetch() }, [fetch])
   return { amenities, isLoading, refresh: fetch }
 }
@@ -155,8 +155,8 @@ export function useRoomAmenities(roomId?: string) {
 export function useRoomRates(roomId?: string, effectiveDate?: string) {
   const [rates, setRates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -175,8 +175,8 @@ export function useRoomRates(roomId?: string, effectiveDate?: string) {
 export function useRoomStats() {
   const [stats, setStats] = useState<{ total: number; available: number; types: number; todayBookings: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -188,7 +188,7 @@ export function useRoomStats() {
       ])
       setStats({ total: total.count || 0, available: available.count || 0, types: types.count || 0, todayBookings: todayBookings.count || 0 })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

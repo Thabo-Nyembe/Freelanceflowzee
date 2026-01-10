@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useBadges(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('badges').select('*').order('name', { ascending: true })
@@ -19,7 +19,7 @@ export function useBadges(isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [isActive, supabase])
+  }, [isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useBadges(isActive?: boolean) {
 export function useBadgeAwards(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('badge_awards').select('*, badges(*)').order('awarded_at', { ascending: false })
@@ -36,7 +36,7 @@ export function useBadgeAwards(userId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

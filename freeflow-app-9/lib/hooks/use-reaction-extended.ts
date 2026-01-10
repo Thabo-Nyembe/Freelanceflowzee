@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useReactions(itemId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('reactions').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useReactions(itemId?: string, itemType?: string) {
 export function useReactionCounts(itemId?: string, itemType?: string) {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,8 +46,8 @@ export function useReactionCounts(itemId?: string, itemType?: string) {
 export function useUserReaction(userId?: string, itemId?: string, itemType?: string) {
   const [reaction, setReaction] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

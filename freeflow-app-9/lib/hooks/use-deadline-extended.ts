@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useDeadline(deadlineId?: string) {
   const [deadline, setDeadline] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!deadlineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('deadlines').select('*').eq('id', deadlineId).single()
       setDeadline(data)
     } finally { setIsLoading(false) }
-  }, [deadlineId, supabase])
+  }, [deadlineId])
   useEffect(() => { fetch() }, [fetch])
   return { deadline, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useDeadline(deadlineId?: string) {
 export function useUserDeadlines(userId?: string, options?: { includeCompleted?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useUserDeadlines(userId?: string, options?: { includeCompleted?:
 export function useUpcomingDeadlines(userId?: string, days = 7) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date()
@@ -64,8 +64,8 @@ export function useOverdueDeadlines(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('deadlines').select('*').neq('status', 'completed').lt('due_date', new Date().toISOString())
@@ -74,7 +74,7 @@ export function useOverdueDeadlines(userId?: string) {
       setData(result || [])
       setCount(result?.length || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, count, isLoading, refresh: fetch }
 }
@@ -82,8 +82,8 @@ export function useOverdueDeadlines(userId?: string) {
 export function useEntityDeadlines(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useInvoiceItems(invoiceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!invoiceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('invoice_items').select('*').eq('invoice_id', invoiceId).order('sort_order', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [invoiceId, supabase])
+  }, [invoiceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useInvoiceItems(invoiceId?: string) {
 export function useInvoiceItemTotal(invoiceId?: string) {
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!invoiceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -38,7 +38,7 @@ export function useInvoiceItemTotal(invoiceId?: string) {
       }, 0) || 0
       setTotal(sum)
     } finally { setIsLoading(false) }
-  }, [invoiceId, supabase])
+  }, [invoiceId])
   useEffect(() => { fetch() }, [fetch])
   return { total, isLoading, refresh: fetch }
 }
@@ -46,8 +46,8 @@ export function useInvoiceItemTotal(invoiceId?: string) {
 export function useLineItems(parentId?: string, parentType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('line_items').select('*').order('sort_order', { ascending: true })

@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useSecureFileDelivery(deliveryId?: string) {
   const [delivery, setDelivery] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!deliveryId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('secure_file_deliveries').select('*').eq('id', deliveryId).single()
       setDelivery(data)
     } finally { setIsLoading(false) }
-  }, [deliveryId, supabase])
+  }, [deliveryId])
   useEffect(() => { fetch() }, [fetch])
   return { delivery, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useSecureFileDelivery(deliveryId?: string) {
 export function useSecureFileDeliveries(options?: { owner_id?: string; recipient_id?: string; status?: string; limit?: number }) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('secure_file_deliveries').select('*')
@@ -47,8 +47,8 @@ export function useSecureFileDeliveryByToken(accessToken?: string) {
   const [delivery, setDelivery] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!accessToken) { setIsLoading(false); return }
     setIsLoading(true)
     setError(null)
@@ -59,7 +59,7 @@ export function useSecureFileDeliveryByToken(accessToken?: string) {
       if (data.max_downloads && data.download_count >= data.max_downloads) { setError('Download limit reached'); return }
       setDelivery(data)
     } catch { setError('Failed to load delivery') } finally { setIsLoading(false) }
-  }, [accessToken, supabase])
+  }, [accessToken])
   useEffect(() => { fetch() }, [fetch])
   return { delivery, error, isLoading, refresh: fetch }
 }
@@ -67,8 +67,8 @@ export function useSecureFileDeliveryByToken(accessToken?: string) {
 export function useSentSecureDeliveries(ownerId?: string, options?: { status?: string; limit?: number }) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!ownerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -85,8 +85,8 @@ export function useSentSecureDeliveries(ownerId?: string, options?: { status?: s
 export function useReceivedSecureDeliveries(recipientId?: string, options?: { status?: string; limit?: number }) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!recipientId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -103,8 +103,8 @@ export function useReceivedSecureDeliveries(recipientId?: string, options?: { st
 export function useSecureDeliveryStats(ownerId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; totalDownloads: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!ownerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -114,7 +114,7 @@ export function useSecureDeliveryStats(ownerId?: string) {
       const totalDownloads = data.reduce((sum, d) => sum + (d.download_count || 0), 0)
       setStats({ total: data.length, byStatus, totalDownloads })
     } finally { setIsLoading(false) }
-  }, [ownerId, supabase])
+  }, [ownerId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -122,15 +122,15 @@ export function useSecureDeliveryStats(ownerId?: string) {
 export function useSecureShareToken(tokenId?: string) {
   const [token, setToken] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tokenId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('secure_share_tokens').select('*').eq('id', tokenId).single()
       setToken(data)
     } finally { setIsLoading(false) }
-  }, [tokenId, supabase])
+  }, [tokenId])
   useEffect(() => { fetch() }, [fetch])
   return { token, isLoading, refresh: fetch }
 }
@@ -139,8 +139,8 @@ export function useSecureShareTokenByToken(tokenValue?: string) {
   const [token, setToken] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!tokenValue) { setIsLoading(false); return }
     setIsLoading(true)
     setError(null)
@@ -151,7 +151,7 @@ export function useSecureShareTokenByToken(tokenValue?: string) {
       if (data.max_views && data.view_count >= data.max_views) { setError('View limit reached'); return }
       setToken(data)
     } catch { setError('Failed to load share token') } finally { setIsLoading(false) }
-  }, [tokenValue, supabase])
+  }, [tokenValue])
   useEffect(() => { fetch() }, [fetch])
   return { token, error, isLoading, refresh: fetch }
 }
@@ -159,8 +159,8 @@ export function useSecureShareTokenByToken(tokenValue?: string) {
 export function useUserSecureShareTokens(userId?: string, options?: { video_id?: string; is_active?: boolean; limit?: number }) {
   const [tokens, setTokens] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -178,8 +178,8 @@ export function useUserSecureShareTokens(userId?: string, options?: { video_id?:
 export function useActiveSecureShareTokens(userId?: string, options?: { limit?: number }) {
   const [tokens, setTokens] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -203,22 +203,22 @@ export function useSecureDeliveryRealtime(ownerId?: string) {
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'secure_file_deliveries', filter: `owner_id=eq.${ownerId}` }, (payload) => setDeliveries(prev => prev.filter(d => d.id !== (payload.old as any).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [ownerId, supabase])
+  }, [ownerId])
   return { deliveries }
 }
 
 export function usePendingSecureDeliveries(recipientId?: string) {
   const [deliveries, setDeliveries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!recipientId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('secure_file_deliveries').select('*').eq('recipient_id', recipientId).eq('status', 'pending').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false })
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
-  }, [recipientId, supabase])
+  }, [recipientId])
   useEffect(() => { fetch() }, [fetch])
   return { deliveries, isLoading, refresh: fetch }
 }

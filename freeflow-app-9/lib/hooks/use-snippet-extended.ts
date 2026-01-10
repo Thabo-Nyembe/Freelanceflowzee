@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useSnippet(snippetId?: string) {
   const [snippet, setSnippet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!snippetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('snippets').select('*').eq('id', snippetId).single()
       setSnippet(data)
     } finally { setIsLoading(false) }
-  }, [snippetId, supabase])
+  }, [snippetId])
   useEffect(() => { fetch() }, [fetch])
   return { snippet, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useSnippet(snippetId?: string) {
 export function useSnippets(options?: { language?: string; category?: string; isPublic?: boolean; tags?: string[] }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('snippets').select('*')
@@ -46,8 +46,8 @@ export function useSnippets(options?: { language?: string; category?: string; is
 export function usePopularSnippets(limit = 20, language?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('snippets').select('*').eq('is_public', true)
@@ -81,15 +81,15 @@ export function useSnippetSearch(searchTerm: string, language?: string) {
 export function useMySnippets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('snippets').select('*').eq('user_id', userId).order('updated_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

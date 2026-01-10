@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useGroup(groupId?: string) {
   const [group, setGroup] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!groupId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('groups').select('*, group_members(*), group_settings(*)').eq('id', groupId).single(); setGroup(data) } finally { setIsLoading(false) }
-  }, [groupId, supabase])
+  }, [groupId])
   useEffect(() => { fetch() }, [fetch])
   return { group, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useGroup(groupId?: string) {
 export function useGroups(options?: { type?: string; privacy?: string; category?: string; search?: string; limit?: number }) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('groups').select('*').eq('is_active', true)
@@ -44,12 +44,12 @@ export function useGroups(options?: { type?: string; privacy?: string; category?
 export function useUserGroups(userId?: string) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('group_members').select('*, groups(*)').eq('user_id', userId).order('joined_at', { ascending: false }); setGroups(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -57,8 +57,8 @@ export function useUserGroups(userId?: string) {
 export function useGroupMembers(groupId?: string, options?: { role?: string; limit?: number }) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!groupId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -89,12 +89,12 @@ export function useIsMember(groupId?: string, userId?: string) {
 export function useGroupInvites(groupId?: string) {
   const [invites, setInvites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!groupId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('group_invites').select('*').eq('group_id', groupId).eq('status', 'pending').order('created_at', { ascending: false }); setInvites(data || []) } finally { setIsLoading(false) }
-  }, [groupId, supabase])
+  }, [groupId])
   useEffect(() => { fetch() }, [fetch])
   return { invites, isLoading, refresh: fetch }
 }
@@ -102,12 +102,12 @@ export function useGroupInvites(groupId?: string) {
 export function useUserGroupInvites(userId?: string) {
   const [invites, setInvites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('group_invites').select('*, groups(*)').eq('invited_user', userId).eq('status', 'pending').order('created_at', { ascending: false }); setInvites(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { invites, isLoading, refresh: fetch }
 }
@@ -115,8 +115,8 @@ export function useUserGroupInvites(userId?: string) {
 export function useGroupPosts(groupId?: string, options?: { type?: string; limit?: number }) {
   const [posts, setPosts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!groupId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -133,8 +133,8 @@ export function useGroupPosts(groupId?: string, options?: { type?: string; limit
 export function useGroupEvents(groupId?: string, options?: { upcoming?: boolean; limit?: number }) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!groupId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -151,11 +151,11 @@ export function useGroupEvents(groupId?: string, options?: { upcoming?: boolean;
 export function usePopularGroups(limit?: number) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('groups').select('*').eq('is_active', true).eq('privacy', 'public').order('member_count', { ascending: false }).limit(limit || 10); setGroups(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -163,8 +163,8 @@ export function usePopularGroups(limit?: number) {
 export function useGroupsByCategory() {
   const [byCategory, setByCategory] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('groups').select('*').eq('is_active', true).eq('privacy', 'public')
@@ -172,7 +172,7 @@ export function useGroupsByCategory() {
       data?.forEach(g => { const cat = g.category || 'Uncategorized'; if (!grouped[cat]) grouped[cat] = []; grouped[cat].push(g) })
       setByCategory(grouped)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { byCategory, isLoading, refresh: fetch }
 }

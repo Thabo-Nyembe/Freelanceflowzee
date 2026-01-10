@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useReportExports(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('report_exports').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useReportExports(userId?: string) {
 export function useReportFilters(reportId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('report_filters').select('*').eq('report_id', reportId); setData(result || []) } finally { setIsLoading(false) }
-  }, [reportId, supabase])
+  }, [reportId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,12 +36,12 @@ export function useReportFilters(reportId?: string) {
 export function useReportSchedules(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('report_schedules').select('*').eq('user_id', userId).eq('is_active', true); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -49,12 +49,12 @@ export function useReportSchedules(userId?: string) {
 export function useReportShares(reportId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('report_shares').select('*').eq('report_id', reportId).eq('is_active', true); setData(result || []) } finally { setIsLoading(false) }
-  }, [reportId, supabase])
+  }, [reportId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -62,8 +62,8 @@ export function useReportShares(reportId?: string) {
 export function useReportTemplates(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('report_templates').select('*').order('name', { ascending: true })
@@ -71,7 +71,7 @@ export function useReportTemplates(userId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -79,12 +79,12 @@ export function useReportTemplates(userId?: string) {
 export function useReportViews(reportId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('report_views').select('*').eq('report_id', reportId).order('viewed_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [reportId, supabase])
+  }, [reportId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -92,12 +92,12 @@ export function useReportViews(reportId?: string) {
 export function useReportWidgets(reportId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('report_widgets').select('*').eq('report_id', reportId).order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [reportId, supabase])
+  }, [reportId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

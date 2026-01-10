@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useSubscriptions(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('subscriptions').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useSubscriptions(userId?: string, status?: string) {
 export function useSubscriptionPlans(isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('subscription_plans').select('*').order('price', { ascending: true })
@@ -37,7 +37,7 @@ export function useSubscriptionPlans(isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [isActive, supabase])
+  }, [isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

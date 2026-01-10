@@ -11,8 +11,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useExchangeRate(fromCurrency?: string, toCurrency?: string) {
   const [rate, setRate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fromCurrency || !toCurrency) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exchange_rates').select('*').eq('from_currency', fromCurrency).eq('to_currency', toCurrency).single(); setRate(data) } finally { setIsLoading(false) }
@@ -24,8 +24,8 @@ export function useExchangeRate(fromCurrency?: string, toCurrency?: string) {
 export function useExchangeRates(options?: { base_currency?: string; provider?: string }) {
   const [rates, setRates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('exchange_rates').select('*')
@@ -42,8 +42,8 @@ export function useExchangeRates(options?: { base_currency?: string; provider?: 
 export function useUserExchangeTransactions(userId?: string, options?: { status?: string; from_currency?: string; limit?: number }) {
   const [transactions, setTransactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,8 +61,8 @@ export function useUserExchangeTransactions(userId?: string, options?: { status?
 export function useExchangeHistory(fromCurrency?: string, toCurrency?: string, options?: { days?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!fromCurrency || !toCurrency) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -79,8 +79,8 @@ export function useExchangeHistory(fromCurrency?: string, toCurrency?: string, o
 export function useExchangeProviders(options?: { is_active?: boolean }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('exchange_providers').select('*')
@@ -88,7 +88,7 @@ export function useExchangeProviders(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setProviders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { providers, isLoading, refresh: fetch }
 }
@@ -112,8 +112,8 @@ export function useCurrencyConverter(amount?: number, fromCurrency?: string, toC
 export function useAvailableCurrencies() {
   const [currencies, setCurrencies] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('exchange_rates').select('from_currency, to_currency')
@@ -121,7 +121,7 @@ export function useAvailableCurrencies() {
       data?.forEach(r => { allCurrencies.add(r.from_currency); allCurrencies.add(r.to_currency) })
       setCurrencies([...allCurrencies].sort())
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { currencies, isLoading, refresh: fetch }
 }
@@ -129,8 +129,8 @@ export function useAvailableCurrencies() {
 export function useExchangeStats(userId?: string) {
   const [stats, setStats] = useState<{ totalTransactions: number; totalVolume: number; byCurrency: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -141,7 +141,7 @@ export function useExchangeStats(userId?: string) {
       const byCurrency = data.reduce((acc: Record<string, number>, t) => { acc[t.from_currency] = (acc[t.from_currency] || 0) + (t.from_amount || 0); return acc }, {})
       setStats({ totalTransactions, totalVolume, byCurrency })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

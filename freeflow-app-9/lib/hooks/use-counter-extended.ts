@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useCounter(entityId?: string, entityType?: string, counterName?: string) {
   const [value, setValue] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !counterName) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useCounter(entityId?: string, entityType?: string, counterName?:
 export function useCounters(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -42,8 +42,8 @@ export function useCounters(entityId?: string, entityType?: string) {
 export function useTopCounters(counterName?: string, entityType?: string, limit = 10) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!counterName || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

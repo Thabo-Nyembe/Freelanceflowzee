@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useDashboard(dashboardId?: string) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dashboards').select('*, dashboard_widgets(*), dashboard_filters(*)').eq('id', dashboardId).single(); setDashboard(data) } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { dashboard, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useDashboard(dashboardId?: string) {
 export function useUserDashboards(userId?: string, options?: { type?: string; is_default?: boolean }) {
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,12 +43,12 @@ export function useUserDashboards(userId?: string, options?: { type?: string; is
 export function useDashboardWidgets(dashboardId?: string) {
   const [widgets, setWidgets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dashboard_widgets').select('*').eq('dashboard_id', dashboardId).order('created_at', { ascending: true }); setWidgets(data || []) } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { widgets, isLoading, refresh: fetch }
 }
@@ -56,12 +56,12 @@ export function useDashboardWidgets(dashboardId?: string) {
 export function useSharedDashboards(userId?: string) {
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dashboard_shares').select('*, dashboards(*)').eq('user_id', userId); setDashboards(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { dashboards, isLoading, refresh: fetch }
 }
@@ -69,12 +69,12 @@ export function useSharedDashboards(userId?: string) {
 export function useDashboardFilters(dashboardId?: string) {
   const [filters, setFilters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dashboard_filters').select('*').eq('dashboard_id', dashboardId).order('name', { ascending: true }); setFilters(data || []) } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { filters, isLoading, refresh: fetch }
 }
@@ -82,8 +82,8 @@ export function useDashboardFilters(dashboardId?: string) {
 export function useDefaultDashboard(userId?: string, type?: string) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -100,8 +100,8 @@ export function useDefaultDashboard(userId?: string, type?: string) {
 export function usePublicDashboards(options?: { type?: string; limit?: number }) {
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('dashboards').select('*').eq('is_public', true)
@@ -117,11 +117,11 @@ export function usePublicDashboards(options?: { type?: string; limit?: number })
 export function useDashboardLayouts() {
   const [layouts, setLayouts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('dashboard_layouts').select('*').order('name', { ascending: true }); setLayouts(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { layouts, isLoading, refresh: fetch }
 }
@@ -129,12 +129,12 @@ export function useDashboardLayouts() {
 export function useDashboardShares(dashboardId?: string) {
   const [shares, setShares] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dashboard_shares').select('*, users:user_id(*)').eq('dashboard_id', dashboardId); setShares(data || []) } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { shares, isLoading, refresh: fetch }
 }
@@ -142,15 +142,15 @@ export function useDashboardShares(dashboardId?: string) {
 export function useWidgetTypes() {
   const [types, setTypes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('dashboard_widgets').select('widget_type')
       const uniqueTypes = [...new Set(data?.map(w => w.widget_type).filter(Boolean))]
       setTypes(uniqueTypes as string[])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }

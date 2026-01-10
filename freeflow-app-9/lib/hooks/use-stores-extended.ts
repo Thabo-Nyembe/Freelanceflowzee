@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useStore(storeId?: string) {
   const [store, setStore] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!storeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('stores').select('*, store_settings(*), store_hours(*), store_locations(*)').eq('id', storeId).single(); setStore(data) } finally { setIsLoading(false) }
-  }, [storeId, supabase])
+  }, [storeId])
   useEffect(() => { fetch() }, [fetch])
   return { store, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useStore(storeId?: string) {
 export function useStores(options?: { type?: string; owner_id?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [stores, setStores] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('stores').select('*, store_locations(*)')
@@ -44,8 +44,8 @@ export function useStores(options?: { type?: string; owner_id?: string; is_activ
 export function useStoreSettings(storeId?: string) {
   const [settings, setSettings] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!storeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -54,7 +54,7 @@ export function useStoreSettings(storeId?: string) {
       data?.forEach(s => { settingsMap[s.setting_key] = s.setting_value })
       setSettings(settingsMap)
     } finally { setIsLoading(false) }
-  }, [storeId, supabase])
+  }, [storeId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -62,12 +62,12 @@ export function useStoreSettings(storeId?: string) {
 export function useStoreHours(storeId?: string) {
   const [hours, setHours] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!storeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('store_hours').select('*').eq('store_id', storeId).order('day_of_week', { ascending: true }); setHours(data || []) } finally { setIsLoading(false) }
-  }, [storeId, supabase])
+  }, [storeId])
   useEffect(() => { fetch() }, [fetch])
   return { hours, isLoading, refresh: fetch }
 }
@@ -75,8 +75,8 @@ export function useStoreHours(storeId?: string) {
 export function useStoreStaff(storeId?: string, options?: { role?: string; is_active?: boolean }) {
   const [staff, setStaff] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!storeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -95,8 +95,8 @@ export function useIsStoreOpen(storeId?: string) {
   const [isOpen, setIsOpen] = useState<boolean | null>(null)
   const [hours, setHours] = useState<{ openTime?: string; closeTime?: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!storeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -112,7 +112,7 @@ export function useIsStoreOpen(storeId?: string) {
         setHours({ openTime: data.open_time, closeTime: data.close_time })
       }
     } finally { setIsLoading(false) }
-  }, [storeId, supabase])
+  }, [storeId])
   useEffect(() => { fetch() }, [fetch])
   return { isOpen, hours, isLoading, refresh: fetch }
 }
@@ -120,8 +120,8 @@ export function useIsStoreOpen(storeId?: string) {
 export function useStoreAnalytics(storeId?: string, options?: { metric_type?: string; period?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!storeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -141,8 +141,8 @@ export function useStoreAnalytics(storeId?: string, options?: { metric_type?: st
 export function useUserStores(userId?: string) {
   const [stores, setStores] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -155,7 +155,7 @@ export function useUserStores(userId?: string) {
       const allStores = [...ownedStores.map(s => ({ ...s, role: 'owner' })), ...staffStores]
       setStores(allStores)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stores, isLoading, refresh: fetch }
 }
@@ -163,8 +163,8 @@ export function useUserStores(userId?: string) {
 export function useNearbyStores(lat?: number, lng?: number, radiusKm: number = 10) {
   const [stores, setStores] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!lat || !lng) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useUserPoints(userId?: string) {
   const [points, setPoints] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('gamification_points').select('*').eq('user_id', userId).single(); setPoints(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { points, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useUserPoints(userId?: string) {
 export function usePointsHistory(userId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('gamification_points_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
@@ -37,8 +37,8 @@ export function usePointsHistory(userId?: string, options?: { limit?: number }) 
 export function useBadges(options?: { category?: string; rarity?: string }) {
   const [badges, setBadges] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('gamification_badges').select('*')
@@ -55,12 +55,12 @@ export function useBadges(options?: { category?: string; rarity?: string }) {
 export function useUserBadges(userId?: string) {
   const [badges, setBadges] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_badges').select('*, gamification_badges(*)').eq('user_id', userId).order('awarded_at', { ascending: false }); setBadges(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { badges, isLoading, refresh: fetch }
 }
@@ -68,8 +68,8 @@ export function useUserBadges(userId?: string) {
 export function useAchievements(options?: { category?: string; is_active?: boolean }) {
   const [achievements, setAchievements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('gamification_achievements').select('*')
@@ -86,12 +86,12 @@ export function useAchievements(options?: { category?: string; is_active?: boole
 export function useUserAchievements(userId?: string) {
   const [achievements, setAchievements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_achievements').select('*, gamification_achievements(*)').eq('user_id', userId).order('unlocked_at', { ascending: false }); setAchievements(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { achievements, isLoading, refresh: fetch }
 }
@@ -99,8 +99,8 @@ export function useUserAchievements(userId?: string) {
 export function useLeaderboard(type: string, options?: { period?: string; limit?: number }) {
   const [leaderboard, setLeaderboard] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('gamification_leaderboards').select('*').eq('type', type)
@@ -116,8 +116,8 @@ export function useLeaderboard(type: string, options?: { period?: string; limit?
 export function useUserRank(userId?: string, type?: string) {
   const [rank, setRank] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !type) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('gamification_leaderboards').select('*').eq('user_id', userId).eq('type', type).single(); setRank(data) } finally { setIsLoading(false) }
@@ -129,15 +129,15 @@ export function useUserRank(userId?: string, type?: string) {
 export function useActiveChallenges() {
   const [challenges, setChallenges] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
       const { data } = await supabase.from('gamification_challenges').select('*').eq('is_active', true).lte('start_date', now).gte('end_date', now).order('end_date', { ascending: true })
       setChallenges(data || [])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { challenges, isLoading, refresh: fetch }
 }
@@ -145,12 +145,12 @@ export function useActiveChallenges() {
 export function useUserChallenges(userId?: string) {
   const [challenges, setChallenges] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('challenge_participants').select('*, gamification_challenges(*)').eq('user_id', userId).order('joined_at', { ascending: false }); setChallenges(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { challenges, isLoading, refresh: fetch }
 }
@@ -158,8 +158,8 @@ export function useUserChallenges(userId?: string) {
 export function useRewards(options?: { category?: string; is_available?: boolean }) {
   const [rewards, setRewards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('gamification_rewards').select('*')

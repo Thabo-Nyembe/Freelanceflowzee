@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useContract(contractId?: string) {
   const [contract, setContract] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contractId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('contracts').select('*, contract_signatures(*), contract_revisions(*)').eq('id', contractId).single()
       setContract(data)
     } finally { setIsLoading(false) }
-  }, [contractId, supabase])
+  }, [contractId])
   useEffect(() => { fetch() }, [fetch])
   return { contract, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useContract(contractId?: string) {
 export function useContracts(userId?: string, options?: { status?: string; client_id?: string; project_id?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -47,15 +47,15 @@ export function useContracts(userId?: string, options?: { status?: string; clien
 export function usePendingContracts(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('contracts').select('*, contract_signatures(*)').eq('user_id', userId).eq('status', 'pending_signature').order('sent_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -63,15 +63,15 @@ export function usePendingContracts(userId?: string) {
 export function useContractSignatures(contractId?: string) {
   const [signatures, setSignatures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contractId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('contract_signatures').select('*').eq('contract_id', contractId).order('order', { ascending: true })
       setSignatures(data || [])
     } finally { setIsLoading(false) }
-  }, [contractId, supabase])
+  }, [contractId])
   useEffect(() => { fetch() }, [fetch])
   return { signatures, isLoading, refresh: fetch }
 }
@@ -79,15 +79,15 @@ export function useContractSignatures(contractId?: string) {
 export function useContractRevisions(contractId?: string) {
   const [revisions, setRevisions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!contractId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('contract_revisions').select('*').eq('contract_id', contractId).order('version', { ascending: false })
       setRevisions(data || [])
     } finally { setIsLoading(false) }
-  }, [contractId, supabase])
+  }, [contractId])
   useEffect(() => { fetch() }, [fetch])
   return { revisions, isLoading, refresh: fetch }
 }
@@ -95,8 +95,8 @@ export function useContractRevisions(contractId?: string) {
 export function useContractTemplates(userId?: string, options?: { category?: string; include_public?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,15 +118,15 @@ export function useContractTemplates(userId?: string, options?: { category?: str
 export function useContractTemplate(templateId?: string) {
   const [template, setTemplate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('contract_templates').select('*').eq('id', templateId).single()
       setTemplate(data)
     } finally { setIsLoading(false) }
-  }, [templateId, supabase])
+  }, [templateId])
   useEffect(() => { fetch() }, [fetch])
   return { template, isLoading, refresh: fetch }
 }
@@ -134,8 +134,8 @@ export function useContractTemplate(templateId?: string) {
 export function useContractStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; draft: number; pending: number; signed: number; declined: number; totalValue: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -149,7 +149,7 @@ export function useContractStats(userId?: string) {
       const totalValue = contracts.reduce((sum, c) => sum + (c.value || 0), 0)
       setStats({ total, draft, pending, signed, declined, totalValue })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -168,15 +168,15 @@ export function useContractRealtime(contractId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [contractId, supabase])
+  }, [contractId])
   return { contract }
 }
 
 export function useContractsAwaitingSignature(email?: string) {
   const [contracts, setContracts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -186,7 +186,7 @@ export function useContractsAwaitingSignature(email?: string) {
       const { data } = await supabase.from('contracts').select('*, contract_signatures(*)').in('id', contractIds).order('sent_at', { ascending: false })
       setContracts(data || [])
     } finally { setIsLoading(false) }
-  }, [email, supabase])
+  }, [email])
   useEffect(() => { fetch() }, [fetch])
   return { contracts, isLoading, refresh: fetch }
 }
@@ -194,8 +194,8 @@ export function useContractsAwaitingSignature(email?: string) {
 export function useExpiringContracts(userId?: string, daysAhead: number = 30) {
   const [contracts, setContracts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

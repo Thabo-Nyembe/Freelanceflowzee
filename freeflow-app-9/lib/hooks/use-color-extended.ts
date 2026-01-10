@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useColorPalette(paletteId?: string) {
   const [palette, setPalette] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!paletteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('color_palettes').select('*').eq('id', paletteId).single(); setPalette(data) } finally { setIsLoading(false) }
-  }, [paletteId, supabase])
+  }, [paletteId])
   useEffect(() => { fetch() }, [fetch])
   return { palette, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useColorPalette(paletteId?: string) {
 export function useColorPalettes(options?: { user_id?: string; is_public?: boolean; tag?: string; limit?: number }) {
   const [palettes, setPalettes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('color_palettes').select('*')
@@ -43,8 +43,8 @@ export function useColorPalettes(options?: { user_id?: string; is_public?: boole
 export function useColorSchemes(options?: { user_id?: string; type?: string; limit?: number }) {
   const [schemes, setSchemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('color_schemes').select('*')
@@ -61,8 +61,8 @@ export function useColorSchemes(options?: { user_id?: string; type?: string; lim
 export function useColorHistory(userId?: string, limit?: number) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('color_history').select('*').eq('user_id', userId).order('used_at', { ascending: false }).limit(limit || 20); setHistory(data || []) } finally { setIsLoading(false) }
@@ -74,12 +74,12 @@ export function useColorHistory(userId?: string, limit?: number) {
 export function useFavoriteColors(userId?: string) {
   const [favorites, setFavorites] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('color_favorites').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setFavorites(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { favorites, isLoading, refresh: fetch }
 }
@@ -87,8 +87,8 @@ export function useFavoriteColors(userId?: string) {
 export function usePublicPalettes(options?: { tag?: string; limit?: number }) {
   const [palettes, setPalettes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('color_palettes').select('*').eq('is_public', true)
@@ -104,8 +104,8 @@ export function usePublicPalettes(options?: { tag?: string; limit?: number }) {
 export function useRecentColors(userId?: string) {
   const [colors, setColors] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -113,7 +113,7 @@ export function useRecentColors(userId?: string) {
       const uniqueColors = [...new Set(data?.map(c => c.color) || [])]
       setColors(uniqueColors)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { colors, isLoading, refresh: fetch }
 }
@@ -121,8 +121,8 @@ export function useRecentColors(userId?: string) {
 export function useColorStats(userId?: string) {
   const [stats, setStats] = useState<{ palettes: number; favorites: number; history: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -133,7 +133,7 @@ export function useColorStats(userId?: string) {
       ])
       setStats({ palettes: palettes.count || 0, favorites: favorites.count || 0, history: history.count || 0 })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

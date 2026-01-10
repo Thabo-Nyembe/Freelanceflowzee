@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useImport(importId?: string) {
   const [importData, setImportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('imports').select('*').eq('id', importId).single()
       setImportData(data)
     } finally { setIsLoading(false) }
-  }, [importId, supabase])
+  }, [importId])
   useEffect(() => { fetch() }, [fetch])
   return { importData, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useImportProgress(importId?: string) {
     }).subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [importId, supabase])
+  }, [importId])
 
   return { status, progress, processedRows, failedRows, totalRows, isComplete: status === 'completed', isFailed: status === 'failed', isLoading }
 }
@@ -67,8 +67,8 @@ export function useImportProgress(importId?: string) {
 export function useUserImports(userId?: string, options?: { status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -86,8 +86,8 @@ export function useImportErrors(importId?: string) {
   const [errors, setErrors] = useState<any[]>([])
   const [failedRows, setFailedRows] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -95,7 +95,7 @@ export function useImportErrors(importId?: string) {
       setErrors(data?.errors || [])
       setFailedRows(data?.failed_rows || 0)
     } finally { setIsLoading(false) }
-  }, [importId, supabase])
+  }, [importId])
   useEffect(() => { fetch() }, [fetch])
   return { errors, failedRows, isLoading, refresh: fetch }
 }

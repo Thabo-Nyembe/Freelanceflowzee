@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRecord(recordId?: string) {
   const [record, setRecord] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!recordId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('records').select('*, record_types(*), record_values(*), users(*)').eq('id', recordId).single(); setRecord(data) } finally { setIsLoading(false) }
-  }, [recordId, supabase])
+  }, [recordId])
   useEffect(() => { fetch() }, [fetch])
   return { record, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRecord(recordId?: string) {
 export function useRecords(options?: { type_id?: string; owner_id?: string; organization_id?: string; parent_id?: string; status?: string; search?: string; limit?: number }) {
   const [records, setRecords] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('records').select('*, record_types(*), users(*)')
@@ -46,12 +46,12 @@ export function useRecords(options?: { type_id?: string; owner_id?: string; orga
 export function useRecordValues(recordId?: string) {
   const [values, setValues] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!recordId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('record_values').select('*, record_fields(*)').eq('record_id', recordId); setValues(data || []) } finally { setIsLoading(false) }
-  }, [recordId, supabase])
+  }, [recordId])
   useEffect(() => { fetch() }, [fetch])
   return { values, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useRecordValues(recordId?: string) {
 export function useRecordTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('record_types').select('*, record_fields(*)')
@@ -77,12 +77,12 @@ export function useRecordTypes(options?: { category?: string; is_active?: boolea
 export function useRecordFields(typeId?: string) {
   const [fields, setFields] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('record_fields').select('*').eq('type_id', typeId).order('order', { ascending: true }); setFields(data || []) } finally { setIsLoading(false) }
-  }, [typeId, supabase])
+  }, [typeId])
   useEffect(() => { fetch() }, [fetch])
   return { fields, isLoading, refresh: fetch }
 }
@@ -90,8 +90,8 @@ export function useRecordFields(typeId?: string) {
 export function useRecordHistory(recordId?: string, options?: { action?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!recordId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -108,8 +108,8 @@ export function useRecordHistory(recordId?: string, options?: { action?: string;
 export function useChildRecords(parentId?: string, options?: { type_id?: string; status?: string }) {
   const [children, setChildren] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -127,8 +127,8 @@ export function useChildRecords(parentId?: string, options?: { type_id?: string;
 export function useMyRecords(userId?: string, options?: { type_id?: string; status?: string; limit?: number }) {
   const [records, setRecords] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -146,8 +146,8 @@ export function useMyRecords(userId?: string, options?: { type_id?: string; stat
 export function useRecentRecords(options?: { organization_id?: string; type_id?: string; limit?: number }) {
   const [records, setRecords] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('records').select('*, record_types(*), users(*)')
@@ -164,8 +164,8 @@ export function useRecentRecords(options?: { organization_id?: string; type_id?:
 export function useArchivedRecords(options?: { owner_id?: string; type_id?: string; limit?: number }) {
   const [records, setRecords] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('records').select('*, record_types(*)').eq('status', 'archived')
@@ -182,8 +182,8 @@ export function useArchivedRecords(options?: { owner_id?: string; type_id?: stri
 export function useRecordTemplates(options?: { type_id?: string; category?: string }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('record_templates').select('*, record_types(*)')

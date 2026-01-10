@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePromotion(promotionId?: string) {
   const [promotion, setPromotion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!promotionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('promotions').select('*, promotion_codes(*), promotion_rules(*), promotion_tiers(*)').eq('id', promotionId).single(); setPromotion(data) } finally { setIsLoading(false) }
-  }, [promotionId, supabase])
+  }, [promotionId])
   useEffect(() => { fetch() }, [fetch])
   return { promotion, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePromotion(promotionId?: string) {
 export function usePromotions(options?: { organization_id?: string; type?: string; status?: string; search?: string; limit?: number }) {
   const [promotions, setPromotions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('promotions').select('*, promotion_codes(count), promotion_usage(count)')
@@ -44,15 +44,15 @@ export function usePromotions(options?: { organization_id?: string; type?: strin
 export function useActivePromotions() {
   const [promotions, setPromotions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
       const { data } = await supabase.from('promotions').select('*, promotion_codes(*)').eq('status', 'active').lte('starts_at', now).or(`ends_at.is.null,ends_at.gt.${now}`).order('created_at', { ascending: false })
       setPromotions(data || [])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { promotions, isLoading, refresh: fetch }
 }
@@ -60,8 +60,8 @@ export function useActivePromotions() {
 export function usePromotionCodes(promotionId?: string, options?: { is_active?: boolean; limit?: number }) {
   const [codes, setCodes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!promotionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -79,8 +79,8 @@ export function usePromotionUsage(promotionId?: string, options?: { from_date?: 
   const [usage, setUsage] = useState<any[]>([])
   const [totalDiscount, setTotalDiscount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!promotionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -99,12 +99,12 @@ export function usePromotionUsage(promotionId?: string, options?: { from_date?: 
 export function usePromotionRules(promotionId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!promotionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('promotion_rules').select('*').eq('promotion_id', promotionId).eq('is_active', true).order('priority', { ascending: true }); setRules(data || []) } finally { setIsLoading(false) }
-  }, [promotionId, supabase])
+  }, [promotionId])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -112,8 +112,8 @@ export function usePromotionRules(promotionId?: string) {
 export function usePromotionCampaigns(options?: { status?: string; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('promotion_campaigns').select('*')
@@ -129,12 +129,12 @@ export function usePromotionCampaigns(options?: { status?: string; limit?: numbe
 export function usePromotionTiers(promotionId?: string) {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!promotionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('promotion_tiers').select('*').eq('promotion_id', promotionId).order('min_amount', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
-  }, [promotionId, supabase])
+  }, [promotionId])
   useEffect(() => { fetch() }, [fetch])
   return { tiers, isLoading, refresh: fetch }
 }
@@ -163,8 +163,8 @@ export function useCodeValidation(code?: string, userId?: string, orderAmount?: 
 export function usePromotionStats(promotionId?: string) {
   const [stats, setStats] = useState<{ usageCount: number; totalDiscount: number; uniqueUsers: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!promotionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -180,7 +180,7 @@ export function usePromotionStats(promotionId?: string) {
       const conversionRate = Math.round((usageCount / totalCodes) * 100)
       setStats({ usageCount, totalDiscount, uniqueUsers, conversionRate })
     } finally { setIsLoading(false) }
-  }, [promotionId, supabase])
+  }, [promotionId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -188,8 +188,8 @@ export function usePromotionStats(promotionId?: string) {
 export function useMyPromotions(userId?: string) {
   const [promotions, setPromotions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -198,7 +198,7 @@ export function useMyPromotions(userId?: string) {
       const validPromotions = codes?.filter(c => c.promotions?.status === 'active' && (!c.promotions?.ends_at || new Date(c.promotions.ends_at) > new Date())) || []
       setPromotions(validPromotions.map(c => ({ ...c.promotions, code: c })))
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { promotions, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useStrategy(strategyId?: string) {
   const [strategy, setStrategy] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('strategies').select('*, strategy_goals(*), strategy_initiatives(*), strategy_metrics(*), strategy_milestones(*)').eq('id', strategyId).single(); setStrategy(data) } finally { setIsLoading(false) }
-  }, [strategyId, supabase])
+  }, [strategyId])
   useEffect(() => { fetch() }, [fetch])
   return { strategy, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useStrategy(strategyId?: string) {
 export function useStrategies(options?: { strategy_type?: string; owner_id?: string; status?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [strategies, setStrategies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('strategies').select('*, strategy_goals(count), strategy_initiatives(count)')
@@ -45,8 +45,8 @@ export function useStrategies(options?: { strategy_type?: string; owner_id?: str
 export function useStrategyGoals(strategyId?: string, options?: { goal_type?: string; status?: string; owner_id?: string }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -65,8 +65,8 @@ export function useStrategyGoals(strategyId?: string, options?: { goal_type?: st
 export function useStrategyInitiatives(strategyId?: string, options?: { goal_id?: string; status?: string; owner_id?: string }) {
   const [initiatives, setInitiatives] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -85,8 +85,8 @@ export function useStrategyInitiatives(strategyId?: string, options?: { goal_id?
 export function useStrategyMetrics(strategyId?: string, options?: { metric_name?: string; goal_id?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -106,8 +106,8 @@ export function useStrategyMetrics(strategyId?: string, options?: { metric_name?
 export function useStrategyMilestones(strategyId?: string, options?: { status?: string; initiative_id?: string }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -125,8 +125,8 @@ export function useStrategyMilestones(strategyId?: string, options?: { status?: 
 export function useStrategyReviews(strategyId?: string, options?: { review_type?: string; limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -143,8 +143,8 @@ export function useStrategyReviews(strategyId?: string, options?: { review_type?
 export function useStrategyProgress(strategyId?: string) {
   const [progress, setProgress] = useState<{ goalsProgress: number; initiativesProgress: number; milestonesProgress: number; overallProgress: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!strategyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -163,7 +163,7 @@ export function useStrategyProgress(strategyId?: string) {
       const overallProgress = (goalsProgress + initiativesProgress + milestonesProgress) / 3
       setProgress({ goalsProgress, initiativesProgress, milestonesProgress, overallProgress })
     } finally { setIsLoading(false) }
-  }, [strategyId, supabase])
+  }, [strategyId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -171,8 +171,8 @@ export function useStrategyProgress(strategyId?: string) {
 export function useUpcomingMilestones(options?: { strategy_id?: string; owner_id?: string; days?: number; limit?: number }) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date()

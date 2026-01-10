@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useHandler(handlerId?: string) {
   const [handler, setHandler] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!handlerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('handlers').select('*').eq('id', handlerId).single()
       setHandler(data)
     } finally { setIsLoading(false) }
-  }, [handlerId, supabase])
+  }, [handlerId])
   useEffect(() => { fetch() }, [fetch])
   return { handler, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useHandler(handlerId?: string) {
 export function useUserHandlers(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,15 +44,15 @@ export function useUserHandlers(userId?: string, options?: { isActive?: boolean 
 export function useHandlersForEvent(eventType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!eventType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('handlers').select('*').contains('event_types', [eventType]).eq('is_active', true)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [eventType, supabase])
+  }, [eventType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -60,8 +60,8 @@ export function useHandlersForEvent(eventType?: string) {
 export function useHandlerExecutions(handlerId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!handlerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,8 +80,8 @@ export function useHandlerStats(handlerId?: string) {
   const [lastExecutedAt, setLastExecutedAt] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!handlerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -94,7 +94,7 @@ export function useHandlerStats(handlerId?: string) {
         setIsActive(data.is_active)
       }
     } finally { setIsLoading(false) }
-  }, [handlerId, supabase])
+  }, [handlerId])
   useEffect(() => { fetch() }, [fetch])
   return { executionCount, failureCount, successRate, lastExecutedAt, isActive, isLoading, refresh: fetch }
 }

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrigger(triggerId?: string) {
   const [trigger, setTrigger] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!triggerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('triggers').select('*').eq('id', triggerId).single()
       setTrigger(data)
     } finally { setIsLoading(false) }
-  }, [triggerId, supabase])
+  }, [triggerId])
   useEffect(() => { fetch() }, [fetch])
   return { trigger, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useTrigger(triggerId?: string) {
 export function useUserTriggers(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useUserTriggers(userId?: string, options?: { isActive?: boolean 
 export function useTriggersForEvent(eventType?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!eventType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useTriggersForEvent(eventType?: string, entityType?: string) {
 export function useTriggerExecutions(triggerId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!triggerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,8 +80,8 @@ export function useTriggerStats(triggerId?: string) {
   const [lastExecutedAt, setLastExecutedAt] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!triggerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -92,7 +92,7 @@ export function useTriggerStats(triggerId?: string) {
         setIsActive(data.is_active)
       }
     } finally { setIsLoading(false) }
-  }, [triggerId, supabase])
+  }, [triggerId])
   useEffect(() => { fetch() }, [fetch])
   return { executionCount, lastExecutedAt, isActive, isLoading, refresh: fetch }
 }

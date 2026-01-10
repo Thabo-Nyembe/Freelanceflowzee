@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLocation(locationId?: string) {
   const [location, setLocation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('locations').select('*, location_types(*), location_hours(*), location_amenities(*), location_photos(*)').eq('id', locationId).single(); setLocation(data) } finally { setIsLoading(false) }
-  }, [locationId, supabase])
+  }, [locationId])
   useEffect(() => { fetch() }, [fetch])
   return { location, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLocation(locationId?: string) {
 export function useLocations(options?: { type_id?: string; city?: string; country?: string; is_active?: boolean; limit?: number }) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('locations').select('*, location_types(*)')
@@ -44,11 +44,11 @@ export function useLocations(options?: { type_id?: string; city?: string; countr
 export function useLocationTypes() {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('location_types').select('*').order('name', { ascending: true }); setTypes(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -56,12 +56,12 @@ export function useLocationTypes() {
 export function useLocationHours(locationId?: string) {
   const [hours, setHours] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_hours').select('*').eq('location_id', locationId).order('day_of_week', { ascending: true }); setHours(data || []) } finally { setIsLoading(false) }
-  }, [locationId, supabase])
+  }, [locationId])
   useEffect(() => { fetch() }, [fetch])
   return { hours, isLoading, refresh: fetch }
 }
@@ -69,12 +69,12 @@ export function useLocationHours(locationId?: string) {
 export function useLocationAmenities(locationId?: string) {
   const [amenities, setAmenities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_amenities').select('*').eq('location_id', locationId); setAmenities(data || []) } finally { setIsLoading(false) }
-  }, [locationId, supabase])
+  }, [locationId])
   useEffect(() => { fetch() }, [fetch])
   return { amenities, isLoading, refresh: fetch }
 }
@@ -82,8 +82,8 @@ export function useLocationAmenities(locationId?: string) {
 export function useLocationReviews(locationId?: string, options?: { limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_reviews').select('*').eq('location_id', locationId).order('created_at', { ascending: false }).limit(options?.limit || 20); setReviews(data || []) } finally { setIsLoading(false) }
@@ -95,12 +95,12 @@ export function useLocationReviews(locationId?: string, options?: { limit?: numb
 export function useLocationPhotos(locationId?: string) {
   const [photos, setPhotos] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_photos').select('*').eq('location_id', locationId).order('is_primary', { ascending: false }); setPhotos(data || []) } finally { setIsLoading(false) }
-  }, [locationId, supabase])
+  }, [locationId])
   useEffect(() => { fetch() }, [fetch])
   return { photos, isLoading, refresh: fetch }
 }
@@ -126,8 +126,8 @@ export function useLocationSearch(query?: string, options?: { type_id?: string; 
 export function useNearbyLocations(latitude?: number, longitude?: number, options?: { radius_km?: number; type_id?: string; limit?: number }) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!latitude || !longitude) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -148,8 +148,8 @@ export function useNearbyLocations(latitude?: number, longitude?: number, option
 export function useTopRatedLocations(options?: { type_id?: string; limit?: number }) {
   const [locations, setLocations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('locations').select('*, location_types(*)').eq('is_active', true).gte('review_count', 1)

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useConnector(connectorId?: string) {
   const [connector, setConnector] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('connectors').select('*, connector_configs(*)').eq('id', connectorId).single(); setConnector(data) } finally { setIsLoading(false) }
-  }, [connectorId, supabase])
+  }, [connectorId])
   useEffect(() => { fetch() }, [fetch])
   return { connector, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useConnector(connectorId?: string) {
 export function useConnectors(options?: { user_id?: string; type?: string; provider?: string; status?: string }) {
   const [connectors, setConnectors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('connectors').select('*')
@@ -44,8 +44,8 @@ export function useConnectors(options?: { user_id?: string; type?: string; provi
 export function useConnectorLogs(connectorId?: string, options?: { event_type?: string; status?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectorId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,12 +63,12 @@ export function useConnectorLogs(connectorId?: string, options?: { event_type?: 
 export function useConnectorMappings(connectorId?: string) {
   const [mappings, setMappings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectorId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('connector_mappings').select('*').eq('connector_id', connectorId).order('created_at', { ascending: false }); setMappings(data || []) } finally { setIsLoading(false) }
-  }, [connectorId, supabase])
+  }, [connectorId])
   useEffect(() => { fetch() }, [fetch])
   return { mappings, isLoading, refresh: fetch }
 }
@@ -76,12 +76,12 @@ export function useConnectorMappings(connectorId?: string) {
 export function useActiveConnectors(userId?: string) {
   const [connectors, setConnectors] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('connectors').select('*').eq('user_id', userId).eq('status', 'active').order('name', { ascending: true }); setConnectors(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { connectors, isLoading, refresh: fetch }
 }
@@ -89,8 +89,8 @@ export function useActiveConnectors(userId?: string) {
 export function useConnectorStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; byType: Record<string, number>; byProvider: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,7 +102,7 @@ export function useConnectorStats(userId?: string) {
       const byProvider = data.reduce((acc: Record<string, number>, c) => { acc[c.provider || 'unknown'] = (acc[c.provider || 'unknown'] || 0) + 1; return acc }, {})
       setStats({ total, active, byType, byProvider })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -110,8 +110,8 @@ export function useConnectorStats(userId?: string) {
 export function useConnectorHealth(connectorId?: string) {
   const [health, setHealth] = useState<{ status: string; lastCheck: string | null; errorCount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!connectorId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -119,7 +119,7 @@ export function useConnectorHealth(connectorId?: string) {
       const { count: errorCount } = await supabase.from('connector_logs').select('*', { count: 'exact', head: true }).eq('connector_id', connectorId).eq('status', 'error').gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       setHealth({ status: connector?.status || 'unknown', lastCheck: connector?.last_tested_at || null, errorCount: errorCount || 0 })
     } finally { setIsLoading(false) }
-  }, [connectorId, supabase])
+  }, [connectorId])
   useEffect(() => { fetch() }, [fetch])
   return { health, isLoading, refresh: fetch }
 }

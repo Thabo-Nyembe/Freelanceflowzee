@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useActionHistory(actionId?: string) {
   const [action, setAction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!actionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('action_history').select('*').eq('id', actionId).single()
       setAction(data)
     } finally { setIsLoading(false) }
-  }, [actionId, supabase])
+  }, [actionId])
   useEffect(() => { fetch() }, [fetch])
   return { action, isLoading, refresh: fetch }
 }
@@ -28,8 +28,8 @@ export function useUserActionHistory(userId?: string, options?: { actionType?: s
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -48,8 +48,8 @@ export function useUserActionHistory(userId?: string, options?: { actionType?: s
 export function useEntityActionHistory(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,8 +64,8 @@ export function useEntityActionHistory(entityType?: string, entityId?: string, o
 export function useRecentActions(options?: { limit?: number; actionTypes?: string[] }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('action_history').select('*, users(id, name, email)')
@@ -81,8 +81,8 @@ export function useRecentActions(options?: { limit?: number; actionTypes?: strin
 export function useActionStats(userId?: string, options?: { startDate?: string; endDate?: string }) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('action_history').select('action_type, entity_type')
@@ -112,7 +112,7 @@ export function useActionHistoryRealtime(userId?: string) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'action_history', filter: `user_id=eq.${userId}` }, (payload) => setActions(prev => [payload.new, ...prev].slice(0, 50)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return { actions }
 }
 

@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useSchedule(scheduleId?: string) {
   const [schedule, setSchedule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('schedules').select('*').eq('id', scheduleId).single()
       setSchedule(data)
     } finally { setIsLoading(false) }
-  }, [scheduleId, supabase])
+  }, [scheduleId])
   useEffect(() => { fetch() }, [fetch])
   return { schedule, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useSchedule(scheduleId?: string) {
 export function useSchedules(options?: { userId?: string; isActive?: boolean; entityType?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('schedules').select('*')
@@ -45,8 +45,8 @@ export function useSchedules(options?: { userId?: string; isActive?: boolean; en
 export function useScheduleRuns(scheduleId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!scheduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,8 +61,8 @@ export function useScheduleRuns(scheduleId?: string, limit = 20) {
 export function useUpcomingSchedules(userId?: string, limit = 10) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('schedules').select('*').eq('is_active', true).gte('next_run_at', new Date().toISOString())

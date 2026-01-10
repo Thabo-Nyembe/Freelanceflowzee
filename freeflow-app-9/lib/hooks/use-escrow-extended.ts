@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useEscrowTransactions(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('escrow_transactions').select('*').or(`buyer_id.eq.${userId},seller_id.eq.${userId}`).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useEscrowTransactions(userId?: string) {
 export function useEscrowMilestones(escrowId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!escrowId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('escrow_milestones').select('*').eq('escrow_id', escrowId).order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [escrowId, supabase])
+  }, [escrowId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

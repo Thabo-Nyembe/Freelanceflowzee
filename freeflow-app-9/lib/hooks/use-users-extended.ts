@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useUser(userId?: string) {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('users').select('*, user_profiles(*), user_preferences(*)').eq('id', userId).single(); setUser(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { user, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useUser(userId?: string) {
 export function useUsers(options?: { role?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('users').select('*, user_profiles(*)')
@@ -43,12 +43,12 @@ export function useUsers(options?: { role?: string; is_active?: boolean; search?
 export function useUserByEmail(email?: string) {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('users').select('*, user_profiles(*)').eq('email', email).single(); setUser(data) } finally { setIsLoading(false) }
-  }, [email, supabase])
+  }, [email])
   useEffect(() => { fetch() }, [fetch])
   return { user, isLoading, refresh: fetch }
 }
@@ -56,12 +56,12 @@ export function useUserByEmail(email?: string) {
 export function useUserProfile(userId?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_profiles').select('*').eq('user_id', userId).single(); setProfile(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { profile, isLoading, refresh: fetch }
 }
@@ -69,12 +69,12 @@ export function useUserProfile(userId?: string) {
 export function useUserPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_preferences').select('*').eq('user_id', userId).single(); setPreferences(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }
 }
@@ -83,8 +83,8 @@ export function useUserSessions(userId?: string, options?: { is_active?: boolean
   const [sessions, setSessions] = useState<any[]>([])
   const [activeSessions, setActiveSessions] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,8 +102,8 @@ export function useUserSessions(userId?: string, options?: { is_active?: boolean
 export function useUserDevices(userId?: string, options?: { is_active?: boolean }) {
   const [devices, setDevices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -140,8 +140,8 @@ export function useUserSearch(query?: string, options?: { exclude_ids?: string[]
 export function useOnlineUsers(options?: { limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const fiveMinutesAgo = new Date()
@@ -152,7 +152,7 @@ export function useOnlineUsers(options?: { limit?: number }) {
       const { data } = await supabase.from('users').select('id, email, full_name, avatar_url').in('id', userIds).limit(options?.limit || 50)
       setUsers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { users, count: users.length, isLoading, refresh: fetch }
 }
@@ -160,8 +160,8 @@ export function useOnlineUsers(options?: { limit?: number }) {
 export function useRecentUsers(options?: { days?: number; limit?: number }) {
   const [users, setUsers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const days = options?.days || 7
@@ -178,8 +178,8 @@ export function useRecentUsers(options?: { days?: number; limit?: number }) {
 export function useUserStats() {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data, count } = await supabase.from('users').select('is_active, role', { count: 'exact' })
@@ -195,7 +195,7 @@ export function useUserStats() {
         by_role: byRole
       })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -203,8 +203,8 @@ export function useUserStats() {
 export function useUserVerifications(userId?: string, options?: { verification_type?: string; is_used?: boolean; limit?: number }) {
   const [verifications, setVerifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

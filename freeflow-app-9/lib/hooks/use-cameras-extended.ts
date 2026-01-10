@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCamera(cameraId?: string) {
   const [camera, setCamera] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cameraId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cameras').select('*').eq('id', cameraId).single(); setCamera(data) } finally { setIsLoading(false) }
-  }, [cameraId, supabase])
+  }, [cameraId])
   useEffect(() => { fetch() }, [fetch])
   return { camera, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCamera(cameraId?: string) {
 export function useCameras(options?: { user_id?: string; status?: string; is_active?: boolean; limit?: number }) {
   const [cameras, setCameras] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('cameras').select('*')
@@ -43,8 +43,8 @@ export function useCameras(options?: { user_id?: string; status?: string; is_act
 export function useCameraRecordings(cameraId?: string, options?: { date_from?: string; date_to?: string; limit?: number }) {
   const [recordings, setRecordings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cameraId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useCameraRecordings(cameraId?: string, options?: { date_from?: s
 export function useCameraAlerts(cameraId?: string, options?: { is_acknowledged?: boolean; limit?: number }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!cameraId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,12 +80,12 @@ export function useCameraAlerts(cameraId?: string, options?: { is_acknowledged?:
 export function useOnlineCameras(userId?: string) {
   const [cameras, setCameras] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cameras').select('*').eq('user_id', userId).eq('status', 'online').eq('is_active', true).order('name', { ascending: true }); setCameras(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { cameras, isLoading, refresh: fetch }
 }
@@ -93,8 +93,8 @@ export function useOnlineCameras(userId?: string) {
 export function useCameraStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; online: number; recording: number; alerts: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -108,7 +108,7 @@ export function useCameraStats(userId?: string) {
         alerts: alertCount || 0
       })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -125,6 +125,6 @@ export function useCameraRealtime(cameraId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [cameraId, supabase])
+  }, [cameraId])
   return { camera }
 }

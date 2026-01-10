@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLicense(licenseId?: string) {
   const [license, setLicense] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!licenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('licenses').select('*, license_types(*), license_activations(*)').eq('id', licenseId).single(); setLicense(data) } finally { setIsLoading(false) }
-  }, [licenseId, supabase])
+  }, [licenseId])
   useEffect(() => { fetch() }, [fetch])
   return { license, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLicense(licenseId?: string) {
 export function useUserLicenses(userId?: string, options?: { status?: string; product_id?: string }) {
   const [licenses, setLicenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,12 +43,12 @@ export function useUserLicenses(userId?: string, options?: { status?: string; pr
 export function useLicenseActivations(licenseId?: string) {
   const [activations, setActivations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!licenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('license_activations').select('*').eq('license_id', licenseId).order('activated_at', { ascending: false }); setActivations(data || []) } finally { setIsLoading(false) }
-  }, [licenseId, supabase])
+  }, [licenseId])
   useEffect(() => { fetch() }, [fetch])
   return { activations, isLoading, refresh: fetch }
 }
@@ -56,11 +56,11 @@ export function useLicenseActivations(licenseId?: string) {
 export function useLicenseTypes() {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('license_types').select('*').order('name', { ascending: true }); setTypes(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useLicenseValidation(licenseKey?: string) {
         setValidation({ isValid: false, license: null })
       }
     } finally { setIsLoading(false) }
-  }, [licenseKey, supabase])
+  }, [licenseKey])
   useEffect(() => { validate() }, [validate])
   return { validation, isLoading, revalidate: validate }
 }
@@ -89,12 +89,12 @@ export function useLicenseValidation(licenseKey?: string) {
 export function useActiveLicenses(userId?: string) {
   const [licenses, setLicenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('licenses').select('*, license_types(*)').eq('user_id', userId).eq('status', 'active').order('expires_at', { ascending: true }); setLicenses(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { licenses, isLoading, refresh: fetch }
 }
@@ -102,8 +102,8 @@ export function useActiveLicenses(userId?: string) {
 export function useExpiringLicenses(userId?: string, options?: { days?: number }) {
   const [licenses, setLicenses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -121,12 +121,12 @@ export function useExpiringLicenses(userId?: string, options?: { days?: number }
 export function useLicenseRenewals(licenseId?: string) {
   const [renewals, setRenewals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!licenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('license_renewals').select('*').eq('license_id', licenseId).order('renewed_at', { ascending: false }); setRenewals(data || []) } finally { setIsLoading(false) }
-  }, [licenseId, supabase])
+  }, [licenseId])
   useEffect(() => { fetch() }, [fetch])
   return { renewals, isLoading, refresh: fetch }
 }

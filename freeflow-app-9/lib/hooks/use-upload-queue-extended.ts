@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useUploadQueue(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('upload_queue').select('*').order('created_at', { ascending: false })
@@ -29,8 +29,8 @@ export function useUploadProgress(uploadId?: string) {
   const [progress, setProgress] = useState<number>(0)
   const [status, setStatus] = useState<string>('pending')
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -38,28 +38,28 @@ export function useUploadProgress(uploadId?: string) {
       setProgress(data?.progress || 0)
       setStatus(data?.status || 'pending')
     } finally { setIsLoading(false) }
-  }, [uploadId, supabase])
+  }, [uploadId])
   useEffect(() => { fetch() }, [fetch])
   useEffect(() => {
     if (!uploadId) return
     const channel = supabase.channel(`upload-${uploadId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'upload_queue', filter: `id=eq.${uploadId}` }, (payload) => { setProgress(payload.new.progress || 0); setStatus(payload.new.status || 'pending') }).subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [uploadId, supabase])
+  }, [uploadId])
   return { progress, status, isLoading, refresh: fetch }
 }
 
 export function useChunkedUploads(uploadId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!uploadId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('upload_chunks').select('*').eq('upload_id', uploadId).order('chunk_index', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [uploadId, supabase])
+  }, [uploadId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

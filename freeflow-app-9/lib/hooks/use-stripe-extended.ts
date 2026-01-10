@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useStripeCustomer(customerId?: string) {
   const [customer, setCustomer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('stripe_customers').select('*').eq('id', customerId).single(); setCustomer(data) } finally { setIsLoading(false) }
-  }, [customerId, supabase])
+  }, [customerId])
   useEffect(() => { fetch() }, [fetch])
   return { customer, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function useStripeCustomer(customerId?: string) {
 export function useStripeCustomerByUser(userId?: string) {
   const [customer, setCustomer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('stripe_customers').select('*').eq('user_id', userId).single(); setCustomer(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { customer, isLoading, refresh: fetch }
 }
@@ -37,8 +37,8 @@ export function useStripeCustomerByUser(userId?: string) {
 export function useStripeSubscriptions(options?: { customer_id?: string; status?: string; limit?: number }) {
   const [subscriptions, setSubscriptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('stripe_subscriptions').select('*')
@@ -55,8 +55,8 @@ export function useStripeSubscriptions(options?: { customer_id?: string; status?
 export function useStripeInvoices(options?: { customer_id?: string; status?: string; limit?: number }) {
   const [invoices, setInvoices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('stripe_invoices').select('*')
@@ -73,8 +73,8 @@ export function useStripeInvoices(options?: { customer_id?: string; status?: str
 export function useStripePayments(options?: { customer_id?: string; status?: string; limit?: number }) {
   const [payments, setPayments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('stripe_payments').select('*')

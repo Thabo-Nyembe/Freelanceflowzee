@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePartner(partnerId?: string) {
   const [partner, setPartner] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!partnerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('partners').select('*, partner_tiers(*), partner_commissions(*), partner_referrals(*)').eq('id', partnerId).single(); setPartner(data) } finally { setIsLoading(false) }
-  }, [partnerId, supabase])
+  }, [partnerId])
   useEffect(() => { fetch() }, [fetch])
   return { partner, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function usePartner(partnerId?: string) {
 export function useUserPartner(userId?: string) {
   const [partner, setPartner] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('partners').select('*, partner_tiers(*)').eq('user_id', userId).single(); setPartner(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { partner, isLoading, refresh: fetch }
 }
@@ -37,8 +37,8 @@ export function useUserPartner(userId?: string) {
 export function usePartners(options?: { tier_id?: string; status?: string; search?: string; limit?: number }) {
   const [partners, setPartners] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('partners').select('*, partner_tiers(*), users(*)')
@@ -56,8 +56,8 @@ export function usePartners(options?: { tier_id?: string; status?: string; searc
 export function usePartnerApplications(options?: { status?: string; limit?: number }) {
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('partner_applications').select('*, users(*)')
@@ -73,11 +73,11 @@ export function usePartnerApplications(options?: { status?: string; limit?: numb
 export function usePartnerTiers() {
   const [tiers, setTiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('partner_tiers').select('*').order('commission_rate', { ascending: true }); setTiers(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { tiers, isLoading, refresh: fetch }
 }
@@ -85,8 +85,8 @@ export function usePartnerTiers() {
 export function usePartnerReferrals(partnerId?: string, options?: { status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [referrals, setReferrals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!partnerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -105,8 +105,8 @@ export function usePartnerReferrals(partnerId?: string, options?: { status?: str
 export function usePartnerCommissions(partnerId?: string, options?: { status?: string; limit?: number }) {
   const [commissions, setCommissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!partnerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -123,8 +123,8 @@ export function usePartnerCommissions(partnerId?: string, options?: { status?: s
 export function usePartnerPayouts(partnerId?: string, options?: { status?: string; limit?: number }) {
   const [payouts, setPayouts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!partnerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -141,8 +141,8 @@ export function usePartnerPayouts(partnerId?: string, options?: { status?: strin
 export function usePartnerStats(partnerId?: string) {
   const [stats, setStats] = useState<{ totalReferrals: number; convertedReferrals: number; totalEarnings: number; pendingEarnings: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!partnerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -157,7 +157,7 @@ export function usePartnerStats(partnerId?: string) {
       const conversionRate = totalReferrals > 0 ? (convertedReferrals / totalReferrals) * 100 : 0
       setStats({ totalReferrals, convertedReferrals, totalEarnings, pendingEarnings, conversionRate })
     } finally { setIsLoading(false) }
-  }, [partnerId, supabase])
+  }, [partnerId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -165,11 +165,11 @@ export function usePartnerStats(partnerId?: string) {
 export function usePendingApplications() {
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('partner_applications').select('*, users(*)').eq('status', 'pending').order('created_at', { ascending: true }); setApplications(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { applications, isLoading, refresh: fetch }
 }

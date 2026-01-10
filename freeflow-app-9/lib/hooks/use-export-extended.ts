@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useExport(exportId?: string) {
   const [exportData, setExportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!exportId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('exports').select('*').eq('id', exportId).single()
       setExportData(data)
     } finally { setIsLoading(false) }
-  }, [exportId, supabase])
+  }, [exportId])
   useEffect(() => { fetch() }, [fetch])
   return { exportData, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useExportProgress(exportId?: string) {
     }).subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [exportId, supabase])
+  }, [exportId])
 
   return { status, progress, fileUrl, isComplete: status === 'completed', isFailed: status === 'failed', isLoading }
 }
@@ -61,8 +61,8 @@ export function useExportProgress(exportId?: string) {
 export function useUserExports(userId?: string, options?: { status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -79,15 +79,15 @@ export function useUserExports(userId?: string, options?: { status?: string }) {
 export function useScheduledExports(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('scheduled_exports').select('*').eq('user_id', userId).eq('is_active', true).order('next_run_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

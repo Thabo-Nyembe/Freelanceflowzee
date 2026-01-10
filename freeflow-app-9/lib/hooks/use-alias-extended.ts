@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useAlias(aliasId?: string) {
   const [alias, setAlias] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!aliasId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('aliases').select('*').eq('id', aliasId).single()
       setAlias(data)
     } finally { setIsLoading(false) }
-  }, [aliasId, supabase])
+  }, [aliasId])
   useEffect(() => { fetch() }, [fetch])
   return { alias, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useAlias(aliasId?: string) {
 export function useAliasByName(name?: string, type?: string) {
   const [alias, setAlias] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!name) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -45,8 +45,8 @@ export function useTargetAliases(targetId?: string, targetType?: string) {
   const [data, setData] = useState<any[]>([])
   const [primaryAlias, setPrimaryAlias] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!targetId || !targetType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,15 +62,15 @@ export function useTargetAliases(targetId?: string, targetType?: string) {
 export function useUserAliases(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('aliases').select('*').eq('user_id', userId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

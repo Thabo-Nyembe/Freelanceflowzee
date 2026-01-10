@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePriority(priorityId?: string) {
   const [priority, setPriority] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priorityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('priorities').select('*, priority_levels(*), priority_rules(*), priority_assignments(*)').eq('id', priorityId).single(); setPriority(data) } finally { setIsLoading(false) }
-  }, [priorityId, supabase])
+  }, [priorityId])
   useEffect(() => { fetch() }, [fetch])
   return { priority, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePriority(priorityId?: string) {
 export function usePriorities(options?: { organization_id?: string; is_active?: boolean; limit?: number }) {
   const [priorities, setPriorities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('priorities').select('*, priority_assignments(count)')
@@ -42,8 +42,8 @@ export function usePriorities(options?: { organization_id?: string; is_active?: 
 export function usePriorityLevels(organizationId?: string) {
   const [levels, setLevels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('priority_levels').select('*')
@@ -51,7 +51,7 @@ export function usePriorityLevels(organizationId?: string) {
       const { data } = await query.order('value', { ascending: false })
       setLevels(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { levels, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function usePriorityLevels(organizationId?: string) {
 export function usePriorityAssignment(entityType?: string, entityId?: string) {
   const [assignment, setAssignment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('priority_assignments').select('*, priorities(*)').eq('entity_type', entityType).eq('entity_id', entityId).single(); setAssignment(data) } finally { setIsLoading(false) }
@@ -72,12 +72,12 @@ export function usePriorityAssignment(entityType?: string, entityId?: string) {
 export function usePriorityRules(priorityId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priorityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('priority_rules').select('*').eq('priority_id', priorityId).eq('is_active', true).order('created_at', { ascending: true }); setRules(data || []) } finally { setIsLoading(false) }
-  }, [priorityId, supabase])
+  }, [priorityId])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -85,8 +85,8 @@ export function usePriorityRules(priorityId?: string) {
 export function usePriorityHistory(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('priority_history').select('*, old_priority:priorities!old_priority_id(*), new_priority:priorities!new_priority_id(*), users(*)').eq('entity_type', entityType).eq('entity_id', entityId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
@@ -98,12 +98,12 @@ export function usePriorityHistory(entityType?: string, entityId?: string, optio
 export function usePriorityEscalations(priorityId?: string) {
   const [escalations, setEscalations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!priorityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('priority_escalations').select('*, escalate_to:priorities!escalate_to_priority_id(*)').eq('priority_id', priorityId).eq('is_active', true).order('after_hours', { ascending: true }); setEscalations(data || []) } finally { setIsLoading(false) }
-  }, [priorityId, supabase])
+  }, [priorityId])
   useEffect(() => { fetch() }, [fetch])
   return { escalations, isLoading, refresh: fetch }
 }
@@ -111,8 +111,8 @@ export function usePriorityEscalations(priorityId?: string) {
 export function useHighPriorityItems(entityType?: string, options?: { organization_id?: string; min_level?: number; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('priority_assignments').select('*, priorities(*)')
@@ -129,8 +129,8 @@ export function useHighPriorityItems(entityType?: string, options?: { organizati
 export function usePriorityStats(organizationId?: string) {
   const [stats, setStats] = useState<{ byLevel: { [level: number]: number }; total: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('priority_assignments').select('*, priorities(*)')
@@ -142,7 +142,7 @@ export function usePriorityStats(organizationId?: string) {
       })
       setStats({ byLevel, total: data?.length || 0 })
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -150,8 +150,8 @@ export function usePriorityStats(organizationId?: string) {
 export function useOverdueEscalations(options?: { limit?: number }) {
   const [escalations, setEscalations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data: assignments } = await supabase.from('priority_assignments').select('*, priorities(*), priority_escalations(*)')
@@ -165,7 +165,7 @@ export function useOverdueEscalations(options?: { limit?: number }) {
       })
       setEscalations(overdue.slice(0, options?.limit || 50))
     } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { escalations, isLoading, refresh: fetch }
 }

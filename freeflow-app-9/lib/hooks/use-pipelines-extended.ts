@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePipeline(pipelineId?: string) {
   const [pipeline, setPipeline] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pipelines').select('*, pipeline_stages(*), pipeline_automations(*)').eq('id', pipelineId).single(); setPipeline(data) } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { pipeline, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePipeline(pipelineId?: string) {
 export function usePipelines(options?: { organization_id?: string; owner_id?: string; type?: string; status?: string; limit?: number }) {
   const [pipelines, setPipelines] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('pipelines').select('*, pipeline_stages(count), pipeline_items(count)')
@@ -44,12 +44,12 @@ export function usePipelines(options?: { organization_id?: string; owner_id?: st
 export function usePipelineStages(pipelineId?: string) {
   const [stages, setStages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pipeline_stages').select('*, pipeline_items(count)').eq('pipeline_id', pipelineId).order('order', { ascending: true }); setStages(data || []) } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { stages, isLoading, refresh: fetch }
 }
@@ -57,8 +57,8 @@ export function usePipelineStages(pipelineId?: string) {
 export function usePipelineItems(pipelineId?: string, options?: { stage_id?: string; status?: string; owner_id?: string; limit?: number }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -77,12 +77,12 @@ export function usePipelineItems(pipelineId?: string, options?: { stage_id?: str
 export function useStageItems(stageId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pipeline_items').select('*').eq('stage_id', stageId).eq('status', 'active').order('position', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [stageId, supabase])
+  }, [stageId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -90,12 +90,12 @@ export function useStageItems(stageId?: string) {
 export function usePipelineAutomations(pipelineId?: string) {
   const [automations, setAutomations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pipeline_automations').select('*').eq('pipeline_id', pipelineId).order('created_at', { ascending: false }); setAutomations(data || []) } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { automations, isLoading, refresh: fetch }
 }
@@ -103,8 +103,8 @@ export function usePipelineAutomations(pipelineId?: string) {
 export function usePipelineMetrics(pipelineId?: string, options?: { from_date?: string; to_date?: string }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -122,8 +122,8 @@ export function usePipelineMetrics(pipelineId?: string, options?: { from_date?: 
 export function usePipelineBoard(pipelineId?: string) {
   const [board, setBoard] = useState<{ stages: any[]; items: Record<string, any[]> }>({ stages: [], items: {} })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -141,7 +141,7 @@ export function usePipelineBoard(pipelineId?: string) {
       })
       setBoard({ stages, items: itemsByStage })
     } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { board, isLoading, refresh: fetch }
 }
@@ -149,8 +149,8 @@ export function usePipelineBoard(pipelineId?: string) {
 export function usePipelineStats(pipelineId?: string) {
   const [stats, setStats] = useState<{ totalItems: number; totalValue: number; stageDistribution: Record<string, number>; wonCount: number; lostCount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -167,7 +167,7 @@ export function usePipelineStats(pipelineId?: string) {
       })
       setStats({ totalItems, totalValue, stageDistribution, wonCount, lostCount })
     } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

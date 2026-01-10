@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useStats(entityId?: string, entityType?: string, period?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -28,8 +28,8 @@ export function useStats(entityId?: string, entityType?: string, period?: string
 export function useStatSummary(entityId?: string, entityType?: string, statName?: string) {
   const [summary, setSummary] = useState<any>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !statName) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -47,8 +47,8 @@ export function useStatSummary(entityId?: string, entityType?: string, statName?
 export function useStatsByPeriod(entityId?: string, entityType?: string, period?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !period) { setIsLoading(false); return }
     setIsLoading(true)
     try {

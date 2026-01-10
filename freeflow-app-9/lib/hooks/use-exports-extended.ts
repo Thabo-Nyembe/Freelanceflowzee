@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useExport(exportId?: string) {
   const [exportData, setExportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!exportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exports').select('*').eq('id', exportId).single(); setExportData(data) } finally { setIsLoading(false) }
-  }, [exportId, supabase])
+  }, [exportId])
   useEffect(() => { fetch() }, [fetch])
   return { export: exportData, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useExport(exportId?: string) {
 export function useUserExports(userId?: string, options?: { type?: string; status?: string; limit?: number }) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,8 +43,8 @@ export function useUserExports(userId?: string, options?: { type?: string; statu
 export function useRecentExports(userId?: string, limit?: number) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(limit || 10); setExports(data || []) } finally { setIsLoading(false) }
@@ -56,12 +56,12 @@ export function useRecentExports(userId?: string, limit?: number) {
 export function useExportJob(jobId?: string) {
   const [job, setJob] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('export_jobs').select('*').eq('id', jobId).single(); setJob(data) } finally { setIsLoading(false) }
-  }, [jobId, supabase])
+  }, [jobId])
   useEffect(() => { fetch() }, [fetch])
   return { job, isLoading, refresh: fetch }
 }
@@ -69,8 +69,8 @@ export function useExportJob(jobId?: string) {
 export function useExportTemplates(options?: { type?: string; is_public?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('export_templates').select('*')
@@ -87,8 +87,8 @@ export function useExportTemplates(options?: { type?: string; is_public?: boolea
 export function useExportSchedules(userId?: string, options?: { is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -105,12 +105,12 @@ export function useExportSchedules(userId?: string, options?: { is_active?: bool
 export function usePendingExports(userId?: string) {
   const [exports, setExports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exports').select('*').eq('user_id', userId).in('status', ['pending', 'processing']).order('created_at', { ascending: false }); setExports(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { exports, isLoading, refresh: fetch }
 }
@@ -118,8 +118,8 @@ export function usePendingExports(userId?: string) {
 export function useExportStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; completed: number; failed: number; totalSize: number; byType: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -132,7 +132,7 @@ export function useExportStats(userId?: string) {
       const byType = data.reduce((acc: Record<string, number>, e) => { acc[e.type] = (acc[e.type] || 0) + 1; return acc }, {})
       setStats({ total, completed, failed, totalSize, byType })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

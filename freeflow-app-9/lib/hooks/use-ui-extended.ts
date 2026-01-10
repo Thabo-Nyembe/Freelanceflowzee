@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useUiComponent(componentId?: string) {
   const [component, setComponent] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!componentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ui_components').select('*').eq('id', componentId).single(); setComponent(data) } finally { setIsLoading(false) }
-  }, [componentId, supabase])
+  }, [componentId])
   useEffect(() => { fetch() }, [fetch])
   return { component, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useUiComponent(componentId?: string) {
 export function useUiComponents(options?: { type?: string; is_active?: boolean; limit?: number }) {
   const [components, setComponents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('ui_components').select('*')
@@ -42,8 +42,8 @@ export function useUiComponents(options?: { type?: string; is_active?: boolean; 
 export function useUiThemes(options?: { is_active?: boolean; is_default?: boolean }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('ui_themes').select('*')
@@ -60,8 +60,8 @@ export function useUiThemes(options?: { is_active?: boolean; is_default?: boolea
 export function useUiLayouts(options?: { type?: string; is_active?: boolean }) {
   const [layouts, setLayouts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('ui_layouts').select('*')
@@ -78,12 +78,12 @@ export function useUiLayouts(options?: { type?: string; is_active?: boolean }) {
 export function useUiPreferences(userId?: string) {
   const [preferences, setPreferences] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ui_preferences').select('*').eq('user_id', userId).single(); setPreferences(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }
 }

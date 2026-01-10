@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLink(linkId?: string) {
   const [link, setLink] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('links').select('*, link_tags(*)').eq('id', linkId).single(); setLink(data) } finally { setIsLoading(false) }
-  }, [linkId, supabase])
+  }, [linkId])
   useEffect(() => { fetch() }, [fetch])
   return { link, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLink(linkId?: string) {
 export function useUserLinks(userId?: string, options?: { group_id?: string; is_active?: boolean; limit?: number }) {
   const [links, setLinks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useLinkByShortCode(shortCode?: string) {
   const [link, setLink] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isValid, setIsValid] = useState(false)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!shortCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -56,7 +56,7 @@ export function useLinkByShortCode(shortCode?: string) {
         setIsValid(valid)
       }
     } finally { setIsLoading(false) }
-  }, [shortCode, supabase])
+  }, [shortCode])
   useEffect(() => { fetch() }, [fetch])
   return { link, isValid, isLoading, refresh: fetch }
 }
@@ -64,8 +64,8 @@ export function useLinkByShortCode(shortCode?: string) {
 export function useLinkClicks(linkId?: string, options?: { limit?: number }) {
   const [clicks, setClicks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('link_clicks').select('*').eq('link_id', linkId).order('clicked_at', { ascending: false }).limit(options?.limit || 100); setClicks(data || []) } finally { setIsLoading(false) }
@@ -77,8 +77,8 @@ export function useLinkClicks(linkId?: string, options?: { limit?: number }) {
 export function useLinkAnalytics(linkId?: string) {
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -99,7 +99,7 @@ export function useLinkAnalytics(linkId?: string) {
       })
       setAnalytics(result)
     } finally { setIsLoading(false) }
-  }, [linkId, supabase])
+  }, [linkId])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -107,12 +107,12 @@ export function useLinkAnalytics(linkId?: string) {
 export function useLinkGroups(userId?: string) {
   const [groups, setGroups] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('link_groups').select('*').eq('user_id', userId).order('name', { ascending: true }); setGroups(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -133,12 +133,12 @@ export function useLinkSearch(userId?: string, query?: string, options?: { limit
 export function useShortLinks(userId?: string) {
   const [links, setLinks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('short_links').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setLinks(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { links, isLoading, refresh: fetch }
 }
@@ -146,8 +146,8 @@ export function useShortLinks(userId?: string) {
 export function useTopLinks(userId?: string, options?: { limit?: number }) {
   const [links, setLinks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('links').select('*').eq('user_id', userId).order('click_count', { ascending: false }).limit(options?.limit || 10); setLinks(data || []) } finally { setIsLoading(false) }
@@ -159,12 +159,12 @@ export function useTopLinks(userId?: string, options?: { limit?: number }) {
 export function useLinkTags(linkId?: string) {
   const [tags, setTags] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('link_tags').select('*').eq('link_id', linkId); setTags(data || []) } finally { setIsLoading(false) }
-  }, [linkId, supabase])
+  }, [linkId])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }

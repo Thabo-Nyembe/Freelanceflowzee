@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTimeline(timelineId?: string) {
   const [timeline, setTimeline] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timelines').select('*, timeline_events(*), timeline_milestones(*)').eq('id', timelineId).single(); setTimeline(data) } finally { setIsLoading(false) }
-  }, [timelineId, supabase])
+  }, [timelineId])
   useEffect(() => { fetch() }, [fetch])
   return { timeline, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTimeline(timelineId?: string) {
 export function useTimelines(options?: { user_id?: string; project_id?: string; limit?: number }) {
   const [timelines, setTimelines] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timelines').select('*')
@@ -42,12 +42,12 @@ export function useTimelines(options?: { user_id?: string; project_id?: string; 
 export function useTimelineEvents(timelineId?: string) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timeline_events').select('*').eq('timeline_id', timelineId).order('date', { ascending: true }); setEvents(data || []) } finally { setIsLoading(false) }
-  }, [timelineId, supabase])
+  }, [timelineId])
   useEffect(() => { fetch() }, [fetch])
   return { events, isLoading, refresh: fetch }
 }
@@ -55,12 +55,12 @@ export function useTimelineEvents(timelineId?: string) {
 export function useTimelineMilestones(timelineId?: string) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timeline_milestones').select('*').eq('timeline_id', timelineId).order('date', { ascending: true }); setMilestones(data || []) } finally { setIsLoading(false) }
-  }, [timelineId, supabase])
+  }, [timelineId])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }
@@ -68,12 +68,12 @@ export function useTimelineMilestones(timelineId?: string) {
 export function useProjectTimeline(projectId?: string) {
   const [timeline, setTimeline] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timelines').select('*, timeline_events(*), timeline_milestones(*)').eq('project_id', projectId).order('created_at', { ascending: false }).limit(1).single(); setTimeline(data) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { timeline, isLoading, refresh: fetch }
 }

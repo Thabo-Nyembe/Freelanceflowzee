@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useConversion(conversionId?: string) {
   const [conversion, setConversion] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!conversionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversions').select('*, conversion_events(*)').eq('id', conversionId).single(); setConversion(data) } finally { setIsLoading(false) }
-  }, [conversionId, supabase])
+  }, [conversionId])
   useEffect(() => { fetch() }, [fetch])
   return { conversion, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useConversion(conversionId?: string) {
 export function useConversions(options?: { goal_id?: string; funnel_id?: string; date_from?: string; date_to?: string; limit?: number }) {
   const [conversions, setConversions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('conversions').select('*')
@@ -44,8 +44,8 @@ export function useConversions(options?: { goal_id?: string; funnel_id?: string;
 export function useConversionGoals(options?: { type?: string; is_active?: boolean }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('conversion_goals').select('*')
@@ -62,8 +62,8 @@ export function useConversionGoals(options?: { type?: string; is_active?: boolea
 export function useConversionFunnels(options?: { is_active?: boolean }) {
   const [funnels, setFunnels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('conversion_funnels').select('*')
@@ -71,7 +71,7 @@ export function useConversionFunnels(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setFunnels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { funnels, isLoading, refresh: fetch }
 }
@@ -79,8 +79,8 @@ export function useConversionFunnels(options?: { is_active?: boolean }) {
 export function useConversionRate(goalId?: string, options?: { date_from?: string; date_to?: string }) {
   const [rate, setRate] = useState<{ conversions: number; target: number; rate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!goalId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -100,8 +100,8 @@ export function useConversionRate(goalId?: string, options?: { date_from?: strin
 export function useFunnelAnalysis(funnelId?: string, options?: { date_from?: string; date_to?: string }) {
   const [analysis, setAnalysis] = useState<{ steps: { name: string; count: number; dropoff: number }[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!funnelId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -128,8 +128,8 @@ export function useFunnelAnalysis(funnelId?: string, options?: { date_from?: str
 export function useConversionStats(options?: { date_from?: string; date_to?: string }) {
   const [stats, setStats] = useState<{ total: number; totalValue: number; byGoal: Record<string, number>; bySource: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('conversions').select('goal_id, source, value')

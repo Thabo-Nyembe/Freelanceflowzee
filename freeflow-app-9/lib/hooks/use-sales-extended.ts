@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSale(saleId?: string) {
   const [sale, setSale] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!saleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('sales').select('*').eq('id', saleId).single(); setSale(data) } finally { setIsLoading(false) }
-  }, [saleId, supabase])
+  }, [saleId])
   useEffect(() => { fetch() }, [fetch])
   return { sale, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSale(saleId?: string) {
 export function useSales(options?: { user_id?: string; client_id?: string; status?: string; limit?: number }) {
   const [sales, setSales] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sales').select('*')
@@ -43,8 +43,8 @@ export function useSales(options?: { user_id?: string; client_id?: string; statu
 export function useSalesOrders(options?: { user_id?: string; status?: string; limit?: number }) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sales_orders').select('*')
@@ -61,8 +61,8 @@ export function useSalesOrders(options?: { user_id?: string; status?: string; li
 export function useSalesTargets(options?: { user_id?: string; period?: string; year?: number }) {
   const [targets, setTargets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sales_targets').select('*')
@@ -80,8 +80,8 @@ export function useSalesTargets(options?: { user_id?: string; period?: string; y
 export function useSalesPipeline(options?: { user_id?: string; stage?: string }) {
   const [pipeline, setPipeline] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sales_pipeline').select('*')

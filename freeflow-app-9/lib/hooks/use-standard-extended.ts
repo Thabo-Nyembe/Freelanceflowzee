@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useStandard(standardId?: string) {
   const [standard, setStandard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!standardId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('standards').select('*').eq('id', standardId).single()
       setStandard(data)
     } finally { setIsLoading(false) }
-  }, [standardId, supabase])
+  }, [standardId])
   useEffect(() => { fetch() }, [fetch])
   return { standard, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useStandard(standardId?: string) {
 export function useStandards(options?: { standardType?: string; category?: string; isMandatory?: boolean; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('standards').select('*')
@@ -46,8 +46,8 @@ export function useStandards(options?: { standardType?: string; category?: strin
 export function useMandatoryStandards(category?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('standards').select('*').eq('is_mandatory', true).eq('is_active', true)
@@ -55,7 +55,7 @@ export function useMandatoryStandards(category?: string) {
       const { data: result } = await query.order('code', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [category, supabase])
+  }, [category])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -63,8 +63,8 @@ export function useMandatoryStandards(category?: string) {
 export function useEntityCompliance(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

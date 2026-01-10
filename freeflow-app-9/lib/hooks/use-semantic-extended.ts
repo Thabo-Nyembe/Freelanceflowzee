@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSemanticEmbedding(embeddingId?: string) {
   const [embedding, setEmbedding] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!embeddingId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('semantic_embeddings').select('*').eq('id', embeddingId).single(); setEmbedding(data) } finally { setIsLoading(false) }
-  }, [embeddingId, supabase])
+  }, [embeddingId])
   useEffect(() => { fetch() }, [fetch])
   return { embedding, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSemanticEmbedding(embeddingId?: string) {
 export function useSemanticEmbeddings(options?: { content_type?: string; limit?: number }) {
   const [embeddings, setEmbeddings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('semantic_embeddings').select('*')
@@ -41,8 +41,8 @@ export function useSemanticEmbeddings(options?: { content_type?: string; limit?:
 export function useSemanticIndexes(options?: { index_type?: string; is_active?: boolean }) {
   const [indexes, setIndexes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('semantic_indexes').select('*')
@@ -59,8 +59,8 @@ export function useSemanticIndexes(options?: { index_type?: string; is_active?: 
 export function useSemanticSearches(options?: { user_id?: string; limit?: number }) {
   const [searches, setSearches] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('semantic_searches').select('*')
@@ -76,8 +76,8 @@ export function useSemanticSearches(options?: { user_id?: string; limit?: number
 export function useSemanticClusters(options?: { index_id?: string; is_active?: boolean }) {
   const [clusters, setClusters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('semantic_clusters').select('*')

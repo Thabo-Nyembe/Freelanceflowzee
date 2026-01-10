@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useInteraction(interactionId?: string) {
   const [interaction, setInteraction] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!interactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('interactions').select('*, interaction_types(*)').eq('id', interactionId).single(); setInteraction(data) } finally { setIsLoading(false) }
-  }, [interactionId, supabase])
+  }, [interactionId])
   useEffect(() => { fetch() }, [fetch])
   return { interaction, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useInteraction(interactionId?: string) {
 export function useInteractions(options?: { user_id?: string; target_id?: string; target_type?: string; interaction_type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [interactions, setInteractions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('interactions').select('*, interaction_types(*)')
@@ -46,8 +46,8 @@ export function useInteractions(options?: { user_id?: string; target_id?: string
 export function useUserInteractions(userId?: string, options?: { target_type?: string; limit?: number }) {
   const [interactions, setInteractions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,8 +64,8 @@ export function useUserInteractions(userId?: string, options?: { target_type?: s
 export function useTargetInteractions(targetId?: string, targetType?: string, options?: { interaction_type?: string; limit?: number }) {
   const [interactions, setInteractions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!targetId || !targetType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -82,8 +82,8 @@ export function useTargetInteractions(targetId?: string, targetType?: string, op
 export function useInteractionTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('interaction_types').select('*')
@@ -100,8 +100,8 @@ export function useInteractionTypes(options?: { category?: string; is_active?: b
 export function useInteractionLogs(interactionId?: string, options?: { limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!interactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('interaction_logs').select('*').eq('interaction_id', interactionId).order('logged_at', { ascending: false }).limit(options?.limit || 50); setLogs(data || []) } finally { setIsLoading(false) }
@@ -113,8 +113,8 @@ export function useInteractionLogs(interactionId?: string, options?: { limit?: n
 export function useInteractionAnalytics(options?: { target_type?: string; interaction_type?: string; from_date?: string; to_date?: string }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('interaction_analytics').select('*')
@@ -133,8 +133,8 @@ export function useInteractionAnalytics(options?: { target_type?: string; intera
 export function useInteractionRules(options?: { trigger_type?: string; is_active?: boolean }) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('interaction_rules').select('*')
@@ -151,8 +151,8 @@ export function useInteractionRules(options?: { trigger_type?: string; is_active
 export function useInteractionCount(targetId?: string, targetType?: string, interactionType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!targetId || !targetType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

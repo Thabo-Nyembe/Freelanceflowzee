@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useOperation(operationId?: string) {
   const [operation, setOperation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('operations').select('*, operation_logs(*), operation_steps(*), operation_metrics(*)').eq('id', operationId).single(); setOperation(data) } finally { setIsLoading(false) }
-  }, [operationId, supabase])
+  }, [operationId])
   useEffect(() => { fetch() }, [fetch])
   return { operation, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useOperation(operationId?: string) {
 export function useOperations(options?: { organization_id?: string; owner_id?: string; type?: string; status?: string; limit?: number }) {
   const [operations, setOperations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('operations').select('*')
@@ -44,8 +44,8 @@ export function useOperations(options?: { organization_id?: string; owner_id?: s
 export function useRunningOperations(organizationId?: string) {
   const [operations, setOperations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('operations').select('*, operation_steps(*)').eq('status', 'running')
@@ -53,7 +53,7 @@ export function useRunningOperations(organizationId?: string) {
       const { data } = await query.order('started_at', { ascending: false })
       setOperations(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { operations, isLoading, refresh: fetch }
 }
@@ -61,8 +61,8 @@ export function useRunningOperations(organizationId?: string) {
 export function useOperationLogs(operationId?: string, options?: { level?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -79,12 +79,12 @@ export function useOperationLogs(operationId?: string, options?: { level?: strin
 export function useOperationSteps(operationId?: string) {
   const [steps, setSteps] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('operation_steps').select('*').eq('operation_id', operationId).order('order', { ascending: true }); setSteps(data || []) } finally { setIsLoading(false) }
-  }, [operationId, supabase])
+  }, [operationId])
   useEffect(() => { fetch() }, [fetch])
   return { steps, isLoading, refresh: fetch }
 }
@@ -92,8 +92,8 @@ export function useOperationSteps(operationId?: string) {
 export function useOperationSchedules(organizationId?: string) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('operation_schedules').select('*, operations(*)')
@@ -101,7 +101,7 @@ export function useOperationSchedules(organizationId?: string) {
       const { data } = await query.eq('is_active', true).order('next_run_at', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -109,12 +109,12 @@ export function useOperationSchedules(organizationId?: string) {
 export function useOperationMetrics(operationId?: string) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('operation_metrics').select('*').eq('operation_id', operationId).order('recorded_at', { ascending: false }); setMetrics(data || []) } finally { setIsLoading(false) }
-  }, [operationId, supabase])
+  }, [operationId])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -122,8 +122,8 @@ export function useOperationMetrics(operationId?: string) {
 export function useOperationAlerts(operationId?: string, options?: { status?: string }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!operationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -140,8 +140,8 @@ export function useOperationAlerts(operationId?: string, options?: { status?: st
 export function useRecentOperations(organizationId?: string, options?: { limit?: number }) {
   const [operations, setOperations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('operations').select('*')
@@ -157,8 +157,8 @@ export function useRecentOperations(organizationId?: string, options?: { limit?:
 export function useOperationStats(organizationId?: string) {
   const [stats, setStats] = useState<{ total: number; running: number; completed: number; failed: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('operations').select('status')
@@ -170,7 +170,7 @@ export function useOperationStats(organizationId?: string) {
       const failed = data?.filter(o => o.status === 'failed').length || 0
       setStats({ total, running, completed, failed })
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

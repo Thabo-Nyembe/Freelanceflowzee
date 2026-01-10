@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLearningPath(pathId?: string) {
   const [path, setPath] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pathId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_paths').select('*, learning_modules(*)').eq('id', pathId).single(); setPath(data) } finally { setIsLoading(false) }
-  }, [pathId, supabase])
+  }, [pathId])
   useEffect(() => { fetch() }, [fetch])
   return { path, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLearningPath(pathId?: string) {
 export function useLearningPaths(options?: { category?: string; difficulty?: string; status?: string; limit?: number }) {
   const [paths, setPaths] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('learning_paths').select('*')
@@ -43,12 +43,12 @@ export function useLearningPaths(options?: { category?: string; difficulty?: str
 export function useLearningModules(pathId?: string) {
   const [modules, setModules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pathId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_modules').select('*').eq('path_id', pathId).order('order', { ascending: true }); setModules(data || []) } finally { setIsLoading(false) }
-  }, [pathId, supabase])
+  }, [pathId])
   useEffect(() => { fetch() }, [fetch])
   return { modules, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useLearningModules(pathId?: string) {
 export function useMyLearningProgress(userId?: string, options?: { status?: string }) {
   const [progress, setProgress] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -74,8 +74,8 @@ export function useMyLearningProgress(userId?: string, options?: { status?: stri
 export function usePathProgress(userId?: string, pathId?: string) {
   const [progress, setProgress] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !pathId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_progress').select('*, learning_paths(*)').eq('user_id', userId).eq('path_id', pathId).single(); setProgress(data) } finally { setIsLoading(false) }
@@ -87,12 +87,12 @@ export function usePathProgress(userId?: string, pathId?: string) {
 export function useLearningAssessments(moduleId?: string) {
   const [assessments, setAssessments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!moduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_assessments').select('*').eq('module_id', moduleId); setAssessments(data || []) } finally { setIsLoading(false) }
-  }, [moduleId, supabase])
+  }, [moduleId])
   useEffect(() => { fetch() }, [fetch])
   return { assessments, isLoading, refresh: fetch }
 }
@@ -100,12 +100,12 @@ export function useLearningAssessments(moduleId?: string) {
 export function useMyCertificates(userId?: string) {
   const [certificates, setCertificates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_certificates').select('*, learning_paths(*)').eq('user_id', userId).order('issued_at', { ascending: false }); setCertificates(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { certificates, isLoading, refresh: fetch }
 }
@@ -131,11 +131,11 @@ export function useLearningSearch(query?: string, options?: { category?: string;
 export function usePopularPaths(options?: { limit?: number }) {
   const [paths, setPaths] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_paths').select('*').eq('status', 'published').order('enrollment_count', { ascending: false }).limit(options?.limit || 10); setPaths(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { paths, isLoading, refresh: fetch }
 }
@@ -143,8 +143,8 @@ export function usePopularPaths(options?: { limit?: number }) {
 export function useModuleCompletions(userId?: string, pathId?: string) {
   const [completedModules, setCompletedModules] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !pathId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -161,12 +161,12 @@ export function useModuleCompletions(userId?: string, pathId?: string) {
 export function useLearningResources(moduleId?: string) {
   const [resources, setResources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!moduleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_resources').select('*').eq('module_id', moduleId).order('order', { ascending: true }); setResources(data || []) } finally { setIsLoading(false) }
-  }, [moduleId, supabase])
+  }, [moduleId])
   useEffect(() => { fetch() }, [fetch])
   return { resources, isLoading, refresh: fetch }
 }

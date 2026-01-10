@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useExperience(experienceId?: string) {
   const [experience, setExperience] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!experienceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('experiences').select('*, experience_hosts(*), experience_reviews(*)').eq('id', experienceId).single(); setExperience(data) } finally { setIsLoading(false) }
-  }, [experienceId, supabase])
+  }, [experienceId])
   useEffect(() => { fetch() }, [fetch])
   return { experience, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useExperience(experienceId?: string) {
 export function useExperiences(options?: { host_id?: string; category?: string; status?: string; price_max?: number; search?: string; limit?: number }) {
   const [experiences, setExperiences] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('experiences').select('*')
@@ -45,8 +45,8 @@ export function useExperiences(options?: { host_id?: string; category?: string; 
 export function useExperienceBookings(experienceId?: string, options?: { status?: string; date_from?: string; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!experienceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,8 +64,8 @@ export function useExperienceBookings(experienceId?: string, options?: { status?
 export function useUserExperienceBookings(userId?: string, options?: { status?: string; upcoming?: boolean; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -83,8 +83,8 @@ export function useUserExperienceBookings(userId?: string, options?: { status?: 
 export function useExperienceReviews(experienceId?: string, options?: { limit?: number }) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!experienceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('experience_reviews').select('*').eq('experience_id', experienceId).order('created_at', { ascending: false }).limit(options?.limit || 20); setReviews(data || []) } finally { setIsLoading(false) }
@@ -96,11 +96,11 @@ export function useExperienceReviews(experienceId?: string, options?: { limit?: 
 export function useFeaturedExperiences(limit?: number) {
   const [experiences, setExperiences] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('experiences').select('*').eq('status', 'published').order('rating_avg', { ascending: false }).limit(limit || 10); setExperiences(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { experiences, isLoading, refresh: fetch }
 }
@@ -108,12 +108,12 @@ export function useFeaturedExperiences(limit?: number) {
 export function useExperienceHost(hostId?: string) {
   const [host, setHost] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!hostId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('experience_hosts').select('*').eq('id', hostId).single(); setHost(data) } finally { setIsLoading(false) }
-  }, [hostId, supabase])
+  }, [hostId])
   useEffect(() => { fetch() }, [fetch])
   return { host, isLoading, refresh: fetch }
 }
@@ -121,15 +121,15 @@ export function useExperienceHost(hostId?: string) {
 export function useExperienceCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('experiences').select('category').eq('status', 'published')
       const uniqueCategories = [...new Set(data?.map(e => e.category).filter(Boolean))]
       setCategories(uniqueCategories as string[])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -137,8 +137,8 @@ export function useExperienceCategories() {
 export function useHostExperienceStats(hostId?: string) {
   const [stats, setStats] = useState<{ totalExperiences: number; totalBookings: number; avgRating: number; totalRevenue: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!hostId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -153,7 +153,7 @@ export function useHostExperienceStats(hostId?: string) {
       const totalRevenue = bookings?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0
       setStats({ totalExperiences, totalBookings, avgRating, totalRevenue })
     } finally { setIsLoading(false) }
-  }, [hostId, supabase])
+  }, [hostId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

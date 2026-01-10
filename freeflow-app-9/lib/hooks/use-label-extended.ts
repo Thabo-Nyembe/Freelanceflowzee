@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useLabel(labelId?: string) {
   const [label, setLabel] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!labelId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('labels').select('*').eq('id', labelId).single()
       setLabel(data)
     } finally { setIsLoading(false) }
-  }, [labelId, supabase])
+  }, [labelId])
   useEffect(() => { fetch() }, [fetch])
   return { label, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useLabel(labelId?: string) {
 export function useLabels(options?: { labelType?: string; workspaceId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('labels').select('*')
@@ -44,8 +44,8 @@ export function useLabels(options?: { labelType?: string; workspaceId?: string }
 export function useEntityLabels(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

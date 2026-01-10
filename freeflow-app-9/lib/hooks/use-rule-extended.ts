@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useRule(ruleId?: string) {
   const [rule, setRule] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!ruleId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('rules').select('*').eq('id', ruleId).single()
       setRule(data)
     } finally { setIsLoading(false) }
-  }, [ruleId, supabase])
+  }, [ruleId])
   useEffect(() => { fetch() }, [fetch])
   return { rule, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useRule(ruleId?: string) {
 export function useRules(options?: { ruleType?: string; entityType?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('rules').select('*')
@@ -45,8 +45,8 @@ export function useRules(options?: { ruleType?: string; entityType?: string; isA
 export function useRuleExecutions(ruleId?: string, limit = 20) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!ruleId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,8 +61,8 @@ export function useRuleExecutions(ruleId?: string, limit = 20) {
 export function useActiveRules(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('rules').select('*').eq('is_active', true)
@@ -70,7 +70,7 @@ export function useActiveRules(entityType?: string) {
       const { data: result } = await query.order('priority', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, supabase])
+  }, [entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

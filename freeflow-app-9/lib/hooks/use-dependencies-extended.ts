@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useDependency(dependencyId?: string) {
   const [dependency, setDependency] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dependencyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dependencies').select('*, dependency_versions(*), dependency_vulnerabilities(*)').eq('id', dependencyId).single(); setDependency(data) } finally { setIsLoading(false) }
-  }, [dependencyId, supabase])
+  }, [dependencyId])
   useEffect(() => { fetch() }, [fetch])
   return { dependency, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useDependency(dependencyId?: string) {
 export function useProjectDependencies(projectId?: string, options?: { type?: string; is_dev?: boolean }) {
   const [dependencies, setDependencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,12 +43,12 @@ export function useProjectDependencies(projectId?: string, options?: { type?: st
 export function useDependencyVulnerabilities(dependencyId?: string) {
   const [vulnerabilities, setVulnerabilities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dependencyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dependency_vulnerabilities').select('*').eq('dependency_id', dependencyId).order('severity', { ascending: false }); setVulnerabilities(data || []) } finally { setIsLoading(false) }
-  }, [dependencyId, supabase])
+  }, [dependencyId])
   useEffect(() => { fetch() }, [fetch])
   return { vulnerabilities, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useDependencyVulnerabilities(dependencyId?: string) {
 export function useProjectVulnerabilities(projectId?: string, options?: { severity?: string; status?: string }) {
   const [vulnerabilities, setVulnerabilities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -77,12 +77,12 @@ export function useProjectVulnerabilities(projectId?: string, options?: { severi
 export function useDependencyVersions(dependencyId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dependencyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dependency_versions').select('*').eq('dependency_id', dependencyId).order('released_at', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [dependencyId, supabase])
+  }, [dependencyId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -90,12 +90,12 @@ export function useDependencyVersions(dependencyId?: string) {
 export function useOutdatedDependencies(projectId?: string) {
   const [dependencies, setDependencies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('dependencies').select('*').eq('project_id', projectId).eq('is_outdated', true); setDependencies(data || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { dependencies, isLoading, refresh: fetch }
 }
@@ -103,8 +103,8 @@ export function useOutdatedDependencies(projectId?: string) {
 export function useDependencyLicenses(projectId?: string) {
   const [licenses, setLicenses] = useState<Record<string, string[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -113,7 +113,7 @@ export function useDependencyLicenses(projectId?: string) {
       data?.forEach(d => { if (d.license) { if (!licenseMap[d.license]) licenseMap[d.license] = []; licenseMap[d.license].push(d.name) } })
       setLicenses(licenseMap)
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { licenses, isLoading, refresh: fetch }
 }
@@ -121,8 +121,8 @@ export function useDependencyLicenses(projectId?: string) {
 export function useDependencyStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; dev: number; production: number; outdated: number; vulnerabilities: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -135,7 +135,7 @@ export function useDependencyStats(projectId?: string) {
       const { count: vulnerabilities } = await supabase.from('dependency_vulnerabilities').select('*', { count: 'exact', head: true }).in('dependency_id', data.map(d => d.id)).eq('status', 'open')
       setStats({ total, dev, production, outdated, vulnerabilities: vulnerabilities || 0 })
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

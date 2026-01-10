@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useMeeting(meetingId?: string) {
   const [meeting, setMeeting] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('meetings').select('*').eq('id', meetingId).single()
       setMeeting(data)
     } finally { setIsLoading(false) }
-  }, [meetingId, supabase])
+  }, [meetingId])
   useEffect(() => { fetch() }, [fetch])
   return { meeting, isLoading, refresh: fetch }
 }
@@ -27,15 +27,15 @@ export function useMeeting(meetingId?: string) {
 export function useMeetingByCode(meetingCode?: string) {
   const [meeting, setMeeting] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!meetingCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('meetings').select('*').eq('meeting_code', meetingCode).single()
       setMeeting(data)
     } finally { setIsLoading(false) }
-  }, [meetingCode, supabase])
+  }, [meetingCode])
   useEffect(() => { fetch() }, [fetch])
   return { meeting, isLoading, refresh: fetch }
 }
@@ -43,8 +43,8 @@ export function useMeetingByCode(meetingCode?: string) {
 export function useMeetings(options?: { hostId?: string; status?: string; type?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('meetings').select('*')
@@ -62,8 +62,8 @@ export function useMeetings(options?: { hostId?: string; status?: string; type?:
 export function useMeetingParticipants(meetingId?: string, options?: { status?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,8 +80,8 @@ export function useMeetingParticipants(meetingId?: string, options?: { status?: 
 export function useMeetingChatMessages(meetingId?: string, options?: { limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -96,15 +96,15 @@ export function useMeetingChatMessages(meetingId?: string, options?: { limit?: n
 export function useMeetingPolls(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('meeting_polls').select('*').eq('meeting_id', meetingId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [meetingId, supabase])
+  }, [meetingId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -112,15 +112,15 @@ export function useMeetingPolls(meetingId?: string) {
 export function useMeetingRecordings(meetingId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('meeting_recordings').select('*').eq('meeting_id', meetingId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [meetingId, supabase])
+  }, [meetingId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -128,15 +128,15 @@ export function useMeetingRecordings(meetingId?: string) {
 export function useMeetingAnalytics(meetingId?: string) {
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!meetingId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('meeting_analytics').select('*').eq('meeting_id', meetingId).single()
       setAnalytics(data)
     } finally { setIsLoading(false) }
-  }, [meetingId, supabase])
+  }, [meetingId])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -144,8 +144,8 @@ export function useMeetingAnalytics(meetingId?: string) {
 export function useMeetingStats(hostId?: string, options?: { startDate?: string; endDate?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!hostId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -178,15 +178,15 @@ export function useMeetingRealtime(meetingId?: string) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'meeting_chat_messages', filter: `meeting_id=eq.${meetingId}` }, (payload) => setMessages(prev => [...prev, payload.new]))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [meetingId, supabase])
+  }, [meetingId])
   return { meeting, participants, messages }
 }
 
 export function useUpcomingMeetings(hostId?: string, limit?: number) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!hostId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

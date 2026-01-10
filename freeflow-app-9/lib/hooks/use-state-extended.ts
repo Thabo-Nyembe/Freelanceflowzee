@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useEntityState(entityId?: string, entityType?: string) {
   const [state, setState] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useEntityState(entityId?: string, entityType?: string) {
 export function useStateValue(entityId?: string, entityType?: string, key?: string) {
   const [value, setValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !key) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -42,15 +42,15 @@ export function useStateValue(entityId?: string, entityType?: string, key?: stri
 export function useStatesByType(entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('states').select('*').eq('entity_type', entityType).order('updated_at', { ascending: false }).limit(50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, supabase])
+  }, [entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

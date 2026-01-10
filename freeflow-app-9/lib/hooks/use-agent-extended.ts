@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useAgentConfiguration(configId?: string) {
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!configId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('agent_configurations').select('*').eq('id', configId).single()
       setConfig(data)
     } finally { setIsLoading(false) }
-  }, [configId, supabase])
+  }, [configId])
   useEffect(() => { fetch() }, [fetch])
   return { config, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useAgentConfiguration(configId?: string) {
 export function useAgentConfigurations(options?: { agentType?: string; isActive?: boolean; userId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('agent_configurations').select('*')
@@ -46,15 +46,15 @@ export function useAgentConfigurations(options?: { agentType?: string; isActive?
 export function useAgentExecution(executionId?: string) {
   const [execution, setExecution] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('agent_executions').select('*, agent_configurations(name, agent_type)').eq('id', executionId).single()
       setExecution(data)
     } finally { setIsLoading(false) }
-  }, [executionId, supabase])
+  }, [executionId])
   useEffect(() => { fetch() }, [fetch])
   return { execution, isLoading, refresh: fetch }
 }
@@ -62,8 +62,8 @@ export function useAgentExecution(executionId?: string) {
 export function useAgentExecutions(options?: { agentConfigId?: string; status?: string; userId?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('agent_executions').select('*, agent_configurations(name, agent_type)')
@@ -81,8 +81,8 @@ export function useAgentExecutions(options?: { agentConfigId?: string; status?: 
 export function useAgentLogs(executionId?: string, options?: { level?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!executionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -99,8 +99,8 @@ export function useAgentLogs(executionId?: string, options?: { level?: string; l
 export function useAgentMetrics(agentConfigId?: string, options?: { startDate?: string; endDate?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!agentConfigId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,8 +118,8 @@ export function useAgentMetrics(agentConfigId?: string, options?: { startDate?: 
 export function useAgentStats(agentConfigId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!agentConfigId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -130,7 +130,7 @@ export function useAgentStats(agentConfigId?: string) {
       const pending = executions?.filter(e => e.status === 'pending' || e.status === 'running').length || 0
       setStats({ total, completed, failed, pending, successRate: total > 0 ? (completed / total * 100).toFixed(1) : '0' })
     } finally { setIsLoading(false) }
-  }, [agentConfigId, supabase])
+  }, [agentConfigId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -148,6 +148,6 @@ export function useAgentExecutionRealtime(executionId?: string) {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'agent_logs', filter: `agent_execution_id=eq.${executionId}` }, (payload) => setLogs(prev => [...prev, payload.new]))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [executionId, supabase])
+  }, [executionId])
   return { execution, logs }
 }

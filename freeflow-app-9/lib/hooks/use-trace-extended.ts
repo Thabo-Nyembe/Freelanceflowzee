@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrace(traceId?: string) {
   const [trace, setTrace] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!traceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('traces').select('*').eq('id', traceId).single()
       setTrace(data)
     } finally { setIsLoading(false) }
-  }, [traceId, supabase])
+  }, [traceId])
   useEffect(() => { fetch() }, [fetch])
   return { trace, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useTrace(traceId?: string) {
 export function useTraces(options?: { serviceName?: string; operationName?: string; status?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('traces').select('*')
@@ -45,15 +45,15 @@ export function useTraces(options?: { serviceName?: string; operationName?: stri
 export function useTraceSpans(traceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!traceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('trace_spans').select('*').eq('trace_id', traceId).order('started_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [traceId, supabase])
+  }, [traceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -61,8 +61,8 @@ export function useTraceSpans(traceId?: string) {
 export function useTraceTree(traceId?: string) {
   const [data, setData] = useState<{ trace: any; spans: any[] }>({ trace: null, spans: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!traceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -70,7 +70,7 @@ export function useTraceTree(traceId?: string) {
       const { data: spans } = await supabase.from('trace_spans').select('*').eq('trace_id', trace?.id).order('started_at', { ascending: true })
       setData({ trace, spans: spans || [] })
     } finally { setIsLoading(false) }
-  }, [traceId, supabase])
+  }, [traceId])
   useEffect(() => { fetch() }, [fetch])
   return { ...data, isLoading, refresh: fetch }
 }

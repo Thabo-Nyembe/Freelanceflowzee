@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useListener(listenerId?: string) {
   const [listener, setListener] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!listenerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('listeners').select('*').eq('id', listenerId).single()
       setListener(data)
     } finally { setIsLoading(false) }
-  }, [listenerId, supabase])
+  }, [listenerId])
   useEffect(() => { fetch() }, [fetch])
   return { listener, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useListener(listenerId?: string) {
 export function useUserListeners(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,15 +44,15 @@ export function useUserListeners(userId?: string, options?: { isActive?: boolean
 export function useListenersForChannel(channel?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!channel) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('listeners').select('*').eq('channel', channel).eq('is_active', true).order('priority', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [channel, supabase])
+  }, [channel])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -60,8 +60,8 @@ export function useListenersForChannel(channel?: string) {
 export function useListenerEvents(listenerId?: string, limit = 50) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!listenerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -78,8 +78,8 @@ export function useListenerStats(listenerId?: string) {
   const [lastEventAt, setLastEventAt] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!listenerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -90,7 +90,7 @@ export function useListenerStats(listenerId?: string) {
         setIsActive(data.is_active)
       }
     } finally { setIsLoading(false) }
-  }, [listenerId, supabase])
+  }, [listenerId])
   useEffect(() => { fetch() }, [fetch])
   return { eventsReceived, lastEventAt, isActive, isLoading, refresh: fetch }
 }

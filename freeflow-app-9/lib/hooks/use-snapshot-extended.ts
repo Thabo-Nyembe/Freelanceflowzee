@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useSnapshots(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,15 +26,15 @@ export function useSnapshots(entityId?: string, entityType?: string) {
 export function useSnapshotById(snapshotId?: string) {
   const [snapshot, setSnapshot] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!snapshotId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('snapshots').select('*').eq('id', snapshotId).single()
       setSnapshot(data)
     } finally { setIsLoading(false) }
-  }, [snapshotId, supabase])
+  }, [snapshotId])
   useEffect(() => { fetch() }, [fetch])
   return { snapshot, isLoading, refresh: fetch }
 }
@@ -42,8 +42,8 @@ export function useSnapshotById(snapshotId?: string) {
 export function useSnapshotCount(entityId?: string, entityType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

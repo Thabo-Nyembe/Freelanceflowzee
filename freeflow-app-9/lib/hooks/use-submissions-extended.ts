@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSubmission(submissionId?: string) {
   const [submission, setSubmission] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!submissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('submissions').select('*, submission_files(*), submission_reviews(*), submission_versions(*), users(*)').eq('id', submissionId).single(); setSubmission(data) } finally { setIsLoading(false) }
-  }, [submissionId, supabase])
+  }, [submissionId])
   useEffect(() => { fetch() }, [fetch])
   return { submission, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSubmission(submissionId?: string) {
 export function useSubmissions(options?: { assignment_id?: string; submitter_id?: string; status?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [submissions, setSubmissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('submissions').select('*, submission_files(count), submission_reviews(count), users(*)')
@@ -46,12 +46,12 @@ export function useSubmissions(options?: { assignment_id?: string; submitter_id?
 export function useSubmissionFiles(submissionId?: string) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!submissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('submission_files').select('*').eq('submission_id', submissionId).order('uploaded_at', { ascending: false }); setFiles(data || []) } finally { setIsLoading(false) }
-  }, [submissionId, supabase])
+  }, [submissionId])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }
@@ -59,12 +59,12 @@ export function useSubmissionFiles(submissionId?: string) {
 export function useSubmissionReviews(submissionId?: string) {
   const [reviews, setReviews] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!submissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('submission_reviews').select('*, users(*), submission_scores(*)').eq('submission_id', submissionId).order('reviewed_at', { ascending: false }); setReviews(data || []) } finally { setIsLoading(false) }
-  }, [submissionId, supabase])
+  }, [submissionId])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -72,8 +72,8 @@ export function useSubmissionReviews(submissionId?: string) {
 export function useSubmissionFeedback(submissionId?: string, options?: { include_private?: boolean }) {
   const [feedback, setFeedback] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!submissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -90,12 +90,12 @@ export function useSubmissionFeedback(submissionId?: string, options?: { include
 export function useSubmissionVersions(submissionId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!submissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('submission_versions').select('*').eq('submission_id', submissionId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [submissionId, supabase])
+  }, [submissionId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -104,8 +104,8 @@ export function useSubmissionScores(submissionId?: string) {
   const [scores, setScores] = useState<any[]>([])
   const [summary, setSummary] = useState<{ totalScore: number; maxScore: number; percentage: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!submissionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -116,7 +116,7 @@ export function useSubmissionScores(submissionId?: string) {
       const maxScore = scoreList.reduce((sum, s) => sum + (s.max_score || 0), 0)
       setSummary({ totalScore, maxScore, percentage: maxScore > 0 ? (totalScore / maxScore) * 100 : 0 })
     } finally { setIsLoading(false) }
-  }, [submissionId, supabase])
+  }, [submissionId])
   useEffect(() => { fetch() }, [fetch])
   return { scores, summary, isLoading, refresh: fetch }
 }
@@ -124,8 +124,8 @@ export function useSubmissionScores(submissionId?: string) {
 export function useMySubmissions(userId?: string, options?: { status?: string; limit?: number }) {
   const [submissions, setSubmissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -142,8 +142,8 @@ export function useMySubmissions(userId?: string, options?: { status?: string; l
 export function usePendingReviews(reviewerId?: string, options?: { limit?: number }) {
   const [submissions, setSubmissions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!reviewerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -159,8 +159,8 @@ export function usePendingReviews(reviewerId?: string, options?: { limit?: numbe
 export function useSubmissionStats(options?: { assignment_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; pending: number; approved: number; rejected: number; revisionRequested: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('submissions').select('status')

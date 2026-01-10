@@ -11,8 +11,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useSetting(key?: string, scope?: { type: string; id: string }) {
   const [setting, setSetting] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!key) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -31,8 +31,8 @@ export function useSetting(key?: string, scope?: { type: string; id: string }) {
 export function useSettings(options?: { category_id?: string; is_public?: boolean; search?: string; keys?: string[] }) {
   const [settings, setSettings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('settings').select('*, setting_categories(*)')
@@ -51,8 +51,8 @@ export function useSettings(options?: { category_id?: string; is_public?: boolea
 export function useSettingsMap(keys: string[], scope?: { type: string; id: string }) {
   const [settingsMap, setSettingsMap] = useState<{ [key: string]: any }>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (keys.length === 0) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -73,8 +73,8 @@ export function useSettingsMap(keys: string[], scope?: { type: string; id: strin
 export function useSettingCategories(options?: { parent_id?: string | null; is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('setting_categories').select('*, settings(count)')
@@ -94,8 +94,8 @@ export function useSettingCategories(options?: { parent_id?: string | null; is_a
 export function useSettingHistory(settingKey?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!settingKey) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -115,8 +115,8 @@ export function useSettingHistory(settingKey?: string, options?: { from_date?: s
 export function useSettingPresets(options?: { category?: string; is_active?: boolean }) {
   const [presets, setPresets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('setting_presets').select('*')
@@ -133,8 +133,8 @@ export function useSettingPresets(options?: { category?: string; is_active?: boo
 export function useSettingOverrides(scope?: { type: string; id: string }) {
   const [overrides, setOverrides] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!scope) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -149,14 +149,14 @@ export function useSettingOverrides(scope?: { type: string; id: string }) {
 export function usePublicSettings() {
   const [settings, setSettings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('settings').select('key, value, label, description').eq('is_public', true).order('key', { ascending: true })
       setSettings(data || [])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -164,8 +164,8 @@ export function usePublicSettings() {
 export function useSettingStats() {
   const [stats, setStats] = useState<{ total: number; categories: number; presets: number; overrides: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const [total, categories, presets, overrides] = await Promise.all([
@@ -176,7 +176,7 @@ export function useSettingStats() {
       ])
       setStats({ total: total.count || 0, categories: categories.count || 0, presets: presets.count || 0, overrides: overrides.count || 0 })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

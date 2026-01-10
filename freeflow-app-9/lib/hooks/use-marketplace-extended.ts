@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useMarketplaceApps(category?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('marketplace_apps').select('*').eq('is_published', true).order('name', { ascending: true })
@@ -19,7 +19,7 @@ export function useMarketplaceApps(category?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [category, supabase])
+  }, [category])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,11 +27,11 @@ export function useMarketplaceApps(category?: string) {
 export function useMarketplaceCategories() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('marketplace_categories').select('*').order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,12 +39,12 @@ export function useMarketplaceCategories() {
 export function useMarketplaceInstallations(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('marketplace_installations').select('*').eq('user_id', userId).order('installed_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

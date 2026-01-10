@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useAccessLogs(userId?: string, resourceType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('access_logs').select('*').order('created_at', { ascending: false }).limit(100)
@@ -28,8 +28,8 @@ export function useAccessLogs(userId?: string, resourceType?: string) {
 export function useAccessTokens(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('access_tokens').select('*').order('created_at', { ascending: false })
@@ -37,7 +37,7 @@ export function useAccessTokens(userId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

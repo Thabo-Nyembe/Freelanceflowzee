@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useRefunds(status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('refunds').select('*').order('created_at', { ascending: false })
@@ -19,7 +19,7 @@ export function useRefunds(status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [status, supabase])
+  }, [status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useRefunds(status?: string) {
 export function useRefundRequests(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('refund_requests').select('*').order('created_at', { ascending: false })

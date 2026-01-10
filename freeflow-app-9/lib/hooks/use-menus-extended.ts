@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useMenu(menuId?: string) {
   const [menu, setMenu] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!menuId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('menus').select('*, menu_items(*), menu_categories(*)').eq('id', menuId).single(); setMenu(data) } finally { setIsLoading(false) }
-  }, [menuId, supabase])
+  }, [menuId])
   useEffect(() => { fetch() }, [fetch])
   return { menu, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useMenu(menuId?: string) {
 export function useMenus(organizationId?: string, options?: { type?: string; is_active?: boolean }) {
   const [menus, setMenus] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!organizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,8 +43,8 @@ export function useMenus(organizationId?: string, options?: { type?: string; is_
 export function useMenuItems(menuId?: string, options?: { category_id?: string; is_available?: boolean }) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!menuId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,12 +62,12 @@ export function useMenuItems(menuId?: string, options?: { category_id?: string; 
 export function useMenuItem(itemId?: string) {
   const [item, setItem] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('menu_items').select('*, menu_categories(*), menu_modifiers(*), menu_prices(*), menu_availability(*)').eq('id', itemId).single(); setItem(data) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { item, isLoading, refresh: fetch }
 }
@@ -75,12 +75,12 @@ export function useMenuItem(itemId?: string) {
 export function useMenuCategories(menuId?: string) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!menuId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('menu_categories').select('*').eq('menu_id', menuId).order('sort_order', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
-  }, [menuId, supabase])
+  }, [menuId])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -88,12 +88,12 @@ export function useMenuCategories(menuId?: string) {
 export function useItemModifiers(itemId?: string) {
   const [modifiers, setModifiers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('menu_modifiers').select('*').eq('item_id', itemId); setModifiers(data || []) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { modifiers, isLoading, refresh: fetch }
 }
@@ -101,12 +101,12 @@ export function useItemModifiers(itemId?: string) {
 export function useItemPrices(itemId?: string) {
   const [prices, setPrices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('menu_prices').select('*').eq('item_id', itemId); setPrices(data || []) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { prices, isLoading, refresh: fetch }
 }
@@ -114,12 +114,12 @@ export function useItemPrices(itemId?: string) {
 export function useItemAvailability(itemId?: string) {
   const [availability, setAvailability] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('menu_availability').select('*').eq('item_id', itemId).single(); setAvailability(data) } finally { setIsLoading(false) }
-  }, [itemId, supabase])
+  }, [itemId])
   useEffect(() => { fetch() }, [fetch])
   return { availability, isLoading, refresh: fetch }
 }
@@ -129,8 +129,8 @@ export function useMenuWithItems(menuId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!menuId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -143,7 +143,7 @@ export function useMenuWithItems(menuId?: string) {
       setItems(itemsRes.data || [])
       setCategories(categoriesRes.data || [])
     } finally { setIsLoading(false) }
-  }, [menuId, supabase])
+  }, [menuId])
   useEffect(() => { fetch() }, [fetch])
   return { menu, items, categories, isLoading, refresh: fetch }
 }
@@ -151,12 +151,12 @@ export function useMenuWithItems(menuId?: string) {
 export function useAvailableItems(menuId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!menuId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('menu_items').select('*, menu_categories(*), menu_modifiers(*)').eq('menu_id', menuId).eq('is_available', true).order('sort_order', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [menuId, supabase])
+  }, [menuId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useBoard(boardId?: string) {
   const [board, setBoard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('boards').select('*, board_columns(*, board_cards(*))').eq('id', boardId).single(); setBoard(data) } finally { setIsLoading(false) }
-  }, [boardId, supabase])
+  }, [boardId])
   useEffect(() => { fetch() }, [fetch])
   return { board, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useBoard(boardId?: string) {
 export function useBoards(options?: { user_id?: string; type?: string; is_archived?: boolean; limit?: number }) {
   const [boards, setBoards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('boards').select('*')
@@ -43,12 +43,12 @@ export function useBoards(options?: { user_id?: string; type?: string; is_archiv
 export function useBoardColumns(boardId?: string) {
   const [columns, setColumns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_columns').select('*, board_cards(*)').eq('board_id', boardId).order('position', { ascending: true }); setColumns(data || []) } finally { setIsLoading(false) }
-  }, [boardId, supabase])
+  }, [boardId])
   useEffect(() => { fetch() }, [fetch])
   return { columns, isLoading, refresh: fetch }
 }
@@ -56,12 +56,12 @@ export function useBoardColumns(boardId?: string) {
 export function useBoardCards(columnId?: string) {
   const [cards, setCards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!columnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_cards').select('*').eq('column_id', columnId).order('position', { ascending: true }); setCards(data || []) } finally { setIsLoading(false) }
-  }, [columnId, supabase])
+  }, [columnId])
   useEffect(() => { fetch() }, [fetch])
   return { cards, isLoading, refresh: fetch }
 }
@@ -69,12 +69,12 @@ export function useBoardCards(columnId?: string) {
 export function useBoardMembers(boardId?: string) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!boardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_members').select('*').eq('board_id', boardId).order('joined_at', { ascending: true }); setMembers(data || []) } finally { setIsLoading(false) }
-  }, [boardId, supabase])
+  }, [boardId])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -94,15 +94,15 @@ export function useBoardRealtime(boardId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [boardId, supabase])
+  }, [boardId])
   return { board }
 }
 
 export function useMyAssignedCards(userId?: string, options?: { limit?: number }) {
   const [cards, setCards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_cards').select('*, boards(name)').eq('assignee_id', userId).eq('is_completed', false).order('due_date', { ascending: true }).limit(options?.limit || 50); setCards(data || []) } finally { setIsLoading(false) }

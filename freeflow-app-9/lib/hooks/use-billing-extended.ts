@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useBillingInfo(userId?: string) {
   const [billing, setBilling] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('billing').select('*').eq('user_id', userId).single()
       setBilling(data)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { billing, isLoading, refresh: fetch }
 }
@@ -27,15 +27,15 @@ export function useBillingInfo(userId?: string) {
 export function useBillingAddress(addressId?: string) {
   const [address, setAddress] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!addressId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('billing_addresses').select('*').eq('id', addressId).single()
       setAddress(data)
     } finally { setIsLoading(false) }
-  }, [addressId, supabase])
+  }, [addressId])
   useEffect(() => { fetch() }, [fetch])
   return { address, isLoading, refresh: fetch }
 }
@@ -43,15 +43,15 @@ export function useBillingAddress(addressId?: string) {
 export function useBillingAddresses(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('billing_addresses').select('*').eq('user_id', userId).order('is_default', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useBillingAddresses(userId?: string) {
 export function useBillingCreditsBalance(userId?: string) {
   const [balance, setBalance] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -68,7 +68,7 @@ export function useBillingCreditsBalance(userId?: string) {
       const total = data?.reduce((sum, c) => sum + (c.remaining_amount || 0), 0) || 0
       setBalance(total)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { balance, isLoading, refresh: fetch }
 }
@@ -76,8 +76,8 @@ export function useBillingCreditsBalance(userId?: string) {
 export function useBillingCredits(userId?: string, options?: { includeExpired?: boolean; includeUsed?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -95,8 +95,8 @@ export function useBillingCredits(userId?: string, options?: { includeExpired?: 
 export function useBillingStats(userId?: string, limit?: number) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -111,8 +111,8 @@ export function useBillingStats(userId?: string, limit?: number) {
 export function useBillingSummary(userId?: string) {
   const [summary, setSummary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -128,7 +128,7 @@ export function useBillingSummary(userId?: string) {
         latestStats: statsRes.data
       })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -136,15 +136,15 @@ export function useBillingSummary(userId?: string) {
 export function useDefaultBillingAddress(userId?: string) {
   const [address, setAddress] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('billing_addresses').select('*').eq('user_id', userId).eq('is_default', true).single()
       setAddress(data)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { address, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useOrder(orderId?: string) {
   const [order, setOrder] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('orders').select('*, order_items(*, products(*)), order_status_history(*), order_payments(*), order_shipments(*)').eq('id', orderId).single(); setOrder(data) } finally { setIsLoading(false) }
-  }, [orderId, supabase])
+  }, [orderId])
   useEffect(() => { fetch() }, [fetch])
   return { order, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useOrder(orderId?: string) {
 export function useOrders(options?: { customer_id?: string; organization_id?: string; status?: string; payment_status?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('orders').select('*, order_items(count)')
@@ -46,12 +46,12 @@ export function useOrders(options?: { customer_id?: string; organization_id?: st
 export function useOrderItems(orderId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('order_items').select('*, products(*)').eq('order_id', orderId).order('created_at', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [orderId, supabase])
+  }, [orderId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -59,12 +59,12 @@ export function useOrderItems(orderId?: string) {
 export function useOrderStatusHistory(orderId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('order_status_history').select('*').eq('order_id', orderId).order('changed_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [orderId, supabase])
+  }, [orderId])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -72,12 +72,12 @@ export function useOrderStatusHistory(orderId?: string) {
 export function useOrderPayments(orderId?: string) {
   const [payments, setPayments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('order_payments').select('*').eq('order_id', orderId).order('created_at', { ascending: false }); setPayments(data || []) } finally { setIsLoading(false) }
-  }, [orderId, supabase])
+  }, [orderId])
   useEffect(() => { fetch() }, [fetch])
   return { payments, isLoading, refresh: fetch }
 }
@@ -85,12 +85,12 @@ export function useOrderPayments(orderId?: string) {
 export function useOrderShipments(orderId?: string) {
   const [shipments, setShipments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('order_shipments').select('*').eq('order_id', orderId).order('created_at', { ascending: false }); setShipments(data || []) } finally { setIsLoading(false) }
-  }, [orderId, supabase])
+  }, [orderId])
   useEffect(() => { fetch() }, [fetch])
   return { shipments, isLoading, refresh: fetch }
 }
@@ -98,8 +98,8 @@ export function useOrderShipments(orderId?: string) {
 export function useOrderNotes(orderId?: string, options?: { is_internal?: boolean }) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -116,12 +116,12 @@ export function useOrderNotes(orderId?: string, options?: { is_internal?: boolea
 export function useOrderDiscounts(orderId?: string) {
   const [discounts, setDiscounts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!orderId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('order_discounts').select('*').eq('order_id', orderId); setDiscounts(data || []) } finally { setIsLoading(false) }
-  }, [orderId, supabase])
+  }, [orderId])
   useEffect(() => { fetch() }, [fetch])
   return { discounts, isLoading, refresh: fetch }
 }
@@ -129,8 +129,8 @@ export function useOrderDiscounts(orderId?: string) {
 export function useCustomerOrders(customerId?: string, options?: { limit?: number }) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('orders').select('*, order_items(count)').eq('customer_id', customerId).order('created_at', { ascending: false }).limit(options?.limit || 20); setOrders(data || []) } finally { setIsLoading(false) }
@@ -142,8 +142,8 @@ export function useCustomerOrders(customerId?: string, options?: { limit?: numbe
 export function useRecentOrders(organizationId?: string, options?: { limit?: number }) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('orders').select('*, order_items(count)')
@@ -159,8 +159,8 @@ export function useRecentOrders(organizationId?: string, options?: { limit?: num
 export function usePendingOrders(organizationId?: string) {
   const [orders, setOrders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('orders').select('*, order_items(*)').in('status', ['pending', 'processing', 'confirmed'])
@@ -168,7 +168,7 @@ export function usePendingOrders(organizationId?: string) {
       const { data } = await query.order('created_at', { ascending: true })
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -176,8 +176,8 @@ export function usePendingOrders(organizationId?: string) {
 export function useOrderStats(organizationId?: string, options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ totalOrders: number; totalRevenue: number; averageOrderValue: number; pendingCount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('orders').select('total, status')

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useReturn(returnId?: string) {
   const [returnRecord, setReturnRecord] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!returnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('returns').select('*, return_items(*), return_reasons(*), return_labels(*), return_inspections(*), orders(*), users(*)').eq('id', returnId).single(); setReturnRecord(data) } finally { setIsLoading(false) }
-  }, [returnId, supabase])
+  }, [returnId])
   useEffect(() => { fetch() }, [fetch])
   return { return: returnRecord, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useReturn(returnId?: string) {
 export function useReturns(options?: { customer_id?: string; order_id?: string; status?: string; from_date?: string; to_date?: string; search?: string; limit?: number }) {
   const [returns, setReturns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('returns').select('*, return_items(count), return_reasons(*), orders(*), users(*)')
@@ -46,12 +46,12 @@ export function useReturns(options?: { customer_id?: string; order_id?: string; 
 export function useReturnItems(returnId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!returnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('return_items').select('*, order_items(*)').eq('return_id', returnId); setItems(data || []) } finally { setIsLoading(false) }
-  }, [returnId, supabase])
+  }, [returnId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useReturnItems(returnId?: string) {
 export function useReturnReasons(options?: { category?: string; is_active?: boolean }) {
   const [reasons, setReasons] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('return_reasons').select('*')
@@ -77,8 +77,8 @@ export function useReturnReasons(options?: { category?: string; is_active?: bool
 export function useReturnPolicies(options?: { category?: string; is_active?: boolean }) {
   const [policies, setPolicies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('return_policies').select('*')
@@ -95,8 +95,8 @@ export function useReturnPolicies(options?: { category?: string; is_active?: boo
 export function useMyReturns(customerId?: string, options?: { status?: string; limit?: number }) {
   const [returns, setReturns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -113,14 +113,14 @@ export function useMyReturns(customerId?: string, options?: { status?: string; l
 export function usePendingReturns(options?: { limit?: number }) {
   const [returns, setReturns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('returns').select('*, return_items(count), users(*), orders(*)').eq('status', 'requested').order('created_at', { ascending: true }).limit(options?.limit || 50)
       setReturns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { returns, isLoading, refresh: fetch }
 }
@@ -128,12 +128,12 @@ export function usePendingReturns(options?: { limit?: number }) {
 export function useReturnInspections(returnId?: string) {
   const [inspections, setInspections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!returnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('return_inspections').select('*, users(*)').eq('return_id', returnId).order('inspected_at', { ascending: false }); setInspections(data || []) } finally { setIsLoading(false) }
-  }, [returnId, supabase])
+  }, [returnId])
   useEffect(() => { fetch() }, [fetch])
   return { inspections, isLoading, refresh: fetch }
 }
@@ -141,12 +141,12 @@ export function useReturnInspections(returnId?: string) {
 export function useReturnLabels(returnId?: string) {
   const [labels, setLabels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!returnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('return_labels').select('*').eq('return_id', returnId).order('generated_at', { ascending: false }); setLabels(data || []) } finally { setIsLoading(false) }
-  }, [returnId, supabase])
+  }, [returnId])
   useEffect(() => { fetch() }, [fetch])
   return { labels, isLoading, refresh: fetch }
 }
@@ -154,8 +154,8 @@ export function useReturnLabels(returnId?: string) {
 export function useReturnStats(options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; requested: number; approved: number; shipped: number; received: number; refunded: number; rejected: number; totalRefunded: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('returns').select('status, refund_amount')

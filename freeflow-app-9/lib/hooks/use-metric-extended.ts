@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useMetrics(entityId?: string, entityType?: string, metricName?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -28,8 +28,8 @@ export function useMetrics(entityId?: string, entityType?: string, metricName?: 
 export function useLatestMetric(entityId?: string, entityType?: string, metricName?: string) {
   const [metric, setMetric] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !metricName) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useLatestMetric(entityId?: string, entityType?: string, metricNa
 export function useMetricTimeSeries(entityId?: string, entityType?: string, metricName?: string, since?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !metricName || !since) { setIsLoading(false); return }
     setIsLoading(true)
     try {

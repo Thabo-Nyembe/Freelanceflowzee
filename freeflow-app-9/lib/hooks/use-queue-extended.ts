@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useQueueItems(queueName?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueName) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -28,8 +28,8 @@ export function useQueueItems(queueName?: string, status?: string) {
 export function useQueueStats(queueName?: string) {
   const [stats, setStats] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!queueName) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -38,7 +38,7 @@ export function useQueueStats(queueName?: string) {
       data?.forEach(item => { counts[item.status] = (counts[item.status] || 0) + 1 })
       setStats(counts)
     } finally { setIsLoading(false) }
-  }, [queueName, supabase])
+  }, [queueName])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -46,15 +46,15 @@ export function useQueueStats(queueName?: string) {
 export function useQueueNames() {
   const [names, setNames] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('queue_items').select('queue_name')
       const unique = [...new Set(data?.map(q => q.queue_name) || [])]
       setNames(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { names, isLoading, refresh: fetch }
 }

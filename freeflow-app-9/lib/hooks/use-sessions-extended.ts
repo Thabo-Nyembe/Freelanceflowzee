@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSession(sessionId?: string) {
   const [session, setSession] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('sessions').select('*, session_tokens(*), session_devices(*), session_activities(*), users(*)').eq('id', sessionId).single(); setSession(data) } finally { setIsLoading(false) }
-  }, [sessionId, supabase])
+  }, [sessionId])
   useEffect(() => { fetch() }, [fetch])
   return { session, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSession(sessionId?: string) {
 export function useSessions(options?: { user_id?: string; status?: string; device_id?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('sessions').select('*, session_devices(*), users(*)')
@@ -45,15 +45,15 @@ export function useSessions(options?: { user_id?: string; status?: string; devic
 export function useUserActiveSessions(userId?: string) {
   const [sessions, setSessions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('sessions').select('*, session_devices(*)').eq('user_id', userId).eq('status', 'active').gt('expires_at', new Date().toISOString()).order('last_activity_at', { ascending: false })
       setSessions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }
@@ -61,8 +61,8 @@ export function useUserActiveSessions(userId?: string) {
 export function useSessionActivities(sessionId?: string, options?: { action?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!sessionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -81,8 +81,8 @@ export function useSessionActivities(sessionId?: string, options?: { action?: st
 export function useUserDevices(userId?: string, options?: { is_trusted?: boolean }) {
   const [devices, setDevices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -112,15 +112,15 @@ export function useCurrentSession() {
       } finally { setIsLoading(false) }
     }
     fetchSession()
-  }, [supabase])
+  }, [])
   return { session, isLoading }
 }
 
 export function useSessionStats(options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; active: number; ended: number; expired: number; uniqueUsers: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let baseQuery = supabase.from('sessions').select('status, user_id')
@@ -143,8 +143,8 @@ export function useSessionStats(options?: { from_date?: string; to_date?: string
 export function useRecentActivities(userId?: string, options?: { limit?: number }) {
   const [activities, setActivities] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

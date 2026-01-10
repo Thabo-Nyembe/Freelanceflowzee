@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useAnimation(animationId?: string) {
   const [animation, setAnimation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!animationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('animations').select('*, animation_keyframes(*)').eq('id', animationId).single(); setAnimation(data) } finally { setIsLoading(false) }
-  }, [animationId, supabase])
+  }, [animationId])
   useEffect(() => { fetch() }, [fetch])
   return { animation, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useAnimation(animationId?: string) {
 export function useAnimations(options?: { user_id?: string; type?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [animations, setAnimations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('animations').select('*')
@@ -44,8 +44,8 @@ export function useAnimations(options?: { user_id?: string; type?: string; is_pu
 export function useAnimationPresets(options?: { type?: string; limit?: number }) {
   const [presets, setPresets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('animation_presets').select('*')
@@ -61,8 +61,8 @@ export function useAnimationPresets(options?: { type?: string; limit?: number })
 export function usePublicAnimations(options?: { type?: string; limit?: number }) {
   const [animations, setAnimations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('animations').select('*').eq('is_public', true)
@@ -78,11 +78,11 @@ export function usePublicAnimations(options?: { type?: string; limit?: number })
 export function useAnimationTypes() {
   const [types, setTypes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('animations').select('type'); const unique = [...new Set((data || []).map(a => a.type).filter(Boolean))]; setTypes(unique) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }

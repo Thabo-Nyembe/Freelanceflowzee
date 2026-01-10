@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useDocumentation(docId?: string) {
   const [doc, setDoc] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('documentation').select('*').eq('id', docId).single(); setDoc(data) } finally { setIsLoading(false) }
-  }, [docId, supabase])
+  }, [docId])
   useEffect(() => { fetch() }, [fetch])
   return { doc, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useDocumentation(docId?: string) {
 export function useDocumentationList(options?: { category_id?: string; is_published?: boolean; search?: string; limit?: number }) {
   const [docs, setDocs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('documentation').select('*')
@@ -43,11 +43,11 @@ export function useDocumentationList(options?: { category_id?: string; is_publis
 export function useDocumentationCategories() {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('documentation_categories').select('*').order('name', { ascending: true }); setCategories(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -55,12 +55,12 @@ export function useDocumentationCategories() {
 export function useDocumentationVersions(docId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!docId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('documentation_versions').select('*').eq('documentation_id', docId).order('version', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [docId, supabase])
+  }, [docId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -68,8 +68,8 @@ export function useDocumentationVersions(docId?: string) {
 export function usePublishedDocumentation(options?: { category_id?: string; limit?: number }) {
   const [docs, setDocs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('documentation').select('*').eq('is_published', true)

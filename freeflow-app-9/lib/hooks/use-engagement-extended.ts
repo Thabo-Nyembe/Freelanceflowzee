@@ -11,8 +11,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useEngagementMetrics(entityId?: string, entityType?: string) {
   const [metrics, setMetrics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('engagement_metrics').select('*').eq('entity_id', entityId).eq('entity_type', entityType).single(); setMetrics(data) } finally { setIsLoading(false) }
@@ -24,8 +24,8 @@ export function useEngagementMetrics(entityId?: string, entityType?: string) {
 export function useEngagementCampaigns(options?: { status?: string; type?: string; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('engagement_campaigns').select('*')
@@ -42,8 +42,8 @@ export function useEngagementCampaigns(options?: { status?: string; type?: strin
 export function useEngagementEvents(options?: { user_id?: string; event_type?: string; entity_id?: string; limit?: number }) {
   const [events, setEvents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('engagement_events').select('*')
@@ -61,12 +61,12 @@ export function useEngagementEvents(options?: { user_id?: string; event_type?: s
 export function useUserEngagementScore(userId?: string) {
   const [score, setScore] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('engagement_scores').select('*').eq('user_id', userId).single(); setScore(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { score, isLoading, refresh: fetch }
 }
@@ -74,8 +74,8 @@ export function useUserEngagementScore(userId?: string) {
 export function useEngagementSurveys(options?: { status?: string; limit?: number }) {
   const [surveys, setSurveys] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('engagement_surveys').select('*')
@@ -91,8 +91,8 @@ export function useEngagementSurveys(options?: { status?: string; limit?: number
 export function useSurveyResponses(surveyId?: string, options?: { limit?: number }) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!surveyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('engagement_survey_responses').select('*').eq('survey_id', surveyId).order('submitted_at', { ascending: false }).limit(options?.limit || 100); setResponses(data || []) } finally { setIsLoading(false) }
@@ -104,8 +104,8 @@ export function useSurveyResponses(surveyId?: string, options?: { limit?: number
 export function useEngagementTrends(options?: { entity_type?: string; days?: number }) {
   const [trends, setTrends] = useState<{ date: string; views: number; clicks: number; shares: number }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const daysAgo = options?.days || 30
@@ -131,8 +131,8 @@ export function useEngagementTrends(options?: { entity_type?: string; days?: num
 export function useTopEngagedContent(options?: { entity_type?: string; metric?: string; limit?: number }) {
   const [content, setContent] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('engagement_metrics').select('*')
@@ -148,15 +148,15 @@ export function useTopEngagedContent(options?: { entity_type?: string; metric?: 
 export function useActiveCampaigns() {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
       const { data } = await supabase.from('engagement_campaigns').select('*').eq('status', 'active').lte('start_date', now).or(`end_date.is.null,end_date.gte.${now}`).order('start_date', { ascending: false })
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRelease(releaseId?: string) {
   const [release, setRelease] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!releaseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('releases').select('*, release_notes(*), release_assets(*)').eq('id', releaseId).single(); setRelease(data) } finally { setIsLoading(false) }
-  }, [releaseId, supabase])
+  }, [releaseId])
   useEffect(() => { fetch() }, [fetch])
   return { release, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRelease(releaseId?: string) {
 export function useReleases(options?: { project_id?: string; status?: string; is_prerelease?: boolean; limit?: number }) {
   const [releases, setReleases] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('releases').select('*')
@@ -43,12 +43,12 @@ export function useReleases(options?: { project_id?: string; status?: string; is
 export function useReleaseNotes(releaseId?: string) {
   const [notes, setNotes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!releaseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('release_notes').select('*').eq('release_id', releaseId).order('order', { ascending: true }); setNotes(data || []) } finally { setIsLoading(false) }
-  }, [releaseId, supabase])
+  }, [releaseId])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }
@@ -56,12 +56,12 @@ export function useReleaseNotes(releaseId?: string) {
 export function useReleaseAssets(releaseId?: string) {
   const [assets, setAssets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!releaseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('release_assets').select('*').eq('release_id', releaseId).order('name', { ascending: true }); setAssets(data || []) } finally { setIsLoading(false) }
-  }, [releaseId, supabase])
+  }, [releaseId])
   useEffect(() => { fetch() }, [fetch])
   return { assets, isLoading, refresh: fetch }
 }
@@ -69,12 +69,12 @@ export function useReleaseAssets(releaseId?: string) {
 export function useLatestRelease(projectId?: string) {
   const [release, setRelease] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('releases').select('*').eq('project_id', projectId).eq('status', 'published').order('published_at', { ascending: false }).limit(1).single(); setRelease(data) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { release, isLoading, refresh: fetch }
 }

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useAlerts(userId?: string, alertType?: string, isRead?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('alerts').select('*').order('created_at', { ascending: false })
@@ -29,15 +29,15 @@ export function useAlerts(userId?: string, alertType?: string, isRead?: boolean)
 export function useUnreadAlertCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { count: result } = await supabase.from('alerts').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('is_read', false)
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -45,8 +45,8 @@ export function useUnreadAlertCount(userId?: string) {
 export function useAlertRules(userId?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('alert_rules').select('*').order('name', { ascending: true })

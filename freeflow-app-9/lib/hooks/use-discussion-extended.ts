@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useDiscussions(categoryId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('discussions').select('*').order('last_activity_at', { ascending: false })
@@ -28,15 +28,15 @@ export function useDiscussions(categoryId?: string, status?: string) {
 export function useDiscussionPosts(discussionId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!discussionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('discussion_posts').select('*').eq('discussion_id', discussionId).order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [discussionId, supabase])
+  }, [discussionId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -44,8 +44,8 @@ export function useDiscussionPosts(discussionId?: string) {
 export function usePinnedDiscussions(categoryId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('discussions').select('*').eq('is_pinned', true).order('pinned_at', { ascending: false })
@@ -53,7 +53,7 @@ export function usePinnedDiscussions(categoryId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [categoryId, supabase])
+  }, [categoryId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

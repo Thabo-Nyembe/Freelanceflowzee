@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useAnnouncements(status?: string, targetAudience?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('announcements').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useAnnouncements(status?: string, targetAudience?: string) {
 export function useActiveAnnouncements(targetAudience?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
@@ -38,7 +38,7 @@ export function useActiveAnnouncements(targetAudience?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [targetAudience, supabase])
+  }, [targetAudience])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -46,15 +46,15 @@ export function useActiveAnnouncements(targetAudience?: string) {
 export function useAnnouncementReads(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('announcement_reads').select('announcement_id').eq('user_id', userId)
       setData(result?.map(r => r.announcement_id) || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

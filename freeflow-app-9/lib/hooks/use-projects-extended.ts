@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useProject(projectId?: string) {
   const [project, setProject] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('projects').select('*, project_members(*, users(*)), project_tasks(count), project_milestones(*), project_files(count), project_budgets(*)').eq('id', projectId).single(); setProject(data) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { project, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useProject(projectId?: string) {
 export function useProjects(options?: { owner_id?: string; organization_id?: string; client_id?: string; status?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('projects').select('*, project_members(count), project_tasks(count), project_milestones(count)')
@@ -46,12 +46,12 @@ export function useProjects(options?: { owner_id?: string; organization_id?: str
 export function useProjectMembers(projectId?: string) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_members').select('*, users(*)').eq('project_id', projectId).order('joined_at', { ascending: true }); setMembers(data || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -59,8 +59,8 @@ export function useProjectMembers(projectId?: string) {
 export function useProjectTasks(projectId?: string, options?: { status?: string; assignee_id?: string; milestone_id?: string; priority?: string }) {
   const [tasks, setTasks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,12 +80,12 @@ export function useProjectTasks(projectId?: string, options?: { status?: string;
 export function useProjectMilestones(projectId?: string) {
   const [milestones, setMilestones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_milestones').select('*, project_tasks(count)').eq('project_id', projectId).order('due_date', { ascending: true }); setMilestones(data || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }
@@ -93,8 +93,8 @@ export function useProjectMilestones(projectId?: string) {
 export function useProjectFiles(projectId?: string, options?: { folder_id?: string; type?: string }) {
   const [files, setFiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -112,8 +112,8 @@ export function useProjectFiles(projectId?: string, options?: { folder_id?: stri
 export function useProjectComments(projectId?: string, options?: { task_id?: string; limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -130,8 +130,8 @@ export function useProjectComments(projectId?: string, options?: { task_id?: str
 export function useMyProjects(userId?: string, options?: { status?: string; role?: string; limit?: number }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -150,12 +150,12 @@ export function useMyProjects(userId?: string, options?: { status?: string; role
 export function useProjectBudget(projectId?: string) {
   const [budget, setBudget] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_budgets').select('*').eq('project_id', projectId).single(); setBudget(data) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { budget, isLoading, refresh: fetch }
 }
@@ -163,12 +163,12 @@ export function useProjectBudget(projectId?: string) {
 export function useProjectTimeline(projectId?: string) {
   const [timeline, setTimeline] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('project_timelines').select('*, users(*)').eq('project_id', projectId).order('created_at', { ascending: false }); setTimeline(data || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { timeline, isLoading, refresh: fetch }
 }
@@ -176,8 +176,8 @@ export function useProjectTimeline(projectId?: string) {
 export function useProjectStats(projectId?: string) {
   const [stats, setStats] = useState<{ totalTasks: number; completedTasks: number; progress: number; overdueTasks: number; memberCount: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -192,7 +192,7 @@ export function useProjectStats(projectId?: string) {
       const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
       setStats({ totalTasks, completedTasks, progress, overdueTasks, memberCount: membersRes.count || 0 })
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -200,8 +200,8 @@ export function useProjectStats(projectId?: string) {
 export function useActiveProjects(options?: { organization_id?: string; limit?: number }) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('projects').select('*, project_tasks(count), project_members(count)').eq('is_active', true).in('status', ['planning', 'in_progress'])

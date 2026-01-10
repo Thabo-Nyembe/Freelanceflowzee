@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLocalizationString(stringId?: string) {
   const [string, setString] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!stringId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('localization_strings').select('*, localization_translations(*)').eq('id', stringId).single(); setString(data) } finally { setIsLoading(false) }
-  }, [stringId, supabase])
+  }, [stringId])
   useEffect(() => { fetch() }, [fetch])
   return { string, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLocalizationString(stringId?: string) {
 export function useLocalizationStrings(options?: { project_id?: string; context_id?: string; status?: string; limit?: number }) {
   const [strings, setStrings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('localization_strings').select('*, localization_translations(*)')
@@ -43,8 +43,8 @@ export function useLocalizationStrings(options?: { project_id?: string; context_
 export function useTranslationsForLocale(localeCode?: string, options?: { project_id?: string }) {
   const [translations, setTranslations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!localeCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -52,7 +52,7 @@ export function useTranslationsForLocale(localeCode?: string, options?: { projec
       const { data } = await query
       setTranslations(data || [])
     } finally { setIsLoading(false) }
-  }, [localeCode, supabase])
+  }, [localeCode])
   useEffect(() => { fetch() }, [fetch])
   return { translations, isLoading, refresh: fetch }
 }
@@ -60,11 +60,11 @@ export function useTranslationsForLocale(localeCode?: string, options?: { projec
 export function useLocales() {
   const [locales, setLocales] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('localization_locales').select('*').order('name', { ascending: true }); setLocales(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { locales, isLoading, refresh: fetch }
 }
@@ -72,11 +72,11 @@ export function useLocales() {
 export function useActiveLocales() {
   const [locales, setLocales] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('localization_locales').select('*').eq('is_active', true).order('name', { ascending: true }); setLocales(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { locales, isLoading, refresh: fetch }
 }
@@ -84,8 +84,8 @@ export function useActiveLocales() {
 export function useLocalizationProjects(organizationId?: string) {
   const [projects, setProjects] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('localization_projects').select('*')
@@ -93,7 +93,7 @@ export function useLocalizationProjects(organizationId?: string) {
       const { data } = await query.order('name', { ascending: true })
       setProjects(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, supabase])
+  }, [organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { projects, isLoading, refresh: fetch }
 }
@@ -101,12 +101,12 @@ export function useLocalizationProjects(organizationId?: string) {
 export function useLocalizationProject(projectId?: string) {
   const [project, setProject] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('localization_projects').select('*').eq('id', projectId).single(); setProject(data) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { project, isLoading, refresh: fetch }
 }
@@ -114,8 +114,8 @@ export function useLocalizationProject(projectId?: string) {
 export function useTranslationProgress(projectId?: string) {
   const [progress, setProgress] = useState<Record<string, { total: number; translated: number; approved: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -135,7 +135,7 @@ export function useTranslationProgress(projectId?: string) {
       })
       setProgress(progressData)
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -161,12 +161,12 @@ export function useLocalizationSearch(projectId?: string, query?: string) {
 export function useLocalizationContexts(projectId?: string) {
   const [contexts, setContexts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('localization_contexts').select('*').eq('project_id', projectId).order('name', { ascending: true }); setContexts(data || []) } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { contexts, isLoading, refresh: fetch }
 }

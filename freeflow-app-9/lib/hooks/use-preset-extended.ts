@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function usePreset(presetId?: string) {
   const [preset, setPreset] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!presetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('presets').select('*').eq('id', presetId).single()
       setPreset(data)
     } finally { setIsLoading(false) }
-  }, [presetId, supabase])
+  }, [presetId])
   useEffect(() => { fetch() }, [fetch])
   return { preset, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function usePreset(presetId?: string) {
 export function usePresets(options?: { presetType?: string; category?: string; isPublic?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('presets').select('*')
@@ -45,8 +45,8 @@ export function usePresets(options?: { presetType?: string; category?: string; i
 export function useDefaultPreset(presetType?: string, workspaceId?: string) {
   const [preset, setPreset] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!presetType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -63,8 +63,8 @@ export function useDefaultPreset(presetType?: string, workspaceId?: string) {
 export function useMyPresets(userId?: string, presetType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

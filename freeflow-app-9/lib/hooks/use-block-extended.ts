@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useBlockedUsers(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('blocks').select('*, blocked:profiles!blocked_id(*)').eq('blocker_id', userId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -50,8 +50,8 @@ export function useBlockedIds(userId?: string) {
   const [blockedIds, setBlockedIds] = useState<string[]>([])
   const [blockedByIds, setBlockedByIds] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,7 +62,7 @@ export function useBlockedIds(userId?: string) {
       setBlockedIds(blocked.data?.map(b => b.blocked_id) || [])
       setBlockedByIds(blockedBy.data?.map(b => b.blocker_id) || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { blockedIds, blockedByIds, isLoading, refresh: fetch }
 }
@@ -70,15 +70,15 @@ export function useBlockedIds(userId?: string) {
 export function useBlockCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { count: result } = await supabase.from('blocks').select('*', { count: 'exact', head: true }).eq('blocker_id', userId)
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

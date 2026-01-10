@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSalary(salaryId?: string) {
   const [salary, setSalary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('salaries').select('*, salary_components(*), salary_deductions(*), salary_structures(*), salary_grades(*), users(*)').eq('id', salaryId).single(); setSalary(data) } finally { setIsLoading(false) }
-  }, [salaryId, supabase])
+  }, [salaryId])
   useEffect(() => { fetch() }, [fetch])
   return { salary, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSalary(salaryId?: string) {
 export function useSalaries(options?: { employee_id?: string; structure_id?: string; grade_id?: string; status?: string; effective_date?: string; limit?: number }) {
   const [salaries, setSalaries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('salaries').select('*, salary_components(*), salary_deductions(*), salary_structures(*), salary_grades(*), users(*)')
@@ -47,8 +47,8 @@ export function useSalaries(options?: { employee_id?: string; structure_id?: str
 export function useEmployeeSalary(employeeId?: string, effectiveDate?: string) {
   const [salary, setSalary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -64,12 +64,12 @@ export function useEmployeeSalary(employeeId?: string, effectiveDate?: string) {
 export function useSalaryComponents(salaryId?: string) {
   const [components, setComponents] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('salary_components').select('*').eq('salary_id', salaryId); setComponents(data || []) } finally { setIsLoading(false) }
-  }, [salaryId, supabase])
+  }, [salaryId])
   useEffect(() => { fetch() }, [fetch])
   return { components, isLoading, refresh: fetch }
 }
@@ -77,12 +77,12 @@ export function useSalaryComponents(salaryId?: string) {
 export function useSalaryDeductions(salaryId?: string) {
   const [deductions, setDeductions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('salary_deductions').select('*').eq('salary_id', salaryId); setDeductions(data || []) } finally { setIsLoading(false) }
-  }, [salaryId, supabase])
+  }, [salaryId])
   useEffect(() => { fetch() }, [fetch])
   return { deductions, isLoading, refresh: fetch }
 }
@@ -90,8 +90,8 @@ export function useSalaryDeductions(salaryId?: string) {
 export function useSalaryHistory(employeeId?: string, options?: { from_date?: string; to_date?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -109,8 +109,8 @@ export function useSalaryHistory(employeeId?: string, options?: { from_date?: st
 export function useSalaryStructures(options?: { is_active?: boolean }) {
   const [structures, setStructures] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('salary_structures').select('*, salary_grades(count)')
@@ -118,7 +118,7 @@ export function useSalaryStructures(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setStructures(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { structures, isLoading, refresh: fetch }
 }
@@ -126,8 +126,8 @@ export function useSalaryStructures(options?: { is_active?: boolean }) {
 export function useSalaryGrades(structureId?: string, options?: { is_active?: boolean }) {
   const [grades, setGrades] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('salary_grades').select('*')
@@ -144,8 +144,8 @@ export function useSalaryGrades(structureId?: string, options?: { is_active?: bo
 export function useSalaryCalculation(salaryId?: string) {
   const [calculation, setCalculation] = useState<{ baseSalary: number; componentsTotal: number; gross: number; deductionsTotal: number; net: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!salaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -157,7 +157,7 @@ export function useSalaryCalculation(salaryId?: string) {
       const net = gross - deductionsTotal
       setCalculation({ baseSalary: data.base_salary, componentsTotal, gross, deductionsTotal, net })
     } finally { setIsLoading(false) }
-  }, [salaryId, supabase])
+  }, [salaryId])
   useEffect(() => { fetch() }, [fetch])
   return { calculation, isLoading, refresh: fetch }
 }
@@ -165,8 +165,8 @@ export function useSalaryCalculation(salaryId?: string) {
 export function useSalaryStats() {
   const [stats, setStats] = useState<{ totalEmployees: number; averageSalary: number; minSalary: number; maxSalary: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('salaries').select('base_salary').eq('status', 'active')
@@ -176,7 +176,7 @@ export function useSalaryStats() {
       const average = amounts.reduce((sum, a) => sum + a, 0) / amounts.length
       setStats({ totalEmployees: amounts.length, averageSalary: Math.round(average * 100) / 100, minSalary: Math.min(...amounts), maxSalary: Math.max(...amounts) })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

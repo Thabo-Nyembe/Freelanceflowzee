@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useWebhooks(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('webhooks').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useWebhooks(userId?: string) {
 export function useWebhookLogs(webhookId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!webhookId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('webhook_logs').select('*').eq('webhook_id', webhookId).order('timestamp', { ascending: false }).limit(100); setData(result || []) } finally { setIsLoading(false) }
-  }, [webhookId, supabase])
+  }, [webhookId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,11 +36,11 @@ export function useWebhookLogs(webhookId?: string) {
 export function useWebhookEvents() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('webhook_events').select('*').order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

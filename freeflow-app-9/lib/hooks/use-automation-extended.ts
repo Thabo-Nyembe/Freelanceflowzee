@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useAutomationWorkflow(workflowId?: string) {
   const [workflow, setWorkflow] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!workflowId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('automation_workflows').select('*, automation_triggers(*), automation_actions(*)').eq('id', workflowId).single(); setWorkflow(data) } finally { setIsLoading(false) }
-  }, [workflowId, supabase])
+  }, [workflowId])
   useEffect(() => { fetch() }, [fetch])
   return { workflow, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useAutomationWorkflow(workflowId?: string) {
 export function useAutomationWorkflows(options?: { user_id?: string; is_active?: boolean; limit?: number }) {
   const [workflows, setWorkflows] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('automation_workflows').select('*')
@@ -42,12 +42,12 @@ export function useAutomationWorkflows(options?: { user_id?: string; is_active?:
 export function useActiveAutomations(userId?: string) {
   const [workflows, setWorkflows] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('automation_workflows').select('*').eq('user_id', userId).eq('is_active', true).order('last_run_at', { ascending: false }); setWorkflows(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { workflows, isLoading, refresh: fetch }
 }
@@ -55,8 +55,8 @@ export function useActiveAutomations(userId?: string) {
 export function useAutomationLogs(workflowId?: string, options?: { status?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!workflowId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -73,8 +73,8 @@ export function useAutomationLogs(workflowId?: string, options?: { status?: stri
 export function useAutomationStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number; totalRuns: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -86,7 +86,7 @@ export function useAutomationStats(userId?: string) {
       const totalRuns = data.reduce((sum, w) => sum + (w.run_count || 0), 0)
       setStats({ total, active, inactive, totalRuns })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -94,8 +94,8 @@ export function useAutomationStats(userId?: string) {
 export function useRecentAutomationRuns(userId?: string, options?: { limit?: number }) {
   const [runs, setRuns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -121,6 +121,6 @@ export function useAutomationLogsRealtime(workflowId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'automation_logs', filter: `workflow_id=eq.${workflowId}` }, (payload) => setLogs(prev => prev.map(l => l.id === (payload.new as any).id ? payload.new : l)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [workflowId, supabase])
+  }, [workflowId])
   return { logs }
 }

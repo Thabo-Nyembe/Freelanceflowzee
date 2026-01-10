@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useChatRoom(roomId?: string) {
   const [room, setRoom] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('chat_rooms').select('*, chat_participants(*)').eq('id', roomId).single()
       setRoom(data)
     } finally { setIsLoading(false) }
-  }, [roomId, supabase])
+  }, [roomId])
   useEffect(() => { fetch() }, [fetch])
   return { room, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useChatRoom(roomId?: string) {
 export function useUserChatRooms(userId?: string, options?: { type?: string; includeArchived?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -50,8 +50,8 @@ export function useChatMessages(roomId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [hasMore, setHasMore] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -85,22 +85,22 @@ export function useChatMessagesRealtime(roomId?: string) {
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${roomId}` }, (payload) => setMessages(prev => prev.filter(m => m.id !== (payload.old as any).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [roomId, supabase])
+  }, [roomId])
   return { messages }
 }
 
 export function useChatParticipants(roomId?: string) {
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!roomId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('chat_participants').select('*').eq('room_id', roomId).order('joined_at', { ascending: true })
       setParticipants(data || [])
     } finally { setIsLoading(false) }
-  }, [roomId, supabase])
+  }, [roomId])
   useEffect(() => { fetch() }, [fetch])
   return { participants, isLoading, refresh: fetch }
 }
@@ -108,8 +108,8 @@ export function useChatParticipants(roomId?: string) {
 export function useUnreadMessages(userId?: string) {
   const [unread, setUnread] = useState<{ total: number; byRoom: Record<string, number> }>({ total: 0, byRoom: {} })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -125,7 +125,7 @@ export function useUnreadMessages(userId?: string) {
       }
       setUnread({ total, byRoom })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { unread, isLoading, refresh: fetch }
 }
@@ -187,15 +187,15 @@ export function useChatRoomRealtime(roomId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [roomId, supabase])
+  }, [roomId])
   return { room }
 }
 
 export function useDirectChat(userId1?: string, userId2?: string) {
   const [room, setRoom] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId1 || !userId2) { setIsLoading(false); return }
     setIsLoading(true)
     try {

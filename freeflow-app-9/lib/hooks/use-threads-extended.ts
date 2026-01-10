@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useThread(threadId?: string) {
   const [thread, setThread] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('threads').select('*, thread_participants(*, users(*))').eq('id', threadId).single(); setThread(data) } finally { setIsLoading(false) }
-  }, [threadId, supabase])
+  }, [threadId])
   useEffect(() => { fetch() }, [fetch])
   return { thread, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useThread(threadId?: string) {
 export function useThreads(options?: { thread_type?: string; context_type?: string; context_id?: string; status?: string; search?: string; limit?: number }) {
   const [threads, setThreads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('threads').select('*, thread_participants(count)')
@@ -45,8 +45,8 @@ export function useThreads(options?: { thread_type?: string; context_type?: stri
 export function useUserThreads(userId?: string, options?: { thread_type?: string; status?: string; limit?: number }) {
   const [threads, setThreads] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -67,8 +67,8 @@ export function useUserThreads(userId?: string, options?: { thread_type?: string
 export function useThreadMessages(threadId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -81,19 +81,19 @@ export function useThreadMessages(threadId?: string, options?: { limit?: number 
     if (!threadId) return
     const channel = supabase.channel(`thread:${threadId}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'thread_messages', filter: `thread_id=eq.${threadId}` }, (payload) => { setMessages(prev => [...prev, payload.new]) }).subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [threadId, supabase])
+  }, [threadId])
   return { messages, isLoading, refresh: fetch }
 }
 
 export function useThreadParticipants(threadId?: string) {
   const [participants, setParticipants] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('thread_participants').select('*, users(*)').eq('thread_id', threadId).order('joined_at', { ascending: true }); setParticipants(data || []) } finally { setIsLoading(false) }
-  }, [threadId, supabase])
+  }, [threadId])
   useEffect(() => { fetch() }, [fetch])
   return { participants, isLoading, refresh: fetch }
 }
@@ -102,8 +102,8 @@ export function useThreadReactions(messageId?: string) {
   const [reactions, setReactions] = useState<any[]>([])
   const [reactionSummary, setReactionSummary] = useState<Record<string, { count: number; users: string[] }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -117,7 +117,7 @@ export function useThreadReactions(messageId?: string) {
       })
       setReactionSummary(summary)
     } finally { setIsLoading(false) }
-  }, [messageId, supabase])
+  }, [messageId])
   useEffect(() => { fetch() }, [fetch])
   return { reactions, reactionSummary, isLoading, refresh: fetch }
 }
@@ -125,8 +125,8 @@ export function useThreadReactions(messageId?: string) {
 export function useThreadAttachments(threadId?: string, options?: { message_id?: string }) {
   const [attachments, setAttachments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -144,8 +144,8 @@ export function useThreadReadStatus(threadId?: string, userId?: string) {
   const [readStatus, setReadStatus] = useState<any>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!threadId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -167,8 +167,8 @@ export function useThreadReadStatus(threadId?: string, userId?: string) {
 export function useUnreadThreadsCount(userId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -187,7 +187,7 @@ export function useUnreadThreadsCount(userId?: string) {
       }
       setCount(unreadCount)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

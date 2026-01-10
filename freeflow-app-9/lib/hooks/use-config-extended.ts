@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useConfigs(category?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('configs').select('*').order('key', { ascending: true })
@@ -19,7 +19,7 @@ export function useConfigs(category?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [category, supabase])
+  }, [category])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,12 +27,12 @@ export function useConfigs(category?: string) {
 export function useConfigVersions(configId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!configId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('config_versions').select('*').eq('config_id', configId).order('version', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [configId, supabase])
+  }, [configId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

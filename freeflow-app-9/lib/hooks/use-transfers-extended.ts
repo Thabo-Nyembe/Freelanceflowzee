@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTransfer(transferId?: string) {
   const [transfer, setTransfer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transferId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transfers').select('*, transfer_items(*), transfer_approvals(*, users(*))').eq('id', transferId).single(); setTransfer(data) } finally { setIsLoading(false) }
-  }, [transferId, supabase])
+  }, [transferId])
   useEffect(() => { fetch() }, [fetch])
   return { transfer, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTransfer(transferId?: string) {
 export function useTransfers(options?: { transfer_type?: string; status?: string; from_id?: string; to_id?: string; initiated_by?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [transfers, setTransfers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('transfers').select('*, transfer_items(count)')
@@ -47,8 +47,8 @@ export function useTransfers(options?: { transfer_type?: string; status?: string
 export function useMyTransfers(userId?: string, options?: { role?: 'from' | 'to' | 'initiated' | 'all'; status?: string; limit?: number }) {
   const [transfers, setTransfers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -70,12 +70,12 @@ export function useMyTransfers(userId?: string, options?: { role?: 'from' | 'to'
 export function useTransferItems(transferId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transferId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transfer_items').select('*').eq('transfer_id', transferId).order('created_at', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [transferId, supabase])
+  }, [transferId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -83,12 +83,12 @@ export function useTransferItems(transferId?: string) {
 export function useTransferApprovals(transferId?: string) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transferId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transfer_approvals').select('*, users(*)').eq('transfer_id', transferId).order('created_at', { ascending: false }); setApprovals(data || []) } finally { setIsLoading(false) }
-  }, [transferId, supabase])
+  }, [transferId])
   useEffect(() => { fetch() }, [fetch])
   return { approvals, isLoading, refresh: fetch }
 }
@@ -96,8 +96,8 @@ export function useTransferApprovals(transferId?: string) {
 export function useTransferHistory(transferId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!transferId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transfer_history').select('*, users(*)').eq('transfer_id', transferId).order('occurred_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
@@ -109,8 +109,8 @@ export function useTransferHistory(transferId?: string, options?: { limit?: numb
 export function usePendingApprovals(approverId?: string, options?: { transfer_type?: string; limit?: number }) {
   const [transfers, setTransfers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!approverId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -127,8 +127,8 @@ export function usePendingApprovals(approverId?: string, options?: { transfer_ty
 export function useTransferSchedules(options?: { transfer_type?: string; status?: string; from_id?: string; to_id?: string; limit?: number }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('transfer_schedules').select('*')
@@ -147,8 +147,8 @@ export function useTransferSchedules(options?: { transfer_type?: string; status?
 export function useTransferBatches(options?: { transfer_type?: string; status?: string; created_by?: string; limit?: number }) {
   const [batches, setBatches] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('transfer_batches').select('*')
@@ -167,8 +167,8 @@ export function useTransferBatch(batchId?: string) {
   const [batch, setBatch] = useState<any>(null)
   const [transfers, setTransfers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!batchId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -179,7 +179,7 @@ export function useTransferBatch(batchId?: string) {
       setBatch(batchRes.data)
       setTransfers(transfersRes.data || [])
     } finally { setIsLoading(false) }
-  }, [batchId, supabase])
+  }, [batchId])
   useEffect(() => { fetch() }, [fetch])
   return { batch, transfers, isLoading, refresh: fetch }
 }

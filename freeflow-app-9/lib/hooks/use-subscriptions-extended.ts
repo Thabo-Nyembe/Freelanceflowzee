@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useSubscription(subscriptionId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('subscriptions').select('*').eq('id', subscriptionId).single()
       setSubscription(data)
     } finally { setIsLoading(false) }
-  }, [subscriptionId, supabase])
+  }, [subscriptionId])
   useEffect(() => { fetch() }, [fetch])
   return { subscription, isLoading, refresh: fetch }
 }
@@ -27,15 +27,15 @@ export function useSubscription(subscriptionId?: string) {
 export function useUserSubscription(userId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('subscriptions').select('*').eq('user_id', userId).in('status', ['active', 'trialing', 'past_due']).order('created_at', { ascending: false }).limit(1).single()
       setSubscription(data)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { subscription, isLoading, refresh: fetch }
 }
@@ -43,8 +43,8 @@ export function useUserSubscription(userId?: string) {
 export function useUserSubscriptions(userId?: string, options?: { status?: string; includeAll?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useUserSubscriptions(userId?: string, options?: { status?: strin
 export function useSubscriptionStatus(userId?: string) {
   const [status, setStatus] = useState<{ isActive: boolean; plan: string | null; expiresAt: string | null; isTrial: boolean; willCancel: boolean }>({ isActive: false, plan: null, expiresAt: null, isTrial: false, willCancel: false })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,7 +80,7 @@ export function useSubscriptionStatus(userId?: string) {
         setStatus({ isActive: false, plan: null, expiresAt: null, isTrial: false, willCancel: false })
       }
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { status, isLoading, refresh: fetch }
 }
@@ -88,8 +88,8 @@ export function useSubscriptionStatus(userId?: string) {
 export function useSubscriptionUsage(subscriptionId?: string, options?: { feature?: string; startDate?: string; endDate?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -108,8 +108,8 @@ export function useSubscriptionUsage(subscriptionId?: string, options?: { featur
 export function useSubscriptionUsageSummary(subscriptionId?: string) {
   const [summary, setSummary] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!subscriptionId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,7 +118,7 @@ export function useSubscriptionUsageSummary(subscriptionId?: string) {
       data?.forEach(u => { result[u.feature] = (result[u.feature] || 0) + u.quantity })
       setSummary(result)
     } finally { setIsLoading(false) }
-  }, [subscriptionId, supabase])
+  }, [subscriptionId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -126,8 +126,8 @@ export function useSubscriptionUsageSummary(subscriptionId?: string) {
 export function useSubscriptionFeatureLimit(subscriptionId?: string, feature?: string, limit?: number) {
   const [usage, setUsage] = useState<{ used: number; limit: number; remaining: number; isWithinLimit: boolean } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!subscriptionId || !feature || limit === undefined) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -145,8 +145,8 @@ export function useSubscriptionFeatureLimit(subscriptionId?: string, feature?: s
 export function useActiveSubscriptions(options?: { planId?: string; billingCycle?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('subscriptions').select('*').in('status', ['active', 'trialing'])
@@ -170,15 +170,15 @@ export function useSubscriptionRealtime(subscriptionId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'subscriptions', filter: `id=eq.${subscriptionId}` }, (payload) => setSubscription(payload.new))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [subscriptionId, supabase])
+  }, [subscriptionId])
   return { subscription }
 }
 
 export function useSubscriptionStats() {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data: all } = await supabase.from('subscriptions').select('status, plan_id, billing_cycle')
@@ -190,7 +190,7 @@ export function useSubscriptionStats() {
       })
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -218,7 +218,7 @@ export function useCreateSubscription() {
     } finally {
       setIsLoading(false)
     }
-  }, [supabase])
+  }, [])
 
   return { create, isLoading, error }
 }

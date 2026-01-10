@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useFavorites(userId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('favorites').select('*').order('created_at', { ascending: false })
@@ -44,8 +44,8 @@ export function useIsFavorited(userId?: string, itemId?: string, itemType?: stri
 export function useFavoriteCount(itemId?: string, itemType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!itemId || !itemType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

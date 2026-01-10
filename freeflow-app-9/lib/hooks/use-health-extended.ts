@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useHealthCheck(checkId?: string) {
   const [check, setCheck] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!checkId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('health_checks').select('*').eq('id', checkId).single()
       setCheck(data)
     } finally { setIsLoading(false) }
-  }, [checkId, supabase])
+  }, [checkId])
   useEffect(() => { fetch() }, [fetch])
   return { check, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useHealthCheck(checkId?: string) {
 export function useHealthChecks(options?: { serviceName?: string; checkType?: string; status?: string; isCritical?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('health_checks').select('*')
@@ -46,8 +46,8 @@ export function useHealthChecks(options?: { serviceName?: string; checkType?: st
 export function useHealthCheckResults(checkId?: string, limit = 100) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!checkId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useHealthCheckResults(checkId?: string, limit = 100) {
 export function useSystemHealth(workspaceId?: string) {
   const [health, setHealth] = useState<{ status: string; summary: { healthy: number; unhealthy: number; degraded: number; unknown: number; total: number }; checks: any[] }>({ status: 'unknown', summary: { healthy: 0, unhealthy: 0, degraded: 0, unknown: 0, total: 0 }, checks: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('health_checks').select('*').eq('is_enabled', true)
@@ -77,7 +77,7 @@ export function useSystemHealth(workspaceId?: string) {
       const overallStatus = criticalUnhealthy > 0 ? 'critical' : unhealthy > 0 ? 'unhealthy' : degraded > 0 ? 'degraded' : 'healthy'
       setHealth({ status: overallStatus, summary: { healthy, unhealthy, degraded, unknown, total: checks?.length || 0 }, checks: checks || [] })
     } finally { setIsLoading(false) }
-  }, [workspaceId, supabase])
+  }, [workspaceId])
   useEffect(() => { fetch() }, [fetch])
   return { health, isLoading, refresh: fetch }
 }
@@ -85,8 +85,8 @@ export function useSystemHealth(workspaceId?: string) {
 export function useServiceHealth(serviceName?: string) {
   const [health, setHealth] = useState<{ status: string; checks: any[] }>({ status: 'unknown', checks: [] })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!serviceName) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -96,7 +96,7 @@ export function useServiceHealth(serviceName?: string) {
       const status = anyUnhealthy ? 'unhealthy' : allHealthy ? 'healthy' : 'degraded'
       setHealth({ status, checks: checks || [] })
     } finally { setIsLoading(false) }
-  }, [serviceName, supabase])
+  }, [serviceName])
   useEffect(() => { fetch() }, [fetch])
   return { health, isLoading, refresh: fetch }
 }

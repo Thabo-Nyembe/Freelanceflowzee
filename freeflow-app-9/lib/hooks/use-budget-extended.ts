@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useBudget(budgetId?: string) {
   const [budget, setBudget] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!budgetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('budgets').select('*').eq('id', budgetId).single()
       setBudget(data)
     } finally { setIsLoading(false) }
-  }, [budgetId, supabase])
+  }, [budgetId])
   useEffect(() => { fetch() }, [fetch])
   return { budget, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useBudget(budgetId?: string) {
 export function useBudgets(options?: { userId?: string; organizationId?: string; projectId?: string; isActive?: boolean; category?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('budgets').select('*')
@@ -48,8 +48,8 @@ export function useBudgets(options?: { userId?: string; organizationId?: string;
 export function useBudgetStatus(budgetId?: string) {
   const [status, setStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!budgetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -65,7 +65,7 @@ export function useBudgetStatus(budgetId?: string) {
         status: percentUsed >= 100 ? 'exceeded' : percentUsed >= 80 ? 'warning' : 'healthy'
       })
     } finally { setIsLoading(false) }
-  }, [budgetId, supabase])
+  }, [budgetId])
   useEffect(() => { fetch() }, [fetch])
   return { status, isLoading, refresh: fetch }
 }
@@ -73,8 +73,8 @@ export function useBudgetStatus(budgetId?: string) {
 export function useBudgetsByCategory(options?: { userId?: string; organizationId?: string }) {
   const [data, setData] = useState<Record<string, { total: number; spent: number; count: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('budgets').select('category, amount, spent')
@@ -99,8 +99,8 @@ export function useBudgetsByCategory(options?: { userId?: string; organizationId
 export function useBudgetSummary(options?: { userId?: string; organizationId?: string }) {
   const [summary, setSummary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('budgets').select('amount, spent, is_active')
@@ -129,15 +129,15 @@ export function useBudgetSummary(options?: { userId?: string; organizationId?: s
 export function useActiveBudgets(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('budgets').select('*').eq('user_id', userId).eq('is_active', true).order('amount', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -145,8 +145,8 @@ export function useActiveBudgets(userId?: string) {
 export function useBudgetAlerts(userId?: string, threshold: number = 80) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -176,6 +176,6 @@ export function useBudgetRealtime(budgetId?: string) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'budgets', filter: `id=eq.${budgetId}` }, (payload) => setBudget(payload.new))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [budgetId, supabase])
+  }, [budgetId])
   return { budget }
 }

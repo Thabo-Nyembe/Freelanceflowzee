@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useAuditAlertRules(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('audit_alert_rules').select('*').eq('user_id', userId).order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,8 +23,8 @@ export function useAuditAlertRules(userId?: string) {
 export function useAuditEvents(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('audit_events').select('*').order('created_at', { ascending: false }).limit(100)
@@ -41,12 +41,12 @@ export function useAuditEvents(entityType?: string, entityId?: string) {
 export function useAuditFindings(auditId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!auditId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('audit_findings').select('*').eq('audit_id', auditId).order('severity', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [auditId, supabase])
+  }, [auditId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -54,8 +54,8 @@ export function useAuditFindings(auditId?: string) {
 export function useAuditLogs(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100)
@@ -63,7 +63,7 @@ export function useAuditLogs(userId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -71,11 +71,11 @@ export function useAuditLogs(userId?: string) {
 export function useAuditRetentionPolicies() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('audit_retention_policies').select('*').order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

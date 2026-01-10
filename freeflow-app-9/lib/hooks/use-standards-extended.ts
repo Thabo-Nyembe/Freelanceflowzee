@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useStandard(standardId?: string) {
   const [standard, setStandard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!standardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('standards').select('*, standard_requirements(*), standard_documents(*)').eq('id', standardId).single(); setStandard(data) } finally { setIsLoading(false) }
-  }, [standardId, supabase])
+  }, [standardId])
   useEffect(() => { fetch() }, [fetch])
   return { standard, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useStandard(standardId?: string) {
 export function useStandards(options?: { category?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [standards, setStandards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('standards').select('*, standard_requirements(count)')
@@ -43,12 +43,12 @@ export function useStandards(options?: { category?: string; is_active?: boolean;
 export function useStandardRequirements(standardId?: string) {
   const [requirements, setRequirements] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!standardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('standard_requirements').select('*').eq('standard_id', standardId).order('order_index', { ascending: true }); setRequirements(data || []) } finally { setIsLoading(false) }
-  }, [standardId, supabase])
+  }, [standardId])
   useEffect(() => { fetch() }, [fetch])
   return { requirements, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useStandardRequirements(standardId?: string) {
 export function useComplianceStatus(entityType?: string, entityId?: string, standardId?: string) {
   const [compliance, setCompliance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId || !standardId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -72,8 +72,8 @@ export function useComplianceStatus(entityType?: string, entityId?: string, stan
 export function useComplianceHistory(entityType?: string, entityId?: string, options?: { standard_id?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -90,8 +90,8 @@ export function useComplianceHistory(entityType?: string, entityId?: string, opt
 export function useCertifications(options?: { entity_type?: string; entity_id?: string; standard_id?: string; status?: string; limit?: number }) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('standard_certifications').select('*, standards(*)')
@@ -110,8 +110,8 @@ export function useCertifications(options?: { entity_type?: string; entity_id?: 
 export function useActiveCertification(entityType?: string, entityId?: string, standardId?: string) {
   const [certification, setCertification] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId || !standardId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -127,8 +127,8 @@ export function useActiveCertification(entityType?: string, entityId?: string, s
 export function useUpcomingAudits(options?: { entity_type?: string; entity_id?: string; auditor_id?: string; limit?: number }) {
   const [audits, setAudits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('standard_audits').select('*, standards(*)').eq('status', 'scheduled').gte('scheduled_date', new Date().toISOString())
@@ -146,15 +146,15 @@ export function useUpcomingAudits(options?: { entity_type?: string; entity_id?: 
 export function useStandardCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('standards').select('category').not('category', 'is', null)
       const unique = [...new Set(data?.map(s => s.category).filter(Boolean))]
       setCategories(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }

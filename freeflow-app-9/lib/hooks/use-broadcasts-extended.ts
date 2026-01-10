@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useBroadcast(broadcastId?: string) {
   const [broadcast, setBroadcast] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!broadcastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('broadcasts').select('*, broadcast_recipients(*)').eq('id', broadcastId).single(); setBroadcast(data) } finally { setIsLoading(false) }
-  }, [broadcastId, supabase])
+  }, [broadcastId])
   useEffect(() => { fetch() }, [fetch])
   return { broadcast, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useBroadcast(broadcastId?: string) {
 export function useBroadcasts(options?: { user_id?: string; status?: string; channel?: string; limit?: number }) {
   const [broadcasts, setBroadcasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('broadcasts').select('*')
@@ -43,12 +43,12 @@ export function useBroadcasts(options?: { user_id?: string; status?: string; cha
 export function useBroadcastRecipients(broadcastId?: string) {
   const [recipients, setRecipients] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!broadcastId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('broadcast_recipients').select('*').eq('broadcast_id', broadcastId).order('created_at', { ascending: true }); setRecipients(data || []) } finally { setIsLoading(false) }
-  }, [broadcastId, supabase])
+  }, [broadcastId])
   useEffect(() => { fetch() }, [fetch])
   return { recipients, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useBroadcastRecipients(broadcastId?: string) {
 export function useBroadcastTemplates(options?: { user_id?: string; type?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('broadcast_templates').select('*')
@@ -74,12 +74,12 @@ export function useBroadcastTemplates(options?: { user_id?: string; type?: strin
 export function useScheduledBroadcasts(userId?: string) {
   const [broadcasts, setBroadcasts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('broadcasts').select('*').eq('user_id', userId).eq('status', 'scheduled').gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }); setBroadcasts(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { broadcasts, isLoading, refresh: fetch }
 }
@@ -87,8 +87,8 @@ export function useScheduledBroadcasts(userId?: string) {
 export function useBroadcastStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -98,7 +98,7 @@ export function useBroadcastStats(userId?: string) {
       const byStatus = data.reduce((acc: Record<string, number>, b) => { acc[b.status || 'unknown'] = (acc[b.status || 'unknown'] || 0) + 1; return acc }, {})
       setStats({ total, byStatus })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

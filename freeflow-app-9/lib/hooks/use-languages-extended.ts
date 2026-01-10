@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLanguage(languageId?: string) {
   const [language, setLanguage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!languageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('languages').select('*').eq('id', languageId).single(); setLanguage(data) } finally { setIsLoading(false) }
-  }, [languageId, supabase])
+  }, [languageId])
   useEffect(() => { fetch() }, [fetch])
   return { language, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLanguage(languageId?: string) {
 export function useLanguages(options?: { is_active?: boolean }) {
   const [languages, setLanguages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('languages').select('*')
@@ -33,7 +33,7 @@ export function useLanguages(options?: { is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setLanguages(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { languages, isLoading, refresh: fetch }
 }
@@ -41,8 +41,8 @@ export function useLanguages(options?: { is_active?: boolean }) {
 export function useTranslations(languageCode?: string, options?: { namespace?: string }) {
   const [translations, setTranslations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!languageCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -59,8 +59,8 @@ export function useTranslations(languageCode?: string, options?: { namespace?: s
 export function useTranslation(languageCode?: string, key?: string, namespace?: string) {
   const [translation, setTranslation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!languageCode || !key) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -77,11 +77,11 @@ export function useTranslation(languageCode?: string, key?: string, namespace?: 
 export function useLocales() {
   const [locales, setLocales] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('language_locales').select('*').order('name', { ascending: true }); setLocales(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { locales, isLoading, refresh: fetch }
 }
@@ -89,12 +89,12 @@ export function useLocales() {
 export function useUserLanguagePreference(userId?: string) {
   const [preference, setPreference] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('language_preferences').select('*, languages(*)').eq('user_id', userId).single(); setPreference(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { preference, isLoading, refresh: fetch }
 }
@@ -102,11 +102,11 @@ export function useUserLanguagePreference(userId?: string) {
 export function useDefaultLanguage() {
   const [language, setLanguage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('languages').select('*').eq('is_default', true).single(); setLanguage(data) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { language, isLoading, refresh: fetch }
 }
@@ -114,8 +114,8 @@ export function useDefaultLanguage() {
 export function useTranslationStrings(namespace?: string) {
   const [strings, setStrings] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('language_strings').select('key, value')
@@ -125,7 +125,7 @@ export function useTranslationStrings(namespace?: string) {
       data?.forEach(s => { stringMap[s.key] = s.value })
       setStrings(stringMap)
     } finally { setIsLoading(false) }
-  }, [namespace, supabase])
+  }, [namespace])
   useEffect(() => { fetch() }, [fetch])
   return { strings, isLoading, refresh: fetch }
 }

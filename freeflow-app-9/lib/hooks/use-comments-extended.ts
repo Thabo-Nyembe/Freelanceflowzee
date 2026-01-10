@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useComment(commentId?: string) {
   const [comment, setComment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comments').select('*, comment_replies(*), comment_reactions(*)').eq('id', commentId).single(); setComment(data) } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { comment, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useComment(commentId?: string) {
 export function useComments(targetType?: string, targetId?: string, options?: { parent_id?: string; limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!targetType || !targetId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -59,12 +59,12 @@ export function useCommentsRealtime(targetType?: string, targetId?: string) {
 export function useCommentReplies(parentId?: string) {
   const [replies, setReplies] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comments').select('*, comment_reactions(*)').eq('parent_id', parentId).order('created_at', { ascending: true }); setReplies(data || []) } finally { setIsLoading(false) }
-  }, [parentId, supabase])
+  }, [parentId])
   useEffect(() => { fetch() }, [fetch])
   return { replies, isLoading, refresh: fetch }
 }
@@ -72,12 +72,12 @@ export function useCommentReplies(parentId?: string) {
 export function useCommentReactions(commentId?: string) {
   const [reactions, setReactions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comment_reactions').select('*').eq('comment_id', commentId); setReactions(data || []) } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { reactions, isLoading, refresh: fetch }
 }
@@ -85,8 +85,8 @@ export function useCommentReactions(commentId?: string) {
 export function useCommentCount(targetType?: string, targetId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!targetType || !targetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { count: total } = await supabase.from('comments').select('*', { count: 'exact', head: true }).eq('target_type', targetType).eq('target_id', targetId); setCount(total || 0) } finally { setIsLoading(false) }
@@ -98,8 +98,8 @@ export function useCommentCount(targetType?: string, targetId?: string) {
 export function useUserComments(userId?: string, options?: { limit?: number }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comments').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setComments(data || []) } finally { setIsLoading(false) }
@@ -111,8 +111,8 @@ export function useUserComments(userId?: string, options?: { limit?: number }) {
 export function useReactionSummary(commentId?: string) {
   const [summary, setSummary] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!commentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -120,7 +120,7 @@ export function useReactionSummary(commentId?: string) {
       const counts = data?.reduce((acc: Record<string, number>, r) => { acc[r.reaction_type] = (acc[r.reaction_type] || 0) + 1; return acc }, {}) || {}
       setSummary(counts)
     } finally { setIsLoading(false) }
-  }, [commentId, supabase])
+  }, [commentId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }

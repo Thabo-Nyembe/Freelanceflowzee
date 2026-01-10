@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useAttributionSource(sourceId?: string) {
   const [source, setSource] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('attribution_sources').select('*').eq('id', sourceId).single(); setSource(data) } finally { setIsLoading(false) }
-  }, [sourceId, supabase])
+  }, [sourceId])
   useEffect(() => { fetch() }, [fetch])
   return { source, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useAttributionSource(sourceId?: string) {
 export function useAttributionSources(options?: { user_id?: string; type?: string; limit?: number }) {
   const [sources, setSources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('attribution_sources').select('*')
@@ -42,8 +42,8 @@ export function useAttributionSources(options?: { user_id?: string; type?: strin
 export function useAttributionStats(userId?: string) {
   const [stats, setStats] = useState<{ totalClicks: number; totalConversions: number; conversionRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -54,7 +54,7 @@ export function useAttributionStats(userId?: string) {
       const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0
       setStats({ totalClicks, totalConversions, conversionRate })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -62,8 +62,8 @@ export function useAttributionStats(userId?: string) {
 export function useTopAttributionSources(userId?: string, options?: { by?: 'clicks' | 'conversions'; limit?: number }) {
   const [sources, setSources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -79,8 +79,8 @@ export function useTopAttributionSources(userId?: string, options?: { by?: 'clic
 export function useAttributionConversions(sourceId?: string, options?: { limit?: number }) {
   const [conversions, setConversions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('attribution_conversions').select('*').eq('source_id', sourceId).order('created_at', { ascending: false }).limit(options?.limit || 50); setConversions(data || []) } finally { setIsLoading(false) }
@@ -92,8 +92,8 @@ export function useAttributionConversions(sourceId?: string, options?: { limit?:
 export function useAttributionByType(userId?: string) {
   const [byType, setByType] = useState<Record<string, { clicks: number; conversions: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -107,7 +107,7 @@ export function useAttributionByType(userId?: string) {
       }, {})
       setByType(grouped)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { byType, isLoading, refresh: fetch }
 }

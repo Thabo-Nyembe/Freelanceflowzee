@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useThemes(themeType?: string, isPublic?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('themes').select('*').order('name', { ascending: true })
@@ -28,15 +28,15 @@ export function useThemes(themeType?: string, isPublic?: boolean) {
 export function useUserTheme(userId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('user_themes').select('*, themes(*)').eq('user_id', userId).eq('is_active', true).single()
       setData(result)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -44,15 +44,15 @@ export function useUserTheme(userId?: string) {
 export function useThemeSettings(themeId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('theme_settings').select('*').eq('theme_id', themeId).single()
       setData(result)
     } finally { setIsLoading(false) }
-  }, [themeId, supabase])
+  }, [themeId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

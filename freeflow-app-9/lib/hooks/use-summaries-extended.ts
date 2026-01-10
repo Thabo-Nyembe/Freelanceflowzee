@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useSummary(summaryId?: string) {
   const [summary, setSummary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!summaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('summaries').select('*, summary_sections(*), summary_metrics(*), summary_recipients(*)').eq('id', summaryId).single(); setSummary(data) } finally { setIsLoading(false) }
-  }, [summaryId, supabase])
+  }, [summaryId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useSummary(summaryId?: string) {
 export function useSummaries(options?: { summary_type?: string; entity_type?: string; entity_id?: string; period?: string; status?: string; created_by?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [summaries, setSummaries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('summaries').select('*, summary_sections(count), users(*)')
@@ -48,12 +48,12 @@ export function useSummaries(options?: { summary_type?: string; entity_type?: st
 export function useSummarySections(summaryId?: string) {
   const [sections, setSections] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!summaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('summary_sections').select('*').eq('summary_id', summaryId).order('order_index', { ascending: true }); setSections(data || []) } finally { setIsLoading(false) }
-  }, [summaryId, supabase])
+  }, [summaryId])
   useEffect(() => { fetch() }, [fetch])
   return { sections, isLoading, refresh: fetch }
 }
@@ -61,12 +61,12 @@ export function useSummarySections(summaryId?: string) {
 export function useSummaryMetrics(summaryId?: string) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!summaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('summary_metrics').select('*').eq('summary_id', summaryId).order('metric_name', { ascending: true }); setMetrics(data || []) } finally { setIsLoading(false) }
-  }, [summaryId, supabase])
+  }, [summaryId])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -74,8 +74,8 @@ export function useSummaryMetrics(summaryId?: string) {
 export function useSummarySchedules(options?: { summary_type?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('summary_schedules').select('*, summary_recipients(count)')
@@ -92,8 +92,8 @@ export function useSummarySchedules(options?: { summary_type?: string; is_active
 export function useSummaryHistory(summaryId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!summaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('summary_history').select('*').eq('summary_id', summaryId).order('occurred_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
@@ -105,8 +105,8 @@ export function useSummaryHistory(summaryId?: string, options?: { limit?: number
 export function useLatestSummary(entityType?: string, entityId?: string, summaryType?: string) {
   const [summary, setSummary] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId || !summaryType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -121,8 +121,8 @@ export function useLatestSummary(entityType?: string, entityId?: string, summary
 export function useMySummaries(userId?: string, options?: { status?: string; limit?: number }) {
   const [summaries, setSummaries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -139,8 +139,8 @@ export function useMySummaries(userId?: string, options?: { status?: string; lim
 export function usePublicSummaries(options?: { summary_type?: string; period?: string; limit?: number }) {
   const [summaries, setSummaries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('summaries').select('*, summary_sections(count), users(*)').eq('is_public', true).eq('status', 'published')

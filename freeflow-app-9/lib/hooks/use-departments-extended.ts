@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useDepartment(departmentId?: string) {
   const [department, setDepartment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('departments').select('*, department_members(*), department_goals(*)').eq('id', departmentId).single(); setDepartment(data) } finally { setIsLoading(false) }
-  }, [departmentId, supabase])
+  }, [departmentId])
   useEffect(() => { fetch() }, [fetch])
   return { department, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useDepartment(departmentId?: string) {
 export function useDepartments(options?: { parent_id?: string; is_active?: boolean; search?: string }) {
   const [departments, setDepartments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('departments').select('*')
@@ -43,12 +43,12 @@ export function useDepartments(options?: { parent_id?: string; is_active?: boole
 export function useDepartmentMembers(departmentId?: string) {
   const [members, setMembers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('department_members').select('*, users:user_id(*)').eq('department_id', departmentId); setMembers(data || []) } finally { setIsLoading(false) }
-  }, [departmentId, supabase])
+  }, [departmentId])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -56,12 +56,12 @@ export function useDepartmentMembers(departmentId?: string) {
 export function useUserDepartments(userId?: string) {
   const [departments, setDepartments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('department_members').select('*, departments:department_id(*)').eq('user_id', userId); setDepartments(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { departments, isLoading, refresh: fetch }
 }
@@ -69,8 +69,8 @@ export function useUserDepartments(userId?: string) {
 export function useDepartmentBudget(departmentId?: string, fiscalYear?: string) {
   const [budget, setBudget] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!departmentId || !fiscalYear) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('department_budgets').select('*').eq('department_id', departmentId).eq('fiscal_year', fiscalYear).single(); setBudget(data) } finally { setIsLoading(false) }
@@ -82,8 +82,8 @@ export function useDepartmentBudget(departmentId?: string, fiscalYear?: string) 
 export function useDepartmentGoals(departmentId?: string, options?: { status?: string }) {
   const [goals, setGoals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -100,8 +100,8 @@ export function useDepartmentGoals(departmentId?: string, options?: { status?: s
 export function useDepartmentHierarchy() {
   const [hierarchy, setHierarchy] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('departments').select('*').eq('is_active', true).order('name', { ascending: true })
@@ -110,7 +110,7 @@ export function useDepartmentHierarchy() {
       }
       setHierarchy(buildTree(data || []))
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { hierarchy, isLoading, refresh: fetch }
 }
@@ -118,8 +118,8 @@ export function useDepartmentHierarchy() {
 export function useDepartmentStats(departmentId?: string) {
   const [stats, setStats] = useState<{ memberCount: number; activeGoals: number; budgetUtilization: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!departmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -129,7 +129,7 @@ export function useDepartmentStats(departmentId?: string) {
       const budgetUtilization = budget?.amount && budget.amount > 0 ? ((budget.spent || 0) / budget.amount) * 100 : 0
       setStats({ memberCount: memberCount || 0, activeGoals: activeGoals || 0, budgetUtilization })
     } finally { setIsLoading(false) }
-  }, [departmentId, supabase])
+  }, [departmentId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

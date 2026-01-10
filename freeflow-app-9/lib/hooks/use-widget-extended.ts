@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useWidgets(userId?: string, widgetType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('widgets').select('*').order('sort_order', { ascending: true })
@@ -28,8 +28,8 @@ export function useWidgets(userId?: string, widgetType?: string) {
 export function useWidgetConfigs(widgetId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('widget_configs').select('*').order('created_at', { ascending: false })
@@ -37,7 +37,7 @@ export function useWidgetConfigs(widgetId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [widgetId, supabase])
+  }, [widgetId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -45,8 +45,8 @@ export function useWidgetConfigs(widgetId?: string) {
 export function useDashboardWidgets(dashboardId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('dashboard_widgets').select('*, widgets(*)').order('position', { ascending: true })
@@ -54,7 +54,7 @@ export function useDashboardWidgets(dashboardId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

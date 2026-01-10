@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useCodeBlock(codeBlockId?: string) {
   const [codeBlock, setCodeBlock] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!codeBlockId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('code_blocks').select('*').eq('id', codeBlockId).single()
       setCodeBlock(data)
     } finally { setIsLoading(false) }
-  }, [codeBlockId, supabase])
+  }, [codeBlockId])
   useEffect(() => { fetch() }, [fetch])
   return { codeBlock, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useCodeBlock(codeBlockId?: string) {
 export function useCodeBlocks(options?: { language?: string; entityType?: string; entityId?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('code_blocks').select('*')
@@ -45,8 +45,8 @@ export function useCodeBlocks(options?: { language?: string; entityType?: string
 export function useEntityCodeBlocks(entityType?: string, entityId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,15 +61,15 @@ export function useEntityCodeBlocks(entityType?: string, entityId?: string) {
 export function useCodeBlockComments(codeBlockId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!codeBlockId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('code_block_comments').select('*, users(id, full_name, avatar_url)').eq('code_block_id', codeBlockId).order('line_number', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [codeBlockId, supabase])
+  }, [codeBlockId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -77,15 +77,15 @@ export function useCodeBlockComments(codeBlockId?: string) {
 export function useCodeBlocksByLanguage(language?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!language) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('code_blocks').select('*').eq('language', language).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [language, supabase])
+  }, [language])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

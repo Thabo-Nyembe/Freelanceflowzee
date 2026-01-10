@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useInvoicingTemplate(templateId?: string) {
   const [template, setTemplate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('invoicing_templates').select('*').eq('id', templateId).single(); setTemplate(data) } finally { setIsLoading(false) }
-  }, [templateId, supabase])
+  }, [templateId])
   useEffect(() => { fetch() }, [fetch])
   return { template, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useInvoicingTemplate(templateId?: string) {
 export function useInvoicingTemplates(options?: { user_id?: string; is_active?: boolean }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('invoicing_templates').select('*')
@@ -42,12 +42,12 @@ export function useInvoicingTemplates(options?: { user_id?: string; is_active?: 
 export function useInvoicingSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('invoicing_settings').select('*').eq('user_id', userId).single(); setSettings(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -55,8 +55,8 @@ export function useInvoicingSettings(userId?: string) {
 export function useInvoicingSchedules(userId?: string, options?: { client_id?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -74,12 +74,12 @@ export function useInvoicingSchedules(userId?: string, options?: { client_id?: s
 export function useInvoicingReminders(invoiceId?: string) {
   const [reminders, setReminders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!invoiceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('invoicing_reminders').select('*').eq('invoice_id', invoiceId).order('scheduled_date', { ascending: true }); setReminders(data || []) } finally { setIsLoading(false) }
-  }, [invoiceId, supabase])
+  }, [invoiceId])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }
@@ -87,8 +87,8 @@ export function useInvoicingReminders(invoiceId?: string) {
 export function useInvoicingDisputes(options?: { invoice_id?: string; client_id?: string; status?: string }) {
   const [disputes, setDisputes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('invoicing_disputes').select('*')
@@ -106,12 +106,12 @@ export function useInvoicingDisputes(options?: { invoice_id?: string; client_id?
 export function useDefaultInvoicingTemplate(userId?: string) {
   const [template, setTemplate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('invoicing_templates').select('*').eq('user_id', userId).eq('is_default', true).single(); setTemplate(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { template, isLoading, refresh: fetch }
 }
@@ -119,8 +119,8 @@ export function useDefaultInvoicingTemplate(userId?: string) {
 export function useUpcomingScheduledInvoices(userId?: string, daysAhead?: number) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -137,8 +137,8 @@ export function useUpcomingScheduledInvoices(userId?: string, daysAhead?: number
 export function useOpenDisputes(options?: { client_id?: string }) {
   const [disputes, setDisputes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('invoicing_disputes').select('*').eq('status', 'open')
@@ -146,7 +146,7 @@ export function useOpenDisputes(options?: { client_id?: string }) {
       const { data } = await query.order('created_at', { ascending: false })
       setDisputes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.client_id, supabase])
+  }, [options?.client_id])
   useEffect(() => { fetch() }, [fetch])
   return { disputes, isLoading, refresh: fetch }
 }

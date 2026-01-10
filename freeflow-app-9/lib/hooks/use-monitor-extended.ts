@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useMonitor(monitorId?: string) {
   const [monitor, setMonitor] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!monitorId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('monitors').select('*').eq('id', monitorId).single()
       setMonitor(data)
     } finally { setIsLoading(false) }
-  }, [monitorId, supabase])
+  }, [monitorId])
   useEffect(() => { fetch() }, [fetch])
   return { monitor, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useMonitor(monitorId?: string) {
 export function useMonitors(options?: { monitorType?: string; status?: string; isEnabled?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('monitors').select('*')
@@ -45,8 +45,8 @@ export function useMonitors(options?: { monitorType?: string; status?: string; i
 export function useMonitorChecks(monitorId?: string, limit = 100) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!monitorId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,8 +61,8 @@ export function useMonitorChecks(monitorId?: string, limit = 100) {
 export function useMonitorAlerts(monitorId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('monitor_alerts').select('*, monitors(name)')
@@ -79,8 +79,8 @@ export function useMonitorAlerts(monitorId?: string, status?: string) {
 export function useMonitorUptime(monitorId?: string, days = 30) {
   const [uptime, setUptime] = useState<{ percentage: number; totalChecks: number }>({ percentage: 100, totalChecks: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!monitorId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useService(serviceId?: string) {
   const [service, setService] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('services').select('*, service_categories(*), service_providers(*), service_pricing(*), service_reviews(count)').eq('id', serviceId).single(); setService(data) } finally { setIsLoading(false) }
-  }, [serviceId, supabase])
+  }, [serviceId])
   useEffect(() => { fetch() }, [fetch])
   return { service, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useService(serviceId?: string) {
 export function useServices(options?: { category_id?: string; provider_id?: string; is_active?: boolean; min_price?: number; max_price?: number; search?: string; limit?: number }) {
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('services').select('*, service_categories(*), service_providers(*), service_pricing(*), service_reviews(count)')
@@ -46,8 +46,8 @@ export function useServices(options?: { category_id?: string; provider_id?: stri
 export function useServiceCategories(options?: { parent_id?: string | null; is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('service_categories').select('*, services(count)')
@@ -67,8 +67,8 @@ export function useServiceCategories(options?: { parent_id?: string | null; is_a
 export function useServiceProviders(options?: { is_active?: boolean; is_verified?: boolean; search?: string; limit?: number }) {
   const [providers, setProviders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('service_providers').select('*, services(count), users(*)')
@@ -86,8 +86,8 @@ export function useServiceProviders(options?: { is_active?: boolean; is_verified
 export function useServiceBookings(serviceId?: string, options?: { from_date?: string; to_date?: string; status?: string; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -106,8 +106,8 @@ export function useServiceBookings(serviceId?: string, options?: { from_date?: s
 export function useMyServiceBookings(customerId?: string, options?: { status?: string; upcoming_only?: boolean; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -125,12 +125,12 @@ export function useMyServiceBookings(customerId?: string, options?: { status?: s
 export function useServicePricing(serviceId?: string) {
   const [pricing, setPricing] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('service_pricing').select('*').eq('service_id', serviceId).order('type', { ascending: true }); setPricing(data || []) } finally { setIsLoading(false) }
-  }, [serviceId, supabase])
+  }, [serviceId])
   useEffect(() => { fetch() }, [fetch])
   return { pricing, isLoading, refresh: fetch }
 }
@@ -138,8 +138,8 @@ export function useServicePricing(serviceId?: string) {
 export function useServiceAvailability(serviceId?: string, date?: string) {
   const [availability, setAvailability] = useState<{ service: any; bookings: any[]; date: string } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!serviceId || !date) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -156,8 +156,8 @@ export function useServiceAvailability(serviceId?: string, date?: string) {
 export function useProviderServices(providerId?: string, options?: { is_active?: boolean }) {
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -174,8 +174,8 @@ export function useProviderServices(providerId?: string, options?: { is_active?:
 export function useServiceStats() {
   const [stats, setStats] = useState<{ total: number; active: number; categories: number; providers: number; bookingsToday: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const today = new Date().toISOString().split('T')[0]
@@ -188,7 +188,7 @@ export function useServiceStats() {
       ])
       setStats({ total: total.count || 0, active: active.count || 0, categories: categories.count || 0, providers: providers.count || 0, bookingsToday: bookingsToday.count || 0 })
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

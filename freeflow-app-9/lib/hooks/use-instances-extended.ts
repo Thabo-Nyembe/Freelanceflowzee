@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useInstance(instanceId?: string) {
   const [instance, setInstance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instances').select('*, instance_configs(*), instance_metrics(*)').eq('id', instanceId).single(); setInstance(data) } finally { setIsLoading(false) }
-  }, [instanceId, supabase])
+  }, [instanceId])
   useEffect(() => { fetch() }, [fetch])
   return { instance, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useInstance(instanceId?: string) {
 export function useInstances(options?: { owner_id?: string; type?: string; status?: string; region?: string; limit?: number }) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('instances').select('*')
@@ -44,8 +44,8 @@ export function useInstances(options?: { owner_id?: string; type?: string; statu
 export function useUserInstances(userId?: string, options?: { status?: string }) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useUserInstances(userId?: string, options?: { status?: string })
 export function useInstanceLogs(instanceId?: string, options?: { level?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -82,8 +82,8 @@ export function useInstanceLogs(instanceId?: string, options?: { level?: string;
 export function useInstanceMetrics(instanceId?: string, options?: { from_date?: string; to_date?: string; metric_type?: string }) {
   const [metrics, setMetrics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,12 +102,12 @@ export function useInstanceMetrics(instanceId?: string, options?: { from_date?: 
 export function useInstanceSnapshots(instanceId?: string) {
   const [snapshots, setSnapshots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instance_snapshots').select('*').eq('instance_id', instanceId).order('created_at', { ascending: false }); setSnapshots(data || []) } finally { setIsLoading(false) }
-  }, [instanceId, supabase])
+  }, [instanceId])
   useEffect(() => { fetch() }, [fetch])
   return { snapshots, isLoading, refresh: fetch }
 }
@@ -115,12 +115,12 @@ export function useInstanceSnapshots(instanceId?: string) {
 export function useInstanceConfig(instanceId?: string) {
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instance_configs').select('*').eq('instance_id', instanceId).single(); setConfig(data?.config || null) } finally { setIsLoading(false) }
-  }, [instanceId, supabase])
+  }, [instanceId])
   useEffect(() => { fetch() }, [fetch])
   return { config, isLoading, refresh: fetch }
 }
@@ -128,12 +128,12 @@ export function useInstanceConfig(instanceId?: string) {
 export function useRunningInstances(userId?: string) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('instances').select('*').eq('owner_id', userId).eq('status', 'running').order('created_at', { ascending: false }); setInstances(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { instances, isLoading, refresh: fetch }
 }
@@ -141,8 +141,8 @@ export function useRunningInstances(userId?: string) {
 export function useInstancesByRegion() {
   const [byRegion, setByRegion] = useState<Record<string, any[]>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('instances').select('*')
@@ -150,7 +150,7 @@ export function useInstancesByRegion() {
       data?.forEach(i => { if (!grouped[i.region]) grouped[i.region] = []; grouped[i.region].push(i) })
       setByRegion(grouped)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { byRegion, isLoading, refresh: fetch }
 }

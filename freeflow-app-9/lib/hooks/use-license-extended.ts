@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useLicenses(userId?: string, status?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('licenses').select('*').order('created_at', { ascending: false })
@@ -28,12 +28,12 @@ export function useLicenses(userId?: string, status?: string) {
 export function useLicenseKeys(licenseId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!licenseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('license_keys').select('*').eq('license_id', licenseId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [licenseId, supabase])
+  }, [licenseId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

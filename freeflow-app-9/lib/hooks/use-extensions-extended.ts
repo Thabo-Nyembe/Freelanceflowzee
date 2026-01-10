@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useExtension(extensionId?: string) {
   const [extension, setExtension] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extensions').select('*, extension_versions(*)').eq('id', extensionId).single(); setExtension(data) } finally { setIsLoading(false) }
-  }, [extensionId, supabase])
+  }, [extensionId])
   useEffect(() => { fetch() }, [fetch])
   return { extension, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useExtension(extensionId?: string) {
 export function useExtensions(options?: { category?: string; status?: string; developer_id?: string; search?: string; limit?: number }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('extensions').select('*')
@@ -44,8 +44,8 @@ export function useExtensions(options?: { category?: string; status?: string; de
 export function useUserExtensions(userId?: string, options?: { is_active?: boolean }) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -76,8 +76,8 @@ export function useIsExtensionInstalled(extensionId?: string, userId?: string) {
 export function useExtensionSettings(extensionId?: string, userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!extensionId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extension_settings').select('*').eq('extension_id', extensionId).eq('user_id', userId).single(); setSettings(data?.settings || null) } finally { setIsLoading(false) }
@@ -89,12 +89,12 @@ export function useExtensionSettings(extensionId?: string, userId?: string) {
 export function useExtensionVersions(extensionId?: string) {
   const [versions, setVersions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!extensionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extension_versions').select('*').eq('extension_id', extensionId).order('published_at', { ascending: false }); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [extensionId, supabase])
+  }, [extensionId])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -102,11 +102,11 @@ export function useExtensionVersions(extensionId?: string) {
 export function usePopularExtensions(limit?: number) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('extensions').select('*').eq('status', 'published').order('install_count', { ascending: false }).limit(limit || 10); setExtensions(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { extensions, isLoading, refresh: fetch }
 }
@@ -114,15 +114,15 @@ export function usePopularExtensions(limit?: number) {
 export function useExtensionCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('extensions').select('category').eq('status', 'published')
       const uniqueCategories = [...new Set(data?.map(e => e.category).filter(Boolean))]
       setCategories(uniqueCategories as string[])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -130,12 +130,12 @@ export function useExtensionCategories() {
 export function useDeveloperExtensions(developerId?: string) {
   const [extensions, setExtensions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!developerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extensions').select('*').eq('developer_id', developerId).order('created_at', { ascending: false }); setExtensions(data || []) } finally { setIsLoading(false) }
-  }, [developerId, supabase])
+  }, [developerId])
   useEffect(() => { fetch() }, [fetch])
   return { extensions, isLoading, refresh: fetch }
 }

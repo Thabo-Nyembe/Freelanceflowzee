@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useChangelog(changelogId?: string) {
   const [changelog, setChangelog] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!changelogId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('changelogs').select('*').eq('id', changelogId).single()
       setChangelog(data)
     } finally { setIsLoading(false) }
-  }, [changelogId, supabase])
+  }, [changelogId])
   useEffect(() => { fetch() }, [fetch])
   return { changelog, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useChangelog(changelogId?: string) {
 export function useChangelogs(options?: { productId?: string; isPublished?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('changelogs').select('*')
@@ -44,8 +44,8 @@ export function useChangelogs(options?: { productId?: string; isPublished?: bool
 export function useLatestChangelog(productId?: string) {
   const [changelog, setChangelog] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('changelogs').select('*').eq('is_published', true)
@@ -53,7 +53,7 @@ export function useLatestChangelog(productId?: string) {
       const { data } = await query.order('release_date', { ascending: false }).limit(1).single()
       setChangelog(data)
     } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { changelog, isLoading, refresh: fetch }
 }

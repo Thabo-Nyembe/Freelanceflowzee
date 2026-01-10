@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useLayouts(layoutType?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('layouts').select('*').order('name', { ascending: true })
@@ -28,8 +28,8 @@ export function useLayouts(layoutType?: string, isActive?: boolean) {
 export function useUserLayout(userId?: string, layoutType?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,15 +46,15 @@ export function useUserLayout(userId?: string, layoutType?: string) {
 export function useLayoutSections(layoutId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!layoutId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('layout_sections').select('*').eq('layout_id', layoutId).order('sort_order', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [layoutId, supabase])
+  }, [layoutId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

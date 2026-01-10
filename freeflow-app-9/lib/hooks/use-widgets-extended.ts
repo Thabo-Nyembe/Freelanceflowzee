@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useWidget(widgetId?: string) {
   const [widget, setWidget] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!widgetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('widgets').select('*').eq('id', widgetId).single(); setWidget(data) } finally { setIsLoading(false) }
-  }, [widgetId, supabase])
+  }, [widgetId])
   useEffect(() => { fetch() }, [fetch])
   return { widget, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useWidget(widgetId?: string) {
 export function useWidgets(options?: { type?: string; is_active?: boolean; limit?: number }) {
   const [widgets, setWidgets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('widgets').select('*')
@@ -42,8 +42,8 @@ export function useWidgets(options?: { type?: string; is_active?: boolean; limit
 export function useWidgetInstances(options?: { widget_id?: string; dashboard_id?: string; user_id?: string }) {
   const [instances, setInstances] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('widget_instances').select('*, widgets(*)')
@@ -61,12 +61,12 @@ export function useWidgetInstances(options?: { widget_id?: string; dashboard_id?
 export function useWidgetSettings(instanceId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('widget_settings').select('*').eq('instance_id', instanceId).single(); setSettings(data) } finally { setIsLoading(false) }
-  }, [instanceId, supabase])
+  }, [instanceId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -74,12 +74,12 @@ export function useWidgetSettings(instanceId?: string) {
 export function useWidgetData(instanceId?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!instanceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: widgetData } = await supabase.from('widget_data').select('*').eq('instance_id', instanceId).order('created_at', { ascending: false }).limit(1).single(); setData(widgetData) } finally { setIsLoading(false) }
-  }, [instanceId, supabase])
+  }, [instanceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -87,11 +87,11 @@ export function useWidgetData(instanceId?: string) {
 export function useActiveWidgets() {
   const [widgets, setWidgets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('widgets').select('*').eq('is_active', true).order('name', { ascending: true }); setWidgets(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { widgets, isLoading, refresh: fetch }
 }

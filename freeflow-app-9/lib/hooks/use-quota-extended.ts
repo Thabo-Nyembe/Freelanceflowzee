@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useQuota(entityId?: string, entityType?: string, quotaType?: string) {
   const [quota, setQuota] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !quotaType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useQuota(entityId?: string, entityType?: string, quotaType?: str
 export function useQuotas(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useQuotaStatus(entityId?: string, entityType?: string, quotaType
   const [used, setUsed] = useState(0)
   const [limit, setLimit] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !quotaType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

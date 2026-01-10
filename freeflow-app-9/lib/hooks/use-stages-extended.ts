@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useStage(stageId?: string) {
   const [stage, setStage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('stages').select('*, stage_transitions(*), stage_rules(*), stage_automations(*)').eq('id', stageId).single(); setStage(data) } finally { setIsLoading(false) }
-  }, [stageId, supabase])
+  }, [stageId])
   useEffect(() => { fetch() }, [fetch])
   return { stage, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useStage(stageId?: string) {
 export function useStages(options?: { pipeline_id?: string; is_active?: boolean; search?: string; limit?: number }) {
   const [stages, setStages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('stages').select('*, stage_assignments(count)')
@@ -43,8 +43,8 @@ export function useStages(options?: { pipeline_id?: string; is_active?: boolean;
 export function useStageTransitions(pipelineId?: string) {
   const [transitions, setTransitions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -54,7 +54,7 @@ export function useStageTransitions(pipelineId?: string) {
       const { data } = await supabase.from('stage_transitions').select('*, from_stage:from_stage_id(*), to_stage:to_stage_id(*)').in('from_stage_id', stageIds)
       setTransitions(data || [])
     } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { transitions, isLoading, refresh: fetch }
 }
@@ -62,8 +62,8 @@ export function useStageTransitions(pipelineId?: string) {
 export function useStageHistory(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -78,8 +78,8 @@ export function useStageHistory(entityType?: string, entityId?: string, options?
 export function useCurrentStage(entityType?: string, entityId?: string) {
   const [assignment, setAssignment] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -94,15 +94,15 @@ export function useCurrentStage(entityType?: string, entityId?: string) {
 export function useAvailableTransitions(stageId?: string) {
   const [transitions, setTransitions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('stage_transitions').select('*, to_stage:to_stage_id(*)').eq('from_stage_id', stageId).eq('is_active', true)
       setTransitions(data || [])
     } finally { setIsLoading(false) }
-  }, [stageId, supabase])
+  }, [stageId])
   useEffect(() => { fetch() }, [fetch])
   return { transitions, isLoading, refresh: fetch }
 }
@@ -110,15 +110,15 @@ export function useAvailableTransitions(stageId?: string) {
 export function useStageRules(stageId?: string) {
   const [rules, setRules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!stageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('stage_rules').select('*').eq('stage_id', stageId).order('name', { ascending: true })
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [stageId, supabase])
+  }, [stageId])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -126,8 +126,8 @@ export function useStageRules(stageId?: string) {
 export function usePipelineStats(pipelineId?: string) {
   const [stats, setStats] = useState<{ stages: number; itemsByStage: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -136,7 +136,7 @@ export function usePipelineStats(pipelineId?: string) {
       stages?.forEach(s => { itemsByStage[s.name] = (s.stage_assignments as any)?.[0]?.count || 0 })
       setStats({ stages: stages?.length || 0, itemsByStage })
     } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

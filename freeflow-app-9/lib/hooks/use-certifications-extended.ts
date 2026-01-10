@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCertification(certificationId?: string) {
   const [certification, setCertification] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!certificationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('certifications').select('*').eq('id', certificationId).single(); setCertification(data) } finally { setIsLoading(false) }
-  }, [certificationId, supabase])
+  }, [certificationId])
   useEffect(() => { fetch() }, [fetch])
   return { certification, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCertification(certificationId?: string) {
 export function useCertifications(options?: { user_id?: string; issuer?: string; status?: string; limit?: number }) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('certifications').select('*')
@@ -43,8 +43,8 @@ export function useCertifications(options?: { user_id?: string; issuer?: string;
 export function useExpiringCertifications(userId?: string, daysAhead?: number) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,12 +61,12 @@ export function useExpiringCertifications(userId?: string, daysAhead?: number) {
 export function useActiveCertifications(userId?: string) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('certifications').select('*').eq('user_id', userId).eq('status', 'active').order('issued_date', { ascending: false }); setCertifications(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { certifications, isLoading, refresh: fetch }
 }
@@ -74,8 +74,8 @@ export function useActiveCertifications(userId?: string) {
 export function useCertificationCourses(options?: { issuer?: string; is_active?: boolean; limit?: number }) {
   const [courses, setCourses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('certification_courses').select('*')
@@ -92,12 +92,12 @@ export function useCertificationCourses(options?: { issuer?: string; is_active?:
 export function useCertificationBadges(userId?: string) {
   const [badges, setBadges] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('certification_badges').select('*').eq('user_id', userId).order('awarded_at', { ascending: false }); setBadges(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { badges, isLoading, refresh: fetch }
 }
@@ -105,8 +105,8 @@ export function useCertificationBadges(userId?: string) {
 export function useCertificationStats(userId?: string) {
   const [stats, setStats] = useState<{ total: number; active: number; expired: number; expiringSoon: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -122,7 +122,7 @@ export function useCertificationStats(userId?: string) {
         expiringSoon: data.filter(c => c.status === 'active' && c.expiry_date && new Date(c.expiry_date) <= thirtyDays && new Date(c.expiry_date) > now).length
       })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

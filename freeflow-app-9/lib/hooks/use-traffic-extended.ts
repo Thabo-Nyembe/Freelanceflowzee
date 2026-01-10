@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrafficSource(sourceId?: string) {
   const [source, setSource] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('traffic_sources').select('*').eq('id', sourceId).single(); setSource(data) } finally { setIsLoading(false) }
-  }, [sourceId, supabase])
+  }, [sourceId])
   useEffect(() => { fetch() }, [fetch])
   return { source, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTrafficSource(sourceId?: string) {
 export function useTrafficSources(options?: { type?: string; campaign_id?: string; is_active?: boolean; limit?: number }) {
   const [sources, setSources] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('traffic_sources').select('*')
@@ -43,8 +43,8 @@ export function useTrafficSources(options?: { type?: string; campaign_id?: strin
 export function useTrafficAnalytics(options?: { source_id?: string; page_path?: string; days?: number }) {
   const [analytics, setAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); let query = supabase.from('traffic_analytics').select('*').gte('created_at', since.toISOString()); if (options?.source_id) query = query.eq('source_id', options.source_id); if (options?.page_path) query = query.eq('page_path', options.page_path); const { data } = await query.order('created_at', { ascending: false }); setAnalytics(data || []) } finally { setIsLoading(false) }
   }, [options?.source_id, options?.page_path, options?.days, supabase])
@@ -55,8 +55,8 @@ export function useTrafficAnalytics(options?: { source_id?: string; page_path?: 
 export function useTrafficCampaigns(options?: { status?: string; is_active?: boolean; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('traffic_campaigns').select('*')
@@ -73,8 +73,8 @@ export function useTrafficCampaigns(options?: { status?: string; is_active?: boo
 export function useTrafficConversions(options?: { source_id?: string; campaign_id?: string; days?: number }) {
   const [conversions, setConversions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); let query = supabase.from('traffic_conversions').select('*').gte('created_at', since.toISOString()); if (options?.source_id) query = query.eq('source_id', options.source_id); if (options?.campaign_id) query = query.eq('campaign_id', options.campaign_id); const { data } = await query.order('created_at', { ascending: false }); setConversions(data || []) } finally { setIsLoading(false) }
   }, [options?.source_id, options?.campaign_id, options?.days, supabase])

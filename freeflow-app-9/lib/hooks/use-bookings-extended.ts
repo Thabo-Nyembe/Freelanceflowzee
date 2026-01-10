@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useBooking(bookingId?: string) {
   const [booking, setBooking] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!bookingId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('bookings').select('*, booking_services(*)').eq('id', bookingId).single(); setBooking(data) } finally { setIsLoading(false) }
-  }, [bookingId, supabase])
+  }, [bookingId])
   useEffect(() => { fetch() }, [fetch])
   return { booking, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useBooking(bookingId?: string) {
 export function useBookings(options?: { user_id?: string; provider_id?: string; status?: string; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('bookings').select('*')
@@ -43,8 +43,8 @@ export function useBookings(options?: { user_id?: string; provider_id?: string; 
 export function useUpcomingBookings(userId?: string, options?: { as_provider?: boolean; limit?: number }) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useUpcomingBookings(userId?: string, options?: { as_provider?: b
 export function useAvailableSlots(providerId?: string, date?: string, serviceId?: string) {
   const [slots, setSlots] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId || !date) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -80,12 +80,12 @@ export function useAvailableSlots(providerId?: string, date?: string, serviceId?
 export function useBookingServices(providerId?: string) {
   const [services, setServices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('booking_services').select('*').eq('provider_id', providerId).eq('is_active', true).order('name', { ascending: true }); setServices(data || []) } finally { setIsLoading(false) }
-  }, [providerId, supabase])
+  }, [providerId])
   useEffect(() => { fetch() }, [fetch])
   return { services, isLoading, refresh: fetch }
 }
@@ -93,8 +93,8 @@ export function useBookingServices(providerId?: string) {
 export function useBookingStats(providerId?: string, options?: { date_from?: string; date_to?: string }) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -115,8 +115,8 @@ export function useBookingStats(providerId?: string, options?: { date_from?: str
 export function useBookingsForDate(providerId?: string, date?: string) {
   const [bookings, setBookings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!providerId || !date) { setIsLoading(false); return }
     setIsLoading(true)
     try {

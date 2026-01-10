@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useResponse(responseId?: string) {
   const [response, setResponse] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!responseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('responses').select('*, response_templates(*), users(*), response_analytics(*)').eq('id', responseId).single(); setResponse(data) } finally { setIsLoading(false) }
-  }, [responseId, supabase])
+  }, [responseId])
   useEffect(() => { fetch() }, [fetch])
   return { response, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useResponse(responseId?: string) {
 export function useResponses(options?: { entity_type?: string; entity_id?: string; user_id?: string; status?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('responses').select('*, response_templates(*), users(*)')
@@ -46,8 +46,8 @@ export function useResponses(options?: { entity_type?: string; entity_id?: strin
 export function useResponseTemplates(options?: { category_id?: string; user_id?: string; is_shared?: boolean; search?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('response_templates').select('*, response_categories(*), users(*)')
@@ -66,8 +66,8 @@ export function useResponseTemplates(options?: { category_id?: string; user_id?:
 export function useResponseCategories(options?: { parent_id?: string | null; is_active?: boolean }) {
   const [categories, setCategories] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('response_categories').select('*')
@@ -87,12 +87,12 @@ export function useResponseCategories(options?: { parent_id?: string | null; is_
 export function useResponseShortcuts(userId?: string) {
   const [shortcuts, setShortcuts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('response_shortcuts').select('*, response_templates(*)').eq('user_id', userId).order('shortcut', { ascending: true }); setShortcuts(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { shortcuts, isLoading, refresh: fetch }
 }
@@ -100,8 +100,8 @@ export function useResponseShortcuts(userId?: string) {
 export function useMyTemplates(userId?: string, options?: { category_id?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,8 +118,8 @@ export function useMyTemplates(userId?: string, options?: { category_id?: string
 export function usePopularTemplates(options?: { category_id?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('response_templates').select('*, response_categories(*)').eq('is_active', true).eq('is_shared', true)
@@ -135,8 +135,8 @@ export function usePopularTemplates(options?: { category_id?: string; limit?: nu
 export function useRecentTemplates(userId?: string, options?: { limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -151,8 +151,8 @@ export function useRecentTemplates(userId?: string, options?: { limit?: number }
 export function useEntityResponses(entityType?: string, entityId?: string, options?: { limit?: number }) {
   const [responses, setResponses] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

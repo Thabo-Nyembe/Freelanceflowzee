@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function usePatch(patchId?: string) {
   const [patch, setPatch] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!patchId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('patches').select('*').eq('id', patchId).single()
       setPatch(data)
     } finally { setIsLoading(false) }
-  }, [patchId, supabase])
+  }, [patchId])
   useEffect(() => { fetch() }, [fetch])
   return { patch, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function usePatch(patchId?: string) {
 export function usePatches(options?: { productId?: string; status?: string; isCritical?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('patches').select('*')
@@ -46,8 +46,8 @@ export function useCriticalPatches(productId?: string) {
   const [data, setData] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('patches').select('*').eq('is_critical', true).eq('status', 'released')
@@ -56,7 +56,7 @@ export function useCriticalPatches(productId?: string) {
       setData(result || [])
       setCount(result?.length || 0)
     } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { data, count, isLoading, refresh: fetch }
 }
@@ -64,8 +64,8 @@ export function useCriticalPatches(productId?: string) {
 export function usePatchesByVersion(version?: string, productId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!version) { setIsLoading(false); return }
     setIsLoading(true)
     try {

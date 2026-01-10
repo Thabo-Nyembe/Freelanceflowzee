@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useTags(tagType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tags').select('*').order('name', { ascending: true })
@@ -19,7 +19,7 @@ export function useTags(tagType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [tagType, supabase])
+  }, [tagType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useTags(tagType?: string) {
 export function useTagAssignments(itemId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tag_assignments').select('*, tags(*)').order('created_at', { ascending: false })

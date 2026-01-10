@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useNewsletter(newsletterId?: string) {
   const [newsletter, setNewsletter] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('newsletters').select('*, newsletter_templates(*), newsletter_segments(*)').eq('id', newsletterId).single(); setNewsletter(data) } finally { setIsLoading(false) }
-  }, [newsletterId, supabase])
+  }, [newsletterId])
   useEffect(() => { fetch() }, [fetch])
   return { newsletter, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useNewsletter(newsletterId?: string) {
 export function useNewsletters(options?: { organization_id?: string; status?: string }) {
   const [newsletters, setNewsletters] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('newsletters').select('*')
@@ -42,8 +42,8 @@ export function useNewsletters(options?: { organization_id?: string; status?: st
 export function useNewsletterSubscribers(newsletterId?: string, options?: { status?: string; limit?: number }) {
   const [subscribers, setSubscribers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -60,8 +60,8 @@ export function useNewsletterSubscribers(newsletterId?: string, options?: { stat
 export function useNewsletterCampaigns(newsletterId?: string, options?: { status?: string; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -78,12 +78,12 @@ export function useNewsletterCampaigns(newsletterId?: string, options?: { status
 export function useNewsletterTemplates(newsletterId?: string) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('newsletter_templates').select('*').eq('newsletter_id', newsletterId).order('name', { ascending: true }); setTemplates(data || []) } finally { setIsLoading(false) }
-  }, [newsletterId, supabase])
+  }, [newsletterId])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -91,12 +91,12 @@ export function useNewsletterTemplates(newsletterId?: string) {
 export function useNewsletterSegments(newsletterId?: string) {
   const [segments, setSegments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('newsletter_segments').select('*').eq('newsletter_id', newsletterId).order('name', { ascending: true }); setSegments(data || []) } finally { setIsLoading(false) }
-  }, [newsletterId, supabase])
+  }, [newsletterId])
   useEffect(() => { fetch() }, [fetch])
   return { segments, isLoading, refresh: fetch }
 }
@@ -104,8 +104,8 @@ export function useNewsletterSegments(newsletterId?: string) {
 export function useCampaignAnalytics(campaignId?: string) {
   const [analytics, setAnalytics] = useState<{ sent: number; delivered: number; opened: number; clicked: number; bounced: number; unsubscribed: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!campaignId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -114,7 +114,7 @@ export function useCampaignAnalytics(campaignId?: string) {
       data?.forEach(a => { if (stats[a.event_type as keyof typeof stats] !== undefined) stats[a.event_type as keyof typeof stats]++ })
       setAnalytics(stats)
     } finally { setIsLoading(false) }
-  }, [campaignId, supabase])
+  }, [campaignId])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -122,8 +122,8 @@ export function useCampaignAnalytics(campaignId?: string) {
 export function useNewsletterStats(newsletterId?: string) {
   const [stats, setStats] = useState<{ totalSubscribers: number; activeSubscribers: number; totalCampaigns: number; sentCampaigns: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -137,7 +137,7 @@ export function useNewsletterStats(newsletterId?: string) {
       const sentCampaigns = campaignsRes.data?.filter(c => c.status === 'sent').length || 0
       setStats({ totalSubscribers, activeSubscribers, totalCampaigns, sentCampaigns })
     } finally { setIsLoading(false) }
-  }, [newsletterId, supabase])
+  }, [newsletterId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -145,8 +145,8 @@ export function useNewsletterStats(newsletterId?: string) {
 export function useSubscriptionStatus(email?: string, newsletterId?: string) {
   const [subscription, setSubscription] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!email || !newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('newsletter_subscribers').select('*').eq('newsletter_id', newsletterId).eq('email', email).single(); setSubscription(data) } finally { setIsLoading(false) }

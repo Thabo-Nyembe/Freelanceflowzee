@@ -11,15 +11,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useMessage(messageId?: string) {
   const [message, setMessage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('messages').select('*, message_attachments(*), message_mentions(*), message_reactions(*)').eq('id', messageId).single()
       setMessage(data)
     } finally { setIsLoading(false) }
-  }, [messageId, supabase])
+  }, [messageId])
   useEffect(() => { fetch() }, [fetch])
   return { message, isLoading, refresh: fetch }
 }
@@ -27,8 +27,8 @@ export function useMessage(messageId?: string) {
 export function useMessages(options?: { channelId?: string; threadId?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('messages').select('*, message_attachments(*)').eq('is_deleted', false)
@@ -45,8 +45,8 @@ export function useMessages(options?: { channelId?: string; threadId?: string; l
 export function useDirectMessages(userId1?: string, userId2?: string, options?: { limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId1 || !userId2) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,15 +61,15 @@ export function useDirectMessages(userId1?: string, userId2?: string, options?: 
 export function useMessageAttachments(messageId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('message_attachments').select('*').eq('message_id', messageId).order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [messageId, supabase])
+  }, [messageId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -77,8 +77,8 @@ export function useMessageAttachments(messageId?: string) {
 export function useMessageMentions(userId?: string, options?: { isRead?: boolean; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -95,8 +95,8 @@ export function useMessageMentions(userId?: string, options?: { isRead?: boolean
 export function useMessageReactions(messageId?: string) {
   const [reactions, setReactions] = useState<{ emoji: string; count: number; users: any[] }[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -109,7 +109,7 @@ export function useMessageReactions(messageId?: string) {
       })
       setReactions(Object.values(grouped))
     } finally { setIsLoading(false) }
-  }, [messageId, supabase])
+  }, [messageId])
   useEffect(() => { fetch() }, [fetch])
   return { reactions, isLoading, refresh: fetch }
 }
@@ -117,15 +117,15 @@ export function useMessageReactions(messageId?: string) {
 export function useMessageReadReceipts(messageId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!messageId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('message_read_receipts').select('*, users(id, name, avatar_url)').eq('message_id', messageId).order('read_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [messageId, supabase])
+  }, [messageId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -134,8 +134,8 @@ export function useMessageThread(threadId?: string) {
   const [thread, setThread] = useState<any>(null)
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!threadId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -146,7 +146,7 @@ export function useMessageThread(threadId?: string) {
       setThread(threadRes.data)
       setMessages(messagesRes.data || [])
     } finally { setIsLoading(false) }
-  }, [threadId, supabase])
+  }, [threadId])
   useEffect(() => { fetch() }, [fetch])
   return { thread, messages, isLoading, refresh: fetch }
 }
@@ -163,7 +163,7 @@ export function useMessagesRealtime(channelId?: string) {
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages', filter: `channel_id=eq.${channelId}` }, (payload) => setMessages(prev => prev.filter(m => m.id !== (payload.old as any).id)))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [channelId, supabase])
+  }, [channelId])
   return { messages }
 }
 
@@ -201,6 +201,6 @@ export function useUnreadMessageCount(userId?: string) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'message_read_receipts', filter: `user_id=eq.${userId}` }, updateCount)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId, supabase])
+  }, [userId])
   return count
 }

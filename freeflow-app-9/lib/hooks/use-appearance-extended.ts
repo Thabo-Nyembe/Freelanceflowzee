@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useAppearanceSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('appearance_settings').select('*').eq('user_id', userId).single(); setSettings(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useAppearanceSettings(userId?: string) {
 export function useAppearanceThemes(options?: { category?: string; is_public?: boolean }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('appearance_themes').select('*')
@@ -42,12 +42,12 @@ export function useAppearanceThemes(options?: { category?: string; is_public?: b
 export function useAppearanceTheme(themeId?: string) {
   const [theme, setTheme] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!themeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('appearance_themes').select('*').eq('id', themeId).single(); setTheme(data) } finally { setIsLoading(false) }
-  }, [themeId, supabase])
+  }, [themeId])
   useEffect(() => { fetch() }, [fetch])
   return { theme, isLoading, refresh: fetch }
 }
@@ -55,8 +55,8 @@ export function useAppearanceTheme(themeId?: string) {
 export function usePublicThemes(options?: { category?: string; limit?: number }) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('appearance_themes').select('*').eq('is_public', true)
@@ -72,12 +72,12 @@ export function usePublicThemes(options?: { category?: string; limit?: number })
 export function useUserThemes(userId?: string) {
   const [themes, setThemes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('appearance_themes').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setThemes(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { themes, isLoading, refresh: fetch }
 }
@@ -85,11 +85,11 @@ export function useUserThemes(userId?: string) {
 export function useThemeCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('appearance_themes').select('category').eq('is_public', true); const unique = [...new Set((data || []).map(t => t.category).filter(Boolean))]; setCategories(unique) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }

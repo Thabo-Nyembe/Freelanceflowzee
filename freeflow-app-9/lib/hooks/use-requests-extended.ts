@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useRequest(requestId?: string) {
   const [request, setRequest] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('requests').select('*, request_types(*), request_comments(*), request_attachments(*), request_approvals(*), requester:requester_id(*), assignee:assignee_id(*)').eq('id', requestId).single(); setRequest(data) } finally { setIsLoading(false) }
-  }, [requestId, supabase])
+  }, [requestId])
   useEffect(() => { fetch() }, [fetch])
   return { request, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useRequest(requestId?: string) {
 export function useRequests(options?: { requester_id?: string; assignee_id?: string; type_id?: string; status?: string; priority?: string; category?: string; search?: string; limit?: number }) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('requests').select('*, request_types(*), requester:requester_id(*), assignee:assignee_id(*), request_comments(count)')
@@ -47,8 +47,8 @@ export function useRequests(options?: { requester_id?: string; assignee_id?: str
 export function useMyRequests(userId?: string, options?: { status?: string; limit?: number }) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -65,8 +65,8 @@ export function useMyRequests(userId?: string, options?: { status?: string; limi
 export function useAssignedRequests(userId?: string, options?: { status?: string; priority?: string; limit?: number }) {
   const [requests, setRequests] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -84,8 +84,8 @@ export function useAssignedRequests(userId?: string, options?: { status?: string
 export function useRequestTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('request_types').select('*')
@@ -102,8 +102,8 @@ export function useRequestTypes(options?: { category?: string; is_active?: boole
 export function useRequestComments(requestId?: string, options?: { is_internal?: boolean }) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -120,12 +120,12 @@ export function useRequestComments(requestId?: string, options?: { is_internal?:
 export function useRequestAttachments(requestId?: string) {
   const [attachments, setAttachments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('request_attachments').select('*, users(*)').eq('request_id', requestId).order('created_at', { ascending: false }); setAttachments(data || []) } finally { setIsLoading(false) }
-  }, [requestId, supabase])
+  }, [requestId])
   useEffect(() => { fetch() }, [fetch])
   return { attachments, isLoading, refresh: fetch }
 }
@@ -133,12 +133,12 @@ export function useRequestAttachments(requestId?: string) {
 export function useRequestHistory(requestId?: string) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('request_history').select('*, users(*)').eq('request_id', requestId).order('created_at', { ascending: false }); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [requestId, supabase])
+  }, [requestId])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -146,12 +146,12 @@ export function useRequestHistory(requestId?: string) {
 export function useRequestApprovals(requestId?: string) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!requestId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('request_approvals').select('*, approver:approver_id(*)').eq('request_id', requestId).order('level', { ascending: true }); setApprovals(data || []) } finally { setIsLoading(false) }
-  }, [requestId, supabase])
+  }, [requestId])
   useEffect(() => { fetch() }, [fetch])
   return { approvals, isLoading, refresh: fetch }
 }
@@ -159,8 +159,8 @@ export function useRequestApprovals(requestId?: string) {
 export function usePendingApprovals(approverId?: string, options?: { limit?: number }) {
   const [approvals, setApprovals] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!approverId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -175,8 +175,8 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
 export function useRequestStats(options?: { requester_id?: string; assignee_id?: string; type_id?: string; from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ total: number; open: number; inProgress: number; completed: number; closed: number; byPriority: { [key: string]: number } } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('requests').select('status, priority')

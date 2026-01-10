@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useCustomization(customizationId?: string) {
   const [customization, setCustomization] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('customizations').select('*, customization_options(*)').eq('id', customizationId).single(); setCustomization(data) } finally { setIsLoading(false) }
-  }, [customizationId, supabase])
+  }, [customizationId])
   useEffect(() => { fetch() }, [fetch])
   return { customization, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useCustomization(customizationId?: string) {
 export function useCustomizations(options?: { type?: string; is_global?: boolean; is_active?: boolean }) {
   const [customizations, setCustomizations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('customizations').select('*')
@@ -43,8 +43,8 @@ export function useCustomizations(options?: { type?: string; is_global?: boolean
 export function useCustomizationPresets(options?: { type?: string; is_default?: boolean }) {
   const [presets, setPresets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('customization_presets').select('*')
@@ -62,8 +62,8 @@ export function useUserCustomizations(userId?: string) {
   const [customizations, setCustomizations] = useState<any[]>([])
   const [valuesMap, setValuesMap] = useState<Record<string, any>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -73,7 +73,7 @@ export function useUserCustomizations(userId?: string) {
       data?.forEach(c => { if (c.customization_id) map[c.customization_id] = c.value })
       setValuesMap(map)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { customizations, valuesMap, isLoading, refresh: fetch }
 }
@@ -81,8 +81,8 @@ export function useUserCustomizations(userId?: string) {
 export function useCustomizationValue(userId?: string, customizationId?: string) {
   const [value, setValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !customizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -99,12 +99,12 @@ export function useCustomizationValue(userId?: string, customizationId?: string)
 export function useCustomizationOptions(customizationId?: string) {
   const [options, setOptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!customizationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('customization_options').select('*').eq('customization_id', customizationId).order('order', { ascending: true }); setOptions(data || []) } finally { setIsLoading(false) }
-  }, [customizationId, supabase])
+  }, [customizationId])
   useEffect(() => { fetch() }, [fetch])
   return { options, isLoading, refresh: fetch }
 }
@@ -112,15 +112,15 @@ export function useCustomizationOptions(customizationId?: string) {
 export function useCustomizationTypes() {
   const [types, setTypes] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('customizations').select('type')
       const uniqueTypes = [...new Set(data?.map(c => c.type).filter(Boolean))]
       setTypes(uniqueTypes as string[])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -128,12 +128,12 @@ export function useCustomizationTypes() {
 export function useDefaultPreset(type?: string) {
   const [preset, setPreset] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!type) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('customization_presets').select('*').eq('type', type).eq('is_default', true).single(); setPreset(data) } finally { setIsLoading(false) }
-  }, [type, supabase])
+  }, [type])
   useEffect(() => { fetch() }, [fetch])
   return { preset, isLoading, refresh: fetch }
 }

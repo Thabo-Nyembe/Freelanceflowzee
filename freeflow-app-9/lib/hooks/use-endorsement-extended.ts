@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useEndorsements(userId?: string, skillId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('endorsements').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useEndorsements(userId?: string, skillId?: string) {
 export function useEndorsementCount(userId?: string, skillId?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

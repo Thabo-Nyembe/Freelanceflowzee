@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePhoneNumber(phoneId?: string) {
   const [phone, setPhone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('id', phoneId).single(); setPhone(data) } finally { setIsLoading(false) }
-  }, [phoneId, supabase])
+  }, [phoneId])
   useEffect(() => { fetch() }, [fetch])
   return { phone, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function usePhoneNumber(phoneId?: string) {
 export function usePhoneNumbers(userId?: string) {
   const [phones, setPhones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('user_id', userId).order('is_primary', { ascending: false }).order('created_at', { ascending: true }); setPhones(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { phones, isLoading, refresh: fetch }
 }
@@ -37,12 +37,12 @@ export function usePhoneNumbers(userId?: string) {
 export function usePrimaryPhone(userId?: string) {
   const [phone, setPhone] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('user_id', userId).eq('is_primary', true).single(); setPhone(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { phone, isLoading, refresh: fetch }
 }
@@ -50,12 +50,12 @@ export function usePrimaryPhone(userId?: string) {
 export function useVerifiedPhones(userId?: string) {
   const [phones, setPhones] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_numbers').select('*').eq('user_id', userId).eq('is_verified', true).order('is_primary', { ascending: false }); setPhones(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { phones, isLoading, refresh: fetch }
 }
@@ -63,8 +63,8 @@ export function useVerifiedPhones(userId?: string) {
 export function usePhoneCalls(phoneId?: string, options?: { direction?: string; status?: string; from_date?: string; limit?: number }) {
   const [calls, setCalls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -83,8 +83,8 @@ export function usePhoneCalls(phoneId?: string, options?: { direction?: string; 
 export function usePhoneSms(phoneId?: string, options?: { direction?: string; status?: string; limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -102,12 +102,12 @@ export function usePhoneSms(phoneId?: string, options?: { direction?: string; st
 export function usePhoneSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('phone_settings').select('*').eq('user_id', userId).single(); setSettings(data || { sms_notifications: true, call_forwarding: false, voicemail_enabled: true }) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -115,8 +115,8 @@ export function usePhoneSettings(userId?: string) {
 export function usePhoneLogs(phoneId?: string, options?: { action?: string; limit?: number }) {
   const [logs, setLogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -133,8 +133,8 @@ export function usePhoneLogs(phoneId?: string, options?: { action?: string; limi
 export function useRecentCalls(userId?: string, options?: { limit?: number }) {
   const [calls, setCalls] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -152,8 +152,8 @@ export function useRecentCalls(userId?: string, options?: { limit?: number }) {
 export function useCallStats(phoneId?: string, options?: { from_date?: string; to_date?: string }) {
   const [stats, setStats] = useState<{ totalCalls: number; inbound: number; outbound: number; missed: number; totalDuration: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!phoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

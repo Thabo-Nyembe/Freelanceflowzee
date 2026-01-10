@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useReplies(parentId?: string, parentType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('replies').select('*').order('created_at', { ascending: true })
@@ -28,8 +28,8 @@ export function useReplies(parentId?: string, parentType?: string) {
 export function useReplyCount(parentId?: string, parentType?: string) {
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!parentId || !parentType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,15 +44,15 @@ export function useReplyCount(parentId?: string, parentType?: string) {
 export function useNestedReplies(replyId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!replyId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('replies').select('*').eq('reply_to_id', replyId).order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [replyId, supabase])
+  }, [replyId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

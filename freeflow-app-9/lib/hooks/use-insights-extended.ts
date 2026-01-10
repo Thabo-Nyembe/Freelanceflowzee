@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useInsight(insightId?: string) {
   const [insight, setInsight] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!insightId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('insights').select('*').eq('id', insightId).single(); setInsight(data) } finally { setIsLoading(false) }
-  }, [insightId, supabase])
+  }, [insightId])
   useEffect(() => { fetch() }, [fetch])
   return { insight, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useInsight(insightId?: string) {
 export function useInsights(options?: { type?: string; source?: string; created_by?: string; is_public?: boolean; limit?: number }) {
   const [insights, setInsights] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('insights').select('*')
@@ -44,8 +44,8 @@ export function useInsights(options?: { type?: string; source?: string; created_
 export function useInsightReports(options?: { created_by?: string; limit?: number }) {
   const [reports, setReports] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('insight_reports').select('*')
@@ -61,12 +61,12 @@ export function useInsightReports(options?: { created_by?: string; limit?: numbe
 export function useInsightDashboard(dashboardId?: string) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('insight_dashboards').select('*, insight_widgets(*)').eq('id', dashboardId).single(); setDashboard(data) } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { dashboard, isLoading, refresh: fetch }
 }
@@ -74,8 +74,8 @@ export function useInsightDashboard(dashboardId?: string) {
 export function useInsightDashboards(options?: { created_by?: string; is_public?: boolean }) {
   const [dashboards, setDashboards] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('insight_dashboards').select('*')
@@ -92,12 +92,12 @@ export function useInsightDashboards(options?: { created_by?: string; is_public?
 export function useDashboardWidgets(dashboardId?: string) {
   const [widgets, setWidgets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!dashboardId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('insight_widgets').select('*, insights(*)').eq('dashboard_id', dashboardId).order('position', { ascending: true }); setWidgets(data || []) } finally { setIsLoading(false) }
-  }, [dashboardId, supabase])
+  }, [dashboardId])
   useEffect(() => { fetch() }, [fetch])
   return { widgets, isLoading, refresh: fetch }
 }
@@ -105,8 +105,8 @@ export function useDashboardWidgets(dashboardId?: string) {
 export function useInsightAlerts(options?: { insight_id?: string; created_by?: string; is_active?: boolean }) {
   const [alerts, setAlerts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('insight_alerts').select('*')
@@ -124,8 +124,8 @@ export function useInsightAlerts(options?: { insight_id?: string; created_by?: s
 export function useInsightSchedules(options?: { created_by?: string; is_active?: boolean }) {
   const [schedules, setSchedules] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('insight_schedules').select('*, insights(*), insight_reports(*)')
@@ -142,12 +142,12 @@ export function useInsightSchedules(options?: { created_by?: string; is_active?:
 export function useDefaultDashboard(userId?: string) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('insight_dashboards').select('*, insight_widgets(*)').eq('created_by', userId).eq('is_default', true).single(); setDashboard(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { dashboard, isLoading, refresh: fetch }
 }
@@ -155,11 +155,11 @@ export function useDefaultDashboard(userId?: string) {
 export function usePublicInsights(limit?: number) {
   const [insights, setInsights] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('insights').select('*').eq('is_public', true).order('view_count', { ascending: false }).limit(limit || 20); setInsights(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { insights, isLoading, refresh: fetch }
 }

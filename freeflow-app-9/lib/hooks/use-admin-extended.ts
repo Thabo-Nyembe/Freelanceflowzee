@@ -10,11 +10,11 @@ import { createClient } from '@/lib/supabase/client'
 export function useAdminActivityLog(limit = 100) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_activity_log').select('*').order('created_at', { ascending: false }).limit(limit); setData(result || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -22,11 +22,11 @@ export function useAdminActivityLog(limit = 100) {
 export function useAdminAgents() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_agents').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -34,11 +34,11 @@ export function useAdminAgents() {
 export function useAdminAnalyticsEvents(limit = 100) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_analytics_events').select('*').order('created_at', { ascending: false }).limit(limit); setData(result || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -46,11 +46,11 @@ export function useAdminAnalyticsEvents(limit = 100) {
 export function useAdminAnalyticsGoals() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_analytics_goals').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -58,11 +58,11 @@ export function useAdminAnalyticsGoals() {
 export function useAdminAnalyticsReports() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_analytics_reports').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -70,12 +70,12 @@ export function useAdminAnalyticsReports() {
 export function useAdminCampaignSubscribers(campaignId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!campaignId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_campaign_subscribers').select('*').eq('campaign_id', campaignId); setData(result || []) } finally { setIsLoading(false) }
-  }, [campaignId, supabase])
+  }, [campaignId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -83,8 +83,8 @@ export function useAdminCampaignSubscribers(campaignId?: string) {
 export function useAdminCrmActivities(contactId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('admin_crm_activities').select('*').order('created_at', { ascending: false })
@@ -92,7 +92,7 @@ export function useAdminCrmActivities(contactId?: string) {
       const { data: result } = await query.limit(100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [contactId, supabase])
+  }, [contactId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -100,11 +100,11 @@ export function useAdminCrmActivities(contactId?: string) {
 export function useAdminCrmContacts() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_crm_contacts').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -112,11 +112,11 @@ export function useAdminCrmContacts() {
 export function useAdminCrmDeals() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_crm_deals').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -124,11 +124,11 @@ export function useAdminCrmDeals() {
 export function useAdminEmailCampaigns() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_email_campaigns').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -136,11 +136,11 @@ export function useAdminEmailCampaigns() {
 export function useAdminIntegrations() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_integrations').select('*').order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -148,11 +148,11 @@ export function useAdminIntegrations() {
 export function useAdminInvoiceReminders() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_invoice_reminders').select('*').order('reminder_date', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -160,11 +160,11 @@ export function useAdminInvoiceReminders() {
 export function useAdminInvoices() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_invoices').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -172,11 +172,11 @@ export function useAdminInvoices() {
 export function useAdminMarketingLeads() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_marketing_leads').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -184,11 +184,11 @@ export function useAdminMarketingLeads() {
 export function useAdminPayments() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_payments').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -196,8 +196,8 @@ export function useAdminPayments() {
 export function useAdminRolePermissions(roleId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('admin_role_permissions').select('*')
@@ -205,7 +205,7 @@ export function useAdminRolePermissions(roleId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [roleId, supabase])
+  }, [roleId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -213,11 +213,11 @@ export function useAdminRolePermissions(roleId?: string) {
 export function useAdminTeamMembers() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_team_members').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -225,11 +225,11 @@ export function useAdminTeamMembers() {
 export function useAdminWebhooks() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_webhooks').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -237,8 +237,8 @@ export function useAdminWebhooks() {
 export function useAdminWorkflowExecutions(workflowId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('admin_workflow_executions').select('*').order('started_at', { ascending: false })
@@ -246,7 +246,7 @@ export function useAdminWorkflowExecutions(workflowId?: string) {
       const { data: result } = await query.limit(100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [workflowId, supabase])
+  }, [workflowId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -254,11 +254,11 @@ export function useAdminWorkflowExecutions(workflowId?: string) {
 export function useAdminWorkflows() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('admin_workflows').select('*').order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

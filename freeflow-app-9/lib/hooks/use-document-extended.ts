@@ -10,12 +10,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useDocumentActivity(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_activity').select('*').eq('document_id', documentId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [documentId, supabase])
+  }, [documentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -23,12 +23,12 @@ export function useDocumentActivity(documentId?: string) {
 export function useDocumentComments(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_comments').select('*').eq('document_id', documentId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [documentId, supabase])
+  }, [documentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,12 +36,12 @@ export function useDocumentComments(documentId?: string) {
 export function useDocumentRequests(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_requests').select('*').eq('user_id', userId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -49,12 +49,12 @@ export function useDocumentRequests(userId?: string) {
 export function useDocumentShares(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_shares').select('*').eq('document_id', documentId).eq('is_active', true); setData(result || []) } finally { setIsLoading(false) }
-  }, [documentId, supabase])
+  }, [documentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -62,8 +62,8 @@ export function useDocumentShares(documentId?: string) {
 export function useDocumentTemplates(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('document_templates').select('*').order('name', { ascending: true })
@@ -71,7 +71,7 @@ export function useDocumentTemplates(userId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -79,12 +79,12 @@ export function useDocumentTemplates(userId?: string) {
 export function useDocumentTranslations(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_translations').select('*').eq('document_id', documentId).order('language', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [documentId, supabase])
+  }, [documentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -92,12 +92,12 @@ export function useDocumentTranslations(documentId?: string) {
 export function useDocumentVersions(documentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!documentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('document_versions').select('*').eq('document_id', documentId).order('version_number', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [documentId, supabase])
+  }, [documentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

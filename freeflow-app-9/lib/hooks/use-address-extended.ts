@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useAddresses(userId?: string, addressType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('addresses').select('*').order('is_default', { ascending: false })
@@ -28,8 +28,8 @@ export function useAddresses(userId?: string, addressType?: string) {
 export function useDefaultAddress(userId?: string, addressType?: string) {
   const [data, setData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -46,14 +46,14 @@ export function useDefaultAddress(userId?: string, addressType?: string) {
 export function useCountries() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('countries').select('*').eq('is_active', true).order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -61,8 +61,8 @@ export function useCountries() {
 export function useStates(countryCode?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('states').select('*').order('name', { ascending: true })
@@ -70,7 +70,7 @@ export function useStates(countryCode?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [countryCode, supabase])
+  }, [countryCode])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

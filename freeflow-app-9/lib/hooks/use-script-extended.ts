@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useScript(scriptId?: string) {
   const [script, setScript] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!scriptId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('scripts').select('*').eq('id', scriptId).single()
       setScript(data)
     } finally { setIsLoading(false) }
-  }, [scriptId, supabase])
+  }, [scriptId])
   useEffect(() => { fetch() }, [fetch])
   return { script, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useScript(scriptId?: string) {
 export function useScripts(options?: { scriptType?: string; language?: string; isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scripts').select('*')
@@ -45,8 +45,8 @@ export function useScripts(options?: { scriptType?: string; language?: string; i
 export function useScriptExecutions(scriptId?: string, limit = 50) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!scriptId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -61,8 +61,8 @@ export function useScriptExecutions(scriptId?: string, limit = 50) {
 export function useActiveScripts(scriptType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('scripts').select('*').eq('is_active', true)
@@ -70,7 +70,7 @@ export function useActiveScripts(scriptType?: string) {
       const { data: result } = await query.order('execution_count', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [scriptType, supabase])
+  }, [scriptType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -78,8 +78,8 @@ export function useActiveScripts(scriptType?: string) {
 export function useScriptStats(scriptId?: string) {
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!scriptId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -89,7 +89,7 @@ export function useScriptStats(scriptId?: string) {
       const avgDuration = total > 0 ? executions!.reduce((acc, e) => acc + (e.duration_ms || 0), 0) / total : 0
       setStats({ total, successful, failed: total - successful, successRate: total > 0 ? (successful / total) * 100 : 0, avgDuration })
     } finally { setIsLoading(false) }
-  }, [scriptId, supabase])
+  }, [scriptId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

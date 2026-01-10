@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useUpdate(updateId?: string) {
   const [update, setUpdate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('updates').select('*').eq('id', updateId).single()
       setUpdate(data)
     } finally { setIsLoading(false) }
-  }, [updateId, supabase])
+  }, [updateId])
   useEffect(() => { fetch() }, [fetch])
   return { update, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useUpdate(updateId?: string) {
 export function useUpdates(options?: { productId?: string; status?: string; updateType?: string }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('updates').select('*')
@@ -45,8 +45,8 @@ export function useUpdates(options?: { productId?: string; status?: string; upda
 export function useLatestUpdate(productId?: string) {
   const [update, setUpdate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('updates').select('*').eq('status', 'published')
@@ -54,7 +54,7 @@ export function useLatestUpdate(productId?: string) {
       const { data } = await query.order('published_at', { ascending: false }).limit(1).single()
       setUpdate(data)
     } finally { setIsLoading(false) }
-  }, [productId, supabase])
+  }, [productId])
   useEffect(() => { fetch() }, [fetch])
   return { update, isLoading, refresh: fetch }
 }

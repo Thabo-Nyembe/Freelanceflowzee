@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useStatus(entityId?: string, entityType?: string) {
   const [status, setStatus] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useStatus(entityId?: string, entityType?: string) {
 export function useStatusHistory(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -42,8 +42,8 @@ export function useStatusHistory(entityId?: string, entityType?: string) {
 export function useStatusCounts(entityType?: string) {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -52,7 +52,7 @@ export function useStatusCounts(entityType?: string) {
       data?.forEach(s => { result[s.status] = (result[s.status] || 0) + 1 })
       setCounts(result)
     } finally { setIsLoading(false) }
-  }, [entityType, supabase])
+  }, [entityType])
   useEffect(() => { fetch() }, [fetch])
   return { counts, isLoading, refresh: fetch }
 }

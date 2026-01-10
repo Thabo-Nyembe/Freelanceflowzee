@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTimer(timerId?: string) {
   const [timer, setTimer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!timerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timers').select('*').eq('id', timerId).single(); setTimer(data) } finally { setIsLoading(false) }
-  }, [timerId, supabase])
+  }, [timerId])
   useEffect(() => { fetch() }, [fetch])
   return { timer, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTimer(timerId?: string) {
 export function useTimers(options?: { user_id?: string; project_id?: string; status?: string; limit?: number }) {
   const [timers, setTimers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timers').select('*')
@@ -43,12 +43,12 @@ export function useTimers(options?: { user_id?: string; project_id?: string; sta
 export function useActiveTimer(userId?: string) {
   const [timer, setTimer] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timers').select('*').eq('user_id', userId).eq('status', 'running').order('started_at', { ascending: false }).limit(1).single(); setTimer(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { timer, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function useActiveTimer(userId?: string) {
 export function useTimerEntries(options?: { user_id?: string; project_id?: string; date?: string; limit?: number }) {
   const [entries, setEntries] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('timer_entries').select('*')
@@ -75,12 +75,12 @@ export function useTimerEntries(options?: { user_id?: string; project_id?: strin
 export function useTimerSettings(userId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('timer_settings').select('*').eq('user_id', userId).single(); setSettings(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -88,12 +88,12 @@ export function useTimerSettings(userId?: string) {
 export function useTodayTimers(userId?: string) {
   const [timers, setTimers] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const today = new Date().toISOString().split('T')[0]; const { data } = await supabase.from('timers').select('*').eq('user_id', userId).gte('created_at', today).order('created_at', { ascending: false }); setTimers(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { timers, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePipeline(pipelineId?: string) {
   const [pipeline, setPipeline] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_pipelines').select('*, ci_stages(*, ci_jobs(*))').eq('id', pipelineId).single(); setPipeline(data) } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { pipeline, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePipeline(pipelineId?: string) {
 export function usePipelines(options?: { project_id?: string; status?: string; branch?: string; limit?: number }) {
   const [pipelines, setPipelines] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('ci_pipelines').select('*')
@@ -43,12 +43,12 @@ export function usePipelines(options?: { project_id?: string; status?: string; b
 export function usePipelineStages(pipelineId?: string) {
   const [stages, setStages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_stages').select('*, ci_jobs(*)').eq('pipeline_id', pipelineId).order('position', { ascending: true }); setStages(data || []) } finally { setIsLoading(false) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   useEffect(() => { fetch() }, [fetch])
   return { stages, isLoading, refresh: fetch }
 }
@@ -56,8 +56,8 @@ export function usePipelineStages(pipelineId?: string) {
 export function usePipelineJobs(pipelineId?: string, stageId?: string) {
   const [jobs, setJobs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pipelineId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -74,12 +74,12 @@ export function usePipelineJobs(pipelineId?: string, stageId?: string) {
 export function useJobArtifacts(jobId?: string) {
   const [artifacts, setArtifacts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!jobId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_artifacts').select('*').eq('job_id', jobId).order('created_at', { ascending: false }); setArtifacts(data || []) } finally { setIsLoading(false) }
-  }, [jobId, supabase])
+  }, [jobId])
   useEffect(() => { fetch() }, [fetch])
   return { artifacts, isLoading, refresh: fetch }
 }
@@ -100,15 +100,15 @@ export function usePipelineRealtime(pipelineId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [pipelineId, supabase])
+  }, [pipelineId])
   return { pipeline, jobs }
 }
 
 export function usePipelineStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; successRate: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -121,7 +121,7 @@ export function usePipelineStats(projectId?: string) {
       const successRate = (successCount + failedCount) > 0 ? (successCount / (successCount + failedCount)) * 100 : 0
       setStats({ total, byStatus, successRate })
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -129,8 +129,8 @@ export function usePipelineStats(projectId?: string) {
 export function useRecentPipelines(projectId?: string, limit?: number) {
   const [pipelines, setPipelines] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_pipelines').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(limit || 10); setPipelines(data || []) } finally { setIsLoading(false) }

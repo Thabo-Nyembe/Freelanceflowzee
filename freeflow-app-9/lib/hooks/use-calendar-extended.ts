@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useCalendar(calendarId?: string) {
   const [calendar, setCalendar] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!calendarId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('calendars').select('*').eq('id', calendarId).single()
       setCalendar(data)
     } finally { setIsLoading(false) }
-  }, [calendarId, supabase])
+  }, [calendarId])
   useEffect(() => { fetch() }, [fetch])
   return { calendar, isLoading, refresh: fetch }
 }
@@ -26,15 +26,15 @@ export function useCalendar(calendarId?: string) {
 export function useUserCalendars(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('calendars').select('*').eq('user_id', userId).order('is_default', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -42,8 +42,8 @@ export function useUserCalendars(userId?: string) {
 export function useCalendarEvents(calendarId?: string, start?: string, end?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!calendarId || !start || !end) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -58,15 +58,15 @@ export function useCalendarEvents(calendarId?: string, start?: string, end?: str
 export function useSharedCalendars(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('calendar_shares').select('calendar_id, permission, calendars(*)').eq('shared_with_id', userId)
       setData(result?.map(cs => ({ ...cs.calendars, permission: cs.permission })) || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useProfile(profileId?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profiles').select('*, profile_settings(*), profile_links(*), profile_skills(*), profile_experience(*), profile_education(*), profile_certifications(*)').eq('id', profileId).single(); setProfile(data) } finally { setIsLoading(false) }
-  }, [profileId, supabase])
+  }, [profileId])
   useEffect(() => { fetch() }, [fetch])
   return { profile, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function useProfile(profileId?: string) {
 export function useProfileByUsername(username?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!username) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profiles').select('*, profile_settings(*), profile_links(*), profile_skills(*), profile_experience(*), profile_education(*), profile_certifications(*)').eq('username', username).single(); setProfile(data) } finally { setIsLoading(false) }
-  }, [username, supabase])
+  }, [username])
   useEffect(() => { fetch() }, [fetch])
   return { profile, isLoading, refresh: fetch }
 }
@@ -37,12 +37,12 @@ export function useProfileByUsername(username?: string) {
 export function useProfileByUserId(userId?: string) {
   const [profile, setProfile] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profiles').select('*, profile_settings(*), profile_links(*), profile_skills(*)').eq('user_id', userId).single(); setProfile(data) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { profile, isLoading, refresh: fetch }
 }
@@ -50,8 +50,8 @@ export function useProfileByUserId(userId?: string) {
 export function useProfiles(options?: { is_public?: boolean; is_verified?: boolean; search?: string; limit?: number }) {
   const [profiles, setProfiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('profiles').select('*, profile_skills(*)')
@@ -69,12 +69,12 @@ export function useProfiles(options?: { is_public?: boolean; is_verified?: boole
 export function useProfileSettings(profileId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profile_settings').select('*').eq('profile_id', profileId).single(); setSettings(data || { show_email: false, show_location: true, allow_messages: true }) } finally { setIsLoading(false) }
-  }, [profileId, supabase])
+  }, [profileId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -82,12 +82,12 @@ export function useProfileSettings(profileId?: string) {
 export function useProfileLinks(profileId?: string) {
   const [links, setLinks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profile_links').select('*').eq('profile_id', profileId).order('order', { ascending: true }); setLinks(data || []) } finally { setIsLoading(false) }
-  }, [profileId, supabase])
+  }, [profileId])
   useEffect(() => { fetch() }, [fetch])
   return { links, isLoading, refresh: fetch }
 }
@@ -95,12 +95,12 @@ export function useProfileLinks(profileId?: string) {
 export function useProfileSkills(profileId?: string) {
   const [skills, setSkills] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profile_skills').select('*').eq('profile_id', profileId).order('endorsement_count', { ascending: false }); setSkills(data || []) } finally { setIsLoading(false) }
-  }, [profileId, supabase])
+  }, [profileId])
   useEffect(() => { fetch() }, [fetch])
   return { skills, isLoading, refresh: fetch }
 }
@@ -108,12 +108,12 @@ export function useProfileSkills(profileId?: string) {
 export function useProfileExperience(profileId?: string) {
   const [experience, setExperience] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profile_experience').select('*').eq('profile_id', profileId).order('start_date', { ascending: false }); setExperience(data || []) } finally { setIsLoading(false) }
-  }, [profileId, supabase])
+  }, [profileId])
   useEffect(() => { fetch() }, [fetch])
   return { experience, isLoading, refresh: fetch }
 }
@@ -121,12 +121,12 @@ export function useProfileExperience(profileId?: string) {
 export function useProfileEducation(profileId?: string) {
   const [education, setEducation] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profile_education').select('*').eq('profile_id', profileId).order('start_year', { ascending: false }); setEducation(data || []) } finally { setIsLoading(false) }
-  }, [profileId, supabase])
+  }, [profileId])
   useEffect(() => { fetch() }, [fetch])
   return { education, isLoading, refresh: fetch }
 }
@@ -134,12 +134,12 @@ export function useProfileEducation(profileId?: string) {
 export function useProfileCertifications(profileId?: string) {
   const [certifications, setCertifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profile_certifications').select('*').eq('profile_id', profileId).order('issue_date', { ascending: false }); setCertifications(data || []) } finally { setIsLoading(false) }
-  }, [profileId, supabase])
+  }, [profileId])
   useEffect(() => { fetch() }, [fetch])
   return { certifications, isLoading, refresh: fetch }
 }
@@ -148,8 +148,8 @@ export function useProfileViews(profileId?: string, options?: { from_date?: stri
   const [views, setViews] = useState<any[]>([])
   const [totalViews, setTotalViews] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!profileId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -176,7 +176,7 @@ export function useUsernameAvailability(username?: string) {
       const { data, error } = await supabase.from('profiles').select('id').eq('username', username).single()
       if (error && error.code === 'PGRST116') { setIsAvailable(true) } else { setIsAvailable(false) }
     } finally { setIsLoading(false) }
-  }, [username, supabase])
+  }, [username])
   useEffect(() => { const timer = setTimeout(check, 500); return () => clearTimeout(timer) }, [check])
   return { isAvailable, isLoading }
 }
@@ -184,11 +184,11 @@ export function useUsernameAvailability(username?: string) {
 export function useVerifiedProfiles(options?: { limit?: number }) {
   const [profiles, setProfiles] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('profiles').select('*, profile_skills(*)').eq('is_public', true).eq('is_verified', true).order('view_count', { ascending: false }).limit(options?.limit || 20); setProfiles(data || []) } finally { setIsLoading(false) }
-  }, [options?.limit, supabase])
+  }, [options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { profiles, isLoading, refresh: fetch }
 }

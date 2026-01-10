@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePushNotification(notificationId?: string) {
   const [notification, setNotification] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!notificationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('push_notifications').select('*').eq('id', notificationId).single(); setNotification(data) } finally { setIsLoading(false) }
-  }, [notificationId, supabase])
+  }, [notificationId])
   useEffect(() => { fetch() }, [fetch])
   return { notification, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePushNotification(notificationId?: string) {
 export function usePushNotifications(options?: { user_id?: string; status?: string; limit?: number }) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('push_notifications').select('*')
@@ -42,12 +42,12 @@ export function usePushNotifications(options?: { user_id?: string; status?: stri
 export function usePushSubscriptions(userId?: string) {
   const [subscriptions, setSubscriptions] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('push_subscriptions').select('*').eq('user_id', userId).eq('is_active', true); setSubscriptions(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { subscriptions, isLoading, refresh: fetch }
 }
@@ -55,8 +55,8 @@ export function usePushSubscriptions(userId?: string) {
 export function usePushCampaigns(options?: { status?: string; limit?: number }) {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('push_campaigns').select('*')
@@ -72,12 +72,12 @@ export function usePushCampaigns(options?: { status?: string; limit?: number }) 
 export function useUnreadNotifications(userId?: string) {
   const [notifications, setNotifications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('push_notifications').select('*').eq('user_id', userId).is('read_at', null).order('created_at', { ascending: false }); setNotifications(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { notifications, isLoading, refresh: fetch }
 }

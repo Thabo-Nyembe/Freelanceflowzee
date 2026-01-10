@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useAllowance(entityId?: string, entityType?: string, allowanceType?: string) {
   const [allowance, setAllowance] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !allowanceType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useAllowance(entityId?: string, entityType?: string, allowanceTy
 export function useAllowances(entityId?: string, entityType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useAllowanceStatus(entityId?: string, entityType?: string, allow
   const [total, setTotal] = useState(0)
   const [isExpired, setIsExpired] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !allowanceType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useMenus(menuType?: string, isActive?: boolean) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('menus').select('*').order('name', { ascending: true })
@@ -28,8 +28,8 @@ export function useMenus(menuType?: string, isActive?: boolean) {
 export function useMenuItems(menuId?: string, parentId?: string | null) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('menu_items').select('*').order('sort_order', { ascending: true })
@@ -47,8 +47,8 @@ export function useMenuItems(menuId?: string, parentId?: string | null) {
 export function useMenuTree(menuId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!menuId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -58,7 +58,7 @@ export function useMenuTree(menuId?: string) {
       }
       setData(buildTree(items || []))
     } finally { setIsLoading(false) }
-  }, [menuId, supabase])
+  }, [menuId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

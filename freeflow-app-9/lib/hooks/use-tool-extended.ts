@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTool(toolId?: string) {
   const [tool, setTool] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!toolId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tools').select('*').eq('id', toolId).single(); setTool(data) } finally { setIsLoading(false) }
-  }, [toolId, supabase])
+  }, [toolId])
   useEffect(() => { fetch() }, [fetch])
   return { tool, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTool(toolId?: string) {
 export function useTools(options?: { type?: string; is_active?: boolean; limit?: number }) {
   const [tools, setTools] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tools').select('*')
@@ -42,12 +42,12 @@ export function useTools(options?: { type?: string; is_active?: boolean; limit?:
 export function useToolSettings(toolId?: string) {
   const [settings, setSettings] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!toolId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tool_settings').select('*').eq('tool_id', toolId).single(); setSettings(data) } finally { setIsLoading(false) }
-  }, [toolId, supabase])
+  }, [toolId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -55,8 +55,8 @@ export function useToolSettings(toolId?: string) {
 export function useToolUsage(toolId?: string, options?: { days?: number }) {
   const [usage, setUsage] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!toolId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); const { data } = await supabase.from('tool_usage').select('*').eq('tool_id', toolId).gte('created_at', since.toISOString()).order('created_at', { ascending: false }); setUsage(data || []) } finally { setIsLoading(false) }
@@ -68,12 +68,12 @@ export function useToolUsage(toolId?: string, options?: { days?: number }) {
 export function useToolIntegrations(toolId?: string) {
   const [integrations, setIntegrations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!toolId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tool_integrations').select('*').eq('tool_id', toolId); setIntegrations(data || []) } finally { setIsLoading(false) }
-  }, [toolId, supabase])
+  }, [toolId])
   useEffect(() => { fetch() }, [fetch])
   return { integrations, isLoading, refresh: fetch }
 }
@@ -81,11 +81,11 @@ export function useToolIntegrations(toolId?: string) {
 export function useActiveTools() {
   const [tools, setTools] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('tools').select('*').eq('is_active', true).order('name', { ascending: true }); setTools(data || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { tools, isLoading, refresh: fetch }
 }

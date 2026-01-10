@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTranslation(translationId?: string) {
   const [translation, setTranslation] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!translationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('translations').select('*, translation_keys(*), translation_locales(*)').eq('id', translationId).single(); setTranslation(data) } finally { setIsLoading(false) }
-  }, [translationId, supabase])
+  }, [translationId])
   useEffect(() => { fetch() }, [fetch])
   return { translation, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTranslation(translationId?: string) {
 export function useTranslations(options?: { locale?: string; namespace?: string; is_reviewed?: boolean; search?: string; limit?: number }) {
   const [translations, setTranslations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('translations').select('*, translation_keys(*)')
@@ -47,8 +47,8 @@ export function useTranslations(options?: { locale?: string; namespace?: string;
 export function useTranslationsByKey(key?: string, namespace: string = 'default') {
   const [translations, setTranslations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!key) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -65,8 +65,8 @@ export function useTranslationsByKey(key?: string, namespace: string = 'default'
 export function useTranslationValue(key?: string, locale?: string, namespace: string = 'default') {
   const [value, setValue] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!key || !locale) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -83,8 +83,8 @@ export function useTranslationValue(key?: string, locale?: string, namespace: st
 export function useTranslationKeys(options?: { namespace?: string; search?: string; limit?: number }) {
   const [keys, setKeys] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('translation_keys').select('*, translations(count)')
@@ -102,8 +102,8 @@ export function useTranslationLocales(options?: { is_active?: boolean }) {
   const [locales, setLocales] = useState<any[]>([])
   const [defaultLocale, setDefaultLocale] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('translation_locales').select('*')
@@ -112,7 +112,7 @@ export function useTranslationLocales(options?: { is_active?: boolean }) {
       setLocales(data || [])
       setDefaultLocale(data?.find(l => l.is_default) || null)
     } finally { setIsLoading(false) }
-  }, [options?.is_active, supabase])
+  }, [options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { locales, defaultLocale, isLoading, refresh: fetch }
 }
@@ -120,15 +120,15 @@ export function useTranslationLocales(options?: { is_active?: boolean }) {
 export function useTranslationNamespaces() {
   const [namespaces, setNamespaces] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('translation_keys').select('namespace')
       const unique = [...new Set(data?.map(k => k.namespace).filter(Boolean))]
       setNamespaces(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { namespaces, isLoading, refresh: fetch }
 }
@@ -136,8 +136,8 @@ export function useTranslationNamespaces() {
 export function useTranslationHistory(translationId?: string, options?: { limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!translationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('translation_history').select('*, users(*)').eq('translation_id', translationId).order('occurred_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
@@ -149,8 +149,8 @@ export function useTranslationHistory(translationId?: string, options?: { limit?
 export function useMissingTranslations(locale?: string, namespace?: string) {
   const [missing, setMissing] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!locale) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -170,8 +170,8 @@ export function useMissingTranslations(locale?: string, namespace?: string) {
 export function useTranslationProgress(namespace?: string) {
   const [progress, setProgress] = useState<Record<string, { translated: number; total: number; percentage: number }>>({})
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let keysQuery = supabase.from('translation_keys').select('id')
@@ -191,7 +191,7 @@ export function useTranslationProgress(namespace?: string) {
       })
       setProgress(progressMap)
     } finally { setIsLoading(false) }
-  }, [namespace, supabase])
+  }, [namespace])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -199,8 +199,8 @@ export function useTranslationProgress(namespace?: string) {
 export function useUnreviewedTranslations(locale?: string, options?: { namespace?: string; limit?: number }) {
   const [translations, setTranslations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('translations').select('*, translation_keys(*)').eq('is_reviewed', false)

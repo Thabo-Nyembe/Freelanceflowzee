@@ -10,15 +10,15 @@ import { createClient } from '@/lib/supabase/client'
 export function useCallbackConfig(callbackId?: string) {
   const [callbackConfig, setCallbackConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!callbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('callbacks').select('*').eq('id', callbackId).single()
       setCallbackConfig(data)
     } finally { setIsLoading(false) }
-  }, [callbackId, supabase])
+  }, [callbackId])
   useEffect(() => { fetch() }, [fetch])
   return { callbackConfig, isLoading, refresh: fetch }
 }
@@ -26,8 +26,8 @@ export function useCallbackConfig(callbackId?: string) {
 export function useUserCallbacks(userId?: string, options?: { isActive?: boolean }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -44,8 +44,8 @@ export function useUserCallbacks(userId?: string, options?: { isActive?: boolean
 export function useCallbackLogs(callbackId?: string, options?: { status?: string; limit?: number }) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!callbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -67,8 +67,8 @@ export function useCallbackStats(callbackId?: string) {
   const [lastStatus, setLastStatus] = useState<string | null>(null)
   const [isActive, setIsActive] = useState(true)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!callbackId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -82,7 +82,7 @@ export function useCallbackStats(callbackId?: string) {
         setIsActive(data.is_active)
       }
     } finally { setIsLoading(false) }
-  }, [callbackId, supabase])
+  }, [callbackId])
   useEffect(() => { fetch() }, [fetch])
   return { callCount, failureCount, successRate, lastCalledAt, lastStatus, isActive, isLoading, refresh: fetch }
 }
@@ -90,8 +90,8 @@ export function useCallbackStats(callbackId?: string) {
 export function useCallbacksByType(callbackType?: string, userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!callbackType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

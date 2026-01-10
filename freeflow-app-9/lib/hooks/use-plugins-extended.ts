@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function usePlugin(pluginId?: string) {
   const [plugin, setPlugin] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!pluginId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plugins').select('*').eq('id', pluginId).single(); setPlugin(data) } finally { setIsLoading(false) }
-  }, [pluginId, supabase])
+  }, [pluginId])
   useEffect(() => { fetch() }, [fetch])
   return { plugin, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function usePlugin(pluginId?: string) {
 export function usePlugins(options?: { category?: string; status?: string; limit?: number }) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('plugins').select('*')
@@ -42,8 +42,8 @@ export function usePlugins(options?: { category?: string; status?: string; limit
 export function useUserPlugins(userId?: string, options?: { is_active?: boolean }) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -60,12 +60,12 @@ export function useUserPlugins(userId?: string, options?: { is_active?: boolean 
 export function useActivePlugins(userId?: string) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plugin_installs').select('*, plugins(*)').eq('user_id', userId).eq('is_active', true).order('installed_at', { ascending: false }); setPlugins(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { plugins, isLoading, refresh: fetch }
 }
@@ -73,12 +73,12 @@ export function useActivePlugins(userId?: string) {
 export function usePluginsByCategory(category?: string) {
   const [plugins, setPlugins] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!category) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('plugins').select('*').eq('category', category).eq('status', 'active').order('name', { ascending: true }); setPlugins(data || []) } finally { setIsLoading(false) }
-  }, [category, supabase])
+  }, [category])
   useEffect(() => { fetch() }, [fetch])
   return { plugins, isLoading, refresh: fetch }
 }

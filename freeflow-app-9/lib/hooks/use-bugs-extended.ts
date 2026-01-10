@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useBug(bugId?: string) {
   const [bug, setBug] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!bugId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('bugs').select('*, bug_comments(*), bug_attachments(*)').eq('id', bugId).single(); setBug(data) } finally { setIsLoading(false) }
-  }, [bugId, supabase])
+  }, [bugId])
   useEffect(() => { fetch() }, [fetch])
   return { bug, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useBug(bugId?: string) {
 export function useBugs(options?: { project_id?: string; reporter_id?: string; assignee_id?: string; status?: string; severity?: string; limit?: number }) {
   const [bugs, setBugs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('bugs').select('*')
@@ -45,12 +45,12 @@ export function useBugs(options?: { project_id?: string; reporter_id?: string; a
 export function useBugComments(bugId?: string) {
   const [comments, setComments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!bugId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('bug_comments').select('*').eq('bug_id', bugId).order('created_at', { ascending: true }); setComments(data || []) } finally { setIsLoading(false) }
-  }, [bugId, supabase])
+  }, [bugId])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -58,8 +58,8 @@ export function useBugComments(bugId?: string) {
 export function useOpenBugs(projectId?: string) {
   const [bugs, setBugs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('bugs').select('*').in('status', ['open', 'assigned', 'in_progress', 'reopened'])
@@ -67,7 +67,7 @@ export function useOpenBugs(projectId?: string) {
       const { data } = await query.order('severity', { ascending: true }).order('created_at', { ascending: false })
       setBugs(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { bugs, isLoading, refresh: fetch }
 }
@@ -75,12 +75,12 @@ export function useOpenBugs(projectId?: string) {
 export function useMyAssignedBugs(userId?: string) {
   const [bugs, setBugs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('bugs').select('*').eq('assignee_id', userId).neq('status', 'closed').order('priority', { ascending: true }); setBugs(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { bugs, isLoading, refresh: fetch }
 }
@@ -88,8 +88,8 @@ export function useMyAssignedBugs(userId?: string) {
 export function useBugStats(projectId?: string) {
   const [stats, setStats] = useState<{ total: number; byStatus: Record<string, number>; bySeverity: Record<string, number> } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('bugs').select('status, severity')
@@ -101,7 +101,7 @@ export function useBugStats(projectId?: string) {
       const bySeverity = data.reduce((acc: Record<string, number>, b) => { acc[b.severity || 'unknown'] = (acc[b.severity || 'unknown'] || 0) + 1; return acc }, {})
       setStats({ total, byStatus, bySeverity })
     } finally { setIsLoading(false) }
-  }, [projectId, supabase])
+  }, [projectId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -118,6 +118,6 @@ export function useBugCommentsRealtime(bugId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [bugId, supabase])
+  }, [bugId])
   return { comments }
 }

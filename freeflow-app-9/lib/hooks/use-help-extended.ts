@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useHelpArticles(categoryId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('help_articles').select('*').eq('is_published', true).order('title', { ascending: true })
@@ -19,7 +19,7 @@ export function useHelpArticles(categoryId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [categoryId, supabase])
+  }, [categoryId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -27,11 +27,11 @@ export function useHelpArticles(categoryId?: string) {
 export function useHelpCategories() {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data: result } = await supabase.from('help_categories').select('*').order('order_index', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,8 +39,8 @@ export function useHelpCategories() {
 export function useHelpDocs(categoryId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('help_docs').select('*').order('title', { ascending: true })
@@ -48,7 +48,7 @@ export function useHelpDocs(categoryId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [categoryId, supabase])
+  }, [categoryId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -56,12 +56,12 @@ export function useHelpDocs(categoryId?: string) {
 export function useHelpFeedback(articleId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!articleId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('help_feedback').select('*').eq('article_id', articleId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [articleId, supabase])
+  }, [articleId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useUsage(entityId?: string, entityType?: string, usageType?: string) {
   const [usage, setUsage] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !usageType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -26,8 +26,8 @@ export function useUsage(entityId?: string, entityType?: string, usageType?: str
 export function useUsageHistory(entityId?: string, entityType?: string, usageType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !usageType) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -43,8 +43,8 @@ export function useUsageSummary(entityId?: string, entityType?: string, usageTyp
   const [total, setTotal] = useState(0)
   const [average, setAverage] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!entityId || !entityType || !usageType) { setIsLoading(false); return }
     setIsLoading(true)
     try {

@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useLiveStream(streamId?: string) {
   const [stream, setStream] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('live_streams').select('*').eq('id', streamId).single(); setStream(data) } finally { setIsLoading(false) }
-  }, [streamId, supabase])
+  }, [streamId])
   useEffect(() => { fetch() }, [fetch])
   return { stream, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useLiveStream(streamId?: string) {
 export function useLiveStreams(options?: { user_id?: string; status?: string; category?: string; limit?: number }) {
   const [streams, setStreams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('live_streams').select('*')
@@ -43,8 +43,8 @@ export function useLiveStreams(options?: { user_id?: string; status?: string; ca
 export function useActiveStreams(options?: { category?: string; limit?: number }) {
   const [streams, setStreams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('live_streams').select('*').eq('status', 'live').eq('is_private', false)
@@ -61,8 +61,8 @@ export function useStreamViewers(streamId?: string) {
   const [viewers, setViewers] = useState<any[]>([])
   const [count, setCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -70,7 +70,7 @@ export function useStreamViewers(streamId?: string) {
       setViewers(data || [])
       setCount(data?.length || 0)
     } finally { setIsLoading(false) }
-  }, [streamId, supabase])
+  }, [streamId])
   useEffect(() => { fetch() }, [fetch])
   return { viewers, count, isLoading, refresh: fetch }
 }
@@ -78,8 +78,8 @@ export function useStreamViewers(streamId?: string) {
 export function useLiveChat(streamId?: string, options?: { limit?: number }) {
   const [messages, setMessages] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('live_chat').select('*').eq('stream_id', streamId).order('sent_at', { ascending: true }).limit(options?.limit || 100); setMessages(data || []) } finally { setIsLoading(false) }
@@ -90,7 +90,7 @@ export function useLiveChat(streamId?: string, options?: { limit?: number }) {
     if (!streamId) return
     const channel = supabase.channel(`live_chat_${streamId}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'live_chat', filter: `stream_id=eq.${streamId}` }, (payload) => { setMessages(prev => [...prev, payload.new]) }).subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [streamId, supabase])
+  }, [streamId])
 
   return { messages, isLoading, refresh: fetch }
 }
@@ -98,12 +98,12 @@ export function useLiveChat(streamId?: string, options?: { limit?: number }) {
 export function useStreamRecordings(streamId?: string) {
   const [recordings, setRecordings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('live_recordings').select('*').eq('stream_id', streamId).order('created_at', { ascending: false }); setRecordings(data || []) } finally { setIsLoading(false) }
-  }, [streamId, supabase])
+  }, [streamId])
   useEffect(() => { fetch() }, [fetch])
   return { recordings, isLoading, refresh: fetch }
 }
@@ -111,8 +111,8 @@ export function useStreamRecordings(streamId?: string) {
 export function useStreamAnalytics(streamId?: string) {
   const [analytics, setAnalytics] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -127,7 +127,7 @@ export function useStreamAnalytics(streamId?: string) {
         duration: stream?.duration_seconds || 0
       })
     } finally { setIsLoading(false) }
-  }, [streamId, supabase])
+  }, [streamId])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -135,8 +135,8 @@ export function useStreamAnalytics(streamId?: string) {
 export function useMyStreams(userId?: string, options?: { status?: string }) {
   const [streams, setStreams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -153,8 +153,8 @@ export function useMyStreams(userId?: string, options?: { status?: string }) {
 export function useScheduledStreams(options?: { user_id?: string; limit?: number }) {
   const [streams, setStreams] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('live_streams').select('*').eq('status', 'scheduled').gte('scheduled_at', new Date().toISOString())
@@ -170,15 +170,15 @@ export function useScheduledStreams(options?: { user_id?: string; limit?: number
 export function useStreamCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('live_streams').select('category').eq('status', 'live').not('category', 'is', null)
       const uniqueCategories = [...new Set(data?.map(s => s.category).filter(Boolean))]
       setCategories(uniqueCategories as string[])
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }

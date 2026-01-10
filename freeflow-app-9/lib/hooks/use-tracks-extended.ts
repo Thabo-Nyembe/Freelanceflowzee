@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useTrack(trackId?: string) {
   const [track, setTrack] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!trackId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tracks').select('*, track_items(*, courses(*), lessons(*)), track_enrollments(count)').eq('id', trackId).single(); setTrack(data) } finally { setIsLoading(false) }
-  }, [trackId, supabase])
+  }, [trackId])
   useEffect(() => { fetch() }, [fetch])
   return { track, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useTrack(trackId?: string) {
 export function useTracks(options?: { track_type?: string; category?: string; difficulty?: string; status?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [tracks, setTracks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tracks').select('*, track_items(count)')
@@ -46,12 +46,12 @@ export function useTracks(options?: { track_type?: string; category?: string; di
 export function useTrackItems(trackId?: string) {
   const [items, setItems] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!trackId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_items').select('*, courses(*), lessons(*)').eq('track_id', trackId).order('order_index', { ascending: true }); setItems(data || []) } finally { setIsLoading(false) }
-  }, [trackId, supabase])
+  }, [trackId])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -60,8 +60,8 @@ export function useTrackEnrollment(trackId?: string, userId?: string) {
   const [enrollment, setEnrollment] = useState<any>(null)
   const [isEnrolled, setIsEnrolled] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!trackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_enrollments').select('*').eq('track_id', trackId).eq('user_id', userId).single(); setEnrollment(data); setIsEnrolled(!!data) } finally { setIsLoading(false) }
@@ -73,8 +73,8 @@ export function useTrackEnrollment(trackId?: string, userId?: string) {
 export function useUserEnrollments(userId?: string, options?: { status?: string; limit?: number }) {
   const [enrollments, setEnrollments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -92,8 +92,8 @@ export function useTrackProgress(trackId?: string, userId?: string) {
   const [progress, setProgress] = useState<any[]>([])
   const [stats, setStats] = useState<{ completedCount: number; totalItems: number; overallProgress: number }>({ completedCount: 0, totalItems: 0, overallProgress: 0 })
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!trackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -118,8 +118,8 @@ export function useTrackCompletion(trackId?: string, userId?: string) {
   const [completion, setCompletion] = useState<any>(null)
   const [isCompleted, setIsCompleted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!trackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_completions').select('*').eq('track_id', trackId).eq('user_id', userId).single(); setCompletion(data); setIsCompleted(!!data) } finally { setIsLoading(false) }
@@ -131,12 +131,12 @@ export function useTrackCompletion(trackId?: string, userId?: string) {
 export function useUserCertificates(userId?: string) {
   const [certificates, setCertificates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_certificates').select('*, tracks(*)').eq('user_id', userId).order('issued_at', { ascending: false }); setCertificates(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { certificates, isLoading, refresh: fetch }
 }
@@ -145,8 +145,8 @@ export function useTrackCertificate(trackId?: string, userId?: string) {
   const [certificate, setCertificate] = useState<any>(null)
   const [hasCertificate, setHasCertificate] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!trackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_certificates').select('*, tracks(*)').eq('track_id', trackId).eq('user_id', userId).single(); setCertificate(data); setHasCertificate(!!data) } finally { setIsLoading(false) }
@@ -158,8 +158,8 @@ export function useTrackCertificate(trackId?: string, userId?: string) {
 export function usePopularTracks(options?: { category?: string; difficulty?: string; limit?: number }) {
   const [tracks, setTracks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('tracks').select('*, track_items(count)').eq('status', 'published').eq('is_public', true)
@@ -176,15 +176,15 @@ export function usePopularTracks(options?: { category?: string; difficulty?: str
 export function useTrackCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('tracks').select('category').not('category', 'is', null).eq('status', 'published')
       const unique = [...new Set(data?.map(t => t.category).filter(Boolean))]
       setCategories(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -192,8 +192,8 @@ export function useTrackCategories() {
 export function useMyCreatedTracks(userId?: string, options?: { status?: string }) {
   const [tracks, setTracks] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {

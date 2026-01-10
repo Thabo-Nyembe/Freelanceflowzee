@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useEducationProgram(programId?: string) {
   const [program, setProgram] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('education_programs').select('*, education_materials(*), education_quizzes(*)').eq('id', programId).single(); setProgram(data) } finally { setIsLoading(false) }
-  }, [programId, supabase])
+  }, [programId])
   useEffect(() => { fetch() }, [fetch])
   return { program, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useEducationProgram(programId?: string) {
 export function useEducationPrograms(options?: { category?: string; level?: string; is_published?: boolean; search?: string; limit?: number }) {
   const [programs, setPrograms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('education_programs').select('*')
@@ -44,12 +44,12 @@ export function useEducationPrograms(options?: { category?: string; level?: stri
 export function useProgramMaterials(programId?: string) {
   const [materials, setMaterials] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('education_materials').select('*').eq('program_id', programId).order('order', { ascending: true }); setMaterials(data || []) } finally { setIsLoading(false) }
-  }, [programId, supabase])
+  }, [programId])
   useEffect(() => { fetch() }, [fetch])
   return { materials, isLoading, refresh: fetch }
 }
@@ -57,12 +57,12 @@ export function useProgramMaterials(programId?: string) {
 export function useProgramQuizzes(programId?: string) {
   const [quizzes, setQuizzes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('education_quizzes').select('*').eq('program_id', programId).order('created_at', { ascending: true }); setQuizzes(data || []) } finally { setIsLoading(false) }
-  }, [programId, supabase])
+  }, [programId])
   useEffect(() => { fetch() }, [fetch])
   return { quizzes, isLoading, refresh: fetch }
 }
@@ -71,8 +71,8 @@ export function useUserProgress(userId?: string, programId?: string) {
   const [progress, setProgress] = useState<any[]>([])
   const [completionPercent, setCompletionPercent] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !programId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -90,12 +90,12 @@ export function useUserProgress(userId?: string, programId?: string) {
 export function useUserCertificates(userId?: string) {
   const [certificates, setCertificates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('education_certificates').select('*, education_programs(*)').eq('user_id', userId).order('issued_at', { ascending: false }); setCertificates(data || []) } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { certificates, isLoading, refresh: fetch }
 }
@@ -103,8 +103,8 @@ export function useUserCertificates(userId?: string) {
 export function useQuizAttempts(userId?: string, quizId?: string) {
   const [attempts, setAttempts] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId || !quizId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('education_quiz_attempts').select('*').eq('user_id', userId).eq('quiz_id', quizId).order('completed_at', { ascending: false }); setAttempts(data || []) } finally { setIsLoading(false) }
@@ -116,11 +116,11 @@ export function useQuizAttempts(userId?: string, quizId?: string) {
 export function usePopularPrograms(limit?: number) {
   const [programs, setPrograms] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('education_programs').select('*').eq('is_published', true).order('enrollment_count', { ascending: false }).limit(limit || 10); setPrograms(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { programs, isLoading, refresh: fetch }
 }
@@ -128,8 +128,8 @@ export function usePopularPrograms(limit?: number) {
 export function useEducationStats(userId?: string) {
   const [stats, setStats] = useState<{ enrolledPrograms: number; completedPrograms: number; certificates: number; totalHours: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -140,7 +140,7 @@ export function useEducationStats(userId?: string) {
       const totalHours = programs?.reduce((sum, p) => sum + (p.duration_hours || 0), 0) || 0
       setStats({ enrolledPrograms: uniquePrograms.length, completedPrograms: certificates || 0, certificates: certificates || 0, totalHours })
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useBookmarks(userId?: string, itemType?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('bookmarks').select('*').order('created_at', { ascending: false })
@@ -28,8 +28,8 @@ export function useBookmarks(userId?: string, itemType?: string) {
 export function useBookmarkFolders(userId?: string, parentId?: string | null) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('bookmark_folders').select('*').order('name', { ascending: true })

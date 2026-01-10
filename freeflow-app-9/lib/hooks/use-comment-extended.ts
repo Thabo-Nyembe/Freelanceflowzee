@@ -10,8 +10,8 @@ import { createClient } from '@/lib/supabase/client'
 export function useComments(resourceType?: string, resourceId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!resourceType || !resourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('comments').select('*').eq('resource_type', resourceType).eq('resource_id', resourceId).order('created_at', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
@@ -23,12 +23,12 @@ export function useComments(resourceType?: string, resourceId?: string) {
 export function useCommentReplies(parentId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!parentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('comments').select('*').eq('parent_id', parentId).order('created_at', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [parentId, supabase])
+  }, [parentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

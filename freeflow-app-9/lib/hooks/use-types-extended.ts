@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useType(typeId?: string) {
   const [type, setType] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('types').select('*, type_fields(*), type_values(count)').eq('id', typeId).single(); setType(data) } finally { setIsLoading(false) }
-  }, [typeId, supabase])
+  }, [typeId])
   useEffect(() => { fetch() }, [fetch])
   return { type, isLoading, refresh: fetch }
 }
@@ -24,12 +24,12 @@ export function useType(typeId?: string) {
 export function useTypeByCode(code?: string) {
   const [type, setType] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!code) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('types').select('*, type_fields(*), type_values(*)').eq('code', code).single(); setType(data) } finally { setIsLoading(false) }
-  }, [code, supabase])
+  }, [code])
   useEffect(() => { fetch() }, [fetch])
   return { type, isLoading, refresh: fetch }
 }
@@ -37,8 +37,8 @@ export function useTypeByCode(code?: string) {
 export function useTypes(options?: { category?: string; parent_id?: string | null; is_system?: boolean; is_active?: boolean; search?: string; limit?: number }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('types').select('*, type_fields(count), type_values(count)')
@@ -59,12 +59,12 @@ export function useTypes(options?: { category?: string; parent_id?: string | nul
 export function useTypeFields(typeId?: string) {
   const [fields, setFields] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('type_fields').select('*').eq('type_id', typeId).order('order_index', { ascending: true }); setFields(data || []) } finally { setIsLoading(false) }
-  }, [typeId, supabase])
+  }, [typeId])
   useEffect(() => { fetch() }, [fetch])
   return { fields, isLoading, refresh: fetch }
 }
@@ -73,8 +73,8 @@ export function useTypeValues(typeId?: string, options?: { is_active?: boolean }
   const [values, setValues] = useState<any[]>([])
   const [defaultValue, setDefaultValue] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -92,8 +92,8 @@ export function useTypeValues(typeId?: string, options?: { is_active?: boolean }
 export function useTypeHierarchy(typeId?: string) {
   const [hierarchy, setHierarchy] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -107,7 +107,7 @@ export function useTypeHierarchy(typeId?: string) {
       }
       setHierarchy(result)
     } finally { setIsLoading(false) }
-  }, [typeId, supabase])
+  }, [typeId])
   useEffect(() => { fetch() }, [fetch])
   return { hierarchy, isLoading, refresh: fetch }
 }
@@ -115,12 +115,12 @@ export function useTypeHierarchy(typeId?: string) {
 export function useChildTypes(typeId?: string) {
   const [children, setChildren] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('types').select('*').eq('parent_id', typeId).order('name', { ascending: true }); setChildren(data || []) } finally { setIsLoading(false) }
-  }, [typeId, supabase])
+  }, [typeId])
   useEffect(() => { fetch() }, [fetch])
   return { children, isLoading, refresh: fetch }
 }
@@ -128,12 +128,12 @@ export function useChildTypes(typeId?: string) {
 export function useTypeMappings(typeId?: string) {
   const [mappings, setMappings] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('type_mappings').select('*, source_type:types!source_type_id(*), target_type:types!target_type_id(*)').or(`source_type_id.eq.${typeId},target_type_id.eq.${typeId}`); setMappings(data || []) } finally { setIsLoading(false) }
-  }, [typeId, supabase])
+  }, [typeId])
   useEffect(() => { fetch() }, [fetch])
   return { mappings, isLoading, refresh: fetch }
 }
@@ -141,12 +141,12 @@ export function useTypeMappings(typeId?: string) {
 export function useTypeValidations(typeId?: string) {
   const [validations, setValidations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!typeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('type_validations').select('*, type_fields(*)').eq('type_id', typeId).order('created_at', { ascending: true }); setValidations(data || []) } finally { setIsLoading(false) }
-  }, [typeId, supabase])
+  }, [typeId])
   useEffect(() => { fetch() }, [fetch])
   return { validations, isLoading, refresh: fetch }
 }
@@ -154,15 +154,15 @@ export function useTypeValidations(typeId?: string) {
 export function useTypeCategories() {
   const [categories, setCategories] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       const { data } = await supabase.from('types').select('category').not('category', 'is', null)
       const unique = [...new Set(data?.map(t => t.category).filter(Boolean))]
       setCategories(unique)
     } finally { setIsLoading(false) }
-  }, [supabase])
+  }, [])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -170,8 +170,8 @@ export function useTypeCategories() {
 export function useRootTypes(options?: { category?: string; is_active?: boolean }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('types').select('*, type_values(count)').is('parent_id', null)
@@ -188,8 +188,8 @@ export function useRootTypes(options?: { category?: string; is_active?: boolean 
 export function useSystemTypes(options?: { category?: string }) {
   const [types, setTypes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('types').select('*, type_values(*)').eq('is_system', true).eq('is_active', true)
@@ -197,7 +197,7 @@ export function useSystemTypes(options?: { category?: string }) {
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, supabase])
+  }, [options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }

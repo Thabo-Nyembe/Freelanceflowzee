@@ -11,8 +11,8 @@ import { createClient } from '@/lib/supabase/client'
 export function usePasswordHistory(userId?: string, limit?: number) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -27,15 +27,15 @@ export function usePasswordHistory(userId?: string, limit?: number) {
 export function usePasswordResetTokens(userId?: string) {
   const [data, setData] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data: result } = await supabase.from('password_reset_tokens').select('id, email, created_at, expires_at, is_used, used_at').eq('user_id', userId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function usePasswordResetToken(token?: string) {
         setIsValid(false)
       }
     } finally { setIsLoading(false) }
-  }, [token, supabase])
+  }, [token])
   useEffect(() => { validate() }, [validate])
   return { tokenData, isValid, isLoading, revalidate: validate }
 }
@@ -86,15 +86,15 @@ export function usePasswordStrength() {
 export function usePasswordLastChanged(userId?: string) {
   const [lastChanged, setLastChanged] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
       const { data } = await supabase.from('password_history').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).single()
       setLastChanged(data?.created_at || null)
     } finally { setIsLoading(false) }
-  }, [userId, supabase])
+  }, [userId])
   useEffect(() => { fetch() }, [fetch])
   return { lastChanged, isLoading, refresh: fetch }
 }

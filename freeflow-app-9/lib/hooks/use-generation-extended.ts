@@ -11,12 +11,12 @@ import { createClient } from '@/lib/supabase/client'
 export function useGeneration(generationId?: string) {
   const [generation, setGeneration] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!generationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generations').select('*, generation_outputs(*)').eq('id', generationId).single(); setGeneration(data) } finally { setIsLoading(false) }
-  }, [generationId, supabase])
+  }, [generationId])
   useEffect(() => { fetch() }, [fetch])
   return { generation, isLoading, refresh: fetch }
 }
@@ -24,8 +24,8 @@ export function useGeneration(generationId?: string) {
 export function useGenerations(options?: { user_id?: string; type?: string; status?: string; model_id?: string; limit?: number }) {
   const [generations, setGenerations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('generations').select('*')
@@ -44,8 +44,8 @@ export function useGenerations(options?: { user_id?: string; type?: string; stat
 export function useUserGenerations(userId?: string, options?: { type?: string; limit?: number }) {
   const [generations, setGenerations] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -62,8 +62,8 @@ export function useUserGenerations(userId?: string, options?: { type?: string; l
 export function useGenerationTemplates(options?: { type?: string; is_public?: boolean; search?: string; limit?: number }) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('generation_templates').select('*')
@@ -81,12 +81,12 @@ export function useGenerationTemplates(options?: { type?: string; is_public?: bo
 export function useGenerationTemplate(templateId?: string) {
   const [template, setTemplate] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!templateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generation_templates').select('*').eq('id', templateId).single(); setTemplate(data) } finally { setIsLoading(false) }
-  }, [templateId, supabase])
+  }, [templateId])
   useEffect(() => { fetch() }, [fetch])
   return { template, isLoading, refresh: fetch }
 }
@@ -94,8 +94,8 @@ export function useGenerationTemplate(templateId?: string) {
 export function useGenerationModels(options?: { type?: string; is_active?: boolean }) {
   const [models, setModels] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try {
       let query = supabase.from('generation_models').select('*')
@@ -112,12 +112,12 @@ export function useGenerationModels(options?: { type?: string; is_active?: boole
 export function useGenerationOutputs(generationId?: string) {
   const [outputs, setOutputs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!generationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generation_outputs').select('*').eq('generation_id', generationId).order('created_at', { ascending: true }); setOutputs(data || []) } finally { setIsLoading(false) }
-  }, [generationId, supabase])
+  }, [generationId])
   useEffect(() => { fetch() }, [fetch])
   return { outputs, isLoading, refresh: fetch }
 }
@@ -125,8 +125,8 @@ export function useGenerationOutputs(generationId?: string) {
 export function useGenerationHistory(userId?: string, options?: { type?: string; from_date?: string; to_date?: string; limit?: number }) {
   const [history, setHistory] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
@@ -145,11 +145,11 @@ export function useGenerationHistory(userId?: string, options?: { type?: string;
 export function usePopularTemplates(limit?: number) {
   const [templates, setTemplates] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
   const fetch = useCallback(async () => {
+  const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('generation_templates').select('*').eq('is_public', true).order('usage_count', { ascending: false }).limit(limit || 10); setTemplates(data || []) } finally { setIsLoading(false) }
-  }, [limit, supabase])
+  }, [limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
