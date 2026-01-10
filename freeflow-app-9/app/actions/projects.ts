@@ -46,7 +46,7 @@ const logger = createFeatureLogger('projects-actions')
 export async function createProject(
   data: CreateProject
 ): Promise<ActionResult<{ id: string; name: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Auth check
@@ -114,7 +114,7 @@ export async function updateProject(
   id: string,
   data: UpdateProject
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -204,7 +204,7 @@ export async function updateProjectProgress(
 export async function archiveProject(
   id: string
 ): Promise<ActionResult<{ archived: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)
@@ -247,7 +247,7 @@ export async function archiveProject(
 export async function deleteProject(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)
@@ -292,7 +292,7 @@ export async function deleteProject(
 export async function getProjects(
   options: { includeArchived?: boolean } = {}
 ): Promise<ActionResult<Array<{ id: string; name: string; status: string }>>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -328,7 +328,7 @@ export async function getProjects(
 export async function getProjectById(
   id: string
 ): Promise<ActionResult<Record<string, unknown> | null>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)
@@ -371,7 +371,7 @@ export async function getProjectById(
 export async function createProjectTask(
   data: CreateTask & { project_id: string }
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -433,7 +433,7 @@ export async function updateProjectTask(
   id: string,
   data: UpdateTask
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)
@@ -490,7 +490,7 @@ export async function updateProjectTask(
 export async function deleteProjectTask(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)
@@ -528,7 +528,7 @@ export async function deleteProjectTask(
 export async function getProjectTasks(
   projectId: string
 ): Promise<ActionResult<Array<Record<string, unknown>>>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(projectId)
@@ -564,7 +564,7 @@ export async function getProjectTasks(
 export async function duplicateProject(
   id: string
 ): Promise<ActionResult<{ id: string; name: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)

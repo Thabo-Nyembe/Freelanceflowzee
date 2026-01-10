@@ -23,7 +23,7 @@ export interface DocumentationInput {
 
 export async function createDocumentation(input: DocumentationInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -52,7 +52,7 @@ export async function createDocumentation(input: DocumentationInput): Promise<Ac
 
 export async function updateDocumentation(id: string, input: Partial<DocumentationInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -83,7 +83,7 @@ export async function updateDocumentation(id: string, input: Partial<Documentati
 
 export async function deleteDocumentation(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -124,7 +124,7 @@ export async function submitForReview(id: string) {
 
 export async function markHelpful(id: string, helpful: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

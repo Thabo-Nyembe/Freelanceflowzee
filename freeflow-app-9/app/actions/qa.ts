@@ -35,7 +35,7 @@ export interface UpdateTestCaseInput extends Partial<CreateTestCaseInput> {
 
 export async function createTestCase(input: CreateTestCaseInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -80,7 +80,7 @@ export async function createTestCase(input: CreateTestCaseInput): Promise<Action
 
 export async function updateTestCase(input: UpdateTestCaseInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -111,7 +111,7 @@ export async function updateTestCase(input: UpdateTestCaseInput): Promise<Action
 
 export async function deleteTestCase(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -138,7 +138,7 @@ export async function deleteTestCase(id: string): Promise<ActionResult<{ success
 
 export async function executeTest(testCaseId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -191,7 +191,7 @@ export async function createTestExecution(input: {
   logs?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -244,7 +244,7 @@ export async function createTestExecution(input: {
 
 export async function getQAStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

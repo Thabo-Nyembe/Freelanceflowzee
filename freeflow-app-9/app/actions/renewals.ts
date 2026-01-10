@@ -48,7 +48,7 @@ export interface UpdateRenewalInput {
 
 export async function createRenewal(input: CreateRenewalInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -119,7 +119,7 @@ export async function createRenewal(input: CreateRenewalInput): Promise<ActionRe
 
 export async function updateRenewal(id: string, input: UpdateRenewalInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -170,7 +170,7 @@ export async function updateRenewal(id: string, input: UpdateRenewalInput): Prom
 
 export async function markRenewalAtRisk(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -205,7 +205,7 @@ export async function markRenewalAtRisk(id: string): Promise<ActionResult<any>> 
 
 export async function winRenewal(id: string, finalArr?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -250,7 +250,7 @@ export async function winRenewal(id: string, finalArr?: number): Promise<ActionR
 
 export async function loseRenewal(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -294,7 +294,7 @@ export async function loseRenewal(id: string): Promise<ActionResult<any>> {
 
 export async function deleteRenewal(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -327,7 +327,7 @@ export async function getRenewals(filters?: {
   priority?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

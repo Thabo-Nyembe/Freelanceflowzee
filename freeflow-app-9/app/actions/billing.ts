@@ -48,7 +48,7 @@ type RefundData = z.infer<typeof refundSchema>
 export async function createBillingTransaction(
   data: CreateTransaction
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Auth check
@@ -111,7 +111,7 @@ export async function updateBillingTransaction(
   id: string,
   data: UpdateTransaction
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -180,7 +180,7 @@ export async function updateBillingTransaction(
 export async function deleteBillingTransaction(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -239,7 +239,7 @@ export async function refundTransaction(
   id: string,
   refundData: RefundData
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -318,7 +318,7 @@ export async function refundTransaction(
 export async function completeTransaction(
   id: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -383,7 +383,7 @@ export async function failTransaction(
   id: string,
   failureReason?: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID

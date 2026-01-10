@@ -122,7 +122,7 @@ export async function createNotification(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -180,7 +180,7 @@ export async function updateNotification(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -226,7 +226,7 @@ export async function deleteNotification(id: string): Promise<ActionResult<{ del
       return actionError('Invalid notification ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -273,7 +273,7 @@ export async function markNotificationAsRead(id: string): Promise<ActionResult<N
       return actionError('Invalid notification ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -317,7 +317,7 @@ export async function markNotificationAsRead(id: string): Promise<ActionResult<N
  */
 export async function markAllNotificationsAsRead(): Promise<ActionResult<{ updated: number }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -368,7 +368,7 @@ export async function dismissNotification(id: string): Promise<ActionResult<Noti
       return actionError('Invalid notification ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -418,7 +418,7 @@ export async function archiveNotification(id: string): Promise<ActionResult<Noti
       return actionError('Invalid notification ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -463,7 +463,7 @@ export async function clearOldNotifications(daysOld: number = 30): Promise<Actio
       return actionError('Days must be between 1 and 365', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -512,7 +512,7 @@ export async function clearOldNotifications(daysOld: number = 30): Promise<Actio
  */
 export async function getNotificationStats(): Promise<ActionResult<NotificationStats>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

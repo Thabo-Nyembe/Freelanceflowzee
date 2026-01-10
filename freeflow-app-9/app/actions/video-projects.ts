@@ -26,7 +26,7 @@ export interface VideoProjectInput {
 
 export async function getVideoProjects(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -52,7 +52,7 @@ export async function getVideoProjects(): Promise<ActionResult<any>> {
 
 export async function getVideoProject(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -79,7 +79,7 @@ export async function getVideoProject(id: string): Promise<ActionResult<any>> {
 
 export async function createVideoProject(input: VideoProjectInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -112,7 +112,7 @@ export async function createVideoProject(input: VideoProjectInput): Promise<Acti
 
 export async function updateVideoProject(id: string, input: Partial<VideoProjectInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -144,7 +144,7 @@ export async function updateVideoProject(id: string, input: Partial<VideoProject
 
 export async function deleteVideoProject(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -171,7 +171,7 @@ export async function deleteVideoProject(id: string): Promise<ActionResult<any>>
 
 export async function processVideoProject(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -220,7 +220,7 @@ export async function processVideoProject(id: string): Promise<ActionResult<any>
 
 export async function getVideoProjectStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

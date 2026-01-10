@@ -68,7 +68,7 @@ interface WorkflowStep {
 
 export async function createWorkflow(formData: FormData): Promise<ActionResult<Workflow>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -147,7 +147,7 @@ export async function updateWorkflow(
       return actionError('Invalid workflow ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -254,7 +254,7 @@ export async function deleteWorkflow(id: string): Promise<ActionResult<{ success
       return actionError('Invalid workflow ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -290,7 +290,7 @@ export async function startWorkflow(id: string): Promise<ActionResult<Workflow>>
       return actionError('Invalid workflow ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -336,7 +336,7 @@ export async function pauseWorkflow(id: string): Promise<ActionResult<Workflow>>
       return actionError('Invalid workflow ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -379,7 +379,7 @@ export async function resumeWorkflow(id: string): Promise<ActionResult<Workflow>
       return actionError('Invalid workflow ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -422,7 +422,7 @@ export async function archiveWorkflow(id: string): Promise<ActionResult<Workflow
       return actionError('Invalid workflow ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -472,7 +472,7 @@ export async function addWorkflowStep(
       return actionError('Invalid workflow ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -547,7 +547,7 @@ export async function updateWorkflowStep(
       return actionError('Invalid workflow step ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -632,7 +632,7 @@ export async function deleteWorkflowStep(
       return actionError('Invalid workflow step ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -667,7 +667,7 @@ export async function startStep(id: string): Promise<ActionResult<WorkflowStep>>
       return actionError('Invalid workflow step ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -712,7 +712,7 @@ export async function completeStep(id: string): Promise<ActionResult<WorkflowSte
       return actionError('Invalid workflow step ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -758,7 +758,7 @@ export async function approveStep(id: string): Promise<ActionResult<WorkflowStep
       return actionError('Invalid workflow step ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -803,7 +803,7 @@ export async function skipStep(id: string): Promise<ActionResult<WorkflowStep>> 
       return actionError('Invalid workflow step ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

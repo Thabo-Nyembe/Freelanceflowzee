@@ -19,7 +19,7 @@ export async function createDependency(data: {
   due_date?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -51,7 +51,7 @@ export async function createDependency(data: {
 
 export async function updateDependencyStatus(id: string, status: string, resolution?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -93,7 +93,7 @@ export async function updateDependencyStatus(id: string, status: string, resolut
 
 export async function updateDependencyProgress(id: string, predecessorProgress: number, successorProgress: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -130,7 +130,7 @@ export async function updateDependencyProgress(id: string, predecessorProgress: 
 
 export async function markAsCriticalPath(id: string, isCritical: boolean, order?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -167,7 +167,7 @@ export async function markAsCriticalPath(id: string, isCritical: boolean, order?
 
 export async function updateBlockedStatus(id: string, isBlocked: boolean, blockerReason?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -214,7 +214,7 @@ export async function updateBlockedStatus(id: string, isBlocked: boolean, blocke
 
 export async function calculateRiskScore(id: string, estimatedDelayDays: number, affectedTasks: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

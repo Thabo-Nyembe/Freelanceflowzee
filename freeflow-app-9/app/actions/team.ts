@@ -28,7 +28,7 @@ export interface TeamMemberInput {
 
 export async function getTeamMembers(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -54,7 +54,7 @@ export async function getTeamMembers(): Promise<ActionResult<any[]>> {
 
 export async function getTeamMember(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -81,7 +81,7 @@ export async function getTeamMember(id: string): Promise<ActionResult<any>> {
 
 export async function createTeamMember(input: TeamMemberInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -113,7 +113,7 @@ export async function createTeamMember(input: TeamMemberInput): Promise<ActionRe
 
 export async function updateTeamMember(id: string, input: Partial<TeamMemberInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -145,7 +145,7 @@ export async function updateTeamMember(id: string, input: Partial<TeamMemberInpu
 
 export async function deleteTeamMember(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -176,7 +176,7 @@ export async function updateTeamMemberStatus(id: string, status: TeamMemberInput
 
 export async function toggleTeamMemberLead(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -227,7 +227,7 @@ export async function updateTeamMemberPerformance(id: string, score: number) {
 
 export async function bulkUpdateTeamMembers(ids: string[], updates: Partial<TeamMemberInput>): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -257,7 +257,7 @@ export async function bulkUpdateTeamMembers(ids: string[], updates: Partial<Team
 
 export async function getTeamStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

@@ -51,7 +51,7 @@ export interface UpdateModelInput {
 
 export async function createModel(input: CreateModelInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -97,7 +97,7 @@ export async function createModel(input: CreateModelInput): Promise<ActionResult
 
 export async function updateModel(id: string, input: UpdateModelInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -128,7 +128,7 @@ export async function updateModel(id: string, input: UpdateModelInput): Promise<
 
 export async function publishModel(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -159,7 +159,7 @@ export async function publishModel(id: string): Promise<ActionResult<any>> {
 
 export async function startRender(id: string, quality?: string, samples?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -194,7 +194,7 @@ export async function startRender(id: string, quality?: string, samples?: number
 
 export async function completeRender(id: string, renderTime: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -228,7 +228,7 @@ export async function completeRender(id: string, renderTime: number): Promise<Ac
 
 export async function incrementModelViews(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase.rpc('increment_model_views', { model_id: id })
 
@@ -258,7 +258,7 @@ export async function incrementModelViews(id: string): Promise<ActionResult<void
 
 export async function deleteModel(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -290,7 +290,7 @@ export async function getModels(filters?: {
   status?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

@@ -22,7 +22,7 @@ interface Attendee {
 
 export async function createEvent(data: Partial<CalendarEvent>): Promise<ActionResult<CalendarEvent>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -55,7 +55,7 @@ export async function updateEvent(id: string, data: Partial<CalendarEvent>): Pro
       return actionError('Invalid event ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -90,7 +90,7 @@ export async function deleteEvent(id: string): Promise<ActionResult<{ success: b
       return actionError('Invalid event ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -128,7 +128,7 @@ export async function updateEventStatus(id: string, status: EventStatus): Promis
       return actionError('Invalid status value', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -167,7 +167,7 @@ export async function addAttendee(eventId: string, attendeeEmail: string): Promi
       return actionError('Invalid email address', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -235,7 +235,7 @@ export async function removeAttendee(eventId: string, attendeeEmail: string): Pr
       return actionError('Email address is required', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -298,7 +298,7 @@ export async function updateRSVP(eventId: string, attendeeEmail: string, respons
       return actionError('Email address is required', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

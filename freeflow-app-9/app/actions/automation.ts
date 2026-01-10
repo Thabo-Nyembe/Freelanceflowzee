@@ -11,7 +11,7 @@ const logger = createFeatureLogger('automation-actions')
 
 export async function createAutomation(data: Partial<Automation>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -38,7 +38,7 @@ export async function createAutomation(data: Partial<Automation>): Promise<Actio
 
 export async function updateAutomation(id: string, data: Partial<Automation>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -67,7 +67,7 @@ export async function updateAutomation(id: string, data: Partial<Automation>): P
 
 export async function deleteAutomation(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -94,7 +94,7 @@ export async function deleteAutomation(id: string): Promise<ActionResult<{ succe
 
 export async function toggleAutomation(id: string, enabled: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -127,7 +127,7 @@ export async function toggleAutomation(id: string, enabled: boolean): Promise<Ac
 
 export async function runAutomation(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

@@ -10,7 +10,7 @@ const logger = createFeatureLogger('performance-analytics-actions')
 
 export async function createPerformanceAnalytic(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -38,7 +38,7 @@ export async function createPerformanceAnalytic(data: any): Promise<ActionResult
 
 export async function updatePerformanceAnalytic(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -68,7 +68,7 @@ export async function updatePerformanceAnalytic(id: string, data: any): Promise<
 
 export async function deletePerformanceAnalytic(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -96,7 +96,7 @@ export async function deletePerformanceAnalytic(id: string): Promise<ActionResul
 
 export async function resolveAlert(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -129,7 +129,7 @@ export async function resolveAlert(id: string): Promise<ActionResult<any>> {
 
 export async function markDegraded(id: string, reason: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

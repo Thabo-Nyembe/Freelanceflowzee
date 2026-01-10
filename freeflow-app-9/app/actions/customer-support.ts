@@ -28,7 +28,7 @@ export interface SupportConversationInput {
 
 export async function createSupportAgent(input: SupportAgentInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -57,7 +57,7 @@ export async function createSupportAgent(input: SupportAgentInput): Promise<Acti
 
 export async function updateSupportAgent(id: string, input: Partial<SupportAgentInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -88,7 +88,7 @@ export async function updateSupportAgent(id: string, input: Partial<SupportAgent
 
 export async function deleteSupportAgent(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -121,7 +121,7 @@ export async function setAgentStatus(id: string, status: 'online' | 'busy' | 'aw
 
 export async function createConversation(input: SupportConversationInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -150,7 +150,7 @@ export async function createConversation(input: SupportConversationInput): Promi
 
 export async function updateConversation(id: string, input: Partial<SupportConversationInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -181,7 +181,7 @@ export async function updateConversation(id: string, input: Partial<SupportConve
 
 export async function closeConversation(id: string, satisfactionRating?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -222,7 +222,7 @@ export async function closeConversation(id: string, satisfactionRating?: number)
 
 export async function assignConversation(conversationId: string, agentId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

@@ -31,7 +31,7 @@ export interface MilestoneInput {
 
 export async function createEscrowDeposit(input: EscrowInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -61,7 +61,7 @@ export async function createEscrowDeposit(input: EscrowInput): Promise<ActionRes
 
 export async function updateEscrowDeposit(id: string, updates: Partial<EscrowInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -93,7 +93,7 @@ export async function activateEscrow(id: string) {
 
 export async function completeEscrow(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -126,7 +126,7 @@ export async function completeEscrow(id: string): Promise<ActionResult<any>> {
 
 export async function releaseFunds(id: string, amount: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -174,7 +174,7 @@ export async function releaseFunds(id: string, amount: number): Promise<ActionRe
 
 export async function deleteEscrowDeposit(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -200,7 +200,7 @@ export async function deleteEscrowDeposit(id: string): Promise<ActionResult<{ su
 
 export async function getEscrowDeposits(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -227,7 +227,7 @@ export async function getEscrowDeposits(): Promise<ActionResult<any[]>> {
 
 export async function createMilestone(input: MilestoneInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -253,7 +253,7 @@ export async function createMilestone(input: MilestoneInput): Promise<ActionResu
 
 export async function completeMilestone(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

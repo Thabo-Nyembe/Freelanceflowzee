@@ -60,7 +60,7 @@ interface UpdateFormData extends Partial<CreateFormData> {
 // Create new form
 export async function createForm(data: CreateFormData): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -91,7 +91,7 @@ export async function createForm(data: CreateFormData): Promise<ActionResult<any
 // Update existing form
 export async function updateForm({ id, ...data }: UpdateFormData): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -121,7 +121,7 @@ export async function updateForm({ id, ...data }: UpdateFormData): Promise<Actio
 // Delete form (soft delete)
 export async function deleteForm(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -149,7 +149,7 @@ export async function deleteForm(id: string): Promise<ActionResult<void>> {
 // Publish form (activate)
 export async function publishForm(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -182,7 +182,7 @@ export async function publishForm(id: string): Promise<ActionResult<any>> {
 // Pause form
 export async function pauseForm(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -212,7 +212,7 @@ export async function pauseForm(id: string): Promise<ActionResult<any>> {
 // Close form
 export async function closeForm(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -245,7 +245,7 @@ export async function closeForm(id: string): Promise<ActionResult<any>> {
 // Duplicate form
 export async function duplicateForm(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -298,7 +298,7 @@ export async function duplicateForm(id: string): Promise<ActionResult<any>> {
 // Increment form views
 export async function incrementFormViews(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase.rpc('increment_form_views', { form_id: id })
 
@@ -335,7 +335,7 @@ export async function incrementFormViews(id: string): Promise<ActionResult<void>
 // Get form statistics
 export async function getFormStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

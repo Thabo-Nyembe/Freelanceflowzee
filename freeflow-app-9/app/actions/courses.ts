@@ -17,7 +17,7 @@ export async function createCourse(courseData: {
   price?: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -47,7 +47,7 @@ export async function createCourse(courseData: {
 
 export async function publishCourse(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -80,7 +80,7 @@ export async function publishCourse(id: string): Promise<ActionResult<any>> {
 
 export async function enrollStudent(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -122,7 +122,7 @@ export async function enrollStudent(id: string): Promise<ActionResult<any>> {
 
 export async function updateCompletionRate(id: string, completedStudents: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -168,7 +168,7 @@ export async function updateCompletionRate(id: string, completedStudents: number
 
 export async function addRating(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -230,7 +230,7 @@ export async function addRating(id: string, rating: number): Promise<ActionResul
 
 export async function updateRevenue(id: string, revenue: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -280,7 +280,7 @@ export async function updateEngagementMetrics(id: string, metrics: {
   assignmentSubmissionRate?: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -336,7 +336,7 @@ export async function updateEngagementMetrics(id: string, metrics: {
 
 export async function markAsFeatured(id: string, featured: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -365,7 +365,7 @@ export async function markAsFeatured(id: string, featured: boolean): Promise<Act
 
 export async function archiveCourse(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

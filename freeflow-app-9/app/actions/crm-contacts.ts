@@ -17,7 +17,7 @@ export async function createCrmContact(contactData: {
   status?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -47,7 +47,7 @@ export async function createCrmContact(contactData: {
 
 export async function updateDealStage(id: string, dealStage: string, dealValue?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -96,7 +96,7 @@ export async function updateDealStage(id: string, dealStage: string, dealValue?:
 
 export async function recordInteraction(id: string, interactionType: 'email' | 'call' | 'meeting' | 'chat'): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -147,7 +147,7 @@ export async function recordInteraction(id: string, interactionType: 'email' | '
 
 export async function updateLeadScore(id: string, score: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -184,7 +184,7 @@ export async function updateLeadScore(id: string, score: number): Promise<Action
 
 export async function recordPurchase(id: string, purchaseValue: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -234,7 +234,7 @@ export async function recordPurchase(id: string, purchaseValue: number): Promise
 
 export async function updateSatisfactionScore(id: string, satisfactionScore: number, npsScore?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -272,7 +272,7 @@ export async function updateSatisfactionScore(id: string, satisfactionScore: num
 
 export async function scheduleFollowup(id: string, followupDate: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -301,7 +301,7 @@ export async function scheduleFollowup(id: string, followupDate: string): Promis
 
 export async function assignContact(id: string, assignedToId: string, assignedToName: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -333,7 +333,7 @@ export async function assignContact(id: string, assignedToId: string, assignedTo
 
 export async function convertToCustomer(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

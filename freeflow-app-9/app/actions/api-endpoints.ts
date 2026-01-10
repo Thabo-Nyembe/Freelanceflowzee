@@ -32,7 +32,7 @@ export async function getApiEndpoints(options?: {
   limit?: number
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -68,7 +68,7 @@ export async function getApiEndpoints(options?: {
 
 export async function getApiEndpoint(endpointId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -95,7 +95,7 @@ export async function getApiEndpoint(endpointId: string): Promise<ActionResult<a
 
 export async function createApiEndpoint(input: ApiEndpointInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -146,7 +146,7 @@ export async function updateApiEndpoint(
   }
 ): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -178,7 +178,7 @@ export async function updateApiEndpoint(
 
 export async function deleteApiEndpoint(endpointId: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -205,7 +205,7 @@ export async function deleteApiEndpoint(endpointId: string): Promise<ActionResul
 
 export async function deprecateApiEndpoint(endpointId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -242,7 +242,7 @@ export async function trackApiRequest(
   success: boolean
 ): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: endpoint } = await supabase
       .from('api_endpoints')
@@ -296,7 +296,7 @@ export async function trackApiRequest(
 
 export async function getApiStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

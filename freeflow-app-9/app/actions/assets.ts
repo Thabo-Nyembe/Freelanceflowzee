@@ -120,7 +120,7 @@ interface AssetWithSize {
 // Create Asset
 export async function createAsset(data: CreateAssetInput): Promise<ActionResult<DigitalAsset>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -196,7 +196,7 @@ export async function updateAsset(
       }
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -257,7 +257,7 @@ export async function deleteAsset(assetId: string): Promise<ActionResult<{ succe
       return actionError('Invalid asset ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -306,7 +306,7 @@ export async function incrementAssetDownload(assetId: string): Promise<ActionRes
       return actionError('Invalid asset ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase.rpc('increment_asset_download', { asset_id: assetId })
 
@@ -337,7 +337,7 @@ export async function incrementAssetDownload(assetId: string): Promise<ActionRes
 // Create Collection
 export async function createAssetCollection(data: CreateCollectionInput): Promise<ActionResult<AssetCollection>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -384,7 +384,7 @@ export async function updateAssetCollection(
       return actionError('Invalid collection ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -428,7 +428,7 @@ export async function deleteAssetCollection(collectionId: string): Promise<Actio
       return actionError('Invalid collection ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -466,7 +466,7 @@ export async function deleteAssetCollection(collectionId: string): Promise<Actio
 // Helper: Update Collection Stats
 async function updateCollectionStats(collectionId: string): Promise<void> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: assets } = await supabase
       .from('digital_assets')
@@ -517,7 +517,7 @@ export async function bulkUpdateAssets(
       }
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -548,7 +548,7 @@ export async function bulkUpdateAssets(
 // Get Asset Stats
 export async function getAssetStats(): Promise<ActionResult<AssetStatsResponse>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

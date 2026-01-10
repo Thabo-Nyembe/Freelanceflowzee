@@ -34,7 +34,7 @@ export interface CreateWebinarData {
 
 export async function createWebinar(data: CreateWebinarData): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -63,7 +63,7 @@ export async function createWebinar(data: CreateWebinarData): Promise<ActionResu
 
 export async function updateWebinar(id: string, data: Partial<CreateWebinarData>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -91,7 +91,7 @@ export async function updateWebinar(id: string, data: Partial<CreateWebinarData>
 
 export async function deleteWebinar(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -118,7 +118,7 @@ export async function deleteWebinar(id: string): Promise<ActionResult<any>> {
 
 export async function startWebinar(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -146,7 +146,7 @@ export async function startWebinar(id: string): Promise<ActionResult<any>> {
 
 export async function endWebinar(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -174,7 +174,7 @@ export async function endWebinar(id: string): Promise<ActionResult<any>> {
 
 export async function getWebinarStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

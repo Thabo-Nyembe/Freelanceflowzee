@@ -60,7 +60,7 @@ export interface Theme {
  */
 export async function createTheme(input: ThemeInput): Promise<ActionResult<Theme>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -99,7 +99,7 @@ export async function updateTheme(id: string, input: Partial<ThemeInput>): Promi
       return actionError('Invalid theme ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -140,7 +140,7 @@ export async function deleteTheme(id: string): Promise<ActionResult<{ success: b
       return actionError('Invalid theme ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -179,7 +179,7 @@ export async function activateTheme(id: string): Promise<ActionResult<Theme>> {
       return actionError('Invalid theme ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -233,7 +233,7 @@ export async function installTheme(id: string): Promise<ActionResult<Theme>> {
       return actionError('Invalid theme ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -274,7 +274,7 @@ export async function uninstallTheme(id: string): Promise<ActionResult<Theme>> {
       return actionError('Invalid theme ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -315,7 +315,7 @@ export async function deactivateTheme(id: string): Promise<ActionResult<Theme>> 
       return actionError('Invalid theme ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -361,7 +361,7 @@ export async function rateTheme(id: string, rating: number): Promise<ActionResul
       return actionError('Rating must be an integer between 1 and 5', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

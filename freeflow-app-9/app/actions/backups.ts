@@ -74,7 +74,7 @@ interface BackupLog {
 // Create backup
 export async function createBackup(input: BackupInput): Promise<ActionResult<Backup>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -160,7 +160,7 @@ export async function updateBackup(
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -204,7 +204,7 @@ export async function deleteBackup(id: string): Promise<ActionResult<{ success: 
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -241,7 +241,7 @@ export async function runBackupNow(id: string): Promise<ActionResult<Backup>> {
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -299,7 +299,7 @@ export async function verifyBackup(id: string): Promise<ActionResult<Backup>> {
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -356,7 +356,7 @@ export async function restoreBackup(id: string): Promise<ActionResult<{ success:
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -397,7 +397,7 @@ export async function cancelBackup(id: string): Promise<ActionResult<Backup>> {
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -441,7 +441,7 @@ export async function getBackupLogs(backupId: string): Promise<ActionResult<Back
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -494,7 +494,7 @@ export async function updateBackupSchedule(
       return actionError('Invalid backup ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -569,7 +569,7 @@ export async function updateRetentionPolicy(
       return actionError('Retention days must be between 1 and 3650', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

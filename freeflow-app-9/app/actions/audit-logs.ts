@@ -148,7 +148,7 @@ export async function createAuditLog(
       return actionError('Action is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -193,7 +193,7 @@ export async function getAuditLogs(
   filters?: GetAuditLogsFilters
 ): Promise<ActionResult<AuditLog[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -255,7 +255,7 @@ export async function getAuditLogs(
  */
 export async function getAuditLogStats(): Promise<ActionResult<AuditLogStats>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -314,7 +314,7 @@ export async function exportAuditLogs(
   filters?: ExportAuditLogsFilters
 ): Promise<ActionResult<ExportResult>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -401,7 +401,7 @@ export async function searchAuditLogs(
       return actionError('Search query is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -451,7 +451,7 @@ export async function createAlertRule(
       return actionError('Rule name is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -502,7 +502,7 @@ export async function updateAlertRule(
       return actionError('Invalid alert rule ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -549,7 +549,7 @@ export async function deleteAlertRule(
       return actionError('Invalid alert rule ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -592,7 +592,7 @@ export async function toggleAlertRule(
       return actionError('Invalid alert rule ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

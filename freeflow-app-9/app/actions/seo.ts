@@ -65,7 +65,7 @@ export interface SEOPageInput {
 // Keyword Actions
 export async function createSEOKeyword(input: SEOKeywordInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -95,7 +95,7 @@ export async function createSEOKeyword(input: SEOKeywordInput): Promise<ActionRe
 
 export async function updateSEOKeyword(id: string, updates: Partial<SEOKeywordInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -120,7 +120,7 @@ export async function updateSEOKeyword(id: string, updates: Partial<SEOKeywordIn
 
 export async function deleteSEOKeyword(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -143,7 +143,7 @@ export async function deleteSEOKeyword(id: string): Promise<ActionResult<void>> 
 
 export async function updateKeywordRanking(id: string, newPosition: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -190,7 +190,7 @@ export async function updateKeywordRanking(id: string, newPosition: number): Pro
 
 export async function getSEOKeywords(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -212,7 +212,7 @@ export async function getSEOKeywords(): Promise<ActionResult<any[]>> {
 // Backlink Actions
 export async function createSEOBacklink(input: SEOBacklinkInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -242,7 +242,7 @@ export async function createSEOBacklink(input: SEOBacklinkInput): Promise<Action
 
 export async function updateSEOBacklink(id: string, updates: Partial<SEOBacklinkInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -271,7 +271,7 @@ export async function updateSEOBacklink(id: string, updates: Partial<SEOBacklink
 
 export async function markBacklinkLost(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -300,7 +300,7 @@ export async function markBacklinkLost(id: string): Promise<ActionResult<any>> {
 
 export async function getSEOBacklinks(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -322,7 +322,7 @@ export async function getSEOBacklinks(): Promise<ActionResult<any[]>> {
 // Page Actions
 export async function createSEOPage(input: SEOPageInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -356,7 +356,7 @@ export async function createSEOPage(input: SEOPageInput): Promise<ActionResult<a
 
 export async function updateSEOPage(id: string, updates: Partial<SEOPageInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -381,7 +381,7 @@ export async function updateSEOPage(id: string, updates: Partial<SEOPageInput>):
 
 export async function crawlPage(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -410,7 +410,7 @@ export async function crawlPage(id: string): Promise<ActionResult<any>> {
 
 export async function getSEOPages(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

@@ -44,7 +44,7 @@ export async function createAdminSetting(
   data: CreateAdminSettingInput
 ): Promise<ActionResult<AdminSetting>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -103,7 +103,7 @@ export async function updateAdminSetting(
       return actionError('Invalid setting ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -171,7 +171,7 @@ export async function deleteAdminSetting(
       return actionError('Invalid setting ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

@@ -34,7 +34,7 @@ export interface FolderInput {
 
 export async function createFile(input: FileInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -60,7 +60,7 @@ export async function createFile(input: FileInput): Promise<ActionResult<any>> {
 
 export async function updateFile(id: string, updates: Partial<FileInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -88,7 +88,7 @@ export async function updateFile(id: string, updates: Partial<FileInput>): Promi
 
 export async function toggleFileStar(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -126,7 +126,7 @@ export async function moveFile(id: string, folderId: string | null): Promise<Act
 
 export async function deleteFile(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -152,7 +152,7 @@ export async function deleteFile(id: string): Promise<ActionResult<{ success: bo
 
 export async function getFiles(folderId?: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -186,7 +186,7 @@ export async function getFiles(folderId?: string): Promise<ActionResult<any[]>> 
 // Folder actions
 export async function createFolder(input: FolderInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -212,7 +212,7 @@ export async function createFolder(input: FolderInput): Promise<ActionResult<any
 
 export async function updateFolder(id: string, updates: Partial<FolderInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -240,7 +240,7 @@ export async function updateFolder(id: string, updates: Partial<FolderInput>): P
 
 export async function deleteFolder(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -266,7 +266,7 @@ export async function deleteFolder(id: string): Promise<ActionResult<{ success: 
 
 export async function getFolders(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

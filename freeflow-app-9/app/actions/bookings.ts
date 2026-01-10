@@ -65,7 +65,7 @@ type RescheduleData = z.infer<typeof rescheduleSchema>
 export async function createBooking(
   data: CreateBooking
 ): Promise<ActionResult<{ id: string; bookingNumber: string; confirmationCode: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Auth check
@@ -130,7 +130,7 @@ export async function updateBooking(
   id: string,
   data: UpdateBooking
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -184,7 +184,7 @@ export async function updateBooking(
 export async function deleteBooking(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -227,7 +227,7 @@ export async function deleteBooking(
 export async function confirmBooking(
   id: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -279,7 +279,7 @@ export async function cancelBooking(
   id: string,
   cancellationData?: CancellationData
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -349,7 +349,7 @@ export async function cancelBooking(
 export async function checkIn(
   id: string
 ): Promise<ActionResult<{ checkedIn: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -395,7 +395,7 @@ export async function checkIn(
 export async function checkOut(
   id: string
 ): Promise<ActionResult<{ checkedOut: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -443,7 +443,7 @@ export async function processPayment(
   id: string,
   amount: number
 ): Promise<ActionResult<{ paymentStatus: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -524,7 +524,7 @@ export async function rescheduleBooking(
   id: string,
   rescheduleData: RescheduleData
 ): Promise<ActionResult<{ rescheduled: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID

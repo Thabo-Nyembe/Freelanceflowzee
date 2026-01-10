@@ -95,7 +95,7 @@ export async function createAnalytic(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -160,7 +160,7 @@ export async function updateAnalytic(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -220,7 +220,7 @@ export async function deleteAnalytic(id: string): Promise<ActionResult<{ deleted
       return actionError('Invalid analytic ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -278,7 +278,7 @@ export async function triggerAlert(id: string): Promise<ActionResult<AnalyticDat
       return actionError('Invalid analytic ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

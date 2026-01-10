@@ -159,7 +159,7 @@ function generateOrderNumber(): string {
  * Recalculate Order Totals
  */
 async function recalculateOrderTotals(orderId: string): Promise<void> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: items } = await supabase
     .from('order_items')
@@ -198,7 +198,7 @@ export async function createOrder(
     // Validate input
     const validatedData = createOrderSchema.parse(data)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -304,7 +304,7 @@ export async function updateOrder(
     uuidSchema.parse(orderId)
     const validatedData = updateOrderSchema.parse(data)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -458,7 +458,7 @@ export async function cancelOrder(
     // Validate ID
     uuidSchema.parse(orderId)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -514,7 +514,7 @@ export async function refundOrder(
       z.number().min(0).parse(refundAmount)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -564,7 +564,7 @@ export async function deleteOrder(orderId: string): Promise<ActionResult<{ succe
     // Validate ID
     uuidSchema.parse(orderId)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -612,7 +612,7 @@ export async function addOrderItem(
     uuidSchema.parse(orderId)
     const validatedItem = orderItemSchema.parse(item)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -670,7 +670,7 @@ export async function removeOrderItem(itemId: string): Promise<ActionResult<{ su
     // Validate ID
     uuidSchema.parse(itemId)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -726,7 +726,7 @@ export async function removeOrderItem(itemId: string): Promise<ActionResult<{ su
  */
 export async function getOrderStats(): Promise<ActionResult<OrderStats>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -771,7 +771,7 @@ export async function searchOrders(query: string): Promise<ActionResult<Order[]>
     // Validate query
     z.string().min(1).max(500).parse(query)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

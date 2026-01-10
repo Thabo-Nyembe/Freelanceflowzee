@@ -29,7 +29,7 @@ export interface UpdateTicketInput extends Partial<CreateTicketInput> {
 
 export async function createTicket(input: CreateTicketInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -74,7 +74,7 @@ export async function createTicket(input: CreateTicketInput): Promise<ActionResu
 
 export async function updateTicket(input: UpdateTicketInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -112,7 +112,7 @@ export async function updateTicket(input: UpdateTicketInput): Promise<ActionResu
 
 export async function deleteTicket(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -139,7 +139,7 @@ export async function deleteTicket(id: string): Promise<ActionResult<any>> {
 
 export async function assignTicket(id: string, assignedTo: string, assignedName: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -180,7 +180,7 @@ export async function addTicketMessage(input: {
   attachments?: unknown[]
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -227,7 +227,7 @@ export async function addTicketMessage(input: {
 
 export async function getTicketStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

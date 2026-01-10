@@ -49,7 +49,7 @@ export interface SalesActivityInput {
 // Deal Actions
 export async function createSalesDeal(input: SalesDealInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -85,7 +85,7 @@ export async function createSalesDeal(input: SalesDealInput): Promise<ActionResu
 
 export async function updateSalesDeal(id: string, updates: Partial<SalesDealInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -117,7 +117,7 @@ export async function updateSalesDeal(id: string, updates: Partial<SalesDealInpu
 
 export async function deleteSalesDeal(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -147,7 +147,7 @@ export async function deleteSalesDeal(id: string): Promise<ActionResult<{ succes
 
 export async function moveDealToStage(id: string, stage: string, probability?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -204,7 +204,7 @@ export async function winDeal(id: string) {
 
 export async function loseDeal(id: string, reason?: string, competitor?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -244,7 +244,7 @@ export async function loseDeal(id: string, reason?: string, competitor?: string)
 
 export async function getSalesDeals(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -274,7 +274,7 @@ export async function getSalesDeals(): Promise<ActionResult<any[]>> {
 
 export async function getSalesDeal(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -305,7 +305,7 @@ export async function getSalesDeal(id: string): Promise<ActionResult<any>> {
 // Activity Actions
 export async function logSalesActivity(input: SalesActivityInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -344,7 +344,7 @@ export async function logSalesActivity(input: SalesActivityInput): Promise<Actio
 
 export async function getSalesActivities(dealId: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('sales_activities')
@@ -375,7 +375,7 @@ export async function createPipelineStage(input: {
   is_lost_stage?: boolean
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -409,7 +409,7 @@ export async function createPipelineStage(input: {
 
 export async function getPipelineStages(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

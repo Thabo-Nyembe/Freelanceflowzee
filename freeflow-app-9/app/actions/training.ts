@@ -36,7 +36,7 @@ export interface UpdateTrainingProgramInput extends Partial<CreateTrainingProgra
 
 export async function createTrainingProgram(input: CreateTrainingProgramInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -81,7 +81,7 @@ export async function createTrainingProgram(input: CreateTrainingProgramInput): 
 
 export async function updateTrainingProgram(input: UpdateTrainingProgramInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -112,7 +112,7 @@ export async function updateTrainingProgram(input: UpdateTrainingProgramInput): 
 
 export async function deleteTrainingProgram(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -144,7 +144,7 @@ export async function enrollTrainee(input: {
   notes?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -187,7 +187,7 @@ export async function updateEnrollment(input: {
   completed_at?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -218,7 +218,7 @@ export async function updateEnrollment(input: {
 
 export async function getTrainingStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

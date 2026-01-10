@@ -44,7 +44,7 @@ export interface UpdateResourceInput {
 
 export async function createResource(input: CreateResourceInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -93,7 +93,7 @@ export async function createResource(input: CreateResourceInput): Promise<Action
 
 export async function updateResource(id: string, input: UpdateResourceInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -145,7 +145,7 @@ export async function updateResource(id: string, input: UpdateResourceInput): Pr
 
 export async function assignResourceToProject(id: string, projectName: string, hoursPerWeek: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -194,7 +194,7 @@ export async function assignResourceToProject(id: string, projectName: string, h
 
 export async function setResourceUnavailable(id: string, availabilityDate: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -229,7 +229,7 @@ export async function setResourceUnavailable(id: string, availabilityDate: strin
 
 export async function deleteResource(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -264,7 +264,7 @@ export async function getResources(filters?: {
   department?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

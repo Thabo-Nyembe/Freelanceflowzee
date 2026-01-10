@@ -15,7 +15,7 @@ export async function getAddOns(options?: {
   searchQuery?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -76,7 +76,7 @@ export async function createAddOn(addOnData: {
   has_trial?: boolean
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -131,7 +131,7 @@ export async function updateAddOn(
   }
 ): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -165,7 +165,7 @@ export async function updateAddOn(
 
 export async function installAddOn(addOnId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -202,7 +202,7 @@ export async function installAddOn(addOnId: string): Promise<ActionResult<any>> 
 
 export async function uninstallAddOn(addOnId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -236,7 +236,7 @@ export async function uninstallAddOn(addOnId: string): Promise<ActionResult<any>
 
 export async function disableAddOn(addOnId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -269,7 +269,7 @@ export async function disableAddOn(addOnId: string): Promise<ActionResult<any>> 
 
 export async function startTrial(addOnId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -319,7 +319,7 @@ export async function startTrial(addOnId: string): Promise<ActionResult<any>> {
 
 export async function rateAddOn(addOnId: string, rating: number, review?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -374,7 +374,7 @@ export async function rateAddOn(addOnId: string, rating: number, review?: string
 
 export async function deleteAddOn(addOnId: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -403,7 +403,7 @@ export async function deleteAddOn(addOnId: string): Promise<ActionResult<void>> 
 
 export async function getAddOnStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

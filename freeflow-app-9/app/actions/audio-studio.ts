@@ -97,7 +97,7 @@ export async function getAudioTracks(
   options?: AudioTrackFilters
 ): Promise<ActionResult<unknown[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -148,7 +148,7 @@ export async function getAudioTrack(trackId: string): Promise<ActionResult<unkno
       return actionError('Invalid track ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -178,7 +178,7 @@ export async function getAudioTrack(trackId: string): Promise<ActionResult<unkno
 
 export async function uploadAudioTrack(input: AudioTrackInput): Promise<ActionResult<unknown>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -243,7 +243,7 @@ export async function updateAudioTrack(
       return actionError('Invalid track ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -283,7 +283,7 @@ export async function deleteAudioTrack(trackId: string): Promise<ActionResult<bo
       return actionError('Invalid track ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -322,7 +322,7 @@ export async function applyAudioEffect(
       return actionError('Invalid track ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -386,7 +386,7 @@ export async function completeProcessing(trackId: string): Promise<ActionResult<
       return actionError('Invalid track ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -437,7 +437,7 @@ export async function getAudioProjects(
   options?: AudioProjectFilters
 ): Promise<ActionResult<unknown[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -478,7 +478,7 @@ export async function getAudioProject(projectId: string): Promise<ActionResult<u
       return actionError('Invalid project ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -508,7 +508,7 @@ export async function getAudioProject(projectId: string): Promise<ActionResult<u
 
 export async function createAudioProject(input: AudioProjectInput): Promise<ActionResult<unknown>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -555,7 +555,7 @@ export async function updateAudioProject(
       return actionError('Invalid project ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -598,7 +598,7 @@ export async function exportAudioProject(
       return actionError('Invalid project ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -640,7 +640,7 @@ export async function deleteAudioProject(projectId: string): Promise<ActionResul
       return actionError('Invalid project ID format')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -670,7 +670,7 @@ export async function deleteAudioProject(projectId: string): Promise<ActionResul
 
 export async function getAudioStudioStats(): Promise<ActionResult<AudioStudioStats | null>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

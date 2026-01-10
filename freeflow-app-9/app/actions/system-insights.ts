@@ -10,7 +10,7 @@ const logger = createFeatureLogger('system-insights-actions')
 
 export async function createInsight(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -37,7 +37,7 @@ export async function createInsight(data: any): Promise<ActionResult<any>> {
 
 export async function updateInsight(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -66,7 +66,7 @@ export async function updateInsight(id: string, data: any): Promise<ActionResult
 
 export async function deleteInsight(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -93,7 +93,7 @@ export async function deleteInsight(id: string): Promise<ActionResult<{ success:
 
 export async function acknowledgeInsight(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -126,7 +126,7 @@ export async function acknowledgeInsight(id: string): Promise<ActionResult<any>>
 
 export async function resolveInsight(id: string, actionTaken?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -161,7 +161,7 @@ export async function resolveInsight(id: string, actionTaken?: string): Promise<
 
 export async function dismissInsight(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

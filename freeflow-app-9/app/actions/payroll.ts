@@ -35,7 +35,7 @@ export interface UpdatePayrollRunInput {
 
 export async function createPayrollRun(input: CreatePayrollRunInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -76,7 +76,7 @@ export async function createPayrollRun(input: CreatePayrollRunInput): Promise<Ac
 
 export async function updatePayrollRun(id: string, input: UpdatePayrollRunInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -106,7 +106,7 @@ export async function updatePayrollRun(id: string, input: UpdatePayrollRunInput)
 
 export async function processPayrollRun(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -136,7 +136,7 @@ export async function processPayrollRun(id: string): Promise<ActionResult<any>> 
 
 export async function approvePayrollRun(id: string, approverName: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -170,7 +170,7 @@ export async function approvePayrollRun(id: string, approverName: string): Promi
 
 export async function deletePayrollRun(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -208,7 +208,7 @@ export async function addEmployeePayroll(runId: string, input: {
   tax_rate?: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -257,7 +257,7 @@ export async function getPayrollRuns(filters?: {
   department?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

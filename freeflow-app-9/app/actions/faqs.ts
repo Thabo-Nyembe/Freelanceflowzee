@@ -22,7 +22,7 @@ export interface FAQInput {
 
 export async function getFAQs(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -49,7 +49,7 @@ export async function getFAQs(): Promise<ActionResult<any[]>> {
 
 export async function createFAQ(input: FAQInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -83,7 +83,7 @@ export async function createFAQ(input: FAQInput): Promise<ActionResult<any>> {
 
 export async function updateFAQ(id: string, input: Partial<FAQInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -117,7 +117,7 @@ export async function updateFAQ(id: string, input: Partial<FAQInput>): Promise<A
 
 export async function deleteFAQ(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -146,7 +146,7 @@ export async function deleteFAQ(id: string): Promise<ActionResult<{ success: boo
 
 export async function markFAQHelpful(id: string, helpful: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -190,7 +190,7 @@ export async function markFAQHelpful(id: string, helpful: boolean): Promise<Acti
 
 export async function getFAQStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

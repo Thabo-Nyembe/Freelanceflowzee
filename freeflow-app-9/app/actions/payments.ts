@@ -106,7 +106,7 @@ export async function createPayment(
     // Validate input
     const validatedData = createPaymentSchema.parse(data)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -164,7 +164,7 @@ export async function updatePayment(
     uuidSchema.parse(paymentId)
     const validatedData = updatePaymentSchema.parse(data)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -301,7 +301,7 @@ export async function refundPayment(
     uuidSchema.parse(paymentId)
     const validatedData = data ? refundPaymentSchema.parse(data) : {}
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -378,7 +378,7 @@ export async function cancelPayment(paymentId: string): Promise<ActionResult<Pay
     // Validate ID
     uuidSchema.parse(paymentId)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -423,7 +423,7 @@ export async function deletePayment(paymentId: string): Promise<ActionResult<{ s
     // Validate ID
     uuidSchema.parse(paymentId)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -464,7 +464,7 @@ export async function deletePayment(paymentId: string): Promise<ActionResult<{ s
  */
 export async function getPaymentStats(): Promise<ActionResult<PaymentStats>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -509,7 +509,7 @@ export async function getPaymentsByOrder(orderId: string): Promise<ActionResult<
     // Validate ID
     uuidSchema.parse(orderId)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -550,7 +550,7 @@ export async function getPaymentsBySubscription(subscriptionId: string): Promise
     // Validate ID
     uuidSchema.parse(subscriptionId)
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

@@ -81,7 +81,7 @@ export async function createMilestone(input: CreateMilestoneInput): Promise<Acti
       return actionError('Milestone name is required', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -143,7 +143,7 @@ export async function updateMilestone(id: string, input: UpdateMilestoneInput): 
       return actionError('Invalid milestone ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -183,7 +183,7 @@ export async function updateMilestoneProgress(id: string, progress: number): Pro
       return actionError('Progress must be a number between 0 and 100', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -222,7 +222,7 @@ export async function markMilestoneAtRisk(id: string): Promise<ActionResult<Mile
       return actionError('Invalid milestone ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -258,7 +258,7 @@ export async function completeMilestone(id: string): Promise<ActionResult<Milest
       return actionError('Invalid milestone ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -298,7 +298,7 @@ export async function deleteMilestone(id: string): Promise<ActionResult<{ succes
       return actionError('Invalid milestone ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -331,7 +331,7 @@ export async function getMilestones(filters?: {
   priority?: string
 }): Promise<ActionResult<Milestone[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

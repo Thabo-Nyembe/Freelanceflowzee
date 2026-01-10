@@ -42,7 +42,7 @@ export interface SocialAccountInput {
 // Post Actions
 export async function createSocialPost(input: SocialPostInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -81,7 +81,7 @@ export async function createSocialPost(input: SocialPostInput): Promise<ActionRe
 
 export async function updateSocialPost(id: string, updates: Partial<SocialPostInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -106,7 +106,7 @@ export async function updateSocialPost(id: string, updates: Partial<SocialPostIn
 
 export async function deleteSocialPost(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -129,7 +129,7 @@ export async function deleteSocialPost(id: string): Promise<ActionResult<void>> 
 
 export async function schedulePost(id: string, scheduledAt: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -158,7 +158,7 @@ export async function schedulePost(id: string, scheduledAt: string): Promise<Act
 
 export async function publishPost(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -195,7 +195,7 @@ export async function updatePostMetrics(id: string, metrics: {
   clicks?: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -233,7 +233,7 @@ export async function updatePostMetrics(id: string, metrics: {
 
 export async function getSocialPosts(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -256,7 +256,7 @@ export async function getSocialPosts(): Promise<ActionResult<any[]>> {
 // Account Actions
 export async function connectSocialAccount(input: SocialAccountInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -287,7 +287,7 @@ export async function connectSocialAccount(input: SocialAccountInput): Promise<A
 
 export async function disconnectSocialAccount(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -314,7 +314,7 @@ export async function updateAccountMetrics(id: string, metrics: {
   posts_count?: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -343,7 +343,7 @@ export async function updateAccountMetrics(id: string, metrics: {
 
 export async function getSocialAccounts(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -365,7 +365,7 @@ export async function getSocialAccounts(): Promise<ActionResult<any[]>> {
 // Analytics Actions
 export async function getSocialAnalytics(accountId?: string, days: number = 30): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

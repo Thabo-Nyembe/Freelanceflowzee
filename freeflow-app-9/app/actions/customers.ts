@@ -40,7 +40,7 @@ export async function createCustomer(
   customerData: CreateCustomerInput
 ): Promise<ActionResult<Customer>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -97,7 +97,7 @@ export async function recordPurchase(
       return actionError('Order value must be a positive number', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -187,7 +187,7 @@ export async function updateCustomerSegment(
       return actionError('Segment is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -244,7 +244,7 @@ export async function updateChurnRisk(
       return actionError('Risk score must be between 0 and 100', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -317,7 +317,7 @@ export async function updateCustomerSatisfaction(
       return actionError('Satisfaction score must be between 0 and 100', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

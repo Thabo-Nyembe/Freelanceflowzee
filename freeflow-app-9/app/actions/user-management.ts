@@ -83,7 +83,7 @@ export async function createManagedUser(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -149,7 +149,7 @@ export async function updateManagedUser(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -209,7 +209,7 @@ export async function deleteManagedUser(id: string): Promise<ActionResult<{ dele
       return actionError('Invalid user ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -270,7 +270,7 @@ export async function suspendUser(
       return actionError('Invalid user ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -334,7 +334,7 @@ export async function activateUser(id: string): Promise<ActionResult<ManagedUser
       return actionError('Invalid user ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

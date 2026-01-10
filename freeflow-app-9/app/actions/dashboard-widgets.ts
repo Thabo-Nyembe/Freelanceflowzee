@@ -20,7 +20,7 @@ export interface DashboardWidgetInput {
 
 export async function createDashboardWidget(input: DashboardWidgetInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -49,7 +49,7 @@ export async function createDashboardWidget(input: DashboardWidgetInput): Promis
 
 export async function updateDashboardWidget(id: string, updates: Partial<DashboardWidgetInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -80,7 +80,7 @@ export async function updateDashboardWidget(id: string, updates: Partial<Dashboa
 
 export async function deleteDashboardWidget(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -109,7 +109,7 @@ export async function deleteDashboardWidget(id: string): Promise<ActionResult<an
 
 export async function reorderDashboardWidgets(widgetPositions: { id: string; position: number }[]): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -140,7 +140,7 @@ export async function reorderDashboardWidgets(widgetPositions: { id: string; pos
 
 export async function getDashboardWidgets(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

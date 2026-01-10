@@ -112,7 +112,7 @@ export async function createJobPosting(
       }
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -188,7 +188,7 @@ export async function updateJobPosting(
       }
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -237,7 +237,7 @@ export async function publishJobPosting(
       return actionError('Invalid job posting ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -290,7 +290,7 @@ export async function closeJobPosting(
       return actionError('Invalid job posting ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -342,7 +342,7 @@ export async function deleteJobPosting(
       return actionError('Invalid job posting ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -407,7 +407,7 @@ export async function createApplication(
       return actionError('Match score must be between 0 and 100', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -491,7 +491,7 @@ export async function updateApplication(
       return actionError('Match score must be between 0 and 100', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -547,7 +547,7 @@ export async function advanceApplicationStage(
       return actionError('Stage is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -608,7 +608,7 @@ export async function rejectApplication(
       return actionError('Invalid application ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -655,7 +655,7 @@ export async function getJobPostings(
   filters?: JobPostingFilters
 ): Promise<ActionResult<JobPosting[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -717,7 +717,7 @@ export async function getApplications(
       }
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

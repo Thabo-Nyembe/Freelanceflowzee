@@ -16,7 +16,7 @@ const logger = createFeatureLogger('content-actions')
  */
 export async function createContent(data: Partial<Content>): Promise<ActionResult<Content>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -58,7 +58,7 @@ export async function updateContent(id: string, data: Partial<Content>): Promise
       return actionError('Invalid content ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -99,7 +99,7 @@ export async function deleteContent(id: string): Promise<ActionResult<{ id: stri
       return actionError('Invalid content ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -138,7 +138,7 @@ export async function publishContent(id: string): Promise<ActionResult<Content>>
       return actionError('Invalid content ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -192,7 +192,7 @@ export async function scheduleContent(id: string, scheduledFor: string): Promise
       return actionError('Scheduled date must be in the future', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -236,7 +236,7 @@ export async function incrementViewCount(id: string): Promise<ActionResult<Conte
       return actionError('Invalid content ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -292,7 +292,7 @@ export async function updateContentEngagement(
       return actionError('Comments must be an integer', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -347,7 +347,7 @@ export async function archiveContent(id: string): Promise<ActionResult<Content>>
       return actionError('Invalid content ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

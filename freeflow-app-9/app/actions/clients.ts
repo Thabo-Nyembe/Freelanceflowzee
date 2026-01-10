@@ -37,7 +37,7 @@ const logger = createFeatureLogger('clients-actions')
 export async function createClient(
   input: CreateClient
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Auth check
@@ -94,7 +94,7 @@ export async function updateClient(
   id: string,
   updates: UpdateClient
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -160,7 +160,7 @@ export async function updateClient(
 export async function archiveClient(
   id: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -220,7 +220,7 @@ export async function archiveClient(
 export async function deleteClient(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -273,7 +273,7 @@ export async function deleteClient(
  * Get all clients for current user
  */
 export async function getClients(): Promise<ActionResult<unknown[]>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Auth check
@@ -307,7 +307,7 @@ export async function getClients(): Promise<ActionResult<unknown[]>> {
 export async function getClientById(
   id: string
 ): Promise<ActionResult<unknown | null>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID

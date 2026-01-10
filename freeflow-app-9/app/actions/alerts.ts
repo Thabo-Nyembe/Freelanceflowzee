@@ -14,7 +14,7 @@ export async function getAlerts(options?: {
   category?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -65,7 +65,7 @@ export async function createAlert(alertData: {
   tags?: string[]
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -107,7 +107,7 @@ export async function createAlert(alertData: {
 
 export async function acknowledgeAlert(alertId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -163,7 +163,7 @@ export async function resolveAlert(
   rootCause?: string
 ): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -217,7 +217,7 @@ export async function resolveAlert(
 
 export async function escalateAlert(alertId: string, assignTo?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -266,7 +266,7 @@ export async function escalateAlert(alertId: string, assignTo?: string): Promise
 
 export async function snoozeAlert(alertId: string, minutes: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -303,7 +303,7 @@ export async function snoozeAlert(alertId: string, minutes: number): Promise<Act
 
 export async function deleteAlert(alertId: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -332,7 +332,7 @@ export async function deleteAlert(alertId: string): Promise<ActionResult<void>> 
 
 export async function getAlertStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -386,7 +386,7 @@ export async function getAlertStats(): Promise<ActionResult<any>> {
 
 export async function acknowledgeAllAlerts(): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

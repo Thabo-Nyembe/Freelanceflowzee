@@ -82,7 +82,7 @@ const layerDataSchema = z.object({
 export async function createCanvas(
   data: Partial<Canvas>
 ): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Auth check
@@ -132,7 +132,7 @@ export async function updateCanvas(
   id: string,
   data: Partial<Canvas>
 ): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -187,7 +187,7 @@ export async function updateCanvas(
  * Delete a canvas (soft delete)
  */
 export async function deleteCanvas(id: string): Promise<ActionResult<{ id: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -231,7 +231,7 @@ export async function autoSaveCanvas(
   id: string,
   canvasData: Record<string, unknown>
 ): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -288,7 +288,7 @@ export async function shareCanvas(
   id: string,
   userEmail: string
 ): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -358,7 +358,7 @@ export async function shareCanvas(
  * Publish canvas
  */
 export async function publishCanvas(id: string): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -411,7 +411,7 @@ export async function addCanvasObject(
   id: string,
   object: unknown
 ): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -483,7 +483,7 @@ export async function updateCanvasLayer(
   layerIndex: number,
   layerData: unknown
 ): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID
@@ -561,7 +561,7 @@ export async function updateCanvasLayer(
  * Lock canvas (prevent editing)
  */
 export async function lockCanvas(id: string): Promise<ActionResult<Canvas>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // Validate ID

@@ -22,7 +22,7 @@ export interface SupportTicketInput {
 
 export async function createSupportTicket(input: SupportTicketInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -49,7 +49,7 @@ export async function createSupportTicket(input: SupportTicketInput): Promise<Ac
 
 export async function updateSupportTicket(id: string, input: Partial<SupportTicketInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -78,7 +78,7 @@ export async function updateSupportTicket(id: string, input: Partial<SupportTick
 
 export async function deleteSupportTicket(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

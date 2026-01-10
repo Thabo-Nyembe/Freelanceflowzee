@@ -38,7 +38,7 @@ export async function getStoreApps(options?: {
   limit?: number
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     let query = supabase
       .from('store_apps')
@@ -72,7 +72,7 @@ export async function getStoreApps(options?: {
 
 export async function getInstalledApps(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -96,7 +96,7 @@ export async function getInstalledApps(): Promise<ActionResult<any[]>> {
 
 export async function getStoreApp(appId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('store_apps')
@@ -115,7 +115,7 @@ export async function getStoreApp(appId: string): Promise<ActionResult<any>> {
 
 export async function installApp(appId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -152,7 +152,7 @@ export async function installApp(appId: string): Promise<ActionResult<any>> {
 
 export async function uninstallApp(appId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -182,7 +182,7 @@ export async function uninstallApp(appId: string): Promise<ActionResult<any>> {
 
 export async function startTrial(appId: string, trialDays: number = 14): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -215,7 +215,7 @@ export async function startTrial(appId: string, trialDays: number = 14): Promise
 
 export async function updateApp(appId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -260,7 +260,7 @@ export async function createAppReview(
   content?: string
 ): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -291,7 +291,7 @@ export async function createAppReview(
 
 export async function getAppReviews(appId: string, limit: number = 50): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('app_reviews')
@@ -312,7 +312,7 @@ export async function getAppReviews(appId: string, limit: number = 50): Promise<
 
 export async function markReviewHelpful(reviewId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: review } = await supabase
       .from('app_reviews')
@@ -340,7 +340,7 @@ export async function markReviewHelpful(reviewId: string): Promise<ActionResult<
 
 export async function getStoreStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

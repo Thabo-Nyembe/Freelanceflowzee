@@ -22,7 +22,7 @@ export interface InvestorMetricInput {
 
 export async function createInvestorMetric(input: InvestorMetricInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -69,7 +69,7 @@ export async function createInvestorMetric(input: InvestorMetricInput): Promise<
 
 export async function updateInvestorMetric(id: string, updates: Partial<InvestorMetricInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -121,7 +121,7 @@ export async function updateInvestorMetric(id: string, updates: Partial<Investor
 
 export async function deleteInvestorMetric(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -150,7 +150,7 @@ export async function deleteInvestorMetric(id: string): Promise<ActionResult<{ s
 
 export async function getInvestorMetrics(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -178,7 +178,7 @@ export async function getInvestorMetrics(): Promise<ActionResult<any[]>> {
 
 export async function getMetricsByCategory(category: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

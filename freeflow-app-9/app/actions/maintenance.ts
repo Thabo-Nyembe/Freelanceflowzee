@@ -36,7 +36,7 @@ interface MaintenanceTaskInput {
 // Create maintenance window
 export async function createMaintenanceWindow(input: MaintenanceWindowInput): Promise<ActionResult<{ id: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -89,7 +89,7 @@ export async function createMaintenanceWindow(input: MaintenanceWindowInput): Pr
 // Update maintenance window
 export async function updateMaintenanceWindow(id: string, input: Partial<MaintenanceWindowInput>): Promise<ActionResult<{ id: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -132,7 +132,7 @@ export async function updateMaintenanceWindow(id: string, input: Partial<Mainten
 // Delete maintenance window
 export async function deleteMaintenanceWindow(id: string): Promise<ActionResult<{ deleted: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -162,7 +162,7 @@ export async function deleteMaintenanceWindow(id: string): Promise<ActionResult<
 // Start maintenance
 export async function startMaintenance(id: string): Promise<ActionResult<{ status: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -197,7 +197,7 @@ export async function startMaintenance(id: string): Promise<ActionResult<{ statu
 // Complete maintenance
 export async function completeMaintenance(id: string, notes?: string): Promise<ActionResult<{ status: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -234,7 +234,7 @@ export async function completeMaintenance(id: string, notes?: string): Promise<A
 // Cancel maintenance
 export async function cancelMaintenance(id: string, reason?: string): Promise<ActionResult<{ status: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -269,7 +269,7 @@ export async function cancelMaintenance(id: string, reason?: string): Promise<Ac
 // Delay maintenance
 export async function delayMaintenance(id: string, newStartTime: string, newEndTime: string): Promise<ActionResult<{ status: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -310,7 +310,7 @@ export async function delayMaintenance(id: string, newStartTime: string, newEndT
 // Send notifications
 export async function sendMaintenanceNotifications(id: string): Promise<ActionResult<{ sent: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -350,7 +350,7 @@ export async function sendMaintenanceNotifications(id: string): Promise<ActionRe
 // Create maintenance task
 export async function createMaintenanceTask(windowId: string, input: MaintenanceTaskInput): Promise<ActionResult<{ id: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -411,7 +411,7 @@ export async function createMaintenanceTask(windowId: string, input: Maintenance
 // Update maintenance task
 export async function updateMaintenanceTask(id: string, input: Partial<MaintenanceTaskInput>): Promise<ActionResult<{ id: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -442,7 +442,7 @@ export async function updateMaintenanceTask(id: string, input: Partial<Maintenan
 // Start task
 export async function startMaintenanceTask(id: string): Promise<ActionResult<{ status: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -476,7 +476,7 @@ export async function startMaintenanceTask(id: string): Promise<ActionResult<{ s
 // Complete task
 export async function completeMaintenanceTask(id: string, notes?: string): Promise<ActionResult<{ status: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -526,7 +526,7 @@ export async function completeMaintenanceTask(id: string, notes?: string): Promi
 // Skip task
 export async function skipMaintenanceTask(id: string, reason?: string): Promise<ActionResult<{ status: string }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -560,7 +560,7 @@ export async function skipMaintenanceTask(id: string, reason?: string): Promise<
 // Delete task
 export async function deleteMaintenanceTask(id: string): Promise<ActionResult<{ deleted: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -589,7 +589,7 @@ export async function deleteMaintenanceTask(id: string): Promise<ActionResult<{ 
 // Reorder tasks
 export async function reorderMaintenanceTasks(windowId: string, taskIds: string[]): Promise<ActionResult<{ reordered: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

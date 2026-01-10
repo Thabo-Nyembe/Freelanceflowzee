@@ -126,7 +126,7 @@ export async function createSprint(input: CreateSprintInput): Promise<ActionResu
       return actionError('Sprint name is required', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -184,7 +184,7 @@ export async function updateSprint(id: string, input: UpdateSprintInput): Promis
       return actionError('Invalid sprint ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -220,7 +220,7 @@ export async function startSprint(id: string): Promise<ActionResult<Sprint>> {
       return actionError('Invalid sprint ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -259,7 +259,7 @@ export async function completeSprint(id: string, retrospective?: string): Promis
       return actionError('Invalid sprint ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -300,7 +300,7 @@ export async function deleteSprint(id: string): Promise<ActionResult<{ success: 
       return actionError('Invalid sprint ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -338,7 +338,7 @@ export async function createSprintTask(input: CreateTaskInput): Promise<ActionRe
       return actionError('Task title is required', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -391,7 +391,7 @@ export async function updateSprintTask(id: string, input: UpdateTaskInput): Prom
       return actionError('Invalid task ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -432,7 +432,7 @@ export async function completeSprintTask(id: string): Promise<ActionResult<Sprin
       return actionError('Invalid task ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -477,7 +477,7 @@ export async function deleteSprintTask(id: string): Promise<ActionResult<{ succe
       return actionError('Invalid task ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -518,7 +518,7 @@ export async function deleteSprintTask(id: string): Promise<ActionResult<{ succe
 
 async function updateSprintTaskCounts(sprintId: string): Promise<void> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Get task counts by status
     const { data: tasks } = await supabase
@@ -554,7 +554,7 @@ export async function getSprints(filters?: {
   teamName?: string
 }): Promise<ActionResult<Sprint[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -597,7 +597,7 @@ export async function getSprintTasks(sprintId: string): Promise<ActionResult<Spr
       return actionError('Invalid sprint ID format', 400)
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

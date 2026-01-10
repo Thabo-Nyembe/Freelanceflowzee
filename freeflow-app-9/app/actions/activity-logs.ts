@@ -32,7 +32,7 @@ export interface LogActivityInput {
 
 export async function logActivity(input: LogActivityInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -81,7 +81,7 @@ export async function getActivityLogs(filters?: {
   endDate?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -127,7 +127,7 @@ export async function getActivityLogs(filters?: {
 
 export async function getActivityStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -167,7 +167,7 @@ export async function getActivityStats(): Promise<ActionResult<any>> {
 
 export async function getUserActivitySummary(userId?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -211,7 +211,7 @@ export async function getUserActivitySummary(userId?: string): Promise<ActionRes
 
 export async function revertActivity(activityId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

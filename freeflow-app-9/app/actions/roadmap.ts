@@ -35,7 +35,7 @@ export async function createRoadmapInitiative(data: {
   metadata?: Record<string, any>
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -105,7 +105,7 @@ export async function updateRoadmapInitiative(initiativeId: string, data: Partia
   metadata: Record<string, any>
 }>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -154,7 +154,7 @@ export async function updateInitiativeProgress(initiativeId: string, progress: n
 // Delete Initiative (soft delete)
 export async function deleteRoadmapInitiative(initiativeId: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -190,7 +190,7 @@ export async function createRoadmapMilestone(data: {
   metadata?: Record<string, any>
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -237,7 +237,7 @@ export async function updateRoadmapMilestone(milestoneId: string, data: Partial<
   metadata: Record<string, any>
 }>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -280,7 +280,7 @@ export async function updateMilestoneStatus(milestoneId: string, status: Milesto
 // Delete Milestone (soft delete)
 export async function deleteRoadmapMilestone(milestoneId: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -311,7 +311,7 @@ export async function deleteRoadmapMilestone(milestoneId: string): Promise<Actio
 // Calculate Milestone Progress
 export async function calculateMilestoneProgress(milestoneId: string, initiativeIds: string[]): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -354,7 +354,7 @@ export async function calculateMilestoneProgress(milestoneId: string, initiative
 // Get Roadmap Stats
 export async function getRoadmapStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

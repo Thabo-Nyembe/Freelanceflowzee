@@ -44,7 +44,7 @@ export interface OAuthAppResult {
 // ============================================
 
 export async function createOAuthApplication(input: CreateOAuthAppInput): Promise<ActionResult<OAuthAppResult>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -109,7 +109,7 @@ export async function updateOAuthApplication(
     isActive?: boolean
   }
 ): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -149,7 +149,7 @@ export async function updateOAuthApplication(
 }
 
 export async function deleteOAuthApplication(appId: string): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -192,7 +192,7 @@ export async function deleteOAuthApplication(appId: string): Promise<ActionResul
 }
 
 export async function regenerateClientSecret(appId: string): Promise<ActionResult<{ clientSecret: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -228,7 +228,7 @@ export async function regenerateClientSecret(appId: string): Promise<ActionResul
 }
 
 export async function getOAuthApplications(): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -252,7 +252,7 @@ export async function getOAuthApplications(): Promise<ActionResult> {
 }
 
 export async function getOAuthApplication(appId: string): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -281,7 +281,7 @@ export async function getOAuthApplication(appId: string): Promise<ActionResult> 
 // ============================================
 
 export async function getOAuthScopes(): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data, error } = await supabase
@@ -308,7 +308,7 @@ export async function grantUserConsent(
   applicationId: string,
   scopes: string[]
 ): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -340,7 +340,7 @@ export async function grantUserConsent(
 }
 
 export async function revokeUserConsent(applicationId: string): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -379,7 +379,7 @@ export async function revokeUserConsent(applicationId: string): Promise<ActionRe
 }
 
 export async function getUserConsents(): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -416,7 +416,7 @@ export async function getUserConsents(): Promise<ActionResult> {
 // ============================================
 
 export async function getUserAccessTokens(): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -452,7 +452,7 @@ export async function getUserAccessTokens(): Promise<ActionResult> {
 }
 
 export async function revokeAccessToken(tokenId: string): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -476,7 +476,7 @@ export async function revokeAccessToken(tokenId: string): Promise<ActionResult> 
 }
 
 export async function revokeAllUserTokens(): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -506,7 +506,7 @@ export async function revokeAllUserTokens(): Promise<ActionResult> {
 // ============================================
 
 export async function validateOAuthClient(clientId: string, redirectUri: string): Promise<ActionResult> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data, error } = await supabase
@@ -533,7 +533,7 @@ export async function createAuthorizationCode(
   codeChallenge?: string,
   codeChallengeMethod?: string
 ): Promise<ActionResult<{ code: string }>> {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()

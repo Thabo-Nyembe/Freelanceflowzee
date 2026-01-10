@@ -96,7 +96,7 @@ export interface FleetVehicleInput {
 // Logistics Route Actions
 export async function createLogisticsRoute(input: LogisticsRouteInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -135,7 +135,7 @@ export async function createLogisticsRoute(input: LogisticsRouteInput): Promise<
 
 export async function updateLogisticsRoute(id: string, updates: Partial<LogisticsRouteInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -186,7 +186,7 @@ export async function updateLogisticsRoute(id: string, updates: Partial<Logistic
 
 export async function deleteLogisticsRoute(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -213,7 +213,7 @@ export async function deleteLogisticsRoute(id: string): Promise<ActionResult<{ s
 
 export async function startRoute(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -246,7 +246,7 @@ export async function startRoute(id: string): Promise<ActionResult<any>> {
 
 export async function completeRoute(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -291,7 +291,7 @@ export async function completeRoute(id: string): Promise<ActionResult<any>> {
 }
 
 export async function delayRoute(id: string, reason?: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -315,7 +315,7 @@ export async function delayRoute(id: string, reason?: string) {
 }
 
 export async function cancelRoute(id: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -338,7 +338,7 @@ export async function cancelRoute(id: string) {
 }
 
 export async function updateRouteProgress(id: string, progress: number, distance?: number) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -362,7 +362,7 @@ export async function updateRouteProgress(id: string, progress: number, distance
 }
 
 export async function getLogisticsRoutes() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -379,7 +379,7 @@ export async function getLogisticsRoutes() {
 }
 
 export async function getLogisticsRoute(id: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -397,7 +397,7 @@ export async function getLogisticsRoute(id: string) {
 
 // Route Stop Actions
 export async function createRouteStop(input: RouteStopInput) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('route_stops')
@@ -422,7 +422,7 @@ export async function createRouteStop(input: RouteStopInput) {
 }
 
 export async function updateRouteStop(id: string, updates: Partial<RouteStopInput>) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('route_stops')
@@ -438,7 +438,7 @@ export async function updateRouteStop(id: string, updates: Partial<RouteStopInpu
 }
 
 export async function arriveAtStop(id: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('route_stops')
@@ -458,7 +458,7 @@ export async function arriveAtStop(id: string) {
 }
 
 export async function completeStop(id: string, notes?: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('route_stops')
@@ -484,7 +484,7 @@ export async function completeStop(id: string, notes?: string) {
 }
 
 export async function skipStop(id: string, reason?: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('route_stops')
@@ -504,7 +504,7 @@ export async function skipStop(id: string, reason?: string) {
 }
 
 export async function getRouteStops(routeId: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('route_stops')
@@ -518,7 +518,7 @@ export async function getRouteStops(routeId: string) {
 
 // Fleet Vehicle Actions
 export async function createFleetVehicle(input: FleetVehicleInput) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -543,7 +543,7 @@ export async function createFleetVehicle(input: FleetVehicleInput) {
 }
 
 export async function updateFleetVehicle(id: string, updates: Partial<FleetVehicleInput>) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -563,7 +563,7 @@ export async function updateFleetVehicle(id: string, updates: Partial<FleetVehic
 }
 
 export async function deleteFleetVehicle(id: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -584,7 +584,7 @@ export async function updateVehicleStatus(
   id: string,
   status: 'available' | 'in-use' | 'maintenance' | 'out-of-service' | 'retired'
 ) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -607,7 +607,7 @@ export async function updateVehicleStatus(
 }
 
 export async function updateVehicleLocation(id: string, lat: number, lng: number) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -631,7 +631,7 @@ export async function updateVehicleLocation(id: string, lat: number, lng: number
 }
 
 export async function getFleetVehicles() {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -648,7 +648,7 @@ export async function getFleetVehicles() {
 }
 
 export async function getFleetVehicle(id: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')

@@ -23,7 +23,7 @@ export interface GrowthMetricInput {
 
 export async function createGrowthMetric(input: GrowthMetricInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -71,7 +71,7 @@ export async function createGrowthMetric(input: GrowthMetricInput): Promise<Acti
 
 export async function updateGrowthMetric(id: string, updates: Partial<GrowthMetricInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -124,7 +124,7 @@ export async function updateGrowthMetric(id: string, updates: Partial<GrowthMetr
 
 export async function deleteGrowthMetric(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -153,7 +153,7 @@ export async function deleteGrowthMetric(id: string): Promise<ActionResult<{ suc
 
 export async function recordValue(id: string, newValue: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -206,7 +206,7 @@ export async function recordValue(id: string, newValue: number): Promise<ActionR
 
 export async function setAsGoal(id: string, targetValue: number, deadline?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -242,7 +242,7 @@ export async function setAsGoal(id: string, targetValue: number, deadline?: stri
 
 export async function getGrowthMetrics(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -270,7 +270,7 @@ export async function getGrowthMetrics(): Promise<ActionResult<any[]>> {
 
 export async function getGoals(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

@@ -32,7 +32,7 @@ export interface MobileAppVersionInput {
 
 export async function createMobileFeature(input: MobileAppFeatureInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -64,7 +64,7 @@ export async function createMobileFeature(input: MobileAppFeatureInput): Promise
 
 export async function updateMobileFeature(id: string, input: Partial<MobileAppFeatureInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -98,7 +98,7 @@ export async function updateMobileFeature(id: string, input: Partial<MobileAppFe
 
 export async function deleteMobileFeature(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -138,7 +138,7 @@ export async function deactivateFeature(id: string): Promise<ActionResult<any>> 
 
 export async function createMobileVersion(input: MobileAppVersionInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -174,7 +174,7 @@ export async function createMobileVersion(input: MobileAppVersionInput): Promise
 
 export async function updateMobileVersion(id: string, input: Partial<MobileAppVersionInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -212,7 +212,7 @@ export async function deprecateVersion(id: string): Promise<ActionResult<any>> {
 
 export async function getMobileAppData(): Promise<ActionResult<{ features: any[], versions: any[] }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

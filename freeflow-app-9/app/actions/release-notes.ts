@@ -27,7 +27,7 @@ export interface ReleaseNoteInput {
 
 export async function createReleaseNote(input: ReleaseNoteInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -54,7 +54,7 @@ export async function createReleaseNote(input: ReleaseNoteInput): Promise<Action
 
 export async function updateReleaseNote(id: string, input: Partial<ReleaseNoteInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -83,7 +83,7 @@ export async function updateReleaseNote(id: string, input: Partial<ReleaseNoteIn
 
 export async function deleteReleaseNote(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -118,7 +118,7 @@ export async function archiveReleaseNote(id: string): Promise<ActionResult<any>>
 
 export async function likeReleaseNote(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

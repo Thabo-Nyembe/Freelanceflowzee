@@ -29,7 +29,7 @@ export interface UIComponentInput {
 
 export async function createUIComponent(input: UIComponentInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -56,7 +56,7 @@ export async function createUIComponent(input: UIComponentInput): Promise<Action
 
 export async function updateUIComponent(id: string, input: Partial<UIComponentInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -85,7 +85,7 @@ export async function updateUIComponent(id: string, input: Partial<UIComponentIn
 
 export async function deleteUIComponent(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -128,7 +128,7 @@ export async function setBetaComponent(id: string) {
 
 export async function rateComponent(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

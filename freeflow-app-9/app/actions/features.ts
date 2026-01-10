@@ -10,7 +10,7 @@ const logger = createFeatureLogger('features-actions')
 
 export async function createFeature(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -40,7 +40,7 @@ export async function createFeature(data: any): Promise<ActionResult<any>> {
 
 export async function updateFeature(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -72,7 +72,7 @@ export async function updateFeature(id: string, data: any): Promise<ActionResult
 
 export async function deleteFeature(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -100,7 +100,7 @@ export async function deleteFeature(id: string): Promise<ActionResult<any>> {
 
 export async function enableFeature(id: string, environment?: 'production' | 'staging' | 'development'): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -139,7 +139,7 @@ export async function enableFeature(id: string, environment?: 'production' | 'st
 
 export async function disableFeature(id: string, environment?: 'production' | 'staging' | 'development'): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -178,7 +178,7 @@ export async function disableFeature(id: string, environment?: 'production' | 's
 
 export async function updateRollout(id: string, percentage: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -211,7 +211,7 @@ export async function updateRollout(id: string, percentage: number): Promise<Act
 
 export async function startABTest(id: string, variants: any, trafficSplit: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -245,7 +245,7 @@ export async function startABTest(id: string, variants: any, trafficSplit: any):
 
 export async function rollbackFeature(id: string, reason: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -279,7 +279,7 @@ export async function rollbackFeature(id: string, reason: string): Promise<Actio
 
 export async function updateFeatureMetrics(id: string, success: boolean, responseTime: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

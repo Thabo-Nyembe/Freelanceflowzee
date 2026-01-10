@@ -33,7 +33,7 @@ export async function createPerformanceReview(data: {
   next_review_date?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -99,7 +99,7 @@ export async function updatePerformanceReview(reviewId: string, data: Partial<{
   metadata: Record<string, any>
 }>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -140,7 +140,7 @@ export async function submitReview(reviewId: string) {
 // Approve Review
 export async function approveReview(reviewId: string, managerComments?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -179,7 +179,7 @@ export async function completeReview(reviewId: string) {
 // Delete Review (soft delete)
 export async function deletePerformanceReview(reviewId: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -215,7 +215,7 @@ export async function createPerformanceGoal(reviewId: string, data: {
   due_date?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -270,7 +270,7 @@ export async function updatePerformanceGoal(goalId: string, data: Partial<{
   notes: string
 }>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -343,7 +343,7 @@ export async function completeGoal(goalId: string, exceeded: boolean = false) {
 // Delete Goal
 export async function deletePerformanceGoal(goalId: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -383,7 +383,7 @@ export async function deletePerformanceGoal(goalId: string): Promise<ActionResul
 
 // Helper: Update Review Goal Counts
 async function updateReviewGoalCounts(reviewId: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data: goals } = await supabase
     .from('performance_goals')
@@ -406,7 +406,7 @@ export async function calculateOverallScore(reviewId: string, scores: {
   managerRating?: number // 1-5
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -459,7 +459,7 @@ export async function calculateOverallScore(reviewId: string, scores: {
 // Get Performance Stats
 export async function getPerformanceStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

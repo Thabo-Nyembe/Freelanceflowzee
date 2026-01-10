@@ -31,7 +31,7 @@ export interface ExtensionInput {
 
 export async function createExtension(input: ExtensionInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -63,7 +63,7 @@ export async function createExtension(input: ExtensionInput): Promise<ActionResu
 
 export async function updateExtension(id: string, input: Partial<ExtensionInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -97,7 +97,7 @@ export async function updateExtension(id: string, input: Partial<ExtensionInput>
 
 export async function deleteExtension(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -126,7 +126,7 @@ export async function deleteExtension(id: string): Promise<ActionResult<{ succes
 
 export async function enableExtension(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -160,7 +160,7 @@ export async function enableExtension(id: string): Promise<ActionResult<any>> {
 
 export async function disableExtension(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -194,7 +194,7 @@ export async function disableExtension(id: string): Promise<ActionResult<any>> {
 
 export async function installExtension(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -239,7 +239,7 @@ export async function installExtension(id: string): Promise<ActionResult<any>> {
 
 export async function updateExtensionVersion(id: string, newVersion: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -285,7 +285,7 @@ export async function updateExtensionVersion(id: string, newVersion: string): Pr
 
 export async function incrementExtensionDownloads(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: extension } = await supabase
       .from('extensions')
@@ -321,7 +321,7 @@ export async function incrementExtensionDownloads(id: string): Promise<ActionRes
 
 export async function rateExtension(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -369,7 +369,7 @@ export async function rateExtension(id: string, rating: number): Promise<ActionR
 
 export async function getExtensions(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

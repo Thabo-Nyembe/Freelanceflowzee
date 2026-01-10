@@ -24,7 +24,7 @@ export interface LeadInput {
 
 export async function createLead(input: LeadInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -64,7 +64,7 @@ export async function createLead(input: LeadInput): Promise<ActionResult<any>> {
 
 export async function updateLead(id: string, updates: Partial<LeadInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -93,7 +93,7 @@ export async function updateLead(id: string, updates: Partial<LeadInput>): Promi
 
 export async function deleteLead(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -124,7 +124,7 @@ export async function qualifyLead(id: string): Promise<ActionResult<any>> {
 
 export async function contactLead(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -165,7 +165,7 @@ export async function updateLeadScore(id: string, score: number): Promise<Action
 
 export async function getLeads(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -190,7 +190,7 @@ export async function getLeads(): Promise<ActionResult<any[]>> {
 
 export async function getLeadsByStatus(status: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -216,7 +216,7 @@ export async function getLeadsByStatus(status: string): Promise<ActionResult<any
 
 export async function addLeadActivity(leadId: string, activityType: string, title: string, description?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

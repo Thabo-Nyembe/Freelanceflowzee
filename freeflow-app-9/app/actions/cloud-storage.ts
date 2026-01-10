@@ -36,7 +36,7 @@ export async function createFile(data: {
   folder?: string
 }): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -63,7 +63,7 @@ export async function createFile(data: {
 
 export async function updateFile(id: string, data: any): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -92,7 +92,7 @@ export async function updateFile(id: string, data: any): Promise<ActionResult<Cl
 
 export async function deleteFile(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -128,7 +128,7 @@ export async function shareFile(id: string, shareConfig: {
   access_level?: string
 }): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -168,7 +168,7 @@ export async function shareFile(id: string, shareConfig: {
 
 export async function unshareFile(id: string): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -203,7 +203,7 @@ export async function unshareFile(id: string): Promise<ActionResult<CloudFile>> 
 
 export async function createVersion(id: string): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -259,7 +259,7 @@ export async function createVersion(id: string): Promise<ActionResult<CloudFile>
 
 export async function incrementDownloads(id: string): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -306,7 +306,7 @@ export async function incrementDownloads(id: string): Promise<ActionResult<Cloud
 
 export async function incrementViews(id: string): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -353,7 +353,7 @@ export async function incrementViews(id: string): Promise<ActionResult<CloudFile
 
 export async function updateProcessingStatus(id: string, status: string, error?: string): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -394,7 +394,7 @@ export async function updateProcessingStatus(id: string, status: string, error?:
 
 export async function archiveFile(id: string): Promise<ActionResult<CloudFile>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

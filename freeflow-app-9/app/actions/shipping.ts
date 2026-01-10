@@ -88,7 +88,7 @@ export interface ShippingCarrier {
 // Fetch all shipments
 export async function fetchShipments(): Promise<ActionResult<Shipment[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -112,7 +112,7 @@ export async function fetchShipments(): Promise<ActionResult<Shipment[]>> {
 // Create shipment
 export async function createShipment(shipment: Partial<Shipment>): Promise<ActionResult<Shipment>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -136,7 +136,7 @@ export async function createShipment(shipment: Partial<Shipment>): Promise<Actio
 // Update shipment
 export async function updateShipment(id: string, updates: Partial<Shipment>): Promise<ActionResult<Shipment>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('shipments')
@@ -158,7 +158,7 @@ export async function updateShipment(id: string, updates: Partial<Shipment>): Pr
 // Delete shipment (soft delete)
 export async function deleteShipment(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
       .from('shipments')
@@ -178,7 +178,7 @@ export async function deleteShipment(id: string): Promise<ActionResult<void>> {
 // Mark as shipped
 export async function markAsShipped(id: string, trackingNumber?: string): Promise<ActionResult<Shipment>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const updates: Partial<Shipment> = {
       status: 'shipped',
@@ -208,7 +208,7 @@ export async function markAsShipped(id: string, trackingNumber?: string): Promis
 // Mark as delivered
 export async function markAsDelivered(id: string, signatureName?: string): Promise<ActionResult<Shipment>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const updates: Partial<Shipment> = {
       status: 'delivered',
@@ -239,7 +239,7 @@ export async function markAsDelivered(id: string, signatureName?: string): Promi
 // Cancel shipment
 export async function cancelShipment(id: string, reason?: string): Promise<ActionResult<Shipment>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('shipments')
@@ -264,7 +264,7 @@ export async function cancelShipment(id: string, reason?: string): Promise<Actio
 // Mark as returned
 export async function markAsReturned(id: string, reason?: string): Promise<ActionResult<Shipment>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('shipments')
@@ -289,7 +289,7 @@ export async function markAsReturned(id: string, reason?: string): Promise<Actio
 // Add tracking event
 export async function addTrackingEvent(shipmentId: string, event: Partial<ShipmentTracking>): Promise<ActionResult<ShipmentTracking>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('shipment_tracking')
@@ -314,7 +314,7 @@ export async function addTrackingEvent(shipmentId: string, event: Partial<Shipme
 // Fetch tracking history
 export async function fetchTrackingHistory(shipmentId: string): Promise<ActionResult<ShipmentTracking[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('shipment_tracking')
@@ -334,7 +334,7 @@ export async function fetchTrackingHistory(shipmentId: string): Promise<ActionRe
 // Fetch all carriers
 export async function fetchCarriers(): Promise<ActionResult<ShippingCarrier[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -358,7 +358,7 @@ export async function fetchCarriers(): Promise<ActionResult<ShippingCarrier[]>> 
 // Create carrier
 export async function createCarrier(carrier: Partial<ShippingCarrier>): Promise<ActionResult<ShippingCarrier>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -382,7 +382,7 @@ export async function createCarrier(carrier: Partial<ShippingCarrier>): Promise<
 // Update carrier
 export async function updateCarrier(id: string, updates: Partial<ShippingCarrier>): Promise<ActionResult<ShippingCarrier>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('shipping_carriers')
@@ -404,7 +404,7 @@ export async function updateCarrier(id: string, updates: Partial<ShippingCarrier
 // Delete carrier (soft delete)
 export async function deleteCarrier(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
       .from('shipping_carriers')

@@ -21,7 +21,7 @@ export interface AnimationInput {
 
 export async function createAnimation(input: AnimationInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -58,7 +58,7 @@ export async function createAnimation(input: AnimationInput): Promise<ActionResu
 
 export async function updateAnimation(id: string, updates: Partial<AnimationInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -90,7 +90,7 @@ export async function updateAnimation(id: string, updates: Partial<AnimationInpu
 
 export async function deleteAnimation(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -117,7 +117,7 @@ export async function deleteAnimation(id: string): Promise<ActionResult<{ succes
 
 export async function startRender(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -149,7 +149,7 @@ export async function startRender(id: string): Promise<ActionResult<any>> {
 
 export async function completeRender(id: string, videoUrl?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -183,7 +183,7 @@ export async function completeRender(id: string, videoUrl?: string): Promise<Act
 
 export async function likeAnimation(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: animation } = await supabase
       .from('animations')
@@ -221,7 +221,7 @@ export async function likeAnimation(id: string): Promise<ActionResult<any>> {
 
 export async function downloadAnimation(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: animation } = await supabase
       .from('animations')
@@ -259,7 +259,7 @@ export async function downloadAnimation(id: string): Promise<ActionResult<any>> 
 
 export async function getAnimations(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

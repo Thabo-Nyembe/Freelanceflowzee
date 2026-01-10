@@ -10,7 +10,7 @@ const logger = createFeatureLogger('capacity-actions')
 
 export async function createCapacity(data: Partial<Capacity>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -40,7 +40,7 @@ export async function createCapacity(data: Partial<Capacity>): Promise<ActionRes
 
 export async function updateCapacity(id: string, data: Partial<Capacity>): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -69,7 +69,7 @@ export async function updateCapacity(id: string, data: Partial<Capacity>): Promi
 
 export async function deleteCapacity(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -96,7 +96,7 @@ export async function deleteCapacity(id: string): Promise<ActionResult<{ success
 
 export async function updateUtilization(id: string, allocated: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -148,7 +148,7 @@ export async function updateUtilization(id: string, allocated: number): Promise<
 
 export async function markUnavailable(id: string, from: string, until: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -182,7 +182,7 @@ export async function markUnavailable(id: string, from: string, until: string): 
 
 export async function resetCapacity(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
