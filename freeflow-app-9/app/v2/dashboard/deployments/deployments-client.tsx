@@ -21,7 +21,7 @@ import {
   GitCommit, FileCode, Zap, Shield, RefreshCw, AlertTriangle, Check, X,
   Box, Layers, Database, Lock, Plus, ChevronRight, ChevronDown,
   Search, Filter, MoreHorizontal, Download, Upload, ArrowUpRight, Timer, Network, User, MessageSquare, FileText, BarChart3, AlertCircle, Webhook,
-  Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2
+  Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2, Key
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -581,6 +581,66 @@ export default function DeploymentsClient() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [filterOptions, setFilterOptions] = useState({ status: 'all', dateRange: 'all', author: 'all' })
 
+  // Settings state
+  const [settingsState, setSettingsState] = useState({
+    // Build & Deploy settings
+    autoDeployOnPush: true,
+    previewDeployments: true,
+    buildCache: true,
+    skewProtection: false,
+    serverlessFunctions: true,
+    edgeFunctions: true,
+    // Notification settings
+    emailNotifications: true,
+    failedDeploymentAlerts: true,
+    productionPromotionAlerts: true,
+    weeklySummary: false,
+    // Security settings
+    forceHttps: true,
+    hstsHeaders: true,
+    xssProtection: true,
+    contentSecurityPolicy: false,
+    ipAllowlist: false,
+    // Git settings
+    autoDeployBranches: true,
+    productionBranchProtection: true,
+    ignoredBuildStep: false,
+    enableGitSubmodules: false,
+    gitLfs: false,
+    requiredStatusChecks: true,
+    previewComments: true,
+    githubDeployments: true,
+    commitStatuses: true,
+    // Protection settings
+    passwordProtection: false,
+    ipAllowlisting: false,
+    vercelAuthentication: true,
+    // Function settings
+    enableCaching: true,
+    enableLogging: true,
+    coldStartOptimization: false,
+  })
+
+  // Protection rules state
+  const [protectionRules, setProtectionRules] = useState(mockProtections)
+
+  // Plugins state
+  const [plugins, setPlugins] = useState(mockBuildPlugins)
+
+  // Alert settings state
+  const [alertSettings, setAlertSettings] = useState({
+    errorAlerts: true,
+    warningAlerts: false,
+    deploymentAlerts: true,
+  })
+
+  // Integration permissions state
+  const [integrationPermissions, setIntegrationPermissions] = useState({
+    readDeployments: true,
+    writeDeployments: true,
+    accessEnvVariables: false,
+  })
+
   // Quick deploy handler
   const handleQuickDeploy = async () => {
     setIsQuickDeploying(true)
@@ -671,6 +731,7 @@ export default function DeploymentsClient() {
     const total = mockDeployments.length
     const successful = mockDeployments.filter(d => d.status === 'success').length
     const avgDuration = mockDeployments.reduce((sum, d) => sum + d.duration, 0) / total
+    const activeDeployments = mockDeployments.filter(d => d.status === 'in_progress' || d.status === 'queued').length
     return {
       total,
       successful,
@@ -679,9 +740,13 @@ export default function DeploymentsClient() {
       totalFunctions: mockFunctions.length,
       totalInvocations: mockFunctions.reduce((sum, f) => sum + f.invocations, 0),
       totalDomains: mockDomains.length,
-      totalStorage: mockBlobs.reduce((sum, b) => sum + b.size, 0)
+      totalStorage: mockBlobs.reduce((sum, b) => sum + b.size, 0),
+      // Additional stats for the banner
+      totalDeployments: total + dbDeployments.length,
+      avgBuildTime: Math.round(avgDuration),
+      activeDeployments: activeDeployments + dbDeployments.filter(d => d.status === 'in_progress' || d.status === 'pending').length,
     }
-  }, [])
+  }, [dbDeployments])
 
   // Promote deployment to production
   const handlePromoteDeployment = async (deployment: DbDeployment) => {
@@ -1813,7 +1878,7 @@ export default function DeploymentsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockProtections.map(protection => (
+                  {protectionRules.map(protection => (
                     <div key={protection.id} className="flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
@@ -1826,7 +1891,10 @@ export default function DeploymentsClient() {
                       </div>
                       <div className="flex items-center gap-4">
                         <Badge className={protection.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{protection.enabled ? 'Enabled' : 'Disabled'}</Badge>
-                        <Switch checked={protection.enabled} />
+                        <Switch checked={protection.enabled} onCheckedChange={(checked) => {
+                          setProtectionRules(prev => prev.map(p => p.id === protection.id ? { ...p, enabled: checked } : p))
+                          toast.success(`${protection.name} ${checked ? 'enabled' : 'disabled'}`)
+                        }} />
                       </div>
                     </div>
                   ))}
@@ -1840,15 +1908,24 @@ export default function DeploymentsClient() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div><h4 className="font-medium">Password Protection</h4><p className="text-sm text-gray-500">Require password to access preview deployments</p></div>
-                  <Switch />
+                  <Switch checked={settingsState.passwordProtection} onCheckedChange={(checked) => {
+                    setSettingsState(prev => ({ ...prev, passwordProtection: checked }))
+                    toast.success(`Password protection ${checked ? 'enabled' : 'disabled'}`)
+                  }} />
                 </div>
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div><h4 className="font-medium">IP Allowlisting</h4><p className="text-sm text-gray-500">Restrict access to specific IP addresses</p></div>
-                  <Switch />
+                  <Switch checked={settingsState.ipAllowlisting} onCheckedChange={(checked) => {
+                    setSettingsState(prev => ({ ...prev, ipAllowlisting: checked }))
+                    toast.success(`IP allowlisting ${checked ? 'enabled' : 'disabled'}`)
+                  }} />
                 </div>
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div><h4 className="font-medium">Vercel Authentication</h4><p className="text-sm text-gray-500">Require team member login to access</p></div>
-                  <Switch defaultChecked />
+                  <Switch checked={settingsState.vercelAuthentication} onCheckedChange={(checked) => {
+                    setSettingsState(prev => ({ ...prev, vercelAuthentication: checked }))
+                    toast.success(`Vercel authentication ${checked ? 'enabled' : 'disabled'}`)
+                  }} />
                 </div>
               </CardContent>
             </Card>
@@ -1890,12 +1967,12 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><Rocket className="h-5 w-5 text-purple-600" />Build & Deploy</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy on push</p><p className="text-sm text-gray-500">Deploy when commits are pushed</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Deployments</p><p className="text-sm text-gray-500">Create deployments for PRs</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Build Cache</p><p className="text-sm text-gray-500">Cache dependencies for faster builds</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Skew Protection</p><p className="text-sm text-gray-500">Ensure asset/code version consistency</p></div><Switch /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Serverless Functions</p><p className="text-sm text-gray-500">Enable serverless API routes</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Edge Functions</p><p className="text-sm text-gray-500">Enable edge runtime for routes</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy on push</p><p className="text-sm text-gray-500">Deploy when commits are pushed</p></div><Switch checked={settingsState.autoDeployOnPush} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, autoDeployOnPush: checked })); toast.success(`Auto-deploy ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Deployments</p><p className="text-sm text-gray-500">Create deployments for PRs</p></div><Switch checked={settingsState.previewDeployments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, previewDeployments: checked })); toast.success(`Preview deployments ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Build Cache</p><p className="text-sm text-gray-500">Cache dependencies for faster builds</p></div><Switch checked={settingsState.buildCache} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, buildCache: checked })); toast.success(`Build cache ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Skew Protection</p><p className="text-sm text-gray-500">Ensure asset/code version consistency</p></div><Switch checked={settingsState.skewProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, skewProtection: checked })); toast.success(`Skew protection ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Serverless Functions</p><p className="text-sm text-gray-500">Enable serverless API routes</p></div><Switch checked={settingsState.serverlessFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, serverlessFunctions: checked })); toast.success(`Serverless functions ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Edge Functions</p><p className="text-sm text-gray-500">Enable edge runtime for routes</p></div><Switch checked={settingsState.edgeFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, edgeFunctions: checked })); toast.success(`Edge functions ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div><Label>Function Timeout</Label><Select defaultValue="60"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="10">10 seconds</SelectItem><SelectItem value="30">30 seconds</SelectItem><SelectItem value="60">60 seconds</SelectItem><SelectItem value="300">5 minutes</SelectItem></SelectContent></Select></div>
                           <div><Label>Function Memory</Label><Select defaultValue="1024"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="512">512 MB</SelectItem><SelectItem value="1024">1024 MB</SelectItem><SelectItem value="2048">2048 MB</SelectItem><SelectItem value="3008">3008 MB</SelectItem></SelectContent></Select></div>
@@ -1905,10 +1982,10 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5 text-purple-600" />Notifications</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Email Notifications</p><p className="text-sm text-gray-500">Receive deployment status via email</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Failed Deployment Alerts</p><p className="text-sm text-gray-500">Immediate notification on failures</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Promotion Alerts</p><p className="text-sm text-gray-500">Notify when deployments go to production</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Weekly deployment statistics digest</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Email Notifications</p><p className="text-sm text-gray-500">Receive deployment status via email</p></div><Switch checked={settingsState.emailNotifications} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, emailNotifications: checked })); toast.success(`Email notifications ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Failed Deployment Alerts</p><p className="text-sm text-gray-500">Immediate notification on failures</p></div><Switch checked={settingsState.failedDeploymentAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, failedDeploymentAlerts: checked })); toast.success(`Failed deployment alerts ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Promotion Alerts</p><p className="text-sm text-gray-500">Notify when deployments go to production</p></div><Switch checked={settingsState.productionPromotionAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, productionPromotionAlerts: checked })); toast.success(`Production promotion alerts ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Weekly deployment statistics digest</p></div><Switch checked={settingsState.weeklySummary} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, weeklySummary: checked })); toast.success(`Weekly summary ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div><Label>Notification Email</Label><Input type="email" placeholder="team@company.com" className="mt-1" /></div>
                           <div><Label>Slack Channel</Label><Input placeholder="#deployments" className="mt-1" /></div>
@@ -1918,11 +1995,11 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-purple-600" />Security</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Force HTTPS</p><p className="text-sm text-gray-500">Redirect all HTTP to HTTPS</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">HSTS Headers</p><p className="text-sm text-gray-500">Strict Transport Security</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">XSS Protection</p><p className="text-sm text-gray-500">Enable X-XSS-Protection header</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Content Security Policy</p><p className="text-sm text-gray-500">Define allowed content sources</p></div><Switch /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">IP Allowlist</p><p className="text-sm text-gray-500">Restrict access by IP address</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Force HTTPS</p><p className="text-sm text-gray-500">Redirect all HTTP to HTTPS</p></div><Switch checked={settingsState.forceHttps} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, forceHttps: checked })); toast.success(`Force HTTPS ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">HSTS Headers</p><p className="text-sm text-gray-500">Strict Transport Security</p></div><Switch checked={settingsState.hstsHeaders} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, hstsHeaders: checked })); toast.success(`HSTS headers ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">XSS Protection</p><p className="text-sm text-gray-500">Enable X-XSS-Protection header</p></div><Switch checked={settingsState.xssProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, xssProtection: checked })); toast.success(`XSS protection ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Content Security Policy</p><p className="text-sm text-gray-500">Define allowed content sources</p></div><Switch checked={settingsState.contentSecurityPolicy} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, contentSecurityPolicy: checked })); toast.success(`Content Security Policy ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">IP Allowlist</p><p className="text-sm text-gray-500">Restrict access by IP address</p></div><Switch checked={settingsState.ipAllowlist} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, ipAllowlist: checked })); toast.success(`IP allowlist ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div><Label>Allowed IPs</Label><Input placeholder="192.168.1.0/24, 10.0.0.0/8" className="mt-1 font-mono" /></div>
                       </CardContent>
                     </Card>
@@ -1962,13 +2039,13 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><GitCommit className="h-5 w-5 text-purple-600" />Branch Configuration</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy Branches</p><p className="text-sm text-gray-500">Automatically deploy all git branches</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Branch Protection</p><p className="text-sm text-gray-500">Require PR reviews before deploying</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Ignored Build Step</p><p className="text-sm text-gray-500">Cancel builds based on changed files</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy Branches</p><p className="text-sm text-gray-500">Automatically deploy all git branches</p></div><Switch checked={settingsState.autoDeployBranches} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, autoDeployBranches: checked })); toast.success(`Auto-deploy branches ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Branch Protection</p><p className="text-sm text-gray-500">Require PR reviews before deploying</p></div><Switch checked={settingsState.productionBranchProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, productionBranchProtection: checked })); toast.success(`Production branch protection ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Ignored Build Step</p><p className="text-sm text-gray-500">Cancel builds based on changed files</p></div><Switch checked={settingsState.ignoredBuildStep} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, ignoredBuildStep: checked })); toast.success(`Ignored build step ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                         <div><Label>Ignore Build Pattern</Label><Input placeholder="docs/**, *.md" className="mt-1 font-mono" /></div>
                         <div><Label>Preview Branch Prefix</Label><Input placeholder="preview/, feature/" className="mt-1 font-mono" /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Enable Git Submodules</p><p className="text-sm text-gray-500">Clone submodules during build</p></div><Switch /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Git LFS</p><p className="text-sm text-gray-500">Enable Large File Storage support</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Enable Git Submodules</p><p className="text-sm text-gray-500">Clone submodules during build</p></div><Switch checked={settingsState.enableGitSubmodules} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, enableGitSubmodules: checked })); toast.success(`Git submodules ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Git LFS</p><p className="text-sm text-gray-500">Enable Large File Storage support</p></div><Switch checked={settingsState.gitLfs} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, gitLfs: checked })); toast.success(`Git LFS ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                       </CardContent>
                     </Card>
                     <Card className="border-gray-200 dark:border-gray-700">
@@ -2002,10 +2079,10 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-purple-600" />Commit Checks</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Required Status Checks</p><p className="text-sm text-gray-500">Block merge until checks pass</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Comments</p><p className="text-sm text-gray-500">Comment preview URL on PRs</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">GitHub Deployments</p><p className="text-sm text-gray-500">Create GitHub deployment events</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Commit Statuses</p><p className="text-sm text-gray-500">Report build status to GitHub</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Required Status Checks</p><p className="text-sm text-gray-500">Block merge until checks pass</p></div><Switch checked={settingsState.requiredStatusChecks} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, requiredStatusChecks: checked })); toast.success(`Required status checks ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Comments</p><p className="text-sm text-gray-500">Comment preview URL on PRs</p></div><Switch checked={settingsState.previewComments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, previewComments: checked })); toast.success(`Preview comments ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">GitHub Deployments</p><p className="text-sm text-gray-500">Create GitHub deployment events</p></div><Switch checked={settingsState.githubDeployments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, githubDeployments: checked })); toast.success(`GitHub deployments ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Commit Statuses</p><p className="text-sm text-gray-500">Report build status to GitHub</p></div><Switch checked={settingsState.commitStatuses} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, commitStatuses: checked })); toast.success(`Commit statuses ${checked ? 'enabled' : 'disabled'}`); }} /></div>
                       </CardContent>
                     </Card>
                   </>
@@ -2104,13 +2181,16 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Build Plugins</CardTitle><Button variant="outline" onClick={() => setShowMarketplaceDialog(true)}><Search className="h-4 w-4 mr-2" />Browse Marketplace</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockBuildPlugins.map(plugin => (
+                      {plugins.map(plugin => (
                         <div key={plugin.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center"><Package className="h-5 w-5 text-indigo-600" /></div>
                             <div><div className="flex items-center gap-2"><h4 className="font-medium">{plugin.name}</h4><Badge variant="outline" className="text-xs">v{plugin.version}</Badge></div><p className="text-sm text-gray-500">{plugin.description}</p><p className="text-xs text-gray-400 mt-1">by {plugin.author} • {(plugin.installCount / 1000).toFixed(0)}k installs</p></div>
                           </div>
-                          <Switch checked={plugin.enabled} />
+                          <Switch checked={plugin.enabled} onCheckedChange={(checked) => {
+                            setPlugins(prev => prev.map(p => p.id === plugin.id ? { ...p, enabled: checked } : p))
+                            toast.success(`${plugin.name} ${checked ? 'enabled' : 'disabled'}`)
+                          }} />
                         </div>
                       ))}
                     </CardContent>
@@ -3313,21 +3393,21 @@ export default function DeploymentsClient() {
                   <AlertCircle className="h-4 w-4 text-red-500" />
                   <span>Error Alerts</span>
                 </div>
-                <Switch defaultChecked />
+                <Switch checked={alertSettings.errorAlerts} onCheckedChange={(checked) => setAlertSettings(prev => ({ ...prev, errorAlerts: checked }))} />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-amber-500" />
                   <span>Warning Alerts</span>
                 </div>
-                <Switch />
+                <Switch checked={alertSettings.warningAlerts} onCheckedChange={(checked) => setAlertSettings(prev => ({ ...prev, warningAlerts: checked }))} />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Rocket className="h-4 w-4 text-purple-500" />
                   <span>Deployment Alerts</span>
                 </div>
-                <Switch defaultChecked />
+                <Switch checked={alertSettings.deploymentAlerts} onCheckedChange={(checked) => setAlertSettings(prev => ({ ...prev, deploymentAlerts: checked }))} />
               </div>
               <div>
                 <Label>Notification Email</Label>
@@ -4011,21 +4091,21 @@ export default function DeploymentsClient() {
                       <p className="text-sm font-medium">Enable Caching</p>
                       <p className="text-xs text-gray-500">Cache function responses for improved performance</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={settingsState.enableCaching} onCheckedChange={(checked) => setSettingsState(prev => ({ ...prev, enableCaching: checked }))} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Enable Logging</p>
                       <p className="text-xs text-gray-500">Log all function invocations and errors</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={settingsState.enableLogging} onCheckedChange={(checked) => setSettingsState(prev => ({ ...prev, enableLogging: checked }))} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Cold Start Optimization</p>
                       <p className="text-xs text-gray-500">Keep function warm to reduce cold starts</p>
                     </div>
-                    <Switch />
+                    <Switch checked={settingsState.coldStartOptimization} onCheckedChange={(checked) => setSettingsState(prev => ({ ...prev, coldStartOptimization: checked }))} />
                   </div>
                 </div>
               </div>
@@ -4168,21 +4248,21 @@ export default function DeploymentsClient() {
                       <p className="text-sm font-medium">Read Deployments</p>
                       <p className="text-xs text-gray-500">Access deployment history and logs</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={integrationPermissions.readDeployments} onCheckedChange={(checked) => setIntegrationPermissions(prev => ({ ...prev, readDeployments: checked }))} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Write Deployments</p>
                       <p className="text-xs text-gray-500">Trigger new deployments</p>
                     </div>
-                    <Switch defaultChecked />
+                    <Switch checked={integrationPermissions.writeDeployments} onCheckedChange={(checked) => setIntegrationPermissions(prev => ({ ...prev, writeDeployments: checked }))} />
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium">Access Environment Variables</p>
                       <p className="text-xs text-gray-500">Read and modify environment variables</p>
                     </div>
-                    <Switch />
+                    <Switch checked={integrationPermissions.accessEnvVariables} onCheckedChange={(checked) => setIntegrationPermissions(prev => ({ ...prev, accessEnvVariables: checked }))} />
                   </div>
                 </div>
               </div>

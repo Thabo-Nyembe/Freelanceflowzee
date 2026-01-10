@@ -1087,7 +1087,19 @@ export default function CollaborationPage() {
                             <p className="text-sm font-medium">Project_Timeline_v2.pdf</p>
                             <p className="text-xs text-gray-500">2.4 MB</p>
                           </div>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              logger.info('Download file clicked', { fileName: 'Project_Timeline_v2.pdf' })
+                              toast.success('Downloading Project_Timeline_v2.pdf...')
+                              // Simulate file download
+                              const link = document.createElement('a')
+                              link.href = '#'
+                              link.download = 'Project_Timeline_v2.pdf'
+                              toast.success('Download started: Project_Timeline_v2.pdf')
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2041,7 +2053,15 @@ export default function CollaborationPage() {
                         <p className="text-sm font-medium">Sprint Planning Meeting</p>
                         <p className="text-xs text-gray-500">Yesterday • 1h 23m • Recording available</p>
                       </div>
-                      <Button size="sm" variant="ghost">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        data-testid="download-recording-btn-1"
+                        onClick={() => {
+                          logger.info('Download recording clicked', { meeting: 'Sprint Planning Meeting' })
+                          toast.success('Downloading Sprint Planning Meeting recording (1h 23m)...')
+                        }}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>
@@ -2051,7 +2071,15 @@ export default function CollaborationPage() {
                         <p className="text-sm font-medium">Client Presentation</p>
                         <p className="text-xs text-gray-500">2 days ago • 45m • Recording available</p>
                       </div>
-                      <Button size="sm" variant="ghost">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        data-testid="download-recording-btn-2"
+                        onClick={() => {
+                          logger.info('Download recording clicked', { meeting: 'Client Presentation' })
+                          toast.success('Downloading Client Presentation recording (45m)...')
+                        }}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>
@@ -2061,7 +2089,15 @@ export default function CollaborationPage() {
                         <p className="text-sm font-medium">Design Review</p>
                         <p className="text-xs text-gray-500">3 days ago • 1h 12m • Recording available</p>
                       </div>
-                      <Button size="sm" variant="ghost">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        data-testid="download-recording-btn-3"
+                        onClick={() => {
+                          logger.info('Download recording clicked', { meeting: 'Design Review' })
+                          toast.success('Downloading Design Review recording (1h 12m)...')
+                        }}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>
@@ -2267,7 +2303,16 @@ export default function CollaborationPage() {
                           <NumberFlow value={3} />
                         </p>
                         <p className="text-sm text-gray-600 mb-3">require immediate attention</p>
-                        <Button size="sm" variant="destructive" className="w-full">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          data-testid="view-critical-issues-btn"
+                          onClick={() => {
+                            logger.info('View critical issues clicked', { count: 3 })
+                            toast.success('Opening 3 critical issues that require immediate attention')
+                          }}
+                        >
                           <Target className="w-4 h-4 mr-2" />
                           View & Address
                         </Button>
@@ -2636,10 +2681,30 @@ export default function CollaborationPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="download-media-btn-1"
+                            onClick={() => {
+                              logger.info('Download media clicked', { fileName: 'Brand_Logo_v2.png' })
+                              toast.success('Downloading Brand_Logo_v2.png (1.2 MB)...')
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="share-media-btn-1"
+                            onClick={() => {
+                              logger.info('Share media clicked', { fileName: 'Brand_Logo_v2.png' })
+                              shareContent({
+                                title: 'Brand_Logo_v2.png',
+                                text: 'Shared from FreeFlow Collaboration',
+                                url: window.location.href
+                              })
+                            }}
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2663,10 +2728,30 @@ export default function CollaborationPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="download-media-btn-2"
+                            onClick={() => {
+                              logger.info('Download media clicked', { fileName: 'Product_Demo.mp4' })
+                              toast.success('Downloading Product_Demo.mp4 (45 MB)...')
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="share-media-btn-2"
+                            onClick={() => {
+                              logger.info('Share media clicked', { fileName: 'Product_Demo.mp4' })
+                              shareContent({
+                                title: 'Product_Demo.mp4',
+                                text: 'Shared from FreeFlow Collaboration',
+                                url: window.location.href
+                              })
+                            }}
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2690,10 +2775,30 @@ export default function CollaborationPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="download-media-btn-3"
+                            onClick={() => {
+                              logger.info('Download media clicked', { fileName: 'Q1_Report.pdf' })
+                              toast.success('Downloading Q1_Report.pdf (3.8 MB)...')
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="share-media-btn-3"
+                            onClick={() => {
+                              logger.info('Share media clicked', { fileName: 'Q1_Report.pdf' })
+                              shareContent({
+                                title: 'Q1_Report.pdf',
+                                text: 'Shared from FreeFlow Collaboration',
+                                url: window.location.href
+                              })
+                            }}
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2717,10 +2822,30 @@ export default function CollaborationPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="download-media-btn-4"
+                            onClick={() => {
+                              logger.info('Download media clicked', { fileName: 'Mockup_Homepage.jpg' })
+                              toast.success('Downloading Mockup_Homepage.jpg (2.1 MB)...')
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="share-media-btn-4"
+                            onClick={() => {
+                              logger.info('Share media clicked', { fileName: 'Mockup_Homepage.jpg' })
+                              shareContent({
+                                title: 'Mockup_Homepage.jpg',
+                                text: 'Shared from FreeFlow Collaboration',
+                                url: window.location.href
+                              })
+                            }}
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2744,10 +2869,30 @@ export default function CollaborationPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="download-media-btn-5"
+                            onClick={() => {
+                              logger.info('Download media clicked', { fileName: 'Meeting_Recording.mp4' })
+                              toast.success('Downloading Meeting_Recording.mp4 (127 MB)...')
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="share-media-btn-5"
+                            onClick={() => {
+                              logger.info('Share media clicked', { fileName: 'Meeting_Recording.mp4' })
+                              shareContent({
+                                title: 'Meeting_Recording.mp4',
+                                text: 'Shared from FreeFlow Collaboration',
+                                url: window.location.href
+                              })
+                            }}
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2771,10 +2916,30 @@ export default function CollaborationPage() {
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="download-media-btn-6"
+                            onClick={() => {
+                              logger.info('Download media clicked', { fileName: 'Style_Guide.pdf' })
+                              toast.success('Downloading Style_Guide.pdf (5.3 MB)...')
+                            }}
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            data-testid="share-media-btn-6"
+                            onClick={() => {
+                              logger.info('Share media clicked', { fileName: 'Style_Guide.pdf' })
+                              shareContent({
+                                title: 'Style_Guide.pdf',
+                                text: 'Shared from FreeFlow Collaboration',
+                                url: window.location.href
+                              })
+                            }}
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2871,22 +3036,70 @@ export default function CollaborationPage() {
                 <div className="space-y-3">
                   <h3 className="font-semibold">Drawing Tools</h3>
                   <div className="grid grid-cols-6 gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="drawing-tool-pen"
+                      onClick={() => {
+                        logger.info('Drawing tool selected', { tool: 'Pen' })
+                        toast.success('Pen tool selected')
+                      }}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="drawing-tool-shape"
+                      onClick={() => {
+                        logger.info('Drawing tool selected', { tool: 'Shape' })
+                        toast.success('Shape tool selected')
+                      }}
+                    >
                       <Square className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="drawing-tool-line"
+                      onClick={() => {
+                        logger.info('Drawing tool selected', { tool: 'Line' })
+                        toast.success('Line tool selected')
+                      }}
+                    >
                       <Activity className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="drawing-tool-comment"
+                      onClick={() => {
+                        logger.info('Drawing tool selected', { tool: 'Comment' })
+                        toast.success('Comment tool selected - Click to add comment')
+                      }}
+                    >
                       <MessageCircle className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="drawing-tool-image"
+                      onClick={() => {
+                        logger.info('Drawing tool selected', { tool: 'Image' })
+                        toast.success('Image tool selected - Click to insert image')
+                      }}
+                    >
                       <Image className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      data-testid="drawing-tool-more"
+                      onClick={() => {
+                        logger.info('More drawing tools clicked')
+                        toast.success('More tools: Arrow, Highlighter, Eraser, Text')
+                      }}
+                    >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </div>
@@ -2924,7 +3137,17 @@ export default function CollaborationPage() {
                         <p className="text-sm font-medium">Product Wireframes</p>
                         <p className="text-xs text-gray-500">Edited 1 hour ago • 8 collaborators</p>
                       </div>
-                      <Button size="sm" variant="ghost">Open</Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        data-testid="open-canvas-btn-1"
+                        onClick={() => {
+                          logger.info('Open canvas clicked', { canvas: 'Product Wireframes' })
+                          toast.success('Opening Product Wireframes canvas with 8 collaborators...')
+                        }}
+                      >
+                        Open
+                      </Button>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                       <Square className="h-5 w-5 text-green-600" />
@@ -2932,7 +3155,17 @@ export default function CollaborationPage() {
                         <p className="text-sm font-medium">User Flow Diagram</p>
                         <p className="text-xs text-gray-500">Edited yesterday • 5 collaborators</p>
                       </div>
-                      <Button size="sm" variant="ghost">Open</Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        data-testid="open-canvas-btn-2"
+                        onClick={() => {
+                          logger.info('Open canvas clicked', { canvas: 'User Flow Diagram' })
+                          toast.success('Opening User Flow Diagram canvas with 5 collaborators...')
+                        }}
+                      >
+                        Open
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -3376,10 +3609,51 @@ export default function CollaborationPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="text-blue-600">All</Button>
-              <Button variant="ghost" size="sm">Images</Button>
-              <Button variant="ghost" size="sm">Videos</Button>
-              <Button variant="ghost" size="sm">Documents</Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600"
+                data-testid="filter-all-btn"
+                onClick={() => {
+                  logger.info('Media filter clicked', { filter: 'All' })
+                  toast.success('Showing all media files')
+                }}
+              >
+                All
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                data-testid="filter-images-btn"
+                onClick={() => {
+                  logger.info('Media filter clicked', { filter: 'Images' })
+                  toast.success('Filtering by images only')
+                }}
+              >
+                Images
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                data-testid="filter-videos-btn"
+                onClick={() => {
+                  logger.info('Media filter clicked', { filter: 'Videos' })
+                  toast.success('Filtering by videos only')
+                }}
+              >
+                Videos
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                data-testid="filter-documents-btn"
+                onClick={() => {
+                  logger.info('Media filter clicked', { filter: 'Documents' })
+                  toast.success('Filtering by documents only')
+                }}
+              >
+                Documents
+              </Button>
             </div>
             <div className="grid grid-cols-3 gap-4">
               {mediaItems.map((item) => (

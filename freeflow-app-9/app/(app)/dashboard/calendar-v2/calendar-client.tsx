@@ -415,6 +415,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [showAddCalendar, setShowAddCalendar] = useState(false)
   const [showSchedulingLink, setShowSchedulingLink] = useState(false)
   const [showAddReminder, setShowAddReminder] = useState(false)
+  const [newCalendarColor, setNewCalendarColor] = useState('bg-teal-500')
   const [calendars, setCalendars] = useState(mockCalendars)
   const [reminders, setReminders] = useState(mockReminders)
   const [connectedApps, setConnectedApps] = useState<Record<string, boolean>>({
@@ -752,17 +753,55 @@ END:VCALENDAR`
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { label: 'New Event', icon: Plus, color: 'from-teal-500 to-cyan-500' },
-                { label: 'Quick Add', icon: Zap, color: 'from-yellow-500 to-orange-500' },
-                { label: 'Meet Now', icon: Video, color: 'from-blue-500 to-indigo-500' },
-                { label: 'Book Room', icon: MapPin, color: 'from-purple-500 to-pink-500' },
-                { label: 'Find Time', icon: Search, color: 'from-green-500 to-emerald-500' },
-                { label: 'Schedule', icon: CalendarClock, color: 'from-orange-500 to-red-500' },
-                { label: 'Reminder', icon: Bell, color: 'from-pink-500 to-rose-500' },
-                { label: 'Share', icon: Share2, color: 'from-gray-500 to-gray-600' }
+                { label: 'New Event', icon: Plus, color: 'from-teal-500 to-cyan-500', action: () => setShowNewEvent(true) },
+                { label: 'Quick Add', icon: Zap, color: 'from-yellow-500 to-orange-500', action: () => {
+                  const title = prompt('Quick add event (e.g., "Meeting tomorrow at 2pm"):')
+                  if (title) {
+                    const tomorrow = new Date()
+                    tomorrow.setDate(tomorrow.getDate() + 1)
+                    tomorrow.setHours(14, 0, 0, 0)
+                    setNewEventForm({
+                      title,
+                      startTime: tomorrow.toISOString().slice(0, 16),
+                      endTime: new Date(tomorrow.getTime() + 60 * 60 * 1000).toISOString().slice(0, 16),
+                      eventType: 'meeting',
+                      location: '',
+                      description: ''
+                    })
+                    setShowNewEvent(true)
+                  }
+                }},
+                { label: 'Meet Now', icon: Video, color: 'from-blue-500 to-indigo-500', action: () => {
+                  const meetId = Math.random().toString(36).substring(2, 11)
+                  const meetLink = `https://meet.freeflow.com/${meetId}`
+                  window.open(meetLink, '_blank')
+                  toast.success('Video meeting started')
+                }},
+                { label: 'Book Room', icon: MapPin, color: 'from-purple-500 to-pink-500', action: () => {
+                  setNewEventForm(prev => ({ ...prev, location: 'Conference Room A' }))
+                  setShowNewEvent(true)
+                  toast.info('Select a time to book the room')
+                }},
+                { label: 'Find Time', icon: Search, color: 'from-green-500 to-emerald-500', action: () => {
+                  setActiveTab('calendar')
+                  setViewMode('week')
+                  toast.info('Browse the calendar to find available time slots')
+                }},
+                { label: 'Schedule', icon: CalendarClock, color: 'from-orange-500 to-red-500', action: () => setActiveTab('scheduling') },
+                { label: 'Reminder', icon: Bell, color: 'from-pink-500 to-rose-500', action: () => setShowAddReminder(true) },
+                { label: 'Share', icon: Share2, color: 'from-gray-500 to-gray-600', action: async () => {
+                  const shareUrl = `${window.location.origin}/calendar/shared/${Date.now()}`
+                  try {
+                    await navigator.clipboard.writeText(shareUrl)
+                    toast.success('Calendar share link copied to clipboard')
+                  } catch (err) {
+                    toast.error('Failed to copy share link')
+                  }
+                }}
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.action}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
@@ -1410,7 +1449,15 @@ END:VCALENDAR`
               <CardContent className="space-y-3">
                 {reminders.map(reminder => (
                   <div key={reminder.id} className={`flex items-center gap-4 p-4 rounded-lg ${reminder.completed ? 'bg-gray-100 dark:bg-gray-800 opacity-60' : 'bg-gray-50 dark:bg-gray-800'}`}>
-                    <button className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${reminder.completed ? 'bg-teal-600 border-teal-600' : 'border-gray-300'}`}>
+                    <button
+                      onClick={() => {
+                        setReminders(prev => prev.map(r =>
+                          r.id === reminder.id ? { ...r, completed: !r.completed } : r
+                        ))
+                        toast.success(reminder.completed ? `"${reminder.title}" marked as incomplete` : `"${reminder.title}" completed`)
+                      }}
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${reminder.completed ? 'bg-teal-600 border-teal-600' : 'border-gray-300 hover:border-teal-400'}`}
+                    >
                       {reminder.completed && <CheckCircle2 className="h-3 w-3 text-white" />}
                     </button>
                     <div className="flex-1">
@@ -2114,7 +2161,11 @@ END:VCALENDAR`
                 <label className="block text-sm font-medium mb-1">Color</label>
                 <div className="flex gap-2">
                   {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-pink-500', 'bg-orange-500', 'bg-teal-500'].map(color => (
-                    <button key={color} className={`w-8 h-8 rounded-full ${color} hover:scale-110 transition-transform`} />
+                    <button
+                      key={color}
+                      onClick={() => setNewCalendarColor(color)}
+                      className={`w-8 h-8 rounded-full ${color} hover:scale-110 transition-transform ${newCalendarColor === color ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white' : ''}`}
+                    />
                   ))}
                 </div>
               </div>
@@ -2127,16 +2178,18 @@ END:VCALENDAR`
                     toast.error('Please enter a calendar name')
                     return
                   }
+                  const typeSelect = document.getElementById('new-calendar-type') as HTMLSelectElement
                   const newCal = {
                     id: Date.now().toString(),
                     name,
-                    color: 'bg-teal-500',
+                    color: newCalendarColor,
                     enabled: true,
-                    type: 'personal' as const,
+                    type: (typeSelect?.value || 'personal') as 'personal' | 'work' | 'shared' | 'holiday' | 'birthday' | 'subscribed',
                     eventCount: 0
                   }
                   setCalendars(prev => [...prev, newCal])
                   setShowAddCalendar(false)
+                  setNewCalendarColor('bg-teal-500') // Reset color for next time
                   toast.success(`Calendar "${name}" added successfully`)
                 }}>
                   Add Calendar

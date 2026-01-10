@@ -286,6 +286,11 @@ export default function MessagesClient() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [exportFormat, setExportFormat] = useState('json')
   const [exportDateRange, setExportDateRange] = useState('all')
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [filterType, setFilterType] = useState<'all' | 'unread' | 'starred' | 'pinned'>('all')
+  const [filterDateRange, setFilterDateRange] = useState<'all' | 'today' | 'week' | 'month'>('all')
+  const [filterChannel, setFilterChannel] = useState<string>('all')
+  const [sidebarThemeColor, setSidebarThemeColor] = useState('#4a154b')
 
   // Stats
   const stats = useMemo(() => {
@@ -828,6 +833,93 @@ export default function MessagesClient() {
     })
   }
 
+  const handleOpenFilterDialog = () => {
+    setShowFilterDialog(true)
+  }
+
+  const handleApplyFilters = () => {
+    // Store filter preferences in sessionStorage
+    const filterPrefs = {
+      type: filterType,
+      dateRange: filterDateRange,
+      channel: filterChannel,
+      applied_at: new Date().toISOString()
+    }
+    sessionStorage.setItem('messages_filter_prefs', JSON.stringify(filterPrefs))
+
+    // Apply filters to channel filter for basic filtering
+    if (filterType === 'unread') {
+      setChannelFilter('unread')
+    } else if (filterType === 'starred') {
+      setChannelFilter('starred')
+    } else {
+      setChannelFilter('all')
+    }
+
+    toast.success('Filters applied', {
+      description: `Showing ${filterType} messages${filterDateRange !== 'all' ? ` from ${filterDateRange}` : ''}`
+    })
+    setShowFilterDialog(false)
+  }
+
+  const handleClearFilters = () => {
+    setFilterType('all')
+    setFilterDateRange('all')
+    setFilterChannel('all')
+    setChannelFilter('all')
+    sessionStorage.removeItem('messages_filter_prefs')
+    toast.info('Filters cleared', { description: 'Showing all messages' })
+    setShowFilterDialog(false)
+  }
+
+  const handleToggleReaction = async (messageId: string, reactionType: ReactionType, currentHasReacted: boolean) => {
+    try {
+      // Find the message in mock data for display purposes
+      const message = mockMessages.find(m => m.id === messageId)
+      const reactionName = reactionType.replace('thumbsup', 'thumbs up').replace('plus1', '+1')
+
+      // Store reaction state in sessionStorage
+      const reactionKey = `reaction_${messageId}_${reactionType}`
+      const currentState = sessionStorage.getItem(reactionKey)
+      const newState = currentState === 'reacted' ? null : 'reacted'
+
+      if (newState) {
+        sessionStorage.setItem(reactionKey, newState)
+        toast.success('Reaction added', {
+          description: `You reacted with ${getReactionIcon(reactionType)} to the message`
+        })
+      } else {
+        sessionStorage.removeItem(reactionKey)
+        toast.info('Reaction removed', {
+          description: `Removed your ${getReactionIcon(reactionType)} reaction`
+        })
+      }
+
+      // If we have Supabase messages, try to update reaction count
+      const supabaseMsg = supabaseMessages?.find(m => m.id === messageId)
+      if (supabaseMsg) {
+        await updateMessage(messageId, {
+          reaction_count: newState ? (supabaseMsg.reaction_count || 0) + 1 : Math.max(0, (supabaseMsg.reaction_count || 0) - 1)
+        })
+      }
+    } catch (error) {
+      toast.error('Failed to update reaction', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  const handleSetSidebarThemeColor = (color: string) => {
+    setSidebarThemeColor(color)
+    // Persist to localStorage for persistence across sessions
+    localStorage.setItem('messages_sidebar_theme_color', color)
+    // Apply as CSS custom property for immediate visual feedback
+    document.documentElement.style.setProperty('--sidebar-theme-color', color)
+    toast.success('Theme color updated', {
+      description: `Sidebar color set to ${color}`
+    })
+  }
+
   const handleMarkAllAsRead = async () => {
     if (!supabaseMessages || supabaseMessages.length === 0) {
       toast.info('No messages to mark as read')
@@ -952,7 +1044,7 @@ export default function MessagesClient() {
                 className="pl-10 w-72"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement filter messages dialog/popover */ }}>
+            <Button variant="outline" size="icon" onClick={handleOpenFilterDialog}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={mutating}>
@@ -1369,7 +1461,7 @@ export default function MessagesClient() {
                               {message.reactions.length > 0 && (
                                 <div className="flex gap-1 mt-2">
                                   {message.reactions.map((reaction, idx) => (
-                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => { /* TODO: Implement toggle reaction or show reaction details */ }}>
+                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => handleToggleReaction(message.id, reaction.type, reaction.hasReacted)}>
                                       {getReactionIcon(reaction.type)} {reaction.count}
                                     </Button>
                                   ))}
@@ -2163,9 +2255,9 @@ export default function MessagesClient() {
                             {['#4a154b', '#1264a3', '#2eb67d', '#e01e5a', '#36c5f0', '#ecb22e'].map(color => (
                               <button
                                 key={color}
-                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                                className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform ${sidebarThemeColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-400' : 'border-white'}`}
                                 style={{ backgroundColor: color }}
-                                onClick={() => { /* TODO: Implement sidebar theme color persistence */ }}
+                                onClick={() => handleSetSidebarThemeColor(color)}
                               />
                             ))}
                           </div>
@@ -2942,6 +3034,85 @@ export default function MessagesClient() {
             <Button onClick={handleStartExport} className="bg-cyan-600 hover:bg-cyan-700">
               <Download className="w-4 h-4 mr-2" />
               Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Messages Dialog */}
+      <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-purple-600" />
+              Filter Messages
+            </DialogTitle>
+            <DialogDescription>
+              Customize which messages are displayed
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Message Type</Label>
+              <Select value={filterType} onValueChange={(value: 'all' | 'unread' | 'starred' | 'pinned') => setFilterType(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select message type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Messages</SelectItem>
+                  <SelectItem value="unread">Unread Only</SelectItem>
+                  <SelectItem value="starred">Starred</SelectItem>
+                  <SelectItem value="pinned">Pinned</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select value={filterDateRange} onValueChange={(value: 'all' | 'today' | 'week' | 'month') => setFilterDateRange(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="month">This Month</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Channel</Label>
+              <Select value={filterChannel} onValueChange={setFilterChannel}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select channel" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Channels</SelectItem>
+                  {mockChannels.map(channel => (
+                    <SelectItem key={channel.id} value={channel.id}>
+                      {channel.type === 'direct' ? channel.name : `#${channel.name}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+              <Filter className="w-4 h-4 text-purple-600" />
+              <span className="text-sm text-purple-700 dark:text-purple-400">
+                {filterType === 'all' && filterDateRange === 'all' && filterChannel === 'all'
+                  ? 'No filters applied - showing all messages'
+                  : `Filtering: ${filterType !== 'all' ? filterType : ''}${filterDateRange !== 'all' ? ` from ${filterDateRange}` : ''}${filterChannel !== 'all' ? ` in selected channel` : ''}`
+                }
+              </span>
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button variant="outline" onClick={handleClearFilters}>
+              Clear Filters
+            </Button>
+            <Button onClick={handleApplyFilters} className="bg-purple-600 hover:bg-purple-700">
+              <Filter className="w-4 h-4 mr-2" />
+              Apply Filters
             </Button>
           </DialogFooter>
         </DialogContent>

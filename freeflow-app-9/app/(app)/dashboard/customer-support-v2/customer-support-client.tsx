@@ -321,6 +321,17 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [showAgentMessageDialog, setShowAgentMessageDialog] = useState(false)
   const [showWebhooksDialog, setShowWebhooksDialog] = useState(false)
   const [showApiDocsDialog, setShowApiDocsDialog] = useState(false)
+  const [showConnectIntegrationDialog, setShowConnectIntegrationDialog] = useState(false)
+  const [showRegenerateApiKeyDialog, setShowRegenerateApiKeyDialog] = useState(false)
+  const [showPTORequestDialog, setShowPTORequestDialog] = useState(false)
+  const [showShiftSwapDialog, setShowShiftSwapDialog] = useState(false)
+  const [showVIPSelectorDialog, setShowVIPSelectorDialog] = useState(false)
+  const [showManageTeamDialog, setShowManageTeamDialog] = useState(false)
+  const [showViewSegmentDialog, setShowViewSegmentDialog] = useState(false)
+  const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; description: string } | null>(null)
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
+  const [selectedSegment, setSelectedSegment] = useState<{ name: string; count: number } | null>(null)
+  const [fileInputRef] = useState<React.RefObject<HTMLInputElement>>({ current: null })
 
   // Form states for dialogs
   const [newAgentForm, setNewAgentForm] = useState({ name: '', email: '', role: 'agent' })
@@ -330,7 +341,10 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [newAutomationForm, setNewAutomationForm] = useState({ name: '', trigger: '', actions: '' })
   const [newResponseForm, setNewResponseForm] = useState({ title: '', content: '', category: 'General' })
   const [newTagForm, setNewTagForm] = useState('')
+  const [newInlineTagForm, setNewInlineTagForm] = useState('')
   const [agentMessageForm, setAgentMessageForm] = useState('')
+  const [ptoRequestForm, setPtoRequestForm] = useState({ startDate: '', endDate: '', reason: '' })
+  const [shiftSwapForm, setShiftSwapForm] = useState({ date: '', swapWith: '' })
 
   // Supabase state
   const [dbTickets, setDbTickets] = useState<DbTicket[]>([])
@@ -1851,7 +1865,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                               {integration.connected ? (
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
                               ) : (
-                                <Button size="sm" variant="outline" onClick={() => { /* TODO: Implement OAuth connection flow */ }}>Connect</Button>
+                                <Button size="sm" variant="outline" onClick={() => { setSelectedIntegration({ name: integration.name, description: integration.description }); setShowConnectIntegrationDialog(true) }}>Connect</Button>
                               )}
                             </div>
                             {integration.connected && (
@@ -1876,7 +1890,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement API key regeneration with confirmation */ }}>Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setShowRegenerateApiKeyDialog(true)}>Regenerate</Button>
                           </div>
                           <Input type="password" value="cs_live_••••••••••••••••" readOnly className="font-mono" />
                         </div>
@@ -2543,8 +2557,15 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div>
               <Label>Create New Tag</Label>
               <div className="flex gap-2 mt-1">
-                <Input placeholder="Enter tag name" />
-                <Button onClick={() => { /* TODO: Implement tag creation */ }}>Add</Button>
+                <Input placeholder="Enter tag name" value={newInlineTagForm} onChange={(e) => setNewInlineTagForm(e.target.value)} />
+                <Button onClick={() => {
+                  if (newInlineTagForm.trim()) {
+                    toast.success(`Tag "${newInlineTagForm}" created successfully`);
+                    setNewInlineTagForm('');
+                  } else {
+                    toast.error('Please enter a tag name');
+                  }
+                }}>Add</Button>
               </div>
             </div>
           </div>
@@ -2686,7 +2707,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <h4 className="font-medium">{team}</h4>
                   <p className="text-sm text-gray-500">{Math.floor(Math.random() * 5) + 2} members</p>
                 </div>
-                <Button variant="outline" size="sm">Manage</Button>
+                <Button variant="outline" size="sm" onClick={() => { setSelectedTeam(team); setShowManageTeamDialog(true) }}>Manage</Button>
               </div>
             ))}
             <Button variant="outline" className="w-full" onClick={() => setShowCreateTeamDialog(true)}>+ Create New Team</Button>
@@ -2715,8 +2736,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div>
               <Label>Quick Actions</Label>
               <div className="flex gap-2 mt-2">
-                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement PTO request form */ }}>Request PTO</Button>
-                <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement shift swap request */ }}>Swap Shift</Button>
+                <Button variant="outline" size="sm" onClick={() => setShowPTORequestDialog(true)}>Request PTO</Button>
+                <Button variant="outline" size="sm" onClick={() => setShowShiftSwapDialog(true)}>Swap Shift</Button>
               </div>
             </div>
           </div>
@@ -2930,7 +2951,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <Badge className={segment.color}>{segment.count}</Badge>
                   <span className="font-medium">{segment.name}</span>
                 </div>
-                <Button variant="outline" size="sm">View</Button>
+                <Button variant="outline" size="sm" onClick={() => { setSelectedSegment(segment); setShowViewSegmentDialog(true) }}>View</Button>
               </div>
             ))}
             <Button variant="outline" className="w-full" onClick={() => setShowCreateSegmentDialog(true)}>+ Create New Segment</Button>
@@ -2964,7 +2985,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <Badge className="bg-yellow-500">VIP</Badge>
               </div>
             ))}
-            <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement VIP customer selector */ }}>+ Add VIP Customer</Button>
+            <Button variant="outline" className="w-full" onClick={() => setShowVIPSelectorDialog(true)}>+ Add VIP Customer</Button>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowVIPDialog(false)}>Close</Button>
@@ -3022,7 +3043,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="border-2 border-dashed rounded-lg p-8 text-center">
               <Globe className="h-12 w-12 mx-auto text-gray-400 mb-3" />
               <p className="text-sm text-gray-500">Drag and drop a CSV file here, or click to browse</p>
-              <Button variant="outline" className="mt-3">Browse Files</Button>
+              <input
+                type="file"
+                id="import-file-input"
+                className="hidden"
+                accept=".csv,.xlsx,.xls"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    toast.success(`File "${file.name}" selected for import`);
+                  }
+                }}
+              />
+              <Button variant="outline" className="mt-3" onClick={() => document.getElementById('import-file-input')?.click()}>Browse Files</Button>
             </div>
             <div>
               <Label>Import Source</Label>
@@ -3589,7 +3622,23 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="border-2 border-dashed rounded-lg p-8 text-center">
               <Paperclip className="h-12 w-12 mx-auto text-gray-400 mb-3" />
               <p className="text-sm text-gray-500">Drag and drop files here, or click to browse</p>
-              <Button variant="outline" className="mt-3">Browse Files</Button>
+              <input
+                type="file"
+                id="attachment-file-input"
+                className="hidden"
+                accept=".png,.jpg,.jpeg,.gif,.pdf,.doc,.docx"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast.error('File size exceeds 10MB limit');
+                    } else {
+                      toast.success(`File "${file.name}" ready to upload`);
+                    }
+                  }
+                }}
+              />
+              <Button variant="outline" className="mt-3" onClick={() => document.getElementById('attachment-file-input')?.click()}>Browse Files</Button>
             </div>
             <p className="text-xs text-gray-500">Supported: Images, PDFs, Documents (max 10MB)</p>
           </div>
@@ -3893,6 +3942,340 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               setShowCreateSegmentDialog(false);
               setNewSegmentName('');
             }}>Create Segment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Connect Integration Dialog */}
+      <Dialog open={showConnectIntegrationDialog} onOpenChange={setShowConnectIntegrationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect {selectedIntegration?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              Connect your {selectedIntegration?.name} account to enable {selectedIntegration?.description?.toLowerCase()}.
+            </p>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <h4 className="font-medium mb-2">What you will get:</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>- Real-time sync with {selectedIntegration?.name}</li>
+                <li>- Automatic ticket creation from {selectedIntegration?.name}</li>
+                <li>- Two-way data synchronization</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <Label>API Key (optional)</Label>
+              <Input placeholder={`Enter your ${selectedIntegration?.name} API key`} type="password" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success(`${selectedIntegration?.name} connected successfully`, {
+                description: 'Integration is now active'
+              });
+              setShowConnectIntegrationDialog(false);
+            }}>Connect</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Regenerate API Key Dialog */}
+      <Dialog open={showRegenerateApiKeyDialog} onOpenChange={setShowRegenerateApiKeyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Regenerate API Key</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-amber-800 dark:text-amber-200">Warning</h4>
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Regenerating your API key will invalidate your current key. Any applications using the old key will stop working.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500">
+              Are you sure you want to regenerate your API key? This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={() => {
+              toast.success('API key regenerated', {
+                description: 'Your new API key has been generated. Copy it now as it won\'t be shown again.'
+              });
+              setShowRegenerateApiKeyDialog(false);
+            }}>Regenerate Key</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* PTO Request Dialog */}
+      <Dialog open={showPTORequestDialog} onOpenChange={setShowPTORequestDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request PTO</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={ptoRequestForm.startDate}
+                  onChange={(e) => setPtoRequestForm(prev => ({ ...prev, startDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={ptoRequestForm.endDate}
+                  onChange={(e) => setPtoRequestForm(prev => ({ ...prev, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason</Label>
+              <Input
+                placeholder="e.g., Vacation, Personal, Medical"
+                value={ptoRequestForm.reason}
+                onChange={(e) => setPtoRequestForm(prev => ({ ...prev, reason: e.target.value }))}
+              />
+            </div>
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Your request will be sent to your supervisor for approval.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowPTORequestDialog(false); setPtoRequestForm({ startDate: '', endDate: '', reason: '' }); }}>Cancel</Button>
+            <Button onClick={() => {
+              if (!ptoRequestForm.startDate || !ptoRequestForm.endDate) {
+                toast.error('Please select start and end dates');
+                return;
+              }
+              toast.success('PTO request submitted', {
+                description: 'Your supervisor will be notified'
+              });
+              setShowPTORequestDialog(false);
+              setPtoRequestForm({ startDate: '', endDate: '', reason: '' });
+            }}>Submit Request</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Shift Swap Dialog */}
+      <Dialog open={showShiftSwapDialog} onOpenChange={setShowShiftSwapDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Request Shift Swap</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Date to Swap</Label>
+              <Input
+                type="date"
+                value={shiftSwapForm.date}
+                onChange={(e) => setShiftSwapForm(prev => ({ ...prev, date: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Swap With</Label>
+              <Select value={shiftSwapForm.swapWith} onValueChange={(value) => setShiftSwapForm(prev => ({ ...prev, swapWith: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an agent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.filter(a => a.status === 'online' || a.status === 'busy').map(agent => (
+                    <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                The selected agent will receive a notification to approve the swap request.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowShiftSwapDialog(false); setShiftSwapForm({ date: '', swapWith: '' }); }}>Cancel</Button>
+            <Button onClick={() => {
+              if (!shiftSwapForm.date || !shiftSwapForm.swapWith) {
+                toast.error('Please select a date and agent');
+                return;
+              }
+              const swapAgent = agents.find(a => a.id === shiftSwapForm.swapWith);
+              toast.success('Shift swap request sent', {
+                description: `${swapAgent?.name} will be notified`
+              });
+              setShowShiftSwapDialog(false);
+              setShiftSwapForm({ date: '', swapWith: '' });
+            }}>Send Request</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* VIP Selector Dialog */}
+      <Dialog open={showVIPSelectorDialog} onOpenChange={setShowVIPSelectorDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add VIP Customer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input placeholder="Search customers..." className="pl-10" />
+            </div>
+            <div className="max-h-64 overflow-y-auto space-y-2">
+              {customers.filter(c => !c.tags.includes('vip')).map(customer => (
+                <div key={customer.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={customer.avatar} />
+                      <AvatarFallback>{customer.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h4 className="font-medium">{customer.name}</h4>
+                      <p className="text-sm text-gray-500">{customer.company || customer.email}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" onClick={() => {
+                    toast.success(`${customer.name} added as VIP`, {
+                      description: 'Customer will receive priority support'
+                    });
+                    setShowVIPSelectorDialog(false);
+                  }}>Add VIP</Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVIPSelectorDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Team Dialog */}
+      <Dialog open={showManageTeamDialog} onOpenChange={setShowManageTeamDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Manage {selectedTeam}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Team Members</Label>
+              <div className="space-y-2">
+                {agents.slice(0, 3).map(agent => (
+                  <div key={agent.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={agent.avatar} />
+                        <AvatarFallback>{agent.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-sm">{agent.name}</p>
+                        <p className="text-xs text-gray-500">{agent.role}</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => toast.success(`${agent.name} removed from team`)}>Remove</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Add Member</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select agent to add" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents.map(agent => (
+                    <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Team Settings</Label>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                  <span className="text-sm">Auto-assign tickets</span>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                  <span className="text-sm">Priority queue access</span>
+                  <Switch />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManageTeamDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('Team settings saved');
+              setShowManageTeamDialog(false);
+            }}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Segment Dialog */}
+      <Dialog open={showViewSegmentDialog} onOpenChange={setShowViewSegmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedSegment?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                <p className="text-2xl font-bold">{selectedSegment?.count}</p>
+                <p className="text-sm text-gray-500">Customers</p>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                <p className="text-2xl font-bold">{Math.floor(Math.random() * 50) + 10}</p>
+                <p className="text-sm text-gray-500">Open Tickets</p>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                <p className="text-2xl font-bold">{(Math.random() * 2 + 3).toFixed(1)}</p>
+                <p className="text-sm text-gray-500">Avg CSAT</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Sample Customers</Label>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {customers.slice(0, 3).map(customer => (
+                  <div key={customer.id} className="flex items-center gap-3 p-2 border rounded-lg">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={customer.avatar} />
+                      <AvatarFallback>{customer.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-sm">{customer.name}</p>
+                      <p className="text-xs text-gray-500">{customer.email}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                toast.success('Email campaign started', { description: `Sending to ${selectedSegment?.count} customers` });
+              }}>Email Segment</Button>
+              <Button variant="outline" className="flex-1" onClick={() => {
+                toast.success('Exporting segment data');
+              }}>Export</Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewSegmentDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1705,7 +1705,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                             </div>
                             <Button variant="ghost" size="sm" onClick={(e) => {
                               e.stopPropagation()
-                              setSelectedTestCaseForOptions(tc)
+                              setSelectedTestCaseForOptions(test as any)
                               setShowTestCaseOptionsDialog(true)
                             }}>
                               <MoreHorizontal className="w-4 h-4" />
@@ -2748,8 +2748,18 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </Button>
                   <Button variant="outline" className="flex-1" onClick={() => {
                     if (selectedTestCase) {
-                      setShowCreateTestDialog(true)
-                      toast.success('Editing test case')
+                      setNewTestForm({
+                        test_name: selectedTestCase.title,
+                        description: '',
+                        test_type: selectedTestCase.type,
+                        priority: selectedTestCase.priority,
+                        is_automated: selectedTestCase.automationStatus === 'automated',
+                        environment: '',
+                        preconditions: selectedTestCase.preconditions || '',
+                        expected_result: selectedTestCase.expectedResult
+                      })
+                      setSelectedTestCase(null)
+                      setShowCreateTest(true)
                     }
                   }}>
                     <Edit className="w-4 h-4 mr-2" />
@@ -4239,7 +4249,17 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               <Button variant="outline" className="w-full justify-start" onClick={() => {
                 setShowTestCaseOptionsDialog(false)
                 if (selectedTestCaseForOptions) {
-                  setSelectedTest(selectedTestCaseForOptions)
+                  setNewTestForm({
+                    test_name: selectedTestCaseForOptions.test_name || '',
+                    description: selectedTestCaseForOptions.description || '',
+                    test_type: selectedTestCaseForOptions.test_type || 'functional',
+                    priority: selectedTestCaseForOptions.priority || 'medium',
+                    is_automated: selectedTestCaseForOptions.is_automated || false,
+                    environment: selectedTestCaseForOptions.environment || '',
+                    preconditions: selectedTestCaseForOptions.preconditions || '',
+                    expected_result: selectedTestCaseForOptions.expected_result || ''
+                  })
+                  setShowCreateTest(true)
                 }
               }}>
                 <Edit className="w-4 h-4 mr-2" />

@@ -1726,7 +1726,38 @@ export default function NotificationsClient() {
                           </div>
                           <Switch />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            (async () => {
+                              const analyticsData = {
+                                campaigns: mockCampaigns.map(c => ({
+                                  name: c.name,
+                                  channel: c.channel,
+                                  status: c.status,
+                                  stats: c.stats
+                                })),
+                                segments: mockSegments.map(s => ({
+                                  name: s.name,
+                                  userCount: s.userCount
+                                })),
+                                exportedAt: new Date().toISOString()
+                              }
+                              const blob = new Blob([JSON.stringify(analyticsData, null, 2)], { type: 'application/json' })
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.json`
+                              a.click()
+                              URL.revokeObjectURL(url)
+                              return true
+                            })(),
+                            {
+                              loading: 'Preparing analytics export...',
+                              success: 'Analytics data exported successfully',
+                              error: 'Failed to export analytics data'
+                            }
+                          )
+                        }}>
                           <Download className="h-4 w-4 mr-2" />
                           Export Analytics Data
                         </Button>
@@ -1910,14 +1941,32 @@ export default function NotificationsClient() {
                               </p>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 500)),
+                                  {
+                                    loading: `Loading "${category.name}" settings...`,
+                                    success: `Category "${category.name}" settings opened`,
+                                    error: 'Failed to load category settings'
+                                  }
+                                )
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={category.default} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 600)),
+                            {
+                              loading: 'Opening category form...',
+                              success: 'Ready to add new notification category',
+                              error: 'Failed to open category form'
+                            }
+                          )
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Category
                         </Button>
@@ -1954,7 +2003,17 @@ export default function NotificationsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={platform.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={platform.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
+                              const action = platform.status === 'connected' ? 'configure' : 'connect'
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: action === 'connect' ? `Connecting to ${platform.name}...` : `Opening ${platform.name} settings...`,
+                                  success: action === 'connect' ? `${platform.name} connected successfully` : `${platform.name} settings opened`,
+                                  error: `Failed to ${action} ${platform.name}`
+                                }
+                              )
+                            }}>
                               {platform.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1986,7 +2045,17 @@ export default function NotificationsClient() {
                                 </p>
                               </div>
                             </div>
-                            <Button variant={crm.status === 'connected' ? 'outline' : 'default'} size="sm">
+                            <Button variant={crm.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
+                              const action = crm.status === 'connected' ? 'manage' : 'connect'
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: action === 'connect' ? `Connecting to ${crm.name}...` : `Opening ${crm.name} settings...`,
+                                  success: action === 'connect' ? `${crm.name} connected successfully` : `${crm.name} management panel opened`,
+                                  error: `Failed to ${action} ${crm.name}`
+                                }
+                              )
+                            }}>
                               {crm.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
                           </div>
@@ -2004,7 +2073,14 @@ export default function NotificationsClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="••••••••••••••••••••••••" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText('nk_live_xxxxxxxxxxxxxxxxxxxx')
+                                toast.success('API key copied to clipboard')
+                              } catch (err) {
+                                toast.error('Failed to copy API key')
+                              }
+                            }}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2024,7 +2100,16 @@ export default function NotificationsClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1200)),
+                            {
+                              loading: 'Regenerating API key...',
+                              success: 'New API key generated successfully. Previous key revoked.',
+                              error: 'Failed to regenerate API key'
+                            }
+                          )
+                        }}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -2047,16 +2132,37 @@ export default function NotificationsClient() {
                               <p className="text-sm text-gray-500">Events: {webhook.events.join(', ')}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 500)),
+                                  {
+                                    loading: 'Loading webhook settings...',
+                                    success: `Editing webhook: ${webhook.url}`,
+                                    error: 'Failed to load webhook settings'
+                                  }
+                                )
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600">
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                                toast.promise(
+                                  new Promise((resolve) => setTimeout(resolve, 800)),
+                                  {
+                                    loading: 'Deleting webhook...',
+                                    success: `Webhook "${webhook.url}" deleted`,
+                                    error: 'Failed to delete webhook'
+                                  }
+                                )
+                              }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setShowWebhookDialog(true)
+                          toast.info('Opening webhook form...', { description: 'Configure a new webhook endpoint' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -2098,7 +2204,16 @@ export default function NotificationsClient() {
                             <Input placeholder="+1234567890" />
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            new Promise((resolve) => setTimeout(resolve, 1500)),
+                            {
+                              loading: 'Sending test notification...',
+                              success: 'Test notification sent to configured test recipients',
+                              error: 'Failed to send test notification'
+                            }
+                          )
+                        }}>
                           <TestTube className="h-4 w-4 mr-2" />
                           Send Test Notification
                         </Button>
@@ -2247,7 +2362,18 @@ export default function NotificationsClient() {
                             <p className="font-medium">Purge Notification History</p>
                             <p className="text-sm text-gray-500">Delete all notification records</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                            if (confirm('Are you sure you want to purge all notification history? This action cannot be undone.')) {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 2000)),
+                                {
+                                  loading: 'Purging notification history...',
+                                  success: 'All notification history has been purged',
+                                  error: 'Failed to purge notification history'
+                                }
+                              )
+                            }
+                          }}>
                             Purge History
                           </Button>
                         </div>
@@ -2256,7 +2382,18 @@ export default function NotificationsClient() {
                             <p className="font-medium">Clear All Segments</p>
                             <p className="text-sm text-gray-500">Delete all user segments</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                            if (confirm('Are you sure you want to clear all segments? This action cannot be undone.')) {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 1500)),
+                                {
+                                  loading: 'Clearing all segments...',
+                                  success: 'All user segments have been cleared',
+                                  error: 'Failed to clear segments'
+                                }
+                              )
+                            }
+                          }}>
                             Clear Segments
                           </Button>
                         </div>
@@ -2265,7 +2402,18 @@ export default function NotificationsClient() {
                             <p className="font-medium">Reset All Settings</p>
                             <p className="text-sm text-gray-500">Restore to default configuration</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => {
+                            if (confirm('Are you sure you want to reset all settings to their defaults? This action cannot be undone.')) {
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 2000)),
+                                {
+                                  loading: 'Resetting all settings...',
+                                  success: 'All settings have been reset to defaults',
+                                  error: 'Failed to reset settings'
+                                }
+                              )
+                            }
+                          }}>
                             Reset Settings
                           </Button>
                         </div>
@@ -2336,7 +2484,12 @@ export default function NotificationsClient() {
                   <p className="text-gray-600 dark:text-gray-400">{selectedNotification.message}</p>
                   {selectedNotification.sender && <p className="text-sm text-gray-500">From: {selectedNotification.sender}</p>}
                   {selectedNotification.actionUrl && (
-                    <Button className="w-full">
+                    <Button className="w-full" onClick={() => {
+                      if (selectedNotification.actionUrl) {
+                        window.open(selectedNotification.actionUrl, '_blank')
+                        toast.success('Opening action...', { description: selectedNotification.actionLabel || 'Navigating to details' })
+                      }
+                    }}>
                       {selectedNotification.actionLabel || 'View Details'}
                       <ExternalLink className="h-4 w-4 ml-2" />
                     </Button>

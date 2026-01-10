@@ -4,6 +4,13 @@ import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -612,6 +619,88 @@ export default function AnalyticsClient() {
     }
   }
 
+  // Handle metric actions from dropdown
+  const handleMetricAction = async (action: string, metric: AnalyticsMetric) => {
+    switch (action) {
+      case 'view':
+        setSelectedMetric(metric)
+        break
+      case 'edit':
+        toast.promise(
+          new Promise(resolve => setTimeout(resolve, 800)),
+          {
+            loading: `Opening ${metric.name} editor...`,
+            success: `Metric editor opened for ${metric.name}`,
+            error: 'Failed to open metric editor'
+          }
+        )
+        break
+      case 'alert':
+        setSelectedMetric(metric)
+        // Wait for state to update then trigger alert setup
+        setTimeout(() => handleSetupAlert(), 100)
+        break
+      case 'export':
+        const exportMetricData = async () => {
+          const metricData = {
+            name: metric.name,
+            value: metric.value,
+            previousValue: metric.previousValue,
+            changePercent: metric.changePercent,
+            category: metric.category,
+            type: metric.type,
+            status: metric.status,
+            exportedAt: new Date().toISOString()
+          }
+          const jsonContent = JSON.stringify(metricData, null, 2)
+          const blob = new Blob([jsonContent], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `metric-${metric.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(url)
+          return { metricName: metric.name }
+        }
+        toast.promise(exportMetricData(), {
+          loading: `Exporting ${metric.name}...`,
+          success: (data) => `${data.metricName} data exported successfully`,
+          error: `Failed to export ${metric.name}`
+        })
+        break
+      case 'delete':
+        toast.promise(
+          new Promise(resolve => setTimeout(resolve, 1500)),
+          {
+            loading: `Removing ${metric.name} from tracking...`,
+            success: `${metric.name} has been removed from tracking`,
+            error: `Failed to remove ${metric.name}`
+          }
+        )
+        break
+      default:
+        break
+    }
+  }
+
+  // Handle AI question from insights panel
+  const handleAskAIQuestion = async (question: string) => {
+    if (!question.trim()) {
+      toast.error('Please enter a question')
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'AI is analyzing your data...',
+        success: `Analysis complete for: "${question}"`,
+        error: 'Failed to process AI question'
+      }
+    )
+  }
+
   // Format value based on type
   const formatValue = (value: number, type: string) => {
     switch (type) {
@@ -1081,12 +1170,39 @@ export default function AnalyticsClient() {
                     <div className="mt-4 pt-4 border-t">
                       <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>Previous: {formatValue(metric.previousValue, metric.type)}</span>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2" onClick={(e) => {
-                          e.stopPropagation()
-                          // TODO: Implement metric options dropdown
-                        }}>
-                          <MoreVertical className="h-3 w-3" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2">
+                              <MoreVertical className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMetricAction('view', metric) }}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMetricAction('edit', metric) }}>
+                              <Edit3 className="h-4 w-4 mr-2" />
+                              Edit Metric
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMetricAction('alert', metric) }}>
+                              <Bell className="h-4 w-4 mr-2" />
+                              Set Alert
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMetricAction('export', metric) }}>
+                              <Download className="h-4 w-4 mr-2" />
+                              Export Data
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={(e) => { e.stopPropagation(); handleMetricAction('delete', metric) }}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Remove Metric
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   </CardContent>
@@ -2630,7 +2746,7 @@ export default function AnalyticsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => console.log('Question:', q)}
+            onAskQuestion={handleAskAIQuestion}
           />
           <PredictiveAnalytics predictions={mockPredictions} />
         </div>

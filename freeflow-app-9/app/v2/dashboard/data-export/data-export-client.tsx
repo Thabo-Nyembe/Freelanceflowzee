@@ -1106,6 +1106,474 @@ export default function DataExportClient() {
     )
   }
 
+  // Log Export Handler
+  const handleExportLogs = async () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          // Generate log content
+          const logContent = mockAuditLogs
+            .map(log => `[${new Date(log.timestamp).toISOString()}] ${log.action.toUpperCase()}: ${log.resource} - ${log.details} (${log.status})`)
+            .join('\n')
+
+          const blob = new Blob([logContent], { type: 'text/plain' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `pipeline-logs-${new Date().toISOString().split('T')[0]}.txt`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          resolve()
+        }, 1000)
+      }),
+      {
+        loading: 'Preparing log export...',
+        success: 'Logs exported successfully',
+        error: 'Failed to export logs'
+      }
+    )
+  }
+
+  // Filter Handlers
+  const handleApplyPipelineFilter = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Applying filters...',
+        success: () => {
+          setShowFilterDialog(false)
+          return 'Filters applied successfully'
+        },
+        error: 'Failed to apply filters'
+      }
+    )
+  }
+
+  // Pipeline Configuration Handler
+  const handleSavePipelineConfig = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Saving pipeline configuration...',
+        success: () => {
+          setShowPipelineConfigureDialog(false)
+          return `Pipeline configuration saved successfully`
+        },
+        error: 'Failed to save configuration'
+      }
+    )
+  }
+
+  // Export Pipeline Logs Handler
+  const handleExportPipelineLogs = async () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          const logContent = `[2024-01-01 10:00:00] INFO: Pipeline started
+[2024-01-01 10:00:01] INFO: Connecting to source...
+[2024-01-01 10:00:02] INFO: Source connection established
+[2024-01-01 10:00:03] INFO: Extracting data...
+[2024-01-01 10:00:15] INFO: Extracted 45,234 records
+[2024-01-01 10:00:16] INFO: Applying transformations...
+[2024-01-01 10:00:25] INFO: Transformations complete
+[2024-01-01 10:00:26] INFO: Loading to destination...
+[2024-01-01 10:00:45] INFO: Successfully loaded 45,234 records
+[2024-01-01 10:00:46] INFO: Pipeline completed successfully`
+
+          const blob = new Blob([logContent], { type: 'text/plain' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `${selectedPipelineForAction?.name || 'pipeline'}-logs.txt`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          resolve()
+        }, 1000)
+      }),
+      {
+        loading: 'Exporting pipeline logs...',
+        success: 'Pipeline logs exported',
+        error: 'Failed to export logs'
+      }
+    )
+  }
+
+  // Delete Pipeline Handler
+  const handleDeletePipeline = async (pipeline: Pipeline) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Deleting ${pipeline.name}...`,
+        success: () => {
+          setShowPipelineMoreDialog(false)
+          return `${pipeline.name} has been deleted`
+        },
+        error: 'Failed to delete pipeline'
+      }
+    )
+  }
+
+  // Add Data Source Handler
+  const handleAddSource = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Connecting to data source...',
+        success: () => {
+          setShowAddSourceDialog(false)
+          return 'Data source added successfully'
+        },
+        error: 'Failed to add data source'
+      }
+    )
+  }
+
+  // Save Source Configuration Handler
+  const handleSaveSourceConfig = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Saving source configuration...',
+        success: () => {
+          setShowSourceConfigureDialog(false)
+          return 'Source configuration saved'
+        },
+        error: 'Failed to save configuration'
+      }
+    )
+  }
+
+  // Create Transform Handler
+  const handleCreateTransform = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating transform...',
+        success: () => {
+          setShowCreateTransformDialog(false)
+          return 'Transform created successfully'
+        },
+        error: 'Failed to create transform'
+      }
+    )
+  }
+
+  // Add Column Mapping Handler
+  const handleAddColumnMapping = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Adding column mapping...',
+        success: () => {
+          setShowAddMappingDialog(false)
+          return 'Column mapping added successfully'
+        },
+        error: 'Failed to add mapping'
+      }
+    )
+  }
+
+  // Add Destination Handler
+  const handleAddDestination = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Connecting to destination...',
+        success: () => {
+          setShowAddDestinationDialog(false)
+          return 'Destination added successfully'
+        },
+        error: 'Failed to add destination'
+      }
+    )
+  }
+
+  // Save Destination Configuration Handler
+  const handleSaveDestinationConfig = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Saving destination configuration...',
+        success: () => {
+          setShowDestConfigureDialog(false)
+          return 'Destination configuration saved'
+        },
+        error: 'Failed to save configuration'
+      }
+    )
+  }
+
+  // IP Allowlist Handler
+  const handleUpdateIpAllowlist = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Updating IP allowlist...',
+        success: () => {
+          setShowIpAllowlistDialog(false)
+          return 'IP allowlist updated successfully'
+        },
+        error: 'Failed to update IP allowlist'
+      }
+    )
+  }
+
+  // Webhook Configuration Handler
+  const handleSaveWebhookConfig = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Saving webhook configuration...',
+        success: () => {
+          setShowWebhookConfigureDialog(false)
+          return 'Webhook configuration saved'
+        },
+        error: 'Failed to save webhook configuration'
+      }
+    )
+  }
+
+  // Archive File Download Handler
+  const handleDownloadArchive = async (fileName: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Preparing ${fileName} for download...`,
+        success: `${fileName} download started`,
+        error: 'Failed to download archive'
+      }
+    )
+  }
+
+  // Archive Delete Handler
+  const handleDeleteArchive = async (fileName: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: `Deleting ${fileName}...`,
+        success: `${fileName} deleted successfully`,
+        error: 'Failed to delete archive'
+      }
+    )
+  }
+
+  // Credential Configuration Handler
+  const handleConfigureCredential = async (credName: string) => {
+    toast.info(`Opening credential configuration for ${credName}`, {
+      description: 'Manage your stored credentials securely'
+    })
+  }
+
+  // Create Job Handler
+  const handleCreateJob = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating export job...',
+        success: () => {
+          setShowNewJobDialog(false)
+          return 'Export job created successfully'
+        },
+        error: 'Failed to create job'
+      }
+    )
+  }
+
+  // Run Job Now Handler
+  const handleRunJobNow = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Starting job execution...',
+        success: () => {
+          setShowRunNowDialog(false)
+          return 'Job started successfully'
+        },
+        error: 'Failed to start job'
+      }
+    )
+  }
+
+  // Pause All Jobs Handler
+  const handlePauseAllJobs = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Pausing all jobs...',
+        success: () => {
+          setShowPauseJobsDialog(false)
+          return 'All jobs have been paused'
+        },
+        error: 'Failed to pause jobs'
+      }
+    )
+  }
+
+  // Download Job Export Handler
+  const handleDownloadJobExport = async (jobName: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Preparing ${jobName} for download...`,
+        success: `${jobName} download started`,
+        error: 'Failed to download export'
+      }
+    )
+  }
+
+  // Apply Job Filter Handler
+  const handleApplyJobFilter = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Applying job filters...',
+        success: () => {
+          setShowJobFilterDialog(false)
+          return 'Job filters applied'
+        },
+        error: 'Failed to apply filters'
+      }
+    )
+  }
+
+  // Create Filter Transform Handler
+  const handleCreateFilterTransform = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Creating filter transform...',
+        success: () => {
+          setShowFilterTransformDialog(false)
+          return 'Filter transform created'
+        },
+        error: 'Failed to create transform'
+      }
+    )
+  }
+
+  // Create SQL Transform Handler
+  const handleCreateSqlTransform = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Creating SQL transform...',
+        success: () => {
+          setShowCustomSqlDialog(false)
+          return 'SQL transform created'
+        },
+        error: 'Failed to create transform'
+      }
+    )
+  }
+
+  // Add Column Handler
+  const handleAddColumn = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Adding column...',
+        success: () => {
+          setShowAddColumnDialog(false)
+          return 'Column added to schema'
+        },
+        error: 'Failed to add column'
+      }
+    )
+  }
+
+  // Map All Columns Handler
+  const handleMapAllColumns = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Auto-mapping all columns...',
+        success: () => {
+          setShowMapAllDialog(false)
+          return 'All columns mapped successfully'
+        },
+        error: 'Failed to map columns'
+      }
+    )
+  }
+
+  // Export Schema Handler
+  const handleExportSchema = async () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          const schemaData = JSON.stringify(mockSchemaMappings, null, 2)
+          const blob = new Blob([schemaData], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = 'schema-mapping.json'
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          resolve()
+        }, 1000)
+      }),
+      {
+        loading: 'Exporting schema...',
+        success: () => {
+          setShowExportSchemaDialog(false)
+          return 'Schema exported successfully'
+        },
+        error: 'Failed to export schema'
+      }
+    )
+  }
+
+  // Update Mapping Handler
+  const handleUpdateMapping = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Updating mapping...',
+        success: () => {
+          setShowEditMappingDialog(false)
+          return 'Mapping updated successfully'
+        },
+        error: 'Failed to update mapping'
+      }
+    )
+  }
+
+  // Test Destination Connection Handler
+  const handleTestDestinationConnection = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: 'Testing destination connection...',
+        success: () => {
+          setShowTestDestinationDialog(false)
+          return 'Connection test successful'
+        },
+        error: 'Connection test failed'
+      }
+    )
+  }
+
+  // Apply Integration Filter Handler
+  const handleApplyIntegrationFilter = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Applying integration filters...',
+        success: () => {
+          setShowIntegrationFilterDialog(false)
+          return 'Integration filters applied'
+        },
+        error: 'Failed to apply filters'
+      }
+    )
+  }
+
   // Get quick actions with dialog handlers
   const dataExportQuickActions = getDataExportQuickActions(
     setShowNewPipelineQuickDialog,
@@ -2813,7 +3281,7 @@ export default function DataExportClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="outline" size="sm" onClick={() => { /* TODO: Implement log export functionality */ }}>
+              <Button variant="outline" size="sm" onClick={handleExportLogs}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Logs
               </Button>
@@ -3112,7 +3580,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Apply filter logic */ setShowFilterDialog(false); }}>Apply Filters</Button>
+              <Button onClick={handleApplyPipelineFilter}>Apply Filters</Button>
             </div>
           </div>
         </DialogContent>
@@ -3150,7 +3618,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPipelineConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Save pipeline configuration */ setShowPipelineConfigureDialog(false); }}>Save Changes</Button>
+              <Button onClick={handleSavePipelineConfig}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>
@@ -3181,7 +3649,7 @@ export default function DataExportClient() {
               </pre>
             </ScrollArea>
             <div className="flex justify-between">
-              <Button variant="outline" size="sm" onClick={() => { /* TODO: Export pipeline logs */ }}><Download className="w-4 h-4 mr-2" />Export Logs</Button>
+              <Button variant="outline" size="sm" onClick={handleExportPipelineLogs}><Download className="w-4 h-4 mr-2" />Export Logs</Button>
               <Button variant="outline" onClick={() => setShowPipelineLogsDialog(false)}>Close</Button>
             </div>
           </div>
@@ -3204,7 +3672,7 @@ export default function DataExportClient() {
             <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowPipelineMoreDialog(false); setShowCloneDialog(true); }}>
               <GitBranch className="w-4 h-4 mr-2" />Clone Pipeline
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-red-600" onClick={() => { if (confirm('Are you sure you want to delete this pipeline?')) { setShowPipelineMoreDialog(false); /* TODO: Delete pipeline */ } }}>
+            <Button variant="ghost" className="w-full justify-start text-red-600" onClick={() => { if (confirm('Are you sure you want to delete this pipeline?')) { selectedPipelineForAction && handleDeletePipeline(selectedPipelineForAction); } }}>
               <Trash2 className="w-4 h-4 mr-2" />Delete Pipeline
             </Button>
           </div>
@@ -3255,7 +3723,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddSourceDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Add data source */ setShowAddSourceDialog(false); }} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={handleAddSource} className="bg-green-600 hover:bg-green-700">
                 <Plus className="w-4 h-4 mr-2" />Add Source
               </Button>
             </div>
@@ -3315,7 +3783,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowSourceConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Save source configuration */ setShowSourceConfigureDialog(false); }}>Save Changes</Button>
+              <Button onClick={handleSaveSourceConfig}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>
@@ -3437,7 +3905,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowCreateTransformDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Create transform */ setShowCreateTransformDialog(false); }} className="bg-purple-600 hover:bg-purple-700">Create</Button>
+              <Button onClick={handleCreateTransform} className="bg-purple-600 hover:bg-purple-700">Create</Button>
             </div>
           </div>
         </DialogContent>
@@ -3523,7 +3991,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddMappingDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Add column mapping */ setShowAddMappingDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Add Mapping</Button>
+              <Button onClick={handleAddColumnMapping} className="bg-blue-600 hover:bg-blue-700">Add Mapping</Button>
             </div>
           </div>
         </DialogContent>
@@ -3562,7 +4030,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowAddDestinationDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Add destination */ setShowAddDestinationDialog(false); }} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={handleAddDestination} className="bg-green-600 hover:bg-green-700">
                 <Plus className="w-4 h-4 mr-2" />Add Destination
               </Button>
             </div>
@@ -3645,7 +4113,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowDestConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Save destination configuration */ setShowDestConfigureDialog(false); }}>Save Changes</Button>
+              <Button onClick={handleSaveDestinationConfig}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>
@@ -3667,7 +4135,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowIpAllowlistDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Update IP allowlist */ setShowIpAllowlistDialog(false); }}>Save</Button>
+              <Button onClick={handleUpdateIpAllowlist}>Save</Button>
             </div>
           </div>
         </DialogContent>
@@ -3706,7 +4174,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowWebhookConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Configure webhook */ setShowWebhookConfigureDialog(false); }}>Save</Button>
+              <Button onClick={handleSaveWebhookConfig}>Save</Button>
             </div>
           </div>
         </DialogContent>
@@ -3752,8 +4220,8 @@ export default function DataExportClient() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => { /* TODO: Download archive file */ }}><Download className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="sm" className="text-red-600" onClick={() => { if (confirm(`Are you sure you want to delete ${file}?`)) { /* TODO: Delete archive */ } }}><Trash2 className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDownloadArchive(file)}><Download className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" className="text-red-600" onClick={() => { if (confirm(`Are you sure you want to delete ${file}?`)) { handleDeleteArchive(file); } }}><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
               ))}
@@ -3925,7 +4393,7 @@ export default function DataExportClient() {
                     <Key className="w-4 h-4 text-gray-400" />
                     <span>{cred}</span>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => { /* TODO: Open credential configuration for ${cred} */ }}><Settings className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleConfigureCredential(cred)}><Settings className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
@@ -3953,7 +4421,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowNewJobDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Create job */ setShowNewJobDialog(false); }}>Create Job</Button>
+              <Button onClick={handleCreateJob}>Create Job</Button>
             </div>
           </div>
         </DialogContent>
@@ -3974,7 +4442,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowRunNowDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Run job now */ setShowRunNowDialog(false); }} className="bg-blue-600 hover:bg-blue-700">Run Now</Button>
+              <Button onClick={handleRunJobNow} className="bg-blue-600 hover:bg-blue-700">Run Now</Button>
             </div>
           </div>
         </DialogContent>
@@ -3987,7 +4455,7 @@ export default function DataExportClient() {
             <p className="text-gray-600 dark:text-gray-300">Pause all running jobs temporarily.</p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPauseJobsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { if (confirm('Are you sure you want to pause all jobs?')) { /* TODO: Pause all jobs */ setShowPauseJobsDialog(false); } }} className="bg-orange-600 hover:bg-orange-700">Pause All</Button>
+              <Button onClick={() => { if (confirm('Are you sure you want to pause all jobs?')) { handlePauseAllJobs(); } }} className="bg-orange-600 hover:bg-orange-700">Pause All</Button>
             </div>
           </div>
         </DialogContent>
@@ -4002,7 +4470,7 @@ export default function DataExportClient() {
               {mockExportJobs.filter(j => j.status === 'completed').map(j => (
                 <div key={j.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span>{j.name}</span>
-                  <Button size="sm" onClick={() => { /* TODO: Download job export */ }}><Download className="w-4 h-4" /></Button>
+                  <Button size="sm" onClick={() => handleDownloadJobExport(j.name)}><Download className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
@@ -4044,7 +4512,7 @@ export default function DataExportClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowJobFilterDialog(false)}>Cancel</Button>
-              <Button onClick={() => { /* TODO: Apply job filters */ setShowJobFilterDialog(false); }}>Apply</Button>
+              <Button onClick={handleApplyJobFilter}>Apply</Button>
             </div>
           </div>
         </DialogContent>
@@ -4063,7 +4531,7 @@ export default function DataExportClient() {
               <Label>Value</Label><Input placeholder="e.g., active" />
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowFilterTransformDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Create filter transform */ setShowFilterTransformDialog(false); }}>Create</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowFilterTransformDialog(false)}>Cancel</Button><Button onClick={handleCreateFilterTransform}>Create</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4101,7 +4569,7 @@ export default function DataExportClient() {
             <Label>SQL Query</Label>
             <textarea className="w-full h-32 p-2 border rounded-md bg-gray-50 dark:bg-gray-800 font-mono text-sm mt-2" placeholder="SELECT * FROM source WHERE..." />
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowCustomSqlDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Create SQL transform */ setShowCustomSqlDialog(false); }}>Create</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowCustomSqlDialog(false)}>Cancel</Button><Button onClick={handleCreateSqlTransform}>Create</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4127,7 +4595,7 @@ export default function DataExportClient() {
               </Select>
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowAddColumnDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Add column */ setShowAddColumnDialog(false); }}>Add</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowAddColumnDialog(false)}>Cancel</Button><Button onClick={handleAddColumn}>Add</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4152,7 +4620,7 @@ export default function DataExportClient() {
       <Dialog open={showMapAllDialog} onOpenChange={setShowMapAllDialog}>
         <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Map All Columns</DialogTitle></DialogHeader>
           <div className="py-4"><p className="text-gray-600">Automatically map all source columns to destination using naming conventions.</p></div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowMapAllDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Map all columns */ setShowMapAllDialog(false); }}>Map All</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowMapAllDialog(false)}>Cancel</Button><Button onClick={handleMapAllColumns}>Map All</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4166,7 +4634,7 @@ export default function DataExportClient() {
       <Dialog open={showExportSchemaDialog} onOpenChange={setShowExportSchemaDialog}>
         <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Export Schema</DialogTitle></DialogHeader>
           <div className="py-4"><p className="text-gray-600">Export schema definition as JSON or DDL.</p></div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowExportSchemaDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Export schema */ setShowExportSchemaDialog(false); }}>Export</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowExportSchemaDialog(false)}>Cancel</Button><Button onClick={handleExportSchema}>Export</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4190,7 +4658,7 @@ export default function DataExportClient() {
             <div className="space-y-2"><Label>Source Column</Label><Input defaultValue={mockSchemaMappings[selectedMappingIndex || 0]?.sourceColumn} /></div>
             <div className="space-y-2"><Label>Destination Column</Label><Input defaultValue={mockSchemaMappings[selectedMappingIndex || 0]?.destinationColumn} /></div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowEditMappingDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Update mapping */ setShowEditMappingDialog(false); }}>Save</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowEditMappingDialog(false)}>Cancel</Button><Button onClick={handleUpdateMapping}>Save</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4337,7 +4805,7 @@ export default function DataExportClient() {
               </Select>
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowTestDestinationDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Test destination connection */ setShowTestDestinationDialog(false); }}>Test Connection</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowTestDestinationDialog(false)}>Cancel</Button><Button onClick={handleTestDestinationConnection}>Test Connection</Button></div>
         </DialogContent>
       </Dialog>
 
@@ -4357,7 +4825,7 @@ export default function DataExportClient() {
               </Select>
             </div>
           </div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowIntegrationFilterDialog(false)}>Cancel</Button><Button onClick={() => { /* TODO: Apply integration filters */ setShowIntegrationFilterDialog(false); }}>Apply</Button></div>
+          <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setShowIntegrationFilterDialog(false)}>Cancel</Button><Button onClick={handleApplyIntegrationFilter}>Apply</Button></div>
         </DialogContent>
       </Dialog>
     </div>

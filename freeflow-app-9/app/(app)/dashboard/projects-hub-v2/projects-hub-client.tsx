@@ -321,6 +321,41 @@ export default function ProjectsHubClient() {
   const [slackChannel, setSlackChannel] = useState('#engineering')
   const [editProjectForm, setEditProjectForm] = useState({ name: '', description: '', budget: 0, priority: 'medium' as Priority, status: 'planning' as ProjectStatus })
 
+  // Settings state for toggles
+  const [settingsState, setSettingsState] = useState({
+    showProgressBars: true,
+    showBudgetInfo: true,
+    compactMode: false,
+    enableTimeTracking: true,
+    autoGenerateKeys: true,
+    emailIssueAssigned: true,
+    emailStatusChanged: true,
+    emailMentioned: true,
+    emailDueDateApproaching: true,
+    emailDailySummary: false,
+    inAppSprintNotifications: true,
+    inAppNewComments: true,
+    inAppAutomationRuns: false,
+    inAppIntegrationErrors: true,
+    slackPostNewIssues: true,
+    slackSprintUpdates: true,
+    slackReleaseNotifications: false,
+    allowExternalCollaborators: false,
+    requireAdminApproval: false,
+    requireCommentOnBlock: true,
+    autoAssignOnProgress: true,
+    requireReviewerForReview: false,
+    preventReopeningDone: false,
+  })
+
+  // Local state for webhooks and custom fields (for deletion)
+  const [localWebhooks, setLocalWebhooks] = useState([
+    { url: 'https://api.company.com/webhooks/jira', events: ['issue.created', 'issue.updated'], status: 'active' },
+    { url: 'https://hooks.zapier.com/hooks/catch/123456', events: ['sprint.completed'], status: 'active' },
+  ])
+  const [localCustomFields, setLocalCustomFields] = useState<CustomField[]>(mockCustomFields)
+  const [localAutomations, setLocalAutomations] = useState(mockAutomations)
+
   // Database integration - use real projects hook
   const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
 
@@ -823,12 +858,12 @@ export default function ProjectsHubClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Workflow Automations</CardTitle><Button onClick={() => setShowAutomationDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button></CardHeader>
               <CardContent className="space-y-4">
-                {mockAutomations.map(auto => (
+                {localAutomations.map((auto, autoIdx) => (
                   <div key={auto.id} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className={`p-2 rounded-lg ${auto.enabled ? 'bg-green-100' : 'bg-gray-100'}`}><Workflow className={`h-5 w-5 ${auto.enabled ? 'text-green-600' : 'text-gray-400'}`} /></div>
                     <div className="flex-1"><h4 className="font-medium">{auto.name}</h4><p className="text-sm text-gray-500">{auto.trigger} → {auto.action}</p></div>
                     <Badge variant="outline">{auto.runsCount} runs</Badge>
-                    <Switch checked={auto.enabled} />
+                    <Switch checked={auto.enabled} onCheckedChange={(checked) => { setLocalAutomations(prev => prev.map((a, idx) => idx === autoIdx ? { ...a, enabled: checked } : a)); toast.success(checked ? `Automation "${auto.name}" enabled` : `Automation "${auto.name}" disabled`) }} />
                   </div>
                 ))}
               </CardContent>
@@ -941,21 +976,21 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">Show Progress Bars</div>
                             <div className="text-sm text-gray-500">Display progress bars on project cards</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.showProgressBars} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, showProgressBars: checked })); toast.success(checked ? 'Progress bars enabled' : 'Progress bars disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Show Budget Information</div>
                             <div className="text-sm text-gray-500">Display budget and spending on project cards</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.showBudgetInfo} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, showBudgetInfo: checked })); toast.success(checked ? 'Budget info enabled' : 'Budget info disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Compact Mode</div>
                             <div className="text-sm text-gray-500">Use a more compact layout for project lists</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.compactMode} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, compactMode: checked })); toast.success(checked ? 'Compact mode enabled' : 'Compact mode disabled') }} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1022,14 +1057,14 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">Enable Time Tracking</div>
                             <div className="text-sm text-gray-500">Track time spent on issues</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.enableTimeTracking} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, enableTimeTracking: checked })); toast.success(checked ? 'Time tracking enabled' : 'Time tracking disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Auto-generate Project Keys</div>
                             <div className="text-sm text-gray-500">Automatically generate project keys from names</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.autoGenerateKeys} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, autoGenerateKeys: checked })); toast.success(checked ? 'Auto-generate keys enabled' : 'Auto-generate keys disabled') }} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1122,35 +1157,35 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">Issue Assigned to Me</div>
                             <div className="text-sm text-gray-500">When issues are assigned to you</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.emailIssueAssigned} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, emailIssueAssigned: checked })); toast.success(checked ? 'Email notification enabled' : 'Email notification disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Issue Status Changed</div>
                             <div className="text-sm text-gray-500">When watching issue status changes</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.emailStatusChanged} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, emailStatusChanged: checked })); toast.success(checked ? 'Email notification enabled' : 'Email notification disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Mentioned in Comments</div>
                             <div className="text-sm text-gray-500">When someone @mentions you</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.emailMentioned} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, emailMentioned: checked })); toast.success(checked ? 'Email notification enabled' : 'Email notification disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Due Date Approaching</div>
                             <div className="text-sm text-gray-500">Issues due within 24 hours</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.emailDueDateApproaching} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, emailDueDateApproaching: checked })); toast.success(checked ? 'Email notification enabled' : 'Email notification disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Daily Summary Email</div>
                             <div className="text-sm text-gray-500">Receive daily digest of activity</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.emailDailySummary} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, emailDailySummary: checked })); toast.success(checked ? 'Daily summary enabled' : 'Daily summary disabled') }} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1168,28 +1203,28 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">Sprint Started/Ended</div>
                             <div className="text-sm text-gray-500">Sprint lifecycle notifications</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.inAppSprintNotifications} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, inAppSprintNotifications: checked })); toast.success(checked ? 'Sprint notifications enabled' : 'Sprint notifications disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">New Comments</div>
                             <div className="text-sm text-gray-500">Comments on issues you're watching</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.inAppNewComments} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, inAppNewComments: checked })); toast.success(checked ? 'Comment notifications enabled' : 'Comment notifications disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Automation Runs</div>
                             <div className="text-sm text-gray-500">When automations execute actions</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.inAppAutomationRuns} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, inAppAutomationRuns: checked })); toast.success(checked ? 'Automation notifications enabled' : 'Automation notifications disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Integration Errors</div>
                             <div className="text-sm text-gray-500">When integrations fail to sync</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.inAppIntegrationErrors} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, inAppIntegrationErrors: checked })); toast.success(checked ? 'Integration error notifications enabled' : 'Integration error notifications disabled') }} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1220,21 +1255,21 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">Post New Issues</div>
                             <div className="text-sm text-gray-500">Share new issues to Slack</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.slackPostNewIssues} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, slackPostNewIssues: checked })); toast.success(checked ? 'Slack issue posting enabled' : 'Slack issue posting disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Sprint Updates</div>
                             <div className="text-sm text-gray-500">Post sprint start/end notifications</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.slackSprintUpdates} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, slackSprintUpdates: checked })); toast.success(checked ? 'Slack sprint updates enabled' : 'Slack sprint updates disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Release Notifications</div>
                             <div className="text-sm text-gray-500">Announce new releases to Slack</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.slackReleaseNotifications} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, slackReleaseNotifications: checked })); toast.success(checked ? 'Slack release notifications enabled' : 'Slack release notifications disabled') }} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1248,10 +1283,7 @@ export default function ProjectsHubClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="border rounded-lg divide-y">
-                          {[
-                            { url: 'https://api.company.com/webhooks/jira', events: ['issue.created', 'issue.updated'], status: 'active' },
-                            { url: 'https://hooks.zapier.com/hooks/catch/123456', events: ['sprint.completed'], status: 'active' },
-                          ].map((webhook, i) => (
+                          {localWebhooks.map((webhook, i) => (
                             <div key={i} className="p-4 flex items-center justify-between">
                               <div>
                                 <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{webhook.url}</code>
@@ -1263,7 +1295,7 @@ export default function ProjectsHubClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => { if (confirm('Delete this webhook?')) { /* TODO: Implement webhook deletion */ } }}>
+                                <Button variant="ghost" size="sm" onClick={() => { if (confirm('Delete this webhook?')) { setLocalWebhooks(prev => prev.filter((_, idx) => idx !== i)); toast.success('Webhook deleted') } }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1412,7 +1444,7 @@ export default function ProjectsHubClient() {
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockCustomFields.map(field => (
+                        {localCustomFields.map(field => (
                           <div key={field.id} className="flex items-center justify-between p-4 border rounded-lg">
                             <div className="flex items-center gap-4">
                               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -1430,7 +1462,7 @@ export default function ProjectsHubClient() {
                               <Button variant="ghost" size="sm" onClick={() => { setSelectedCustomField(field); setCustomFieldForm({ name: field.name, type: field.type, required: field.required, appliesTo: field.appliesTo }); setShowCustomFieldDialog(true) }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Delete custom field "${field.name}"?`)) { /* TODO: Implement custom field deletion */ } }}>
+                              <Button variant="ghost" size="sm" onClick={() => { if (confirm(`Delete custom field "${field.name}"?`)) { setLocalCustomFields(prev => prev.filter(f => f.id !== field.id)); toast.success(`Custom field "${field.name}" deleted`) } }}>
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
                             </div>
@@ -1502,14 +1534,14 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">Allow External Collaborators</div>
                             <div className="text-sm text-gray-500">Invite users outside organization</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.allowExternalCollaborators} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, allowExternalCollaborators: checked })); toast.success(checked ? 'External collaborators allowed' : 'External collaborators restricted') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Require Admin Approval</div>
                             <div className="text-sm text-gray-500">For creating new projects</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.requireAdminApproval} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, requireAdminApproval: checked })); toast.success(checked ? 'Admin approval required' : 'Admin approval not required') }} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1647,28 +1679,28 @@ export default function ProjectsHubClient() {
                             <div className="font-medium">Require Comment on Block</div>
                             <div className="text-sm text-gray-500">Force comment when moving to Blocked</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.requireCommentOnBlock} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, requireCommentOnBlock: checked })); toast.success(checked ? 'Comment required on block' : 'Comment not required on block') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Auto-assign on In Progress</div>
                             <div className="text-sm text-gray-500">Assign to current user when starting work</div>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch checked={settingsState.autoAssignOnProgress} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, autoAssignOnProgress: checked })); toast.success(checked ? 'Auto-assign enabled' : 'Auto-assign disabled') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Require Reviewer for Review</div>
                             <div className="text-sm text-gray-500">Must have reviewer before moving to Review</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.requireReviewerForReview} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, requireReviewerForReview: checked })); toast.success(checked ? 'Reviewer required' : 'Reviewer not required') }} />
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <div className="font-medium">Prevent Reopening Done Issues</div>
                             <div className="text-sm text-gray-500">Require admin approval to reopen</div>
                           </div>
-                          <Switch />
+                          <Switch checked={settingsState.preventReopeningDone} onCheckedChange={(checked) => { setSettingsState(s => ({ ...s, preventReopeningDone: checked })); toast.success(checked ? 'Reopening restricted' : 'Reopening allowed') }} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1681,7 +1713,7 @@ export default function ProjectsHubClient() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockAutomations.map(auto => (
+                        {localAutomations.map((auto, autoIdx) => (
                           <div key={auto.id} className="flex items-center gap-4 p-4 border rounded-lg">
                             <div className={`p-2 rounded-lg ${auto.enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
                               <Workflow className={`h-5 w-5 ${auto.enabled ? 'text-green-600' : 'text-gray-400'}`} />
@@ -1691,7 +1723,7 @@ export default function ProjectsHubClient() {
                               <p className="text-sm text-gray-500">{auto.trigger} → {auto.action}</p>
                             </div>
                             <Badge variant="outline">{auto.runsCount} runs</Badge>
-                            <Switch checked={auto.enabled} />
+                            <Switch checked={auto.enabled} onCheckedChange={(checked) => { setLocalAutomations(prev => prev.map((a, idx) => idx === autoIdx ? { ...a, enabled: checked } : a)); toast.success(checked ? `Automation "${auto.name}" enabled` : `Automation "${auto.name}" disabled`) }} />
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => setShowAutomationDialog(true)}>

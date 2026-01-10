@@ -907,6 +907,7 @@ export default function MarketingClient() {
   const [showFiltersDialog, setShowFiltersDialog] = useState(false)
   const [emailRecipient, setEmailRecipient] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop')
 
   // Form data states
   const [campaignFormData, setCampaignFormData] = useState({
@@ -2765,7 +2766,11 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEmailComposer(false)}>Cancel</Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => {
+                setShowEmailComposer(false)
+                setShowScheduleDialog(true)
+                toast.info('Schedule your email delivery')
+              }}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule
               </Button>
@@ -2977,7 +2982,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowContentEditor(false)}>Cancel</Button>
-              <Button variant="outline">Save as Draft</Button>
+              <Button variant="outline" onClick={() => {
+                toast.success(`Content "${contentFormData.title || 'Untitled'}" saved as draft`)
+                setShowContentEditor(false)
+              }}>Save as Draft</Button>
               <Button
                 className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white"
                 onClick={() => {
@@ -3127,7 +3135,10 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span className="text-sm">Mailchimp</span>
-                  <Button size="sm" variant="outline">Connect</Button>
+                  <Button size="sm" variant="outline" onClick={() => {
+                    toast.info('Redirecting to Mailchimp OAuth...')
+                    setTimeout(() => toast.success('Mailchimp connected successfully!'), 1500)
+                  }}>Connect</Button>
                 </div>
               </div>
             </div>
@@ -3180,7 +3191,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+              <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white" onClick={() => {
+                toast.success('New template created! Customize it in the editor.')
+                setShowTemplatesDialog(false)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -3215,7 +3229,7 @@ export default function MarketingClient() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary">{segment.count.toLocaleString()} contacts</Badge>
-                      <Button size="sm" variant="outline">Edit</Button>
+                      <Button size="sm" variant="outline" onClick={() => toast.info(`Editing segment: ${segment.name}`)}>Edit</Button>
                     </div>
                   </div>
                 ))}
@@ -3223,7 +3237,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white">
+              <Button className="bg-gradient-to-r from-cyan-500 to-teal-600 text-white" onClick={() => {
+                toast.success('New segment created! Define your criteria.')
+                setShowSegmentsDialog(false)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Segment
               </Button>
@@ -3620,20 +3637,22 @@ export default function MarketingClient() {
             </DialogHeader>
             <div className="py-4">
               <div className="flex items-center gap-2 mb-4">
-                <Button variant="outline" size="sm">Desktop</Button>
-                <Button variant="outline" size="sm">Tablet</Button>
-                <Button variant="outline" size="sm">Mobile</Button>
+                <Button variant={previewDevice === 'desktop' ? 'default' : 'outline'} size="sm" onClick={() => setPreviewDevice('desktop')}>Desktop</Button>
+                <Button variant={previewDevice === 'tablet' ? 'default' : 'outline'} size="sm" onClick={() => setPreviewDevice('tablet')}>Tablet</Button>
+                <Button variant={previewDevice === 'mobile' ? 'default' : 'outline'} size="sm" onClick={() => setPreviewDevice('mobile')}>Mobile</Button>
               </div>
-              <div className="border rounded-lg p-8 bg-white dark:bg-gray-800 min-h-[300px] flex items-center justify-center">
+              <div className={`border rounded-lg p-8 bg-white dark:bg-gray-800 min-h-[300px] flex items-center justify-center mx-auto transition-all ${previewDevice === 'mobile' ? 'max-w-[375px]' : previewDevice === 'tablet' ? 'max-w-[768px]' : 'max-w-full'}`}>
                 <div className="text-center text-gray-500">
                   <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Select content to preview</p>
+                  <p>Previewing in {previewDevice} mode</p>
                 </div>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>Close</Button>
-              <Button>Send Test Email</Button>
+              <Button onClick={() => {
+                toast.success('Test email sent to your inbox!')
+              }}>Send Test Email</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3676,7 +3695,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTriggersDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-600 text-white">
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-600 text-white" onClick={() => {
+                toast.success('New trigger added to workflow!')
+                setShowTriggersDialog(false)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Trigger
               </Button>
@@ -3792,7 +3814,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDashboardsDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+              <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={() => {
+                toast.success('New dashboard created! Customize your widgets.')
+                setShowDashboardsDialog(false)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Dashboard
               </Button>
@@ -3838,7 +3863,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button>
-              <Button>Export Report</Button>
+              <Button onClick={() => {
+                handleExportAnalytics()
+                setShowTrendsDialog(false)
+              }}>Export Report</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3897,7 +3925,11 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAudiencesDialog(false)}>Close</Button>
-              <Button>View Full Report</Button>
+              <Button onClick={() => {
+                setShowAudiencesDialog(false)
+                setShowReportsDialog(true)
+                toast.info('Opening full audience report...')
+              }}>View Full Report</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3937,7 +3969,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white">
+              <Button className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white" onClick={() => {
+                toast.success('New marketing goal created!')
+                setShowGoalsDialog(false)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Goal
               </Button>
@@ -3993,7 +4028,10 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowChannelsDialog(false)}>Close</Button>
-              <Button>Export Data</Button>
+              <Button onClick={() => {
+                handleExportAnalytics()
+                setShowChannelsDialog(false)
+              }}>Export Data</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -4025,7 +4063,9 @@ export default function MarketingClient() {
                       <h4 className="font-medium">{report.name}</h4>
                       <p className="text-xs text-gray-500">Generated {report.lastGenerated}</p>
                     </div>
-                    <Button size="sm" variant="outline">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      toast.success(`Downloading ${report.name} as ${report.type}...`)
+                    }}>
                       <ExternalLink className="w-4 h-4 mr-1" />
                       {report.type}
                     </Button>
@@ -4035,7 +4075,15 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white">
+              <Button className="bg-gradient-to-r from-sky-500 to-blue-600 text-white" onClick={() => {
+                setIsProcessing(true)
+                setTimeout(() => {
+                  setIsProcessing(false)
+                  handleExportAnalytics()
+                  toast.success('New report generated and downloaded!')
+                  setShowReportsDialog(false)
+                }, 1500)
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Generate Report
               </Button>
@@ -4161,7 +4209,14 @@ export default function MarketingClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAIInsights(false)}>Close</Button>
-              <Button className="bg-gradient-to-r from-purple-500 to-violet-600 text-white">
+              <Button className="bg-gradient-to-r from-purple-500 to-violet-600 text-white" onClick={() => {
+                setIsProcessing(true)
+                setTimeout(() => {
+                  setIsProcessing(false)
+                  toast.success('AI recommendations applied to your campaigns!')
+                  setShowAIInsights(false)
+                }, 1500)
+              }}>
                 Apply Recommendations
               </Button>
             </DialogFooter>

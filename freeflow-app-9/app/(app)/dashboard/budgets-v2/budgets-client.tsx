@@ -2400,7 +2400,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <AIInsightsPanel
               insights={mockBudgetsAIInsights}
               title="Budget Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                toast.success(`${insight.title}: ${insight.description}`, {
+                  description: `Category: ${insight.category || 'General'}`
+                })
+              }}
             />
           </div>
           <div className="space-y-6">

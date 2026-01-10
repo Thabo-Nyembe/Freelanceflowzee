@@ -769,6 +769,11 @@ export default function BuildsClient() {
   const [selectedBuild, setSelectedBuild] = useState<Build | null>(null)
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
 
+  // Concurrency Settings state
+  const [maxConcurrentJobs, setMaxConcurrentJobs] = useState(5)
+  const [queuePendingJobs, setQueuePendingJobs] = useState(true)
+  const [cancelOnNewPush, setCancelOnNewPush] = useState(false)
+
   // Filtered data
   const filteredBuilds = useMemo(() => {
     return mockBuilds.filter(build => {
@@ -880,6 +885,78 @@ export default function BuildsClient() {
 
   const handleCopySecret = async (secretName: string) => {
     toast.info(`Secret "${secretName}" value is hidden. Navigate to secret settings to view or update.`)
+  }
+
+  // Concurrency Settings handlers
+  const handleMaxConcurrentJobsChange = async (value: number) => {
+    setMaxConcurrentJobs(value)
+    await apiPost('/api/builds/settings/concurrency', {
+      max_concurrent_jobs: value
+    }, {
+      loading: 'Updating concurrency limit...',
+      success: `Max concurrent jobs set to ${value}`,
+      error: 'Failed to update concurrency settings'
+    })
+  }
+
+  const handleToggleQueuePendingJobs = async () => {
+    const newValue = !queuePendingJobs
+    setQueuePendingJobs(newValue)
+    await apiPost('/api/builds/settings/concurrency', {
+      queue_pending_jobs: newValue
+    }, {
+      loading: 'Updating queue settings...',
+      success: newValue ? 'Job queuing enabled' : 'Job queuing disabled',
+      error: 'Failed to update queue settings'
+    })
+  }
+
+  const handleToggleCancelOnNewPush = async () => {
+    const newValue = !cancelOnNewPush
+    setCancelOnNewPush(newValue)
+    await apiPost('/api/builds/settings/concurrency', {
+      cancel_in_progress_on_push: newValue
+    }, {
+      loading: 'Updating cancel settings...',
+      success: newValue ? 'Auto-cancel on new push enabled' : 'Auto-cancel on new push disabled',
+      error: 'Failed to update cancel settings'
+    })
+  }
+
+  // AI Insight action handler
+  const handleInsightAction = async (insight: { id: string; type: string; title: string; description: string }) => {
+    switch (insight.type) {
+      case 'success':
+        toast.success(`Insight: ${insight.title}`, { description: insight.description })
+        break
+      case 'warning':
+        toast.warning(`Action required: ${insight.title}`, {
+          description: insight.description,
+          action: {
+            label: 'View Details',
+            onClick: () => router.push('/dashboard/builds?filter=flaky')
+          }
+        })
+        break
+      case 'info':
+        toast.info(`AI Suggestion: ${insight.title}`, {
+          description: insight.description,
+          action: {
+            label: 'Apply',
+            onClick: () => toast.promise(
+              apiPost('/api/builds/optimize', { suggestion_id: insight.id }, {}),
+              {
+                loading: 'Applying optimization...',
+                success: 'Optimization applied successfully',
+                error: 'Failed to apply optimization'
+              }
+            )
+          }
+        })
+        break
+      default:
+        toast.info(insight.title, { description: insight.description })
+    }
   }
 
   // Quick Actions with real functionality
@@ -1726,21 +1803,47 @@ export default function BuildsClient() {
                         <p className="font-medium">Max concurrent jobs</p>
                         <p className="text-sm text-gray-500">Limit parallel workflow runs</p>
                       </div>
-                      <Input type="number" defaultValue={5} className="w-20 text-center" />
+                      <Input
+                        type="number"
+                        value={maxConcurrentJobs}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10)
+                          if (value >= 1 && value <= 20) {
+                            handleMaxConcurrentJobsChange(value)
+                          }
+                        }}
+                        min={1}
+                        max={20}
+                        className="w-20 text-center"
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Queue pending jobs</p>
                         <p className="text-sm text-gray-500">Hold jobs when limit reached</p>
                       </div>
-                      <Button variant="outline" size="sm">Enabled</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleToggleQueuePendingJobs}
+                        className={queuePendingJobs ? 'bg-green-50 text-green-700 border-green-200' : ''}
+                      >
+                        {queuePendingJobs ? 'Enabled' : 'Disabled'}
+                      </Button>
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Cancel in-progress on new push</p>
                         <p className="text-sm text-gray-500">Stop old runs when new commits arrive</p>
                       </div>
-                      <Button variant="outline" size="sm">Disabled</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleToggleCancelOnNewPush}
+                        className={cancelOnNewPush ? 'bg-green-50 text-green-700 border-green-200' : ''}
+                      >
+                        {cancelOnNewPush ? 'Enabled' : 'Disabled'}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -1790,7 +1893,7 @@ export default function BuildsClient() {
             <AIInsightsPanel
               insights={mockBuildsAIInsights}
               title="Build Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">

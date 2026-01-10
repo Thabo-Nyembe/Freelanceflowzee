@@ -19,6 +19,13 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -98,7 +105,10 @@ import {
   History,
   Wand2,
   GitBranch,
-  AlertTriangle
+  AlertTriangle,
+  Trash2,
+  Send,
+  ExternalLink
 } from 'lucide-react'
 
 interface VideoProject {
@@ -244,6 +254,16 @@ export default function VideoStudioPage() {
   const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Delete Asset Dialog State
+  const [showDeleteAssetDialog, setShowDeleteAssetDialog] = useState(false)
+  const [assetToDelete, setAssetToDelete] = useState<string | null>(null)
+  const [isDeletingAsset, setIsDeletingAsset] = useState(false)
+
+  // Collaboration Invite State
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [isSendingInvite, setIsSendingInvite] = useState(false)
+
   const [newTextOverlay, setNewTextOverlay] = useState({ text: '', style: 'title', position: 'center' })
   const [selectedTransition, setSelectedTransition] = useState<string>('')
   const [selectedEffect, setSelectedEffect] = useState<string>('')
@@ -519,6 +539,98 @@ export default function VideoStudioPage() {
       setIsDeleting(false)
       setShowDeleteProjectDialog(false)
       setProjectToDelete(null)
+    }
+  }
+
+  // ============================================================================
+  // ASSET DELETE HANDLERS
+  // ============================================================================
+  const handleDeleteAsset = (assetId: string) => {
+    const asset = assets.find(a => a.id === assetId)
+    logger.info('Asset deletion initiated', {
+      assetId,
+      name: asset?.name,
+      type: asset?.type
+    })
+    setAssetToDelete(assetId)
+    setShowDeleteAssetDialog(true)
+  }
+
+  const confirmDeleteAsset = async () => {
+    if (!assetToDelete) return
+
+    const asset = assets.find(a => a.id === assetToDelete)
+    logger.info('Asset deletion confirmed', { assetId: assetToDelete, name: asset?.name })
+
+    try {
+      setIsDeletingAsset(true)
+
+      if (userId) {
+        const { deleteVideoAsset } = await import('@/lib/video-assets-queries')
+        const result = await deleteVideoAsset(userId, assetToDelete)
+
+        if (result.error) {
+          throw new Error(result.error)
+        }
+      }
+
+      // Update local state
+      setAssets(prev => prev.filter(a => a.id !== assetToDelete))
+      logger.info('Asset deleted', { assetId: assetToDelete, name: asset?.name })
+      toast.success(`Asset "${asset?.name}" deleted`)
+      announce(`Asset ${asset?.name} deleted`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete asset', { error, assetId: assetToDelete })
+      toast.error('Failed to delete asset', {
+        description: error.message || 'Please try again'
+      })
+      announce('Error deleting asset', 'assertive')
+    } finally {
+      setIsDeletingAsset(false)
+      setShowDeleteAssetDialog(false)
+      setAssetToDelete(null)
+    }
+  }
+
+  // ============================================================================
+  // COLLABORATION INVITE HANDLER
+  // ============================================================================
+  const handleSendCollaborationInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+
+    if (!inviteEmail.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    logger.info('Sending collaboration invite', { email: inviteEmail, projectId: selectedProject?.id })
+    setIsSendingInvite(true)
+
+    try {
+      const result = await apiCall('/api/video/collaboration/invite', {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId: selectedProject?.id,
+          email: inviteEmail
+        })
+      }, {
+        loading: 'Sending invitation...',
+        success: `Invitation sent to ${inviteEmail}`,
+        error: 'Failed to send invitation'
+      })
+
+      if (result.success) {
+        logger.info('Collaboration invite sent', { email: inviteEmail })
+        setInviteEmail('')
+        announce(`Invitation sent to ${inviteEmail}`, 'polite')
+      }
+    } catch (error: any) {
+      logger.error('Failed to send collaboration invite', { error, email: inviteEmail })
+    } finally {
+      setIsSendingInvite(false)
     }
   }
 
@@ -1966,9 +2078,49 @@ export default function VideoStudioPage() {
                           </Badge>
                         )}
                       </div>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleOpenProject(project.id)}>
+                            <Edit3 className="w-4 h-4 mr-2" />
+                            Edit Project
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDuplicateProject(project.id)}>
+                            <Copy className="w-4 h-4 mr-2" />
+                            Duplicate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleShareVideo(project.id)}>
+                            <Share2 className="w-4 h-4 mr-2" />
+                            Share
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleVersionHistory(project.id)}>
+                            <History className="w-4 h-4 mr-2" />
+                            Version History
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleAnalytics(project.id)}>
+                            <BarChart3 className="w-4 h-4 mr-2" />
+                            Analytics
+                          </DropdownMenuItem>
+                          {project.status === 'ready' && (
+                            <DropdownMenuItem onClick={() => handlePublishVideo(project.id)}>
+                              <ExternalLink className="w-4 h-4 mr-2" />
+                              Publish
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteProject(project.id)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     <CardTitle className="text-lg">{project.title}</CardTitle>
                     <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
@@ -2170,13 +2322,72 @@ export default function VideoStudioPage() {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <Badge variant="outline">{asset.type}</Badge>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              // Create asset preview from database data
+                              const previewAsset: Asset = {
+                                id: asset.id,
+                                name: asset.name,
+                                type: asset.type as 'video' | 'audio' | 'image',
+                                url: asset.file_path || '',
+                                thumbnail: asset.thumbnail_path || '',
+                                size: asset.file_size || 0,
+                                format: asset.format,
+                                tags: asset.tags || [],
+                                description: `Professional ${asset.type} asset`,
+                                createdAt: asset.created_at,
+                                duration: asset.duration,
+                                dimensions: asset.type === 'image' ? { width: 1920, height: 1080 } : undefined
+                              }
+                              setSelectedAsset(previewAsset)
+                              setIsAssetPreviewOpen(true)
+                            }}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Preview
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              logger.info('Asset download started', { assetId: asset.id, name: asset.name })
+                              const link = document.createElement('a')
+                              link.href = asset.file_path
+                              link.download = asset.name
+                              link.click()
+                              toast.success(`Downloading ${asset.name}`)
+                            }}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              copyToClipboard(`${window.location.origin}/assets/${asset.id}`, `Asset link copied for ${asset.name}`)
+                            }}
+                          >
+                            <Copy className="w-4 h-4 mr-2" />
+                            Copy Link
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteAsset(asset.id)}
+                            className="text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     <CardTitle className="text-sm">{asset.name}</CardTitle>
                   </CardHeader>
-                  
+
                   <CardContent className="space-y-3">
                     <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
                       {asset.type === 'video' && <Video className="w-6 h-6 text-gray-400" />}
@@ -2966,8 +3177,33 @@ onClick={() => {
             <div className="space-y-2">
               <Label>Invite Team Members</Label>
               <div className="flex gap-2">
-                <Input placeholder="Enter email address..." className="flex-1" />
-                <Button>Send Invite</Button>
+                <Input
+                  placeholder="Enter email address..."
+                  className="flex-1"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSendCollaborationInvite()
+                    }
+                  }}
+                />
+                <Button
+                  onClick={handleSendCollaborationInvite}
+                  disabled={isSendingInvite}
+                >
+                  {isSendingInvite ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Invite
+                    </>
+                  )}
+                </Button>
               </div>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg space-y-3">
@@ -3277,6 +3513,40 @@ onClick={() => {
               className="bg-red-600 hover:bg-red-700"
             >
               {isDeleting ? 'Deleting...' : 'Delete Project'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Asset Confirmation Dialog */}
+      <AlertDialog open={showDeleteAssetDialog} onOpenChange={setShowDeleteAssetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Asset?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium text-red-700">
+                This action cannot be undone.
+              </p>
+              <p>
+                Are you sure you want to delete{' '}
+                <span className="font-semibold">
+                  "{assets.find(a => a.id === assetToDelete)?.name}"
+                </span>
+                ? This asset will be permanently removed from your library.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingAsset}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteAsset}
+              disabled={isDeletingAsset}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeletingAsset ? 'Deleting...' : 'Delete Asset'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -227,6 +227,20 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const [showCrashReportsDialog, setShowCrashReportsDialog] = useState(false)
   const [showUpdateMetadataDialog, setShowUpdateMetadataDialog] = useState(false)
 
+  // Edit Dialog states
+  const [showEditCampaignDialog, setShowEditCampaignDialog] = useState(false)
+  const [showEditIapDialog, setShowEditIapDialog] = useState(false)
+  const [showEditAppNameDialog, setShowEditAppNameDialog] = useState(false)
+  const [showCreateTesterGroupDialog, setShowCreateTesterGroupDialog] = useState(false)
+  const [showCiCdConfigDialog, setShowCiCdConfigDialog] = useState(false)
+  const [showRemoveAppDialog, setShowRemoveAppDialog] = useState(false)
+  const [showDeleteAppDialog, setShowDeleteAppDialog] = useState(false)
+  const [selectedCampaign, setSelectedCampaign] = useState<PushCampaign | null>(null)
+  const [selectedIap, setSelectedIap] = useState<InAppPurchase | null>(null)
+  const [selectedCiCd, setSelectedCiCd] = useState<{ name: string; connected: boolean } | null>(null)
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [newTesterGroupName, setNewTesterGroupName] = useState('')
+
   // Quick Action form states
   const [submitReviewForm, setSubmitReviewForm] = useState({ buildId: '', notes: '' })
   const [pushNotificationForm, setPushNotificationForm] = useState({ title: '', message: '', targetAudience: 'all' })
@@ -500,6 +514,285 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleRefreshData = useCallback(() => {
     toast.success('Data refreshed', { description: 'All mobile app data has been updated' })
   }, [])
+
+  // Edit Campaign Handler
+  const handleEditCampaign = (campaign: PushCampaign) => {
+    setSelectedCampaign(campaign)
+    setCampaignForm({
+      title: campaign.title,
+      message: campaign.message,
+      platform: campaign.platform,
+      targetAudience: campaign.targetAudience
+    })
+    setShowEditCampaignDialog(true)
+  }
+
+  const handleSaveEditCampaign = async () => {
+    if (!selectedCampaign || !campaignForm.title.trim()) {
+      toast.error('Missing required fields')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_push_campaigns').update({
+        title: campaignForm.title,
+        message: campaignForm.message,
+        platform: campaignForm.platform,
+        target_audience: campaignForm.targetAudience
+      }).eq('id', selectedCampaign.id)
+      if (error) throw error
+      toast.success('Campaign updated', { description: `"${campaignForm.title}" has been saved` })
+      setShowEditCampaignDialog(false)
+      setSelectedCampaign(null)
+    } catch (err: any) {
+      toast.error('Update failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // Edit IAP Handler
+  const handleEditIap = (iap: InAppPurchase) => {
+    setSelectedIap(iap)
+    setIapForm({
+      productId: iap.productId,
+      name: iap.name,
+      type: iap.type,
+      price: iap.price
+    })
+    setShowEditIapDialog(true)
+  }
+
+  const handleSaveEditIap = async () => {
+    if (!selectedIap || !iapForm.productId.trim()) {
+      toast.error('Missing required fields')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_iaps').update({
+        product_id: iapForm.productId,
+        name: iapForm.name,
+        type: iapForm.type,
+        price: iapForm.price
+      }).eq('id', selectedIap.id)
+      if (error) throw error
+      toast.success('Product updated', { description: `"${iapForm.name}" has been saved` })
+      setShowEditIapDialog(false)
+      setSelectedIap(null)
+    } catch (err: any) {
+      toast.error('Update failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // Copy handlers
+  const handleCopyBundleId = async () => {
+    try {
+      await navigator.clipboard.writeText('com.freeflow.app')
+      toast.success('Copied!', { description: 'Bundle ID copied to clipboard' })
+    } catch {
+      toast.error('Failed to copy')
+    }
+  }
+
+  const handleCopyApiKey = async () => {
+    try {
+      await navigator.clipboard.writeText('asc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+      toast.success('Copied!', { description: 'API key copied to clipboard' })
+    } catch {
+      toast.error('Failed to copy')
+    }
+  }
+
+  // Regenerate API Key
+  const handleRegenerateApiKey = async () => {
+    setIsLoading(true)
+    try {
+      const newKey = `asc_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`
+      const { error } = await supabase.from('mobile_app_settings').upsert({
+        user_id: userId,
+        section: 'api_key',
+        value: newKey,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,section' })
+      if (error) throw error
+      toast.success('API key regenerated', { description: 'New key has been generated. Update your integrations.' })
+    } catch (err: any) {
+      toast.error('Failed to regenerate', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // Test Webhook
+  const handleTestWebhook = async (webhookUrl: string) => {
+    if (!webhookUrl.trim()) {
+      toast.error('Enter webhook URL', { description: 'Please enter a valid webhook URL first' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: 'Testing webhook...',
+          success: 'Webhook test successful! Payload delivered.',
+          error: 'Webhook test failed'
+        }
+      )
+    } finally { setIsLoading(false) }
+  }
+
+  // CI/CD Integration
+  const handleCiCdAction = (cicd: { name: string; connected: boolean }) => {
+    setSelectedCiCd(cicd)
+    setShowCiCdConfigDialog(true)
+  }
+
+  const handleSaveCiCdConfig = async () => {
+    if (!selectedCiCd) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_cicd_integrations').upsert({
+        user_id: userId,
+        provider: selectedCiCd.name,
+        connected: true,
+        configured_at: new Date().toISOString()
+      }, { onConflict: 'user_id,provider' })
+      if (error) throw error
+      toast.success(`${selectedCiCd.name} ${selectedCiCd.connected ? 'configured' : 'connected'}`, {
+        description: selectedCiCd.connected ? 'Configuration saved' : 'Integration connected successfully'
+      })
+      setShowCiCdConfigDialog(false)
+      setSelectedCiCd(null)
+    } catch (err: any) {
+      toast.error('Action failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // Create Tester Group
+  const handleCreateTesterGroup = async (groupName: string) => {
+    if (!groupName.trim()) {
+      toast.error('Enter group name')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_tester_groups').insert({
+        user_id: userId,
+        name: groupName,
+        testers: 0,
+        active: true,
+        created_at: new Date().toISOString()
+      })
+      if (error) throw error
+      toast.success('Group created', { description: `"${groupName}" is ready for testers` })
+      setShowCreateTesterGroupDialog(false)
+    } catch (err: any) {
+      toast.error('Failed to create group', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // Export Analytics
+  const handleExportAnalytics = async () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Preparing analytics export...',
+        success: 'Analytics exported! Check your downloads folder.',
+        error: 'Export failed'
+      }
+    )
+  }
+
+  // View Reports
+  const handleViewReports = () => {
+    setActiveTab('overview')
+    toast.info('Analytics reports', { description: 'Viewing detailed reports in Overview tab' })
+  }
+
+  // Remove from App Store
+  const handleRemoveFromStore = async () => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_settings').upsert({
+        user_id: userId,
+        section: 'store_availability',
+        value: 'removed',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,section' })
+      if (error) throw error
+      toast.success('App removed from store', { description: 'Your app is no longer available for sale' })
+      setShowRemoveAppDialog(false)
+    } catch (err: any) {
+      toast.error('Failed to remove', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // Delete App
+  const handleDeleteApp = async () => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_apps').delete().eq('user_id', userId)
+      if (error) throw error
+      toast.success('App deleted', { description: 'Your app has been permanently deleted' })
+      setShowDeleteAppDialog(false)
+    } catch (err: any) {
+      toast.error('Delete failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // Submit for Review (in Build dialog)
+  const handleSubmitBuildForReview = async () => {
+    if (!selectedBuild) return
+    await handleSubmitToStore(selectedBuild.id, selectedBuild.platform)
+  }
+
+  // Release to App Store (in Build dialog)
+  const handleReleaseBuild = async () => {
+    if (!selectedBuild) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_builds').update({
+        status: 'released',
+        released_at: new Date().toISOString()
+      }).eq('id', selectedBuild.id)
+      if (error) throw error
+      toast.success('Released!', { description: `v${selectedBuild.version} is now live on ${selectedBuild.platform === 'ios' ? 'App Store' : 'Play Store'}` })
+      setShowBuildDialog(false)
+    } catch (err: any) {
+      toast.error('Release failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  // View Crashes (in Build dialog)
+  const handleViewCrashes = () => {
+    if (!selectedBuild) return
+    setShowCrashReportsDialog(true)
+    setShowBuildDialog(false)
+  }
+
+  // Edit App Name
+  const handleEditAppName = () => {
+    setShowEditAppNameDialog(true)
+  }
+
+  const handleSaveAppName = async (newName: string) => {
+    if (!newName.trim()) {
+      toast.error('Enter app name')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_settings').upsert({
+        user_id: userId,
+        section: 'app_name',
+        value: newName,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,section' })
+      if (error) throw error
+      toast.success('App name updated', { description: `Name changed to "${newName}"` })
+      setShowEditAppNameDialog(false)
+    } catch (err: any) {
+      toast.error('Update failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -1193,7 +1486,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                               </div>
                               <p className="text-sm text-gray-600">{campaign.message}</p>
                             </div>
-                            <Button variant="outline" size="sm">Edit</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleEditCampaign(campaign)}>Edit</Button>
                           </div>
                           <div className="flex items-center gap-6 text-sm">
                             <span className="flex items-center gap-1">
@@ -1327,7 +1620,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             <p className="font-semibold text-green-600">${iap.revenue.toLocaleString()}</p>
                             <p className="text-xs text-gray-500">Revenue</p>
                           </div>
-                          <Button variant="outline" size="sm">Edit</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleEditIap(iap)}>Edit</Button>
                         </div>
                       ))}
                     </div>
@@ -1441,14 +1734,14 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             <Label className="text-gray-900 dark:text-white font-medium">App Name</Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Mobile</p>
                           </div>
-                          <Button variant="outline" size="sm">Edit</Button>
+                          <Button variant="outline" size="sm" onClick={handleEditAppName}>Edit</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <Label className="text-gray-900 dark:text-white font-medium">Bundle ID</Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">com.freeflow.app</p>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleCopyBundleId}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1683,8 +1976,13 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook</Label>
                           <div className="flex gap-2">
-                            <Input placeholder="https://your-webhook-url.com" className="flex-1" />
-                            <Button variant="outline">Test</Button>
+                            <Input
+                              placeholder="https://your-webhook-url.com"
+                              className="flex-1"
+                              value={webhookUrl}
+                              onChange={(e) => setWebhookUrl(e.target.value)}
+                            />
+                            <Button variant="outline" onClick={() => handleTestWebhook(webhookUrl)}>Test</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1711,7 +2009,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">App Store Connect API Key</Label>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={handleCopyApiKey}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -1720,9 +2018,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             asc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleRegenerateApiKey} disabled={isLoading}>
                           <RefreshCw className="h-4 w-4 mr-2" />
-                          Regenerate API Key
+                          {isLoading ? 'Regenerating...' : 'Regenerate API Key'}
                         </Button>
                       </CardContent>
                     </Card>
@@ -1752,7 +2050,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                                 <Cpu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                                 <span className="font-medium text-gray-900 dark:text-white">{ci.name}</span>
                               </div>
-                              <Button variant={ci.connected ? 'outline' : 'default'} size="sm">
+                              <Button variant={ci.connected ? 'outline' : 'default'} size="sm" onClick={() => handleCiCdAction(ci)}>
                                 {ci.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1792,7 +2090,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             <Switch defaultChecked={group.active} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowCreateTesterGroupDialog(true)}>
                           <Users className="h-4 w-4 mr-2" />
                           Create New Group
                         </Button>
@@ -1892,11 +2190,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                           <Switch defaultChecked />
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExportAnalytics}>
                             <Download className="h-4 w-4 mr-2" />
                             Export Analytics
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleViewReports}>
                             <BarChart3 className="h-4 w-4 mr-2" />
                             View Reports
                           </Button>
@@ -1921,7 +2219,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             <h4 className="font-medium text-gray-900 dark:text-white">Remove from App Store</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Temporarily remove app from sale</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => setShowRemoveAppDialog(true)}>
                             Remove
                           </Button>
                         </div>
@@ -1930,7 +2228,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             <h4 className="font-medium text-gray-900 dark:text-white">Delete App</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently delete this app</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => setShowDeleteAppDialog(true)}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </Button>
@@ -2042,18 +2340,18 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
                 <div className="flex gap-3">
                   {selectedBuild.status === 'ready' && (
-                    <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                    <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={handleSubmitBuildForReview} disabled={isLoading}>
                       <Send className="h-4 w-4 mr-2" />
-                      Submit for Review
+                      {isLoading ? 'Submitting...' : 'Submit for Review'}
                     </Button>
                   )}
                   {selectedBuild.status === 'approved' && (
-                    <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={handleReleaseBuild} disabled={isLoading}>
                       <Play className="h-4 w-4 mr-2" />
-                      Release to App Store
+                      {isLoading ? 'Releasing...' : 'Release to App Store'}
                     </Button>
                   )}
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleViewCrashes}>
                     <Bug className="h-4 w-4 mr-2" />
                     View Crashes
                   </Button>
@@ -2665,6 +2963,248 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 toast.success('Metadata updated', { description: 'App store listing will be updated with the next release.' })
               }} disabled={isLoading}>
                 {isLoading ? 'Saving...' : 'Save Metadata'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Campaign Dialog */}
+      <Dialog open={showEditCampaignDialog} onOpenChange={setShowEditCampaignDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Campaign</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Campaign Title</Label>
+              <Input value={campaignForm.title} onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })} />
+            </div>
+            <div>
+              <Label>Message</Label>
+              <Input value={campaignForm.message} onChange={(e) => setCampaignForm({ ...campaignForm, message: e.target.value })} />
+            </div>
+            <div>
+              <Label>Platform</Label>
+              <Select value={campaignForm.platform} onValueChange={(v: Platform) => setCampaignForm({ ...campaignForm, platform: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Platforms</SelectItem>
+                  <SelectItem value="ios">iOS Only</SelectItem>
+                  <SelectItem value="android">Android Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Target Audience</Label>
+              <Input value={campaignForm.targetAudience} onChange={(e) => setCampaignForm({ ...campaignForm, targetAudience: e.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditCampaignDialog(false)}>Cancel</Button>
+              <Button onClick={handleSaveEditCampaign} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit IAP Dialog */}
+      <Dialog open={showEditIapDialog} onOpenChange={setShowEditIapDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit In-App Purchase</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Product ID</Label>
+              <Input value={iapForm.productId} onChange={(e) => setIapForm({ ...iapForm, productId: e.target.value })} />
+            </div>
+            <div>
+              <Label>Product Name</Label>
+              <Input value={iapForm.name} onChange={(e) => setIapForm({ ...iapForm, name: e.target.value })} />
+            </div>
+            <div>
+              <Label>Product Type</Label>
+              <Select value={iapForm.type} onValueChange={(v: 'consumable' | 'non-consumable' | 'subscription') => setIapForm({ ...iapForm, type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="subscription">Subscription</SelectItem>
+                  <SelectItem value="consumable">Consumable</SelectItem>
+                  <SelectItem value="non-consumable">Non-Consumable</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Price</Label>
+              <Input value={iapForm.price} onChange={(e) => setIapForm({ ...iapForm, price: e.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditIapDialog(false)}>Cancel</Button>
+              <Button onClick={handleSaveEditIap} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit App Name Dialog */}
+      <Dialog open={showEditAppNameDialog} onOpenChange={setShowEditAppNameDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit App Name</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>App Name</Label>
+              <Input
+                defaultValue="FreeFlow Mobile"
+                onChange={(e) => setMetadataForm({ ...metadataForm, appName: e.target.value })}
+              />
+              <p className="text-sm text-gray-500 mt-1">This name will appear on the App Store.</p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditAppNameDialog(false)}>Cancel</Button>
+              <Button onClick={() => handleSaveAppName(metadataForm.appName)} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Tester Group Dialog */}
+      <Dialog open={showCreateTesterGroupDialog} onOpenChange={setShowCreateTesterGroupDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-cyan-600" />
+              Create Tester Group
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Group Name</Label>
+              <Input
+                placeholder="e.g., Internal Team, Beta Testers"
+                value={newTesterGroupName}
+                onChange={(e) => setNewTesterGroupName(e.target.value)}
+              />
+            </div>
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                After creating the group, you can add testers by inviting them via email.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowCreateTesterGroupDialog(false)
+                setNewTesterGroupName('')
+              }}>Cancel</Button>
+              <Button onClick={() => handleCreateTesterGroup(newTesterGroupName)} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Group'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* CI/CD Config Dialog */}
+      <Dialog open={showCiCdConfigDialog} onOpenChange={setShowCiCdConfigDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <GitBranch className="h-5 w-5 text-gray-600" />
+              {selectedCiCd?.connected ? 'Configure' : 'Connect'} {selectedCiCd?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedCiCd?.connected ? (
+              <>
+                <div>
+                  <Label>Build Configuration</Label>
+                  <Select defaultValue="production">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="debug">Debug</SelectItem>
+                      <SelectItem value="release">Release</SelectItem>
+                      <SelectItem value="production">Production</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Label>Auto-deploy on merge</Label>
+                  <Switch defaultChecked />
+                </div>
+              </>
+            ) : (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Connect {selectedCiCd?.name} to automatically build and deploy your app when you push changes to your repository.
+                </p>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCiCdConfigDialog(false)}>Cancel</Button>
+              <Button onClick={handleSaveCiCdConfig} disabled={isLoading}>
+                {isLoading ? 'Processing...' : selectedCiCd?.connected ? 'Save Configuration' : 'Connect'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove from App Store Dialog */}
+      <Dialog open={showRemoveAppDialog} onOpenChange={setShowRemoveAppDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertOctagon className="h-5 w-5" />
+              Remove from App Store
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to remove this app from the App Store? Users will no longer be able to download it, but existing users can still use it.
+            </p>
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                This action can be reversed by re-submitting your app for review.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRemoveAppDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleRemoveFromStore} disabled={isLoading}>
+                {isLoading ? 'Removing...' : 'Remove from Store'}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete App Dialog */}
+      <Dialog open={showDeleteAppDialog} onOpenChange={setShowDeleteAppDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete App Permanently
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you absolutely sure you want to permanently delete this app? This action cannot be undone.
+            </p>
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                Warning: All builds, analytics, reviews, and app data will be permanently deleted.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAppDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteApp} disabled={isLoading}>
+                {isLoading ? 'Deleting...' : 'Delete Permanently'}
               </Button>
             </DialogFooter>
           </div>

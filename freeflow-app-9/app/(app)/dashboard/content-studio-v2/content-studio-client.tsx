@@ -640,6 +640,14 @@ export default function ContentStudioClient() {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [showBulkPublishDialog, setShowBulkPublishDialog] = useState(false)
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showDeleteAllContentDialog, setShowDeleteAllContentDialog] = useState(false)
+  const [showResetSpaceDialog, setShowResetSpaceDialog] = useState(false)
+  const [showRegenerateKeysDialog, setShowRegenerateKeysDialog] = useState(false)
+  const [showEntryMenuDialog, setShowEntryMenuDialog] = useState(false)
+  const [entryMenuTarget, setEntryMenuTarget] = useState<ContentEntry | null>(null)
+  const [showEditEntryDialog, setShowEditEntryDialog] = useState(false)
+  const [showPublishEntryDialog, setShowPublishEntryDialog] = useState(false)
+  const [showEditContentTypeDialog, setShowEditContentTypeDialog] = useState(false)
 
   // Form states for dialogs
   const [newEntryTitle, setNewEntryTitle] = useState('')
@@ -665,6 +673,12 @@ export default function ContentStudioClient() {
   const [webhookUrl, setWebhookUrl] = useState('')
   const [webhookEvents, setWebhookEvents] = useState<string[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [newTagInput, setNewTagInput] = useState('')
+  const [currentTags, setCurrentTags] = useState<string[]>(['featured', 'announcement', 'product', 'blog'])
+  const [editEntryTitle, setEditEntryTitle] = useState('')
+  const [editEntrySlug, setEditEntrySlug] = useState('')
+  const [editContentTypeName, setEditContentTypeName] = useState('')
+  const [editContentTypeDescription, setEditContentTypeDescription] = useState('')
 
   // Dashboard stats
   const stats = useMemo(() => ({
@@ -1302,7 +1316,11 @@ export default function ContentStudioClient() {
                         <Badge className={getStatusColor(entry.status)}>{entry.status}</Badge>
                         <Badge variant="outline">{entry.content_type_name}</Badge>
                       </div>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={(e) => {
+                        e.stopPropagation()
+                        setEntryMenuTarget(entry)
+                        setShowEntryMenuDialog(true)
+                      }}>
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1833,11 +1851,14 @@ export default function ContentStudioClient() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => setShowRegenerateKeysDialog(true)}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Regenerate Keys
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => {
+                            window.open('https://www.contentful.com/developers/docs/', '_blank')
+                            toast.success('Opening API documentation', { description: 'API docs opened in new tab' })
+                          }}>
                             <ExternalLink className="w-4 h-4 mr-2" />
                             API Docs
                           </Button>
@@ -2049,14 +2070,14 @@ export default function ContentStudioClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Content</p>
                             <p className="text-sm text-gray-500">Remove all entries and content types</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowDeleteAllContentDialog(true)}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Space</p>
                             <p className="text-sm text-gray-500">Reset entire space to defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => setShowResetSpaceDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2177,12 +2198,18 @@ export default function ContentStudioClient() {
                   )}
 
                   <div className="flex gap-3">
-                    <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                    <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                      if (selectedEntry) {
+                        setEditEntryTitle(selectedEntry.title)
+                        setEditEntrySlug(selectedEntry.slug)
+                        setShowEditEntryDialog(true)
+                      }
+                    }}>
                       <Edit2 className="w-4 h-4 mr-2" />
                       Edit Entry
                     </Button>
                     {selectedEntry.status === 'draft' && (
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={() => setShowPublishEntryDialog(true)}>
                         <Send className="w-4 h-4 mr-2" />
                         Publish
                       </Button>
@@ -2251,7 +2278,13 @@ export default function ContentStudioClient() {
                     </div>
                   </div>
 
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={() => {
+                    if (selectedContentType) {
+                      setEditContentTypeName(selectedContentType.name)
+                      setEditContentTypeDescription(selectedContentType.description)
+                      setShowEditContentTypeDialog(true)
+                    }
+                  }}>
                     <Edit2 className="w-4 h-4 mr-2" />
                     Edit Content Type
                   </Button>
@@ -2986,10 +3019,13 @@ export default function ContentStudioClient() {
               <div className="space-y-2">
                 <Label>Current Tags</Label>
                 <div className="flex flex-wrap gap-2">
-                  {['featured', 'announcement', 'product', 'blog'].map(tag => (
+                  {currentTags.map(tag => (
                     <Badge key={tag} variant="secondary" className="px-3 py-1">
                       {tag}
-                      <button className="ml-2 text-gray-500 hover:text-gray-700" onClick={() => { /* TODO: Implement tag removal */ }}>x</button>
+                      <button className="ml-2 text-gray-500 hover:text-gray-700" onClick={() => {
+                        setCurrentTags(currentTags.filter(t => t !== tag))
+                        toast.success('Tag removed', { description: `"${tag}" has been removed` })
+                      }}>x</button>
                     </Badge>
                   ))}
                 </div>
@@ -2997,8 +3033,36 @@ export default function ContentStudioClient() {
               <div className="space-y-2">
                 <Label htmlFor="new-tag">Add New Tag</Label>
                 <div className="flex gap-2">
-                  <Input id="new-tag" placeholder="Enter tag name" />
-                  <Button onClick={() => { /* TODO: Implement tag addition */ }}>Add</Button>
+                  <Input
+                    id="new-tag"
+                    placeholder="Enter tag name"
+                    value={newTagInput}
+                    onChange={(e) => setNewTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newTagInput.trim()) {
+                        if (!currentTags.includes(newTagInput.trim().toLowerCase())) {
+                          setCurrentTags([...currentTags, newTagInput.trim().toLowerCase()])
+                          toast.success('Tag added', { description: `"${newTagInput.trim()}" has been added` })
+                          setNewTagInput('')
+                        } else {
+                          toast.error('Tag already exists')
+                        }
+                      }
+                    }}
+                  />
+                  <Button onClick={() => {
+                    if (newTagInput.trim()) {
+                      if (!currentTags.includes(newTagInput.trim().toLowerCase())) {
+                        setCurrentTags([...currentTags, newTagInput.trim().toLowerCase()])
+                        toast.success('Tag added', { description: `"${newTagInput.trim()}" has been added` })
+                        setNewTagInput('')
+                      } else {
+                        toast.error('Tag already exists')
+                      }
+                    } else {
+                      toast.error('Please enter a tag name')
+                    }
+                  }}>Add</Button>
                 </div>
               </div>
             </div>
@@ -3387,6 +3451,338 @@ export default function ContentStudioClient() {
                 toast.success('Sync complete', { description: 'All locales are synchronized' })
                 setShowSyncAllDialog(false)
               }}>Sync Now</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete All Content Dialog */}
+        <Dialog open={showDeleteAllContentDialog} onOpenChange={setShowDeleteAllContentDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete All Content</DialogTitle>
+              <DialogDescription>This action cannot be undone. All entries and content types will be permanently deleted.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-300">
+                  Warning: This will delete {mockEntries.length} entries and {mockContentTypes.length} content types.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type &quot;DELETE&quot; to confirm</Label>
+                <Input placeholder="DELETE" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteAllContentDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={async () => {
+                setIsProcessing(true)
+                await new Promise(resolve => setTimeout(resolve, 2000))
+                toast.success('Content deleted', { description: 'All entries and content types have been removed' })
+                setShowDeleteAllContentDialog(false)
+                setIsProcessing(false)
+              }} disabled={isProcessing}>
+                {isProcessing ? 'Deleting...' : 'Delete Everything'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Space Dialog */}
+        <Dialog open={showResetSpaceDialog} onOpenChange={setShowResetSpaceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Reset Space</DialogTitle>
+              <DialogDescription>This will reset your entire space to default settings.</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-sm text-red-800 dark:text-red-300">
+                  Warning: All content, settings, webhooks, and API keys will be reset. This action cannot be undone.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type &quot;RESET&quot; to confirm</Label>
+                <Input placeholder="RESET" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetSpaceDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={async () => {
+                setIsProcessing(true)
+                await new Promise(resolve => setTimeout(resolve, 2000))
+                toast.success('Space reset', { description: 'Your space has been reset to defaults' })
+                setShowResetSpaceDialog(false)
+                setIsProcessing(false)
+              }} disabled={isProcessing}>
+                {isProcessing ? 'Resetting...' : 'Reset Space'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Regenerate Keys Dialog */}
+        <Dialog open={showRegenerateKeysDialog} onOpenChange={setShowRegenerateKeysDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Regenerate API Keys</DialogTitle>
+              <DialogDescription>Generate new API keys for your space</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                  Warning: Regenerating keys will invalidate your existing keys. All applications using the old keys will need to be updated.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="regen-delivery" className="rounded" defaultChecked />
+                  <Label htmlFor="regen-delivery">Content Delivery API Key</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="regen-management" className="rounded" defaultChecked />
+                  <Label htmlFor="regen-management">Content Management API Key</Label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRegenerateKeysDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                setIsProcessing(true)
+                await new Promise(resolve => setTimeout(resolve, 1500))
+                toast.success('API keys regenerated', { description: 'New keys are now active. Update your applications.' })
+                setShowRegenerateKeysDialog(false)
+                setIsProcessing(false)
+              }} disabled={isProcessing}>
+                {isProcessing ? 'Generating...' : 'Regenerate Keys'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Entry Menu Dialog */}
+        <Dialog open={showEntryMenuDialog} onOpenChange={setShowEntryMenuDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Entry Actions</DialogTitle>
+              {entryMenuTarget && (
+                <DialogDescription>{entryMenuTarget.title}</DialogDescription>
+              )}
+            </DialogHeader>
+            <div className="py-2 space-y-1">
+              <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                if (entryMenuTarget) {
+                  setSelectedEntry(entryMenuTarget)
+                  setShowEntryMenuDialog(false)
+                }
+              }}>
+                <Eye className="w-4 h-4 mr-2" />
+                View Details
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                if (entryMenuTarget) {
+                  setEditEntryTitle(entryMenuTarget.title)
+                  setEditEntrySlug(entryMenuTarget.slug)
+                  setShowEditEntryDialog(true)
+                  setShowEntryMenuDialog(false)
+                }
+              }}>
+                <Edit2 className="w-4 h-4 mr-2" />
+                Edit Entry
+              </Button>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                if (entryMenuTarget) {
+                  toast.success('Entry duplicated', { description: `Copy of "${entryMenuTarget.title}" created as draft` })
+                  setShowEntryMenuDialog(false)
+                }
+              }}>
+                <Copy className="w-4 h-4 mr-2" />
+                Duplicate
+              </Button>
+              {entryMenuTarget?.status === 'draft' && (
+                <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                  setShowPublishEntryDialog(true)
+                  setShowEntryMenuDialog(false)
+                }}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Publish
+                </Button>
+              )}
+              {entryMenuTarget?.status === 'published' && (
+                <Button variant="ghost" className="w-full justify-start" onClick={() => {
+                  toast.success('Entry unpublished', { description: `"${entryMenuTarget.title}" is now a draft` })
+                  setShowEntryMenuDialog(false)
+                }}>
+                  <Archive className="w-4 h-4 mr-2" />
+                  Unpublish
+                </Button>
+              )}
+              <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => {
+                if (entryMenuTarget) {
+                  toast.success('Entry deleted', { description: `"${entryMenuTarget.title}" has been removed` })
+                  setShowEntryMenuDialog(false)
+                }
+              }}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Entry Dialog */}
+        <Dialog open={showEditEntryDialog} onOpenChange={setShowEditEntryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Entry</DialogTitle>
+              <DialogDescription>Modify entry details and content</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-entry-title">Title</Label>
+                <Input
+                  id="edit-entry-title"
+                  value={editEntryTitle}
+                  onChange={(e) => setEditEntryTitle(e.target.value)}
+                  placeholder="Enter entry title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-entry-slug">Slug</Label>
+                <Input
+                  id="edit-entry-slug"
+                  value={editEntrySlug}
+                  onChange={(e) => setEditEntrySlug(e.target.value)}
+                  placeholder="url-friendly-slug"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-entry-content">Content</Label>
+                <Textarea
+                  id="edit-entry-content"
+                  placeholder="Enter your content here..."
+                  rows={6}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditEntryDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                if (!editEntryTitle.trim()) {
+                  toast.error('Title is required')
+                  return
+                }
+                setIsProcessing(true)
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('Entry updated', { description: `"${editEntryTitle}" has been saved` })
+                setShowEditEntryDialog(false)
+                setSelectedEntry(null)
+                setIsProcessing(false)
+              }} disabled={isProcessing}>
+                {isProcessing ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Publish Entry Dialog */}
+        <Dialog open={showPublishEntryDialog} onOpenChange={setShowPublishEntryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Publish Entry</DialogTitle>
+              <DialogDescription>Make this content live and publicly accessible</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="text-sm text-green-800 dark:text-green-300">
+                  Publishing will make this entry visible to all users through the Content Delivery API.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Publish options</Label>
+                <div className="flex items-center gap-2">
+                  <input type="radio" name="publish-option" id="publish-now" className="rounded" defaultChecked />
+                  <Label htmlFor="publish-now">Publish immediately</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="radio" name="publish-option" id="publish-schedule" className="rounded" />
+                  <Label htmlFor="publish-schedule">Schedule for later</Label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowPublishEntryDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                setIsProcessing(true)
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('Entry published', { description: 'Content is now live' })
+                setShowPublishEntryDialog(false)
+                setSelectedEntry(null)
+                setIsProcessing(false)
+              }} disabled={isProcessing}>
+                {isProcessing ? 'Publishing...' : 'Publish'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Content Type Dialog */}
+        <Dialog open={showEditContentTypeDialog} onOpenChange={setShowEditContentTypeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Content Type</DialogTitle>
+              <DialogDescription>Modify content type settings and fields</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-type-name">Name</Label>
+                <Input
+                  id="edit-type-name"
+                  value={editContentTypeName}
+                  onChange={(e) => setEditContentTypeName(e.target.value)}
+                  placeholder="Content type name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-type-description">Description</Label>
+                <Textarea
+                  id="edit-type-description"
+                  value={editContentTypeDescription}
+                  onChange={(e) => setEditContentTypeDescription(e.target.value)}
+                  placeholder="Describe this content type..."
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Display Field</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select display field" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="title">Title</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="headline">Headline</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditContentTypeDialog(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                if (!editContentTypeName.trim()) {
+                  toast.error('Name is required')
+                  return
+                }
+                setIsProcessing(true)
+                await new Promise(resolve => setTimeout(resolve, 1000))
+                toast.success('Content type updated', { description: `"${editContentTypeName}" has been saved` })
+                setShowEditContentTypeDialog(false)
+                setSelectedContentType(null)
+                setIsProcessing(false)
+              }} disabled={isProcessing}>
+                {isProcessing ? 'Saving...' : 'Save Changes'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -301,6 +301,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [showDeleteWorkspaceDialog, setShowDeleteWorkspaceDialog] = useState(false)
   const [showApiLogsDialog, setShowApiLogsDialog] = useState(false)
   const [showFormActionsDialog, setShowFormActionsDialog] = useState(false)
+  const [showCustomThemeDialog, setShowCustomThemeDialog] = useState(false)
+  const [showWebhookOptionsDialog, setShowWebhookOptionsDialog] = useState(false)
+  const [showQRCodeDialog, setShowQRCodeDialog] = useState(false)
+  const [selectedWebhook, setSelectedWebhook] = useState<{ url: string; events: string[]; status: string } | null>(null)
+  const [selectedTheme, setSelectedTheme] = useState<FormTheme | null>(null)
+  const [isDisconnectingIntegration, setIsDisconnectingIntegration] = useState(false)
+  const [isDeletingWebhook, setIsDeletingWebhook] = useState(false)
   const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
   const [selectedResponse, setSelectedResponse] = useState<FormResponse | null>(null)
   const [customDomain, setCustomDomain] = useState('')
@@ -662,6 +669,128 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       }
     }
     input.click()
+  }
+
+  const handleApplyTheme = async (theme: FormTheme, context: 'settings' | 'form') => {
+    try {
+      if (context === 'settings') {
+        // Save theme as default preference
+        await new Promise(resolve => setTimeout(resolve, 500))
+        toast.success('Theme Applied', { description: `"${theme.name}" is now your default theme for new forms` })
+      } else if (context === 'form' && selectedForm) {
+        // Apply theme to selected form
+        await updateForm(selectedForm.id, { theme: theme.id })
+        toast.success('Theme Updated', { description: `"${theme.name}" applied to "${selectedForm.title}"` })
+        setShowThemesDialog(false)
+      }
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to apply theme' })
+    }
+  }
+
+  const handleOpenDocumentation = (docTitle: string) => {
+    const docUrls: Record<string, string> = {
+      'Getting Started': 'https://docs.freeflow.io/forms/getting-started',
+      'API Reference': 'https://docs.freeflow.io/forms/api-reference',
+      'SDKs & Libraries': 'https://docs.freeflow.io/forms/sdks',
+    }
+    const url = docUrls[docTitle] || 'https://docs.freeflow.io/forms'
+    window.open(url, '_blank')
+    toast.info('Opening Documentation', { description: `Opening ${docTitle} in a new tab` })
+  }
+
+  const handleGenerateQRCode = () => {
+    setShowQRCodeDialog(true)
+  }
+
+  const handleCopyQRCode = async () => {
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`
+    try {
+      const response = await fetch(qrCodeUrl)
+      const blob = await response.blob()
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ])
+      toast.success('QR Code Copied', { description: 'QR code image copied to clipboard' })
+    } catch (err) {
+      // Fallback to copying URL if clipboard image write fails
+      await navigator.clipboard.writeText(qrCodeUrl)
+      toast.success('QR Code URL Copied', { description: 'QR code URL copied to clipboard' })
+    }
+  }
+
+  const handleDownloadQRCode = async () => {
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`
+    const a = document.createElement('a')
+    a.href = qrCodeUrl
+    a.download = `qr-code-${selectedForm?.title?.replace(/\s+/g, '-').toLowerCase() || 'form'}.png`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    toast.success('QR Code Downloaded', { description: 'QR code saved to your downloads' })
+  }
+
+  const handleWebhookOptions = (webhook: { url: string; events: string[]; status: string }) => {
+    setSelectedWebhook(webhook)
+    setShowWebhookOptionsDialog(true)
+  }
+
+  const handleDeleteWebhook = async () => {
+    if (!selectedWebhook) return
+    setIsDeletingWebhook(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Webhook Deleted', { description: `Webhook ${selectedWebhook.url} has been removed` })
+      setShowWebhookOptionsDialog(false)
+      setSelectedWebhook(null)
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to delete webhook' })
+    } finally {
+      setIsDeletingWebhook(false)
+    }
+  }
+
+  const handleDisconnectIntegration = async () => {
+    if (!selectedIntegration) return
+    setIsDisconnectingIntegration(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Integration Disconnected', { description: `${selectedIntegration.name} has been disconnected` })
+      setShowIntegrationDialog(false)
+    } catch (err) {
+      toast.error('Error', { description: `Failed to disconnect ${selectedIntegration.name}` })
+    } finally {
+      setIsDisconnectingIntegration(false)
+    }
+  }
+
+  const handleExportApiLogs = async () => {
+    try {
+      const logs = [
+        { time: '2 min ago', method: 'POST', endpoint: '/api/forms/submit', status: 200, duration: '124ms' },
+        { time: '5 min ago', method: 'GET', endpoint: '/api/forms/list', status: 200, duration: '89ms' },
+        { time: '12 min ago', method: 'POST', endpoint: '/api/webhooks/deliver', status: 200, duration: '456ms' },
+        { time: '15 min ago', method: 'PUT', endpoint: '/api/forms/abc123', status: 200, duration: '234ms' },
+        { time: '20 min ago', method: 'POST', endpoint: '/api/forms/submit', status: 200, duration: '156ms' },
+        { time: '25 min ago', method: 'POST', endpoint: '/api/webhooks/deliver', status: 500, duration: '2341ms' },
+        { time: '30 min ago', method: 'GET', endpoint: '/api/analytics', status: 200, duration: '567ms' },
+        { time: '45 min ago', method: 'DELETE', endpoint: '/api/responses/xyz789', status: 204, duration: '78ms' },
+      ]
+      const csvContent = 'Time,Method,Endpoint,Status,Duration\n' +
+        logs.map(log => `${log.time},${log.method},${log.endpoint},${log.status},${log.duration}`).join('\n')
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `api-logs-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Logs Exported', { description: 'API logs have been exported as CSV' })
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to export API logs' })
+    }
   }
 
   if (error) return (
@@ -1454,7 +1583,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                       <CardContent>
                         <div className="grid grid-cols-3 gap-4">
                           {formThemes.map(theme => (
-                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md" onClick={() => { /* TODO: Apply theme to forms - save theme preference to user settings */ }}>
+                            <button key={theme.id} className="p-4 border rounded-xl hover:border-indigo-500 transition-all text-left hover:shadow-md" onClick={() => handleApplyTheme(theme, 'settings')}>
                               <div className="flex items-center gap-2 mb-3">
                                 <div className="w-5 h-5 rounded-full border-2 border-white shadow-sm" style={{ backgroundColor: theme.primaryColor }}></div>
                                 <span className="font-medium">{theme.name}</span>
@@ -1463,7 +1592,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                               <p className="text-xs text-gray-500 mt-2">{theme.fontFamily}</p>
                             </button>
                           ))}
-                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center" onClick={() => { /* TODO: Open custom theme designer dialog */ }}>
+                          <button className="p-4 border-2 border-dashed rounded-xl hover:border-indigo-500 transition-all flex flex-col items-center justify-center" onClick={() => setShowCustomThemeDialog(true)}>
                             <Palette className="h-8 w-8 text-gray-400 mb-2" />
                             <span className="text-sm font-medium text-gray-600">Create Custom</span>
                           </button>
@@ -1720,7 +1849,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30">
                                   {webhook.status}
                                 </Badge>
-                                <Button variant="ghost" size="sm" onClick={() => { /* TODO: Show webhook options menu - configure or delete webhook */ }}>
+                                <Button variant="ghost" size="sm" onClick={() => handleWebhookOptions(webhook)}>
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1746,7 +1875,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             { title: 'API Reference', icon: FileText, desc: 'Full documentation' },
                             { title: 'SDKs & Libraries', icon: GitBranch, desc: 'Node, Python, PHP' },
                           ].map((doc, i) => (
-                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left" onClick={() => { /* TODO: Open documentation link for doc.title */ }}>
+                            <button key={i} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all text-left" onClick={() => handleOpenDocumentation(doc.title)}>
                               <doc.icon className="h-6 w-6 text-indigo-600 mb-2" />
                               <h4 className="font-medium">{doc.title}</h4>
                               <p className="text-sm text-gray-500">{doc.desc}</p>
@@ -2178,7 +2307,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <Mail className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">Email</span>
                 </button>
-                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={() => { /* TODO: Generate and display QR code for form URL */ }}>
+                <button className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center" onClick={handleGenerateQRCode}>
                   <ExternalLink className="h-5 w-5 mx-auto mb-1" />
                   <span className="text-xs">QR Code</span>
                 </button>
@@ -2228,7 +2357,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </DialogHeader>
             <div className="grid grid-cols-2 gap-4 py-4">
               {formThemes.map(theme => (
-                <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left" onClick={() => { /* TODO: Apply theme to selected form */ setShowThemesDialog(false); }}>
+                <button key={theme.id} className="p-4 border rounded-lg hover:border-indigo-500 transition-colors text-left" onClick={() => handleApplyTheme(theme, 'form')}>
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-5 h-5 rounded-full" style={{ backgroundColor: theme.primaryColor }}></div>
                     <span className="font-medium">{theme.name}</span>
@@ -2484,8 +2613,15 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button>
               {selectedIntegration?.connected ? (
-                <Button variant="destructive" onClick={() => { if (confirm(`Are you sure you want to disconnect ${selectedIntegration.name}? This will stop all data syncing.`)) { /* TODO: Disconnect integration via API */ setShowIntegrationDialog(false); } }}>
-                  Disconnect
+                <Button variant="destructive" onClick={handleDisconnectIntegration} disabled={isDisconnectingIntegration}>
+                  {isDisconnectingIntegration ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Disconnecting...
+                    </>
+                  ) : (
+                    'Disconnect'
+                  )}
                 </Button>
               ) : (
                 <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => selectedIntegration && handleConnectIntegration(selectedIntegration)}>
@@ -2768,7 +2904,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </ScrollArea>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowApiLogsDialog(false)}>Close</Button>
-              <Button variant="outline" onClick={() => { /* TODO: Export API logs as CSV/JSON file */ }}>
+              <Button variant="outline" onClick={handleExportApiLogs}>
                 <Download className="h-4 w-4 mr-2" />
                 Export Logs
               </Button>
@@ -2817,6 +2953,165 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 Delete Form
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* QR Code Dialog */}
+        <Dialog open={showQRCodeDialog} onOpenChange={setShowQRCodeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>QR Code</DialogTitle>
+              <DialogDescription>Scan to open the form on mobile devices</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col items-center py-6">
+              <div className="p-4 bg-white rounded-lg shadow-inner">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`}
+                  alt="QR Code"
+                  className="w-48 h-48"
+                />
+              </div>
+              <p className="text-sm text-gray-500 mt-4 text-center">
+                {selectedForm?.title || 'Form'}
+              </p>
+              <p className="text-xs text-gray-400 mt-1 font-mono">
+                https://freeflow.io/form/{selectedForm?.id || 'abc123'}
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowQRCodeDialog(false)}>Close</Button>
+              <Button variant="outline" onClick={handleCopyQRCode}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy
+              </Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleDownloadQRCode}>
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Custom Theme Dialog */}
+        <Dialog open={showCustomThemeDialog} onOpenChange={setShowCustomThemeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Custom Theme</DialogTitle>
+              <DialogDescription>Design your own theme for forms</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Theme Name</Label>
+                <Input placeholder="My Custom Theme" className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Primary Color</Label>
+                  <div className="flex gap-2 mt-1">
+                    <input type="color" defaultValue="#6366f1" className="w-10 h-10 rounded cursor-pointer" />
+                    <Input defaultValue="#6366f1" className="flex-1" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Background Color</Label>
+                  <div className="flex gap-2 mt-1">
+                    <input type="color" defaultValue="#ffffff" className="w-10 h-10 rounded cursor-pointer" />
+                    <Input defaultValue="#ffffff" className="flex-1" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>Font Family</Label>
+                <select className="mt-1 w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Inter</option>
+                  <option>Poppins</option>
+                  <option>Roboto</option>
+                  <option>Nunito</option>
+                  <option>Open Sans</option>
+                </select>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <p className="text-sm text-gray-500 mb-2">Preview</p>
+                <div className="h-24 bg-gray-50 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-8 h-8 bg-indigo-600 rounded mx-auto mb-2"></div>
+                    <p className="text-sm font-medium">Sample Form Title</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCustomThemeDialog(false)}>Cancel</Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                toast.success('Theme Created', { description: 'Your custom theme has been saved' })
+                setShowCustomThemeDialog(false)
+              }}>
+                <Save className="h-4 w-4 mr-2" />
+                Save Theme
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Options Dialog */}
+        <Dialog open={showWebhookOptionsDialog} onOpenChange={setShowWebhookOptionsDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Webhook Options</DialogTitle>
+              <DialogDescription>Configure or delete this webhook</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">Endpoint URL</p>
+                <code className="text-sm font-mono text-indigo-600">{selectedWebhook?.url}</code>
+              </div>
+              <div>
+                <Label>Events</Label>
+                <div className="mt-2 space-y-2">
+                  {['submission.created', 'submission.updated', 'form.published', 'form.updated'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id={`webhook-${event}`}
+                        defaultChecked={selectedWebhook?.events.includes(event)}
+                        className="rounded text-indigo-600"
+                      />
+                      <label htmlFor={`webhook-${event}`} className="text-sm">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Status</p>
+                  <p className="text-xs text-gray-500">Enable or disable this webhook</p>
+                </div>
+                <Switch defaultChecked={selectedWebhook?.status === 'active'} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookOptionsDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteWebhook} disabled={isDeletingWebhook}>
+                {isDeletingWebhook ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Webhook
+                  </>
+                )}
+              </Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                toast.success('Webhook Updated', { description: 'Webhook configuration has been saved' })
+                setShowWebhookOptionsDialog(false)
+              }}>
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

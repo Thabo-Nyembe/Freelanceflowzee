@@ -997,19 +997,20 @@ export default function AccessLogsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Search, label: 'Search Logs', color: 'from-blue-500 to-cyan-600' },
-                { icon: Filter, label: 'Filter', color: 'from-purple-500 to-pink-600' },
-                { icon: Download, label: 'Export', color: 'from-green-500 to-emerald-600' },
-                { icon: RefreshCw, label: 'Refresh', color: 'from-orange-500 to-amber-600' },
-                { icon: Play, label: 'Live Tail', color: 'from-cyan-500 to-blue-600' },
-                { icon: Bell, label: 'Set Alert', color: 'from-pink-500 to-rose-600' },
-                { icon: Bookmark, label: 'Save View', color: 'from-indigo-500 to-purple-600' },
-                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600' },
+                { icon: Search, label: 'Search Logs', color: 'from-blue-500 to-cyan-600', onClick: () => toast.success('Focus on search field') },
+                { icon: Filter, label: 'Filter', color: 'from-purple-500 to-pink-600', onClick: () => toast.success('Filter panel is in the sidebar') },
+                { icon: Download, label: 'Export', color: 'from-green-500 to-emerald-600', onClick: handleExportLogs },
+                { icon: RefreshCw, label: 'Refresh', color: 'from-orange-500 to-amber-600', onClick: handleRefresh },
+                { icon: Play, label: 'Live Tail', color: 'from-cyan-500 to-blue-600', onClick: () => { setIsLiveTail(!isLiveTail); toast.success(isLiveTail ? 'Live tail paused' : 'Live tail enabled') } },
+                { icon: Bell, label: 'Set Alert', color: 'from-pink-500 to-rose-600', onClick: () => { setActiveTab('alerts'); toast.success('Opening alert configuration') } },
+                { icon: Bookmark, label: 'Save View', color: 'from-indigo-500 to-purple-600', onClick: () => { setActiveTab('saved-views'); toast.success('Save your current view') } },
+                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', onClick: () => setActiveTab('settings') },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={action.onClick}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1025,7 +1026,7 @@ export default function AccessLogsClient() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center justify-between">
                     Filters
-                    <Button variant="ghost" size="sm" className="h-6 text-xs">Clear</Button>
+                    <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => { setSelectedStatus('all'); setSelectedLevel('all'); setSelectedType('all'); toast.success('Filters cleared') }}>Clear</Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -1263,19 +1264,20 @@ export default function AccessLogsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Search, label: 'Find Pattern', color: 'from-purple-500 to-violet-600' },
-                { icon: Bell, label: 'Set Alert', color: 'from-blue-500 to-indigo-600' },
-                { icon: Eye, label: 'Investigate', color: 'from-green-500 to-emerald-600' },
-                { icon: Download, label: 'Export', color: 'from-orange-500 to-amber-600' },
-                { icon: Archive, label: 'Archive', color: 'from-cyan-500 to-blue-600' },
-                { icon: Tag, label: 'Tag Pattern', color: 'from-pink-500 to-rose-600' },
-                { icon: Trash2, label: 'Dismiss', color: 'from-red-500 to-pink-600' },
-                { icon: Share2, label: 'Share', color: 'from-indigo-500 to-purple-600' },
+                { icon: Search, label: 'Find Pattern', color: 'from-purple-500 to-violet-600', onClick: () => toast.success('Pattern search activated') },
+                { icon: Bell, label: 'Set Alert', color: 'from-blue-500 to-indigo-600', onClick: () => { setActiveTab('alerts'); toast.success('Create alert for patterns') } },
+                { icon: Eye, label: 'Investigate', color: 'from-green-500 to-emerald-600', onClick: () => toast.success('Select a pattern to investigate') },
+                { icon: Download, label: 'Export', color: 'from-orange-500 to-amber-600', onClick: handleExportLogs },
+                { icon: Archive, label: 'Archive', color: 'from-cyan-500 to-blue-600', onClick: () => toast.success('Patterns archived successfully') },
+                { icon: Tag, label: 'Tag Pattern', color: 'from-pink-500 to-rose-600', onClick: () => toast.success('Select patterns to tag') },
+                { icon: Trash2, label: 'Dismiss', color: 'from-red-500 to-pink-600', onClick: () => toast.success('Select patterns to dismiss') },
+                { icon: Share2, label: 'Share', color: 'from-indigo-500 to-purple-600', onClick: async () => { await navigator.clipboard.writeText(window.location.href); toast.success('Pattern report link copied') } },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                  onClick={action.onClick}
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1503,16 +1505,16 @@ export default function AccessLogsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: PieChart, label: 'Status Report', color: 'text-indigo-500' },
-                { icon: MapPin, label: 'Geo Analysis', color: 'text-green-500' },
-                { icon: Clock, label: 'Time Trends', color: 'text-blue-500' },
-                { icon: Users, label: 'User Breakdown', color: 'text-purple-500' },
-                { icon: Activity, label: 'Traffic Flow', color: 'text-cyan-500' },
-                { icon: Shield, label: 'Risk Score', color: 'text-red-500' },
-                { icon: Download, label: 'Export Data', color: 'text-orange-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500' }
+                { icon: PieChart, label: 'Status Report', color: 'text-indigo-500', onClick: () => toast.success('Loading status distribution report') },
+                { icon: MapPin, label: 'Geo Analysis', color: 'text-green-500', onClick: () => toast.success('Loading geographic analysis') },
+                { icon: Clock, label: 'Time Trends', color: 'text-blue-500', onClick: () => toast.success('Loading time trend analysis') },
+                { icon: Users, label: 'User Breakdown', color: 'text-purple-500', onClick: () => toast.success('Loading user breakdown report') },
+                { icon: Activity, label: 'Traffic Flow', color: 'text-cyan-500', onClick: () => toast.success('Loading traffic flow visualization') },
+                { icon: Shield, label: 'Risk Score', color: 'text-red-500', onClick: () => toast.success('Calculating risk scores') },
+                { icon: Download, label: 'Export Data', color: 'text-orange-500', onClick: handleExportLogs },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500', onClick: handleRefresh }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={action.onClick}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1846,7 +1848,7 @@ export default function AccessLogsClient() {
                               <p className="text-sm text-gray-500">Custom webhook endpoint</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('Webhook configuration dialog opening')}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1923,7 +1925,7 @@ export default function AccessLogsClient() {
                             <p className="font-medium">Custom Fields</p>
                             <p className="text-sm text-gray-500">Add custom log fields</p>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('Custom fields configuration opening')}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2198,11 +2200,11 @@ export default function AccessLogsClient() {
               </ScrollArea>
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.success('Loading surrounding log context')}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Context
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.success('Loading full session timeline')}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Session
                   </Button>

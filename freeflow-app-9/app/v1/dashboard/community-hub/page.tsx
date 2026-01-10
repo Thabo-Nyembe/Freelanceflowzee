@@ -2343,13 +2343,33 @@ export default function CommunityHubPage() {
                   </div>
                   <div className="flex gap-2">
                     {post.showcase.liveUrl && (
-                      <Button size="sm" variant="outline" className="text-purple-700 border-purple-300">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-purple-700 border-purple-300"
+                        onClick={() => {
+                          if (typeof window !== 'undefined' && post.showcase?.liveUrl) {
+                            window.open(post.showcase.liveUrl, '_blank', 'noopener,noreferrer')
+                          }
+                          toast.success(`Opening live demo for ${post.showcase?.title || 'project'}`)
+                        }}
+                      >
                         <ExternalLink className="w-4 h-4 mr-1" />
                         Live Demo
                       </Button>
                     )}
                     {post.showcase.githubUrl && (
-                      <Button size="sm" variant="outline" className="text-purple-700 border-purple-300">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-purple-700 border-purple-300"
+                        onClick={() => {
+                          if (typeof window !== 'undefined' && post.showcase?.githubUrl) {
+                            window.open(post.showcase.githubUrl, '_blank', 'noopener,noreferrer')
+                          }
+                          toast.success(`Opening source code for ${post.showcase?.title || 'project'}`)
+                        }}
+                      >
                         <Github className="w-4 h-4 mr-1" />
                         Code
                       </Button>
@@ -2437,6 +2457,10 @@ export default function CommunityHubPage() {
                     variant="ghost"
                     size="sm"
                     className="text-gray-500"
+                    onClick={() => {
+                      handlePostAction('report', post.id)
+                    }}
+                    title="Report post"
                   >
                     <MoreHorizontal className="w-4 h-4" />
                   </Button>
@@ -2880,7 +2904,13 @@ export default function CommunityHubPage() {
           <TabsContent value="groups" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Community Groups</h2>
-              <Button data-testid="create-group-btn">
+              <Button
+                data-testid="create-group-btn"
+                onClick={() => {
+                  dispatch({ type: 'SET_SHOW_CREATE_GROUP', payload: true })
+                  toast.success('Create new group - Public, private, or secret - Set category, rules, and member permissions')
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Group
               </Button>
@@ -2974,7 +3004,23 @@ export default function CommunityHubPage() {
                       </Badge>
                     </div>
                     
-                        <Button data-testid={`join-group-${group.id}-btn`} className="w-full" size="sm">
+                        <Button
+                          data-testid={`join-group-${group.id}-btn`}
+                          className="w-full"
+                          size="sm"
+                          onClick={() => {
+                            const joinData = {
+                              groupId: group.id,
+                              groupName: group.name,
+                              joinedAt: new Date().toISOString(),
+                              userId: state.currentUser?.id || 'user-1'
+                            }
+                            const existingJoined = JSON.parse(localStorage.getItem('joined_groups') || '[]')
+                            existingJoined.push(joinData)
+                            localStorage.setItem('joined_groups', JSON.stringify(existingJoined))
+                            toast.success(`Joined ${group.name}! - ${group.members.toLocaleString()} members - ${group.posts} posts - ${group.activity}`)
+                          }}
+                        >
                           Join Group
                         </Button>
                       </CardContent>
@@ -2988,7 +3034,14 @@ export default function CommunityHubPage() {
           <TabsContent value="jobs" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Job Board</h2>
-              <Button>
+              <Button
+                data-testid="post-job-btn"
+                onClick={() => {
+                  dispatch({ type: 'SET_POST_TYPE', payload: 'job' })
+                  dispatch({ type: 'SET_SHOW_CREATE_POST', payload: true })
+                  toast.success('Post job opportunity - Fixed or hourly - Set budget, deadline, and required skills')
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Post Job
               </Button>
@@ -3096,11 +3149,36 @@ export default function CommunityHubPage() {
                           </div>
                           
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              data-testid={`save-job-${job.id}-btn`}
+                              onClick={() => {
+                                const saveData = {
+                                  jobId: job.id,
+                                  jobTitle: job.title,
+                                  company: job.company,
+                                  savedAt: new Date().toISOString()
+                                }
+                                const existingSaved = JSON.parse(localStorage.getItem('saved_jobs') || '[]')
+                                existingSaved.push(saveData)
+                                localStorage.setItem('saved_jobs', JSON.stringify(existingSaved))
+                                toast.success(`Job saved! ${job.title} at ${job.company} - ${job.budget}`)
+                              }}
+                            >
                               <Bookmark className="w-4 h-4 mr-1" />
                               Save
                             </Button>
-                            <Button size="sm">
+                            <Button
+                              size="sm"
+                              data-testid={`apply-job-${job.id}-btn`}
+                              onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                  window.location.href = `/v1/dashboard/jobs/${job.id}/apply`
+                                }
+                                toast.success(`Applying for ${job.title} at ${job.company} - ${job.budget} - ${job.applications} other applicants`)
+                              }}
+                            >
                               Apply Now
                             </Button>
                           </div>

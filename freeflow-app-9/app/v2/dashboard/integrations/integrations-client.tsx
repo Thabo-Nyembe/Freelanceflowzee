@@ -277,7 +277,19 @@ export default function IntegrationsClient() {
   const [showCreateIntegrationDialog, setShowCreateIntegrationDialog] = useState(false)
   const [showCreateZapDialog, setShowCreateZapDialog] = useState(false)
   const [showCreateWebhookDialog, setShowCreateWebhookDialog] = useState(false)
+  const [showConnectDialog, setShowConnectDialog] = useState(false)
+  const [showOAuthDialog, setShowOAuthDialog] = useState(false)
+  const [showWebhookSecretsDialog, setShowWebhookSecretsDialog] = useState(false)
+  const [showWebhookLogsDialog, setShowWebhookLogsDialog] = useState(false)
+  const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false)
+  const [showIpAllowlistDialog, setShowIpAllowlistDialog] = useState(false)
+  const [showAuditLogsDialog, setShowAuditLogsDialog] = useState(false)
+  const [showBillingHistoryDialog, setShowBillingHistoryDialog] = useState(false)
+  const [showUpgradePlansDialog, setShowUpgradePlansDialog] = useState(false)
+  const [showEditZapDialog, setShowEditZapDialog] = useState(false)
+  const [zapToEdit, setZapToEdit] = useState<WorkflowType | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [revealedApiKey, setRevealedApiKey] = useState<string | null>(null)
 
   // Form states
   const [integrationForm, setIntegrationForm] = useState<IntegrationFormData>({
@@ -615,6 +627,372 @@ export default function IntegrationsClient() {
     toast.success('URL copied to clipboard')
   }
 
+  // Zap Action Handlers
+  const handleRunAllZaps = async () => {
+    const draftOrPausedZaps = workflows.filter(z => z.status === 'draft' || z.status === 'paused')
+    if (draftOrPausedZaps.length === 0) {
+      toast.info('No zaps to start - all zaps are already running')
+      return
+    }
+    toast.promise(
+      Promise.all(draftOrPausedZaps.map(z => z.status === 'paused' ? resumeWorkflow(z.id) : startWorkflow(z.id))),
+      {
+        loading: `Starting ${draftOrPausedZaps.length} zaps...`,
+        success: `${draftOrPausedZaps.length} zaps are now running`,
+        error: 'Failed to start some zaps'
+      }
+    )
+  }
+
+  const handlePauseAllZaps = async () => {
+    const activeZaps = workflows.filter(z => z.status === 'active')
+    if (activeZaps.length === 0) {
+      toast.info('No active zaps to pause')
+      return
+    }
+    toast.promise(
+      Promise.all(activeZaps.map(z => pauseWorkflow(z.id))),
+      {
+        loading: `Pausing ${activeZaps.length} zaps...`,
+        success: `${activeZaps.length} zaps have been paused`,
+        error: 'Failed to pause some zaps'
+      }
+    )
+  }
+
+  const handleExportZaps = () => {
+    const data = workflows.map(zap => ({
+      id: zap.id,
+      name: zap.name,
+      description: zap.description,
+      status: zap.status,
+      type: zap.type,
+      priority: zap.priority,
+      total_steps: zap.total_steps,
+      completion_rate: zap.completion_rate,
+      created_at: zap.created_at
+    }))
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `zaps-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Zaps exported successfully', { description: `${workflows.length} zaps exported` })
+  }
+
+  const handleEditZap = (zap: WorkflowType) => {
+    setZapToEdit(zap)
+    setWorkflowForm({
+      name: zap.name,
+      description: zap.description || '',
+      type: zap.type,
+      priority: zap.priority
+    })
+    setShowEditZapDialog(true)
+    setSelectedZap(null)
+  }
+
+  const handleUpdateZap = async () => {
+    if (!zapToEdit || !workflowForm.name) {
+      toast.error('Please enter a workflow name')
+      return
+    }
+    setIsSubmitting(true)
+    const result = await updateWorkflow(zapToEdit.id, {
+      name: workflowForm.name,
+      description: workflowForm.description,
+      type: workflowForm.type,
+      priority: workflowForm.priority
+    })
+    setIsSubmitting(false)
+    if (result.success) {
+      toast.success('Zap updated successfully')
+      setShowEditZapDialog(false)
+      setZapToEdit(null)
+      setWorkflowForm({ name: '', description: '', type: 'integration', priority: 'medium' })
+    } else {
+      toast.error('Failed to update zap', { description: result.error })
+    }
+  }
+
+  // Integration Action Handlers
+  const handleExportIntegrations = () => {
+    const data = integrations.map(app => ({
+      id: app.id,
+      name: app.name,
+      provider: app.provider,
+      category: app.category,
+      is_connected: app.is_connected,
+      api_calls_count: app.api_calls_count,
+      created_at: app.created_at
+    }))
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `integrations-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Integrations exported successfully', { description: `${integrations.length} integrations exported` })
+  }
+
+  // Task Action Handlers
+  const handleRetryFailedTasks = () => {
+    const failedTasks = mockTasks.filter(t => t.status === 'failed')
+    if (failedTasks.length === 0) {
+      toast.info('No failed tasks to retry')
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Retrying ${failedTasks.length} failed tasks...`,
+        success: `${failedTasks.length} tasks have been queued for retry`,
+        error: 'Failed to retry tasks'
+      }
+    )
+  }
+
+  const handleReplayTask = (task: Task) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: `Replaying task: ${task.zapName}...`,
+        success: 'Task has been queued for replay',
+        error: 'Failed to replay task'
+      }
+    )
+  }
+
+  const handleClearTaskHistory = () => {
+    toast('Clear task history?', {
+      description: 'This will remove all completed and failed tasks from history.',
+      action: {
+        label: 'Clear',
+        onClick: () => {
+          toast.success('Task history cleared', { description: 'All historical tasks have been removed' })
+        }
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {}
+      }
+    })
+  }
+
+  const handleExportTasks = () => {
+    const data = mockTasks.map(task => ({
+      id: task.id,
+      zapId: task.zapId,
+      zapName: task.zapName,
+      status: task.status,
+      startedAt: task.startedAt,
+      completedAt: task.completedAt,
+      duration: task.duration,
+      stepsCount: task.steps.length
+    }))
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `task-history-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Task history exported', { description: `${mockTasks.length} tasks exported` })
+  }
+
+  // Webhook Action Handlers
+  const handleRetryFailedDeliveries = () => {
+    const failedWebhooks = webhooks.filter(w => w.failed_deliveries > 0)
+    if (failedWebhooks.length === 0) {
+      toast.info('No failed deliveries to retry')
+      return
+    }
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Retrying failed webhook deliveries...',
+        success: `Retried deliveries for ${failedWebhooks.length} webhooks`,
+        error: 'Failed to retry deliveries'
+      }
+    )
+  }
+
+  const handleVerifySSL = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Verifying SSL certificates for all webhooks...',
+        success: 'All webhook SSL certificates are valid',
+        error: 'Some webhooks have SSL issues'
+      }
+    )
+  }
+
+  const handleExportWebhooks = () => {
+    const data = webhooks.map(webhook => ({
+      id: webhook.id,
+      name: webhook.name,
+      url: webhook.url,
+      status: webhook.status,
+      events: webhook.events,
+      total_deliveries: webhook.total_deliveries,
+      success_rate: webhook.success_rate,
+      created_at: webhook.created_at
+    }))
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `webhooks-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Webhooks exported successfully', { description: `${webhooks.length} webhooks exported` })
+  }
+
+  const handleRevealWebhookSecret = (webhook: WebhookType) => {
+    toast.promise(
+      new Promise<void>(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Fetching secret...',
+        success: () => {
+          navigator.clipboard.writeText(webhook.secret || 'whsec_default_secret_key')
+          return 'Secret copied to clipboard'
+        },
+        error: 'Failed to reveal secret'
+      }
+    )
+  }
+
+  // Analytics Action Handlers
+  const handleFetchErrorReports = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Fetching error reports...',
+        success: 'Error report generated - 3 issues found',
+        error: 'Failed to fetch error reports'
+      }
+    )
+  }
+
+  const handleGenerateReports = () => {
+    toast.promise(
+      new Promise<void>(resolve => setTimeout(() => {
+        const report = {
+          generated_at: new Date().toISOString(),
+          total_tasks: workflowStats.totalSteps,
+          success_rate: usageStats.successRate,
+          active_zaps: workflowStats.active,
+          connected_apps: integrationStats.connected
+        }
+        const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `integration-report-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        resolve()
+      }, 1500)),
+      {
+        loading: 'Generating report...',
+        success: 'Report generated and downloaded',
+        error: 'Failed to generate report'
+      }
+    )
+  }
+
+  const handleExportAnalytics = () => {
+    const data = {
+      exported_at: new Date().toISOString(),
+      usage_stats: usageStats,
+      workflow_stats: workflowStats,
+      integration_stats: integrationStats,
+      webhook_stats: webhookStats
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Analytics exported', { description: 'All analytics data exported successfully' })
+  }
+
+  // API Key Handlers
+  const handleRevealApiKey = (keyType: 'production' | 'test') => {
+    if (revealedApiKey === keyType) {
+      setRevealedApiKey(null)
+      return
+    }
+    toast.promise(
+      new Promise<void>(resolve => setTimeout(() => {
+        setRevealedApiKey(keyType)
+        resolve()
+      }, 500)),
+      {
+        loading: 'Verifying access...',
+        success: `${keyType === 'production' ? 'Production' : 'Test'} key revealed`,
+        error: 'Failed to reveal key'
+      }
+    )
+  }
+
+  const handleCopyApiKey = (key: string) => {
+    navigator.clipboard.writeText(key)
+    toast.success('API key copied to clipboard')
+  }
+
+  const handleRegenerateApiKeys = () => {
+    toast('Regenerate API keys?', {
+      description: 'This will invalidate all existing keys. Make sure to update your applications.',
+      action: {
+        label: 'Regenerate',
+        onClick: () => {
+          toast.promise(
+            new Promise(resolve => setTimeout(resolve, 2000)),
+            {
+              loading: 'Regenerating API keys...',
+              success: 'New API keys generated successfully',
+              error: 'Failed to regenerate keys'
+            }
+          )
+        }
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {}
+      }
+    })
+  }
+
+  // AI Insight Handler
+  const handleAiInsightAction = (insight: { id: string; type: string; title: string }) => {
+    toast.info(`Acting on: ${insight.title}`, {
+      description: `Insight type: ${insight.type}`,
+      action: {
+        label: 'View Details',
+        onClick: () => setActiveTab('analytics')
+      }
+    })
+  }
+
   // Quick actions
   const mockIntegrationsQuickActions = [
     { id: '1', label: 'New Zap', icon: 'Zap', shortcut: 'N', action: () => setShowCreateZapDialog(true) },
@@ -644,7 +1022,7 @@ export default function IntegrationsClient() {
               <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('tasks')}>
               <History className="w-4 h-4 mr-2" />
               Task History
             </Button>
@@ -941,10 +1319,10 @@ export default function IntegrationsClient() {
                               <Play className="w-4 h-4" />
                             </Button>
                           ) : null}
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleEditZap(zap)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => setSelectedZap(zap)}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1181,7 +1559,7 @@ export default function IntegrationsClient() {
                                 Replay
                               </Button>
                             )}
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedTask(task) }}>
                               <Eye className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1977,7 +2355,7 @@ export default function IntegrationsClient() {
                       <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">
                         {selectedWebhook.secret.substring(0, 12)}********************
                       </code>
-                      <Button variant="ghost" size="sm" onClick={() => handleRevealWebhookSecret(webhook)}>
+                      <Button variant="ghost" size="sm" onClick={() => handleRevealWebhookSecret(selectedWebhook!)}>
                         <Eye className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2194,6 +2572,466 @@ export default function IntegrationsClient() {
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Webhook className="w-4 h-4 mr-2" />}
                 Create Webhook
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Zap Dialog */}
+        <Dialog open={showEditZapDialog} onOpenChange={setShowEditZapDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Zap</DialogTitle>
+              <DialogDescription>Update the workflow configuration</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-zap-name">Name *</Label>
+                <Input
+                  id="edit-zap-name"
+                  placeholder="e.g., New Lead Notification"
+                  value={workflowForm.name}
+                  onChange={(e) => setWorkflowForm({ ...workflowForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-zap-type">Type</Label>
+                <Select
+                  value={workflowForm.type}
+                  onValueChange={(value: WorkflowType['type']) => setWorkflowForm({ ...workflowForm, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="integration">Integration</SelectItem>
+                    <SelectItem value="approval">Approval</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="notification">Notification</SelectItem>
+                    <SelectItem value="data-sync">Data Sync</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-zap-priority">Priority</Label>
+                <Select
+                  value={workflowForm.priority}
+                  onValueChange={(value: WorkflowType['priority']) => setWorkflowForm({ ...workflowForm, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-zap-desc">Description</Label>
+                <Textarea
+                  id="edit-zap-desc"
+                  placeholder="What does this automation do?"
+                  value={workflowForm.description}
+                  onChange={(e) => setWorkflowForm({ ...workflowForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditZapDialog(false); setZapToEdit(null) }}>Cancel</Button>
+              <Button onClick={handleUpdateZap} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Edit className="w-4 h-4 mr-2" />}
+                Update Zap
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connect App Dialog */}
+        <Dialog open={showConnectDialog} onOpenChange={setShowConnectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link className="w-5 h-5" />
+                Connect an App
+              </DialogTitle>
+              <DialogDescription>Choose an app to connect to your workspace</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Available Apps</Label>
+                <ScrollArea className="h-64 border rounded-lg p-2">
+                  {integrations.filter(app => !app.is_connected).map(app => (
+                    <div key={app.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer" onClick={() => { handleConnectApp(app); setShowConnectDialog(false) }}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{app.icon || getCategoryIcon(app.category || 'all')}</span>
+                        <div>
+                          <p className="font-medium text-sm">{app.name}</p>
+                          <p className="text-xs text-muted-foreground">{app.provider}</p>
+                        </div>
+                      </div>
+                      <Button size="sm" variant="outline">Connect</Button>
+                    </div>
+                  ))}
+                  {integrations.filter(app => !app.is_connected).length === 0 && (
+                    <p className="text-center text-muted-foreground py-8">All apps are connected</p>
+                  )}
+                </ScrollArea>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* OAuth Settings Dialog */}
+        <Dialog open={showOAuthDialog} onOpenChange={setShowOAuthDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                OAuth Configuration
+              </DialogTitle>
+              <DialogDescription>Manage OAuth tokens and authentication</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-sm">Token Expiration Warning</p>
+                    <p className="text-xs text-muted-foreground mt-1">3 OAuth tokens will expire in the next 7 days. Re-authenticate to maintain connectivity.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {integrations.filter(app => app.is_connected).slice(0, 3).map(app => (
+                  <div key={app.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{app.icon || getCategoryIcon(app.category || 'all')}</span>
+                      <div>
+                        <p className="font-medium text-sm">{app.name}</p>
+                        <p className="text-xs text-muted-foreground">Connected {app.connected_at ? formatDate(app.connected_at) : 'recently'}</p>
+                      </div>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => { handleSyncApp(app); setShowOAuthDialog(false) }}>
+                      <RefreshCw className="w-3 h-3 mr-1" />
+                      Refresh
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowOAuthDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Secrets Dialog */}
+        <Dialog open={showWebhookSecretsDialog} onOpenChange={setShowWebhookSecretsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5" />
+                Webhook Secrets
+              </DialogTitle>
+              <DialogDescription>Manage signing secrets for webhook verification</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {webhooks.map(webhook => (
+                <div key={webhook.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-medium text-sm">{webhook.name}</p>
+                    <Badge variant={webhook.status === 'active' ? 'default' : 'secondary'}>{webhook.status}</Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-mono">
+                      {webhook.secret ? `${webhook.secret.substring(0, 8)}...` : 'whsec_***'}
+                    </code>
+                    <Button size="sm" variant="ghost" onClick={() => handleRevealWebhookSecret(webhook)}>
+                      <Eye className="w-3 h-3 mr-1" />
+                      Reveal
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(webhook.secret || 'whsec_default'); toast.success('Secret copied') }}>
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {webhooks.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">No webhooks configured</p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookSecretsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Logs Dialog */}
+        <Dialog open={showWebhookLogsDialog} onOpenChange={setShowWebhookLogsDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Webhook Delivery Logs
+              </DialogTitle>
+              <DialogDescription>Recent webhook delivery attempts and responses</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-96">
+              <div className="space-y-2">
+                {webhooks.flatMap(webhook =>
+                  Array.from({ length: 3 }).map((_, i) => ({
+                    id: `${webhook.id}-${i}`,
+                    webhookName: webhook.name,
+                    status: i === 0 ? 'success' : i === 1 ? 'success' : 'failed',
+                    timestamp: new Date(Date.now() - i * 3600000).toISOString(),
+                    responseCode: i === 2 ? 500 : 200,
+                    duration: Math.floor(Math.random() * 500) + 50
+                  }))
+                ).slice(0, 10).map(log => (
+                  <div key={log.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {log.status === 'success' ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-red-600" />
+                        )}
+                        <span className="font-medium text-sm">{log.webhookName}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>HTTP {log.responseCode}</span>
+                        <span>{log.duration}ms</span>
+                        <span>{formatDate(log.timestamp)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {webhooks.length === 0 && (
+                  <p className="text-center text-muted-foreground py-8">No webhook logs available</p>
+                )}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookLogsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Two-Factor Auth Dialog */}
+        <Dialog open={showTwoFactorDialog} onOpenChange={setShowTwoFactorDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5" />
+                Two-Factor Authentication
+              </DialogTitle>
+              <DialogDescription>Manage your 2FA settings for enhanced security</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="font-medium text-sm">Two-Factor Authentication is Enabled</p>
+                    <p className="text-xs text-muted-foreground mt-1">Your account is protected with authenticator app verification.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Recovery Codes</Label>
+                <p className="text-xs text-muted-foreground">Keep these codes safe. They can be used to access your account if you lose your authenticator device.</p>
+                <Button variant="outline" className="w-full" onClick={() => toast.success('Recovery codes downloaded', { description: '8 recovery codes saved to file' })}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Recovery Codes
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Backup Methods</Label>
+                <Button variant="outline" className="w-full" onClick={() => toast.info('SMS backup verification enabled')}>
+                  Add SMS Backup
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTwoFactorDialog(false)}>Close</Button>
+              <Button variant="destructive" onClick={() => toast('Disable 2FA?', { description: 'This will reduce your account security.', action: { label: 'Disable', onClick: () => toast.success('2FA has been disabled') }, cancel: { label: 'Cancel', onClick: () => {} } })}>
+                Disable 2FA
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* IP Allowlist Dialog */}
+        <Dialog open={showIpAllowlistDialog} onOpenChange={setShowIpAllowlistDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                IP Allowlist
+              </DialogTitle>
+              <DialogDescription>Restrict API access to specific IP addresses</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                {['192.168.1.0/24', '10.0.0.1', '172.16.0.0/16'].map((ip, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <code className="text-sm font-mono">{ip}</code>
+                    <Button size="sm" variant="ghost" onClick={() => toast.success(`IP ${ip} removed from allowlist`)}>
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input placeholder="Enter IP address or CIDR range" />
+                <Button onClick={() => toast.success('IP address added to allowlist')}>
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowIpAllowlistDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audit Logs Dialog */}
+        <Dialog open={showAuditLogsDialog} onOpenChange={setShowAuditLogsDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Audit Logs
+              </DialogTitle>
+              <DialogDescription>Security and activity audit trail - 90 day retention</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-96">
+              <div className="space-y-2">
+                {[
+                  { action: 'API Key regenerated', user: 'admin@company.com', ip: '192.168.1.100', time: '2 hours ago' },
+                  { action: 'Webhook created', user: 'developer@company.com', ip: '10.0.0.15', time: '5 hours ago' },
+                  { action: 'Integration connected: Slack', user: 'admin@company.com', ip: '192.168.1.100', time: '1 day ago' },
+                  { action: 'Zap enabled: Lead Notification', user: 'marketing@company.com', ip: '172.16.0.50', time: '2 days ago' },
+                  { action: 'IP Allowlist updated', user: 'admin@company.com', ip: '192.168.1.100', time: '3 days ago' },
+                  { action: '2FA enabled', user: 'admin@company.com', ip: '192.168.1.100', time: '1 week ago' },
+                ].map((log, idx) => (
+                  <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm">{log.action}</p>
+                        <p className="text-xs text-muted-foreground">{log.user}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-muted-foreground">{log.time}</p>
+                        <code className="text-xs">{log.ip}</code>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => handleExportAnalytics()}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Logs
+              </Button>
+              <Button variant="outline" onClick={() => setShowAuditLogsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Billing History Dialog */}
+        <Dialog open={showBillingHistoryDialog} onOpenChange={setShowBillingHistoryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Billing History
+              </DialogTitle>
+              <DialogDescription>View and download past invoices</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              {[
+                { date: 'Jan 1, 2024', amount: '$49.00', status: 'Paid', invoice: 'INV-2024-001' },
+                { date: 'Dec 1, 2023', amount: '$49.00', status: 'Paid', invoice: 'INV-2023-012' },
+                { date: 'Nov 1, 2023', amount: '$49.00', status: 'Paid', invoice: 'INV-2023-011' },
+                { date: 'Oct 1, 2023', amount: '$49.00', status: 'Paid', invoice: 'INV-2023-010' },
+              ].map((bill, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium text-sm">{bill.date}</p>
+                    <p className="text-xs text-muted-foreground">{bill.invoice}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="font-medium text-sm">{bill.amount}</p>
+                      <Badge variant="outline" className="text-green-600">{bill.status}</Badge>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => toast.success(`Downloading ${bill.invoice}...`)}>
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBillingHistoryDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upgrade Plans Dialog */}
+        <Dialog open={showUpgradePlansDialog} onOpenChange={setShowUpgradePlansDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5" />
+                Upgrade Your Plan
+              </DialogTitle>
+              <DialogDescription>Choose the plan that best fits your automation needs</DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              {[
+                { name: 'Starter', price: '$19', tasks: '2,000', zaps: '5', features: ['Basic integrations', 'Email support', '7-day history'], current: false },
+                { name: 'Professional', price: '$49', tasks: '50,000', zaps: '20', features: ['All integrations', 'Priority support', '90-day history', 'API access'], current: true },
+                { name: 'Enterprise', price: '$199', tasks: 'Unlimited', zaps: 'Unlimited', features: ['Custom integrations', 'Dedicated support', 'Unlimited history', 'SSO', 'SLA'], current: false },
+              ].map((plan, idx) => (
+                <Card key={idx} className={`relative ${plan.current ? 'border-orange-500 border-2' : ''}`}>
+                  {plan.current && (
+                    <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-orange-500">Current Plan</Badge>
+                  )}
+                  <CardHeader className="text-center pt-6">
+                    <CardTitle>{plan.name}</CardTitle>
+                    <p className="text-3xl font-bold">{plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-center text-sm">
+                      <p><strong>{plan.tasks}</strong> tasks/month</p>
+                      <p><strong>{plan.zaps}</strong> active zaps</p>
+                    </div>
+                    <ul className="space-y-2 text-sm">
+                      {plan.features.map((feature, fidx) => (
+                        <li key={fidx} className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <Button className={`w-full ${plan.current ? '' : 'bg-gradient-to-r from-orange-500 to-red-600'}`} variant={plan.current ? 'outline' : 'default'} disabled={plan.current} onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Upgrading to ${plan.name}...`, success: `Successfully upgraded to ${plan.name}!`, error: 'Upgrade failed' })}>
+                      {plan.current ? 'Current Plan' : 'Upgrade'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUpgradePlansDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

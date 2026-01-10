@@ -775,7 +775,9 @@ export default function BackupsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => {
+              toast.info('Filter options available: Status, Type, Date Range, Storage Location')
+            }}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -879,19 +881,31 @@ export default function BackupsClient() {
             {/* Dashboard Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Job', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Play, label: 'Run Now', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: RotateCw, label: 'Restore', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Archive, label: 'Vaults', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Shield, label: 'Compliance', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: HardDrive, label: 'Storage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'New Job', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setShowCreateDialog(true) },
+                { icon: Play, label: 'Run Now', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: handleCreateBackup },
+                { icon: RotateCw, label: 'Restore', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleRestoreBackup('Latest Backup') },
+                { icon: Archive, label: 'Vaults', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setActiveTab('vaults') },
+                { icon: Shield, label: 'Compliance', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setActiveTab('compliance') },
+                { icon: HardDrive, label: 'Storage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setActiveTab('storage') },
+                { icon: BarChart3, label: 'Reports', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: async () => {
+                  toast.loading('Generating reports...')
+                  try {
+                    const response = await fetch('/api/backups/reports')
+                    if (!response.ok) throw new Error('Failed to generate reports')
+                    toast.dismiss()
+                    toast.success('Reports generated successfully')
+                  } catch (error) {
+                    toast.dismiss()
+                    toast.error(error instanceof Error ? error.message : 'Failed to generate reports')
+                  }
+                } },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1399,7 +1413,21 @@ export default function BackupsClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Compliance Reports</CardTitle>
-                    <Button size="sm"><RefreshCw className="h-4 w-4 mr-2" />Run Evaluation</Button>
+                    <Button size="sm" onClick={async () => {
+                      toast.loading('Running compliance evaluation...')
+                      try {
+                        const response = await fetch('/api/backups/compliance/evaluate', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' }
+                        })
+                        if (!response.ok) throw new Error('Failed to run evaluation')
+                        toast.dismiss()
+                        toast.success('Compliance evaluation completed successfully')
+                      } catch (error) {
+                        toast.dismiss()
+                        toast.error(error instanceof Error ? error.message : 'Failed to run evaluation')
+                      }
+                    }}><RefreshCw className="h-4 w-4 mr-2" />Run Evaluation</Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -1826,7 +1854,23 @@ export default function BackupsClient() {
                                 <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={async () => {
+                              const action = integration.connected ? 'Disconnecting from' : 'Connecting to'
+                              toast.loading(`${action} ${integration.name}...`)
+                              try {
+                                const response = await fetch('/api/backups/integrations', {
+                                  method: integration.connected ? 'DELETE' : 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ service: integration.name })
+                                })
+                                if (!response.ok) throw new Error(`Failed to ${integration.connected ? 'disconnect' : 'connect'}`)
+                                toast.dismiss()
+                                toast.success(`${integration.connected ? 'Disconnected from' : 'Connected to'} ${integration.name}`)
+                              } catch (error) {
+                                toast.dismiss()
+                                toast.error(error instanceof Error ? error.message : `Failed to ${integration.connected ? 'disconnect' : 'connect'}`)
+                              }
+                            }}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1895,15 +1939,59 @@ export default function BackupsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Backup Agent Version</p><p className="text-sm text-gray-500">v2.5.1</p></div>
-                          <Button variant="outline" size="sm">Update</Button>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            toast.loading('Checking for updates...')
+                            try {
+                              const response = await fetch('/api/backups/agent/update', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                              })
+                              if (!response.ok) throw new Error('Failed to update agent')
+                              toast.dismiss()
+                              toast.success('Backup agent updated to latest version')
+                            } catch (error) {
+                              toast.dismiss()
+                              toast.error(error instanceof Error ? error.message : 'Failed to update agent')
+                            }
+                          }}>Update</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Cache Size</p><p className="text-sm text-gray-500">2.1 GB used</p></div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            if (!confirm('Are you sure you want to clear the cache? This may temporarily slow down backup operations.')) return
+                            toast.loading('Clearing cache...')
+                            try {
+                              const response = await fetch('/api/backups/cache/clear', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                              })
+                              if (!response.ok) throw new Error('Failed to clear cache')
+                              toast.dismiss()
+                              toast.success('Cache cleared successfully - 2.1 GB freed')
+                            } catch (error) {
+                              toast.dismiss()
+                              toast.error(error instanceof Error ? error.message : 'Failed to clear cache')
+                            }
+                          }}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Debug Logging</p><p className="text-sm text-gray-500">Disabled</p></div>
-                          <Button variant="outline" size="sm">Enable</Button>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            toast.loading('Enabling debug logging...')
+                            try {
+                              const response = await fetch('/api/backups/settings/debug', {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ enabled: true })
+                              })
+                              if (!response.ok) throw new Error('Failed to enable debug logging')
+                              toast.dismiss()
+                              toast.success('Debug logging enabled')
+                            } catch (error) {
+                              toast.dismiss()
+                              toast.error(error instanceof Error ? error.message : 'Failed to enable debug logging')
+                            }
+                          }}>Enable</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2147,7 +2235,24 @@ export default function BackupsClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowLegalHoldDialog(false)}>Cancel</Button>
-                <Button className="bg-rose-600 hover:bg-rose-700">Apply Legal Hold</Button>
+                <Button className="bg-rose-600 hover:bg-rose-700" onClick={async () => {
+                  if (!confirm('Are you sure you want to apply a legal hold? This will prevent deletion of the selected recovery points.')) return
+                  toast.loading('Applying legal hold...')
+                  try {
+                    const response = await fetch('/api/backups/legal-hold', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ reason: 'Legal hold applied via UI' })
+                    })
+                    if (!response.ok) throw new Error('Failed to apply legal hold')
+                    toast.dismiss()
+                    toast.success('Legal hold applied successfully - recovery points are now protected')
+                    setShowLegalHoldDialog(false)
+                  } catch (error) {
+                    toast.dismiss()
+                    toast.error(error instanceof Error ? error.message : 'Failed to apply legal hold')
+                  }
+                }}>Apply Legal Hold</Button>
               </div>
             </div>
           </DialogContent>

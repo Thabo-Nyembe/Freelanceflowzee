@@ -794,7 +794,10 @@ export default function AlertsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => setShowFiltersDialog(true)}>
+            <Button variant="outline" onClick={() => {
+              setShowFiltersDialog(true)
+              toast.success('Filters panel opened', { description: 'Use the status and severity buttons above to filter alerts' })
+            }}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -1111,7 +1114,10 @@ export default function AlertsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Service Directory</CardTitle>
-                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => setShowAddServiceDialog(true)}>
+                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
+                    setShowAddServiceDialog(true)
+                    toast.success('Add Service', { description: 'Opening service creation form...' })
+                  }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Service
                   </Button>
@@ -1150,7 +1156,10 @@ export default function AlertsClient() {
                         <p className="text-xs text-gray-500">{service.team}</p>
                       </div>
 
-                      <Button variant="ghost" size="icon" onClick={() => setEditingService(service)}>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        setEditingService(service)
+                        toast.success(`Configuring ${service.name}`, { description: 'Opening service settings...' })
+                      }}>
                         <Settings className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1191,7 +1200,10 @@ export default function AlertsClient() {
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center justify-between">
                       <span className="text-sm text-gray-500">{policy.services} services using this policy</span>
-                      <Button variant="outline" size="sm" onClick={() => setEditingPolicy(policy)}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setEditingPolicy(policy)
+                        toast.success(`Editing ${policy.name}`, { description: 'Opening escalation policy editor...' })
+                      }}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>
@@ -1208,7 +1220,10 @@ export default function AlertsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Connected Integrations</CardTitle>
-                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => setShowAddIntegrationDialog(true)}>
+                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
+                    setShowAddIntegrationDialog(true)
+                    toast.success('Add Integration', { description: 'Opening integration setup wizard...' })
+                  }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Integration
                   </Button>
@@ -1246,8 +1261,14 @@ export default function AlertsClient() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Switch checked={integrationStates[integration.id] ?? integration.status === 'active'} onCheckedChange={(checked) => setIntegrationStates(prev => ({ ...prev, [integration.id]: checked }))} />
-                        <Button variant="ghost" size="icon" onClick={() => setEditingIntegration(integration)}>
+                        <Switch checked={integrationStates[integration.id] ?? integration.status === 'active'} onCheckedChange={(checked) => {
+                          setIntegrationStates(prev => ({ ...prev, [integration.id]: checked }))
+                          toast.success(checked ? `${integration.name} enabled` : `${integration.name} disabled`, { description: checked ? 'Integration is now active' : 'Integration has been disabled' })
+                        }} />
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setEditingIntegration(integration)
+                          toast.success(`Configuring ${integration.name}`, { description: 'Opening integration settings...' })
+                        }}>
                           <Settings className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1488,14 +1509,23 @@ export default function AlertsClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm" onClick={() => setEditingChannel({ name: channel.name, config: channel.config })}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setEditingChannel({ name: channel.name, config: channel.config })
+                                toast.success(`Editing ${channel.name}`, { description: 'Opening channel configuration...' })
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch checked={channelStates[channel.name] ?? channel.enabled} onCheckedChange={(checked) => setChannelStates(prev => ({ ...prev, [channel.name]: checked }))} />
+                              <Switch checked={channelStates[channel.name] ?? channel.enabled} onCheckedChange={(checked) => {
+                                setChannelStates(prev => ({ ...prev, [channel.name]: checked }))
+                                toast.success(checked ? `${channel.name} enabled` : `${channel.name} disabled`, { description: checked ? 'Notifications will be sent via this channel' : 'This channel is now disabled' })
+                              }} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full mt-4" onClick={() => setShowAddChannelDialog(true)}>
+                        <Button variant="outline" className="w-full mt-4" onClick={() => {
+                          setShowAddChannelDialog(true)
+                          toast.success('Add Notification Channel', { description: 'Opening channel setup form...' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Notification Channel
                         </Button>
@@ -1607,16 +1637,27 @@ export default function AlertsClient() {
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => setEditingTier(tier)}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setEditingTier(tier)
+                                toast.success(`Editing ${tier.tier}`, { description: 'Opening escalation tier settings...' })
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm(`Are you sure you want to remove ${tier.tier}?`)) { setEscalationTiers(prev => prev.filter(t => t.tier !== tier.tier)) } }}>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                                if (confirm(`Are you sure you want to remove ${tier.tier}?`)) {
+                                  setEscalationTiers(prev => prev.filter(t => t.tier !== tier.tier))
+                                  toast.success(`${tier.tier} removed`, { description: 'Escalation tier has been deleted' })
+                                }
+                              }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => setShowAddTierDialog(true)}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setShowAddTierDialog(true)
+                          toast.success('Add Escalation Tier', { description: 'Opening tier configuration form...' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Escalation Tier
                         </Button>
@@ -1643,13 +1684,19 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge variant="outline">{schedule.rotation}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => setEditingSchedule(schedule)}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setEditingSchedule(schedule)
+                                toast.success(`Editing ${schedule.name}`, { description: 'Opening on-call schedule editor...' })
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => setShowAddScheduleDialog(true)}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setShowAddScheduleDialog(true)
+                          toast.success('Create Schedule', { description: 'Opening schedule creation form...' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Schedule
                         </Button>
@@ -1739,7 +1786,10 @@ export default function AlertsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => setEditingMonitoringIntegration(integration)}>
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
+                              setEditingMonitoringIntegration(integration)
+                              toast.success(integration.status === 'connected' ? `Configuring ${integration.name}` : `Connecting ${integration.name}`, { description: integration.status === 'connected' ? 'Opening integration settings...' : 'Starting connection wizard...' })
+                            }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1771,7 +1821,10 @@ export default function AlertsClient() {
                                 )}
                               </div>
                             </div>
-                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => setEditingTicketingIntegration(integration)}>
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
+                              setEditingTicketingIntegration(integration)
+                              toast.success(integration.status === 'connected' ? `Configuring ${integration.name}` : `Connecting ${integration.name}`, { description: integration.status === 'connected' ? 'Opening ticketing integration settings...' : 'Starting connection wizard...' })
+                            }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1789,10 +1842,18 @@ export default function AlertsClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value={apiKey} readOnly className="font-mono" />
-                            <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(apiKey)}>
+                            <Button variant="outline" size="sm" onClick={() => {
+                              navigator.clipboard.writeText(apiKey)
+                              toast.success('API Key copied', { description: 'API key has been copied to clipboard' })
+                            }}>
                               <Copy className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => setApiKey(`kazi-alerts-${crypto.randomUUID().substring(0, 20)}`)}>
+                            <Button variant="outline" size="sm" onClick={() => {
+                              if (confirm('Are you sure you want to regenerate the API key? Existing integrations will stop working.')) {
+                                setApiKey(`kazi-alerts-${crypto.randomUUID().substring(0, 20)}`)
+                                toast.success('API Key regenerated', { description: 'A new API key has been generated. Update your integrations.' })
+                              }
+                            }}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1805,17 +1866,28 @@ export default function AlertsClient() {
                                 <p className="text-sm text-gray-500">Events: {webhook.events.join(', ')}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" onClick={() => setEditingWebhook(webhook)}>
+                                <Button variant="ghost" size="sm" onClick={() => {
+                                  setEditingWebhook(webhook)
+                                  toast.success('Editing Webhook', { description: 'Opening webhook configuration...' })
+                                }}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm('Are you sure you want to delete this webhook?')) { setWebhooks(prev => prev.filter(w => w.id !== webhook.id)) } }}>
+                                <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                                  if (confirm('Are you sure you want to delete this webhook?')) {
+                                    setWebhooks(prev => prev.filter(w => w.id !== webhook.id))
+                                    toast.success('Webhook deleted', { description: 'The webhook has been removed' })
+                                  }
+                                }}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setShowAddWebhookDialog(true)
+                          toast.success('Add Webhook', { description: 'Opening webhook creation form...' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1850,14 +1922,23 @@ export default function AlertsClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm" onClick={() => setEditingRule(rule)}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setEditingRule(rule)
+                                toast.success(`Editing ${rule.name}`, { description: 'Opening rule configuration...' })
+                              }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch checked={ruleStates[rule.name] ?? rule.enabled} onCheckedChange={(checked) => setRuleStates(prev => ({ ...prev, [rule.name]: checked }))} />
+                              <Switch checked={ruleStates[rule.name] ?? rule.enabled} onCheckedChange={(checked) => {
+                                setRuleStates(prev => ({ ...prev, [rule.name]: checked }))
+                                toast.success(checked ? `${rule.name} enabled` : `${rule.name} disabled`, { description: checked ? 'This rule is now active' : 'This rule has been disabled' })
+                              }} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => setShowAddRuleDialog(true)}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setShowAddRuleDialog(true)
+                          toast.success('Create Rule', { description: 'Opening rule creation form...' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Rule
                         </Button>
@@ -1881,12 +1962,18 @@ export default function AlertsClient() {
                               <p className="font-medium font-mono">{route.service}</p>
                               <p className="text-sm text-gray-500">{route.team} • {route.schedule}</p>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => setEditingRoute(route)}>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              setEditingRoute(route)
+                              toast.success(`Editing ${route.service} route`, { description: 'Opening routing configuration...' })
+                            }}>
                               <Edit className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => setShowAddRoutingDialog(true)}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setShowAddRoutingDialog(true)
+                          toast.success('Add Routing Rule', { description: 'Opening routing rule form...' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Routing Rule
                         </Button>
@@ -2081,7 +2168,12 @@ export default function AlertsClient() {
                             <p className="font-medium">Clear All Alerts</p>
                             <p className="text-sm text-gray-500">Delete all alert history</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => { if (confirm('Are you sure you want to clear all alerts? This action cannot be undone.')) { fetchAlerts() } }}>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                            if (confirm('Are you sure you want to clear all alerts? This action cannot be undone.')) {
+                              fetchAlerts()
+                              toast.success('Alerts cleared', { description: 'All alert history has been removed' })
+                            }
+                          }}>
                             Clear Alerts
                           </Button>
                         </div>
@@ -2090,7 +2182,12 @@ export default function AlertsClient() {
                             <p className="font-medium">Reset All Rules</p>
                             <p className="text-sm text-gray-500">Restore default alert rules</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => { if (confirm('Are you sure you want to reset all rules to defaults?')) { setRuleStates({ 'CPU Critical': true, 'Memory Warning': true, 'Disk Space Low': true, 'API Latency': false }) } }}>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                            if (confirm('Are you sure you want to reset all rules to defaults?')) {
+                              setRuleStates({ 'CPU Critical': true, 'Memory Warning': true, 'Disk Space Low': true, 'API Latency': false })
+                              toast.success('Rules reset', { description: 'All alert rules have been restored to defaults' })
+                            }
+                          }}>
                             Reset Rules
                           </Button>
                         </div>
@@ -2099,7 +2196,12 @@ export default function AlertsClient() {
                             <p className="font-medium">Delete All Integrations</p>
                             <p className="text-sm text-gray-500">Remove all connected services</p>
                           </div>
-                          <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to delete all integrations? This action cannot be undone.')) { setIntegrationStates({}) } }}>
+                          <Button variant="destructive" onClick={() => {
+                            if (confirm('Are you sure you want to delete all integrations? This action cannot be undone.')) {
+                              setIntegrationStates({})
+                              toast.success('Integrations deleted', { description: 'All connected services have been removed' })
+                            }
+                          }}>
                             Delete All
                           </Button>
                         </div>
@@ -2118,7 +2220,9 @@ export default function AlertsClient() {
             <AIInsightsPanel
               insights={mockAlertsAIInsights}
               title="Alert Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                toast.success(`Insight: ${insight.title}`, { description: insight.description })
+              }}
             />
           </div>
           <div className="space-y-6">

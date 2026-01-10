@@ -777,6 +777,9 @@ export default function NotificationsClient() {
 
           {/* Segments Tab */}
           <TabsContent value="segments" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => toast.success('Create Segment', { description: 'Segment builder would open here' })}><Plus className="h-4 w-4 mr-2" />Create Segment</Button>
+            </div>
             <div className="grid grid-cols-3 gap-6">
               {mockSegments.map(segment => (
                 <Card key={segment.id} className="border-gray-200 dark:border-gray-700">
@@ -797,6 +800,26 @@ export default function NotificationsClient() {
                       <span className="text-sm text-gray-500">users</span>
                     </div>
                     <p className="text-xs text-gray-400 mt-2">Updated {segment.lastUpdated}</p>
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.success('View Users', { description: `Viewing ${segment.userCount.toLocaleString()} users in "${segment.name}"` })}>
+                        <Eye className="h-4 w-4 mr-1" />View
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.success('Edit Segment', { description: `Opening editor for "${segment.name}"` })}>
+                        <Edit className="h-4 w-4 mr-1" />Edit
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Segment', { description: `"${segment.name}" duplicated as "${segment.name} (Copy)"` })}>
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      {!segment.isDefault && (
+                        <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
+                          if (confirm(`Delete segment "${segment.name}"?`)) {
+                            toast.success('Segment Deleted', { description: `"${segment.name}" has been removed` })
+                          }
+                        }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -805,6 +828,12 @@ export default function NotificationsClient() {
 
           {/* Templates Tab */}
           <TabsContent value="templates" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => {
+                setShowTemplateDialog(true)
+                toast.success('Create Template', { description: 'Template builder opened' })
+              }}><Plus className="h-4 w-4 mr-2" />Create Template</Button>
+            </div>
             <div className="grid grid-cols-2 gap-6">
               {mockTemplates.map(template => {
                 const ChannelIcon = getChannelIcon(template.channel)
@@ -824,8 +853,35 @@ export default function NotificationsClient() {
                         <p className="font-medium text-sm mb-1">{template.title}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{template.message}</p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         {template.variables.map(v => <Badge key={v} variant="outline" className="text-xs">{`{{${v}}}`}</Badge>)}
+                      </div>
+                      <div className="flex items-center gap-2 pt-4 border-t">
+                        <Button variant="default" size="sm" className="flex-1" onClick={() => {
+                          setCampaignForm(prev => ({ ...prev, title: template.title, message: template.message }))
+                          setShowCreateCampaign(true)
+                          toast.success('Template Selected', { description: `Using "${template.name}" for new campaign` })
+                        }}>
+                          <Send className="h-4 w-4 mr-1" />Use Template
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.success('Edit Template', { description: `Opening editor for "${template.name}"` })}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('Preview Template', { description: `Previewing "${template.name}"` })}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Template', { description: `"${template.name}" duplicated` })}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        {!template.isDefault && (
+                          <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
+                            if (confirm(`Delete template "${template.name}"?`)) {
+                              toast.success('Template Deleted', { description: `"${template.name}" has been removed` })
+                            }
+                          }}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -881,6 +937,19 @@ export default function NotificationsClient() {
                             { loading: `Resuming automation "${automation.name}"...`, success: `Automation "${automation.name}" resumed`, error: 'Failed to resume automation' }
                           )
                         }}><Play className="h-4 w-4 mr-1" />Resume</Button>}
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('Edit Automation', { description: `Opening workflow editor for "${automation.name}"` })}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Automation', { description: `"${automation.name}" duplicated` })}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
+                          if (confirm(`Delete automation "${automation.name}"?`)) {
+                            toast.success('Automation Deleted', { description: `"${automation.name}" has been removed` })
+                          }
+                        }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 mb-4">
@@ -893,6 +962,17 @@ export default function NotificationsClient() {
                       <div><p className="text-lg font-bold text-red-600">{automation.stats.totalFailed}</p><p className="text-xs text-gray-500">Failed</p></div>
                       <div><p className="text-lg font-bold text-violet-600">{automation.stats.conversionRate}%</p><p className="text-xs text-gray-500">Conversion</p></div>
                     </div>
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                      <Button variant="outline" size="sm" onClick={() => toast.success('View Analytics', { description: `Opening detailed analytics for "${automation.name}"` })}>
+                        <BarChart3 className="h-4 w-4 mr-1" />Analytics
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success('Test Automation', { description: `Sending test trigger for "${automation.name}"` })}>
+                        <TestTube className="h-4 w-4 mr-1" />Test
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success('View History', { description: `Viewing execution history for "${automation.name}"` })}>
+                        <RefreshCw className="h-4 w-4 mr-1" />History
+                      </Button>
+                    </div>
                     {automation.lastTriggered && <p className="text-xs text-gray-500 mt-4">Last triggered: {formatTimeAgo(automation.lastTriggered)}</p>}
                   </CardContent>
                 </Card>
@@ -902,6 +982,9 @@ export default function NotificationsClient() {
 
           {/* A/B Testing Tab */}
           <TabsContent value="ab-testing" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => toast.success('Create A/B Test', { description: 'A/B test wizard would open here' })}><Plus className="h-4 w-4 mr-2" />Create A/B Test</Button>
+            </div>
             <div className="space-y-6">
               {mockABTests.map(test => (
                 <Card key={test.id} className="border-gray-200 dark:border-gray-700">
@@ -914,6 +997,24 @@ export default function NotificationsClient() {
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(test.status)}>{test.status}</Badge>
                         {test.status === 'completed' && test.winner && <Badge className="bg-green-100 text-green-700">Winner: {test.variants.find(v => v.id === test.winner)?.name}</Badge>}
+                        {test.status === 'running' && (
+                          <Button size="sm" variant="outline" onClick={() => toast.success('Test Stopped', { description: `A/B test "${test.name}" has been stopped` })}>
+                            <Pause className="h-4 w-4 mr-1" />Stop Test
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('View Details', { description: `Opening detailed report for "${test.name}"` })}>
+                          <BarChart3 className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('Duplicate Test', { description: `"${test.name}" duplicated` })}>
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
+                          if (confirm(`Delete A/B test "${test.name}"?`)) {
+                            toast.success('Test Deleted', { description: `"${test.name}" has been removed` })
+                          }
+                        }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
@@ -931,6 +1032,11 @@ export default function NotificationsClient() {
                           <div className="flex items-center justify-between mb-3">
                             <h4 className="font-semibold">{variant.name}</h4>
                             {test.winner === variant.id && <Badge className="bg-green-500">Winner</Badge>}
+                            {test.status === 'running' && !test.winner && (
+                              <Button size="sm" variant="outline" onClick={() => toast.success('Winner Selected', { description: `"${variant.name}" declared as winner` })}>
+                                Declare Winner
+                              </Button>
+                            )}
                           </div>
                           <p className="text-sm font-medium mb-1">{variant.title}</p>
                           <p className="text-sm text-gray-500 mb-4">{variant.message}</p>
@@ -942,6 +1048,23 @@ export default function NotificationsClient() {
                         </div>
                       ))}
                     </div>
+                    {test.status === 'completed' && test.winner && (
+                      <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                        <Button variant="default" size="sm" onClick={() => {
+                          const winningVariant = test.variants.find(v => v.id === test.winner)
+                          if (winningVariant) {
+                            setCampaignForm(prev => ({ ...prev, title: winningVariant.title, message: winningVariant.message }))
+                            setShowCreateCampaign(true)
+                            toast.success('Apply Winner', { description: `Using winning variant "${winningVariant.name}" for new campaign` })
+                          }
+                        }}>
+                          <Send className="h-4 w-4 mr-1" />Apply Winner to Campaign
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.success('Export Results', { description: `Exporting detailed results for "${test.name}"` })}>
+                          <Download className="h-4 w-4 mr-1" />Export Results
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -973,9 +1096,32 @@ export default function NotificationsClient() {
                         <p className="font-medium">{webhook.successRate}%</p>
                         <p className="text-xs text-gray-500">Success rate</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        setShowWebhookDialog(true)
-                      }}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('Test Webhook', { description: `Sending test payload to "${webhook.name}"` })}>
+                          <TestTube className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => toast.success('View Logs', { description: `Opening delivery logs for "${webhook.name}"` })}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setShowWebhookDialog(true)
+                          toast.success('Edit Webhook', { description: `Editing "${webhook.name}"` })
+                        }}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        {webhook.status === 'failed' && (
+                          <Button variant="ghost" size="icon" onClick={() => toast.success('Retry Webhook', { description: `Retrying failed deliveries for "${webhook.name}"` })}>
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
+                          if (confirm(`Delete webhook "${webhook.name}"?`)) {
+                            toast.success('Webhook Deleted', { description: `"${webhook.name}" has been removed` })
+                          }
+                        }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -2482,6 +2628,314 @@ export default function NotificationsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateCampaign(false)} disabled={isSubmitting}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={handleSendCampaign} disabled={isSubmitting}><Send className="h-4 w-4 mr-2" />{isSubmitting ? 'Sending...' : 'Send Now'}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Automation Dialog */}
+        <Dialog open={showCreateAutomation} onOpenChange={setShowCreateAutomation}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Automation</DialogTitle>
+              <DialogDescription>Set up automated notification workflows</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Automation Name</Label>
+                <Input placeholder="e.g., Welcome Series" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea placeholder="Describe what this automation does..." rows={2} />
+              </div>
+              <div>
+                <Label>Trigger Type</Label>
+                <Select defaultValue="event">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="event">User Event</SelectItem>
+                    <SelectItem value="schedule">Schedule (Cron)</SelectItem>
+                    <SelectItem value="segment_entry">Segment Entry</SelectItem>
+                    <SelectItem value="segment_exit">Segment Exit</SelectItem>
+                    <SelectItem value="api">API Trigger</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Initial Action</Label>
+                <Select defaultValue="send_notification">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="send_notification">Send Notification</SelectItem>
+                    <SelectItem value="wait">Wait Duration</SelectItem>
+                    <SelectItem value="condition">Add Condition</SelectItem>
+                    <SelectItem value="webhook">Call Webhook</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateAutomation(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Automation Created', { description: 'Your automation has been saved as a draft' })
+                setShowCreateAutomation(false)
+              }}>
+                <Workflow className="h-4 w-4 mr-2" />Create Automation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Template</DialogTitle>
+              <DialogDescription>Create a reusable notification template</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Template Name</Label>
+                <Input placeholder="e.g., Order Confirmation" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Channel</Label>
+                  <Select defaultValue="push">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="push">Push</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="sms">SMS</SelectItem>
+                      <SelectItem value="slack">Slack</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <Select defaultValue="transactional">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="transactional">Transactional</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="onboarding">Onboarding</SelectItem>
+                      <SelectItem value="security">Security</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Title</Label>
+                <Input placeholder="Notification title with {{variables}}" />
+              </div>
+              <div>
+                <Label>Message</Label>
+                <Textarea placeholder="Message body with {{variables}}..." rows={3} />
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm font-medium mb-2">Available Variables</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => toast.info('Variable copied', { description: '{{name}} copied to clipboard' })}>{`{{name}}`}</Badge>
+                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => toast.info('Variable copied', { description: '{{email}} copied to clipboard' })}>{`{{email}}`}</Badge>
+                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => toast.info('Variable copied', { description: '{{app_name}} copied to clipboard' })}>{`{{app_name}}`}</Badge>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Template Created', { description: 'Your template has been saved' })
+                setShowTemplateDialog(false)
+              }}>
+                <Layers className="h-4 w-4 mr-2" />Save Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Dialog */}
+        <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Configure Webhook</DialogTitle>
+              <DialogDescription>Set up webhook endpoint for event notifications</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Webhook Name</Label>
+                <Input placeholder="e.g., Analytics Integration" />
+              </div>
+              <div>
+                <Label>Endpoint URL</Label>
+                <Input placeholder="https://api.example.com/webhooks" />
+              </div>
+              <div>
+                <Label>Events to Send</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {['notification.sent', 'notification.delivered', 'notification.opened', 'notification.clicked', 'notification.failed', 'campaign.completed'].map(event => (
+                    <div key={event} className="flex items-center gap-2">
+                      <input type="checkbox" id={event} className="rounded" defaultChecked={event.includes('sent') || event.includes('failed')} />
+                      <label htmlFor={event} className="text-sm">{event}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Secret Key (for signature verification)</Label>
+                <div className="flex gap-2">
+                  <Input type="password" placeholder="whsec_..." className="flex-1" />
+                  <Button variant="outline" size="sm" onClick={() => toast.success('Secret Generated', { description: 'New webhook secret generated' })}>
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Enable Webhook</Label>
+                  <p className="text-sm text-gray-500">Start receiving events</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => toast.success('Test Sent', { description: 'Test payload sent to webhook endpoint' })}>
+                <TestTube className="h-4 w-4 mr-2" />Test
+              </Button>
+              <Button onClick={() => {
+                toast.success('Webhook Saved', { description: 'Your webhook configuration has been saved' })
+                setShowWebhookDialog(false)
+              }}>
+                <Webhook className="h-4 w-4 mr-2" />Save Webhook
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Category Editor Dialog */}
+        <Dialog open={!!showCategoryEditor} onOpenChange={() => setShowCategoryEditor(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>{showCategoryEditor === 'new' ? 'Create Category' : `Edit ${showCategoryEditor}`}</DialogTitle>
+              <DialogDescription>Configure notification category settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Category Name</Label>
+                <Input placeholder="e.g., Product Updates" defaultValue={showCategoryEditor !== 'new' ? showCategoryEditor ?? '' : ''} />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea placeholder="What notifications belong to this category?" rows={2} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Enabled by Default</Label>
+                  <p className="text-sm text-gray-500">New users auto-subscribed</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Allow User Control</Label>
+                  <p className="text-sm text-gray-500">Users can opt-out</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCategoryEditor(null)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success(showCategoryEditor === 'new' ? 'Category Created' : 'Category Updated', { description: 'Category settings saved' })
+                setShowCategoryEditor(null)
+              }}>
+                Save Category
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filters Panel */}
+        <Dialog open={showFiltersPanel} onOpenChange={setShowFiltersPanel}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Filter Notifications</DialogTitle>
+              <DialogDescription>Narrow down your notification list</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Status</Label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="unread">Unread</SelectItem>
+                    <SelectItem value="read">Read</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Channel</Label>
+                <Select value={channelFilter} onValueChange={setChannelFilter}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Channels</SelectItem>
+                    <SelectItem value="push">Push</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                    <SelectItem value="in_app">In-App</SelectItem>
+                    <SelectItem value="slack">Slack</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Priority</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Priorities</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Starred Only</Label>
+                  <p className="text-sm text-gray-500">Show only starred</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setStatusFilter('all')
+                setChannelFilter('all')
+                toast.success('Filters Reset')
+              }}>Reset</Button>
+              <Button onClick={() => {
+                setShowFiltersPanel(false)
+                toast.success('Filters Applied')
+              }}>
+                <Filter className="h-4 w-4 mr-2" />Apply Filters
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

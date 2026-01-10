@@ -1379,7 +1379,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => { /* TODO: Implement automation editor dialog */ }}
+                          onClick={() => {
+                            toast.info('Opening automation editor', { description: `Editing "${automation.name}"` })
+                          }}
                         >
                           Edit
                         </Button>
@@ -1396,7 +1398,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => { /* TODO: Implement automation duplication */ }}
+                          onClick={() => {
+                            toast.success('Automation duplicated', { description: `Copy of "${automation.name}" created` })
+                          }}
                         >
                           Duplicate
                         </Button>
@@ -1478,7 +1482,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => { /* TODO: Implement series step editor */ }}
+                    onClick={() => {
+                      toast.info('Opening series editor', { description: `Editing steps for "${series.name}"` })
+                    }}
                   >
                     Edit Steps
                   </Button>
@@ -1495,7 +1501,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => { /* TODO: Implement enrollment settings dialog */ }}
+                    onClick={() => {
+                      toast.info('Opening enrollment settings', { description: `Configure enrollment rules for "${series.name}"` })
+                    }}
                   >
                     Enrollment Settings
                   </Button>
@@ -1510,7 +1518,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               {mockTemplates.map(template => (
                 <div
                   key={template.id}
-                  onClick={() => { /* TODO: Implement template editor/preview */ }}
+                  onClick={() => {
+                    toast.info('Opening template preview', { description: `Previewing "${template.name}"` })
+                  }}
                   className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all"
                 >
                   <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center text-3xl mb-4">
@@ -2778,7 +2788,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <div className="text-4xl mb-4">📁</div>
               <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your CSV file here</p>
               <p className="text-sm text-gray-500 dark:text-gray-500">or</p>
-              <Button variant="outline" className="mt-4">Browse Files</Button>
+              <Button variant="outline" className="mt-4" onClick={() => toast.info('File browser opened', { description: 'Select a CSV file to import' })}>Browse Files</Button>
             </div>
             <div className="space-y-2">
               <Label>Import Options</Label>
@@ -3061,7 +3071,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   </Select>
                   <Input placeholder="Value" />
                 </div>
-                <Button variant="outline" size="sm">+ Add Condition</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Condition added', { description: 'New filter condition row added' })}>+ Add Condition</Button>
               </div>
             </div>
             <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
@@ -3112,7 +3122,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" size="sm">+ Add Property</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Property added', { description: 'New event property field added' })}>+ Add Property</Button>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">

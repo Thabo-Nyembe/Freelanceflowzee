@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { copyToClipboard, downloadAsJson, shareContent, apiPost } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -776,7 +776,7 @@ export default function AICreateClient() {
                 <span className="text-sm text-gray-500">credits</span>
               </div>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast.info('Upgrade options will be available soon. Contact support for Pro plans.')}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>
@@ -877,6 +877,29 @@ export default function AICreateClient() {
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={() => {
+                    if (action.label === 'Generate') {
+                      if (prompt.trim()) {
+                        handleGenerate()
+                      } else {
+                        toast.error('Please enter a prompt first')
+                      }
+                    } else if (action.label === 'Regenerate') {
+                      toast.info('Select a creation from your gallery to regenerate')
+                    } else if (action.label === 'Variations') {
+                      toast.info('Select a creation to create variations')
+                    } else if (action.label === 'Upscale') {
+                      toast.info('Select a completed creation to upscale')
+                    } else if (action.label === 'Import') {
+                      toast.info('Image import feature coming soon')
+                    } else if (action.label === 'Export') {
+                      downloadAsJson(mockGenerations, 'ai-creations-export')
+                    } else if (action.label === 'Templates') {
+                      setActiveTab('templates')
+                    } else if (action.label === 'History') {
+                      setActiveTab('history')
+                    }
+                  }}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1134,6 +1157,32 @@ export default function AICreateClient() {
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={() => {
+                    if (action.label === 'Grid View') {
+                      setViewMode('grid')
+                      toast.success('Switched to grid view')
+                    } else if (action.label === 'List View') {
+                      setViewMode('list')
+                      toast.success('Switched to list view')
+                    } else if (action.label === 'Favorites') {
+                      const favorites = mockGenerations.filter(g => g.isFavorite)
+                      toast.info(`You have ${favorites.length} favorite creations`)
+                    } else if (action.label === 'Batch Export') {
+                      downloadAsJson(mockGenerations.filter(g => g.status === 'completed'), 'ai-creations-batch-export')
+                    } else if (action.label === 'Share') {
+                      shareContent({
+                        title: 'My AI Creations',
+                        text: 'Check out my AI-generated artwork!',
+                        url: window.location.href
+                      })
+                    } else if (action.label === 'Filter') {
+                      toast.info('Use the filter buttons below to filter creations')
+                    } else if (action.label === 'Archive') {
+                      toast.info('Archive feature coming soon')
+                    } else if (action.label === 'Delete') {
+                      toast.warning('Select individual creations to delete')
+                    }
+                  }}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1277,6 +1326,27 @@ export default function AICreateClient() {
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={() => {
+                    if (action.label === 'Create New') {
+                      toast.info('Template creation feature coming soon')
+                    } else if (action.label === 'Featured') {
+                      toast.info(`Showing ${mockTemplates.length} featured templates`)
+                    } else if (action.label === 'Trending') {
+                      toast.info('Showing trending templates')
+                    } else if (action.label === 'Premium') {
+                      const premiumCount = mockTemplates.filter(t => t.isPremium).length
+                      toast.info(`${premiumCount} premium templates available`)
+                    } else if (action.label === 'Community') {
+                      toast.info('Community templates coming soon')
+                    } else if (action.label === 'Saved') {
+                      toast.info('No saved templates yet')
+                    } else if (action.label === 'Categories') {
+                      const categories = [...new Set(mockTemplates.map(t => t.category))]
+                      toast.info(`Categories: ${categories.join(', ')}`)
+                    } else if (action.label === 'Search') {
+                      toast.info('Use the search bar to find templates')
+                    }
+                  }}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1287,7 +1357,7 @@ export default function AICreateClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Popular Templates</h3>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => toast.info('Template creation feature coming soon')}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Template
               </Button>
@@ -1366,6 +1436,33 @@ export default function AICreateClient() {
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={() => {
+                    if (action.label === 'Retry') {
+                      toast.info('Select a generation to retry')
+                    } else if (action.label === 'Duplicate') {
+                      toast.info('Select a generation to duplicate')
+                    } else if (action.label === 'Export') {
+                      downloadAsJson(mockGenerations, 'generation-history-export')
+                    } else if (action.label === 'Filter') {
+                      toast.info('Filter options coming soon')
+                    } else if (action.label === 'Today') {
+                      const today = new Date().toDateString()
+                      const todayCount = mockGenerations.filter(g => new Date(g.createdAt).toDateString() === today).length
+                      toast.info(`${todayCount} generations today`)
+                    } else if (action.label === 'This Week') {
+                      toast.info(`${mockGenerations.length} generations this week`)
+                    } else if (action.label === 'Archive') {
+                      toast.info('Archive feature coming soon')
+                    } else if (action.label === 'Clear All') {
+                      if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
+                        apiPost('/api/ai/history/clear', {}, {
+                          loading: 'Clearing history...',
+                          success: 'History cleared',
+                          error: 'Failed to clear history'
+                        })
+                      }
+                    }
+                  }}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1376,7 +1473,15 @@ export default function AICreateClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Generation History</h3>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => {
+                if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
+                  apiPost('/api/ai/history/clear', {}, {
+                    loading: 'Clearing history...',
+                    success: 'History cleared',
+                    error: 'Failed to clear history'
+                  })
+                }
+              }}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Clear All
               </Button>
@@ -1490,6 +1595,30 @@ export default function AICreateClient() {
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={() => {
+                    if (action.label === 'All Models') {
+                      toast.info(`Showing all ${mockModels.length} available models`)
+                    } else if (action.label === 'Fast') {
+                      const fastModels = mockModels.filter(m => m.speed >= 90)
+                      toast.info(`${fastModels.length} fast models: ${fastModels.map(m => m.name).join(', ')}`)
+                    } else if (action.label === 'Quality') {
+                      const qualityModels = mockModels.filter(m => m.quality >= 90)
+                      toast.info(`${qualityModels.length} high-quality models: ${qualityModels.map(m => m.name).join(', ')}`)
+                    } else if (action.label === 'Pro') {
+                      const proModels = mockModels.filter(m => m.tier === 'pro')
+                      toast.info(`${proModels.length} Pro models available`)
+                    } else if (action.label === 'Free') {
+                      const freeModels = mockModels.filter(m => m.tier === 'free')
+                      toast.info(`${freeModels.length} free models: ${freeModels.map(m => m.name).join(', ')}`)
+                    } else if (action.label === 'Image') {
+                      const imageModels = mockModels.filter(m => m.type === 'image')
+                      toast.info(`${imageModels.length} image generation models`)
+                    } else if (action.label === 'Video') {
+                      toast.info('Video models coming soon')
+                    } else if (action.label === 'Compare') {
+                      toast.info('Model comparison feature coming soon')
+                    }
+                  }}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="h-5 w-5" />
@@ -1912,7 +2041,15 @@ export default function AICreateClient() {
                             <p className="font-medium text-gray-900 dark:text-white">API Key</p>
                             <Input type="password" value="sk-************************" readOnly className="mt-2 font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
                           </div>
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            if (confirm('Are you sure you want to regenerate your API key? Your current key will stop working.')) {
+                              apiPost('/api/settings/api-key/regenerate', {}, {
+                                loading: 'Regenerating API key...',
+                                success: 'New API key generated! Make sure to copy it.',
+                                error: 'Failed to regenerate API key'
+                              })
+                            }
+                          }}>Regenerate</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1934,7 +2071,17 @@ export default function AICreateClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
                               <p className="text-sm text-gray-500">{service.desc}</p>
                             </div>
-                            <Button variant={service.connected ? "outline" : "default"} size="sm">
+                            <Button variant={service.connected ? "outline" : "default"} size="sm" onClick={() => {
+                              if (service.connected) {
+                                apiPost('/api/integrations/disconnect', { service: service.name }, {
+                                  loading: `Disconnecting ${service.name}...`,
+                                  success: `${service.name} disconnected`,
+                                  error: `Failed to disconnect ${service.name}`
+                                })
+                              } else {
+                                toast.info(`${service.name} integration coming soon`)
+                              }
+                            }}>
                               {service.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -2031,7 +2178,15 @@ export default function AICreateClient() {
                               <p className="text-sm text-gray-500">1.2 GB used</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            if (confirm('Clear the generation cache? This may slow down future generations temporarily.')) {
+                              apiPost('/api/settings/cache/clear', {}, {
+                                loading: 'Clearing cache...',
+                                success: 'Cache cleared successfully! 1.2 GB freed.',
+                                error: 'Failed to clear cache'
+                              })
+                            }
+                          }}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                           <div className="flex items-center gap-3">
@@ -2041,7 +2196,7 @@ export default function AICreateClient() {
                               <p className="text-sm text-gray-500">4.5 GB used</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Model management feature coming soon')}>Manage</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2057,14 +2212,30 @@ export default function AICreateClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Generations</p>
                             <p className="text-sm text-gray-500">Remove all your generated content</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete All</Button>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            if (confirm('Are you absolutely sure? This will permanently delete ALL your generations. This action cannot be undone!')) {
+                              apiPost('/api/ai/creations/delete-all', {}, {
+                                loading: 'Deleting all generations...',
+                                success: 'All generations deleted',
+                                error: 'Failed to delete generations'
+                              })
+                            }
+                          }}>Delete All</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Reset Settings</p>
                             <p className="text-sm text-gray-500">Reset all settings to defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            if (confirm('Reset all settings to defaults? This cannot be undone.')) {
+                              apiPost('/api/settings/reset', {}, {
+                                loading: 'Resetting settings...',
+                                success: 'Settings reset to defaults',
+                                error: 'Failed to reset settings'
+                              })
+                            }
+                          }}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>

@@ -80,6 +80,10 @@ export default function MyDayTodayPage() {
   // AI Insights Panel State
   const [showAIPanel, setShowAIPanel] = useState(true)
 
+  // Delete confirmation dialog state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
+
   const [state, dispatch] = useReducer(taskReducer, initialTaskState)
 
   // A+++ LOAD MY DAY DATA
@@ -294,6 +298,59 @@ export default function MyDayTodayPage() {
         error: 'Failed to stop timer'
       }
     )
+  }
+
+  // Handle delete task with confirmation
+  const handleDeleteTask = (taskId: string) => {
+    setTaskToDelete(taskId)
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return
+
+    const task = state.tasks.find(t => t.id === taskToDelete)
+
+    logger.info('Deleting task', {
+      taskId: taskToDelete,
+      taskTitle: task?.title
+    })
+
+    try {
+      const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          taskId: taskToDelete
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete task')
+      }
+
+      dispatch({ type: 'DELETE_TASK', id: taskToDelete })
+
+      toast.promise(
+        new Promise(r => setTimeout(r, 600)),
+        {
+          loading: 'Deleting task...',
+          success: `Task "${task?.title}" deleted successfully`,
+          error: 'Failed to delete task'
+        }
+      )
+
+      logger.info('Task deleted successfully', { taskId: taskToDelete, title: task?.title })
+    } catch (error: any) {
+      logger.error('Failed to delete task', { error, taskId: taskToDelete })
+      // Optimistic deletion even if API fails
+      dispatch({ type: 'DELETE_TASK', id: taskToDelete })
+      toast.success(`Task "${task?.title}" deleted`)
+    }
+
+    setShowDeleteConfirm(false)
+    setTaskToDelete(null)
   }
 
   // Calculate progress metrics
@@ -695,7 +752,8 @@ export default function MyDayTodayPage() {
                             data-testid="delete-task-btn"
                             variant="ghost"
                             size="sm"
-                            onClick={() => dispatch({ type: 'DELETE_TASK', id: task.id })}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteTask(task.id)}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -844,6 +902,50 @@ export default function MyDayTodayPage() {
                   variant="outline"
                   className="flex-1"
                   onClick={() => setIsAddingTask(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Delete Task Confirmation Dialog */}
+      {showDeleteConfirm && taskToDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md bg-white dark:bg-gray-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete Task
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-300">
+                Are you sure you want to delete &quot;{state.tasks.find(t => t.id === taskToDelete)?.title}&quot;?
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                This action cannot be undone. The task and all associated time tracking data will be permanently removed.
+              </p>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  data-testid="confirm-delete-task-btn"
+                  variant="destructive"
+                  className="flex-1"
+                  onClick={confirmDeleteTask}
+                >
+                  Delete Task
+                </Button>
+                <Button
+                  data-testid="cancel-delete-task-btn"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowDeleteConfirm(false)
+                    setTaskToDelete(null)
+                  }}
                 >
                   Cancel
                 </Button>

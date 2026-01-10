@@ -3386,7 +3386,7 @@ export default function VideoStudioClient() {
                         </Badge>
                       )}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button size="sm" className="bg-white text-black hover:bg-gray-100">
+                        <Button size="sm" className="bg-white text-black hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); handleSelectTemplate(template); }}>
                           <Plus className="w-4 h-4 mr-1" />
                           Use Template
                         </Button>
