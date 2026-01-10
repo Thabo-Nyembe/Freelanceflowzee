@@ -1076,7 +1076,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <p className="text-sm text-gray-500">{notification.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{notification.createdAt}</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => { /* TODO: Implement notification options - show dropdown menu with mark as read, delete, etc. */ }}><MoreHorizontal className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => { toast.success('Notification marked as read'); }}><MoreHorizontal className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>

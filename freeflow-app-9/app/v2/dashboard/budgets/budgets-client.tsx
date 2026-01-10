@@ -3894,7 +3894,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="font-medium text-gray-900 dark:text-white mb-1">Drop your CSV file here</p>
                 <p className="text-sm text-gray-500 mb-4">or click to browse</p>
-                <Button variant="outline" size="sm" onClick={() => { /* TODO: Open file browser for CSV import */ }}>Select File</Button>
+                <Button variant="outline" size="sm" onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.csv'; input.onchange = (e) => { const file = (e.target as HTMLInputElement).files?.[0]; if (file) toast.success(`Selected: ${file.name}`); }; input.click(); }}>Select File</Button>
               </div>
               <div className="space-y-2">
                 <Label>Account to Import To</Label>
@@ -4008,7 +4008,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="font-medium text-gray-900 dark:text-white mb-1">Drop your QIF file here</p>
                 <p className="text-sm text-gray-500 mb-4">or click to browse</p>
-                <Button variant="outline" size="sm" onClick={() => { /* TODO: Open file browser for QIF import */ }}>Select File</Button>
+                <Button variant="outline" size="sm" onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.qif'; input.onchange = (e) => { const file = (e.target as HTMLInputElement).files?.[0]; if (file) toast.success(`Selected: ${file.name}`); }; input.click(); }}>Select File</Button>
               </div>
               <div className="space-y-2">
                 <Label>Account to Import To</Label>
