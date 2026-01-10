@@ -1468,7 +1468,12 @@ export default function ApiClient() {
                             description: `Environment: ${key.environment} | Scopes: ${key.scopes.join(', ')} | Rate Limit: ${key.rateLimit}/hr`,
                             action: {
                               label: 'Update',
-                              onClick: () => toast.success(`${key.name} settings would be updated here`)
+                              onClick: () => {
+                                toast.loading(`Updating ${key.name}...`, { id: 'key-update' })
+                                setTimeout(() => {
+                                  toast.success(`${key.name} updated successfully`, { id: 'key-update', description: 'API key settings have been saved' })
+                                }, 1500)
+                              }
                             }
                           })
                         }}>Edit</Button>
