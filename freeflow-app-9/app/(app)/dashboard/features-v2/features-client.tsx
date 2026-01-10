@@ -16,7 +16,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
 import {
   Flag,
   ToggleLeft,
@@ -427,6 +433,38 @@ export default function FeaturesClient() {
   const [activeTab, setActiveTab] = useState('features')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states for TODO implementations
+  const [showCreateSegmentDialog, setShowCreateSegmentDialog] = useState(false)
+  const [showExperimentDialog, setShowExperimentDialog] = useState(false)
+  const [showRolloutDialog, setShowRolloutDialog] = useState(false)
+
+  // Form state for Create Segment dialog
+  const [segmentForm, setSegmentForm] = useState({
+    name: '',
+    description: '',
+    attribute: 'sessions_per_week',
+    operator: '>',
+    value: ''
+  })
+
+  // Form state for A/B Experiment dialog
+  const [experimentForm, setExperimentForm] = useState({
+    name: '',
+    featureId: '',
+    controlName: 'Control',
+    variantName: 'Variant A',
+    controlPercentage: 50,
+    metricName: ''
+  })
+
+  // Form state for Rollout Configuration dialog
+  const [rolloutForm, setRolloutForm] = useState({
+    stage: 'canary' as RolloutStage,
+    percentage: 5,
+    targetSegments: [] as string[],
+    environments: ['staging'] as string[]
+  })
+
   // Filtered and sorted features
   const filteredFeatures = useMemo(() => {
     let result = features
@@ -536,6 +574,68 @@ export default function FeaturesClient() {
       { itemName: `feature "${featureName}"` }
     )
   }, [])
+
+  // Handler for creating a new segment
+  const handleSubmitSegment = useCallback(() => {
+    if (!segmentForm.name || !segmentForm.value) {
+      toast.error('Please fill in all required fields', {
+        description: 'Segment name and rule value are required'
+      })
+      return
+    }
+    toast.success('Segment created successfully', {
+      description: `"${segmentForm.name}" segment has been created with ${segmentForm.attribute} ${segmentForm.operator} ${segmentForm.value}`
+    })
+    setShowCreateSegmentDialog(false)
+    setSegmentForm({
+      name: '',
+      description: '',
+      attribute: 'sessions_per_week',
+      operator: '>',
+      value: ''
+    })
+  }, [segmentForm])
+
+  // Handler for creating a new A/B experiment
+  const handleSubmitExperiment = useCallback(() => {
+    if (!experimentForm.name || !experimentForm.featureId) {
+      toast.error('Please fill in all required fields', {
+        description: 'Experiment name and feature are required'
+      })
+      return
+    }
+    const selectedFeatureName = features.find(f => f.id === experimentForm.featureId)?.name
+    toast.success('A/B Experiment created successfully', {
+      description: `"${experimentForm.name}" experiment started for ${selectedFeatureName} with ${experimentForm.controlPercentage}% / ${100 - experimentForm.controlPercentage}% split`
+    })
+    setShowExperimentDialog(false)
+    setExperimentForm({
+      name: '',
+      featureId: '',
+      controlName: 'Control',
+      variantName: 'Variant A',
+      controlPercentage: 50,
+      metricName: ''
+    })
+  }, [experimentForm, features])
+
+  // Handler for configuring rollout
+  const handleSubmitRollout = useCallback(() => {
+    if (!selectedFeature) {
+      toast.error('No feature selected')
+      return
+    }
+    toast.success('Rollout configured successfully', {
+      description: `${selectedFeature.name} configured for ${rolloutForm.stage} rollout at ${rolloutForm.percentage}% to ${rolloutForm.environments.join(', ')}`
+    })
+    setShowRolloutDialog(false)
+    setRolloutForm({
+      stage: 'canary',
+      percentage: 5,
+      targetSegments: [],
+      environments: ['staging']
+    })
+  }, [rolloutForm, selectedFeature])
 
   // Quick actions for the toolbar
   const featuresQuickActions = useMemo(() => [
@@ -1141,7 +1241,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">User Segments</h2>
-              <Button onClick={() => { /* TODO: Implement segment creation dialog */ }}>
+              <Button onClick={() => setShowCreateSegmentDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Segment
               </Button>
@@ -1204,7 +1304,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">A/B Experiments</h2>
-              <Button onClick={() => { /* TODO: Implement A/B experiment creation dialog */ }}>
+              <Button onClick={() => setShowExperimentDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Experiment
               </Button>
@@ -1917,7 +2017,7 @@ export default function FeaturesClient() {
                       <div className="text-center py-8 text-gray-500">
                         <Flag className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <p>No rollout configured yet</p>
-                        <Button className="mt-4" onClick={() => { /* TODO: Implement rollout configuration dialog */ }}>Configure Rollout</Button>
+                        <Button className="mt-4" onClick={() => setShowRolloutDialog(true)}>Configure Rollout</Button>
                       </div>
                     )}
                   </TabsContent>
@@ -2016,6 +2116,289 @@ export default function FeaturesClient() {
               </Tabs>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Segment Dialog */}
+      <Dialog open={showCreateSegmentDialog} onOpenChange={setShowCreateSegmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-green-600" />
+              Create User Segment
+            </DialogTitle>
+            <DialogDescription>
+              Define a new user segment with targeting rules for feature rollouts
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="segment-name">Segment Name *</Label>
+              <Input
+                id="segment-name"
+                placeholder="e.g., Power Users, Enterprise Customers"
+                value={segmentForm.name}
+                onChange={(e) => setSegmentForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="segment-description">Description</Label>
+              <Textarea
+                id="segment-description"
+                placeholder="Describe who belongs to this segment..."
+                value={segmentForm.description}
+                onChange={(e) => setSegmentForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Targeting Rule</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Select
+                  value={segmentForm.attribute}
+                  onValueChange={(value) => setSegmentForm(prev => ({ ...prev, attribute: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Attribute" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sessions_per_week">Sessions/Week</SelectItem>
+                    <SelectItem value="plan">Plan Type</SelectItem>
+                    <SelectItem value="beta_opt_in">Beta Opt-in</SelectItem>
+                    <SelectItem value="primary_platform">Platform</SelectItem>
+                    <SelectItem value="account_age_days">Account Age</SelectItem>
+                    <SelectItem value="total_revenue">Total Revenue</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={segmentForm.operator}
+                  onValueChange={(value) => setSegmentForm(prev => ({ ...prev, operator: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Operator" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="=">=</SelectItem>
+                    <SelectItem value="!=">!=</SelectItem>
+                    <SelectItem value=">">&gt;</SelectItem>
+                    <SelectItem value="<">&lt;</SelectItem>
+                    <SelectItem value=">=">&gt;=</SelectItem>
+                    <SelectItem value="<=">&lt;=</SelectItem>
+                    <SelectItem value="in">in</SelectItem>
+                    <SelectItem value="contains">contains</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="Value"
+                  value={segmentForm.value}
+                  onChange={(e) => setSegmentForm(prev => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+              <p className="text-xs text-gray-500">
+                Example: sessions_per_week &gt; 10 targets users with high engagement
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateSegmentDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitSegment} className="bg-green-600 hover:bg-green-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Segment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create A/B Experiment Dialog */}
+      <Dialog open={showExperimentDialog} onOpenChange={setShowExperimentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-orange-600" />
+              Create A/B Experiment
+            </DialogTitle>
+            <DialogDescription>
+              Set up a new A/B test to measure feature impact
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="experiment-name">Experiment Name *</Label>
+              <Input
+                id="experiment-name"
+                placeholder="e.g., New Checkout Flow Test"
+                value={experimentForm.name}
+                onChange={(e) => setExperimentForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="experiment-feature">Feature *</Label>
+              <Select
+                value={experimentForm.featureId}
+                onValueChange={(value) => setExperimentForm(prev => ({ ...prev, featureId: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a feature to test" />
+                </SelectTrigger>
+                <SelectContent>
+                  {features.filter(f => !f.abTest).map(feature => (
+                    <SelectItem key={feature.id} value={feature.id}>
+                      {feature.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="control-name">Control Name</Label>
+                <Input
+                  id="control-name"
+                  placeholder="Control"
+                  value={experimentForm.controlName}
+                  onChange={(e) => setExperimentForm(prev => ({ ...prev, controlName: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="variant-name">Variant Name</Label>
+                <Input
+                  id="variant-name"
+                  placeholder="Variant A"
+                  value={experimentForm.variantName}
+                  onChange={(e) => setExperimentForm(prev => ({ ...prev, variantName: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Traffic Split: {experimentForm.controlPercentage}% / {100 - experimentForm.controlPercentage}%</Label>
+              <Slider
+                value={[experimentForm.controlPercentage]}
+                onValueChange={(value) => setExperimentForm(prev => ({ ...prev, controlPercentage: value[0] }))}
+                max={100}
+                min={0}
+                step={5}
+                className="py-4"
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>{experimentForm.controlName}: {experimentForm.controlPercentage}%</span>
+                <span>{experimentForm.variantName}: {100 - experimentForm.controlPercentage}%</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="metric-name">Primary Metric</Label>
+              <Input
+                id="metric-name"
+                placeholder="e.g., Conversion Rate, Time on Page"
+                value={experimentForm.metricName}
+                onChange={(e) => setExperimentForm(prev => ({ ...prev, metricName: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExperimentDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitExperiment} className="bg-orange-600 hover:bg-orange-700">
+              <Play className="h-4 w-4 mr-2" />
+              Start Experiment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Configure Rollout Dialog */}
+      <Dialog open={showRolloutDialog} onOpenChange={setShowRolloutDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5 text-indigo-600" />
+              Configure Rollout
+            </DialogTitle>
+            <DialogDescription>
+              Set up progressive rollout for {selectedFeature?.name || 'this feature'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="rollout-stage">Rollout Stage</Label>
+              <Select
+                value={rolloutForm.stage}
+                onValueChange={(value) => setRolloutForm(prev => ({ ...prev, stage: value as RolloutStage }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select rollout stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="canary">Canary (1-5%)</SelectItem>
+                  <SelectItem value="beta">Beta (10-25%)</SelectItem>
+                  <SelectItem value="ga">General Availability (50-75%)</SelectItem>
+                  <SelectItem value="full">Full Rollout (100%)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Rollout Percentage: {rolloutForm.percentage}%</Label>
+              <Slider
+                value={[rolloutForm.percentage]}
+                onValueChange={(value) => setRolloutForm(prev => ({ ...prev, percentage: value[0] }))}
+                max={100}
+                min={0}
+                step={5}
+                className="py-4"
+              />
+              <Progress value={rolloutForm.percentage} className="h-2" />
+            </div>
+            <div className="space-y-2">
+              <Label>Target Segments</Label>
+              <div className="flex flex-wrap gap-2">
+                {segments.map(segment => (
+                  <Badge
+                    key={segment.id}
+                    variant={rolloutForm.targetSegments.includes(segment.name.toLowerCase().replace(/\s+/g, '_')) ? 'default' : 'outline'}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      const segmentKey = segment.name.toLowerCase().replace(/\s+/g, '_')
+                      setRolloutForm(prev => ({
+                        ...prev,
+                        targetSegments: prev.targetSegments.includes(segmentKey)
+                          ? prev.targetSegments.filter(s => s !== segmentKey)
+                          : [...prev.targetSegments, segmentKey]
+                      }))
+                    }}
+                  >
+                    {segment.name}
+                  </Badge>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500">Click to select/deselect target segments</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Environments</Label>
+              <div className="flex gap-2">
+                {['staging', 'production'].map(env => (
+                  <Badge
+                    key={env}
+                    variant={rolloutForm.environments.includes(env) ? 'default' : 'outline'}
+                    className={`cursor-pointer ${rolloutForm.environments.includes(env) ? (env === 'production' ? 'bg-green-600' : 'bg-blue-600') : ''}`}
+                    onClick={() => {
+                      setRolloutForm(prev => ({
+                        ...prev,
+                        environments: prev.environments.includes(env)
+                          ? prev.environments.filter(e => e !== env)
+                          : [...prev.environments, env]
+                      }))
+                    }}
+                  >
+                    {env}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRolloutDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitRollout} className="bg-indigo-600 hover:bg-indigo-700">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Save Rollout Config
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

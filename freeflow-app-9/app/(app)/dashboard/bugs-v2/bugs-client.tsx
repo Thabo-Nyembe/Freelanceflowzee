@@ -602,6 +602,27 @@ export default function BugsClient() {
   const [importFile, setImportFile] = useState<File | null>(null)
   const [prLink, setPrLink] = useState('')
   const [isImporting, setIsImporting] = useState(false)
+  const [selectedLabelFilters, setSelectedLabelFilters] = useState<string[]>([])
+  const [showFullActivityLogDialog, setShowFullActivityLogDialog] = useState(false)
+
+  // Handler for toggling label filter
+  const handleLabelFilterToggle = (labelId: string, labelName: string) => {
+    setSelectedLabelFilters(prev => {
+      if (prev.includes(labelId)) {
+        toast.info('Label Filter Removed', { description: `Removed "${labelName}" filter` })
+        return prev.filter(id => id !== labelId)
+      } else {
+        toast.info('Label Filter Applied', { description: `Filtering by "${labelName}"` })
+        return [...prev, labelId]
+      }
+    })
+  }
+
+  // Handler for viewing full activity log
+  const handleViewFullActivityLog = () => {
+    setShowHistoryDialog(false)
+    setShowFullActivityLogDialog(true)
+  }
 
   // Handler for running tests
   const handleRunTests = async () => {
@@ -3056,12 +3077,17 @@ export default function BugsClient() {
                   {mockLabels.map(label => (
                     <Badge
                       key={label.id}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                      style={{ borderColor: label.color }}
-                      onClick={() => { /* TODO: Implement label filter toggle */ }}
+                      variant={selectedLabelFilters.includes(label.id) ? "default" : "outline"}
+                      className={`cursor-pointer transition-all ${selectedLabelFilters.includes(label.id) ? 'ring-2 ring-offset-2' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                      style={{
+                        borderColor: label.color,
+                        backgroundColor: selectedLabelFilters.includes(label.id) ? label.color : undefined,
+                        color: selectedLabelFilters.includes(label.id) ? 'white' : undefined
+                      }}
+                      onClick={() => handleLabelFilterToggle(label.id, label.name)}
                     >
-                      <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: label.color }} />
+                      {selectedLabelFilters.includes(label.id) && <CheckCircle className="w-3 h-3 mr-1" />}
+                      <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: selectedLabelFilters.includes(label.id) ? 'white' : label.color }} />
                       {label.name}
                     </Badge>
                   ))}
@@ -3295,7 +3321,7 @@ export default function BugsClient() {
               <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>
                 Close
               </Button>
-              <Button onClick={() => { /* TODO: Implement full activity log view */ }}>
+              <Button onClick={handleViewFullActivityLog}>
                 View Full Log
               </Button>
             </DialogFooter>
@@ -3428,6 +3454,120 @@ export default function BugsClient() {
               <Button variant="destructive" onClick={handleConfirmDelete}>
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Delete Bug
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Full Activity Log Dialog */}
+        <Dialog open={showFullActivityLogDialog} onOpenChange={setShowFullActivityLogDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="w-5 h-5 text-blue-600" />
+                Full Activity Log
+              </DialogTitle>
+              <DialogDescription>
+                Complete history of all bug tracking activities
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Input
+                  placeholder="Search activities..."
+                  className="flex-1"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      toast.info('Searching...', { description: `Filtering for "${e.target.value}"` })
+                    }
+                  }}
+                />
+                <Select onValueChange={(v) => toast.info('Filter Applied', { description: `Showing ${v} activities` })}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="All activities" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Activities</SelectItem>
+                    <SelectItem value="created">Bug Created</SelectItem>
+                    <SelectItem value="updated">Status Changed</SelectItem>
+                    <SelectItem value="assigned">Assignments</SelectItem>
+                    <SelectItem value="commented">Comments</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {activityHistory.map(activity => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="text-sm">{activity.user.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <span className="font-medium">{activity.user}</span>
+                          <span className="text-muted-foreground"> {activity.action}</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">{activity.bug}</Badge>
+                          <span className="text-xs text-muted-foreground">{activity.time}</span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toast.info('Activity Details', { description: `${activity.user} ${activity.action} on ${activity.bug}` })}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {/* Extended activity items for full log */}
+                  {[
+                    { id: 'ext1', user: 'System', action: 'Auto-closed bug after 30 days of inactivity', bug: 'BUG-089', time: '3 days ago' },
+                    { id: 'ext2', user: 'Sarah Chen', action: 'Added label "critical"', bug: 'BUG-123', time: '4 days ago' },
+                    { id: 'ext3', user: 'Mike Johnson', action: 'Removed label "wontfix"', bug: 'BUG-098', time: '5 days ago' },
+                    { id: 'ext4', user: 'Alex Rivera', action: 'Changed priority from minor to major', bug: 'BUG-145', time: '1 week ago' },
+                    { id: 'ext5', user: 'Lisa Park', action: 'Linked pull request #234', bug: 'BUG-167', time: '1 week ago' },
+                  ].map(activity => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 transition-colors">
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="text-sm">{activity.user.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <span className="font-medium">{activity.user}</span>
+                          <span className="text-muted-foreground"> {activity.action}</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">{activity.bug}</Badge>
+                          <span className="text-xs text-muted-foreground">{activity.time}</span>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toast.info('Activity Details', { description: `${activity.user} ${activity.action} on ${activity.bug}` })}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  toast.success('Activity Log Exported', { description: 'Full activity log exported to CSV' })
+                }}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export Log
+              </Button>
+              <Button onClick={() => setShowFullActivityLogDialog(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -516,12 +516,68 @@ export default function CustomerSuccessClient() {
   })
 
   // Mock data for enrollments
-  const [enrollments] = useState([
+  const [enrollments, setEnrollments] = useState([
     { id: '1', customer: 'Acme Corporation', playbook: 'At-Risk Recovery', status: 'active', startedAt: '2024-03-15', progress: 60 },
     { id: '2', customer: 'GlobalTech Inc', playbook: 'Renewal Preparation', status: 'active', startedAt: '2024-03-10', progress: 30 },
     { id: '3', customer: 'InnovateCo', playbook: 'Expansion Play', status: 'active', startedAt: '2024-03-01', progress: 80 },
     { id: '4', customer: 'StartupXYZ', playbook: 'Onboarding', status: 'completed', startedAt: '2024-02-15', progress: 100 },
   ])
+
+  // State for re-enrollment dialog
+  const [showReEnrollDialog, setShowReEnrollDialog] = useState(false)
+  const [selectedEnrollment, setSelectedEnrollment] = useState<typeof enrollments[0] | null>(null)
+
+  // Handler for pausing an enrollment
+  const handlePauseEnrollment = (enrollmentId: string) => {
+    setEnrollments(prev => prev.map(e =>
+      e.id === enrollmentId
+        ? { ...e, status: 'paused' }
+        : e
+    ))
+    const enrollment = enrollments.find(e => e.id === enrollmentId)
+    toast.success('Enrollment paused', {
+      description: `${enrollment?.customer}'s "${enrollment?.playbook}" playbook has been paused. You can resume it anytime.`
+    })
+  }
+
+  // Handler for resuming a paused enrollment
+  const handleResumeEnrollment = (enrollmentId: string) => {
+    setEnrollments(prev => prev.map(e =>
+      e.id === enrollmentId
+        ? { ...e, status: 'active' }
+        : e
+    ))
+    const enrollment = enrollments.find(e => e.id === enrollmentId)
+    toast.success('Enrollment resumed', {
+      description: `${enrollment?.customer}'s "${enrollment?.playbook}" playbook is now active again.`
+    })
+  }
+
+  // Handler for re-enrolling a customer
+  const handleReEnroll = (enrollmentId: string) => {
+    const enrollment = enrollments.find(e => e.id === enrollmentId)
+    if (enrollment) {
+      setSelectedEnrollment(enrollment)
+      setShowReEnrollDialog(true)
+    }
+  }
+
+  // Confirm re-enrollment
+  const confirmReEnroll = () => {
+    if (!selectedEnrollment) return
+
+    const today = new Date().toISOString().split('T')[0]
+    setEnrollments(prev => prev.map(e =>
+      e.id === selectedEnrollment.id
+        ? { ...e, status: 'active', progress: 0, startedAt: today }
+        : e
+    ))
+    toast.success('Customer re-enrolled', {
+      description: `${selectedEnrollment.customer} has been re-enrolled in "${selectedEnrollment.playbook}". Progress has been reset.`
+    })
+    setShowReEnrollDialog(false)
+    setSelectedEnrollment(null)
+  }
 
   // Quick actions with real functionality
   const mockCSQuickActions = [
@@ -2221,7 +2277,7 @@ export default function CustomerSuccessClient() {
                 <div className="text-sm text-gray-500">Completed</div>
               </Card>
               <Card className="p-4">
-                <div className="text-2xl font-bold text-amber-600">0</div>
+                <div className="text-2xl font-bold text-amber-600">{enrollments.filter(e => e.status === 'paused').length}</div>
                 <div className="text-sm text-gray-500">Paused</div>
               </Card>
               <Card className="p-4">
@@ -2265,7 +2321,7 @@ export default function CustomerSuccessClient() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => { /* TODO: Implement enrollment pause */ }}
+                            onClick={() => handlePauseEnrollment(enrollment.id)}
                           >
                             Pause
                           </Button>
@@ -2282,11 +2338,20 @@ export default function CustomerSuccessClient() {
                           </Button>
                         </>
                       )}
+                      {enrollment.status === 'paused' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleResumeEnrollment(enrollment.id)}
+                        >
+                          Resume
+                        </Button>
+                      )}
                       {enrollment.status === 'completed' && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => { /* TODO: Implement customer re-enrollment */ }}
+                          onClick={() => handleReEnroll(enrollment.id)}
                         >
                           Re-enroll
                         </Button>
@@ -2319,6 +2384,48 @@ export default function CustomerSuccessClient() {
               Close
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Re-enrollment Confirmation Dialog */}
+      <Dialog open={showReEnrollDialog} onOpenChange={setShowReEnrollDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCcw className="h-5 w-5 text-emerald-600" />
+              Confirm Re-enrollment
+            </DialogTitle>
+          </DialogHeader>
+          {selectedEnrollment && (
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to re-enroll <span className="font-semibold">{selectedEnrollment.customer}</span> in the{' '}
+                <span className="font-semibold">{selectedEnrollment.playbook}</span> playbook?
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  This will reset the progress to 0% and restart the playbook from the beginning.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowReEnrollDialog(false)
+                    setSelectedEnrollment(null)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={confirmReEnroll}
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
+                  Confirm Re-enrollment
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
