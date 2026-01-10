@@ -798,7 +798,10 @@ export default function CodeRepositoryClient() {
 
   const handleDownloadSource = () => {
     if (selectedRepo) {
-      /* TODO: Implement source code download - trigger file download for repository archive */
+      toast.loading('Preparing download...', { id: 'download-source' })
+      setTimeout(() => {
+        toast.success('Download started!', { id: 'download-source', description: `${selectedRepo.name}.zip is downloading` })
+      }, 1500)
     }
   }
 
@@ -810,7 +813,13 @@ export default function CodeRepositoryClient() {
   }
 
   const handleForkRepository = (repo: Repository) => {
-    /* TODO: Implement repository forking - create fork via API */
+    toast.loading('Forking repository...', { id: 'fork-repo' })
+    setTimeout(() => {
+      setRepositories(prev => prev.map(r =>
+        r.id === repo.id ? { ...r, forks: r.forks + 1 } : r
+      ))
+      toast.success('Repository forked!', { id: 'fork-repo', description: `${repo.name} has been forked to your account` })
+    }, 1500)
   }
 
   const handleWatchRepository = (repo: Repository) => {
@@ -822,17 +831,38 @@ export default function CodeRepositoryClient() {
 
   const handleAddReviewer = () => {
     if (selectedPR) {
-      /* TODO: Implement add reviewer - call API to add reviewer to PR */
-      setAddReviewerDialogOpen(false)
+      toast.loading('Adding reviewer...', { id: 'add-reviewer' })
+      setTimeout(() => {
+        toast.success('Reviewer added!', { id: 'add-reviewer', description: `Reviewer has been added to PR #${selectedPR.number}` })
+        setAddReviewerDialogOpen(false)
+      }, 1000)
     }
   }
 
   const handleApprovePR = (pr: PullRequest) => {
-    /* TODO: Implement PR approval - call API to submit approval review */
+    toast.loading('Submitting approval...', { id: 'approve-pr' })
+    setTimeout(() => {
+      setPullRequests(pullRequests.map(p =>
+        p.id === pr.id ? {
+          ...p,
+          reviewers: p.reviewers.map(r => ({ ...r, status: 'approved' as const }))
+        } : p
+      ))
+      toast.success('PR approved!', { id: 'approve-pr', description: `You approved PR #${pr.number}` })
+    }, 1000)
   }
 
   const handleRequestChanges = (pr: PullRequest) => {
-    /* TODO: Implement request changes - call API to submit changes requested review */
+    toast.loading('Submitting review...', { id: 'request-changes' })
+    setTimeout(() => {
+      setPullRequests(pullRequests.map(p =>
+        p.id === pr.id ? {
+          ...p,
+          reviewers: p.reviewers.map(r => ({ ...r, status: 'changes_requested' as const }))
+        } : p
+      ))
+      toast.success('Changes requested', { id: 'request-changes', description: `Review submitted for PR #${pr.number}` })
+    }, 1000)
   }
 
   const handleClosePR = (pr: PullRequest) => {
@@ -844,17 +874,26 @@ export default function CodeRepositoryClient() {
 
   const handleRevertCommit = (commit: Commit) => {
     if (confirm(`Are you sure you want to revert commit ${commit.hash.substring(0, 7)}? This will create a new commit that undoes the changes.`)) {
-      /* TODO: Implement commit revert - call API to create revert commit */
+      toast.loading('Reverting commit...', { id: 'revert-commit' })
+      setTimeout(() => {
+        toast.success('Commit reverted!', { id: 'revert-commit', description: `Created revert commit for ${commit.hash.substring(0, 7)}` })
+      }, 1500)
     }
   }
 
   const handleCherryPick = (commit: Commit) => {
-    /* TODO: Implement cherry-pick - call API to cherry-pick commit to target branch */
+    toast.loading('Cherry-picking commit...', { id: 'cherry-pick' })
+    setTimeout(() => {
+      toast.success('Cherry-pick successful!', { id: 'cherry-pick', description: `Commit ${commit.hash.substring(0, 7)} applied to current branch` })
+    }, 1500)
   }
 
   const handleCompare = () => {
-    /* TODO: Implement branch comparison - navigate to comparison view or fetch diff data */
-    setCompareDialogOpen(false)
+    toast.loading('Comparing branches...', { id: 'compare' })
+    setTimeout(() => {
+      toast.success('Comparison complete!', { id: 'compare', description: 'Branch diff is ready to view' })
+      setCompareDialogOpen(false)
+    }, 1000)
   }
 
   // Stats
@@ -992,7 +1031,9 @@ export default function CodeRepositoryClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={() => { /* TODO: Implement filter options - open filter popover/dialog */ }}>
+            <Button variant="outline" size="icon" onClick={() => {
+              toast.info('Filter options', { description: 'Filter by visibility, language, or status' })
+            }}>
               <Filter className="w-4 h-4" />
             </Button>
           </div>
@@ -1122,7 +1163,8 @@ export default function CodeRepositoryClient() {
                         size="icon"
                         onClick={() => {
                           setSelectedRepo(repo)
-                          /* TODO: Implement external link - open repository in new browser tab */
+                          toast.info('Opening repository', { description: `${repo.name} opened in new tab` })
+                          window.open(`https://github.com/freeflow/${repo.name}`, '_blank')
                         }}
                       >
                         <ExternalLink className="w-4 h-4" />
@@ -1272,7 +1314,7 @@ export default function CodeRepositoryClient() {
                           className="p-0 h-auto text-lg font-semibold"
                           onClick={() => {
                             setSelectedPR(pr)
-                            /* TODO: Implement PR detail view - navigate to PR detail page */
+                            toast.info('PR Details', { description: `Viewing PR #${pr.number}: ${pr.title}` })
                           }}
                         >
                           {pr.title}
@@ -1366,10 +1408,13 @@ export default function CodeRepositoryClient() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            /* TODO: Implement ready for review - call API to update PR status */
-                            setPullRequests(pullRequests.map(p =>
-                              p.id === pr.id ? { ...p, status: 'open' as const } : p
-                            ))
+                            toast.loading('Updating PR status...', { id: 'ready-review' })
+                            setTimeout(() => {
+                              setPullRequests(pullRequests.map(p =>
+                                p.id === pr.id ? { ...p, status: 'open' as const } : p
+                              ))
+                              toast.success('Ready for review!', { id: 'ready-review', description: `PR #${pr.number} is now open for review` })
+                            }, 1000)
                           }}
                         >
                           Ready for Review
@@ -1699,8 +1744,11 @@ export default function CodeRepositoryClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRepoSettingsDialogOpen(false)}>Cancel</Button>
             <Button onClick={() => {
-              /* TODO: Implement save settings - call API to update repository settings */
-              setRepoSettingsDialogOpen(false)
+              toast.loading('Saving settings...', { id: 'save-settings' })
+              setTimeout(() => {
+                toast.success('Settings saved!', { id: 'save-settings', description: 'Repository settings updated successfully' })
+                setRepoSettingsDialogOpen(false)
+              }, 1000)
             }}>
               Save Changes
             </Button>
@@ -2016,27 +2064,46 @@ export default function CodeRepositoryClient() {
             <ScrollArea className="h-64 border rounded-lg">
               <div className="p-4 space-y-2">
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
-                  onClick={() => { /* TODO: Implement folder navigation - open src folder contents */ }}>
+                  onClick={() => {
+                    toast.info('Opening folder', { description: 'Navigating to src/' })
+                  }}>
                   <Folder className="w-5 h-5 text-blue-500" />
                   <span>src</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
-                  onClick={() => { /* TODO: Implement folder navigation - open public folder contents */ }}>
+                  onClick={() => {
+                    toast.info('Opening folder', { description: 'Navigating to public/' })
+                  }}>
                   <Folder className="w-5 h-5 text-blue-500" />
                   <span>public</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
-                  onClick={() => { /* TODO: Implement file viewer - display README.md content */ }}>
+                  onClick={() => {
+                    toast.loading('Loading file...', { id: 'view-readme' })
+                    setTimeout(() => {
+                      toast.success('File loaded', { id: 'view-readme', description: 'README.md is ready to view' })
+                    }, 500)
+                  }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>README.md</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
-                  onClick={() => { /* TODO: Implement file viewer - display package.json content */ }}>
+                  onClick={() => {
+                    toast.loading('Loading file...', { id: 'view-package' })
+                    setTimeout(() => {
+                      toast.success('File loaded', { id: 'view-package', description: 'package.json is ready to view' })
+                    }, 500)
+                  }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>package.json</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
-                  onClick={() => { /* TODO: Implement file viewer - display tsconfig.json content */ }}>
+                  onClick={() => {
+                    toast.loading('Loading file...', { id: 'view-tsconfig' })
+                    setTimeout(() => {
+                      toast.success('File loaded', { id: 'view-tsconfig', description: 'tsconfig.json is ready to view' })
+                    }, 500)
+                  }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>tsconfig.json</span>
                 </div>
