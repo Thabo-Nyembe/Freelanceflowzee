@@ -35,7 +35,7 @@ export function useSales(options?: { user_id?: string; client_id?: string; statu
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSales(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.client_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.client_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sales, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useSalesOrders(options?: { user_id?: string; status?: string; li
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useSalesTargets(options?: { user_id?: string; period?: string; y
       const { data } = await query.order('created_at', { ascending: false })
       setTargets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.period, options?.year, supabase])
+  }, [options?.user_id, options?.period, options?.year])
   useEffect(() => { fetch() }, [fetch])
   return { targets, isLoading, refresh: fetch }
 }
@@ -90,7 +90,7 @@ export function useSalesPipeline(options?: { user_id?: string; stage?: string })
       const { data } = await query.order('value', { ascending: false })
       setPipeline(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.stage, supabase])
+  }, [options?.user_id, options?.stage])
   useEffect(() => { fetch() }, [fetch])
   return { pipeline, isLoading, refresh: fetch }
 }

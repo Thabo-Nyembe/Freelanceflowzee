@@ -40,7 +40,7 @@ export function useSummaries(options?: { summary_type?: string; entity_type?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSummaries(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.summary_type, options?.entity_type, options?.entity_id, options?.period, options?.status, options?.created_by, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.summary_type, options?.entity_type, options?.entity_id, options?.period, options?.status, options?.created_by, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { summaries, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useSummarySchedules(options?: { summary_type?: string; is_active
       const { data } = await query.order('next_run_at', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.summary_type, options?.is_active, supabase])
+  }, [options?.summary_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -97,7 +97,7 @@ export function useSummaryHistory(summaryId?: string, options?: { limit?: number
     if (!summaryId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('summary_history').select('*').eq('summary_id', summaryId).order('occurred_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [summaryId, options?.limit, supabase])
+  }, [summaryId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useLatestSummary(entityType?: string, entityId?: string, summary
       const { data } = await supabase.from('summaries').select('*, summary_sections(*), summary_metrics(*)').eq('entity_type', entityType).eq('entity_id', entityId).eq('summary_type', summaryType).eq('status', 'published').order('published_at', { ascending: false }).limit(1).single()
       setSummary(data)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, summaryType, supabase])
+  }, [entityType, entityId, summaryType])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -131,7 +131,7 @@ export function useMySummaries(userId?: string, options?: { status?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSummaries(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { summaries, isLoading, refresh: fetch }
 }
@@ -149,7 +149,7 @@ export function usePublicSummaries(options?: { summary_type?: string; period?: s
       const { data } = await query.order('published_at', { ascending: false }).limit(options?.limit || 50)
       setSummaries(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.summary_type, options?.period, options?.limit, supabase])
+  }, [options?.summary_type, options?.period, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { summaries, isLoading, refresh: fetch }
 }

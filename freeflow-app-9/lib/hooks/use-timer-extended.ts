@@ -35,7 +35,7 @@ export function useTimers(options?: { user_id?: string; project_id?: string; sta
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTimers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.project_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.project_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { timers, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useTimerEntries(options?: { user_id?: string; project_id?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setEntries(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.project_id, options?.date, options?.limit, supabase])
+  }, [options?.user_id, options?.project_id, options?.date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { entries, isLoading, refresh: fetch }
 }

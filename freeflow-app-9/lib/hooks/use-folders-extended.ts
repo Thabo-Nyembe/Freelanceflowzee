@@ -38,7 +38,7 @@ export function useFolders(options?: { owner_id?: string; parent_id?: string | n
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setFolders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.parent_id, options?.is_deleted, options?.limit, supabase])
+  }, [options?.owner_id, options?.parent_id, options?.is_deleted, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { folders, isLoading, refresh: fetch }
 }

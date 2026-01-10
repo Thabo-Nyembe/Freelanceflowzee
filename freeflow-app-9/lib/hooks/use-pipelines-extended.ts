@@ -36,7 +36,7 @@ export function usePipelines(options?: { organization_id?: string; owner_id?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPipelines(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.owner_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.organization_id, options?.owner_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { pipelines, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function usePipelineItems(pipelineId?: string, options?: { stage_id?: str
       const { data } = await query.order('position', { ascending: true }).order('created_at', { ascending: false }).limit(options?.limit || 100)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [pipelineId, options?.stage_id, options?.status, options?.owner_id, options?.limit, supabase])
+  }, [pipelineId, options?.stage_id, options?.status, options?.owner_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -114,7 +114,7 @@ export function usePipelineMetrics(pipelineId?: string, options?: { from_date?: 
       const { data } = await query.order('moved_at', { ascending: false })
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [pipelineId, options?.from_date, options?.to_date, supabase])
+  }, [pipelineId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }

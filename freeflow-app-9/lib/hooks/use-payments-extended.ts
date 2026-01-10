@@ -39,7 +39,7 @@ export function usePayments(userId?: string, options?: { status?: string; limit?
       setData(result || [])
       setTotal(count || 0)
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, total, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function usePaymentMethods(userId?: string, options?: { type?: string; is
       const { data: result } = await query.order('is_default', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.isVerified, supabase])
+  }, [userId, options?.type, options?.isVerified])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function usePaymentLinks(userId?: string, options?: { isActive?: boolean;
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, options?.limit, supabase])
+  }, [userId, options?.isActive, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -181,7 +181,7 @@ export function usePaymentAnalytics(options?: { period?: string; limit?: number 
       const { data: result } = await query.order('period_start', { ascending: false }).limit(options?.limit || 30)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.period, options?.limit, supabase])
+  }, [options?.period, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

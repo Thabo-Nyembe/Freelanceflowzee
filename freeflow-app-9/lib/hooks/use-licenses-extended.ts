@@ -35,7 +35,7 @@ export function useUserLicenses(userId?: string, options?: { status?: string; pr
       const { data } = await query.order('created_at', { ascending: false })
       setLicenses(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.product_id, supabase])
+  }, [userId, options?.status, options?.product_id])
   useEffect(() => { fetch() }, [fetch])
   return { licenses, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useExpiringLicenses(userId?: string, options?: { days?: number }
       const { data } = await supabase.from('licenses').select('*, license_types(*)').eq('user_id', userId).eq('status', 'active').lte('expires_at', futureDate.toISOString()).gte('expires_at', new Date().toISOString()).order('expires_at', { ascending: true })
       setLicenses(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.days, supabase])
+  }, [userId, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { licenses, isLoading, refresh: fetch }
 }

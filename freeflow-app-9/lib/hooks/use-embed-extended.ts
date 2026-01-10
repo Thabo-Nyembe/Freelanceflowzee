@@ -37,7 +37,7 @@ export function useEmbeds(options?: { embedType?: string; workspaceId?: string; 
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.embedType, options?.workspaceId, options?.userId, supabase])
+  }, [options?.embedType, options?.workspaceId, options?.userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useEntityEmbeds(entityType?: string, entityId?: string) {
       const { data: result } = await supabase.from('entity_embeds').select('embed_id, embeds(*)').eq('entity_type', entityType).eq('entity_id', entityId)
       setData(result?.map(ee => ee.embeds) || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

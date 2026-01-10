@@ -42,7 +42,7 @@ export function useUserMembership(userId?: string, programId?: string) {
     if (!userId || !programId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('loyalty_members').select('*, loyalty_programs(*), loyalty_tiers(*)').eq('user_id', userId).eq('program_id', programId).single(); setMembership(data) } finally { setIsLoading(false) }
-  }, [userId, programId, supabase])
+  }, [userId, programId])
   useEffect(() => { fetch() }, [fetch])
   return { membership, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useLoyaltyTransactions(memberId?: string, options?: { type?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTransactions(data || [])
     } finally { setIsLoading(false) }
-  }, [memberId, options?.type, options?.limit, supabase])
+  }, [memberId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useLoyaltyRewards(programId?: string, options?: { is_active?: bo
       const { data } = await query.order('points_cost', { ascending: true })
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [programId, options?.is_active, supabase])
+  }, [programId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, isLoading, refresh: fetch }
 }

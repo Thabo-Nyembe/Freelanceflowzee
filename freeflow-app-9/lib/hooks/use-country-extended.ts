@@ -37,7 +37,7 @@ export function useCountries(options?: { continent?: string; region?: string; is
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.continent, options?.region, options?.isActive, supabase])
+  }, [options?.continent, options?.region, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useCountryCities(countryCode?: string, stateCode?: string) {
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [countryCode, stateCode, supabase])
+  }, [countryCode, stateCode])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

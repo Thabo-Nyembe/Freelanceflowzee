@@ -38,7 +38,7 @@ export function useBulkOperations(options?: { operationType?: string; entityType
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.operationType, options?.entityType, options?.status, options?.userId, supabase])
+  }, [options?.operationType, options?.entityType, options?.status, options?.userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -68,7 +68,7 @@ export function useExchangeRate(baseCurrency?: string, targetCurrency?: string) 
       const { data } = await supabase.from('exchange_rates').select('rate').eq('base_currency', baseCurrency).eq('target_currency', targetCurrency).single()
       setRate(data?.rate || null)
     } finally { setIsLoading(false) }
-  }, [baseCurrency, targetCurrency, supabase])
+  }, [baseCurrency, targetCurrency])
   useEffect(() => { fetch() }, [fetch])
   return { rate, isLoading, refresh: fetch }
 }

@@ -16,7 +16,7 @@ export function useLikeStatus(userId?: string, entityType?: string, entityId?: s
     if (!userId || !entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('likes').select('id').eq('user_id', userId).eq('entity_type', entityType).eq('entity_id', entityId).single(); setIsLiked(!!data) } finally { setIsLoading(false) }
-  }, [userId, entityType, entityId, supabase])
+  }, [userId, entityType, entityId])
   useEffect(() => { check() }, [check])
   return { isLiked, isLoading, recheck: check }
 }
@@ -29,7 +29,7 @@ export function useLikeCount(entityType?: string, entityId?: string) {
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('like_counts').select('count').eq('entity_type', entityType).eq('entity_id', entityId).single(); setCount(data?.count || 0) } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -42,7 +42,7 @@ export function useLikesForEntity(entityType?: string, entityId?: string, option
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('likes').select('*').eq('entity_type', entityType).eq('entity_id', entityId).order('created_at', { ascending: false }).limit(options?.limit || 50); setLikes(data || []) } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.limit, supabase])
+  }, [entityType, entityId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { likes, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useUserLikes(userId?: string, options?: { entity_type?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setLikes(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.entity_type, options?.limit, supabase])
+  }, [userId, options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { likes, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useReactions(entityType?: string, entityId?: string) {
       data?.forEach(r => { reactionCounts[r.reaction_type] = (reactionCounts[r.reaction_type] || 0) + 1 })
       setCounts(reactionCounts)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { reactions, counts, isLoading, refresh: fetch }
 }
@@ -93,7 +93,7 @@ export function useUserReaction(userId?: string, entityType?: string, entityId?:
     if (!userId || !entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('like_reactions').select('*').eq('user_id', userId).eq('entity_type', entityType).eq('entity_id', entityId).single(); setReaction(data) } finally { setIsLoading(false) }
-  }, [userId, entityType, entityId, supabase])
+  }, [userId, entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { reaction, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function useMostLiked(entityType?: string, options?: { limit?: number; pe
       const { data } = await query.order('count', { ascending: false }).limit(options?.limit || 10)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, options?.limit, options?.period, supabase])
+  }, [entityType, options?.limit, options?.period])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useLikeAndReaction(userId?: string, entityType?: string, entityI
         likeCount: countResult.data?.count || 0
       })
     } finally { setIsLoading(false) }
-  }, [userId, entityType, entityId, supabase])
+  }, [userId, entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { ...state, isLoading, refresh: fetch }
 }

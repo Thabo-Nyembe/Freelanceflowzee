@@ -20,7 +20,7 @@ export function useAttachments(parentId?: string, parentType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [parentId, parentType, supabase])
+  }, [parentId, parentType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function useAttachmentsByUser(userId?: string, fileType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, fileType, supabase])
+  }, [userId, fileType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

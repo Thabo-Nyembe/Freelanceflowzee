@@ -34,7 +34,7 @@ export function useCapacityPlans(options?: { user_id?: string; status?: string; 
       const { data } = await query.order('start_date', { ascending: true }).limit(options?.limit || 50)
       setPlans(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { plans, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useCapacityAllocations(planId?: string, options?: { resource_id?
       const { data } = await query.order('start_date', { ascending: true })
       setAllocations(data || [])
     } finally { setIsLoading(false) }
-  }, [planId, options?.resource_id, options?.project_id, options?.status, supabase])
+  }, [planId, options?.resource_id, options?.project_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { allocations, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useCapacityForecasts(planId?: string, options?: { date_from?: st
       const { data } = await query.order('date', { ascending: true })
       setForecasts(data || [])
     } finally { setIsLoading(false) }
-  }, [planId, options?.date_from, options?.date_to, supabase])
+  }, [planId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { forecasts, isLoading, refresh: fetch }
 }

@@ -23,7 +23,7 @@ export function useSetting(key?: string, scope?: { type: string; id: string }) {
       const { data } = await supabase.from('settings').select('*, setting_categories(*)').eq('key', key).single()
       setSetting(data)
     } finally { setIsLoading(false) }
-  }, [key, scope?.type, scope?.id, supabase])
+  }, [key, scope?.type, scope?.id])
   useEffect(() => { fetch() }, [fetch])
   return { setting, isLoading, refresh: fetch }
 }
@@ -43,7 +43,7 @@ export function useSettings(options?: { category_id?: string; is_public?: boolea
       const { data } = await query.order('key', { ascending: true })
       setSettings(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.is_public, options?.search, JSON.stringify(options?.keys), supabase])
+  }, [options?.category_id, options?.is_public, options?.search, JSON.stringify(options?.keys)])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function useSettingsMap(keys: string[], scope?: { type: string; id: strin
       }
       setSettingsMap(map)
     } finally { setIsLoading(false) }
-  }, [JSON.stringify(keys), scope?.type, scope?.id, supabase])
+  }, [JSON.stringify(keys), scope?.type, scope?.id])
   useEffect(() => { fetch() }, [fetch])
   return { settingsMap, isLoading, refresh: fetch, getValue: (key: string) => settingsMap[key] }
 }
@@ -86,7 +86,7 @@ export function useSettingCategories(options?: { parent_id?: string | null; is_a
       const { data } = await query.order('order', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.parent_id, options?.is_active, supabase])
+  }, [options?.parent_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -107,7 +107,7 @@ export function useSettingHistory(settingKey?: string, options?: { from_date?: s
       const { data } = await query.order('changed_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [settingKey, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [settingKey, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function useSettingPresets(options?: { category?: string; is_active?: boo
       const { data } = await query.order('name', { ascending: true })
       setPresets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { presets, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useSettingOverrides(scope?: { type: string; id: string }) {
       const { data } = await supabase.from('setting_overrides').select('*, settings(*)').eq('scope_type', scope.type).eq('scope_id', scope.id)
       setOverrides(data || [])
     } finally { setIsLoading(false) }
-  }, [scope?.type, scope?.id, supabase])
+  }, [scope?.type, scope?.id])
   useEffect(() => { fetch() }, [fetch])
   return { overrides, isLoading, refresh: fetch }
 }

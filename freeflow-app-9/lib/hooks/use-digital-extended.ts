@@ -35,7 +35,7 @@ export function useDigitalAssets(options?: { user_id?: string; type?: string; st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAssets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { assets, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useDownloadHistory(assetId?: string, options?: { limit?: number 
     if (!assetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('digital_downloads').select('*').eq('asset_id', assetId).order('downloaded_at', { ascending: false }).limit(options?.limit || 100); setDownloads(data || []) } finally { setIsLoading(false) }
-  }, [assetId, options?.limit, supabase])
+  }, [assetId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { downloads, isLoading, refresh: fetch }
 }
@@ -61,7 +61,7 @@ export function useUserDownloads(userId?: string, options?: { limit?: number }) 
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('digital_downloads').select('*, digital_assets(*)').eq('user_id', userId).order('downloaded_at', { ascending: false }).limit(options?.limit || 50); setDownloads(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { downloads, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function useDigitalLicenses(userId?: string, options?: { status?: string 
       const { data } = await query.order('created_at', { ascending: false })
       setLicenses(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { licenses, isLoading, refresh: fetch }
 }
@@ -97,7 +97,7 @@ export function useDigitalProducts(options?: { category?: string; is_active?: bo
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProducts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, options?.limit, supabase])
+  }, [options?.category, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { products, isLoading, refresh: fetch }
 }
@@ -111,7 +111,7 @@ export function useAssetLicense(assetId?: string, userId?: string) {
     if (!assetId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('digital_licenses').select('*').eq('asset_id', assetId).eq('user_id', userId).eq('status', 'active').single(); setLicense(data); setHasLicense(!!data) } finally { setIsLoading(false) }
-  }, [assetId, userId, supabase])
+  }, [assetId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { license, hasLicense, isLoading, refresh: fetch }
 }

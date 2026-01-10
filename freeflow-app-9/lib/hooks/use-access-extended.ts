@@ -20,7 +20,7 @@ export function useAccessLogs(userId?: string, resourceType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, resourceType, supabase])
+  }, [userId, resourceType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useDocs(options?: { project_id?: string; type?: string; status?:
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setDocs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.type, options?.status, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.project_id, options?.type, options?.status, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { docs, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useDocFeedback(docId?: string, options?: { page_id?: string; typ
       const { data } = await query.order('created_at', { ascending: false })
       setFeedback(data || [])
     } finally { setIsLoading(false) }
-  }, [docId, options?.page_id, options?.type, supabase])
+  }, [docId, options?.page_id, options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { feedback, isLoading, refresh: fetch }
 }
@@ -126,7 +126,7 @@ export function usePublicDocs(options?: { type?: string; search?: string; limit?
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setDocs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.search, options?.limit, supabase])
+  }, [options?.type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { docs, isLoading, refresh: fetch }
 }
@@ -158,7 +158,7 @@ export function useUserDocs(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('docs').select('*').eq('owner_id', userId).order('updated_at', { ascending: false }).limit(options?.limit || 50); setDocs(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { docs, isLoading, refresh: fetch }
 }

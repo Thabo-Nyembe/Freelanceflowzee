@@ -35,7 +35,7 @@ export function useTags(options?: { group_id?: string; is_system?: boolean; sear
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setTags(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.group_id, options?.is_system, options?.search, options?.limit, supabase])
+  }, [options?.group_id, options?.is_system, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useEntityTags(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('tag_assignments').select('*, tags(*, tag_groups(*))').eq('entity_type', entityType).eq('entity_id', entityId)
       setTags((data || []).map(a => a.tags))
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function usePopularTags(options?: { entity_type?: string; limit?: number 
       const { data } = await supabase.from('tags').select('*, tag_groups(*)').order('usage_count', { ascending: false }).limit(options?.limit || 20)
       setTags(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.limit, supabase])
+  }, [options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useEntitiesByTag(tagId?: string, entityType?: string, options?: 
       const { data } = await query.order('assigned_at', { ascending: false }).limit(options?.limit || 100)
       setEntities(data || [])
     } finally { setIsLoading(false) }
-  }, [tagId, entityType, options?.limit, supabase])
+  }, [tagId, entityType, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { entities, isLoading, refresh: fetch }
 }
@@ -140,7 +140,7 @@ export function useTagSearch(searchTerm: string, options?: { group_id?: string; 
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 10)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, options?.group_id, options?.limit, supabase])
+  }, [searchTerm, options?.group_id, options?.limit])
   useEffect(() => { const timeout = setTimeout(search, 300); return () => clearTimeout(timeout) }, [search])
   return { results, isLoading }
 }
@@ -158,7 +158,7 @@ export function useRecentlyUsedTags(userId?: string, options?: { limit?: number 
       data?.forEach(a => { if (!uniqueTags.has(a.tag_id)) uniqueTags.set(a.tag_id, a.tags) })
       setTags(Array.from(uniqueTags.values()))
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tags, isLoading, refresh: fetch }
 }

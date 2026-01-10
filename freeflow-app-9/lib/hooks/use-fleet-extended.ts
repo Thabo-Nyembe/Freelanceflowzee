@@ -35,7 +35,7 @@ export function useVehicles(options?: { status?: string; type?: string; driver_i
       const { data } = await query.order('registration_number', { ascending: true }).limit(options?.limit || 100)
       setVehicles(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.type, options?.driver_id, options?.limit, supabase])
+  }, [options?.status, options?.type, options?.driver_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vehicles, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useDrivers(options?: { status?: string; license_type?: string; l
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setDrivers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.license_type, options?.limit, supabase])
+  }, [options?.status, options?.license_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { drivers, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useTrips(options?: { vehicle_id?: string; driver_id?: string; st
       const { data } = await query.order('scheduled_start', { ascending: false }).limit(options?.limit || 50)
       setTrips(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.vehicle_id, options?.driver_id, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.vehicle_id, options?.driver_id, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { trips, isLoading, refresh: fetch }
 }
@@ -105,7 +105,7 @@ export function useVehicleTrips(vehicleId?: string, options?: { status?: string;
       const { data } = await query.order('scheduled_start', { ascending: false }).limit(options?.limit || 20)
       setTrips(data || [])
     } finally { setIsLoading(false) }
-  }, [vehicleId, options?.status, options?.limit, supabase])
+  }, [vehicleId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { trips, isLoading, refresh: fetch }
 }
@@ -123,7 +123,7 @@ export function useMaintenanceRecords(vehicleId?: string, options?: { status?: s
       const { data } = await query.order('scheduled_date', { ascending: false }).limit(options?.limit || 20)
       setRecords(data || [])
     } finally { setIsLoading(false) }
-  }, [vehicleId, options?.status, options?.limit, supabase])
+  }, [vehicleId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { records, isLoading, refresh: fetch }
 }
@@ -142,7 +142,7 @@ export function useFuelLogs(vehicleId?: string, options?: { from_date?: string; 
       const { data } = await query.order('logged_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [vehicleId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [vehicleId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

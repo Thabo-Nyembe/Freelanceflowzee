@@ -36,7 +36,7 @@ export function useSources(options?: { type_id?: string; status?: string; is_act
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setSources(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.status, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.type_id, options?.status, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sources, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useSyncHistory(sourceId?: string, options?: { status?: string; l
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 20)
       setSyncs(data || [])
     } finally { setIsLoading(false) }
-  }, [sourceId, options?.status, options?.limit, supabase])
+  }, [sourceId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { syncs, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function useSourceLogs(sourceId?: string, options?: { level?: string; eve
       const { data } = await query.order('logged_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [sourceId, options?.level, options?.event_type, options?.from_date, options?.limit, supabase])
+  }, [sourceId, options?.level, options?.event_type, options?.from_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function useAliasByName(name?: string, type?: string) {
       const { data } = await query.single()
       setAlias(data)
     } finally { setIsLoading(false) }
-  }, [name, type, supabase])
+  }, [name, type])
   useEffect(() => { fetch() }, [fetch])
   return { alias, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useTargetAliases(targetId?: string, targetType?: string) {
       setData(result || [])
       setPrimaryAlias(result?.find(a => a.is_primary) || null)
     } finally { setIsLoading(false) }
-  }, [targetId, targetType, supabase])
+  }, [targetId, targetType])
   useEffect(() => { fetch() }, [fetch])
   return { data, primaryAlias, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useAliasAvailability(aliasName?: string, aliasType?: string) {
       const { data } = await supabase.from('aliases').select('id').eq('alias_name', aliasName).eq('alias_type', aliasType).single()
       setIsAvailable(!data)
     } catch { setIsAvailable(true) } finally { setIsLoading(false) }
-  }, [aliasName, aliasType, supabase])
+  }, [aliasName, aliasType])
   useEffect(() => { check() }, [check])
   return { isAvailable, isLoading, check }
 }

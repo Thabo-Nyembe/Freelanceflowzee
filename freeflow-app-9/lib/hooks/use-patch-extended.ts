@@ -37,7 +37,7 @@ export function usePatches(options?: { productId?: string; status?: string; isCr
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.productId, options?.status, options?.isCritical, supabase])
+  }, [options?.productId, options?.status, options?.isCritical])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function usePatchesByVersion(version?: string, productId?: string) {
       const { data: result } = await query.order('patch_number', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [version, productId, supabase])
+  }, [version, productId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

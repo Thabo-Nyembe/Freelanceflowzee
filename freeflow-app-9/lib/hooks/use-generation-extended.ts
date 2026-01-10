@@ -36,7 +36,7 @@ export function useGenerations(options?: { user_id?: string; type?: string; stat
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setGenerations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.model_id, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.model_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { generations, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUserGenerations(userId?: string, options?: { type?: string; l
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setGenerations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { generations, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useGenerationTemplates(options?: { type?: string; is_public?: bo
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.type, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function useGenerationModels(options?: { type?: string; is_active?: boole
       const { data } = await query.order('name', { ascending: true })
       setModels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { models, isLoading, refresh: fetch }
 }
@@ -137,7 +137,7 @@ export function useGenerationHistory(userId?: string, options?: { type?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [userId, options?.type, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

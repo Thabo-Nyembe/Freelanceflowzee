@@ -35,7 +35,7 @@ export function useVariables(options?: { group_id?: string; type?: string; is_ac
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setVariables(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.group_id, options?.type, options?.is_active, options?.limit, supabase])
+  }, [options?.group_id, options?.type, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { variables, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useVariableHistory(variableId?: string, options?: { limit?: numb
     if (!variableId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('variable_history').select('*').eq('variable_id', variableId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [variableId, options?.limit, supabase])
+  }, [variableId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

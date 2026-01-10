@@ -36,7 +36,7 @@ export function usePolls(options?: { creator_id?: string; status?: string; visib
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPolls(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.creator_id, options?.status, options?.visibility, options?.search, options?.limit, supabase])
+  }, [options?.creator_id, options?.status, options?.visibility, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { polls, isLoading, refresh: fetch }
 }
@@ -89,7 +89,7 @@ export function useHasVoted(pollId?: string, userId?: string) {
       setHasVoted((data?.length || 0) > 0)
       setVotedOptions(data?.map(v => v.option_id) || [])
     } finally { setIsLoading(false) }
-  }, [pollId, userId, supabase])
+  }, [pollId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { hasVoted, votedOptions, isLoading, refresh: fetch }
 }
@@ -102,7 +102,7 @@ export function usePollComments(pollId?: string, options?: { limit?: number }) {
     if (!pollId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('poll_comments').select('*, users(*)').eq('poll_id', pollId).is('parent_id', null).order('created_at', { ascending: false }).limit(options?.limit || 50); setComments(data || []) } finally { setIsLoading(false) }
-  }, [pollId, options?.limit, supabase])
+  }, [pollId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -132,7 +132,7 @@ export function useActivePolls(options?: { visibility?: string; limit?: number }
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setPolls(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.visibility, options?.limit, supabase])
+  }, [options?.visibility, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { polls, isLoading, refresh: fetch }
 }
@@ -150,7 +150,7 @@ export function useMyPolls(userId?: string, options?: { status?: string; limit?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPolls(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { polls, isLoading, refresh: fetch }
 }
@@ -168,7 +168,7 @@ export function usePollVoters(pollId?: string, optionId?: string) {
       const { data } = await query.order('voted_at', { ascending: false })
       setVoters(data || [])
     } finally { setIsLoading(false) }
-  }, [pollId, optionId, supabase])
+  }, [pollId, optionId])
   useEffect(() => { fetch() }, [fetch])
   return { voters, isLoading, refresh: fetch }
 }

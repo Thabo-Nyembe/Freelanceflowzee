@@ -35,7 +35,7 @@ export function useInventoryItems(options?: { location_id?: string; category?: s
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.location_id, options?.category, options?.status, options?.limit, supabase])
+  }, [options?.location_id, options?.category, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useInventoryMovements(itemId?: string, options?: { type?: string
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setMovements(data || [])
     } finally { setIsLoading(false) }
-  }, [itemId, options?.type, options?.limit, supabase])
+  }, [itemId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { movements, isLoading, refresh: fetch }
 }

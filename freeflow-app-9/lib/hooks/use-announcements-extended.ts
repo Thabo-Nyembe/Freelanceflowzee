@@ -37,7 +37,7 @@ export function useAnnouncements(options?: { user_id?: string; type?: string; st
       const { data } = await query.order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAnnouncements(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.priority, options?.is_pinned, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.priority, options?.is_pinned, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { announcements, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useActiveAnnouncements(options?: { target_audience?: string; lim
       })
       setAnnouncements(filtered)
     } finally { setIsLoading(false) }
-  }, [options?.target_audience, options?.limit, supabase])
+  }, [options?.target_audience, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { announcements, isLoading, refresh: fetch }
 }

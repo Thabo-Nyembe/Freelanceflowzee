@@ -33,7 +33,7 @@ export function useSemanticEmbeddings(options?: { content_type?: string; limit?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setEmbeddings(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.content_type, options?.limit, supabase])
+  }, [options?.content_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { embeddings, isLoading, refresh: fetch }
 }
@@ -51,7 +51,7 @@ export function useSemanticIndexes(options?: { index_type?: string; is_active?: 
       const { data } = await query.order('name', { ascending: true })
       setIndexes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.index_type, options?.is_active, supabase])
+  }, [options?.index_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { indexes, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useSemanticSearches(options?: { user_id?: string; limit?: number
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSearches(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.limit, supabase])
+  }, [options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { searches, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useSemanticClusters(options?: { index_id?: string; is_active?: b
       const { data } = await query.order('name', { ascending: true })
       setClusters(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.index_id, options?.is_active, supabase])
+  }, [options?.index_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { clusters, isLoading, refresh: fetch }
 }

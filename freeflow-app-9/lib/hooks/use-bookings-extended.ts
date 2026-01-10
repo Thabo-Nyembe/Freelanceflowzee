@@ -35,7 +35,7 @@ export function useBookings(options?: { user_id?: string; provider_id?: string; 
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 50)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.provider_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.provider_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUpcomingBookings(userId?: string, options?: { as_provider?: b
       const { data } = await query.gte('start_time', now).in('status', ['pending', 'confirmed']).order('start_time', { ascending: true }).limit(options?.limit || 10)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.as_provider, options?.limit, supabase])
+  }, [userId, options?.as_provider, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useAvailableSlots(providerId?: string, date?: string, serviceId?
       const { data } = await query.order('start_time', { ascending: true })
       setSlots(data || [])
     } finally { setIsLoading(false) }
-  }, [providerId, date, serviceId, supabase])
+  }, [providerId, date, serviceId])
   useEffect(() => { fetch() }, [fetch])
   return { slots, isLoading, refresh: fetch }
 }
@@ -107,7 +107,7 @@ export function useBookingStats(providerId?: string, options?: { date_from?: str
       const byStatus = data.reduce((acc: Record<string, number>, b) => { acc[b.status || 'unknown'] = (acc[b.status || 'unknown'] || 0) + 1; return acc }, {})
       setStats({ total, byStatus })
     } finally { setIsLoading(false) }
-  }, [providerId, options?.date_from, options?.date_to, supabase])
+  }, [providerId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function useBookingsForDate(providerId?: string, date?: string) {
       const { data } = await supabase.from('bookings').select('*').eq('provider_id', providerId).gte('start_time', startOfDay).lte('start_time', endOfDay).order('start_time', { ascending: true })
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [providerId, date, supabase])
+  }, [providerId, date])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }

@@ -87,7 +87,7 @@ export function useBillingCredits(userId?: string, options?: { includeExpired?: 
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.includeExpired, options?.includeUsed, supabase])
+  }, [userId, options?.includeExpired, options?.includeUsed])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -103,7 +103,7 @@ export function useBillingStats(userId?: string, limit?: number) {
       const { data: result } = await supabase.from('billing_stats').select('*').eq('user_id', userId).order('period_start', { ascending: false }).limit(limit || 12)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

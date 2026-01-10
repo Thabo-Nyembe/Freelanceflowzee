@@ -38,7 +38,7 @@ export function useSurveys(options?: { survey_type?: string; category?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSurveys(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.survey_type, options?.category, options?.status, options?.created_by, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.survey_type, options?.category, options?.status, options?.created_by, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { surveys, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useSurveyResponses(surveyId?: string, options?: { respondent_id?
       const { data } = await query.order('submitted_at', { ascending: false }).limit(options?.limit || 100)
       setResponses(data || [])
     } finally { setIsLoading(false) }
-  }, [surveyId, options?.respondent_id, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [surveyId, options?.respondent_id, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { responses, isLoading, refresh: fetch }
 }
@@ -131,7 +131,7 @@ export function useMyResponses(userId?: string, options?: { status?: string; lim
       const { data } = await query.order('submitted_at', { ascending: false }).limit(options?.limit || 50)
       setResponses(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { responses, isLoading, refresh: fetch }
 }
@@ -149,7 +149,7 @@ export function useActiveSurveys(options?: { category?: string; limit?: number }
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSurveys(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { surveys, isLoading, refresh: fetch }
 }
@@ -181,7 +181,7 @@ export function useHasRespondedToSurvey(surveyId?: string, userId?: string) {
       const { data } = await supabase.from('survey_responses').select('id').eq('survey_id', surveyId).eq('respondent_id', userId).limit(1)
       setHasResponded((data?.length || 0) > 0)
     } finally { setIsLoading(false) }
-  }, [surveyId, userId, supabase])
+  }, [surveyId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { hasResponded, isLoading, refresh: fetch }
 }

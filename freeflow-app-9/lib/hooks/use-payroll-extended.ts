@@ -34,7 +34,7 @@ export function usePayrollRuns(options?: { user_id?: string; status?: string; li
       const { data } = await query.order('pay_date', { ascending: false }).limit(options?.limit || 50)
       setRuns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { runs, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useEmployeePayrollHistory(employeeId?: string, options?: { limit
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_items').select('*, payroll_runs(*)').eq('employee_id', employeeId).order('created_at', { ascending: false }).limit(options?.limit || 24); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [employeeId, options?.limit, supabase])
+  }, [employeeId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -99,7 +99,7 @@ export function usePayrollStats(userId?: string, year?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('payroll_runs').select('*').eq('user_id', userId).eq('status', 'completed'); if (!data) { setStats(null); return }; const items = await supabase.from('payroll_items').select('net_pay').in('run_id', data.map(r => r.id)); const total_paid = (items.data || []).reduce((sum, i) => sum + (i.net_pay || 0), 0); setStats({ total_paid, total_runs: data.length, avg_per_run: data.length > 0 ? total_paid / data.length : 0 }); } finally { setIsLoading(false) }
-  }, [userId, year, supabase])
+  }, [userId, year])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

@@ -34,7 +34,7 @@ export function usePlatforms(options?: { type?: string; is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setPlatforms(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { platforms, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function usePlatformConnections(options?: { platform_id?: string; user_id
       const { data } = await query.order('created_at', { ascending: false })
       setConnections(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.platform_id, options?.user_id, options?.organization_id, options?.status, supabase])
+  }, [options?.platform_id, options?.user_id, options?.organization_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { connections, isLoading, refresh: fetch }
 }
@@ -99,7 +99,7 @@ export function usePlatformSyncLogs(connectionId?: string, options?: { status?: 
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [connectionId, options?.status, options?.sync_type, options?.limit, supabase])
+  }, [connectionId, options?.status, options?.sync_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

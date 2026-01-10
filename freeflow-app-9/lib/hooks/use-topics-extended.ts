@@ -53,7 +53,7 @@ export function useTopics(options?: { category?: string; parent_id?: string | nu
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTopics(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.parent_id, options?.status, options?.is_private, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.parent_id, options?.status, options?.is_private, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { topics, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useTopicPosts(topicId?: string, options?: { post_type?: string; 
       const { data } = await query.order('is_pinned', { ascending: false }).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPosts(data || [])
     } finally { setIsLoading(false) }
-  }, [topicId, options?.post_type, options?.author_id, options?.is_pinned, options?.limit, supabase])
+  }, [topicId, options?.post_type, options?.author_id, options?.is_pinned, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { posts, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useTopicFollowers(topicId?: string, options?: { limit?: number }
       setFollowers(data || [])
       setCount(totalCount || 0)
     } finally { setIsLoading(false) }
-  }, [topicId, options?.limit, supabase])
+  }, [topicId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { followers, count, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function useIsFollowing(topicId?: string, userId?: string) {
     if (!topicId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('topic_followers').select('id').eq('topic_id', topicId).eq('user_id', userId).single(); setIsFollowing(!!data) } finally { setIsLoading(false) }
-  }, [topicId, userId, supabase])
+  }, [topicId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { isFollowing, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function useUserFollowedTopics(userId?: string, options?: { category?: st
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTopics(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.category, options?.limit, supabase])
+  }, [userId, options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { topics, isLoading, refresh: fetch }
 }
@@ -152,7 +152,7 @@ export function useIsModerator(topicId?: string, userId?: string) {
     if (!topicId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('topic_moderators').select('role').eq('topic_id', topicId).eq('user_id', userId).single(); setIsModerator(!!data); setRole(data?.role || null) } finally { setIsLoading(false) }
-  }, [topicId, userId, supabase])
+  }, [topicId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { isModerator, role, isLoading, refresh: fetch }
 }
@@ -182,7 +182,7 @@ export function usePopularTopics(options?: { category?: string; limit?: number }
       const { data } = await query.order('follower_count', { ascending: false }).limit(options?.limit || 20)
       setTopics(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { topics, isLoading, refresh: fetch }
 }

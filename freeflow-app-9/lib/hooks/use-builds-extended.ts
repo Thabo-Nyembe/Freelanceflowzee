@@ -36,7 +36,7 @@ export function useBuilds(options?: { project_id?: string; status?: string; bran
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBuilds(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.status, options?.branch, options?.triggered_by, options?.limit, supabase])
+  }, [options?.project_id, options?.status, options?.branch, options?.triggered_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { builds, isLoading, refresh: fetch }
 }
@@ -88,7 +88,7 @@ export function useRecentBuilds(projectId?: string, limit?: number) {
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('builds').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(limit || 10); setBuilds(data || []) } finally { setIsLoading(false) }
-  }, [projectId, limit, supabase])
+  }, [projectId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { builds, isLoading, refresh: fetch }
 }

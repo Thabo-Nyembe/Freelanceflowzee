@@ -37,7 +37,7 @@ export function useDefaults(options?: { defaultType?: string; entityType?: strin
       const { data: result } = await query.order('key', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.defaultType, options?.entityType, options?.isSystem, supabase])
+  }, [options?.defaultType, options?.entityType, options?.isSystem])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useDefaultByKey(key?: string, workspaceId?: string) {
       const { data } = await query.single()
       setValue(data?.value)
     } finally { setIsLoading(false) }
-  }, [key, workspaceId, supabase])
+  }, [key, workspaceId])
   useEffect(() => { fetch() }, [fetch])
   return { value, isLoading, refresh: fetch }
 }

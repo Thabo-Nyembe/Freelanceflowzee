@@ -20,7 +20,7 @@ export function useDiscussions(categoryId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [categoryId, status, supabase])
+  }, [categoryId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -41,7 +41,7 @@ export function useUserChatRooms(userId?: string, options?: { type?: string; inc
       const { data: result } = await query.order('last_message_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.includeArchived, supabase])
+  }, [userId, options?.type, options?.includeArchived])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useChatMessages(roomId?: string, options?: { limit?: number }) {
       setMessages((data || []).reverse())
       setHasMore((data?.length || 0) >= (options?.limit || 50))
     } finally { setIsLoading(false) }
-  }, [roomId, options?.limit, supabase])
+  }, [roomId, options?.limit])
   const loadMore = useCallback(async () => {
     if (!roomId || messages.length === 0) return
     const oldestMessage = messages[0]
@@ -68,7 +68,7 @@ export function useChatMessages(roomId?: string, options?: { limit?: number }) {
       setMessages(prev => [...data.reverse(), ...prev])
       setHasMore(data.length >= (options?.limit || 50))
     }
-  }, [roomId, messages, options?.limit, supabase])
+  }, [roomId, messages, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, hasMore, loadMore, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useChatSearch(roomId: string, searchTerm: string) {
       const { data } = await supabase.from('chat_messages').select('*, chat_attachments(*)').eq('room_id', roomId).ilike('content', `%${searchTerm}%`).eq('is_deleted', false).order('created_at', { ascending: false }).limit(20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [roomId, searchTerm, supabase])
+  }, [roomId, searchTerm])
   useEffect(() => {
     const timer = setTimeout(search, 300)
     return () => clearTimeout(timer)
@@ -155,7 +155,7 @@ export function useTypingIndicator(roomId: string, userId: string) {
   const setTyping = useCallback((isTyping: boolean) => {
     const channel = supabase.channel(`typing_${roomId}`)
     channel.send({ type: 'broadcast', event: 'typing', payload: { userId, isTyping } })
-  }, [roomId, userId, supabase])
+  }, [roomId, userId])
   useEffect(() => {
     const channel = supabase.channel(`typing_${roomId}`)
       .on('broadcast', { event: 'typing' }, ({ payload }) => {
@@ -169,7 +169,7 @@ export function useTypingIndicator(roomId: string, userId: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [roomId, userId, supabase])
+  }, [roomId, userId])
   return { typingUsers, setTyping }
 }
 
@@ -206,7 +206,7 @@ export function useDirectChat(userId1?: string, userId2?: string) {
       })
       setRoom(directRoom || null)
     } finally { setIsLoading(false) }
-  }, [userId1, userId2, supabase])
+  }, [userId1, userId2])
   useEffect(() => { fetch() }, [fetch])
   return { room, isLoading, refresh: fetch }
 }

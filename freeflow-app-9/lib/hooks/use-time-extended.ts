@@ -20,7 +20,7 @@ export function useTimeEntries(userId?: string, projectId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, projectId, supabase])
+  }, [userId, projectId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function useTimeSheets(userId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, status, supabase])
+  }, [userId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

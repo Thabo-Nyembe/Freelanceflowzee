@@ -37,7 +37,7 @@ export function usePositions(options?: { organization_id?: string; department_id
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPositions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.department_id, options?.status, options?.type, options?.search, options?.limit, supabase])
+  }, [options?.organization_id, options?.department_id, options?.status, options?.type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { positions, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function usePositionApplications(positionId?: string, options?: { status?
       const { data } = await query.order('applied_at', { ascending: false }).limit(options?.limit || 50)
       setApplications(data || [])
     } finally { setIsLoading(false) }
-  }, [positionId, options?.status, options?.limit, supabase])
+  }, [positionId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { applications, isLoading, refresh: fetch }
 }
@@ -99,7 +99,7 @@ export function useMyApplications(userId?: string, options?: { status?: string; 
       const { data } = await query.order('applied_at', { ascending: false }).limit(options?.limit || 50)
       setApplications(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { applications, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function usePositionInterviews(positionId?: string, options?: { status?: 
       const { data } = await query.order('scheduled_at', { ascending: true })
       setInterviews(data || [])
     } finally { setIsLoading(false) }
-  }, [positionId, options?.status, supabase])
+  }, [positionId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { interviews, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function usePositionOffers(positionId?: string, options?: { status?: stri
       const { data } = await query.order('created_at', { ascending: false })
       setOffers(data || [])
     } finally { setIsLoading(false) }
-  }, [positionId, options?.status, supabase])
+  }, [positionId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { offers, isLoading, refresh: fetch }
 }
@@ -154,7 +154,7 @@ export function useOpenPositions(options?: { organization_id?: string; departmen
       const { data } = await query.order('published_at', { ascending: false }).limit(options?.limit || 50)
       setPositions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.department_id, options?.type, options?.limit, supabase])
+  }, [options?.organization_id, options?.department_id, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { positions, isLoading, refresh: fetch }
 }

@@ -18,7 +18,7 @@ export function useHistory(entityId?: string, entityType?: string) {
       const { data: result } = await supabase.from('history').select('*').eq('entity_id', entityId).eq('entity_type', entityType).order('created_at', { ascending: false }).limit(50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -50,7 +50,7 @@ export function useHistoryCount(entityId?: string, entityType?: string) {
       const { count: result } = await supabase.from('history').select('*', { count: 'exact', head: true }).eq('entity_id', entityId).eq('entity_type', entityType)
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

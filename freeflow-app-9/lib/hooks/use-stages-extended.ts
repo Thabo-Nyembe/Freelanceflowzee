@@ -35,7 +35,7 @@ export function useStages(options?: { pipeline_id?: string; is_active?: boolean;
       const { data } = await query.order('order_index', { ascending: true }).limit(options?.limit || 100)
       setStages(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.pipeline_id, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.pipeline_id, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { stages, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useStageHistory(entityType?: string, entityId?: string, options?
       const { data } = await supabase.from('stage_history').select('*, from_stage:from_stage_id(*), to_stage:to_stage_id(*), users(*)').eq('entity_type', entityType).eq('entity_id', entityId).order('moved_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.limit, supabase])
+  }, [entityType, entityId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useCurrentStage(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('stage_assignments').select('*, stages(*)').eq('entity_type', entityType).eq('entity_id', entityId).single()
       setAssignment(data)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { assignment, stage: assignment?.stages, isLoading, refresh: fetch }
 }

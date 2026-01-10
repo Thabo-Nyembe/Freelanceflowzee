@@ -38,7 +38,7 @@ export function useResponses(options?: { entity_type?: string; entity_id?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setResponses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.entity_id, options?.user_id, options?.status, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.entity_type, options?.entity_id, options?.user_id, options?.status, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { responses, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useResponseTemplates(options?: { category_id?: string; user_id?:
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.user_id, options?.is_shared, options?.search, options?.limit, supabase])
+  }, [options?.category_id, options?.user_id, options?.is_shared, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function useResponseCategories(options?: { parent_id?: string | null; is_
       const { data } = await query.order('order', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.parent_id, options?.is_active, supabase])
+  }, [options?.parent_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -110,7 +110,7 @@ export function useMyTemplates(userId?: string, options?: { category_id?: string
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.category_id, options?.limit, supabase])
+  }, [userId, options?.category_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -127,7 +127,7 @@ export function usePopularTemplates(options?: { category_id?: string; limit?: nu
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 20)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.limit, supabase])
+  }, [options?.category_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -143,7 +143,7 @@ export function useRecentTemplates(userId?: string, options?: { limit?: number }
       const { data } = await supabase.from('response_templates').select('*, response_categories(*)').or(`user_id.eq.${userId},is_shared.eq.true`).not('last_used_at', 'is', null).order('last_used_at', { ascending: false }).limit(options?.limit || 10)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -159,7 +159,7 @@ export function useEntityResponses(entityType?: string, entityId?: string, optio
       const { data } = await supabase.from('responses').select('*, users(*)').eq('entity_type', entityType).eq('entity_id', entityId).eq('status', 'active').order('created_at', { ascending: true }).limit(options?.limit || 100)
       setResponses(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.limit, supabase])
+  }, [entityType, entityId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { responses, isLoading, refresh: fetch }
 }

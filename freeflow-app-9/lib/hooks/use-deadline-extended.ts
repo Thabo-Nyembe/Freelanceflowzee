@@ -36,7 +36,7 @@ export function useUserDeadlines(userId?: string, options?: { includeCompleted?:
       const { data: result } = await query.order('due_date', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.includeCompleted, supabase])
+  }, [userId, options?.includeCompleted])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useUpcomingDeadlines(userId?: string, days = 7) {
       const { data: result } = await query.order('due_date', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, days, supabase])
+  }, [userId, days])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -90,7 +90,7 @@ export function useEntityDeadlines(entityType?: string, entityId?: string) {
       const { data: result } = await supabase.from('deadlines').select('*').eq('entity_type', entityType).eq('entity_id', entityId).order('due_date', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

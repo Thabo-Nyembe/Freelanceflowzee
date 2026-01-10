@@ -39,7 +39,7 @@ export function useRewards(options?: { program_id?: string; type_id?: string; ti
       const { data } = await query.order('points_required', { ascending: true }).limit(options?.limit || 50)
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.program_id, options?.type_id, options?.tier_id, options?.is_active, options?.min_points, options?.max_points, options?.search, options?.limit, supabase])
+  }, [options?.program_id, options?.type_id, options?.tier_id, options?.is_active, options?.min_points, options?.max_points, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useUserPoints(userId?: string, programId?: string) {
       const { data } = await query
       setPoints(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, programId, supabase])
+  }, [userId, programId])
   useEffect(() => { fetch() }, [fetch])
   return { points, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useUserRedemptions(userId?: string, options?: { status?: string;
       const { data } = await query.order('redeemed_at', { ascending: false }).limit(options?.limit || 50)
       setRedemptions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { redemptions, isLoading, refresh: fetch }
 }
@@ -127,7 +127,7 @@ export function useUserTier(userId?: string, programId?: string) {
       const { data } = await supabase.from('reward_tiers').select('*').eq('program_id', programId).lte('points_threshold', points.lifetime_earned).order('points_threshold', { ascending: false }).limit(1).single()
       setTier(data)
     } finally { setIsLoading(false) }
-  }, [userId, programId, supabase])
+  }, [userId, programId])
   useEffect(() => { fetch() }, [fetch])
   return { tier, isLoading, refresh: fetch }
 }
@@ -160,7 +160,7 @@ export function useAvailableRewards(userId?: string, programId?: string) {
       const { data } = await supabase.from('rewards').select('*, reward_types(*)').eq('program_id', programId).eq('is_active', true).lte('points_required', balance).or('quantity_available.is.null,quantity_available.gt.0').order('points_required', { ascending: false })
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, programId, supabase])
+  }, [userId, programId])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, userPoints, isLoading, refresh: fetch }
 }

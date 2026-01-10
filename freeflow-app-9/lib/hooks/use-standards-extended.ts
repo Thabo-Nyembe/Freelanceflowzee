@@ -35,7 +35,7 @@ export function useStandards(options?: { category?: string; is_active?: boolean;
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setStandards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { standards, isLoading, refresh: fetch }
 }
@@ -64,7 +64,7 @@ export function useComplianceStatus(entityType?: string, entityId?: string, stan
       const { data } = await supabase.from('standard_compliance').select('*, standards(*)').eq('entity_type', entityType).eq('entity_id', entityId).eq('standard_id', standardId).order('assessed_at', { ascending: false }).limit(1).single()
       setCompliance(data)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, standardId, supabase])
+  }, [entityType, entityId, standardId])
   useEffect(() => { fetch() }, [fetch])
   return { compliance, isLoading, refresh: fetch }
 }
@@ -82,7 +82,7 @@ export function useComplianceHistory(entityType?: string, entityId?: string, opt
       const { data } = await query.order('assessed_at', { ascending: false }).limit(options?.limit || 20)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.standard_id, options?.limit, supabase])
+  }, [entityType, entityId, options?.standard_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -102,7 +102,7 @@ export function useCertifications(options?: { entity_type?: string; entity_id?: 
       const { data } = await query.order('issued_at', { ascending: false }).limit(options?.limit || 50)
       setCertifications(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.entity_id, options?.standard_id, options?.status, options?.limit, supabase])
+  }, [options?.entity_type, options?.entity_id, options?.standard_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { certifications, isLoading, refresh: fetch }
 }
@@ -119,7 +119,7 @@ export function useActiveCertification(entityType?: string, entityId?: string, s
       const { data } = await supabase.from('standard_certifications').select('*, standards(*)').eq('entity_type', entityType).eq('entity_id', entityId).eq('standard_id', standardId).eq('status', 'active').lte('valid_from', now).gte('valid_until', now).single()
       setCertification(data)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, standardId, supabase])
+  }, [entityType, entityId, standardId])
   useEffect(() => { fetch() }, [fetch])
   return { certification, isValid: !!certification, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useUpcomingAudits(options?: { entity_type?: string; entity_id?: 
       const { data } = await query.order('scheduled_date', { ascending: true }).limit(options?.limit || 20)
       setAudits(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.entity_id, options?.auditor_id, options?.limit, supabase])
+  }, [options?.entity_type, options?.entity_id, options?.auditor_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { audits, isLoading, refresh: fetch }
 }

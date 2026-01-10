@@ -36,7 +36,7 @@ export function useAdvisorySessions(options?: { user_id?: string; advisor_id?: s
       const { data } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 50)
       setSessions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.advisor_id, options?.status, options?.session_type, options?.limit, supabase])
+  }, [options?.user_id, options?.advisor_id, options?.status, options?.session_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }
@@ -49,7 +49,7 @@ export function useUpcomingAdvisorySessions(userId?: string, options?: { limit?:
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('advisory_sessions').select('*').eq('user_id', userId).in('status', ['scheduled', 'confirmed']).gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }).limit(options?.limit || 10); setSessions(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }
@@ -62,7 +62,7 @@ export function usePastAdvisorySessions(userId?: string, options?: { limit?: num
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('advisory_sessions').select('*').eq('user_id', userId).eq('status', 'completed').order('completed_at', { ascending: false }).limit(options?.limit || 20); setSessions(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }

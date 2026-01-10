@@ -39,7 +39,7 @@ export function useReviews(options: { entity_type: string; entity_id: string; mi
       const { data } = await query.order(orderBy, { ascending }).limit(options.limit || 50)
       setReviews(data || [])
     } finally { setIsLoading(false) }
-  }, [options.entity_type, options.entity_id, options.min_rating, options.verified_only, options.with_media, options.sort_by, options.limit, supabase])
+  }, [options.entity_type, options.entity_id, options.min_rating, options.verified_only, options.with_media, options.sort_by, options.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useReviewSummary(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('review_summaries').select('*').eq('entity_type', entityType).eq('entity_id', entityId).single()
       setSummary(data || { total_reviews: 0, average_rating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } })
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useUserReview(entityType?: string, entityId?: string, userId?: s
       setReview(data)
       setHasReviewed(!!data)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, userId, supabase])
+  }, [entityType, entityId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { review, hasReviewed, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useMyReviews(userId?: string, options?: { entity_type?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReviews(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.entity_type, options?.limit, supabase])
+  }, [userId, options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function useReviewVote(reviewId?: string, userId?: string) {
     if (!reviewId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('review_votes').select('*').eq('review_id', reviewId).eq('user_id', userId).single(); setVote(data) } finally { setIsLoading(false) }
-  }, [reviewId, userId, supabase])
+  }, [reviewId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { vote, isLoading, refresh: fetch }
 }
@@ -136,7 +136,7 @@ export function useTopReviewed(entityType?: string, options?: { min_reviews?: nu
       const { data } = await query.order('average_rating', { ascending: false }).order('total_reviews', { ascending: false }).limit(options?.limit || 20)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, options?.min_reviews, options?.min_rating, options?.limit, supabase])
+  }, [entityType, options?.min_reviews, options?.min_rating, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -153,7 +153,7 @@ export function useRecentReviews(options?: { entity_type?: string; limit?: numbe
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setReviews(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.limit, supabase])
+  }, [options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }

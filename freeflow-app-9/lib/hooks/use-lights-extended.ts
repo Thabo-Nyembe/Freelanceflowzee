@@ -35,7 +35,7 @@ export function useLights(options?: { user_id?: string; location?: string; is_on
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setLights(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.location, options?.is_on, options?.limit, supabase])
+  }, [options?.user_id, options?.location, options?.is_on, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { lights, isLoading, refresh: fetch }
 }

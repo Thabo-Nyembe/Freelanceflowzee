@@ -34,7 +34,7 @@ export function useCommunicationChannels(options?: { type?: string; is_active?: 
       const { data } = await query.order('name', { ascending: true })
       setChannels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { channels, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useCommunicationMessages(options?: { channel_id?: string; recipi
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setMessages(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.channel_id, options?.recipient_id, options?.status, options?.limit, supabase])
+  }, [options?.channel_id, options?.recipient_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useCommunicationTemplates(options?: { channel_type?: string; is_
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.channel_type, options?.is_active, supabase])
+  }, [options?.channel_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -106,7 +106,7 @@ export function useMessageStats(options?: { channel_id?: string; date_from?: str
       const byStatus = data.reduce((acc: Record<string, number>, m) => { acc[m.status || 'unknown'] = (acc[m.status || 'unknown'] || 0) + 1; return acc }, {})
       setStats({ total, byStatus })
     } finally { setIsLoading(false) }
-  }, [options?.channel_id, options?.date_from, options?.date_to, supabase])
+  }, [options?.channel_id, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

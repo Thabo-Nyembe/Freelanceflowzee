@@ -20,7 +20,7 @@ export function useRequests(userId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, status, supabase])
+  }, [userId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useRequestCount(userId?: string, status?: string) {
       const { count: result } = await query
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, status, supabase])
+  }, [userId, status])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

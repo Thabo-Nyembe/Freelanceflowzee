@@ -20,7 +20,7 @@ export function useLogs(logType?: string, level?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [logType, level, supabase])
+  }, [logType, level])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

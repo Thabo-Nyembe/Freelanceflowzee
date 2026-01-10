@@ -37,7 +37,7 @@ export function useTemplates(options?: { template_type?: string; category_id?: s
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.template_type, options?.category_id, options?.created_by, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.template_type, options?.category_id, options?.created_by, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useMyTemplates(userId?: string, options?: { template_type?: stri
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.template_type, options?.limit, supabase])
+  }, [userId, options?.template_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useTemplateUsages(templateId?: string, options?: { user_id?: str
       setUsages(data || [])
       setTotalUsages(count || data?.length || 0)
     } finally { setIsLoading(false) }
-  }, [templateId, options?.user_id, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [templateId, options?.user_id, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { usages, totalUsages, isLoading, refresh: fetch }
 }
@@ -126,7 +126,7 @@ export function useSharedTemplates(userId?: string, options?: { share_type?: str
       const { data } = await query.order('created_at', { ascending: false })
       setTemplates((data || []).map(s => ({ ...s.templates, share: s })))
     } finally { setIsLoading(false) }
-  }, [userId, options?.share_type, supabase])
+  }, [userId, options?.share_type])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -163,7 +163,7 @@ export function usePopularTemplates(options?: { template_type?: string; limit?: 
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 20)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.template_type, options?.limit, supabase])
+  }, [options?.template_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

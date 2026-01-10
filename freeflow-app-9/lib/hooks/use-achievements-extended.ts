@@ -37,7 +37,7 @@ export function useAchievements(options?: { category?: string; isActive?: boolea
       const { data: result } = await query.order('points', { ascending: false }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.isActive, options?.limit, supabase])
+  }, [options?.category, options?.isActive, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useAchievementProgress(userId?: string, achievementId?: string) 
       ])
       setProgress({ isEarned: !!earnedRes.data, requirements: achievementRes.data?.requirements })
     } finally { setIsLoading(false) }
-  }, [userId, achievementId, supabase])
+  }, [userId, achievementId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useRecentAchievements(userId?: string, limit?: number) {
       const { data: result } = await supabase.from('user_achievements').select('*, achievements(*)').eq('user_id', userId).order('earned_at', { ascending: false }).limit(limit || 5)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useCohorts(options?: { type?: string; date_from?: string; date_t
       const { data } = await query.order('cohort_date', { ascending: false }).limit(options?.limit || 50)
       setCohorts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.date_from, options?.date_to, options?.limit, supabase])
+  }, [options?.type, options?.date_from, options?.date_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { cohorts, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useCohortMembers(cohortId?: string, options?: { limit?: number }
     if (!cohortId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('cohort_members').select('*').eq('cohort_id', cohortId).order('joined_at', { ascending: true }).limit(options?.limit || 100); setMembers(data || []) } finally { setIsLoading(false) }
-  }, [cohortId, options?.limit, supabase])
+  }, [cohortId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useCohortMetrics(cohortId?: string, options?: { metric_name?: st
       const { data } = await query.order('period', { ascending: true })
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [cohortId, options?.metric_name, options?.period_from, options?.period_to, supabase])
+  }, [cohortId, options?.metric_name, options?.period_from, options?.period_to])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useCohortComparison(cohortIds: string[], metricName: string) {
       data?.forEach(m => { if (!grouped[m.cohort_id]) grouped[m.cohort_id] = []; grouped[m.cohort_id].push(m) })
       setComparison(grouped)
     } finally { setIsLoading(false) }
-  }, [cohortIds, metricName, supabase])
+  }, [cohortIds, metricName])
   useEffect(() => { fetch() }, [fetch])
   return { comparison, isLoading, refresh: fetch }
 }

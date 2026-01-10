@@ -34,7 +34,7 @@ export function useNewsletters(options?: { organization_id?: string; status?: st
       const { data } = await query.order('name', { ascending: true })
       setNewsletters(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.status, supabase])
+  }, [options?.organization_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { newsletters, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useNewsletterSubscribers(newsletterId?: string, options?: { stat
       const { data } = await query.order('subscribed_at', { ascending: false }).limit(options?.limit || 100)
       setSubscribers(data || [])
     } finally { setIsLoading(false) }
-  }, [newsletterId, options?.status, options?.limit, supabase])
+  }, [newsletterId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { subscribers, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useNewsletterCampaigns(newsletterId?: string, options?: { status
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [newsletterId, options?.status, options?.limit, supabase])
+  }, [newsletterId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }
@@ -150,7 +150,7 @@ export function useSubscriptionStatus(email?: string, newsletterId?: string) {
     if (!email || !newsletterId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('newsletter_subscribers').select('*').eq('newsletter_id', newsletterId).eq('email', email).single(); setSubscription(data) } finally { setIsLoading(false) }
-  }, [email, newsletterId, supabase])
+  }, [email, newsletterId])
   useEffect(() => { fetch() }, [fetch])
   return { subscription, isLoading, refresh: fetch }
 }

@@ -38,7 +38,7 @@ export function useShipments(options?: { order_id?: string; carrier_id?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setShipments(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.order_id, options?.carrier_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.order_id, options?.carrier_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { shipments, isLoading, refresh: fetch }
 }
@@ -137,7 +137,7 @@ export function useShipmentStats(options?: { from_date?: string; to_date?: strin
         failed: shipments.filter(s => s.status === 'failed_delivery').length
       })
     } finally { setIsLoading(false) }
-  }, [options?.from_date, options?.to_date, supabase])
+  }, [options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

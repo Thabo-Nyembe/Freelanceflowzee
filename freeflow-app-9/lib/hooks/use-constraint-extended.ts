@@ -37,7 +37,7 @@ export function useConstraints(options?: { constraintType?: string; entityType?:
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.constraintType, options?.entityType, options?.isActive, supabase])
+  }, [options?.constraintType, options?.entityType, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

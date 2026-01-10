@@ -20,7 +20,7 @@ export function useDrafts(userId?: string, entityType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, entityType, supabase])
+  }, [userId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,7 +36,7 @@ export function useDraft(draftId?: string, userId?: string) {
       const { data } = await supabase.from('drafts').select('*').eq('id', draftId).eq('user_id', userId).single()
       setDraft(data)
     } finally { setIsLoading(false) }
-  }, [draftId, userId, supabase])
+  }, [draftId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { draft, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useDraftCount(userId?: string, entityType?: string) {
       const { count: result } = await query
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, entityType, supabase])
+  }, [userId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

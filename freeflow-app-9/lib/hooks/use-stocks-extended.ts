@@ -39,7 +39,7 @@ export function useStocks(options?: { product_id?: string; location_id?: string;
       }
       setStocks(result)
     } finally { setIsLoading(false) }
-  }, [options?.product_id, options?.location_id, options?.low_stock, options?.search, options?.limit, supabase])
+  }, [options?.product_id, options?.location_id, options?.low_stock, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { stocks, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useStockMovements(stockId?: string, options?: { movement_type?: 
       const { data } = await query.order('moved_at', { ascending: false }).limit(options?.limit || 50)
       setMovements(data || [])
     } finally { setIsLoading(false) }
-  }, [stockId, options?.movement_type, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [stockId, options?.movement_type, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { movements, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useStockReservations(stockId?: string, options?: { status?: stri
       const { data } = await query.order('reserved_at', { ascending: false })
       setReservations(data || [])
     } finally { setIsLoading(false) }
-  }, [stockId, options?.status, supabase])
+  }, [stockId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { reservations, isLoading, refresh: fetch }
 }
@@ -95,7 +95,7 @@ export function useStockLocations(options?: { is_active?: boolean; search?: stri
       const { data } = await query.order('name', { ascending: true })
       setLocations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.search, supabase])
+  }, [options?.is_active, options?.search])
   useEffect(() => { fetch() }, [fetch])
   return { locations, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useStockAlerts(options?: { alert_type?: string; status?: string;
       const { data } = await query.order('triggered_at', { ascending: false }).limit(options?.limit || 50)
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.alert_type, options?.status, options?.limit, supabase])
+  }, [options?.alert_type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function useLowStockItems(options?: { location_id?: string; limit?: numbe
       })
       setItems(lowStock)
     } finally { setIsLoading(false) }
-  }, [options?.location_id, options?.limit, supabase])
+  }, [options?.location_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -154,7 +154,7 @@ export function useStockAvailability(productId?: string, locationId?: string) {
       const reserved = (data || []).reduce((sum, s) => sum + (s.reserved_quantity || 0), 0)
       setAvailability({ total, reserved, available: total - reserved })
     } finally { setIsLoading(false) }
-  }, [productId, locationId, supabase])
+  }, [productId, locationId])
   useEffect(() => { fetch() }, [fetch])
   return { availability, isLoading, refresh: fetch }
 }

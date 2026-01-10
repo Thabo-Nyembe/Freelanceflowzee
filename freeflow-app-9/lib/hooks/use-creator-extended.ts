@@ -35,7 +35,7 @@ export function useCreators(options?: { category?: string; is_verified?: boolean
       const { data } = await query.order('follower_count', { ascending: false }).limit(options?.limit || 50)
       setCreators(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_verified, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.is_verified, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { creators, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useCreatorContent(creatorId?: string, options?: { type?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setContent(data || [])
     } finally { setIsLoading(false) }
-  }, [creatorId, options?.type, options?.status, options?.limit, supabase])
+  }, [creatorId, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { content, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useIsFollowing(creatorId?: string, userId?: string) {
     if (!creatorId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('creator_followers').select('id').eq('creator_id', creatorId).eq('user_id', userId).single(); setIsFollowing(!!data) } finally { setIsLoading(false) }
-  }, [creatorId, userId, supabase])
+  }, [creatorId, userId])
   useEffect(() => { check() }, [check])
   return { isFollowing, isLoading, recheck: check }
 }
@@ -101,7 +101,7 @@ export function useCreatorEarnings(creatorId?: string, options?: { date_from?: s
       setEarnings(data || [])
       setTotal(data?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
-  }, [creatorId, options?.date_from, options?.date_to, supabase])
+  }, [creatorId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { earnings, total, isLoading, refresh: fetch }
 }

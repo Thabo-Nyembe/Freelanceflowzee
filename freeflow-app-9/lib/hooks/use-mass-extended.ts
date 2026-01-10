@@ -37,7 +37,7 @@ export function useMassActions(options?: { actionType?: string; targetType?: str
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.actionType, options?.targetType, options?.status, supabase])
+  }, [options?.actionType, options?.targetType, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useMassNotifications(options?: { notificationType?: string; stat
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.notificationType, options?.status, supabase])
+  }, [options?.notificationType, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

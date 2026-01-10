@@ -105,7 +105,7 @@ export function useVideoDailyAnalytics(videoId?: string, days = 30) {
     } finally {
       setIsLoading(false)
     }
-  }, [videoId, days, supabase])
+  }, [videoId, days])
 
   useEffect(() => { fetch() }, [fetch])
 
@@ -549,7 +549,7 @@ export function useVideoLikes(videoId?: string) {
       }
       return true
     }
-  }, [videoId, data, supabase])
+  }, [videoId, data])
 
   return { data, count, isLoading, toggle, refresh: fetch }
 }
@@ -806,7 +806,7 @@ export function useVideoUsageLogs(userId?: string, limit = 100) {
     } finally {
       setIsLoading(false)
     }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
 
   useEffect(() => { fetch() }, [fetch])
 
@@ -900,7 +900,7 @@ export function useVideoWatchTime(videoId?: string, userId?: string) {
     } finally {
       setIsLoading(false)
     }
-  }, [videoId, userId, supabase])
+  }, [videoId, userId])
 
   useEffect(() => { fetch() }, [fetch])
 
@@ -913,7 +913,7 @@ export function useVideoWatchTime(videoId?: string, userId?: string) {
       total_duration: totalDuration,
       last_position: watchedSeconds,
     }, { onConflict: 'video_id,user_id' })
-  }, [videoId, userId, supabase])
+  }, [videoId, userId])
 
   return { data, isLoading, updateWatchTime, refresh: fetch }
 }

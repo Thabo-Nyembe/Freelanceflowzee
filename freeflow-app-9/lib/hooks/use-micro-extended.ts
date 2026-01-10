@@ -34,7 +34,7 @@ export function useMicroservices(options?: { type?: string; status?: string; lim
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setServices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.status, options?.limit, supabase])
+  }, [options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { services, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useMicroDeployments(serviceId?: string, options?: { status?: str
       const { data } = await query.order('deployed_at', { ascending: false }).limit(options?.limit || 20)
       setDeployments(data || [])
     } finally { setIsLoading(false) }
-  }, [serviceId, options?.status, options?.limit, supabase])
+  }, [serviceId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { deployments, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useMicroLogs(serviceId?: string, options?: { level?: string; lim
       const { data } = await query.order('timestamp', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [serviceId, options?.level, options?.limit, supabase])
+  }, [serviceId, options?.level, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function useMembers(organizationId?: string, options?: { status?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setMembers(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.status, options?.role_id, options?.department, options?.limit, supabase])
+  }, [organizationId, options?.status, options?.role_id, options?.department, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useMemberInvitations(organizationId?: string, options?: { status
       const { data } = await query.order('created_at', { ascending: false })
       setInvitations(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.status, supabase])
+  }, [organizationId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { invitations, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useMemberActivities(memberId?: string, options?: { limit?: numbe
     if (!memberId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('member_activities').select('*').eq('member_id', memberId).order('created_at', { ascending: false }).limit(options?.limit || 50); setActivities(data || []) } finally { setIsLoading(false) }
-  }, [memberId, options?.limit, supabase])
+  }, [memberId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { activities, isLoading, refresh: fetch }
 }

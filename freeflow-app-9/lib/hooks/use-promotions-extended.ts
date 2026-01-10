@@ -36,7 +36,7 @@ export function usePromotions(options?: { organization_id?: string; type?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPromotions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.type, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.organization_id, options?.type, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { promotions, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function usePromotionCodes(promotionId?: string, options?: { is_active?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setCodes(data || [])
     } finally { setIsLoading(false) }
-  }, [promotionId, options?.is_active, options?.limit, supabase])
+  }, [promotionId, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { codes, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function usePromotionUsage(promotionId?: string, options?: { from_date?: 
       setUsage(data || [])
       setTotalDiscount(data?.reduce((sum, u) => sum + (u.discount_amount || 0), 0) || 0)
     } finally { setIsLoading(false) }
-  }, [promotionId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [promotionId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { usage, totalDiscount, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function usePromotionCampaigns(options?: { status?: string; limit?: numbe
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.limit, supabase])
+  }, [options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }
@@ -155,7 +155,7 @@ export function useCodeValidation(code?: string, userId?: string, orderAmount?: 
       if (promotion.min_order_amount && orderAmount && orderAmount < promotion.min_order_amount) { setValidation({ isValid: false, error: `Minimum order of ${promotion.min_order_amount} required` }); setIsLoading(false); return }
       setValidation({ isValid: true, promotion, code: promoCode })
     } finally { setIsLoading(false) }
-  }, [code, userId, orderAmount, supabase])
+  }, [code, userId, orderAmount])
   useEffect(() => { validate() }, [validate])
   return { validation, isLoading, validate }
 }

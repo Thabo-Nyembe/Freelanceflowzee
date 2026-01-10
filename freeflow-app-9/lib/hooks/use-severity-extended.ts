@@ -37,7 +37,7 @@ export function useSeverities(options?: { entityType?: string; workspaceId?: str
       const { data: result } = await query.order('level', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.entityType, options?.workspaceId, options?.isCritical, supabase])
+  }, [options?.entityType, options?.workspaceId, options?.isCritical])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useEntitySeverity(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('entity_severities').select('severity_id, severities(*)').eq('entity_type', entityType).eq('entity_id', entityId).single()
       setSeverity(data?.severities || null)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { severity, isLoading, refresh: fetch }
 }

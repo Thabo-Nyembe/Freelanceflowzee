@@ -20,7 +20,7 @@ export function useStats(entityId?: string, entityType?: string, period?: string
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, period, supabase])
+  }, [entityId, entityType, period])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,7 +39,7 @@ export function useStatSummary(entityId?: string, entityType?: string, statName?
       const avg = values.length > 0 ? sum / values.length : 0
       setSummary({ sum, avg, max: Math.max(...values, 0), min: Math.min(...values, 0), count: values.length })
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, statName, supabase])
+  }, [entityId, entityType, statName])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useStatsByPeriod(entityId?: string, entityType?: string, period?
       const { data: result } = await supabase.from('stats').select('*').eq('entity_id', entityId).eq('entity_type', entityType).eq('period', period).order('recorded_at', { ascending: false }).limit(30)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, period, supabase])
+  }, [entityId, entityType, period])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useBatches(options?: { batchType?: string; status?: string; user
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.batchType, options?.status, options?.userId, supabase])
+  }, [options?.batchType, options?.status, options?.userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useBatchItems(batchId?: string, status?: string) {
       const { data: result } = await query.order('item_index', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [batchId, status, supabase])
+  }, [batchId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -80,6 +80,6 @@ export function useBatchProgress(batchId?: string) {
     if (!batchId) return
     const channel = supabase.channel(`batch-${batchId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'batches', filter: `id=eq.${batchId}` }, () => fetch()).subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [batchId, supabase, fetch])
+  }, [batchId, fetch])
   return { progress, isLoading, refresh: fetch }
 }

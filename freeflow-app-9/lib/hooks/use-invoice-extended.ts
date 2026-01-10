@@ -41,7 +41,7 @@ export function useInvoiceAnalyticsDaily(userId?: string, days?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('invoice_analytics_daily').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(days || 30); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, days, supabase])
+  }, [userId, days])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

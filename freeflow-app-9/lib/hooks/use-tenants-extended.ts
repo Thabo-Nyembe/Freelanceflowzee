@@ -49,7 +49,7 @@ export function useTenants(options?: { status?: string; plan?: string; owner_id?
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTenants(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.plan, options?.owner_id, options?.search, options?.limit, supabase])
+  }, [options?.status, options?.plan, options?.owner_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tenants, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useTenantUsers(tenantId?: string, options?: { role?: string; is_
       const { data } = await query.order('joined_at', { ascending: true })
       setUsers(data || [])
     } finally { setIsLoading(false) }
-  }, [tenantId, options?.role, options?.is_active, supabase])
+  }, [tenantId, options?.role, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { users, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useUserTenants(userId?: string, options?: { role?: string; is_ac
       const { data } = await query.order('joined_at', { ascending: false })
       setTenants((data || []).map(m => ({ ...m.tenants, membership: m })))
     } finally { setIsLoading(false) }
-  }, [userId, options?.role, options?.is_active, supabase])
+  }, [userId, options?.role, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { tenants, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useTenantMembership(tenantId?: string, userId?: string) {
     if (!tenantId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tenant_users').select('*').eq('tenant_id', tenantId).eq('user_id', userId).single(); setMembership(data) } finally { setIsLoading(false) }
-  }, [tenantId, userId, supabase])
+  }, [tenantId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { membership, isMember: !!membership, role: membership?.role, isLoading, refresh: fetch }
 }
@@ -149,7 +149,7 @@ export function useTenantInvitations(tenantId?: string, options?: { status?: str
       const { data } = await query.order('created_at', { ascending: false })
       setInvitations(data || [])
     } finally { setIsLoading(false) }
-  }, [tenantId, options?.status, supabase])
+  }, [tenantId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { invitations, isLoading, refresh: fetch }
 }

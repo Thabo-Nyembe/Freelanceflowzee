@@ -49,7 +49,7 @@ export function useUrls(options?: { created_by?: string; group_id?: string; is_a
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setUrls(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.created_by, options?.group_id, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.created_by, options?.group_id, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { urls, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useMyUrls(userId?: string, options?: { group_id?: string; is_act
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setUrls(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.group_id, options?.is_active, options?.limit, supabase])
+  }, [userId, options?.group_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { urls, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useUrlClicks(urlId?: string, options?: { from_date?: string; to_
       const { data } = await query.order('clicked_at', { ascending: false }).limit(options?.limit || 100)
       setClicks(data || [])
     } finally { setIsLoading(false) }
-  }, [urlId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [urlId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { clicks, isLoading, refresh: fetch }
 }
@@ -123,7 +123,7 @@ export function useUrlAnalytics(urlId?: string, options?: { from_date?: string; 
         by_referer: byReferer
       })
     } finally { setIsLoading(false) }
-  }, [urlId, options?.from_date, options?.to_date, supabase])
+  }, [urlId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useUrlGroups(options?: { created_by?: string; is_public?: boolea
       const { data } = await query.order('name', { ascending: true })
       setGroups(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.created_by, options?.is_public, supabase])
+  }, [options?.created_by, options?.is_public])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -180,7 +180,7 @@ export function useTopUrls(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('urls').select('*').eq('created_by', userId).eq('is_active', true).order('click_count', { ascending: false }).limit(options?.limit || 10); setUrls(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { urls, isLoading, refresh: fetch }
 }
@@ -199,7 +199,7 @@ export function useRecentUrls(userId?: string, options?: { days?: number; limit?
       const { data } = await supabase.from('urls').select('*').eq('created_by', userId).gte('created_at', sinceDate.toISOString()).order('created_at', { ascending: false }).limit(options?.limit || 20)
       setUrls(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.days, options?.limit, supabase])
+  }, [userId, options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { urls, isLoading, refresh: fetch }
 }
@@ -212,7 +212,7 @@ export function useExpiredUrls(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('urls').select('*').eq('created_by', userId).lt('expires_at', new Date().toISOString()).order('expires_at', { ascending: false }).limit(options?.limit || 20); setUrls(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { urls, isLoading, refresh: fetch }
 }

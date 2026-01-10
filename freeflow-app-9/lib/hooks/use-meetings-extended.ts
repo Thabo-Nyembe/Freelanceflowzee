@@ -54,7 +54,7 @@ export function useMeetings(options?: { hostId?: string; status?: string; type?:
       const { data: result } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.hostId, options?.status, options?.type, options?.limit, supabase])
+  }, [options?.hostId, options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useMeetingParticipants(meetingId?: string, options?: { status?: 
       const { data: result } = await query.order('joined_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [meetingId, options?.status, supabase])
+  }, [meetingId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -88,7 +88,7 @@ export function useMeetingChatMessages(meetingId?: string, options?: { limit?: n
       const { data: result } = await supabase.from('meeting_chat_messages').select('*, users(id, name, avatar_url)').eq('meeting_id', meetingId).order('created_at', { ascending: true }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [meetingId, options?.limit, supabase])
+  }, [meetingId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -155,7 +155,7 @@ export function useMeetingStats(hostId?: string, options?: { startDate?: string;
       const { data: result } = await query.order('period_start', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [hostId, options?.startDate, options?.endDate, supabase])
+  }, [hostId, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -193,7 +193,7 @@ export function useUpcomingMeetings(hostId?: string, limit?: number) {
       const { data: result } = await supabase.from('meetings').select('*').eq('host_id', hostId).eq('status', 'scheduled').gte('scheduled_at', new Date().toISOString()).order('scheduled_at', { ascending: true }).limit(limit || 10)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [hostId, limit, supabase])
+  }, [hostId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

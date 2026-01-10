@@ -38,7 +38,7 @@ export function useTriggers(options?: { trigger_type?: string; event_type?: stri
       const { data } = await query.order('priority', { ascending: false }).order('name', { ascending: true }).limit(options?.limit || 50)
       setTriggers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.trigger_type, options?.event_type, options?.entity_type, options?.is_active, options?.created_by, options?.search, options?.limit, supabase])
+  }, [options?.trigger_type, options?.event_type, options?.entity_type, options?.is_active, options?.created_by, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { triggers, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useMyTriggers(userId?: string, options?: { trigger_type?: string
       const { data } = await query.order('updated_at', { ascending: false })
       setTriggers(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.trigger_type, options?.is_active, supabase])
+  }, [userId, options?.trigger_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { triggers, isLoading, refresh: fetch }
 }
@@ -103,7 +103,7 @@ export function useTriggerExecutions(triggerId?: string, options?: { status?: st
       const { data } = await query.order('executed_at', { ascending: false }).limit(options?.limit || 50)
       setExecutions(data || [])
     } finally { setIsLoading(false) }
-  }, [triggerId, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [triggerId, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { executions, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function useTriggerLogs(triggerId?: string, options?: { status?: string; 
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [triggerId, options?.status, options?.limit, supabase])
+  }, [triggerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -164,7 +164,7 @@ export function useTriggerStats(triggerId?: string, options?: { from_date?: stri
         skipped: executions.filter(e => e.status === 'skipped').length
       })
     } finally { setIsLoading(false) }
-  }, [triggerId, options?.from_date, options?.to_date, supabase])
+  }, [triggerId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -182,7 +182,7 @@ export function useEventTriggers(eventType?: string, entityType?: string) {
       const { data } = await query.order('priority', { ascending: false })
       setTriggers(data || [])
     } finally { setIsLoading(false) }
-  }, [eventType, entityType, supabase])
+  }, [eventType, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { triggers, isLoading, refresh: fetch }
 }

@@ -51,7 +51,7 @@ export function useTranslations(languageCode?: string, options?: { namespace?: s
       const { data } = await query.order('key', { ascending: true })
       setTranslations(data || [])
     } finally { setIsLoading(false) }
-  }, [languageCode, options?.namespace, supabase])
+  }, [languageCode, options?.namespace])
   useEffect(() => { fetch() }, [fetch])
   return { translations, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useTranslation(languageCode?: string, key?: string, namespace?: 
       const { data } = await query.single()
       setTranslation(data)
     } finally { setIsLoading(false) }
-  }, [languageCode, key, namespace, supabase])
+  }, [languageCode, key, namespace])
   useEffect(() => { fetch() }, [fetch])
   return { translation, isLoading, refresh: fetch }
 }

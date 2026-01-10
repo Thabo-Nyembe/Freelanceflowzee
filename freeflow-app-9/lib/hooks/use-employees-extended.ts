@@ -36,7 +36,7 @@ export function useEmployees(options?: { department_id?: string; status?: string
       const { data } = await query.order('hire_date', { ascending: false }).limit(options?.limit || 50)
       setEmployees(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.department_id, options?.status, options?.manager_id, options?.search, options?.limit, supabase])
+  }, [options?.department_id, options?.status, options?.manager_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { employees, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useEmployeeDocuments(employeeId?: string, options?: { type?: str
       const { data } = await query.order('uploaded_at', { ascending: false })
       setDocuments(data || [])
     } finally { setIsLoading(false) }
-  }, [employeeId, options?.type, supabase])
+  }, [employeeId, options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { documents, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useEmployeePerformance(employeeId?: string, options?: { limit?: 
     if (!employeeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('employee_performance').select('*').eq('employee_id', employeeId).order('review_date', { ascending: false }).limit(options?.limit || 10); setReviews(data || []) } finally { setIsLoading(false) }
-  }, [employeeId, options?.limit, supabase])
+  }, [employeeId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -99,7 +99,7 @@ export function useEmployeeLeave(employeeId?: string, options?: { status?: strin
       const { data } = await query.order('start_date', { ascending: false })
       setLeaves(data || [])
     } finally { setIsLoading(false) }
-  }, [employeeId, options?.status, options?.year, supabase])
+  }, [employeeId, options?.status, options?.year])
   useEffect(() => { fetch() }, [fetch])
   return { leaves, isLoading, refresh: fetch }
 }

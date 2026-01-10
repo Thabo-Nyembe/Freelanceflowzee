@@ -34,7 +34,7 @@ export function useTrends(options?: { metric_type?: string; is_active?: boolean;
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTrends(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.metric_type, options?.is_active, options?.limit, supabase])
+  }, [options?.metric_type, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { trends, isLoading, refresh: fetch }
 }
@@ -47,7 +47,7 @@ export function useTrendData(trendId?: string, options?: { days?: number }) {
     if (!trendId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); const { data: trendData } = await supabase.from('trend_data').select('*').eq('trend_id', trendId).gte('recorded_at', since.toISOString()).order('recorded_at', { ascending: true }); setData(trendData || []) } finally { setIsLoading(false) }
-  }, [trendId, options?.days, supabase])
+  }, [trendId, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function useTrendAlerts(options?: { trend_id?: string; is_acknowledged?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.trend_id, options?.is_acknowledged, options?.limit, supabase])
+  }, [options?.trend_id, options?.is_acknowledged, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }

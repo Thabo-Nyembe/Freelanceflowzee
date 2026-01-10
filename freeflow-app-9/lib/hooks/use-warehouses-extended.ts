@@ -35,7 +35,7 @@ export function useWarehouses(options?: { status?: string; city?: string; countr
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setWarehouses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.city, options?.country, options?.limit, supabase])
+  }, [options?.status, options?.city, options?.country, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { warehouses, isLoading, refresh: fetch }
 }
@@ -61,7 +61,7 @@ export function useWarehouseInventory(warehouseId?: string, options?: { product_
     if (!warehouseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('warehouse_inventory').select('*').eq('warehouse_id', warehouseId); if (options?.product_id) query = query.eq('product_id', options.product_id); if (options?.low_stock) query = query.lt('quantity', 10); const { data } = await query.order('product_id', { ascending: true }); setInventory(data || []) } finally { setIsLoading(false) }
-  }, [warehouseId, options?.product_id, options?.low_stock, supabase])
+  }, [warehouseId, options?.product_id, options?.low_stock])
   useEffect(() => { fetch() }, [fetch])
   return { inventory, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useWarehouseTransfers(options?: { from_warehouse_id?: string; to
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTransfers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.from_warehouse_id, options?.to_warehouse_id, options?.status, options?.limit, supabase])
+  }, [options?.from_warehouse_id, options?.to_warehouse_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transfers, isLoading, refresh: fetch }
 }

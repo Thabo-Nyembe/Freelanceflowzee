@@ -34,7 +34,7 @@ export function useTimelines(options?: { user_id?: string; project_id?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTimelines(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.project_id, options?.limit, supabase])
+  }, [options?.user_id, options?.project_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { timelines, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useRules(options?: { ruleType?: string; entityType?: string; isA
       const { data: result } = await query.order('priority', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.ruleType, options?.entityType, options?.isActive, supabase])
+  }, [options?.ruleType, options?.entityType, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useRuleExecutions(ruleId?: string, limit = 20) {
       const { data: result } = await supabase.from('rule_executions').select('*').eq('rule_id', ruleId).order('executed_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [ruleId, limit, supabase])
+  }, [ruleId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

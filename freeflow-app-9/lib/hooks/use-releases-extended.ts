@@ -35,7 +35,7 @@ export function useReleases(options?: { project_id?: string; status?: string; is
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReleases(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.status, options?.is_prerelease, options?.limit, supabase])
+  }, [options?.project_id, options?.status, options?.is_prerelease, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { releases, isLoading, refresh: fetch }
 }

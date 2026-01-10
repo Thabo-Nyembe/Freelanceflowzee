@@ -36,7 +36,7 @@ export function useClients(options?: { user_id?: string; status?: string; indust
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setClients(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.industry, options?.search, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.industry, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { clients, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useClientNotes(clientId?: string, options?: { type?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setNotes(data || [])
     } finally { setIsLoading(false) }
-  }, [clientId, options?.type, options?.limit, supabase])
+  }, [clientId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useClientSearch(userId?: string, searchTerm?: string) {
       const { data } = await supabase.from('clients').select('id, name, email, company').eq('user_id', userId).or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,company.ilike.%${searchTerm}%`).limit(10)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, searchTerm, supabase])
+  }, [userId, searchTerm])
   useEffect(() => { search() }, [search])
   return { results, isLoading }
 }

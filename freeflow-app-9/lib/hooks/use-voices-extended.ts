@@ -36,7 +36,7 @@ export function useVoices(options?: { user_id?: string; type?: string; language?
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setVoices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.language, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.language, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { voices, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useVoiceGenerations(options?: { voice_id?: string; user_id?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setGenerations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.voice_id, options?.user_id, options?.limit, supabase])
+  }, [options?.voice_id, options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { generations, isLoading, refresh: fetch }
 }

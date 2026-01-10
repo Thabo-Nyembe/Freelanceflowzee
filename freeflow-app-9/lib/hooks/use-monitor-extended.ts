@@ -37,7 +37,7 @@ export function useMonitors(options?: { monitorType?: string; status?: string; i
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.monitorType, options?.status, options?.isEnabled, supabase])
+  }, [options?.monitorType, options?.status, options?.isEnabled])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useMonitorChecks(monitorId?: string, limit = 100) {
       const { data: result } = await supabase.from('monitor_checks').select('*').eq('monitor_id', monitorId).order('checked_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [monitorId, limit, supabase])
+  }, [monitorId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useMonitorAlerts(monitorId?: string, status?: string) {
       const { data: result } = await query.order('triggered_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [monitorId, status, supabase])
+  }, [monitorId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useMonitorUptime(monitorId?: string, days = 30) {
       const percentage = total > 0 ? Math.round((up / total) * 10000) / 100 : 100
       setUptime({ percentage, totalChecks: total })
     } finally { setIsLoading(false) }
-  }, [monitorId, days, supabase])
+  }, [monitorId, days])
   useEffect(() => { fetch() }, [fetch])
   return { uptime, isLoading, refresh: fetch }
 }

@@ -20,7 +20,7 @@ export function useAddresses(userId?: string, addressType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, addressType, supabase])
+  }, [userId, addressType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function useDefaultAddress(userId?: string, addressType?: string) {
       const { data: result } = await query.single()
       setData(result)
     } finally { setIsLoading(false) }
-  }, [userId, addressType, supabase])
+  }, [userId, addressType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

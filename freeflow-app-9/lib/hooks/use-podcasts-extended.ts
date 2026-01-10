@@ -36,7 +36,7 @@ export function usePodcasts(options?: { author_id?: string; category_id?: string
       const { data } = await query.order('subscriber_count', { ascending: false }).limit(options?.limit || 50)
       setPodcasts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.category_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.author_id, options?.category_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { podcasts, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function usePodcastEpisodes(podcastId?: string, options?: { status?: stri
       const { data } = await query.order('episode_number', { ascending: false }).limit(options?.limit || 50)
       setEpisodes(data || [])
     } finally { setIsLoading(false) }
-  }, [podcastId, options?.status, options?.season_number, options?.limit, supabase])
+  }, [podcastId, options?.status, options?.season_number, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { episodes, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useIsSubscribed(podcastId?: string, userId?: string) {
     if (!podcastId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('podcast_subscriptions').select('id').eq('podcast_id', podcastId).eq('user_id', userId).single(); setIsSubscribed(!!data) } finally { setIsLoading(false) }
-  }, [podcastId, userId, supabase])
+  }, [podcastId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { isSubscribed, isLoading, refresh: fetch }
 }
@@ -173,7 +173,7 @@ export function useSubscribedEpisodes(userId?: string, options?: { limit?: numbe
       const { data } = await supabase.from('podcast_episodes').select('*, podcasts(*)').in('podcast_id', podcastIds).eq('status', 'published').order('publish_date', { ascending: false }).limit(options?.limit || 20)
       setEpisodes(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { episodes, isLoading, refresh: fetch }
 }

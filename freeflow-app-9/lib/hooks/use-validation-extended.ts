@@ -37,7 +37,7 @@ export function useValidations(options?: { validationType?: string; entityType?:
       const { data: result } = await query.order('field', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.validationType, options?.entityType, options?.isActive, supabase])
+  }, [options?.validationType, options?.entityType, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useFieldValidations(entityType?: string, field?: string) {
       const { data: result } = await supabase.from('validations').select('*').eq('entity_type', entityType).eq('field', field).eq('is_active', true)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, field, supabase])
+  }, [entityType, field])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

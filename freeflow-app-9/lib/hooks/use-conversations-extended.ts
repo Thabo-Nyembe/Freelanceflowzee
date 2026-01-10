@@ -36,7 +36,7 @@ export function useConversations(userId?: string, options?: { type?: string; lim
       const { data } = await query.order('last_message_at', { ascending: false }).limit(options?.limit || 50)
       setConversations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { conversations, isLoading, refresh: fetch }
 }
@@ -49,7 +49,7 @@ export function useConversationMessages(conversationId?: string, options?: { lim
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('conversation_messages').select('*').eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages((data || []).reverse()) } finally { setIsLoading(false) }
-  }, [conversationId, options?.limit, supabase])
+  }, [conversationId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }

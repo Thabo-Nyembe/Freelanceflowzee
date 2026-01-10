@@ -24,7 +24,7 @@ export function useCacheEntry(key?: string, namespace?: string) {
         setData(result?.value || null)
       }
     } finally { setIsLoading(false) }
-  }, [key, namespace, supabase])
+  }, [key, namespace])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

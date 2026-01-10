@@ -37,7 +37,7 @@ export function useRules(options?: { group_id?: string; type?: string; trigger_e
       const { data } = await query.order('priority', { ascending: true }).order('name', { ascending: true }).limit(options?.limit || 100)
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.group_id, options?.type, options?.trigger_event, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.group_id, options?.type, options?.trigger_event, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useRuleExecutions(ruleId?: string, options?: { status?: string; 
       const { data } = await query.order('executed_at', { ascending: false }).limit(options?.limit || 100)
       setExecutions(data || [])
     } finally { setIsLoading(false) }
-  }, [ruleId, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [ruleId, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { executions, isLoading, refresh: fetch }
 }
@@ -118,7 +118,7 @@ export function useRuleTemplates(options?: { type?: string; is_active?: boolean 
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

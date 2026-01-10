@@ -35,7 +35,7 @@ export function useUserVerifications(userId?: string, options?: { type?: string;
       const { data } = await query.order('created_at', { ascending: false })
       setVerifications(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.status, supabase])
+  }, [userId, options?.type, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { verifications, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useSessionHistory(userId?: string, options?: { limit?: number })
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('identity_sessions').select('*').eq('user_id', userId).order('started_at', { ascending: false }).limit(options?.limit || 50); setSessions(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }
@@ -142,7 +142,7 @@ export function useIsVerified(userId?: string, verificationType?: string) {
       setVerification(data)
       setIsVerified(!!data)
     } finally { setIsLoading(false) }
-  }, [userId, verificationType, supabase])
+  }, [userId, verificationType])
   useEffect(() => { check() }, [check])
   return { isVerified, verification, isLoading, recheck: check }
 }

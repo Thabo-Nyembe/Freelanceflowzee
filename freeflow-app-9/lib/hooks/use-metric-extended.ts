@@ -20,7 +20,7 @@ export function useMetrics(entityId?: string, entityType?: string, metricName?: 
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, metricName, supabase])
+  }, [entityId, entityType, metricName])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,7 +36,7 @@ export function useLatestMetric(entityId?: string, entityType?: string, metricNa
       const { data } = await supabase.from('metrics').select('*').eq('entity_id', entityId).eq('entity_type', entityType).eq('metric_name', metricName).order('timestamp', { ascending: false }).limit(1).single()
       setMetric(data)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, metricName, supabase])
+  }, [entityId, entityType, metricName])
   useEffect(() => { fetch() }, [fetch])
   return { metric, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useMetricTimeSeries(entityId?: string, entityType?: string, metr
       const { data: result } = await supabase.from('metrics').select('value, timestamp').eq('entity_id', entityId).eq('entity_type', entityType).eq('metric_name', metricName).gte('timestamp', since).order('timestamp', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, metricName, since, supabase])
+  }, [entityId, entityType, metricName, since])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

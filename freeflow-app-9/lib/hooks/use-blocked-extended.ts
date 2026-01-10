@@ -16,7 +16,7 @@ export function useBlockedUsers(blockerId?: string, options?: { limit?: number }
     if (!blockerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('blocked_users').select('*').eq('blocker_id', blockerId).order('created_at', { ascending: false }).limit(options?.limit || 50); setBlockedUsers(data || []) } finally { setIsLoading(false) }
-  }, [blockerId, options?.limit, supabase])
+  }, [blockerId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { blockedUsers, isLoading, refresh: fetch }
 }
@@ -29,7 +29,7 @@ export function useIsUserBlocked(blockerId?: string, blockedId?: string) {
     if (!blockerId || !blockedId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('blocked_users').select('id').eq('blocker_id', blockerId).eq('blocked_id', blockedId).single(); setIsBlocked(!!data) } finally { setIsLoading(false) }
-  }, [blockerId, blockedId, supabase])
+  }, [blockerId, blockedId])
   useEffect(() => { check() }, [check])
   return { isBlocked, isLoading, recheck: check }
 }
@@ -46,7 +46,7 @@ export function useBlockedIPs(options?: { is_active?: boolean; limit?: number })
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBlockedIPs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.limit, supabase])
+  }, [options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { blockedIPs, isLoading, refresh: fetch }
 }
@@ -63,7 +63,7 @@ export function useBlockedDomains(options?: { is_active?: boolean; limit?: numbe
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBlockedDomains(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.limit, supabase])
+  }, [options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { blockedDomains, isLoading, refresh: fetch }
 }

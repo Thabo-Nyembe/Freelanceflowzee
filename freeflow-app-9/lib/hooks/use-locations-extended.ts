@@ -36,7 +36,7 @@ export function useLocations(options?: { type_id?: string; city?: string; countr
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setLocations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.city, options?.country, options?.is_active, options?.limit, supabase])
+  }, [options?.type_id, options?.city, options?.country, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { locations, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useLocationReviews(locationId?: string, options?: { limit?: numb
     if (!locationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('location_reviews').select('*').eq('location_id', locationId).order('created_at', { ascending: false }).limit(options?.limit || 20); setReviews(data || []) } finally { setIsLoading(false) }
-  }, [locationId, options?.limit, supabase])
+  }, [locationId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -118,7 +118,7 @@ export function useLocationSearch(query?: string, options?: { type_id?: string; 
       const { data } = await dbQuery.order('rating', { ascending: false }).limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [query, options?.type_id, options?.limit, supabase])
+  }, [query, options?.type_id, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -140,7 +140,7 @@ export function useNearbyLocations(latitude?: number, longitude?: number, option
       })
       setLocations(data || [])
     } finally { setIsLoading(false) }
-  }, [latitude, longitude, options?.radius_km, options?.type_id, options?.limit, supabase])
+  }, [latitude, longitude, options?.radius_km, options?.type_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { locations, isLoading, refresh: fetch }
 }
@@ -157,7 +157,7 @@ export function useTopRatedLocations(options?: { type_id?: string; limit?: numbe
       const { data } = await query.order('rating', { ascending: false }).limit(options?.limit || 10)
       setLocations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.limit, supabase])
+  }, [options?.type_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { locations, isLoading, refresh: fetch }
 }

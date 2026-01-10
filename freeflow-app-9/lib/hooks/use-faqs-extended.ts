@@ -35,7 +35,7 @@ export function useFaqs(options?: { category_id?: string; is_published?: boolean
       const { data } = await query.order('order', { ascending: true }).limit(options?.limit || 100)
       setFaqs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.is_published, options?.search, options?.limit, supabase])
+  }, [options?.category_id, options?.is_published, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { faqs, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useFaqSearch(query?: string, options?: { category_id?: string; l
       const { data } = await q.order('view_count', { ascending: false }).limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [query, options?.category_id, options?.limit, supabase])
+  }, [query, options?.category_id, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -124,7 +124,7 @@ export function useFaqTranslation(faqId?: string, language?: string) {
     if (!faqId || !language) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('faq_translations').select('*').eq('faq_id', faqId).eq('language', language).single(); setTranslation(data) } finally { setIsLoading(false) }
-  }, [faqId, language, supabase])
+  }, [faqId, language])
   useEffect(() => { fetch() }, [fetch])
   return { translation, isLoading, refresh: fetch }
 }

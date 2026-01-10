@@ -37,7 +37,7 @@ export function useProcesses(options?: { organization_id?: string; status?: stri
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProcesses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.status, options?.category, options?.owner_id, options?.search, options?.limit, supabase])
+  }, [options?.organization_id, options?.status, options?.category, options?.owner_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { processes, isLoading, refresh: fetch }
 }
@@ -82,7 +82,7 @@ export function useProcessInstances(options?: { process_id?: string; status?: st
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setInstances(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.process_id, options?.status, options?.started_by, options?.limit, supabase])
+  }, [options?.process_id, options?.status, options?.started_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { instances, isLoading, refresh: fetch }
 }
@@ -101,7 +101,7 @@ export function useProcessTasks(options?: { instance_id?: string; assignee_id?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTasks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.instance_id, options?.assignee_id, options?.status, options?.limit, supabase])
+  }, [options?.instance_id, options?.assignee_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -119,7 +119,7 @@ export function useMyProcessTasks(userId?: string, options?: { status?: string; 
       const { data } = await query.order('due_at', { ascending: true }).limit(options?.limit || 50)
       setTasks(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -163,7 +163,7 @@ export function useProcessTemplates(options?: { category?: string; search?: stri
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useMessages(options?: { channelId?: string; threadId?: string; l
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.channelId, options?.threadId, options?.limit, supabase])
+  }, [options?.channelId, options?.threadId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useDirectMessages(userId1?: string, userId2?: string, options?: 
       const { data: result } = await supabase.from('messages').select('*, message_attachments(*)').or(`and(sender_id.eq.${userId1},recipient_id.eq.${userId2}),and(sender_id.eq.${userId2},recipient_id.eq.${userId1})`).eq('is_deleted', false).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId1, userId2, options?.limit, supabase])
+  }, [userId1, userId2, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useMessageMentions(userId?: string, options?: { isRead?: boolean
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isRead, options?.limit, supabase])
+  }, [userId, options?.isRead, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -182,7 +182,7 @@ export function useDirectMessagesRealtime(userId1?: string, userId2?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [userId1, userId2, supabase])
+  }, [userId1, userId2])
   return { messages }
 }
 

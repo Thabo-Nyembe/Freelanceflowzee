@@ -16,7 +16,7 @@ export function useExchangeRate(fromCurrency?: string, toCurrency?: string) {
     if (!fromCurrency || !toCurrency) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exchange_rates').select('*').eq('from_currency', fromCurrency).eq('to_currency', toCurrency).single(); setRate(data) } finally { setIsLoading(false) }
-  }, [fromCurrency, toCurrency, supabase])
+  }, [fromCurrency, toCurrency])
   useEffect(() => { fetch() }, [fetch])
   return { rate, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useExchangeRates(options?: { base_currency?: string; provider?: 
       const { data } = await query.order('from_currency', { ascending: true })
       setRates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.base_currency, options?.provider, supabase])
+  }, [options?.base_currency, options?.provider])
   useEffect(() => { fetch() }, [fetch])
   return { rates, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useUserExchangeTransactions(userId?: string, options?: { status?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTransactions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.from_currency, options?.limit, supabase])
+  }, [userId, options?.status, options?.from_currency, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useExchangeHistory(fromCurrency?: string, toCurrency?: string, o
       const { data } = await supabase.from('exchange_history').select('*').eq('from_currency', fromCurrency).eq('to_currency', toCurrency).gte('date', startDate).order('date', { ascending: true })
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [fromCurrency, toCurrency, options?.days, supabase])
+  }, [fromCurrency, toCurrency, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function useCurrencyConverter(amount?: number, fromCurrency?: string, toC
       const { data: rateData } = await supabase.from('exchange_rates').select('rate').eq('from_currency', fromCurrency).eq('to_currency', toCurrency).single()
       if (rateData) { setResult({ convertedAmount: amount * rateData.rate, rate: rateData.rate }) }
     } finally { setIsLoading(false) }
-  }, [amount, fromCurrency, toCurrency, supabase])
+  }, [amount, fromCurrency, toCurrency])
   useEffect(() => { convert() }, [convert])
   return { result, isLoading, refresh: convert }
 }

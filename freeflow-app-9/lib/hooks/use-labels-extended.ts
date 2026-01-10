@@ -35,7 +35,7 @@ export function useLabels(options?: { organization_id?: string; group_id?: strin
       const { data } = await query.order('name', { ascending: true })
       setLabels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.group_id, options?.search, supabase])
+  }, [options?.organization_id, options?.group_id, options?.search])
   useEffect(() => { fetch() }, [fetch])
   return { labels, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useEntityLabels(entityType?: string, entityId?: string) {
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('label_assignments').select('*, labels(*)').eq('entity_type', entityType).eq('entity_id', entityId); setLabels(data || []) } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { labels, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function usePopularLabels(organizationId?: string, options?: { limit?: nu
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 10)
       setLabels(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.limit, supabase])
+  }, [organizationId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { labels, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function useLabelSearch(organizationId?: string, query?: string) {
       const { data } = await dbQuery.order('usage_count', { ascending: false }).limit(10)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, query, supabase])
+  }, [organizationId, query])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -146,7 +146,7 @@ export function useLabelsByEntity(entityType?: string, entityIds?: string[]) {
       })
       setLabelMap(map)
     } finally { setIsLoading(false) }
-  }, [entityType, entityIds, supabase])
+  }, [entityType, entityIds])
   useEffect(() => { fetch() }, [fetch])
   return { labelMap, isLoading, refresh: fetch }
 }

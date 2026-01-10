@@ -37,7 +37,7 @@ export function usePolicies(options?: { policyType?: string; resourceType?: stri
       const { data: result } = await query.order('priority', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.policyType, options?.resourceType, options?.isActive, supabase])
+  }, [options?.policyType, options?.resourceType, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

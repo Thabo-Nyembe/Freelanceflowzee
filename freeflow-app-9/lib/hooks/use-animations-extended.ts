@@ -36,7 +36,7 @@ export function useAnimations(options?: { user_id?: string; type?: string; is_pu
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAnimations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { animations, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useAnimationPresets(options?: { type?: string; limit?: number })
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setPresets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { presets, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function usePublicAnimations(options?: { type?: string; limit?: number })
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAnimations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { animations, isLoading, refresh: fetch }
 }

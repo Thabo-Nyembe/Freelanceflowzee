@@ -38,7 +38,7 @@ export function useReferrals(options?: { referrer_id?: string; referred_id?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReferrals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.referrer_id, options?.referred_id, options?.campaign_id, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.referrer_id, options?.referred_id, options?.campaign_id, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { referrals, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useMyReferrals(userId?: string, options?: { status?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReferrals(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { referrals, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useUserReferralCode(userId?: string, campaignId?: string) {
       const { data } = await query.order('created_at', { ascending: false }).limit(1).single()
       setCode(data)
     } finally { setIsLoading(false) }
-  }, [userId, campaignId, supabase])
+  }, [userId, campaignId])
   useEffect(() => { fetch() }, [fetch])
   return { code, isLoading, refresh: fetch }
 }
@@ -106,7 +106,7 @@ export function useReferralRewards(options?: { user_id?: string; referral_id?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.referral_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.referral_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, isLoading, refresh: fetch }
 }
@@ -124,7 +124,7 @@ export function useMyRewards(userId?: string, options?: { status?: string; limit
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useReferralCampaigns(options?: { is_active?: boolean; limit?: nu
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.limit, supabase])
+  }, [options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function useReferralStats(userId?: string, options?: { campaign_id?: stri
       const pendingRewards = rewards?.filter(r => r.status === 'pending').reduce((sum, r) => sum + (r.amount || 0), 0) || 0
       setStats({ totalReferrals, pendingReferrals, completedReferrals, totalEarned, pendingRewards })
     } finally { setIsLoading(false) }
-  }, [userId, options?.campaign_id, options?.from_date, options?.to_date, supabase])
+  }, [userId, options?.campaign_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -192,7 +192,7 @@ export function useTopReferrers(options?: { campaign_id?: string; limit?: number
       const sorted = Object.values(counts).sort((a, b) => b.count - a.count).slice(0, options?.limit || 10)
       setReferrers(sorted)
     } finally { setIsLoading(false) }
-  }, [options?.campaign_id, options?.limit, supabase])
+  }, [options?.campaign_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { referrers, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useProposals(options?: { author_id?: string; client_id?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProposals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.client_id, options?.organization_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.author_id, options?.client_id, options?.organization_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { proposals, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useProposalComments(proposalId?: string, options?: { is_internal
       const { data } = await query.order('created_at', { ascending: true })
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [proposalId, options?.is_internal, supabase])
+  }, [proposalId, options?.is_internal])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useProposalTemplates(options?: { category?: string; search?: str
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -130,7 +130,7 @@ export function useMyProposals(userId?: string, options?: { status?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProposals(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { proposals, isLoading, refresh: fetch }
 }
@@ -148,7 +148,7 @@ export function useClientProposals(clientId?: string, options?: { status?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProposals(data || [])
     } finally { setIsLoading(false) }
-  }, [clientId, options?.status, options?.limit, supabase])
+  }, [clientId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { proposals, isLoading, refresh: fetch }
 }
@@ -166,7 +166,7 @@ export function usePendingProposals(options?: { author_id?: string; organization
       const { data } = await query.order('sent_at', { ascending: false }).limit(options?.limit || 50)
       setProposals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.organization_id, options?.limit, supabase])
+  }, [options?.author_id, options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { proposals, isLoading, refresh: fetch }
 }
@@ -196,7 +196,7 @@ export function useProposalStats(options?: { author_id?: string; organization_id
       const conversionRate = sentOrResponded > 0 ? Math.round((accepted / sentOrResponded) * 100) : 0
       setStats({ total, draft, sent, accepted, declined, totalValue, acceptedValue, conversionRate })
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.organization_id, options?.from_date, options?.to_date, supabase])
+  }, [options?.author_id, options?.organization_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -215,7 +215,7 @@ export function useExpiringProposals(options?: { days?: number; author_id?: stri
       const { data } = await query.order('valid_until', { ascending: true })
       setProposals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.days, options?.author_id, supabase])
+  }, [options?.days, options?.author_id])
   useEffect(() => { fetch() }, [fetch])
   return { proposals, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function useUserDesigns(userId?: string, options?: { project_id?: string;
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setDesigns(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.project_id, options?.type, options?.status, options?.limit, supabase])
+  }, [userId, options?.project_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { designs, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useDesignAssets(designId?: string, options?: { type?: string }) 
       const { data } = await query.order('created_at', { ascending: false })
       setAssets(data || [])
     } finally { setIsLoading(false) }
-  }, [designId, options?.type, supabase])
+  }, [designId, options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { assets, isLoading, refresh: fetch }
 }
@@ -85,7 +85,7 @@ export function useDesignComments(designId?: string, options?: { is_resolved?: b
       const { data } = await query.order('created_at', { ascending: true })
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [designId, options?.is_resolved, supabase])
+  }, [designId, options?.is_resolved])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -111,7 +111,7 @@ export function useRecentDesigns(userId?: string, limit?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('designs').select('*').eq('user_id', userId).order('updated_at', { ascending: false }).limit(limit || 10); setDesigns(data || []) } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { designs, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useProjectDesigns(projectId?: string, options?: { status?: strin
       const { data } = await query.order('updated_at', { ascending: false })
       setDesigns(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.status, supabase])
+  }, [projectId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { designs, isLoading, refresh: fetch }
 }

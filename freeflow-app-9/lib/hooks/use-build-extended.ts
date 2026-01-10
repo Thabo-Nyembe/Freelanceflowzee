@@ -39,7 +39,7 @@ export function useBuilds(projectId?: string, options?: { status?: string; branc
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.status, options?.branch, options?.environment, options?.limit, supabase])
+  }, [projectId, options?.status, options?.branch, options?.environment, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useLatestBuild(projectId?: string, options?: { branch?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(1).single()
       setBuild(data)
     } finally { setIsLoading(false) }
-  }, [projectId, options?.branch, options?.environment, supabase])
+  }, [projectId, options?.branch, options?.environment])
   useEffect(() => { fetch() }, [fetch])
   return { build, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useBuildLogs(buildId?: string, options?: { level?: string; step?
       const { data: result } = await query.order('timestamp', { ascending: true }).limit(options?.limit || 1000)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [buildId, options?.level, options?.step, options?.limit, supabase])
+  }, [buildId, options?.level, options?.step, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useBuildArtifacts(buildId?: string, options?: { type?: string })
       const { data: result } = await query.order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [buildId, options?.type, supabase])
+  }, [buildId, options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -152,7 +152,7 @@ export function useBuildStats(projectId?: string, options?: { startDate?: string
       const successRate = total > 0 ? (success / total) * 100 : 0
       setStats({ total, success, failed, cancelled, avgDuration, successRate })
     } finally { setIsLoading(false) }
-  }, [projectId, options?.startDate, options?.endDate, supabase])
+  }, [projectId, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

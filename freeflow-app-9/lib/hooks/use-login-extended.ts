@@ -16,7 +16,7 @@ export function useLoginAttempts(email?: string, options?: { limit?: number }) {
     if (!email) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('login_attempts').select('*').eq('email', email).order('attempted_at', { ascending: false }).limit(options?.limit || 50); setAttempts(data || []) } finally { setIsLoading(false) }
-  }, [email, options?.limit, supabase])
+  }, [email, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { attempts, isLoading, refresh: fetch }
 }
@@ -47,7 +47,7 @@ export function useLoginHistory(userId?: string, options?: { action?: string; li
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.action, options?.limit, supabase])
+  }, [userId, options?.action, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useFailedLoginAttempts(email?: string, options?: { minutes?: num
       const { data } = await supabase.from('login_attempts').select('id').eq('email', email).eq('success', false).gte('attempted_at', since)
       setCount(data?.length || 0)
     } finally { setIsLoading(false) }
-  }, [email, options?.minutes, supabase])
+  }, [email, options?.minutes])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useRecentLoginActivity(userId?: string, options?: { limit?: numb
       const { data: history } = await supabase.from('login_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 10)
       setActivity(history || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { activity, isLoading, refresh: fetch }
 }

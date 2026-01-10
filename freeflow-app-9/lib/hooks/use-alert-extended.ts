@@ -21,7 +21,7 @@ export function useAlerts(userId?: string, alertType?: string, isRead?: boolean)
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, alertType, isRead, supabase])
+  }, [userId, alertType, isRead])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useAlertRules(userId?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, isActive, supabase])
+  }, [userId, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

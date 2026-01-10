@@ -34,7 +34,7 @@ export function usePageBySlug(slug?: string, options?: { organization_id?: strin
       const { data } = await query.single()
       setPage(data)
     } finally { setIsLoading(false) }
-  }, [slug, options?.organization_id, supabase])
+  }, [slug, options?.organization_id])
   useEffect(() => { fetch() }, [fetch])
   return { page, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function usePages(options?: { organization_id?: string; author_id?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPages(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.author_id, options?.type, options?.status, options?.parent_id, options?.search, options?.limit, supabase])
+  }, [options?.organization_id, options?.author_id, options?.type, options?.status, options?.parent_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { pages, isLoading, refresh: fetch }
 }
@@ -82,7 +82,7 @@ export function usePageVersions(pageId?: string, options?: { limit?: number }) {
     if (!pageId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('page_versions').select('*').eq('page_id', pageId).order('created_at', { ascending: false }).limit(options?.limit || 20); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [pageId, options?.limit, supabase])
+  }, [pageId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -127,7 +127,7 @@ export function usePageAnalytics(pageId?: string, options?: { from_date?: string
       const { data } = await query.order('recorded_at', { ascending: false })
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
-  }, [pageId, options?.from_date, options?.to_date, supabase])
+  }, [pageId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -158,7 +158,7 @@ export function usePublishedPages(organizationId?: string, options?: { type?: st
       const { data } = await query.order('published_at', { ascending: false }).limit(options?.limit || 50)
       setPages(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.type, options?.limit, supabase])
+  }, [organizationId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { pages, isLoading, refresh: fetch }
 }

@@ -21,7 +21,7 @@ export function useImages(userId?: string, folderId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, folderId, status, supabase])
+  }, [userId, folderId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

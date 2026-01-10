@@ -40,7 +40,7 @@ export function useUserActionHistory(userId?: string, options?: { actionType?: s
       setData(result || [])
       setTotal(count || 0)
     } finally { setIsLoading(false) }
-  }, [userId, options?.actionType, options?.entityType, options?.limit, supabase])
+  }, [userId, options?.actionType, options?.entityType, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, total, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useEntityActionHistory(entityType?: string, entityId?: string, o
       const { data: result } = await supabase.from('action_history').select('*, users(id, name, email)').eq('entity_type', entityType).eq('entity_id', entityId).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.limit, supabase])
+  }, [entityType, entityId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useRecentActions(options?: { limit?: number; actionTypes?: strin
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.limit, options?.actionTypes, supabase])
+  }, [options?.limit, options?.actionTypes])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -97,7 +97,7 @@ export function useActionStats(userId?: string, options?: { startDate?: string; 
       })
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [userId, options?.startDate, options?.endDate, supabase])
+  }, [userId, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -130,7 +130,7 @@ export function useActionSearch(searchTerm: string, options?: { userId?: string;
       const { data: result } = await query.order('created_at', { ascending: false }).limit(50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, options?.userId, options?.entityType, supabase])
+  }, [searchTerm, options?.userId, options?.entityType])
   useEffect(() => { const timer = setTimeout(search, 300); return () => clearTimeout(timer) }, [search])
   return { data, isLoading }
 }

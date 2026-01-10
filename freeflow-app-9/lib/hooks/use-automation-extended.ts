@@ -34,7 +34,7 @@ export function useAutomationWorkflows(options?: { user_id?: string; is_active?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setWorkflows(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_active, options?.limit, supabase])
+  }, [options?.user_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { workflows, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function useAutomationLogs(workflowId?: string, options?: { status?: stri
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [workflowId, options?.status, options?.limit, supabase])
+  }, [workflowId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -105,7 +105,7 @@ export function useRecentAutomationRuns(userId?: string, options?: { limit?: num
       const { data } = await supabase.from('automation_logs').select('*, automation_workflows(name)').in('workflow_id', workflowIds).order('started_at', { ascending: false }).limit(options?.limit || 20)
       setRuns(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { runs, isLoading, refresh: fetch }
 }

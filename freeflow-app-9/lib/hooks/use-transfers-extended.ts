@@ -39,7 +39,7 @@ export function useTransfers(options?: { transfer_type?: string; status?: string
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setTransfers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.transfer_type, options?.status, options?.from_id, options?.to_id, options?.initiated_by, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.transfer_type, options?.status, options?.from_id, options?.to_id, options?.initiated_by, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transfers, isLoading, refresh: fetch }
 }
@@ -62,7 +62,7 @@ export function useMyTransfers(userId?: string, options?: { role?: 'from' | 'to'
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTransfers(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.role, options?.status, options?.limit, supabase])
+  }, [userId, options?.role, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transfers, isLoading, refresh: fetch }
 }
@@ -101,7 +101,7 @@ export function useTransferHistory(transferId?: string, options?: { limit?: numb
     if (!transferId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('transfer_history').select('*, users(*)').eq('transfer_id', transferId).order('occurred_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [transferId, options?.limit, supabase])
+  }, [transferId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -119,7 +119,7 @@ export function usePendingApprovals(approverId?: string, options?: { transfer_ty
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 50)
       setTransfers(data || [])
     } finally { setIsLoading(false) }
-  }, [approverId, options?.transfer_type, options?.limit, supabase])
+  }, [approverId, options?.transfer_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transfers, isLoading, refresh: fetch }
 }
@@ -139,7 +139,7 @@ export function useTransferSchedules(options?: { transfer_type?: string; status?
       const { data } = await query.order('next_run', { ascending: true }).limit(options?.limit || 50)
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.transfer_type, options?.status, options?.from_id, options?.to_id, options?.limit, supabase])
+  }, [options?.transfer_type, options?.status, options?.from_id, options?.to_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -158,7 +158,7 @@ export function useTransferBatches(options?: { transfer_type?: string; status?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBatches(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.transfer_type, options?.status, options?.created_by, options?.limit, supabase])
+  }, [options?.transfer_type, options?.status, options?.created_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { batches, isLoading, refresh: fetch }
 }

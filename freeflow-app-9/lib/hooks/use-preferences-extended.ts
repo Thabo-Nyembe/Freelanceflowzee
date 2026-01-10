@@ -34,7 +34,7 @@ export function useUserPreferences(userId?: string, categoryId?: string) {
       const { data } = await query.order('created_at', { ascending: true })
       setPreferences(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, categoryId, supabase])
+  }, [userId, categoryId])
   useEffect(() => { fetch() }, [fetch])
   return { preferences, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function usePreferenceValue(userId?: string, key?: string) {
         setValue(defaultData?.default_value ?? null)
       }
     } finally { setIsLoading(false) }
-  }, [userId, key, supabase])
+  }, [userId, key])
   useEffect(() => { fetch() }, [fetch])
   return { value, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function usePreferenceHistory(preferenceId?: string, options?: { limit?: 
     if (!preferenceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('preference_history').select('*').eq('preference_id', preferenceId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [preferenceId, options?.limit, supabase])
+  }, [preferenceId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

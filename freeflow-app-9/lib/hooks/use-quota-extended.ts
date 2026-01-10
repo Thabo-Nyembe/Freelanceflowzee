@@ -18,7 +18,7 @@ export function useQuota(entityId?: string, entityType?: string, quotaType?: str
       const { data } = await supabase.from('quotas').select('*').eq('entity_id', entityId).eq('entity_type', entityType).eq('quota_type', quotaType).single()
       setQuota(data)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, quotaType, supabase])
+  }, [entityId, entityType, quotaType])
   useEffect(() => { fetch() }, [fetch])
   return { quota, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useQuotas(entityId?: string, entityType?: string) {
       const { data: result } = await supabase.from('quotas').select('*').eq('entity_id', entityId).eq('entity_type', entityType)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useQuotaStatus(entityId?: string, entityType?: string, quotaType
         setRemaining(Math.max(0, (data.limit_value || 0) - (data.used || 0)))
       }
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, quotaType, supabase])
+  }, [entityId, entityType, quotaType])
   useEffect(() => { fetch() }, [fetch])
   return { remaining, used, limit, percentage: limit > 0 ? (used / limit) * 100 : 0, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useCertifications(options?: { user_id?: string; issuer?: string;
       const { data } = await query.order('issued_date', { ascending: false }).limit(options?.limit || 50)
       setCertifications(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.issuer, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.issuer, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { certifications, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useExpiringCertifications(userId?: string, daysAhead?: number) {
       const { data } = await supabase.from('certifications').select('*').eq('user_id', userId).eq('status', 'active').not('expiry_date', 'is', null).lte('expiry_date', futureDate.toISOString()).order('expiry_date', { ascending: true })
       setCertifications(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, daysAhead, supabase])
+  }, [userId, daysAhead])
   useEffect(() => { fetch() }, [fetch])
   return { certifications, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useCertificationCourses(options?: { issuer?: string; is_active?:
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setCourses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.issuer, options?.is_active, options?.limit, supabase])
+  }, [options?.issuer, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { courses, isLoading, refresh: fetch }
 }

@@ -34,7 +34,7 @@ export function usePricingPlans(options?: { billing_period?: string; is_active?:
       const { data } = await query.order('price', { ascending: true }).limit(options?.limit || 20)
       setPlans(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.billing_period, options?.is_active, options?.limit, supabase])
+  }, [options?.billing_period, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { plans, isLoading, refresh: fetch }
 }

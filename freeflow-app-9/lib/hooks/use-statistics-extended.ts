@@ -36,7 +36,7 @@ export function useStatistics(options?: { category?: string; metric_type?: strin
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setStatistics(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.metric_type, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.metric_type, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { statistics, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useStatisticSnapshots(statisticId?: string, options?: { from_dat
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setSnapshots(data || [])
     } finally { setIsLoading(false) }
-  }, [statisticId, options?.from_date, options?.to_date, options?.period, options?.limit, supabase])
+  }, [statisticId, options?.from_date, options?.to_date, options?.period, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { snapshots, isLoading, refresh: fetch }
 }
@@ -95,7 +95,7 @@ export function useStatisticAggregations(statisticId?: string, options?: { aggre
       const { data } = await query.order('period_start', { ascending: false }).limit(options?.limit || 50)
       setAggregations(data || [])
     } finally { setIsLoading(false) }
-  }, [statisticId, options?.aggregation_type, options?.period, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [statisticId, options?.aggregation_type, options?.period, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { aggregations, isLoading, refresh: fetch }
 }
@@ -114,7 +114,7 @@ export function useStatisticReports(options?: { report_type?: string; is_active?
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.report_type, options?.is_active, options?.created_by, options?.limit, supabase])
+  }, [options?.report_type, options?.is_active, options?.created_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -132,7 +132,7 @@ export function useStatisticAlerts(statisticId?: string, options?: { is_active?:
       const { data } = await query.order('name', { ascending: true })
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [statisticId, options?.is_active, supabase])
+  }, [statisticId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -158,7 +158,7 @@ export function useStatisticTrend(statisticId?: string, days: number = 30) {
       const changePercent = previousAvg > 0 ? (change / previousAvg) * 100 : 0
       setTrend({ current: currentAvg, previous: previousAvg, change, changePercent })
     } finally { setIsLoading(false) }
-  }, [statisticId, days, supabase])
+  }, [statisticId, days])
   useEffect(() => { fetch() }, [fetch])
   return { trend, isLoading, refresh: fetch }
 }

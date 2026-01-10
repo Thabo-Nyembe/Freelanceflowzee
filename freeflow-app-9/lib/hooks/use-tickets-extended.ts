@@ -40,7 +40,7 @@ export function useTickets(options?: { ticket_type?: string; status?: string; pr
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setTickets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.ticket_type, options?.status, options?.priority, options?.category, options?.department, options?.created_by, options?.overdue, options?.search, options?.limit, supabase])
+  }, [options?.ticket_type, options?.status, options?.priority, options?.category, options?.department, options?.created_by, options?.overdue, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tickets, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useMyTickets(userId?: string, options?: { status?: string; prior
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setTickets(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.priority, options?.limit, supabase])
+  }, [userId, options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tickets, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useAssignedTickets(userId?: string, options?: { status?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setTickets(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.priority, options?.limit, supabase])
+  }, [userId, options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tickets, isLoading, refresh: fetch }
 }
@@ -99,7 +99,7 @@ export function useTicketComments(ticketId?: string, options?: { is_internal?: b
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 100)
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [ticketId, options?.is_internal, options?.limit, supabase])
+  }, [ticketId, options?.is_internal, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -143,7 +143,7 @@ export function useTicketHistory(ticketId?: string, options?: { action?: string;
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [ticketId, options?.action, options?.limit, supabase])
+  }, [ticketId, options?.action, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -195,7 +195,7 @@ export function useTicketStats(options?: { department?: string; from_date?: stri
       }
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [options?.department, options?.from_date, options?.to_date, supabase])
+  }, [options?.department, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -216,7 +216,7 @@ export function useOverdueTickets(options?: { department?: string; assigned_to?:
       }
       setTickets(result)
     } finally { setIsLoading(false) }
-  }, [options?.department, options?.assigned_to, options?.limit, supabase])
+  }, [options?.department, options?.assigned_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tickets, isLoading, refresh: fetch }
 }

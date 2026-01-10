@@ -37,7 +37,7 @@ export function useFiles(options?: { owner_id?: string; folder_id?: string; mime
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setFiles(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.folder_id, options?.mime_type, options?.is_starred, options?.is_deleted, options?.limit, supabase])
+  }, [options?.owner_id, options?.folder_id, options?.mime_type, options?.is_starred, options?.is_deleted, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useUserFiles(userId?: string, options?: { folder_id?: string; is
       const { data } = await query.order('updated_at', { ascending: false })
       setFiles(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.folder_id, options?.is_deleted, supabase])
+  }, [userId, options?.folder_id, options?.is_deleted])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function useRecentFiles(userId?: string, limit?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('files').select('*').eq('owner_id', userId).eq('is_deleted', false).order('updated_at', { ascending: false }).limit(limit || 20); setFiles(data || []) } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }
@@ -153,7 +153,7 @@ export function useFileSearch(query?: string, options?: { owner_id?: string; mim
       const { data } = await q.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [query, options?.owner_id, options?.mime_type, options?.limit, supabase])
+  }, [query, options?.owner_id, options?.mime_type, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }

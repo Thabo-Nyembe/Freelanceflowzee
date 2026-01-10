@@ -38,7 +38,7 @@ export function useAutomations(userId?: string, options?: { isActive?: boolean; 
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, options?.triggerType, options?.limit, supabase])
+  }, [userId, options?.isActive, options?.triggerType, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useAutomationRuns(automationId?: string, options?: { status?: st
       const { data: result } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [automationId, options?.status, options?.limit, supabase])
+  }, [automationId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

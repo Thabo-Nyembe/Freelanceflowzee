@@ -38,7 +38,7 @@ export function useRefunds(options?: { customer_id?: string; order_id?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRefunds(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.order_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.customer_id, options?.order_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { refunds, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useRefundPolicies(options?: { category?: string; is_active?: boo
       const { data } = await query.order('name', { ascending: true })
       setPolicies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { policies, isLoading, refresh: fetch }
 }
@@ -110,7 +110,7 @@ export function useRefundStats(options?: { from_date?: string; to_date?: string 
       const pendingAmount = refunds.filter(r => r.status === 'pending' || r.status === 'approved').reduce((sum, r) => sum + (r.amount || 0), 0)
       setStats({ total, pending, approved, processed, rejected, totalAmount, pendingAmount })
     } finally { setIsLoading(false) }
-  }, [options?.from_date, options?.to_date, supabase])
+  }, [options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -128,7 +128,7 @@ export function useCustomerRefunds(customerId?: string, options?: { status?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setRefunds(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.status, options?.limit, supabase])
+  }, [customerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { refunds, isLoading, refresh: fetch }
 }

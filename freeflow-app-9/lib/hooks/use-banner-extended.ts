@@ -20,7 +20,7 @@ export function useBanners(location?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [location, isActive, supabase])
+  }, [location, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useBoards(options?: { user_id?: string; type?: string; is_archiv
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setBoards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.is_archived, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.is_archived, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { boards, isLoading, refresh: fetch }
 }
@@ -106,7 +106,7 @@ export function useMyAssignedCards(userId?: string, options?: { limit?: number }
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('board_cards').select('*, boards(name)').eq('assignee_id', userId).eq('is_completed', false).order('due_date', { ascending: true }).limit(options?.limit || 50); setCards(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { cards, isLoading, refresh: fetch }
 }

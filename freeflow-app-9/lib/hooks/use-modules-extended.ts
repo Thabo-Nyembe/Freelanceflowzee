@@ -37,7 +37,7 @@ export function useModules(options?: { category?: string; status?: string; is_pu
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setModules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.status, options?.is_published, options?.author_id, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.status, options?.is_published, options?.author_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { modules, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useModuleInstallations(options?: { organization_id?: string; use
       const { data } = await query.order('installed_at', { ascending: false })
       setInstallations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.user_id, options?.status, supabase])
+  }, [options?.organization_id, options?.user_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { installations, isLoading, refresh: fetch }
 }
@@ -127,7 +127,7 @@ export function useInstalledModules(userId?: string, organizationId?: string) {
       const { data } = await query.order('installed_at', { ascending: false })
       setModules(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, organizationId, supabase])
+  }, [userId, organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { modules, isLoading, refresh: fetch }
 }
@@ -144,7 +144,7 @@ export function usePublishedModules(options?: { category?: string; limit?: numbe
       const { data } = await query.order('install_count', { ascending: false }).limit(options?.limit || 50)
       setModules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { modules, isLoading, refresh: fetch }
 }

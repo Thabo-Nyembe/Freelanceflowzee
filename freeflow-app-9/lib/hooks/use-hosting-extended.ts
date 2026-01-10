@@ -35,7 +35,7 @@ export function useSites(options?: { owner_id?: string; status?: string; framewo
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSites(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.status, options?.framework, options?.limit, supabase])
+  }, [options?.owner_id, options?.status, options?.framework, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sites, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useDeployments(siteId?: string, options?: { status?: string; lim
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 20)
       setDeployments(data || [])
     } finally { setIsLoading(false) }
-  }, [siteId, options?.status, options?.limit, supabase])
+  }, [siteId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { deployments, isLoading, refresh: fetch }
 }
@@ -124,7 +124,7 @@ export function useSiteAnalytics(siteId?: string, options?: { from_date?: string
       const { data } = await query.order('date', { ascending: false }).limit(30)
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
-  }, [siteId, options?.from_date, options?.to_date, supabase])
+  }, [siteId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }

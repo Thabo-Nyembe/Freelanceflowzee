@@ -19,7 +19,7 @@ export function usePasswordHistory(userId?: string, limit?: number) {
       const { data: result } = await supabase.from('password_history').select('id, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(limit || 10)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

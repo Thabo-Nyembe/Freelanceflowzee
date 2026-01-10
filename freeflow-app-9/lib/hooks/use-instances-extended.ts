@@ -36,7 +36,7 @@ export function useInstances(options?: { owner_id?: string; type?: string; statu
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInstances(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.type, options?.status, options?.region, options?.limit, supabase])
+  }, [options?.owner_id, options?.type, options?.status, options?.region, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { instances, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUserInstances(userId?: string, options?: { status?: string })
       const { data } = await query.order('created_at', { ascending: false })
       setInstances(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { instances, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useInstanceLogs(instanceId?: string, options?: { level?: string;
       const { data } = await query.order('timestamp', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [instanceId, options?.level, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [instanceId, options?.level, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useInstanceMetrics(instanceId?: string, options?: { from_date?: 
       const { data } = await query.order('timestamp', { ascending: false }).limit(100)
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [instanceId, options?.from_date, options?.to_date, options?.metric_type, supabase])
+  }, [instanceId, options?.from_date, options?.to_date, options?.metric_type])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }

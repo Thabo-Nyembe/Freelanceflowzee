@@ -36,7 +36,7 @@ export function usePriorities(options?: { entityType?: string; workspaceId?: str
       const { data: result } = await query.order('level', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.entityType, options?.workspaceId, supabase])
+  }, [options?.entityType, options?.workspaceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useEntityPriority(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('entity_priorities').select('priority_id, priorities(*)').eq('entity_type', entityType).eq('entity_id', entityId).single()
       setPriority(data?.priorities || null)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { priority, isLoading, refresh: fetch }
 }

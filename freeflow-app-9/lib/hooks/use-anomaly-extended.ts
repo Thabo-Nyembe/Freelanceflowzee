@@ -37,7 +37,7 @@ export function useAnomalies(options?: { user_id?: string; source?: string; type
       const { data } = await query.order('detected_at', { ascending: false }).limit(options?.limit || 50)
       setAnomalies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.source, options?.type, options?.severity, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.source, options?.type, options?.severity, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { anomalies, isLoading, refresh: fetch }
 }

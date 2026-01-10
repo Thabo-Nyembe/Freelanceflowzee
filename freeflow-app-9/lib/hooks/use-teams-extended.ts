@@ -36,7 +36,7 @@ export function useTeams(options?: { team_type?: string; owner_id?: string; is_p
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTeams(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.team_type, options?.owner_id, options?.is_private, options?.search, options?.limit, supabase])
+  }, [options?.team_type, options?.owner_id, options?.is_private, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { teams, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useTeamMembers(teamId?: string, options?: { role?: string; is_ac
       const { data } = await query.order('joined_at', { ascending: true })
       setMembers(data || [])
     } finally { setIsLoading(false) }
-  }, [teamId, options?.role, options?.is_active, supabase])
+  }, [teamId, options?.role, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useUserTeams(userId?: string, options?: { role?: string; is_acti
       const { data } = await query.order('joined_at', { ascending: false })
       setTeams((data || []).map(m => ({ ...m.teams, membership: m })))
     } finally { setIsLoading(false) }
-  }, [userId, options?.role, options?.is_active, supabase])
+  }, [userId, options?.role, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { teams, isLoading, refresh: fetch }
 }
@@ -90,7 +90,7 @@ export function useTeamMembership(teamId?: string, userId?: string) {
       const { data } = await supabase.from('team_members').select('*').eq('team_id', teamId).eq('user_id', userId).single()
       setMembership(data)
     } finally { setIsLoading(false) }
-  }, [teamId, userId, supabase])
+  }, [teamId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { membership, isMember: !!membership, role: membership?.role, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useTeamInvitations(teamId?: string, options?: { status?: string 
       const { data } = await query.order('created_at', { ascending: false })
       setInvitations(data || [])
     } finally { setIsLoading(false) }
-  }, [teamId, options?.status, supabase])
+  }, [teamId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { invitations, isLoading, refresh: fetch }
 }
@@ -145,7 +145,7 @@ export function useTeamActivities(teamId?: string, options?: { activity_type?: s
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setActivities(data || [])
     } finally { setIsLoading(false) }
-  }, [teamId, options?.activity_type, options?.user_id, options?.limit, supabase])
+  }, [teamId, options?.activity_type, options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { activities, isLoading, refresh: fetch }
 }

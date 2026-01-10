@@ -38,7 +38,7 @@ export function useServices(options?: { category_id?: string; provider_id?: stri
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setServices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.provider_id, options?.is_active, options?.min_price, options?.max_price, options?.search, options?.limit, supabase])
+  }, [options?.category_id, options?.provider_id, options?.is_active, options?.min_price, options?.max_price, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { services, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useServiceCategories(options?: { parent_id?: string | null; is_a
       const { data } = await query.order('order', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.parent_id, options?.is_active, supabase])
+  }, [options?.parent_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useServiceProviders(options?: { is_active?: boolean; is_verified
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setProviders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.is_verified, options?.search, options?.limit, supabase])
+  }, [options?.is_active, options?.is_verified, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { providers, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function useServiceBookings(serviceId?: string, options?: { from_date?: s
       const { data } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 100)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [serviceId, options?.from_date, options?.to_date, options?.status, options?.limit, supabase])
+  }, [serviceId, options?.from_date, options?.to_date, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function useMyServiceBookings(customerId?: string, options?: { status?: s
       const { data } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 50)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.status, options?.upcoming_only, options?.limit, supabase])
+  }, [customerId, options?.status, options?.upcoming_only, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -148,7 +148,7 @@ export function useServiceAvailability(serviceId?: string, date?: string) {
       const { data: bookings } = await supabase.from('service_bookings').select('scheduled_at, end_time').eq('service_id', serviceId).neq('status', 'cancelled').gte('scheduled_at', date).lt('scheduled_at', date + 'T23:59:59')
       setAvailability({ service, bookings: bookings || [], date })
     } finally { setIsLoading(false) }
-  }, [serviceId, date, supabase])
+  }, [serviceId, date])
   useEffect(() => { fetch() }, [fetch])
   return { availability, isLoading, refresh: fetch }
 }
@@ -166,7 +166,7 @@ export function useProviderServices(providerId?: string, options?: { is_active?:
       const { data } = await query.order('name', { ascending: true })
       setServices(data || [])
     } finally { setIsLoading(false) }
-  }, [providerId, options?.is_active, supabase])
+  }, [providerId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { services, isLoading, refresh: fetch }
 }

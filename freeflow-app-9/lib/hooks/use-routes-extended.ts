@@ -37,7 +37,7 @@ export function useRoutes(options?: { type?: string; origin_id?: string; destina
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setRoutes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.origin_id, options?.destination_id, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.type, options?.origin_id, options?.destination_id, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { routes, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useRouteSchedules(routeId?: string, options?: { is_active?: bool
       const { data } = await query.order('departure_time', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [routeId, options?.is_active, options?.from_date, supabase])
+  }, [routeId, options?.is_active, options?.from_date])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useRouteVehicles(routeId?: string, options?: { is_active?: boole
       const { data } = await query.order('assigned_at', { ascending: false })
       setVehicles(data || [])
     } finally { setIsLoading(false) }
-  }, [routeId, options?.is_active, supabase])
+  }, [routeId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { vehicles, isLoading, refresh: fetch }
 }
@@ -105,7 +105,7 @@ export function useRouteDrivers(routeId?: string, options?: { is_active?: boolea
       const { data } = await query.order('assigned_at', { ascending: false })
       setDrivers(data || [])
     } finally { setIsLoading(false) }
-  }, [routeId, options?.is_active, supabase])
+  }, [routeId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { drivers, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function useRouteTracking(routeId?: string, options?: { from_time?: strin
       const { data } = await query.order('tracked_at', { ascending: false }).limit(options?.limit || 100)
       setTracking(data || [])
     } finally { setIsLoading(false) }
-  }, [routeId, options?.vehicle_id, options?.from_time, options?.to_time, options?.limit, supabase])
+  }, [routeId, options?.vehicle_id, options?.from_time, options?.to_time, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tracking, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function useActiveRoutes(options?: { type?: string; limit?: number }) {
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setRoutes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { routes, isLoading, refresh: fetch }
 }
@@ -205,7 +205,7 @@ export function useDriverRoutes(driverId?: string, options?: { is_active?: boole
       const { data } = await query.order('assigned_at', { ascending: false })
       setRoutes(data || [])
     } finally { setIsLoading(false) }
-  }, [driverId, options?.is_active, supabase])
+  }, [driverId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { routes, isLoading, refresh: fetch }
 }

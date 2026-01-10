@@ -36,7 +36,7 @@ export function useChangelogs(options?: { productId?: string; isPublished?: bool
       const { data: result } = await query.order('release_date', { ascending: false }).limit(options?.limit || 20)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.productId, options?.isPublished, options?.limit, supabase])
+  }, [options?.productId, options?.isPublished, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useChangelogSearch(query?: string, productId?: string) {
       const { data: result } = await dbQuery.order('release_date', { ascending: false }).limit(10)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [query, productId, supabase])
+  }, [query, productId])
   useEffect(() => { search() }, [search])
   return { data, isLoading, search }
 }

@@ -35,7 +35,7 @@ export function useCampaigns(options?: { user_id?: string; status?: string; type
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.type, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useCampaignMetrics(campaignId?: string, options?: { metric_name?
       const { data } = await query.order('date', { ascending: true })
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [campaignId, options?.metric_name, options?.date_from, options?.date_to, supabase])
+  }, [campaignId, options?.metric_name, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }

@@ -20,7 +20,7 @@ export function usePolls(userId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, status, supabase])
+  }, [userId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useUserPollVote(userId?: string, pollId?: string) {
       const { data } = await supabase.from('poll_votes').select('*').eq('user_id', userId).eq('poll_id', pollId).single()
       setVote(data)
     } finally { setIsLoading(false) }
-  }, [userId, pollId, supabase])
+  }, [userId, pollId])
   useEffect(() => { fetch() }, [fetch])
   return { vote, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function useFeatures(options?: { category?: string; status?: string; prio
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setFeatures(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.status, options?.priority, options?.owner_id, options?.limit, supabase])
+  }, [options?.category, options?.status, options?.priority, options?.owner_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { features, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useFeatureRequests(options?: { status?: string; category?: strin
       const { data } = await query.order('vote_count', { ascending: false }).limit(options?.limit || 50)
       setRequests(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.category, options?.user_id, options?.limit, supabase])
+  }, [options?.status, options?.category, options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { requests, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useHasVoted(featureId?: string, userId?: string) {
     if (!featureId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('feature_votes').select('*').eq('feature_id', featureId).eq('user_id', userId).single(); setHasVoted(!!data); setVote(data) } finally { setIsLoading(false) }
-  }, [featureId, userId, supabase])
+  }, [featureId, userId])
   useEffect(() => { check() }, [check])
   return { hasVoted, vote, isLoading, recheck: check }
 }
@@ -117,7 +117,7 @@ export function useFeatureReleases(options?: { status?: string; limit?: number }
       const { data } = await query.order('release_date', { ascending: false }).limit(options?.limit || 20)
       setReleases(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.limit, supabase])
+  }, [options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { releases, isLoading, refresh: fetch }
 }

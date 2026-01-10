@@ -37,7 +37,7 @@ export function useAllocations(options?: { user_id?: string; resource_type?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAllocations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.resource_type, options?.resource_id, options?.allocated_to, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.resource_type, options?.resource_id, options?.allocated_to, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { allocations, isLoading, refresh: fetch }
 }
@@ -50,7 +50,7 @@ export function useResourceAllocations(resourceType?: string, resourceId?: strin
     if (!resourceType || !resourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('allocations').select('*').eq('resource_type', resourceType).eq('resource_id', resourceId).eq('status', 'active'); setAllocations(data || []) } finally { setIsLoading(false) }
-  }, [resourceType, resourceId, supabase])
+  }, [resourceType, resourceId])
   useEffect(() => { fetch() }, [fetch])
   return { allocations, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useUserAllocations(allocatedTo?: string, options?: { resource_ty
       const { data } = await query.order('start_date', { ascending: true }).limit(options?.limit || 50)
       setAllocations(data || [])
     } finally { setIsLoading(false) }
-  }, [allocatedTo, options?.resource_type, options?.status, options?.limit, supabase])
+  }, [allocatedTo, options?.resource_type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { allocations, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useActiveAllocations(userId?: string, options?: { resource_type?
       const { data } = await query.order('start_date', { ascending: true }).limit(options?.limit || 50)
       setAllocations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.resource_type, options?.limit, supabase])
+  }, [userId, options?.resource_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { allocations, isLoading, refresh: fetch }
 }
@@ -111,7 +111,7 @@ export function useAllocationStats(userId?: string, options?: { resource_type?: 
       const totalAmount = data.reduce((sum, a) => sum + (a.amount || 0), 0)
       setStats({ total, active, completed, totalQuantity, totalAmount })
     } finally { setIsLoading(false) }
-  }, [userId, options?.resource_type, supabase])
+  }, [userId, options?.resource_type])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

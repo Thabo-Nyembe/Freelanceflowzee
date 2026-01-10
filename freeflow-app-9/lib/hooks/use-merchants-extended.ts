@@ -48,7 +48,7 @@ export function useMerchants(options?: { status?: string; verification_status?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setMerchants(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.verification_status, options?.business_type, options?.limit, supabase])
+  }, [options?.status, options?.verification_status, options?.business_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { merchants, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useMerchantProducts(merchantId?: string, options?: { status?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProducts(data || [])
     } finally { setIsLoading(false) }
-  }, [merchantId, options?.status, options?.category, options?.limit, supabase])
+  }, [merchantId, options?.status, options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { products, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useMerchantOrders(merchantId?: string, options?: { status?: stri
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [merchantId, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [merchantId, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -118,7 +118,7 @@ export function useMerchantPayouts(merchantId?: string, options?: { status?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPayouts(data || [])
     } finally { setIsLoading(false) }
-  }, [merchantId, options?.status, options?.limit, supabase])
+  }, [merchantId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { payouts, isLoading, refresh: fetch }
 }

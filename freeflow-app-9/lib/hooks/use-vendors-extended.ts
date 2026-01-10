@@ -35,7 +35,7 @@ export function useVendors(options?: { user_id?: string; type?: string; status?:
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setVendors(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vendors, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useVendorPayments(vendorId?: string, options?: { date_from?: str
       const { data } = await query.order('payment_date', { ascending: false })
       setPayments(data || [])
     } finally { setIsLoading(false) }
-  }, [vendorId, options?.date_from, options?.date_to, supabase])
+  }, [vendorId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { payments, isLoading, refresh: fetch }
 }
@@ -97,7 +97,7 @@ export function useActiveVendors(options?: { type?: string; limit?: number }) {
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setVendors(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vendors, isLoading, refresh: fetch }
 }

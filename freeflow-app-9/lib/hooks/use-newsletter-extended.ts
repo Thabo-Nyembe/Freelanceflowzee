@@ -34,7 +34,7 @@ export function useNewsletters(options?: { user_id?: string; status?: string; li
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setNewsletters(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { newsletters, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useNewsletterSubscribers(options?: { user_id?: string; status?: 
       const { data } = await query.order('subscribed_at', { ascending: false }).limit(options?.limit || 100)
       setSubscribers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { subscribers, isLoading, refresh: fetch }
 }

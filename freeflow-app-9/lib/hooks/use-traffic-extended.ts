@@ -35,7 +35,7 @@ export function useTrafficSources(options?: { type?: string; campaign_id?: strin
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setSources(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.campaign_id, options?.is_active, options?.limit, supabase])
+  }, [options?.type, options?.campaign_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sources, isLoading, refresh: fetch }
 }
@@ -47,7 +47,7 @@ export function useTrafficAnalytics(options?: { source_id?: string; page_path?: 
   const supabase = createClient()
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); let query = supabase.from('traffic_analytics').select('*').gte('created_at', since.toISOString()); if (options?.source_id) query = query.eq('source_id', options.source_id); if (options?.page_path) query = query.eq('page_path', options.page_path); const { data } = await query.order('created_at', { ascending: false }); setAnalytics(data || []) } finally { setIsLoading(false) }
-  }, [options?.source_id, options?.page_path, options?.days, supabase])
+  }, [options?.source_id, options?.page_path, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function useTrafficCampaigns(options?: { status?: string; is_active?: boo
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.is_active, options?.limit, supabase])
+  }, [options?.status, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useTrafficConversions(options?: { source_id?: string; campaign_i
   const supabase = createClient()
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); let query = supabase.from('traffic_conversions').select('*').gte('created_at', since.toISOString()); if (options?.source_id) query = query.eq('source_id', options.source_id); if (options?.campaign_id) query = query.eq('campaign_id', options.campaign_id); const { data } = await query.order('created_at', { ascending: false }); setConversions(data || []) } finally { setIsLoading(false) }
-  }, [options?.source_id, options?.campaign_id, options?.days, supabase])
+  }, [options?.source_id, options?.campaign_id, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { conversions, isLoading, refresh: fetch }
 }

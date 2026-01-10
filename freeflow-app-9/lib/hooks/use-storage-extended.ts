@@ -76,7 +76,7 @@ export function useStorageFolders(userId?: string, parentId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, parentId, supabase])
+  }, [userId, parentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

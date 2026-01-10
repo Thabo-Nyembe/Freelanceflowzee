@@ -48,7 +48,7 @@ export function useCalendarEvents(calendarId?: string, options?: { start_date?: 
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 100)
       setEvents(data || [])
     } finally { setIsLoading(false) }
-  }, [calendarId, options?.start_date, options?.end_date, options?.limit, supabase])
+  }, [calendarId, options?.start_date, options?.end_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { events, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useAllCalendarEvents(userId?: string, options?: { start_date?: s
       const { data } = await query.order('start_time', { ascending: true })
       setEvents(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.start_date, options?.end_date, supabase])
+  }, [userId, options?.start_date, options?.end_date])
   useEffect(() => { fetch() }, [fetch])
   return { events, isLoading, refresh: fetch }
 }
@@ -101,7 +101,7 @@ export function useUpcomingEvents(userId?: string, limit?: number) {
       const { data } = await supabase.from('calendar_events').select('*, calendars(name, color)').in('calendar_id', calendars.map(c => c.id)).gte('start_time', now).order('start_time', { ascending: true }).limit(limit || 10)
       setEvents(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { events, isLoading, refresh: fetch }
 }

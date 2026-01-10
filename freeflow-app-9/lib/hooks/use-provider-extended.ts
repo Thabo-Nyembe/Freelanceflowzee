@@ -35,7 +35,7 @@ export function useProviders(options?: { type?: string; status?: string; min_rat
       const { data } = await query.order('rating', { ascending: false }).limit(options?.limit || 50)
       setProviders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.status, options?.min_rating, options?.limit, supabase])
+  }, [options?.type, options?.status, options?.min_rating, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { providers, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useProviderAvailability(providerId?: string, options?: { date_fr
       const { data } = await query.order('date', { ascending: true })
       setAvailability(data || [])
     } finally { setIsLoading(false) }
-  }, [providerId, options?.date_from, options?.date_to, supabase])
+  }, [providerId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { availability, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useProviderReviews(providerId?: string, options?: { limit?: numb
     if (!providerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('provider_reviews').select('*').eq('provider_id', providerId).order('created_at', { ascending: false }).limit(options?.limit || 20); setReviews(data || []) } finally { setIsLoading(false) }
-  }, [providerId, options?.limit, supabase])
+  }, [providerId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -97,7 +97,7 @@ export function useTopProviders(options?: { type?: string; limit?: number }) {
       const { data } = await query.order('rating', { ascending: false }).limit(options?.limit || 10)
       setProviders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { providers, isLoading, refresh: fetch }
 }

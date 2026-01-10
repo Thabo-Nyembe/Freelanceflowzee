@@ -35,7 +35,7 @@ export function useColorPalettes(options?: { user_id?: string; is_public?: boole
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPalettes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_public, options?.tag, options?.limit, supabase])
+  }, [options?.user_id, options?.is_public, options?.tag, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { palettes, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useColorSchemes(options?: { user_id?: string; type?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSchemes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { schemes, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useColorHistory(userId?: string, limit?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('color_history').select('*').eq('user_id', userId).order('used_at', { ascending: false }).limit(limit || 20); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -96,7 +96,7 @@ export function usePublicPalettes(options?: { tag?: string; limit?: number }) {
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPalettes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.tag, options?.limit, supabase])
+  }, [options?.tag, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { palettes, isLoading, refresh: fetch }
 }

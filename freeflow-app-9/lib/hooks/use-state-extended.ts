@@ -18,7 +18,7 @@ export function useEntityState(entityId?: string, entityType?: string) {
       const { data } = await supabase.from('states').select('state').eq('entity_id', entityId).eq('entity_type', entityType).single()
       setState(data?.state || {})
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { state, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useStateValue(entityId?: string, entityType?: string, key?: stri
       const { data } = await supabase.from('states').select('state').eq('entity_id', entityId).eq('entity_type', entityType).single()
       setValue(data?.state?.[key] || null)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, key, supabase])
+  }, [entityId, entityType, key])
   useEffect(() => { fetch() }, [fetch])
   return { value, isLoading, refresh: fetch }
 }

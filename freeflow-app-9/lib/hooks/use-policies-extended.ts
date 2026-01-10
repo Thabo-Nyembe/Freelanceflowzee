@@ -37,7 +37,7 @@ export function usePolicies(options?: { organization_id?: string; category_id?: 
       const { data } = await query.order('title', { ascending: true }).limit(options?.limit || 50)
       setPolicies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.category_id, options?.status, options?.requires_acknowledgment, options?.search, options?.limit, supabase])
+  }, [options?.organization_id, options?.category_id, options?.status, options?.requires_acknowledgment, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { policies, isLoading, refresh: fetch }
 }
@@ -63,7 +63,7 @@ export function usePolicyAcknowledgments(policyId?: string, options?: { limit?: 
     if (!policyId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('policy_acknowledgments').select('*, users(*)').eq('policy_id', policyId).order('acknowledged_at', { ascending: false }).limit(options?.limit || 100); setAcknowledgments(data || []) } finally { setIsLoading(false) }
-  }, [policyId, options?.limit, supabase])
+  }, [policyId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { acknowledgments, isLoading, refresh: fetch }
 }
@@ -95,7 +95,7 @@ export function useHasAcknowledged(policyId?: string, userId?: string) {
       setHasAcknowledged(!!data)
       setAcknowledgment(data)
     } finally { setIsLoading(false) }
-  }, [policyId, userId, supabase])
+  }, [policyId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { hasAcknowledged, acknowledgment, isLoading, refresh: fetch }
 }
@@ -159,7 +159,7 @@ export function usePendingAcknowledgments(userId?: string, organizationId?: stri
       const pending = allPolicies?.filter(p => !acknowledgedMap.has(`${p.id}-${p.version}`)) || []
       setPolicies(pending)
     } finally { setIsLoading(false) }
-  }, [userId, organizationId, supabase])
+  }, [userId, organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { policies, isLoading, refresh: fetch }
 }

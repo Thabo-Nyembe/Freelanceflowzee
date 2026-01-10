@@ -77,7 +77,7 @@ export function useUserImports(userId?: string, options?: { status?: string }) {
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

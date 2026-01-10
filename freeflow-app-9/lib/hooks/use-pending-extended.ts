@@ -20,7 +20,7 @@ export function usePendingItems(userId?: string, itemType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, itemType, supabase])
+  }, [userId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function usePendingCount(userId?: string, itemType?: string) {
       const { count: result } = await query
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, itemType, supabase])
+  }, [userId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

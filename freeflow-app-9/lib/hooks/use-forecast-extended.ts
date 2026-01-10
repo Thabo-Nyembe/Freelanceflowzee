@@ -35,7 +35,7 @@ export function useForecasts(options?: { user_id?: string; type?: string; status
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setForecasts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { forecasts, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useForecastModels(options?: { type?: string; is_active?: boolean
       const { data } = await query.order('name', { ascending: true })
       setModels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { models, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function useRecentForecasts(userId?: string, options?: { limit?: number }
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forecasts').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 10); setForecasts(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { forecasts, isLoading, refresh: fetch }
 }

@@ -42,7 +42,7 @@ export function useDirectMessages(conversationId?: string, options?: { limit?: n
     if (!conversationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('direct_messages').select('*').eq('conversation_id', conversationId).eq('is_deleted', false).order('sent_at', { ascending: true }).limit(options?.limit || 100); setMessages(data || []) } finally { setIsLoading(false) }
-  }, [conversationId, options?.limit, supabase])
+  }, [conversationId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }
@@ -123,7 +123,7 @@ export function useConversationWithUser(currentUserId?: string, otherUserId?: st
       const { data } = await supabase.from('direct_conversations').select('*').contains('participants', participants).single()
       setConversation(data)
     } finally { setIsLoading(false) }
-  }, [currentUserId, otherUserId, supabase])
+  }, [currentUserId, otherUserId])
   useEffect(() => { fetch() }, [fetch])
   return { conversation, isLoading, refresh: fetch }
 }
@@ -136,7 +136,7 @@ export function useLastReadMessage(conversationId?: string, userId?: string) {
     if (!conversationId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('direct_message_reads').select('*').eq('conversation_id', conversationId).eq('user_id', userId).single(); setLastRead(data) } finally { setIsLoading(false) }
-  }, [conversationId, userId, supabase])
+  }, [conversationId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { lastRead, isLoading, refresh: fetch }
 }

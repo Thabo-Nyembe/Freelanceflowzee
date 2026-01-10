@@ -35,7 +35,7 @@ export function useRoutes(options?: { method?: string; is_active?: boolean; is_p
       const { data } = await query.order('path', { ascending: true }).limit(options?.limit || 100)
       setRoutes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.method, options?.is_active, options?.is_protected, options?.limit, supabase])
+  }, [options?.method, options?.is_active, options?.is_protected, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { routes, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useRouteAnalytics(routeId?: string, options?: { days?: number })
     if (!routeId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); const { data } = await supabase.from('route_analytics').select('*').eq('route_id', routeId).gte('created_at', since.toISOString()).order('created_at', { ascending: false }); setAnalytics(data || []) } finally { setIsLoading(false) }
-  }, [routeId, options?.days, supabase])
+  }, [routeId, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }

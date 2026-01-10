@@ -39,7 +39,7 @@ export function useReceipts(options?: { customer_id?: string; organization_id?: 
       const { data } = await query.order('issued_at', { ascending: false }).limit(options?.limit || 50)
       setReceipts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.organization_id, options?.status, options?.payment_method, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.customer_id, options?.organization_id, options?.status, options?.payment_method, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { receipts, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useCustomerReceipts(customerId?: string, options?: { status?: st
       const { data } = await query.order('issued_at', { ascending: false }).limit(options?.limit || 50)
       setReceipts(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.status, options?.limit, supabase])
+  }, [customerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { receipts, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useReceiptStats(options?: { organization_id?: string; from_date?
       })
       setStats({ total, issued, voided, totalAmount, byPaymentMethod })
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.from_date, options?.to_date, supabase])
+  }, [options?.organization_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useRecentReceipts(options?: { organization_id?: string; limit?: 
       const { data } = await query.order('issued_at', { ascending: false }).limit(options?.limit || 20)
       setReceipts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.limit, supabase])
+  }, [options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { receipts, isLoading, refresh: fetch }
 }
@@ -147,7 +147,7 @@ export function useReceiptTemplates(options?: { organization_id?: string; catego
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.category, supabase])
+  }, [options?.organization_id, options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

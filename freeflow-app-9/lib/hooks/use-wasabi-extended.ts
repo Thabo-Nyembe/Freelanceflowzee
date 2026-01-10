@@ -35,7 +35,7 @@ export function useWasabiBuckets(options?: { user_id?: string; is_public?: boole
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setBuckets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_public, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.is_public, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { buckets, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useWasabiObjects(bucketId?: string, options?: { prefix?: string;
     if (!bucketId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('wasabi_objects').select('*').eq('bucket_id', bucketId); if (options?.prefix) query = query.like('key', `${options.prefix}%`); const { data } = await query.order('key', { ascending: true }).limit(options?.limit || 100); setObjects(data || []) } finally { setIsLoading(false) }
-  }, [bucketId, options?.prefix, options?.limit, supabase])
+  }, [bucketId, options?.prefix, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { objects, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useWasabiUploads(options?: { bucket_id?: string; user_id?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setUploads(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.bucket_id, options?.user_id, options?.status, options?.limit, supabase])
+  }, [options?.bucket_id, options?.user_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { uploads, isLoading, refresh: fetch }
 }

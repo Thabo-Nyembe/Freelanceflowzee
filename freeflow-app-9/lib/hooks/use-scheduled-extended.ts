@@ -34,7 +34,7 @@ export function useScheduledTasks(options?: { is_active?: boolean; handler?: str
       const { data } = await query.order('next_run_at', { ascending: true }).limit(options?.limit || 50)
       setTasks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.handler, options?.limit, supabase])
+  }, [options?.is_active, options?.handler, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useScheduledJobs(options?: { task_id?: string; status?: string; 
       const { data } = await query.order('scheduled_at', { ascending: false }).limit(options?.limit || 50)
       setJobs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.task_id, options?.status, options?.limit, supabase])
+  }, [options?.task_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useScheduledReports(options?: { user_id?: string; report_type?: 
       const { data } = await query.order('next_run_at', { ascending: true })
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.report_type, options?.is_active, supabase])
+  }, [options?.user_id, options?.report_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -89,7 +89,7 @@ export function useScheduledNotifications(options?: { user_id?: string; is_sent?
       const { data } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 50)
       setNotifications(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_sent, options?.limit, supabase])
+  }, [options?.user_id, options?.is_sent, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notifications, isLoading, refresh: fetch }
 }

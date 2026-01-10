@@ -35,7 +35,7 @@ export function useRegions(options?: { country_code?: string; is_active?: boolea
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setRegions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.country_code, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.country_code, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { regions, isLoading, refresh: fetch }
 }

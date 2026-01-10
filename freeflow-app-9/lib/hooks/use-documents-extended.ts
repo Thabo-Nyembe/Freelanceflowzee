@@ -36,7 +36,7 @@ export function useDocuments(options?: { user_id?: string; folder_id?: string; t
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setDocuments(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.folder_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.folder_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { documents, isLoading, refresh: fetch }
 }
@@ -88,7 +88,7 @@ export function useMyDocuments(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('documents').select('*').eq('user_id', userId).order('updated_at', { ascending: false }).limit(options?.limit || 50); setDocuments(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { documents, isLoading, refresh: fetch }
 }

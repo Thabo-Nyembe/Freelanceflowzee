@@ -37,7 +37,7 @@ export function usePosts(options?: { author_id?: string; type?: string; visibili
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPosts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.type, options?.visibility, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.author_id, options?.type, options?.visibility, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { posts, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function usePostComments(postId?: string, options?: { parent_id?: string;
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 100)
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [postId, options?.parent_id, options?.limit, supabase])
+  }, [postId, options?.parent_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useHasLiked(postId?: string, userId?: string) {
     if (!postId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('post_likes').select('id').eq('post_id', postId).eq('user_id', userId).single(); setHasLiked(!!data) } finally { setIsLoading(false) }
-  }, [postId, userId, supabase])
+  }, [postId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { hasLiked, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useFeed(userId?: string, options?: { limit?: number }) {
       const { data } = await supabase.from('posts').select('*, users(*), post_comments(count), post_likes(count), post_media(*)').eq('status', 'published').in('visibility', ['public', 'followers']).order('created_at', { ascending: false }).limit(options?.limit || 20)
       setPosts(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { posts, isLoading, refresh: fetch }
 }
@@ -160,7 +160,7 @@ export function usePostsByTag(tag?: string, options?: { limit?: number }) {
       const { data } = await supabase.from('posts').select('*, users(*), post_media(*)').in('id', postIds).eq('status', 'published').order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPosts(data || [])
     } finally { setIsLoading(false) }
-  }, [tag, options?.limit, supabase])
+  }, [tag, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { posts, isLoading, refresh: fetch }
 }
@@ -178,7 +178,7 @@ export function useMyPosts(userId?: string, options?: { status?: string; limit?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPosts(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { posts, isLoading, refresh: fetch }
 }

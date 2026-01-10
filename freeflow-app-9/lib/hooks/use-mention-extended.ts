@@ -20,7 +20,7 @@ export function useMentions(userId?: string, unreadOnly = false) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, unreadOnly, supabase])
+  }, [userId, unreadOnly])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useMentionsByItem(itemId?: string, itemType?: string) {
       const { data: result } = await supabase.from('mentions').select('*').eq('item_id', itemId).eq('item_type', itemType).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

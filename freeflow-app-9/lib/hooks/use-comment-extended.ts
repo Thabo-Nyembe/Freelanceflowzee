@@ -15,7 +15,7 @@ export function useComments(resourceType?: string, resourceId?: string) {
     if (!resourceType || !resourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('comments').select('*').eq('resource_type', resourceType).eq('resource_id', resourceId).order('created_at', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
-  }, [resourceType, resourceId, supabase])
+  }, [resourceType, resourceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

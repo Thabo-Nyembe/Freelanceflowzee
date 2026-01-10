@@ -34,7 +34,7 @@ export function useSprints(options?: { project_id?: string; status?: string; lim
       const { data } = await query.order('start_date', { ascending: false }).limit(options?.limit || 20)
       setSprints(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.status, options?.limit, supabase])
+  }, [options?.project_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sprints, isLoading, refresh: fetch }
 }
@@ -47,7 +47,7 @@ export function useSprintTasks(sprintId?: string, options?: { status?: string })
     if (!sprintId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('sprint_tasks').select('*').eq('sprint_id', sprintId); if (options?.status) query = query.eq('status', options.status); const { data } = await query.order('priority', { ascending: true }); setTasks(data || []) } finally { setIsLoading(false) }
-  }, [sprintId, options?.status, supabase])
+  }, [sprintId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }

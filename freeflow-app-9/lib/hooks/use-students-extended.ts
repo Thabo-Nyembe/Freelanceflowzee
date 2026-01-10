@@ -36,7 +36,7 @@ export function useStudents(options?: { program_id?: string; status?: string; le
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setStudents(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.program_id, options?.status, options?.level, options?.search, options?.limit, supabase])
+  }, [options?.program_id, options?.status, options?.level, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { students, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useStudentEnrollments(studentId?: string, options?: { status?: s
       const { data } = await query.order('enrolled_at', { ascending: false })
       setEnrollments(data || [])
     } finally { setIsLoading(false) }
-  }, [studentId, options?.status, options?.semester, supabase])
+  }, [studentId, options?.status, options?.semester])
   useEffect(() => { fetch() }, [fetch])
   return { enrollments, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useStudentGrades(studentId?: string, options?: { course_id?: str
       const { data } = await query.order('graded_at', { ascending: false }).limit(options?.limit || 100)
       setGrades(data || [])
     } finally { setIsLoading(false) }
-  }, [studentId, options?.course_id, options?.grade_type, options?.limit, supabase])
+  }, [studentId, options?.course_id, options?.grade_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { grades, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useStudentAttendance(studentId?: string, options?: { course_id?:
       const late = records.filter(r => r.status === 'late').length
       setStats({ total, present, absent, late, rate: total > 0 ? (present / total) * 100 : 0 })
     } finally { setIsLoading(false) }
-  }, [studentId, options?.course_id, options?.from_date, options?.to_date, supabase])
+  }, [studentId, options?.course_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { attendance, stats, isLoading, refresh: fetch }
 }
@@ -145,7 +145,7 @@ export function useStudentProgress(studentId?: string, courseId?: string) {
       const { data } = await supabase.from('student_progress').select('*').eq('student_id', studentId).eq('course_id', courseId).single()
       setProgress(data)
     } finally { setIsLoading(false) }
-  }, [studentId, courseId, supabase])
+  }, [studentId, courseId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -166,7 +166,7 @@ export function useStudentAchievements(studentId?: string, options?: { achieveme
       setAchievements(achievementList)
       setTotalPoints(achievementList.reduce((sum, a) => sum + (a.points || 0), 0))
     } finally { setIsLoading(false) }
-  }, [studentId, options?.achievement_type, options?.limit, supabase])
+  }, [studentId, options?.achievement_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { achievements, totalPoints, isLoading, refresh: fetch }
 }
@@ -184,7 +184,7 @@ export function useCourseStudents(courseId?: string, options?: { status?: string
       const { data } = await query.order('enrolled_at', { ascending: false })
       setStudents((data || []).map(e => ({ ...e.students, enrollment: e })))
     } finally { setIsLoading(false) }
-  }, [courseId, options?.status, supabase])
+  }, [courseId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { students, isLoading, refresh: fetch }
 }

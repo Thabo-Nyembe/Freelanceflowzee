@@ -38,7 +38,7 @@ export function usePurchases(options?: { vendor_id?: string; organization_id?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPurchases(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.vendor_id, options?.organization_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.vendor_id, options?.organization_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { purchases, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function usePurchaseOrders(options?: { vendor_id?: string; status?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.vendor_id, options?.status, options?.limit, supabase])
+  }, [options?.vendor_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function usePurchaseInvoices(options?: { purchase_id?: string; vendor_id?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInvoices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.purchase_id, options?.status, options?.limit, supabase])
+  }, [options?.purchase_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { invoices, isLoading, refresh: fetch }
 }
@@ -118,7 +118,7 @@ export function usePurchaseReturns(options?: { purchase_id?: string; vendor_id?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReturns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.purchase_id, options?.status, options?.limit, supabase])
+  }, [options?.purchase_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { returns, isLoading, refresh: fetch }
 }
@@ -136,7 +136,7 @@ export function usePurchaseVendors(options?: { is_active?: boolean; search?: str
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setVendors(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vendors, isLoading, refresh: fetch }
 }
@@ -166,7 +166,7 @@ export function usePendingPurchases(options?: { organization_id?: string; limit?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPurchases(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.limit, supabase])
+  }, [options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { purchases, isLoading, refresh: fetch }
 }
@@ -183,7 +183,7 @@ export function useOverdueInvoices(options?: { organization_id?: string; limit?:
       const { data } = await query.order('due_date', { ascending: true }).limit(options?.limit || 50)
       setInvoices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.limit, supabase])
+  }, [options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { invoices, isLoading, refresh: fetch }
 }
@@ -208,7 +208,7 @@ export function usePurchaseStats(options?: { organization_id?: string; from_date
       const averageOrderValue = totalPurchases > 0 ? Math.round(purchases.reduce((sum, p) => sum + (p.total || 0), 0) / totalPurchases) : 0
       setStats({ totalPurchases, totalSpent, pendingAmount, vendorCount, averageOrderValue })
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.from_date, options?.to_date, supabase])
+  }, [options?.organization_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -228,7 +228,7 @@ export function useVendorPurchases(vendorId?: string, options?: { status?: strin
       setPurchases(data || [])
       setTotalSpent(data?.reduce((sum, p) => sum + (p.total || 0), 0) || 0)
     } finally { setIsLoading(false) }
-  }, [vendorId, options?.status, options?.limit, supabase])
+  }, [vendorId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { purchases, totalSpent, isLoading, refresh: fetch }
 }

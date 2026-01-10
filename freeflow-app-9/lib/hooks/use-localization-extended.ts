@@ -35,7 +35,7 @@ export function useLocalizationStrings(options?: { project_id?: string; context_
       const { data } = await query.order('key', { ascending: true }).limit(options?.limit || 100)
       setStrings(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.context_id, options?.status, options?.limit, supabase])
+  }, [options?.project_id, options?.context_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { strings, isLoading, refresh: fetch }
 }
@@ -153,7 +153,7 @@ export function useLocalizationSearch(projectId?: string, query?: string) {
       const { data } = await dbQuery.limit(50)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, query, supabase])
+  }, [projectId, query])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }

@@ -35,7 +35,7 @@ export function useRealtimeConnections(options?: { user_id?: string; channel_id?
       const { data } = await query.order('connected_at', { ascending: false }).limit(options?.limit || 100)
       setConnections(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.channel_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.channel_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { connections, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useRealtimeChannels(options?: { type?: string; is_active?: boole
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setChannels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, options?.limit, supabase])
+  }, [options?.type, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { channels, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useRealtimeMessages(channelId?: string, options?: { limit?: numb
     if (!channelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('realtime_messages').select('*').eq('channel_id', channelId).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages(data || []) } finally { setIsLoading(false) }
-  }, [channelId, options?.limit, supabase])
+  }, [channelId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }

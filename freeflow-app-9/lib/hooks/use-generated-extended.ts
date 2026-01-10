@@ -35,7 +35,7 @@ export function useGeneratedContentList(options?: { user_id?: string; type?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setContents(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { contents, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useGeneratedImages(userId?: string, options?: { limit?: number }
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('generated_images').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setImages(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { images, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useGeneratedCode(userId?: string, options?: { language?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCode(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.language, options?.limit, supabase])
+  }, [userId, options?.language, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { code, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useGeneratedReports(userId?: string, options?: { type?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }

@@ -41,7 +41,7 @@ export function useFeedbacks(options?: { user_id?: string; target_type?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.target_type, options?.target_id, options?.category, options?.status, options?.priority, options?.limit, supabase])
+  }, [options?.user_id, options?.target_type, options?.target_id, options?.category, options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { feedbacks, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useFeedbackReplies(feedbackId?: string, options?: { limit?: numb
       const { data } = await supabase.from('feedback_replies').select('*').eq('feedback_id', feedbackId).order('created_at', { ascending: true }).limit(options?.limit || 100)
       setReplies(data || [])
     } finally { setIsLoading(false) }
-  }, [feedbackId, options?.limit, supabase])
+  }, [feedbackId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { replies, isLoading, refresh: fetch }
 }
@@ -106,7 +106,7 @@ export function useUserFeedbackVote(feedbackId?: string, userId?: string) {
       const { data } = await supabase.from('feedback_votes').select('vote_type').eq('feedback_id', feedbackId).eq('user_id', userId).single()
       setVote(data?.vote_type || null)
     } finally { setIsLoading(false) }
-  }, [feedbackId, userId, supabase])
+  }, [feedbackId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { vote, isLoading, refresh: fetch }
 }
@@ -128,7 +128,7 @@ export function useFeedbackStats(options?: { user_id?: string; target_type?: str
       const byCategory = data.reduce((acc: Record<string, number>, f) => { acc[f.category || 'general'] = (acc[f.category || 'general'] || 0) + 1; return acc }, {})
       setStats({ total: data.length, byStatus, byPriority, byCategory })
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.target_type, supabase])
+  }, [options?.user_id, options?.target_type])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -145,7 +145,7 @@ export function usePopularFeedback(options?: { target_type?: string; limit?: num
       const { data } = await query.order('vote_count', { ascending: false }).limit(options?.limit || 10)
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.target_type, options?.limit, supabase])
+  }, [options?.target_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { feedbacks, isLoading, refresh: fetch }
 }
@@ -163,7 +163,7 @@ export function useFeedbackSearch(searchTerm: string, options?: { target_type?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, options?.target_type, options?.limit, supabase])
+  }, [searchTerm, options?.target_type, options?.limit])
   useEffect(() => {
     const timer = setTimeout(search, 300)
     return () => clearTimeout(timer)
@@ -184,7 +184,7 @@ export function useStarredFeedback(options?: { user_id?: string; target_type?: s
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 20)
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.target_type, options?.limit, supabase])
+  }, [options?.user_id, options?.target_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { feedbacks, isLoading, refresh: fetch }
 }
@@ -202,7 +202,7 @@ export function useAssignedFeedback(assigneeId?: string, options?: { status?: st
       const { data } = await query.order('priority', { ascending: false }).limit(options?.limit || 50)
       setFeedbacks(data || [])
     } finally { setIsLoading(false) }
-  }, [assigneeId, options?.status, options?.limit, supabase])
+  }, [assigneeId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { feedbacks, isLoading, refresh: fetch }
 }

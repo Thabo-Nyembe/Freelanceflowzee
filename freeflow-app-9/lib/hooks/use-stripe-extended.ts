@@ -47,7 +47,7 @@ export function useStripeSubscriptions(options?: { customer_id?: string; status?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSubscriptions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.status, options?.limit, supabase])
+  }, [options?.customer_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { subscriptions, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function useStripeInvoices(options?: { customer_id?: string; status?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInvoices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.status, options?.limit, supabase])
+  }, [options?.customer_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { invoices, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useStripePayments(options?: { customer_id?: string; status?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPayments(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.status, options?.limit, supabase])
+  }, [options?.customer_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { payments, isLoading, refresh: fetch }
 }

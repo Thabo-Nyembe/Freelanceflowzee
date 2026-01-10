@@ -35,7 +35,7 @@ export function useShippingRates(options?: { zone_id?: string; method_id?: strin
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setRates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.zone_id, options?.method_id, options?.is_active, options?.limit, supabase])
+  }, [options?.zone_id, options?.method_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rates, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useShippingMethods(options?: { is_active?: boolean; carrier_id?:
       const { data } = await query.order('name', { ascending: true })
       setMethods(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.carrier_id, supabase])
+  }, [options?.is_active, options?.carrier_id])
   useEffect(() => { fetch() }, [fetch])
   return { methods, isLoading, refresh: fetch }
 }

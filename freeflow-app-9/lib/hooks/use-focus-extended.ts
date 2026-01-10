@@ -36,7 +36,7 @@ export function useFocusSessions(userId?: string, options?: { status?: string; f
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setSessions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [userId, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useFocusGoals(userId?: string, options?: { status?: string }) {
       const { data } = await query.order('created_at', { ascending: false })
       setGoals(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }
@@ -85,7 +85,7 @@ export function useFocusBlocks(userId?: string, options?: { is_active?: boolean 
       const { data } = await query.order('start_time', { ascending: true })
       setBlocks(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, supabase])
+  }, [userId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { blocks, isLoading, refresh: fetch }
 }
@@ -116,7 +116,7 @@ export function useFocusStats(userId?: string, period?: string) {
       const { data } = await query.order('date', { ascending: false }).limit(30)
       setStats(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, period, supabase])
+  }, [userId, period])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

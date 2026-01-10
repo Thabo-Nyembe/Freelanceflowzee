@@ -36,7 +36,7 @@ export function useFonts(options?: { family_id?: string; style?: string; is_acti
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setFonts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.family_id, options?.style, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.family_id, options?.style, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { fonts, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useFontFamilies(options?: { category?: string; search?: string; 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setFamilies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { families, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function useUserFontUploads(userId?: string, options?: { status?: string;
       const { data } = await query.order('uploaded_at', { ascending: false }).limit(options?.limit || 20)
       setUploads(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { uploads, isLoading, refresh: fetch }
 }
@@ -139,7 +139,7 @@ export function useHasUserFont(userId?: string, fontId?: string) {
     if (!userId || !fontId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('user_fonts').select('id').eq('user_id', userId).eq('font_id', fontId).single(); setHasFont(!!data) } finally { setIsLoading(false) }
-  }, [userId, fontId, supabase])
+  }, [userId, fontId])
   useEffect(() => { check() }, [check])
   return { hasFont, isLoading, recheck: check }
 }

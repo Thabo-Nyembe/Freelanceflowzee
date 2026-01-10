@@ -37,7 +37,7 @@ export function useInsights(options?: { user_id?: string; type?: string; categor
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInsights(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.category_id, options?.status, options?.priority, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.category_id, options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { insights, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useNewInsights(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('insights').select('*').eq('user_id', userId).eq('status', 'new').order('priority', { ascending: true }).order('created_at', { ascending: false }).limit(options?.limit || 20); setInsights(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { insights, isLoading, refresh: fetch }
 }

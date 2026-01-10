@@ -42,7 +42,7 @@ export function usePasswordHistory(userId?: string, options?: { limit?: number }
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('password_history').select('id, created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 10); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -156,7 +156,7 @@ export function usePasswordExpiry(userId?: string, policy?: any) {
         setExpiryInfo({ isExpired: false, daysUntilExpiry: maxAgeDays, lastChanged: null })
       }
     } finally { setIsLoading(false) }
-  }, [userId, policy, supabase])
+  }, [userId, policy])
   useEffect(() => { fetch() }, [fetch])
   return { expiryInfo, isLoading, refresh: fetch }
 }

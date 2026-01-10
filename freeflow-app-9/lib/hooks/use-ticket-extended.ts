@@ -36,7 +36,7 @@ export function useTickets(options?: { user_id?: string; status?: string; priori
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTickets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.priority, options?.assigned_to, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.priority, options?.assigned_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tickets, isLoading, refresh: fetch }
 }

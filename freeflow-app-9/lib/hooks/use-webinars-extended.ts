@@ -35,7 +35,7 @@ export function useWebinars(options?: { user_id?: string; status?: string; is_pu
       const { data } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 50)
       setWebinars(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.is_public, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.is_public, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { webinars, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useWebinarRegistrations(webinarId?: string, options?: { status?:
     if (!webinarId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('webinar_registrations').select('*').eq('webinar_id', webinarId); if (options?.status) query = query.eq('status', options.status); const { data } = await query.order('created_at', { ascending: false }); setRegistrations(data || []) } finally { setIsLoading(false) }
-  }, [webinarId, options?.status, supabase])
+  }, [webinarId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { registrations, isLoading, refresh: fetch }
 }

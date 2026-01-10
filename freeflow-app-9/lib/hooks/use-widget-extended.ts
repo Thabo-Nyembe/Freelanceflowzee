@@ -20,7 +20,7 @@ export function useWidgets(userId?: string, widgetType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, widgetType, supabase])
+  }, [userId, widgetType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

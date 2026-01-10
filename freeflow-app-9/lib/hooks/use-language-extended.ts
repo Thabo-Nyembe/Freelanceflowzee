@@ -37,7 +37,7 @@ export function useLanguages(options?: { isSupported?: boolean; isEnabled?: bool
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.isSupported, options?.isEnabled, options?.direction, supabase])
+  }, [options?.isSupported, options?.isEnabled, options?.direction])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

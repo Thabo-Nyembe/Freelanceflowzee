@@ -37,7 +37,7 @@ export function useBugs(options?: { project_id?: string; reporter_id?: string; a
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBugs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.reporter_id, options?.assignee_id, options?.status, options?.severity, options?.limit, supabase])
+  }, [options?.project_id, options?.reporter_id, options?.assignee_id, options?.status, options?.severity, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bugs, isLoading, refresh: fetch }
 }

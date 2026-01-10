@@ -50,7 +50,7 @@ export function useTerms(options?: { term_type?: string; category_id?: string; s
       const { data } = await query.order('title', { ascending: true }).limit(options?.limit || 50)
       setTerms(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.term_type, options?.category_id, options?.status, options?.is_required, options?.search, options?.limit, supabase])
+  }, [options?.term_type, options?.category_id, options?.status, options?.is_required, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { terms, isLoading, refresh: fetch }
 }
@@ -93,7 +93,7 @@ export function useTermAcceptance(termId?: string, userId?: string) {
       setIsAccepted(!!acceptedVersion && acceptedVersion >= currentVersion)
       setNeedsUpdate(!!acceptedVersion && acceptedVersion < currentVersion)
     } finally { setIsLoading(false) }
-  }, [termId, userId, supabase])
+  }, [termId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { acceptance, isAccepted, needsUpdate, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useTermAcceptances(termId?: string, options?: { version?: number
       setAcceptances(data || [])
       setTotalCount(count || 0)
     } finally { setIsLoading(false) }
-  }, [termId, options?.version, options?.limit, supabase])
+  }, [termId, options?.version, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { acceptances, totalCount, isLoading, refresh: fetch }
 }
@@ -188,7 +188,7 @@ export function useUserTermAcceptances(userId?: string, options?: { term_type?: 
       }
       setAcceptances(result)
     } finally { setIsLoading(false) }
-  }, [userId, options?.term_type, supabase])
+  }, [userId, options?.term_type])
   useEffect(() => { fetch() }, [fetch])
   return { acceptances, isLoading, refresh: fetch }
 }

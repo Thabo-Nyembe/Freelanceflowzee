@@ -78,7 +78,7 @@ export function useUserTransfers(userId?: string, options?: { status?: string; d
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.direction, supabase])
+  }, [userId, options?.status, options?.direction])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useTransferHistory(entityType?: string, entityId?: string) {
       const { data: result } = await supabase.from('transfers').select('*').eq('entity_type', entityType).contains('entity_ids', [entityId]).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

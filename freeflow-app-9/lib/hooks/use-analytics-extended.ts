@@ -67,7 +67,7 @@ export function useAnalyticsDailyMetrics(userId?: string, days = 30) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('analytics_daily_metrics').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(days); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, days, supabase])
+  }, [userId, days])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -119,7 +119,7 @@ export function useAnalyticsEvents(userId?: string, limit = 100) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('analytics_events').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(limit); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -197,7 +197,7 @@ export function useAnalyticsMonthlyMetrics(userId?: string, months = 12) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('analytics_monthly_metrics').select('*').eq('user_id', userId).order('month', { ascending: false }).limit(months); setData(result || []) } finally { setIsLoading(false) }
-  }, [userId, months, supabase])
+  }, [userId, months])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

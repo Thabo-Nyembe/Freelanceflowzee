@@ -41,7 +41,7 @@ export function useIsBlocked(userId?: string, otherUserId?: string) {
         setBlockedBy(null)
       }
     } finally { setIsLoading(false) }
-  }, [userId, otherUserId, supabase])
+  }, [userId, otherUserId])
   useEffect(() => { check() }, [check])
   return { blocked, blockedBy, isLoading, refresh: check }
 }

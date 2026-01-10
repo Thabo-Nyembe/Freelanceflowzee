@@ -56,7 +56,7 @@ export function useProducts(options?: { category_id?: string; organization_id?: 
       const { data } = await query.order(orderBy, { ascending }).limit(options?.limit || 50)
       setProducts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.organization_id, options?.is_active, options?.is_featured, options?.min_price, options?.max_price, options?.search, options?.sort_by, options?.limit, supabase])
+  }, [options?.category_id, options?.organization_id, options?.is_active, options?.is_featured, options?.min_price, options?.max_price, options?.search, options?.sort_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { products, isLoading, refresh: fetch }
 }
@@ -107,7 +107,7 @@ export function useProductReviews(productId?: string, options?: { is_approved?: 
         setAverageRating(Math.round(avg * 10) / 10)
       }
     } finally { setIsLoading(false) }
-  }, [productId, options?.is_approved, options?.sort_by, options?.limit, supabase])
+  }, [productId, options?.is_approved, options?.sort_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, averageRating, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useProductCategories(options?: { parent_id?: string; is_active?:
       const { data } = await query.order('order', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.parent_id, options?.is_active, supabase])
+  }, [options?.parent_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -155,7 +155,7 @@ export function useFeaturedProducts(options?: { category_id?: string; limit?: nu
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 10)
       setProducts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.limit, supabase])
+  }, [options?.category_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { products, isLoading, refresh: fetch }
 }
@@ -173,7 +173,7 @@ export function useProductSearch(searchTerm?: string, options?: { category_id?: 
       const { data } = await query.limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, options?.category_id, options?.limit, supabase])
+  }, [searchTerm, options?.category_id, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -202,7 +202,7 @@ export function useLowStockProducts(options?: { threshold?: number; limit?: numb
       const { data } = await supabase.from('product_inventory').select('*, products(*)').lt('quantity', threshold).order('quantity', { ascending: true }).limit(options?.limit || 50)
       setProducts(data?.map(i => ({ ...i.products, inventory: i })) || [])
     } finally { setIsLoading(false) }
-  }, [options?.threshold, options?.limit, supabase])
+  }, [options?.threshold, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { products, isLoading, refresh: fetch }
 }

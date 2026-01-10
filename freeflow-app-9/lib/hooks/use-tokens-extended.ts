@@ -37,7 +37,7 @@ export function useTokens(options?: { token_type?: string; owner_id?: string; ow
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTokens(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.token_type, options?.owner_id, options?.owner_type, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.token_type, options?.owner_id, options?.owner_type, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tokens, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useMyTokens(userId?: string, options?: { token_type?: string; st
       const { data } = await query.order('created_at', { ascending: false })
       setTokens(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.token_type, options?.status, supabase])
+  }, [userId, options?.token_type, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { tokens, isLoading, refresh: fetch }
 }
@@ -90,7 +90,7 @@ export function useTokenUsage(tokenId?: string, options?: { from_date?: string; 
       setUsages(data || [])
       setTotalUsage(count || data?.length || 0)
     } finally { setIsLoading(false) }
-  }, [tokenId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [tokenId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { usages, totalUsage, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useTokenAuditLogs(tokenId?: string, options?: { action?: string;
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [tokenId, options?.action, options?.limit, supabase])
+  }, [tokenId, options?.action, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -165,7 +165,7 @@ export function useExpiringTokens(ownerId?: string, daysUntilExpiry: number = 7)
       const { data } = await supabase.from('tokens').select('*, token_scopes(*)').eq('owner_id', ownerId).eq('status', 'active').not('expires_at', 'is', null).lte('expires_at', expiryDate).order('expires_at', { ascending: true })
       setTokens(data || [])
     } finally { setIsLoading(false) }
-  }, [ownerId, daysUntilExpiry, supabase])
+  }, [ownerId, daysUntilExpiry])
   useEffect(() => { fetch() }, [fetch])
   return { tokens, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useForms(options?: { created_by?: string; status?: string; type?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setForms(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.created_by, options?.status, options?.type, options?.limit, supabase])
+  }, [options?.created_by, options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { forms, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useFormSubmissions(formId?: string, options?: { from_date?: stri
       const { data } = await query.order('submitted_at', { ascending: false }).limit(options?.limit || 100)
       setSubmissions(data || [])
     } finally { setIsLoading(false) }
-  }, [formId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [formId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { submissions, isLoading, refresh: fetch }
 }
@@ -128,7 +128,7 @@ export function useUserForms(userId?: string, options?: { status?: string }) {
       const { data } = await query.order('created_at', { ascending: false })
       setForms(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { forms, isLoading, refresh: fetch }
 }

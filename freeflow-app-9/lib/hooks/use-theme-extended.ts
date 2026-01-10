@@ -20,7 +20,7 @@ export function useThemes(themeType?: string, isPublic?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [themeType, isPublic, supabase])
+  }, [themeType, isPublic])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

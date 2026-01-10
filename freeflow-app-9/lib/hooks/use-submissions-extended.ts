@@ -38,7 +38,7 @@ export function useSubmissions(options?: { assignment_id?: string; submitter_id?
       const { data } = await query.order('submitted_at', { ascending: false }).limit(options?.limit || 50)
       setSubmissions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.assignment_id, options?.submitter_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.assignment_id, options?.submitter_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { submissions, isLoading, refresh: fetch }
 }
@@ -82,7 +82,7 @@ export function useSubmissionFeedback(submissionId?: string, options?: { include
       const { data } = await query.order('created_at', { ascending: true })
       setFeedback(data || [])
     } finally { setIsLoading(false) }
-  }, [submissionId, options?.include_private, supabase])
+  }, [submissionId, options?.include_private])
   useEffect(() => { fetch() }, [fetch])
   return { feedback, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function useMySubmissions(userId?: string, options?: { status?: string; l
       const { data } = await query.order('submitted_at', { ascending: false }).limit(options?.limit || 50)
       setSubmissions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { submissions, isLoading, refresh: fetch }
 }
@@ -151,7 +151,7 @@ export function usePendingReviews(reviewerId?: string, options?: { limit?: numbe
       const { data } = await supabase.from('submissions').select('*, users(*), assignments(*)').eq('status', 'submitted').order('submitted_at', { ascending: true }).limit(options?.limit || 50)
       setSubmissions(data || [])
     } finally { setIsLoading(false) }
-  }, [reviewerId, options?.limit, supabase])
+  }, [reviewerId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { submissions, isLoading, refresh: fetch }
 }
@@ -177,7 +177,7 @@ export function useSubmissionStats(options?: { assignment_id?: string; from_date
         revisionRequested: submissions.filter(s => s.status === 'revision_requested').length
       })
     } finally { setIsLoading(false) }
-  }, [options?.assignment_id, options?.from_date, options?.to_date, supabase])
+  }, [options?.assignment_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

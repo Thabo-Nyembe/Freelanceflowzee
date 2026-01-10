@@ -38,7 +38,7 @@ export function useCosts(options?: { user_id?: string; category_id?: string; cos
       const { data } = await query.order('date', { ascending: false }).limit(options?.limit || 50)
       setCosts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.category_id, options?.cost_center_id, options?.status, options?.date_from, options?.date_to, options?.limit, supabase])
+  }, [options?.user_id, options?.category_id, options?.cost_center_id, options?.status, options?.date_from, options?.date_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { costs, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useCostSummary(options?: { user_id?: string; date_from?: string;
       const byStatus = data.reduce((acc: Record<string, number>, c) => { acc[c.status || 'unknown'] = (acc[c.status || 'unknown'] || 0) + 1; return acc }, {})
       setSummary({ total, byCategory, byCostCenter, byStatus })
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.date_from, options?.date_to, supabase])
+  }, [options?.user_id, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }

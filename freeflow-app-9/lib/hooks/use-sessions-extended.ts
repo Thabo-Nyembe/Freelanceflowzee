@@ -37,7 +37,7 @@ export function useSessions(options?: { user_id?: string; status?: string; devic
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setSessions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.device_id, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.device_id, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useSessionActivities(sessionId?: string, options?: { action?: st
       const { data } = await query.order('performed_at', { ascending: false }).limit(options?.limit || 100)
       setActivities(data || [])
     } finally { setIsLoading(false) }
-  }, [sessionId, options?.action, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [sessionId, options?.action, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { activities, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useUserDevices(userId?: string, options?: { is_trusted?: boolean
       const { data } = await query.order('last_used_at', { ascending: false })
       setDevices(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_trusted, supabase])
+  }, [userId, options?.is_trusted])
   useEffect(() => { fetch() }, [fetch])
   return { devices, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useSessionStats(options?: { from_date?: string; to_date?: string
       const uniqueUsers = new Set(sessions.map(s => s.user_id)).size
       setStats({ total, active, ended, expired, uniqueUsers })
     } finally { setIsLoading(false) }
-  }, [options?.from_date, options?.to_date, supabase])
+  }, [options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -154,7 +154,7 @@ export function useRecentActivities(userId?: string, options?: { limit?: number 
       const { data } = await supabase.from('session_activities').select('*, sessions(*)').in('session_id', sessionIds).order('performed_at', { ascending: false }).limit(options?.limit || 50)
       setActivities(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { activities, isLoading, refresh: fetch }
 }

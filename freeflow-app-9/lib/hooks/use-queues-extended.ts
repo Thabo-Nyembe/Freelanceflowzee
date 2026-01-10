@@ -35,7 +35,7 @@ export function useQueues(options?: { organization_id?: string; type?: string; s
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setQueues(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.organization_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { queues, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useQueueItems(queueId?: string, options?: { status?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [queueId, options?.status, options?.limit, supabase])
+  }, [queueId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useQueueLogs(queueId?: string, options?: { limit?: number }) {
     if (!queueId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('queue_logs').select('*').eq('queue_id', queueId).order('created_at', { ascending: false }).limit(options?.limit || 100); setLogs(data || []) } finally { setIsLoading(false) }
-  }, [queueId, options?.limit, supabase])
+  }, [queueId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -155,7 +155,7 @@ export function useFailedItems(queueId?: string, options?: { limit?: number }) {
       const { data } = await query.order('failed_at', { ascending: false }).limit(options?.limit || 50)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [queueId, options?.limit, supabase])
+  }, [queueId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -174,7 +174,7 @@ export function useQueueMetrics(queueId?: string, options?: { from_date?: string
       const { data } = await query.order('recorded_at', { ascending: true })
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [queueId, options?.from_date, options?.to_date, supabase])
+  }, [queueId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -191,7 +191,7 @@ export function usePendingItems(options?: { queue_id?: string; limit?: number })
       const { data } = await query.order('priority', { ascending: false }).order('created_at', { ascending: true }).limit(options?.limit || 100)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.queue_id, options?.limit, supabase])
+  }, [options?.queue_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }

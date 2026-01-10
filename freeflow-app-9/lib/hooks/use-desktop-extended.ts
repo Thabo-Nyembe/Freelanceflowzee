@@ -38,7 +38,7 @@ export function useDesktopApps(userId?: string, options?: { app_type?: string; i
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setApps(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.app_type, options?.is_installed, options?.limit, supabase])
+  }, [userId, options?.app_type, options?.is_installed, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { apps, isLoading, refresh: fetch }
 }
@@ -89,7 +89,7 @@ export function useDesktopNotifications(userId?: string, options?: { is_read?: b
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setNotifications(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_read, options?.priority, options?.limit, supabase])
+  }, [userId, options?.is_read, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notifications, isLoading, refresh: fetch }
 }
@@ -143,7 +143,7 @@ export function useDesktopShortcuts(userId?: string, options?: { folder_id?: str
       const { data } = await query.order('name', { ascending: true })
       setShortcuts(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.folder_id, supabase])
+  }, [userId, options?.folder_id])
   useEffect(() => { fetch() }, [fetch])
   return { shortcuts, isLoading, refresh: fetch }
 }
@@ -175,7 +175,7 @@ export function useRecentApps(userId?: string, options?: { limit?: number }) {
       const { data } = await supabase.from('desktop_apps').select('*').eq('user_id', userId).eq('is_installed', true).not('last_launched_at', 'is', null).order('last_launched_at', { ascending: false }).limit(options?.limit || 10)
       setApps(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { apps, isLoading, refresh: fetch }
 }
@@ -191,7 +191,7 @@ export function useFrequentApps(userId?: string, options?: { limit?: number }) {
       const { data } = await supabase.from('desktop_apps').select('*').eq('user_id', userId).eq('is_installed', true).gt('launch_count', 0).order('launch_count', { ascending: false }).limit(options?.limit || 10)
       setApps(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { apps, isLoading, refresh: fetch }
 }
@@ -207,7 +207,7 @@ export function useAppSearch(userId: string, searchTerm: string) {
       const { data } = await supabase.from('desktop_apps').select('*').eq('user_id', userId).ilike('name', `%${searchTerm}%`).limit(20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, searchTerm, supabase])
+  }, [userId, searchTerm])
   useEffect(() => {
     const timer = setTimeout(search, 300)
     return () => clearTimeout(timer)

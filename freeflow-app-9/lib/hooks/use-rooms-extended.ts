@@ -39,7 +39,7 @@ export function useRooms(options?: { type_id?: string; location_id?: string; bui
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setRooms(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.location_id, options?.building, options?.floor, options?.min_capacity, options?.is_available, options?.search, options?.limit, supabase])
+  }, [options?.type_id, options?.location_id, options?.building, options?.floor, options?.min_capacity, options?.is_available, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rooms, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useRoomBookings(roomId?: string, options?: { from_date?: string;
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 100)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [roomId, options?.from_date, options?.to_date, options?.status, options?.limit, supabase])
+  }, [roomId, options?.from_date, options?.to_date, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -95,7 +95,7 @@ export function useMyRoomBookings(userId?: string, options?: { status?: string; 
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 50)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.upcoming_only, options?.limit, supabase])
+  }, [userId, options?.status, options?.upcoming_only, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -111,7 +111,7 @@ export function useRoomAvailability(roomId?: string, startTime?: string, endTime
       const { data: conflicts } = await supabase.from('room_bookings').select('id, title, start_time, end_time').eq('room_id', roomId).neq('status', 'cancelled').or(`and(start_time.lt.${endTime},end_time.gt.${startTime})`)
       setAvailability({ available: !conflicts || conflicts.length === 0, conflicts: conflicts || [] })
     } finally { setIsLoading(false) }
-  }, [roomId, startTime, endTime, supabase])
+  }, [roomId, startTime, endTime])
   useEffect(() => { fetch() }, [fetch])
   return { availability, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function useAvailableRooms(startTime?: string, endTime?: string, options?
       const bookedRoomIds = new Set(bookings?.map(b => b.room_id) || [])
       setRooms(allRooms.filter(r => !bookedRoomIds.has(r.id)))
     } finally { setIsLoading(false) }
-  }, [startTime, endTime, options?.type_id, options?.min_capacity, options?.location_id, supabase])
+  }, [startTime, endTime, options?.type_id, options?.min_capacity, options?.location_id])
   useEffect(() => { fetch() }, [fetch])
   return { rooms, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function useRoomRates(roomId?: string, effectiveDate?: string) {
       const { data } = await query.order('effective_from', { ascending: false })
       setRates(data || [])
     } finally { setIsLoading(false) }
-  }, [roomId, effectiveDate, supabase])
+  }, [roomId, effectiveDate])
   useEffect(() => { fetch() }, [fetch])
   return { rates, isLoading, refresh: fetch }
 }

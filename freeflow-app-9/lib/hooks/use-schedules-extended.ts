@@ -38,7 +38,7 @@ export function useSchedules(options?: { owner_id?: string; entity_type?: string
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.entity_type, options?.entity_id, options?.type, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.owner_id, options?.entity_type, options?.entity_id, options?.type, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useScheduleEntries(scheduleId?: string, options?: { from_date?: 
       const { data } = await query.order('start_time', { ascending: true })
       setEntries(data || [])
     } finally { setIsLoading(false) }
-  }, [scheduleId, options?.from_date, options?.to_date, options?.day_of_week, supabase])
+  }, [scheduleId, options?.from_date, options?.to_date, options?.day_of_week])
   useEffect(() => { fetch() }, [fetch])
   return { entries, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useScheduleExceptions(scheduleId?: string, options?: { from_date
       const { data } = await query.order('date', { ascending: true })
       setExceptions(data || [])
     } finally { setIsLoading(false) }
-  }, [scheduleId, options?.type, options?.from_date, options?.to_date, supabase])
+  }, [scheduleId, options?.type, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { exceptions, isLoading, refresh: fetch }
 }
@@ -126,7 +126,7 @@ export function useUserSchedules(userId?: string, options?: { type?: string; is_
       const { data } = await query.order('name', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.is_active, supabase])
+  }, [userId, options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -144,7 +144,7 @@ export function useScheduleTemplates(options?: { type?: string; is_active?: bool
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

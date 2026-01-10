@@ -35,7 +35,7 @@ export function useRecurringPayments(options?: { user_id?: string; status?: stri
       const { data } = await query.order('next_date', { ascending: true }).limit(options?.limit || 50)
       setPayments(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.frequency, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.frequency, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { payments, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useRecurringInvoices(options?: { user_id?: string; client_id?: s
       const { data } = await query.order('next_invoice_date', { ascending: true }).limit(options?.limit || 50)
       setInvoices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.client_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.client_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { invoices, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useRecurringTasks(options?: { user_id?: string; project_id?: str
       const { data } = await query.order('next_run', { ascending: true }).limit(options?.limit || 50)
       setTasks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.project_id, options?.is_active, options?.limit, supabase])
+  }, [options?.user_id, options?.project_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useRecurringSchedules(options?: { type?: string; is_active?: boo
       const { data } = await query.order('name', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }

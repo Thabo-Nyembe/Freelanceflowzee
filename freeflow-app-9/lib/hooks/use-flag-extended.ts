@@ -54,7 +54,7 @@ export function useFlags(options?: { environment?: string; isEnabled?: boolean }
       const { data: result } = await query.order('flag_key', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.environment, options?.isEnabled, supabase])
+  }, [options?.environment, options?.isEnabled])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useFlagEvaluation(flagKey?: string, context?: Record<string, any
         setValue(flag.default_value)
       }
     } finally { setIsLoading(false) }
-  }, [flagKey, context, supabase])
+  }, [flagKey, context])
   useEffect(() => { evaluate() }, [evaluate])
   return { isEnabled, value, isLoading, evaluate }
 }

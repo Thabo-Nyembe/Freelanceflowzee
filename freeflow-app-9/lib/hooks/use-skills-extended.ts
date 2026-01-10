@@ -37,7 +37,7 @@ export function useSkills(options?: { category_id?: string; type?: string; is_te
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setSkills(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.type, options?.is_technical, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.category_id, options?.type, options?.is_technical, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { skills, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useUserSkills(userId?: string, options?: { category_id?: string;
       }
       setSkills(skills)
     } finally { setIsLoading(false) }
-  }, [userId, options?.category_id, options?.min_level, supabase])
+  }, [userId, options?.category_id, options?.min_level])
   useEffect(() => { fetch() }, [fetch])
   return { skills, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useSkillCategories(options?: { parent_id?: string | null; is_act
       const { data } = await query.order('order', { ascending: true })
       setCategories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.parent_id, options?.is_active, supabase])
+  }, [options?.parent_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { categories, isLoading, refresh: fetch }
 }
@@ -110,7 +110,7 @@ export function useSkillAssessments(userId?: string, skillId?: string, options?:
       const { data } = await query.order('assessed_at', { ascending: false }).limit(options?.limit || 20)
       setAssessments(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, skillId, options?.limit, supabase])
+  }, [userId, skillId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { assessments, isLoading, refresh: fetch }
 }
@@ -128,7 +128,7 @@ export function useSkillEndorsements(userId?: string, skillId?: string) {
       const { data } = await query.order('endorsed_at', { ascending: false })
       setEndorsements(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, skillId, supabase])
+  }, [userId, skillId])
   useEffect(() => { fetch() }, [fetch])
   return { endorsements, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useSkillRequirements(entityType?: string, entityId?: string) {
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('skill_requirements').select('*, skills(*)').eq('entity_type', entityType).eq('entity_id', entityId); setRequirements(data || []) } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { requirements, isLoading, refresh: fetch }
 }
@@ -169,7 +169,7 @@ export function useSkillMatch(userId?: string, entityType?: string, entityId?: s
       const matchPercentage = reqs.length > 0 ? Math.round((matched / reqs.length) * 100) : 100
       setMatch({ requirements: reqs, userSkills: skills, matchPercentage })
     } finally { setIsLoading(false) }
-  }, [userId, entityType, entityId, supabase])
+  }, [userId, entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { match, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useThreads(options?: { thread_type?: string; context_type?: stri
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setThreads(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.thread_type, options?.context_type, options?.context_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.thread_type, options?.context_type, options?.context_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { threads, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useUserThreads(userId?: string, options?: { thread_type?: string
       const { data } = await query.order('last_message_at', { ascending: false }).limit(options?.limit || 50)
       setThreads(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.thread_type, options?.status, options?.limit, supabase])
+  }, [userId, options?.thread_type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { threads, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useThreadMessages(threadId?: string, options?: { limit?: number 
       const { data } = await supabase.from('thread_messages').select('*, users(*), thread_reactions(*)').eq('thread_id', threadId).order('sent_at', { ascending: true }).limit(options?.limit || 100)
       setMessages(data || [])
     } finally { setIsLoading(false) }
-  }, [threadId, options?.limit, supabase])
+  }, [threadId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   useEffect(() => {
     if (!threadId) return
@@ -135,7 +135,7 @@ export function useThreadAttachments(threadId?: string, options?: { message_id?:
       const { data } = await query.order('created_at', { ascending: false })
       setAttachments(data || [])
     } finally { setIsLoading(false) }
-  }, [threadId, options?.message_id, supabase])
+  }, [threadId, options?.message_id])
   useEffect(() => { fetch() }, [fetch])
   return { attachments, isLoading, refresh: fetch }
 }
@@ -159,7 +159,7 @@ export function useThreadReadStatus(threadId?: string, userId?: string) {
         setUnreadCount(count || 0)
       }
     } finally { setIsLoading(false) }
-  }, [threadId, userId, supabase])
+  }, [threadId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { readStatus, unreadCount, hasUnread: unreadCount > 0, isLoading, refresh: fetch }
 }

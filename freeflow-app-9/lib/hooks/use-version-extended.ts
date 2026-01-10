@@ -34,7 +34,7 @@ export function useVersionHistory(entityType?: string, entityId?: string, limit 
       const { data: result } = await supabase.from('versions').select('*').eq('entity_type', entityType).eq('entity_id', entityId).order('created_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, limit, supabase])
+  }, [entityType, entityId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -50,7 +50,7 @@ export function useCurrentVersion(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('versions').select('*').eq('entity_type', entityType).eq('entity_id', entityId).eq('is_current', true).single()
       setVersion(data)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { version, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useVersionCount(entityType?: string, entityId?: string) {
       const { count: result } = await supabase.from('versions').select('*', { count: 'exact', head: true }).eq('entity_type', entityType).eq('entity_id', entityId)
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

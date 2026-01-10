@@ -22,7 +22,7 @@ export function useMentions(userId?: string, options?: { content_type?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setMentions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.content_type, options?.status, options?.limit, supabase])
+  }, [userId, options?.content_type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { mentions, isLoading, refresh: fetch }
 }
@@ -61,7 +61,7 @@ export function useContentMentions(contentType?: string, contentId?: string) {
     if (!contentType || !contentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('mentions').select('*').eq('content_type', contentType).eq('content_id', contentId).order('position', { ascending: true }); setMentions(data || []) } finally { setIsLoading(false) }
-  }, [contentType, contentId, supabase])
+  }, [contentType, contentId])
   useEffect(() => { fetch() }, [fetch])
   return { mentions, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useMentionableUsers(query: string, options?: { organization_id?:
     if (!query || query.length < 2) { setUsers([]); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('users').select('id, name, email, avatar_url').or(`name.ilike.%${query}%,email.ilike.%${query}%`).limit(options?.limit || 10); setUsers(data || []) } finally { setIsLoading(false) }
-  }, [query, options?.limit, supabase])
+  }, [query, options?.limit])
   useEffect(() => { const debounce = setTimeout(search, 300); return () => clearTimeout(debounce) }, [search])
   return { users, isLoading }
 }
@@ -100,7 +100,7 @@ export function useMentionHistory(userId?: string, options?: { limit?: number })
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('mention_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 100); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useRecentMentioners(userId?: string, options?: { limit?: number 
       const { data: users } = await supabase.from('users').select('id, name, avatar_url').in('id', uniqueIds)
       setMentioners(users || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { mentioners, isLoading, refresh: fetch }
 }

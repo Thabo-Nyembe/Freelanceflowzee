@@ -20,7 +20,7 @@ export function useVotes(itemId?: string, itemType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -42,7 +42,7 @@ export function useVoteScore(itemId?: string, itemType?: string) {
       setDownvotes(downs)
       setScore(ups - downs)
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { score, upvotes, downvotes, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useUserVote(userId?: string, itemId?: string, itemType?: string)
       const { data } = await supabase.from('votes').select('vote_type').eq('user_id', userId).eq('item_id', itemId).eq('item_type', itemType).single()
       setVote(data?.vote_type || null)
     } finally { setIsLoading(false) }
-  }, [userId, itemId, itemType, supabase])
+  }, [userId, itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { vote, isLoading, refresh: fetch }
 }

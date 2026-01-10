@@ -36,7 +36,7 @@ export function useConnectors(options?: { user_id?: string; type?: string; provi
       const { data } = await query.order('name', { ascending: true })
       setConnectors(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.provider, options?.status, supabase])
+  }, [options?.user_id, options?.type, options?.provider, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { connectors, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useConnectorLogs(connectorId?: string, options?: { event_type?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [connectorId, options?.event_type, options?.status, options?.limit, supabase])
+  }, [connectorId, options?.event_type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

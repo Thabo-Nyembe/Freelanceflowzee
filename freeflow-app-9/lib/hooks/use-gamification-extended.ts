@@ -29,7 +29,7 @@ export function usePointsHistory(userId?: string, options?: { limit?: number }) 
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('gamification_points_history').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -47,7 +47,7 @@ export function useBadges(options?: { category?: string; rarity?: string }) {
       const { data } = await query.order('name', { ascending: true })
       setBadges(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.rarity, supabase])
+  }, [options?.category, options?.rarity])
   useEffect(() => { fetch() }, [fetch])
   return { badges, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useAchievements(options?: { category?: string; is_active?: boole
       const { data } = await query.order('points', { ascending: false })
       setAchievements(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { achievements, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useLeaderboard(type: string, options?: { period?: string; limit?
       const { data } = await query.order('rank', { ascending: true }).limit(options?.limit || 100)
       setLeaderboard(data || [])
     } finally { setIsLoading(false) }
-  }, [type, options?.period, options?.limit, supabase])
+  }, [type, options?.period, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { leaderboard, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function useUserRank(userId?: string, type?: string) {
     if (!userId || !type) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('gamification_leaderboards').select('*').eq('user_id', userId).eq('type', type).single(); setRank(data) } finally { setIsLoading(false) }
-  }, [userId, type, supabase])
+  }, [userId, type])
   useEffect(() => { fetch() }, [fetch])
   return { rank, isLoading, refresh: fetch }
 }
@@ -168,7 +168,7 @@ export function useRewards(options?: { category?: string; is_available?: boolean
       const { data } = await query.order('points_required', { ascending: true })
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_available, supabase])
+  }, [options?.category, options?.is_available])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, isLoading, refresh: fetch }
 }

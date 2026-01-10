@@ -37,7 +37,7 @@ export function useStrategies(options?: { strategy_type?: string; owner_id?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setStrategies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.strategy_type, options?.owner_id, options?.status, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.strategy_type, options?.owner_id, options?.status, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { strategies, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useStrategyGoals(strategyId?: string, options?: { goal_type?: st
       const { data } = await query.order('priority', { ascending: true })
       setGoals(data || [])
     } finally { setIsLoading(false) }
-  }, [strategyId, options?.goal_type, options?.status, options?.owner_id, supabase])
+  }, [strategyId, options?.goal_type, options?.status, options?.owner_id])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useStrategyInitiatives(strategyId?: string, options?: { goal_id?
       const { data } = await query.order('priority', { ascending: true })
       setInitiatives(data || [])
     } finally { setIsLoading(false) }
-  }, [strategyId, options?.goal_id, options?.status, options?.owner_id, supabase])
+  }, [strategyId, options?.goal_id, options?.status, options?.owner_id])
   useEffect(() => { fetch() }, [fetch])
   return { initiatives, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function useStrategyMetrics(strategyId?: string, options?: { metric_name?
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [strategyId, options?.metric_name, options?.goal_id, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [strategyId, options?.metric_name, options?.goal_id, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function useStrategyMilestones(strategyId?: string, options?: { status?: 
       const { data } = await query.order('target_date', { ascending: true })
       setMilestones(data || [])
     } finally { setIsLoading(false) }
-  }, [strategyId, options?.status, options?.initiative_id, supabase])
+  }, [strategyId, options?.status, options?.initiative_id])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useStrategyReviews(strategyId?: string, options?: { review_type?
       const { data } = await query.order('reviewed_at', { ascending: false }).limit(options?.limit || 20)
       setReviews(data || [])
     } finally { setIsLoading(false) }
-  }, [strategyId, options?.review_type, options?.limit, supabase])
+  }, [strategyId, options?.review_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -183,7 +183,7 @@ export function useUpcomingMilestones(options?: { strategy_id?: string; owner_id
       const { data } = await query.order('target_date', { ascending: true }).limit(options?.limit || 20)
       setMilestones(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.strategy_id, options?.owner_id, options?.days, options?.limit, supabase])
+  }, [options?.strategy_id, options?.owner_id, options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }

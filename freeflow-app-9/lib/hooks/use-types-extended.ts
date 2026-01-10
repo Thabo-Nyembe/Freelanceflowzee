@@ -51,7 +51,7 @@ export function useTypes(options?: { category?: string; parent_id?: string | nul
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.parent_id, options?.is_system, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.parent_id, options?.is_system, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useTypeValues(typeId?: string, options?: { is_active?: boolean }
       setValues(data || [])
       setDefaultValue(data?.find(v => v.is_default) || null)
     } finally { setIsLoading(false) }
-  }, [typeId, options?.is_active, supabase])
+  }, [typeId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { values, defaultValue, isLoading, refresh: fetch }
 }
@@ -180,7 +180,7 @@ export function useRootTypes(options?: { category?: string; is_active?: boolean 
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }

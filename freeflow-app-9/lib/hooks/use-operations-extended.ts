@@ -36,7 +36,7 @@ export function useOperations(options?: { organization_id?: string; owner_id?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOperations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.owner_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.organization_id, options?.owner_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { operations, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useOperationLogs(operationId?: string, options?: { level?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [operationId, options?.level, options?.limit, supabase])
+  }, [operationId, options?.level, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -132,7 +132,7 @@ export function useOperationAlerts(operationId?: string, options?: { status?: st
       const { data } = await query.order('created_at', { ascending: false })
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [operationId, options?.status, supabase])
+  }, [operationId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -149,7 +149,7 @@ export function useRecentOperations(organizationId?: string, options?: { limit?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 10)
       setOperations(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.limit, supabase])
+  }, [organizationId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { operations, isLoading, refresh: fetch }
 }

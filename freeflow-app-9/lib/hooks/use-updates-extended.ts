@@ -36,7 +36,7 @@ export function useUpdates(options?: { channel_id?: string; is_critical?: boolea
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setUpdates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.channel_id, options?.is_critical, options?.is_published, options?.search, options?.limit, supabase])
+  }, [options?.channel_id, options?.is_critical, options?.is_published, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { updates, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function useCheckForUpdates(currentVersion?: string, channelId?: string) 
       setHasUpdate(updateAvailable)
       setAvailableUpdate(updateAvailable ? data : null)
     } finally { setIsLoading(false) }
-  }, [currentVersion, channelId, supabase])
+  }, [currentVersion, channelId])
   useEffect(() => { check() }, [check])
   return { hasUpdate, update: availableUpdate, isLoading, refresh: check }
 }
@@ -116,7 +116,7 @@ export function useUpdateInstallations(updateId?: string, options?: { status?: s
       const { data } = await query.order('installed_at', { ascending: false }).limit(options?.limit || 100)
       setInstallations(data || [])
     } finally { setIsLoading(false) }
-  }, [updateId, options?.status, options?.limit, supabase])
+  }, [updateId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { installations, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useUpdateRollbacks(updateId?: string, options?: { limit?: number
     if (!updateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('update_rollbacks').select('*').eq('update_id', updateId).order('rolled_back_at', { ascending: false }).limit(options?.limit || 50); setRollbacks(data || []) } finally { setIsLoading(false) }
-  }, [updateId, options?.limit, supabase])
+  }, [updateId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rollbacks, isLoading, refresh: fetch }
 }
@@ -172,7 +172,7 @@ export function useCriticalUpdates(options?: { channel_id?: string; limit?: numb
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 10)
       setUpdates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.channel_id, options?.limit, supabase])
+  }, [options?.channel_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { updates, isLoading, refresh: fetch }
 }
@@ -189,7 +189,7 @@ export function useScheduledUpdates(options?: { channel_id?: string; limit?: num
       const { data } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 10)
       setUpdates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.channel_id, options?.limit, supabase])
+  }, [options?.channel_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { updates, isLoading, refresh: fetch }
 }
@@ -207,7 +207,7 @@ export function useUpdateNotifications(updateId?: string, options?: { status?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setNotifications(data || [])
     } finally { setIsLoading(false) }
-  }, [updateId, options?.status, options?.limit, supabase])
+  }, [updateId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notifications, isLoading, refresh: fetch }
 }
@@ -220,7 +220,7 @@ export function useDeviceUpdateHistory(deviceId?: string, options?: { limit?: nu
     if (!deviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('update_installations').select('*, updates(*)').eq('device_id', deviceId).order('installed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [deviceId, options?.limit, supabase])
+  }, [deviceId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

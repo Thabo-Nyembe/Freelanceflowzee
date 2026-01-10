@@ -35,7 +35,7 @@ export function useOffers(options?: { organization_id?: string; status?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOffers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.status, options?.offer_type, options?.limit, supabase])
+  }, [options?.organization_id, options?.status, options?.offer_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { offers, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useOfferRedemptions(offerId?: string, options?: { user_id?: stri
       const { data } = await query.order('redeemed_at', { ascending: false }).limit(options?.limit || 100)
       setRedemptions(data || [])
     } finally { setIsLoading(false) }
-  }, [offerId, options?.user_id, options?.limit, supabase])
+  }, [offerId, options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { redemptions, isLoading, refresh: fetch }
 }
@@ -136,7 +136,7 @@ export function useUserRedemptions(userId?: string, options?: { limit?: number }
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('offer_redemptions').select('*, offers(*)').eq('user_id', userId).order('redeemed_at', { ascending: false }).limit(options?.limit || 50); setRedemptions(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { redemptions, isLoading, refresh: fetch }
 }

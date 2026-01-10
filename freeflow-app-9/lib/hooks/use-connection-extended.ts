@@ -20,7 +20,7 @@ export function useConnections(userId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, status, supabase])
+  }, [userId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useConnectionStatus(userId?: string, otherUserId?: string) {
         setStatus('none')
       }
     } finally { setIsLoading(false) }
-  }, [userId, otherUserId, supabase])
+  }, [userId, otherUserId])
   useEffect(() => { check() }, [check])
   return { status, isRequester, isLoading, refresh: check }
 }

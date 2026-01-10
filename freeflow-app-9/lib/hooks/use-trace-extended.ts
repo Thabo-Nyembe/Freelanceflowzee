@@ -37,7 +37,7 @@ export function useTraces(options?: { serviceName?: string; operationName?: stri
       const { data: result } = await query.order('started_at', { ascending: false }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.serviceName, options?.operationName, options?.status, options?.limit, supabase])
+  }, [options?.serviceName, options?.operationName, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

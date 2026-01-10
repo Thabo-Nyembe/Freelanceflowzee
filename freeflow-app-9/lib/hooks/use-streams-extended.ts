@@ -37,7 +37,7 @@ export function useStreams(options?: { streamer_id?: string; category?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setStreams(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.streamer_id, options?.category, options?.is_live, options?.stream_type, options?.search, options?.limit, supabase])
+  }, [options?.streamer_id, options?.category, options?.is_live, options?.stream_type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { streams, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useLiveStreams(options?: { category?: string; limit?: number }) 
       const { data } = await query.order('viewer_count', { ascending: false }).limit(options?.limit || 50)
       setStreams(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { streams, isLoading, refresh: fetch }
 }
@@ -88,7 +88,7 @@ export function useStreamChat(streamId?: string, options?: { limit?: number }) {
       const { data } = await supabase.from('stream_chats').select('*, users(*)').eq('stream_id', streamId).order('sent_at', { ascending: true }).limit(options?.limit || 100)
       setMessages(data || [])
     } finally { setIsLoading(false) }
-  }, [streamId, options?.limit, supabase])
+  }, [streamId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   // Subscribe to new messages
   useEffect(() => {
@@ -127,7 +127,7 @@ export function useStreamAnalytics(streamId?: string, options?: { metric_type?: 
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
-  }, [streamId, options?.metric_type, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [streamId, options?.metric_type, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }

@@ -21,7 +21,7 @@ export function usePublications(userId?: string, entityType?: string, status?: s
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, entityType, status, supabase])
+  }, [userId, entityType, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,7 +39,7 @@ export function usePublicationStatus(entityId?: string, entityType?: string) {
       setStatus(data?.status || null)
       setIsPublished(data?.status === 'published')
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { status, isPublished, isLoading, refresh: fetch }
 }

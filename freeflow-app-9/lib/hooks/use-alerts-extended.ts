@@ -37,7 +37,7 @@ export function useAlerts(options?: { user_id?: string; type?: string; severity?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.severity, options?.status, options?.is_read, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.severity, options?.status, options?.is_read, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -50,7 +50,7 @@ export function useUnreadAlerts(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('alerts').select('*').eq('user_id', userId).eq('is_read', false).eq('status', 'active').order('created_at', { ascending: false }).limit(options?.limit || 50); setAlerts(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }

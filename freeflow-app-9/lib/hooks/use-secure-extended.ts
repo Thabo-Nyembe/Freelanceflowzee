@@ -38,7 +38,7 @@ export function useSecureFileDeliveries(options?: { owner_id?: string; recipient
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.recipient_id, options?.status, options?.limit, supabase])
+  }, [options?.owner_id, options?.recipient_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { deliveries, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useSentSecureDeliveries(ownerId?: string, options?: { status?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
-  }, [ownerId, options?.status, options?.limit, supabase])
+  }, [ownerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { deliveries, isLoading, refresh: fetch }
 }
@@ -95,7 +95,7 @@ export function useReceivedSecureDeliveries(recipientId?: string, options?: { st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setDeliveries(data || [])
     } finally { setIsLoading(false) }
-  }, [recipientId, options?.status, options?.limit, supabase])
+  }, [recipientId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { deliveries, isLoading, refresh: fetch }
 }
@@ -170,7 +170,7 @@ export function useUserSecureShareTokens(userId?: string, options?: { video_id?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTokens(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.video_id, options?.is_active, options?.limit, supabase])
+  }, [userId, options?.video_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tokens, isLoading, refresh: fetch }
 }
@@ -186,7 +186,7 @@ export function useActiveSecureShareTokens(userId?: string, options?: { limit?: 
       const { data } = await supabase.from('secure_share_tokens').select('*').eq('created_by', userId).eq('is_active', true).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTokens(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tokens, isLoading, refresh: fetch }
 }

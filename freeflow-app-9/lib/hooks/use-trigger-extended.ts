@@ -36,7 +36,7 @@ export function useUserTriggers(userId?: string, options?: { isActive?: boolean 
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, supabase])
+  }, [userId, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useTriggersForEvent(eventType?: string, entityType?: string) {
       const { data: result } = await query.order('priority', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [eventType, entityType, supabase])
+  }, [eventType, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useTriggerExecutions(triggerId?: string, limit = 20) {
       const { data: result } = await supabase.from('trigger_executions').select('*').eq('trigger_id', triggerId).order('executed_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [triggerId, limit, supabase])
+  }, [triggerId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

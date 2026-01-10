@@ -35,7 +35,7 @@ export function useSmsMessages(options?: { status?: string; to?: string; campaig
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setMessages(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.to, options?.campaign_id, options?.limit, supabase])
+  }, [options?.status, options?.to, options?.campaign_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useSmsTemplates(options?: { is_active?: boolean; category?: stri
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.category, supabase])
+  }, [options?.is_active, options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useSmsCampaigns(options?: { status?: string; is_active?: boolean
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.is_active, options?.limit, supabase])
+  }, [options?.status, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }
@@ -89,7 +89,7 @@ export function useSmsLogs(options?: { message_id?: string; status?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.message_id, options?.status, options?.limit, supabase])
+  }, [options?.message_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

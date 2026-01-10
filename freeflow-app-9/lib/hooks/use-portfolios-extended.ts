@@ -48,7 +48,7 @@ export function usePortfolios(options?: { owner_id?: string; is_public?: boolean
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setPortfolios(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.owner_id, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { portfolios, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function usePortfolioItems(portfolioId?: string, options?: { category_id?
       const { data } = await query.order('order', { ascending: true })
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [portfolioId, options?.category_id, options?.is_featured, supabase])
+  }, [portfolioId, options?.category_id, options?.is_featured])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function usePortfolioTestimonials(portfolioId?: string, options?: { is_ap
       const { data } = await query.order('created_at', { ascending: false })
       setTestimonials(data || [])
     } finally { setIsLoading(false) }
-  }, [portfolioId, options?.is_approved, supabase])
+  }, [portfolioId, options?.is_approved])
   useEffect(() => { fetch() }, [fetch])
   return { testimonials, isLoading, refresh: fetch }
 }
@@ -130,7 +130,7 @@ export function usePortfolioViews(portfolioId?: string, options?: { from_date?: 
       const { data } = await query.order('viewed_at', { ascending: false })
       setViews(data || [])
     } finally { setIsLoading(false) }
-  }, [portfolioId, options?.from_date, options?.to_date, supabase])
+  }, [portfolioId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { views, isLoading, refresh: fetch }
 }

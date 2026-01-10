@@ -38,7 +38,7 @@ export function useIssues(options?: { project_id?: string; status?: string; prio
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setIssues(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.status, options?.priority, options?.type, options?.milestone_id, options?.created_by, options?.limit, supabase])
+  }, [options?.project_id, options?.status, options?.priority, options?.type, options?.milestone_id, options?.created_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { issues, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useProjectIssues(projectId?: string, options?: { status?: string
       const { data } = await query.order('created_at', { ascending: false })
       setIssues(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.status, supabase])
+  }, [projectId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { issues, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useIssueMilestones(projectId?: string, options?: { is_open?: boo
       const { data } = await query.order('due_date', { ascending: true })
       setMilestones(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.is_open, supabase])
+  }, [projectId, options?.is_open])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }
@@ -160,7 +160,7 @@ export function useMyAssignedIssues(userId?: string, options?: { status?: string
       const { data } = await query.order('created_at', { ascending: false })
       setIssues(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { issues, isLoading, refresh: fetch }
 }

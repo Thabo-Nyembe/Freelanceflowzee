@@ -38,7 +38,7 @@ export function useRegions(options?: { regionType?: string; countryCode?: string
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.regionType, options?.countryCode, options?.parentId, options?.isActive, supabase])
+  }, [options?.regionType, options?.countryCode, options?.parentId, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

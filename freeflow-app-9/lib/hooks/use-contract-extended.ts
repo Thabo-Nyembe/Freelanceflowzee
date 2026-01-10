@@ -39,7 +39,7 @@ export function useContracts(userId?: string, options?: { status?: string; clien
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.client_id, options?.project_id, options?.limit, supabase])
+  }, [userId, options?.status, options?.client_id, options?.project_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -110,7 +110,7 @@ export function useContractTemplates(userId?: string, options?: { category?: str
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.category, options?.include_public, supabase])
+  }, [userId, options?.category, options?.include_public])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -204,7 +204,7 @@ export function useExpiringContracts(userId?: string, daysAhead: number = 30) {
       const { data } = await supabase.from('contracts').select('*').eq('user_id', userId).eq('status', 'signed').lte('end_date', futureDate.toISOString().split('T')[0]).gte('end_date', new Date().toISOString().split('T')[0]).order('end_date', { ascending: true })
       setContracts(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, daysAhead, supabase])
+  }, [userId, daysAhead])
   useEffect(() => { fetch() }, [fetch])
   return { contracts, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useInvites(options?: { inviter_id?: string; status?: string; typ
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInvites(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.inviter_id, options?.status, options?.type, options?.limit, supabase])
+  }, [options?.inviter_id, options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { invites, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useUserInvites(userId?: string, options?: { status?: string }) {
       const { data } = await query.order('created_at', { ascending: false })
       setInvites(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { invites, isLoading, refresh: fetch }
 }

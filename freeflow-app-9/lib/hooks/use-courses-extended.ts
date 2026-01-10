@@ -37,7 +37,7 @@ export function useCourses(options?: { instructor_id?: string; category?: string
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCourses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.instructor_id, options?.category, options?.level, options?.is_published, options?.search, options?.limit, supabase])
+  }, [options?.instructor_id, options?.category, options?.level, options?.is_published, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { courses, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useUserEnrollments(userId?: string, options?: { status?: string 
       const { data } = await query.order('enrolled_at', { ascending: false })
       setEnrollments(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { enrollments, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useIsEnrolled(userId?: string, courseId?: string) {
     if (!userId || !courseId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('course_enrollments').select('*').eq('user_id', userId).eq('course_id', courseId).single(); setIsEnrolled(!!data); setEnrollment(data) } finally { setIsLoading(false) }
-  }, [userId, courseId, supabase])
+  }, [userId, courseId])
   useEffect(() => { check() }, [check])
   return { isEnrolled, enrollment, isLoading, recheck: check }
 }

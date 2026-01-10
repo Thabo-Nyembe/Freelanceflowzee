@@ -36,7 +36,7 @@ export function useUserCallbacks(userId?: string, options?: { isActive?: boolean
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, supabase])
+  }, [userId, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useCallbackLogs(callbackId?: string, options?: { status?: string
       const { data: result } = await query.order('executed_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [callbackId, options?.status, options?.limit, supabase])
+  }, [callbackId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useCallbacksByType(callbackType?: string, userId?: string) {
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [callbackType, userId, supabase])
+  }, [callbackType, userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

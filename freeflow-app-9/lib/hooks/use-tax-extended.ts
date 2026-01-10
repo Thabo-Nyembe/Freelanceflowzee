@@ -20,7 +20,7 @@ export function useTaxRates(country?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [country, isActive, supabase])
+  }, [country, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useTaxExemptions(userId?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, isActive, supabase])
+  }, [userId, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useApplicableTaxRate(country?: string, state?: string, categoryI
       const { data } = await query.order('state', { ascending: false, nullsFirst: false }).limit(1).single()
       setRate(data)
     } finally { setIsLoading(false) }
-  }, [country, state, categoryId, supabase])
+  }, [country, state, categoryId])
   useEffect(() => { fetch() }, [fetch])
   return { rate, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function useUserListeners(userId?: string, options?: { isActive?: boolean
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, supabase])
+  }, [userId, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useListenerEvents(listenerId?: string, limit = 50) {
       const { data: result } = await supabase.from('listener_events').select('*').eq('listener_id', listenerId).order('received_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [listenerId, limit, supabase])
+  }, [listenerId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useRealtimeListener(channel?: string, onEvent?: (event: any) => 
     })
 
     return () => { supabase.removeChannel(subscription) }
-  }, [channel, onEvent, supabase])
+  }, [channel, onEvent])
 
   return { isConnected }
 }

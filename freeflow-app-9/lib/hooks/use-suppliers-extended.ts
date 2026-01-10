@@ -39,7 +39,7 @@ export function useSuppliers(options?: { category?: string; is_active?: boolean;
       }
       setSuppliers(result)
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, options?.min_rating, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.is_active, options?.min_rating, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { suppliers, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useSupplierProducts(supplierId?: string, options?: { is_preferre
       const { data } = await query.order('created_at', { ascending: false })
       setProducts(data || [])
     } finally { setIsLoading(false) }
-  }, [supplierId, options?.is_preferred, supabase])
+  }, [supplierId, options?.is_preferred])
   useEffect(() => { fetch() }, [fetch])
   return { products, isLoading, refresh: fetch }
 }
@@ -90,7 +90,7 @@ export function useSupplierOrders(supplierId?: string, options?: { status?: stri
       const { data } = await query.order('ordered_at', { ascending: false }).limit(options?.limit || 50)
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [supplierId, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [supplierId, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useSupplierRatings(supplierId?: string, options?: { category?: s
         setAverage(ratingList.reduce((sum, r) => sum + r.rating, 0) / ratingList.length)
       }
     } finally { setIsLoading(false) }
-  }, [supplierId, options?.category, options?.limit, supabase])
+  }, [supplierId, options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { ratings, average, isLoading, refresh: fetch }
 }
@@ -131,7 +131,7 @@ export function useSupplierDocuments(supplierId?: string, options?: { document_t
       const { data } = await query.order('uploaded_at', { ascending: false })
       setDocuments(data || [])
     } finally { setIsLoading(false) }
-  }, [supplierId, options?.document_type, supabase])
+  }, [supplierId, options?.document_type])
   useEffect(() => { fetch() }, [fetch])
   return { documents, isLoading, refresh: fetch }
 }

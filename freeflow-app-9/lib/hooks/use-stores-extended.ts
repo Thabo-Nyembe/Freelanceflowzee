@@ -36,7 +36,7 @@ export function useStores(options?: { type?: string; owner_id?: string; is_activ
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setStores(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.owner_id, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.type, options?.owner_id, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { stores, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useStoreStaff(storeId?: string, options?: { role?: string; is_ac
       const { data } = await query.order('joined_at', { ascending: false })
       setStaff(data || [])
     } finally { setIsLoading(false) }
-  }, [storeId, options?.role, options?.is_active, supabase])
+  }, [storeId, options?.role, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { staff, isLoading, refresh: fetch }
 }
@@ -133,7 +133,7 @@ export function useStoreAnalytics(storeId?: string, options?: { metric_type?: st
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
-  }, [storeId, options?.metric_type, options?.period, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [storeId, options?.metric_type, options?.period, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -181,7 +181,7 @@ export function useNearbyStores(lat?: number, lng?: number, radiusKm: number = 1
       }).filter(s => s.distance <= radiusKm).sort((a, b) => a.distance - b.distance)
       setStores(withDistance)
     } finally { setIsLoading(false) }
-  }, [lat, lng, radiusKm, supabase])
+  }, [lat, lng, radiusKm])
   useEffect(() => { fetch() }, [fetch])
   return { stores, isLoading, refresh: fetch }
 }

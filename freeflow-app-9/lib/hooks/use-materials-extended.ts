@@ -36,7 +36,7 @@ export function useMaterials(options?: { category_id?: string; status?: string; 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setMaterials(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.status, options?.organization_id, options?.search, options?.limit, supabase])
+  }, [options?.category_id, options?.status, options?.organization_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { materials, isLoading, refresh: fetch }
 }
@@ -96,7 +96,7 @@ export function useMaterialOrders(options?: { supplier_id?: string; status?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.supplier_id, options?.status, options?.limit, supabase])
+  }, [options?.supplier_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -115,7 +115,7 @@ export function useMaterialUsage(materialId?: string, options?: { from_date?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setUsage(data || [])
     } finally { setIsLoading(false) }
-  }, [materialId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [materialId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { usage, isLoading, refresh: fetch }
 }

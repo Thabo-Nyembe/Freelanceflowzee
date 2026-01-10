@@ -20,7 +20,7 @@ export function useArchives(userId?: string, entityType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, entityType, supabase])
+  }, [userId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -20,7 +20,7 @@ export function useMenus(menuType?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [menuType, isActive, supabase])
+  }, [menuType, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,7 +39,7 @@ export function useMenuItems(menuId?: string, parentId?: string | null) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [menuId, parentId, supabase])
+  }, [menuId, parentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

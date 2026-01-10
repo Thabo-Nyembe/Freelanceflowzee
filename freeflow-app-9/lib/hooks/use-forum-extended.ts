@@ -21,7 +21,7 @@ export function useForums(parentId?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [parentId, isActive, supabase])
+  }, [parentId, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,7 +39,7 @@ export function useForumTopics(forumId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [forumId, status, supabase])
+  }, [forumId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

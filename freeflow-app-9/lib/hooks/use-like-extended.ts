@@ -20,7 +20,7 @@ export function useLikes(itemId?: string, itemType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,7 +36,7 @@ export function useIsLiked(userId?: string, itemId?: string, itemType?: string) 
       const { data } = await supabase.from('likes').select('id').eq('user_id', userId).eq('item_id', itemId).eq('item_type', itemType).single()
       setIsLiked(!!data)
     } finally { setIsLoading(false) }
-  }, [userId, itemId, itemType, supabase])
+  }, [userId, itemId, itemType])
   useEffect(() => { check() }, [check])
   return { isLiked, isLoading, refresh: check }
 }
@@ -52,7 +52,7 @@ export function useLikeCount(itemId?: string, itemType?: string) {
       const { count: result } = await supabase.from('likes').select('*', { count: 'exact', head: true }).eq('item_id', itemId).eq('item_type', itemType)
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

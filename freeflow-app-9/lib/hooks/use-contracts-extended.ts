@@ -35,7 +35,7 @@ export function useContracts(options?: { user_id?: string; status?: string; type
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setContracts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.type, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { contracts, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function useContractTemplates(options?: { type?: string; is_active?: bool
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useExpiringContracts(userId?: string, daysAhead?: number) {
       const { data } = await supabase.from('contracts').select('*').eq('user_id', userId).eq('status', 'signed').not('end_date', 'is', null).lte('end_date', futureDate.toISOString()).gte('end_date', new Date().toISOString()).order('end_date', { ascending: true })
       setContracts(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, daysAhead, supabase])
+  }, [userId, daysAhead])
   useEffect(() => { fetch() }, [fetch])
   return { contracts, isLoading, refresh: fetch }
 }

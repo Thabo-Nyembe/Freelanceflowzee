@@ -38,7 +38,7 @@ export function useRecords(options?: { type_id?: string; owner_id?: string; orga
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRecords(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.owner_id, options?.organization_id, options?.parent_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.type_id, options?.owner_id, options?.organization_id, options?.parent_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { records, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useRecordTypes(options?: { category?: string; is_active?: boolea
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useRecordHistory(recordId?: string, options?: { action?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [recordId, options?.action, options?.limit, supabase])
+  }, [recordId, options?.action, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -119,7 +119,7 @@ export function useChildRecords(parentId?: string, options?: { type_id?: string;
       const { data } = await query.order('created_at', { ascending: false })
       setChildren(data || [])
     } finally { setIsLoading(false) }
-  }, [parentId, options?.type_id, options?.status, supabase])
+  }, [parentId, options?.type_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { children, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useMyRecords(userId?: string, options?: { type_id?: string; stat
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRecords(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type_id, options?.status, options?.limit, supabase])
+  }, [userId, options?.type_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { records, isLoading, refresh: fetch }
 }
@@ -156,7 +156,7 @@ export function useRecentRecords(options?: { organization_id?: string; type_id?:
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 20)
       setRecords(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.type_id, options?.limit, supabase])
+  }, [options?.organization_id, options?.type_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { records, isLoading, refresh: fetch }
 }
@@ -174,7 +174,7 @@ export function useArchivedRecords(options?: { owner_id?: string; type_id?: stri
       const { data } = await query.order('archived_at', { ascending: false }).limit(options?.limit || 50)
       setRecords(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.type_id, options?.limit, supabase])
+  }, [options?.owner_id, options?.type_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { records, isLoading, refresh: fetch }
 }
@@ -192,7 +192,7 @@ export function useRecordTemplates(options?: { type_id?: string; category?: stri
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.category, supabase])
+  }, [options?.type_id, options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

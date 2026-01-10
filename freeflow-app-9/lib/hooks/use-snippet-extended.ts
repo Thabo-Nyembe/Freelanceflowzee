@@ -38,7 +38,7 @@ export function useSnippets(options?: { language?: string; category?: string; is
       const { data: result } = await query.order('usage_count', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.language, options?.category, options?.isPublic, options?.tags, supabase])
+  }, [options?.language, options?.category, options?.isPublic, options?.tags])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function usePopularSnippets(limit = 20, language?: string) {
       const { data: result } = await query.order('usage_count', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [limit, language, supabase])
+  }, [limit, language])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useSnippetSearch(searchTerm: string, language?: string) {
       const { data: result } = await query.order('usage_count', { ascending: false }).limit(50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, language, supabase])
+  }, [searchTerm, language])
   useEffect(() => { const timer = setTimeout(search, 300); return () => clearTimeout(timer) }, [search])
   return { data, isLoading }
 }

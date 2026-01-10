@@ -23,7 +23,7 @@ export function useModerationQueue(options?: { status?: string; content_type?: s
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 50)
       setQueue(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.content_type, options?.priority, options?.assigned_to, options?.limit, supabase])
+  }, [options?.status, options?.content_type, options?.priority, options?.assigned_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { queue, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useModerationRules(options?: { rule_type?: string; is_active?: b
       const { data } = await query.order('priority', { ascending: false })
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.rule_type, options?.is_active, supabase])
+  }, [options?.rule_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -102,7 +102,7 @@ export function useModerationAppeals(options?: { status?: string; user_id?: stri
       const { data } = await query.order('submitted_at', { ascending: true }).limit(options?.limit || 50)
       setAppeals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.user_id, options?.limit, supabase])
+  }, [options?.status, options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { appeals, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useModerationLogs(options?: { moderator_id?: string; action_type
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.moderator_id, options?.action_type, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.moderator_id, options?.action_type, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -140,7 +140,7 @@ export function useModerationReports(options?: { status?: string; report_type?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.report_type, options?.limit, supabase])
+  }, [options?.status, options?.report_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }

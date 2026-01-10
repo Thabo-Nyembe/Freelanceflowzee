@@ -36,7 +36,7 @@ export function useCustomFields(entityType?: string, workspaceId?: string) {
       const { data: result } = await query.order('display_order', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, workspaceId, supabase])
+  }, [entityType, workspaceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useCustomFieldValues(entityType?: string, entityId?: string) {
       const valuesMap = data?.reduce((acc, v) => ({ ...acc, [v.field_id]: v.value }), {}) || {}
       setValues(valuesMap)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { values, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useEntityWithCustomFields(entityType?: string, entityId?: string
       const valuesMap = valuesResult.data?.reduce((acc, v) => ({ ...acc, [v.field_id]: v.value }), {}) || {}
       setData({ fields: fieldsResult.data || [], values: valuesMap })
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { ...data, isLoading, refresh: fetch }
 }

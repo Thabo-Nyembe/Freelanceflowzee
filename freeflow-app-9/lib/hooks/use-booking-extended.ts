@@ -189,7 +189,7 @@ export function useBookingSlots(serviceId?: string, date?: string) {
       const { data: result } = await query.order('start_time', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [serviceId, date, supabase])
+  }, [serviceId, date])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

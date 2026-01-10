@@ -54,7 +54,7 @@ export function useUnits(options?: { group_id?: string; is_si?: boolean; is_acti
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setUnits(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.group_id, options?.is_si, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.group_id, options?.is_si, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { units, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useUnitGroups(options?: { is_active?: boolean; search?: string }
       const { data } = await query.order('name', { ascending: true })
       setGroups(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.search, supabase])
+  }, [options?.is_active, options?.search])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -111,7 +111,7 @@ export function useUnitFormat(unitId?: string, locale?: string) {
     if (!unitId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('unit_formats').select('*').eq('unit_id', unitId).eq('locale', locale || 'default').single(); setFormat(data) } finally { setIsLoading(false) }
-  }, [unitId, locale, supabase])
+  }, [unitId, locale])
   useEffect(() => { fetch() }, [fetch])
   return { format, isLoading, refresh: fetch }
 }
@@ -142,7 +142,7 @@ export function usePreferredUnit(userId?: string, groupId?: string) {
       const { data: baseUnit } = await supabase.from('units').select('*').eq('group_id', groupId).eq('base_unit', true).single()
       setUnit(baseUnit || null)
     } finally { setIsLoading(false) }
-  }, [userId, groupId, supabase])
+  }, [userId, groupId])
   useEffect(() => { fetch() }, [fetch])
   return { unit, isLoading, refresh: fetch }
 }
@@ -171,7 +171,7 @@ export function useUnitConversion(value: number, fromUnitId?: string, toUnitId?:
         setResult(null)
       }
     } finally { setIsLoading(false) }
-  }, [value, fromUnitId, toUnitId, supabase])
+  }, [value, fromUnitId, toUnitId])
   useEffect(() => { convert() }, [convert])
   return { result, isLoading, refresh: convert }
 }

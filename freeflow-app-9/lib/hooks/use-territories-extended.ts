@@ -41,7 +41,7 @@ export function useTerritories(options?: { territory_type?: string; parent_id?: 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setTerritories(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.territory_type, options?.parent_id, options?.region, options?.country, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.territory_type, options?.parent_id, options?.region, options?.country, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { territories, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function useTerritoryAssignments(territoryId?: string, options?: { role?:
       const { data } = await query.order('created_at', { ascending: false })
       setAssignments(data || [])
     } finally { setIsLoading(false) }
-  }, [territoryId, options?.role, options?.status, supabase])
+  }, [territoryId, options?.role, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { assignments, isLoading, refresh: fetch }
 }
@@ -101,7 +101,7 @@ export function useUserTerritories(userId?: string, options?: { role?: string; i
       setTerritories(result)
       setPrimaryTerritory(result.find(t => t.assignment?.is_primary) || null)
     } finally { setIsLoading(false) }
-  }, [userId, options?.role, options?.is_primary, supabase])
+  }, [userId, options?.role, options?.is_primary])
   useEffect(() => { fetch() }, [fetch])
   return { territories, primaryTerritory, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useTerritoryMetrics(territoryId?: string, options?: { from_perio
       setMetrics(data || [])
       setLatestMetrics(data?.[0] || null)
     } finally { setIsLoading(false) }
-  }, [territoryId, options?.from_period, options?.to_period, options?.limit, supabase])
+  }, [territoryId, options?.from_period, options?.to_period, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, latestMetrics, isLoading, refresh: fetch }
 }
@@ -153,7 +153,7 @@ export function useTerritoryHistory(territoryId?: string, options?: { action?: s
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [territoryId, options?.action, options?.limit, supabase])
+  }, [territoryId, options?.action, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -172,7 +172,7 @@ export function useTerritoryRules(territoryId?: string, options?: { rule_type?: 
       const { data } = await query.order('priority', { ascending: true })
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [territoryId, options?.rule_type, options?.is_active, supabase])
+  }, [territoryId, options?.rule_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }

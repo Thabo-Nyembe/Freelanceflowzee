@@ -36,7 +36,7 @@ export function useAddOns(options?: { category?: string; status?: string; pricin
       const { data } = await query.order('install_count', { ascending: false }).limit(options?.limit || 50)
       setAddOns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.status, options?.pricing_type, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.status, options?.pricing_type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { addOns, isLoading, refresh: fetch }
 }
@@ -62,7 +62,7 @@ export function useIsAddOnInstalled(userId?: string, addOnId?: string) {
     if (!userId || !addOnId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('add_on_installations').select('id').eq('user_id', userId).eq('add_on_id', addOnId).single(); setIsInstalled(!!data) } finally { setIsLoading(false) }
-  }, [userId, addOnId, supabase])
+  }, [userId, addOnId])
   useEffect(() => { check() }, [check])
   return { isInstalled, isLoading, recheck: check }
 }

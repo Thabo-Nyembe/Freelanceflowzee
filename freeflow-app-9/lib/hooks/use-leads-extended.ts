@@ -36,7 +36,7 @@ export function useLeads(options?: { owner_id?: string; stage_id?: string; sourc
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setLeads(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.stage_id, options?.source_id, options?.status, options?.limit, supabase])
+  }, [options?.owner_id, options?.stage_id, options?.source_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { leads, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useLeadActivities(leadId?: string, options?: { type?: string; li
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setActivities(data || [])
     } finally { setIsLoading(false) }
-  }, [leadId, options?.type, options?.limit, supabase])
+  }, [leadId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { activities, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useLeadSearch(query?: string, options?: { owner_id?: string; lim
       const { data } = await dbQuery.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [query, options?.owner_id, options?.limit, supabase])
+  }, [query, options?.owner_id, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -158,7 +158,7 @@ export function useMyLeads(userId?: string, options?: { status?: string }) {
       const { data } = await query.order('created_at', { ascending: false })
       setLeads(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { leads, isLoading, refresh: fetch }
 }

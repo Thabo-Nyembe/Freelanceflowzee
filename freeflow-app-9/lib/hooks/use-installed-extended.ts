@@ -34,7 +34,7 @@ export function useInstalledApps(userId?: string, options?: { is_active?: boolea
       const { data } = await query.order('installed_at', { ascending: false }).limit(options?.limit || 100)
       setApps(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, options?.limit, supabase])
+  }, [userId, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { apps, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useInstalledPlugins(userId?: string, options?: { is_active?: boo
       const { data } = await query.order('installed_at', { ascending: false }).limit(options?.limit || 100)
       setPlugins(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, options?.limit, supabase])
+  }, [userId, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { plugins, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useInstalledExtensions(userId?: string, options?: { is_active?: 
       const { data } = await query.order('installed_at', { ascending: false }).limit(options?.limit || 100)
       setExtensions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, options?.limit, supabase])
+  }, [userId, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { extensions, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function useUserHandlers(userId?: string, options?: { isActive?: boolean 
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, supabase])
+  }, [userId, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useHandlerExecutions(handlerId?: string, limit = 20) {
       const { data: result } = await supabase.from('handler_executions').select('*').eq('handler_id', handlerId).order('executed_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [handlerId, limit, supabase])
+  }, [handlerId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -18,7 +18,7 @@ export function useSnapshots(entityId?: string, entityType?: string) {
       const { data: result } = await supabase.from('snapshots').select('*').eq('entity_id', entityId).eq('entity_type', entityType).order('created_at', { ascending: false }).limit(20)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -50,7 +50,7 @@ export function useSnapshotCount(entityId?: string, entityType?: string) {
       const { count: result } = await supabase.from('snapshots').select('*', { count: 'exact', head: true }).eq('entity_id', entityId).eq('entity_type', entityType)
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

@@ -38,7 +38,7 @@ export function useOrders(options?: { customer_id?: string; organization_id?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.organization_id, options?.status, options?.payment_status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.customer_id, options?.organization_id, options?.status, options?.payment_status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useOrderNotes(orderId?: string, options?: { is_internal?: boolea
       const { data } = await query.order('created_at', { ascending: false })
       setNotes(data || [])
     } finally { setIsLoading(false) }
-  }, [orderId, options?.is_internal, supabase])
+  }, [orderId, options?.is_internal])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function useCustomerOrders(customerId?: string, options?: { limit?: numbe
     if (!customerId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('orders').select('*, order_items(count)').eq('customer_id', customerId).order('created_at', { ascending: false }).limit(options?.limit || 20); setOrders(data || []) } finally { setIsLoading(false) }
-  }, [customerId, options?.limit, supabase])
+  }, [customerId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -151,7 +151,7 @@ export function useRecentOrders(organizationId?: string, options?: { limit?: num
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 10)
       setOrders(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.limit, supabase])
+  }, [organizationId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { orders, isLoading, refresh: fetch }
 }
@@ -191,7 +191,7 @@ export function useOrderStats(organizationId?: string, options?: { from_date?: s
       const pendingCount = data?.filter(o => ['pending', 'processing'].includes(o.status)).length || 0
       setStats({ totalOrders, totalRevenue, averageOrderValue, pendingCount })
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.from_date, options?.to_date, supabase])
+  }, [organizationId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

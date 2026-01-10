@@ -38,7 +38,7 @@ export function useReturns(options?: { customer_id?: string; order_id?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReturns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.order_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.customer_id, options?.order_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { returns, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useReturnReasons(options?: { category?: string; is_active?: bool
       const { data } = await query.order('order', { ascending: true })
       setReasons(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { reasons, isLoading, refresh: fetch }
 }
@@ -87,7 +87,7 @@ export function useReturnPolicies(options?: { category?: string; is_active?: boo
       const { data } = await query.order('name', { ascending: true })
       setPolicies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { policies, isLoading, refresh: fetch }
 }
@@ -105,7 +105,7 @@ export function useMyReturns(customerId?: string, options?: { status?: string; l
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setReturns(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.status, options?.limit, supabase])
+  }, [customerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { returns, isLoading, refresh: fetch }
 }
@@ -173,7 +173,7 @@ export function useReturnStats(options?: { from_date?: string; to_date?: string 
       const totalRefunded = returns.filter(r => r.status === 'refunded').reduce((sum, r) => sum + (r.refund_amount || 0), 0)
       setStats({ total, requested, approved, shipped, received, refunded, rejected, totalRefunded })
     } finally { setIsLoading(false) }
-  }, [options?.from_date, options?.to_date, supabase])
+  }, [options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

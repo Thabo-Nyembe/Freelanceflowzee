@@ -35,7 +35,7 @@ export function useProjectDeployments(projectId?: string, options?: { environmen
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setDeployments(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.environment_id, options?.status, options?.limit, supabase])
+  }, [projectId, options?.environment_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { deployments, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useDeploymentLogs(deploymentId?: string, options?: { level?: str
       const { data } = await query.order('logged_at', { ascending: true })
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [deploymentId, options?.level, supabase])
+  }, [deploymentId, options?.level])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useLatestDeployment(projectId?: string, environmentId?: string) 
     if (!projectId || !environmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('deployments').select('*').eq('project_id', projectId).eq('environment_id', environmentId).eq('status', 'completed').order('completed_at', { ascending: false }).limit(1).single(); setDeployment(data) } finally { setIsLoading(false) }
-  }, [projectId, environmentId, supabase])
+  }, [projectId, environmentId])
   useEffect(() => { fetch() }, [fetch])
   return { deployment, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function useDeploymentStats(projectId?: string, options?: { days?: number
       const byEnvironment = data.reduce((acc: Record<string, number>, d) => { acc[d.environment_id] = (acc[d.environment_id] || 0) + 1; return acc }, {})
       setStats({ total, successful, failed, avgDuration, byEnvironment })
     } finally { setIsLoading(false) }
-  }, [projectId, options?.days, supabase])
+  }, [projectId, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

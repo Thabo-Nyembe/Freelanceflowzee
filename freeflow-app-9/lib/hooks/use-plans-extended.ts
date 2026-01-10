@@ -47,7 +47,7 @@ export function usePlans(options?: { is_active?: boolean; is_public?: boolean })
       const { data } = await query.order('tier', { ascending: true })
       setPlans(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.is_public, supabase])
+  }, [options?.is_active, options?.is_public])
   useEffect(() => { fetch() }, [fetch])
   return { plans, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function usePlanPricing(planId?: string, options?: { currency?: string })
       const { data } = await query.order('interval', { ascending: true })
       setPricing(data || [])
     } finally { setIsLoading(false) }
-  }, [planId, options?.currency, supabase])
+  }, [planId, options?.currency])
   useEffect(() => { fetch() }, [fetch])
   return { pricing, isLoading, refresh: fetch }
 }
@@ -149,7 +149,7 @@ export function useSubscriptionUsage(subscriptionId?: string, options?: { limit_
       const { data } = await query.order('recorded_at', { ascending: false })
       setUsage(data || [])
     } finally { setIsLoading(false) }
-  }, [subscriptionId, options?.limit_key, options?.from_date, supabase])
+  }, [subscriptionId, options?.limit_key, options?.from_date])
   useEffect(() => { fetch() }, [fetch])
   return { usage, isLoading, refresh: fetch }
 }
@@ -172,7 +172,7 @@ export function useLimitCheck(subscriptionId?: string, limitKey?: string) {
       const percentage = limit.limit_value > 0 ? Math.round((current / limit.limit_value) * 100) : 0
       setCheck({ allowed: current < limit.limit_value, current, limit: limit.limit_value, percentage })
     } finally { setIsLoading(false) }
-  }, [subscriptionId, limitKey, supabase])
+  }, [subscriptionId, limitKey])
   useEffect(() => { fetch() }, [fetch])
   return { check, isLoading, refresh: fetch }
 }

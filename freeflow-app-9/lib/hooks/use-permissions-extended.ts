@@ -35,7 +35,7 @@ export function usePermissions(options?: { resource?: string; organization_id?: 
       const { data } = await query.order('resource', { ascending: true }).order('name', { ascending: true }).limit(options?.limit || 100)
       setPermissions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.resource, options?.organization_id, options?.is_active, options?.limit, supabase])
+  }, [options?.resource, options?.organization_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { permissions, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function usePermissionGroups(options?: { organization_id?: string; is_act
       const { data } = await query.order('name', { ascending: true })
       setGroups(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.is_active, supabase])
+  }, [options?.organization_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useUserPermissions(userId?: string, options?: { organization_id?
       const { data } = await query
       setPermissions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.organization_id, supabase])
+  }, [userId, options?.organization_id])
   useEffect(() => { fetch() }, [fetch])
   return { permissions, isLoading, refresh: fetch }
 }
@@ -132,7 +132,7 @@ export function usePermissionCheck(userId?: string, permissionSlug?: string, res
       const { data: assignment } = await supabase.from('permission_assignments').select('id').eq('user_id', userId).eq('permission_id', permissionSlug).single()
       setIsAllowed(!!assignment)
     } finally { setIsLoading(false) }
-  }, [userId, permissionSlug, resourceId, supabase])
+  }, [userId, permissionSlug, resourceId])
   useEffect(() => { fetch() }, [fetch])
   return { isAllowed, isLoading, refresh: fetch }
 }
@@ -150,7 +150,7 @@ export function usePermissionLogs(options?: { user_id?: string; action?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.action, options?.from_date, options?.limit, supabase])
+  }, [options?.action, options?.from_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useVacations(options?: { user_id?: string; vacation_type_id?: st
       const { data } = await query.order('start_date', { ascending: false }).limit(options?.limit || 50)
       setVacations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.vacation_type_id, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.user_id, options?.vacation_type_id, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vacations, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useMyVacations(userId?: string, options?: { status?: string; yea
       const { data } = await query.order('start_date', { ascending: false }).limit(options?.limit || 50)
       setVacations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.year, options?.limit, supabase])
+  }, [userId, options?.status, options?.year, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vacations, isLoading, refresh: fetch }
 }
@@ -92,7 +92,7 @@ export function useVacationBalance(userId?: string, year?: number) {
       const { data } = await supabase.from('vacation_balances').select('*, vacation_types(*)').eq('user_id', userId).eq('year', targetYear)
       setBalances(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, year, supabase])
+  }, [userId, year])
   useEffect(() => { fetch() }, [fetch])
   return { balances, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useVacationBalanceByType(userId?: string, vacationTypeId?: strin
       const { data } = await supabase.from('vacation_balances').select('*, vacation_types(*)').eq('user_id', userId).eq('vacation_type_id', vacationTypeId).eq('year', targetYear).single()
       setBalance(data)
     } finally { setIsLoading(false) }
-  }, [userId, vacationTypeId, year, supabase])
+  }, [userId, vacationTypeId, year])
   useEffect(() => { fetch() }, [fetch])
   return { balance, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
     if (!approverId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vacations').select('*, vacation_types(*), users(*)').eq('status', 'pending').order('created_at', { ascending: true }).limit(options?.limit || 50); setVacations(data || []) } finally { setIsLoading(false) }
-  }, [approverId, options?.limit, supabase])
+  }, [approverId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vacations, count: vacations.length, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useTeamCalendar(teamMemberIds?: string[], fromDate?: string, toD
     if (!teamMemberIds || teamMemberIds.length === 0 || !fromDate || !toDate) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('vacations').select('*, users(*), vacation_types(*)').in('user_id', teamMemberIds).in('status', ['approved', 'pending']).gte('start_date', fromDate).lte('end_date', toDate).order('start_date', { ascending: true }); setVacations(data || []) } finally { setIsLoading(false) }
-  }, [teamMemberIds, fromDate, toDate, supabase])
+  }, [teamMemberIds, fromDate, toDate])
   useEffect(() => { fetch() }, [fetch])
   return { vacations, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function useUpcomingVacations(userId?: string, options?: { days?: number;
       const { data } = await supabase.from('vacations').select('*, vacation_types(*)').eq('user_id', userId).eq('status', 'approved').gte('start_date', now.toISOString().split('T')[0]).lte('start_date', futureDate.toISOString().split('T')[0]).order('start_date', { ascending: true }).limit(options?.limit || 10)
       setVacations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.days, options?.limit, supabase])
+  }, [userId, options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vacations, isLoading, refresh: fetch }
 }
@@ -195,7 +195,7 @@ export function useVacationStats(userId?: string, year?: number) {
         total_allocated: allBalances.reduce((sum, b) => sum + (b.allocated || 0), 0)
       })
     } finally { setIsLoading(false) }
-  }, [userId, year, supabase])
+  }, [userId, year])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

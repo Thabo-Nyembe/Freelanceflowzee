@@ -39,7 +39,7 @@ export function useRequests(options?: { requester_id?: string; assignee_id?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRequests(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.requester_id, options?.assignee_id, options?.type_id, options?.status, options?.priority, options?.category, options?.search, options?.limit, supabase])
+  }, [options?.requester_id, options?.assignee_id, options?.type_id, options?.status, options?.priority, options?.category, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { requests, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useMyRequests(userId?: string, options?: { status?: string; limi
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRequests(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { requests, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useAssignedRequests(userId?: string, options?: { status?: string
       const { data } = await query.order('priority', { ascending: false }).order('created_at', { ascending: true }).limit(options?.limit || 50)
       setRequests(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.priority, options?.limit, supabase])
+  }, [userId, options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { requests, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useRequestTypes(options?: { category?: string; is_active?: boole
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useRequestComments(requestId?: string, options?: { is_internal?:
       const { data } = await query.order('created_at', { ascending: true })
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [requestId, options?.is_internal, supabase])
+  }, [requestId, options?.is_internal])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
       const { data } = await supabase.from('request_approvals').select('*, requests(*, requester:requester_id(*))').eq('approver_id', approverId).eq('status', 'pending').order('created_at', { ascending: true }).limit(options?.limit || 20)
       setApprovals(data || [])
     } finally { setIsLoading(false) }
-  }, [approverId, options?.limit, supabase])
+  }, [approverId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { approvals, isLoading, refresh: fetch }
 }
@@ -196,7 +196,7 @@ export function useRequestStats(options?: { requester_id?: string; assignee_id?:
       requests.forEach(r => { byPriority[r.priority || 'medium'] = (byPriority[r.priority || 'medium'] || 0) + 1 })
       setStats({ total, open, inProgress, completed, closed, byPriority })
     } finally { setIsLoading(false) }
-  }, [options?.requester_id, options?.assignee_id, options?.type_id, options?.from_date, options?.to_date, supabase])
+  }, [options?.requester_id, options?.assignee_id, options?.type_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

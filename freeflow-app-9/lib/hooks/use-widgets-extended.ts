@@ -34,7 +34,7 @@ export function useWidgets(options?: { type?: string; is_active?: boolean; limit
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setWidgets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, options?.limit, supabase])
+  }, [options?.type, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { widgets, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useWidgetInstances(options?: { widget_id?: string; dashboard_id?
       const { data } = await query.order('order', { ascending: true })
       setInstances(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.widget_id, options?.dashboard_id, options?.user_id, supabase])
+  }, [options?.widget_id, options?.dashboard_id, options?.user_id])
   useEffect(() => { fetch() }, [fetch])
   return { instances, isLoading, refresh: fetch }
 }

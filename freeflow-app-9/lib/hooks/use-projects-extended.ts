@@ -38,7 +38,7 @@ export function useProjects(options?: { owner_id?: string; organization_id?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProjects(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.organization_id, options?.client_id, options?.status, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.owner_id, options?.organization_id, options?.client_id, options?.status, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { projects, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useProjectTasks(projectId?: string, options?: { status?: string;
       const { data } = await query.order('created_at', { ascending: false })
       setTasks(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.status, options?.assignee_id, options?.milestone_id, options?.priority, supabase])
+  }, [projectId, options?.status, options?.assignee_id, options?.milestone_id, options?.priority])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function useProjectFiles(projectId?: string, options?: { folder_id?: stri
       const { data } = await query.order('created_at', { ascending: false })
       setFiles(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.folder_id, options?.type, supabase])
+  }, [projectId, options?.folder_id, options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { files, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useProjectComments(projectId?: string, options?: { task_id?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.task_id, options?.limit, supabase])
+  }, [projectId, options?.task_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -142,7 +142,7 @@ export function useMyProjects(userId?: string, options?: { status?: string; role
       if (options?.status) projects = projects.filter(p => p.status === options.status)
       setProjects(projects)
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.role, options?.limit, supabase])
+  }, [userId, options?.status, options?.role, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { projects, isLoading, refresh: fetch }
 }
@@ -209,7 +209,7 @@ export function useActiveProjects(options?: { organization_id?: string; limit?: 
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 20)
       setProjects(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.limit, supabase])
+  }, [options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { projects, isLoading, refresh: fetch }
 }

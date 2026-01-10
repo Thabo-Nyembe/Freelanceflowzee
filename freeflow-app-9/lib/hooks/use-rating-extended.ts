@@ -20,7 +20,7 @@ export function useRatings(itemId?: string, itemType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -36,7 +36,7 @@ export function useUserRating(userId?: string, itemId?: string, itemType?: strin
       const { data } = await supabase.from('ratings').select('rating').eq('user_id', userId).eq('item_id', itemId).eq('item_type', itemType).single()
       setRating(data?.rating || null)
     } finally { setIsLoading(false) }
-  }, [userId, itemId, itemType, supabase])
+  }, [userId, itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { rating, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useAverageRating(itemId?: string, itemType?: string) {
         setCount(0)
       }
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { average, count, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useRatingDistribution(itemId?: string, itemType?: string) {
       data?.forEach(r => { dist[r.rating] = (dist[r.rating] || 0) + 1 })
       setDistribution(dist)
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { distribution, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useAccounts(options?: { accountType?: string; status?: string; o
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.accountType, options?.status, options?.ownerId, supabase])
+  }, [options?.accountType, options?.status, options?.ownerId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -85,7 +85,7 @@ export function useAccountActivities(accountId?: string, limit = 50) {
       const { data: result } = await supabase.from('account_activities').select('*, users(id, full_name, avatar_url)').eq('account_id', accountId).order('created_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [accountId, limit, supabase])
+  }, [accountId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

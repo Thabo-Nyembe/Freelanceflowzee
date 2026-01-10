@@ -20,7 +20,7 @@ export function useTokens(userId?: string, tokenType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, tokenType, supabase])
+  }, [userId, tokenType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

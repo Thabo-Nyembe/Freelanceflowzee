@@ -39,7 +39,7 @@ export function useTranslations(options?: { locale?: string; namespace?: string;
       }
       setTranslations(result)
     } finally { setIsLoading(false) }
-  }, [options?.locale, options?.namespace, options?.is_reviewed, options?.search, options?.limit, supabase])
+  }, [options?.locale, options?.namespace, options?.is_reviewed, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { translations, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useTranslationsByKey(key?: string, namespace: string = 'default'
       const { data } = await supabase.from('translations').select('*, translation_locales(*)').eq('key_id', keyRecord.id).order('locale', { ascending: true })
       setTranslations(data || [])
     } finally { setIsLoading(false) }
-  }, [key, namespace, supabase])
+  }, [key, namespace])
   useEffect(() => { fetch() }, [fetch])
   return { translations, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useTranslationValue(key?: string, locale?: string, namespace: st
       const { data } = await supabase.from('translations').select('value').eq('key_id', keyRecord.id).eq('locale', locale).single()
       setValue(data?.value || null)
     } finally { setIsLoading(false) }
-  }, [key, locale, namespace, supabase])
+  }, [key, locale, namespace])
   useEffect(() => { fetch() }, [fetch])
   return { value, isLoading, refresh: fetch }
 }
@@ -93,7 +93,7 @@ export function useTranslationKeys(options?: { namespace?: string; search?: stri
       const { data } = await query.order('key', { ascending: true }).limit(options?.limit || 200)
       setKeys(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.namespace, options?.search, options?.limit, supabase])
+  }, [options?.namespace, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { keys, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useTranslationHistory(translationId?: string, options?: { limit?
     if (!translationId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('translation_history').select('*, users(*)').eq('translation_id', translationId).order('occurred_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [translationId, options?.limit, supabase])
+  }, [translationId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -162,7 +162,7 @@ export function useMissingTranslations(locale?: string, namespace?: string) {
       const missingKeys = keys?.filter(k => !translatedKeyIds.includes(k.id)) || []
       setMissing(missingKeys)
     } finally { setIsLoading(false) }
-  }, [locale, namespace, supabase])
+  }, [locale, namespace])
   useEffect(() => { fetch() }, [fetch])
   return { missing, count: missing.length, isLoading, refresh: fetch }
 }
@@ -212,7 +212,7 @@ export function useUnreviewedTranslations(locale?: string, options?: { namespace
       }
       setTranslations(result)
     } finally { setIsLoading(false) }
-  }, [locale, options?.namespace, options?.limit, supabase])
+  }, [locale, options?.namespace, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { translations, isLoading, refresh: fetch }
 }

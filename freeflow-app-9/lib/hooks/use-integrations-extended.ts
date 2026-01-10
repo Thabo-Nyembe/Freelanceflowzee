@@ -37,7 +37,7 @@ export function useIntegrations(options?: { user_id?: string; type?: string; pro
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setIntegrations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.provider, options?.status, options?.is_active, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.provider, options?.status, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { integrations, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useIntegrationLogs(integrationId?: string, options?: { level?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [integrationId, options?.level, options?.limit, supabase])
+  }, [integrationId, options?.level, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

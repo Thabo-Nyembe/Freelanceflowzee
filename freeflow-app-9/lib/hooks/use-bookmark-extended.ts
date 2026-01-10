@@ -20,7 +20,7 @@ export function useBookmarks(userId?: string, itemType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, itemType, supabase])
+  }, [userId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,7 +39,7 @@ export function useBookmarkFolders(userId?: string, parentId?: string | null) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, parentId, supabase])
+  }, [userId, parentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useIsBookmarked(userId?: string, itemId?: string, itemType?: str
       const { data } = await supabase.from('bookmarks').select('id').eq('user_id', userId).eq('item_id', itemId).eq('item_type', itemType).single()
       setIsBookmarked(!!data)
     } finally { setIsLoading(false) }
-  }, [userId, itemId, itemType, supabase])
+  }, [userId, itemId, itemType])
   useEffect(() => { check() }, [check])
   return { isBookmarked, isLoading, refresh: check }
 }

@@ -18,7 +18,7 @@ export function useAllowance(entityId?: string, entityType?: string, allowanceTy
       const { data } = await supabase.from('allowances').select('*').eq('entity_id', entityId).eq('entity_type', entityType).eq('allowance_type', allowanceType).single()
       setAllowance(data)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, allowanceType, supabase])
+  }, [entityId, entityType, allowanceType])
   useEffect(() => { fetch() }, [fetch])
   return { allowance, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useAllowances(entityId?: string, entityType?: string) {
       const { data: result } = await supabase.from('allowances').select('*').eq('entity_id', entityId).eq('entity_type', entityType)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useAllowanceStatus(entityId?: string, entityType?: string, allow
         setIsExpired(data.expires_at ? new Date(data.expires_at) < new Date() : false)
       }
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, allowanceType, supabase])
+  }, [entityId, entityType, allowanceType])
   useEffect(() => { fetch() }, [fetch])
   return { remaining, total, percentage: total > 0 ? ((total - remaining) / total) * 100 : 0, isExpired, isLoading, refresh: fetch }
 }

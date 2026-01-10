@@ -40,7 +40,7 @@ export function useTransactions(userId?: string, options?: { type?: string; stat
       setData(result || [])
       setTotal(count || 0)
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.status, options?.limit, supabase])
+  }, [userId, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, total, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useTransactionsByReference(referenceType?: string, referenceId?:
       const { data: result } = await supabase.from('transactions').select('*').eq('reference_type', referenceType).eq('reference_id', referenceId).order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [referenceType, referenceId, supabase])
+  }, [referenceType, referenceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -82,7 +82,7 @@ export function useTransactionStats(userId?: string, options?: { startDate?: str
       })
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [userId, options?.startDate, options?.endDate, supabase])
+  }, [userId, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

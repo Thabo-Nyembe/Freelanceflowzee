@@ -54,7 +54,7 @@ export function useIsFollowing(followerId?: string, followingId?: string) {
       const { data } = await supabase.from('follows').select('id').eq('follower_id', followerId).eq('following_id', followingId).single()
       setIsFollowing(!!data)
     } finally { setIsLoading(false) }
-  }, [followerId, followingId, supabase])
+  }, [followerId, followingId])
   useEffect(() => { check() }, [check])
   return { isFollowing, isLoading, refresh: check }
 }

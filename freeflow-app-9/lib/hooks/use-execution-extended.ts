@@ -36,7 +36,7 @@ export function useExecutions(options?: { type?: string; status?: string; workfl
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setExecutions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.status, options?.workflow_id, options?.triggered_by, options?.limit, supabase])
+  }, [options?.type, options?.status, options?.workflow_id, options?.triggered_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { executions, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useExecutionLogs(executionId?: string, options?: { step_id?: str
       const { data } = await query.order('logged_at', { ascending: true }).limit(options?.limit || 500)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [executionId, options?.step_id, options?.level, options?.limit, supabase])
+  }, [executionId, options?.step_id, options?.level, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -124,7 +124,7 @@ export function useExecutionStats(options?: { type?: string; days?: number }) {
       const byType = data.reduce((acc: Record<string, number>, e) => { acc[e.type] = (acc[e.type] || 0) + 1; return acc }, {})
       setStats({ total, successful, failed, avgDuration, byType })
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.days, supabase])
+  }, [options?.type, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useBudgets(options?: { user_id?: string; status?: string; period
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBudgets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.period, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.period, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { budgets, isLoading, refresh: fetch }
 }

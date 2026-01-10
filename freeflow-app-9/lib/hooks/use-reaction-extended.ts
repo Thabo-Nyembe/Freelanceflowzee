@@ -20,7 +20,7 @@ export function useReactions(itemId?: string, itemType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function useReactionCounts(itemId?: string, itemType?: string) {
       data?.forEach(r => { counts[r.reaction_type] = (counts[r.reaction_type] || 0) + 1 })
       setCounts(counts)
     } finally { setIsLoading(false) }
-  }, [itemId, itemType, supabase])
+  }, [itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { counts, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUserReaction(userId?: string, itemId?: string, itemType?: str
       const { data } = await supabase.from('reactions').select('reaction_type').eq('user_id', userId).eq('item_id', itemId).eq('item_type', itemType).single()
       setReaction(data?.reaction_type || null)
     } finally { setIsLoading(false) }
-  }, [userId, itemId, itemType, supabase])
+  }, [userId, itemId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { reaction, isLoading, refresh: fetch }
 }

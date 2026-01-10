@@ -35,7 +35,7 @@ export function useDisputes(options?: { user_id?: string; status?: string; type?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setDisputes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.type, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { disputes, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useDisputeMessages(disputeId?: string, options?: { include_inter
       const { data } = await query.order('sent_at', { ascending: true })
       setMessages(data || [])
     } finally { setIsLoading(false) }
-  }, [disputeId, options?.include_internal, supabase])
+  }, [disputeId, options?.include_internal])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }

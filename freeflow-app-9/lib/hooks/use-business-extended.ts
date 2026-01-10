@@ -52,7 +52,7 @@ export function useVerifiedBusinessProfiles(options?: { industry?: string; limit
       const { data: result } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.industry, options?.limit, supabase])
+  }, [options?.industry, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -131,7 +131,7 @@ export function useBusinessReports(businessId?: string, options?: { report_type?
       const { data: result } = await query.order('generated_at', { ascending: false }).limit(options?.limit || 20)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [businessId, options?.report_type, options?.limit, supabase])
+  }, [businessId, options?.report_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function useBusinessSearch(searchTerm: string, options?: { industry?: str
       const { data: result } = await query.order('name', { ascending: true }).limit(options?.limit || 20)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, options?.industry, options?.business_type, options?.verified_only, options?.limit, supabase])
+  }, [searchTerm, options?.industry, options?.business_type, options?.verified_only, options?.limit])
   useEffect(() => {
     const timer = setTimeout(search, 300)
     return () => clearTimeout(timer)

@@ -20,7 +20,7 @@ export function useQueueItems(queueName?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [queueName, status, supabase])
+  }, [queueName, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

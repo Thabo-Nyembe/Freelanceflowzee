@@ -36,7 +36,7 @@ export function useCustomers(options?: { segment_id?: string; status?: string; s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCustomers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.segment_id, options?.status, options?.source, options?.search, options?.limit, supabase])
+  }, [options?.segment_id, options?.status, options?.source, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { customers, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useCustomerInteractions(customerId?: string, options?: { type?: 
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setInteractions(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.type, options?.limit, supabase])
+  }, [customerId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { interactions, isLoading, refresh: fetch }
 }

@@ -33,7 +33,7 @@ export function useFeatures(options?: { is_enabled?: boolean; limit?: number }) 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setFeatures(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_enabled, options?.limit, supabase])
+  }, [options?.is_enabled, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { features, isLoading, refresh: fetch }
 }
@@ -51,7 +51,7 @@ export function useFeatureFlags(options?: { user_id?: string; environment?: stri
       const { data } = await query
       setFlags(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.environment, supabase])
+  }, [options?.user_id, options?.environment])
   useEffect(() => { fetch() }, [fetch])
   return { flags, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useFeatureRequests(options?: { status?: string; limit?: number }
       const { data } = await query.order('votes', { ascending: false }).limit(options?.limit || 50)
       setRequests(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.limit, supabase])
+  }, [options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { requests, isLoading, refresh: fetch }
 }

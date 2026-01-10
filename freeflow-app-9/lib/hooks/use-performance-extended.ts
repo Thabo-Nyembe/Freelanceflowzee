@@ -76,7 +76,7 @@ export function usePerformanceMetrics(entityType?: string, entityId?: string) {
       const { data: result } = await query.limit(100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

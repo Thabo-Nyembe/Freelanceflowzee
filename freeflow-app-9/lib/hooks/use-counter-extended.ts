@@ -18,7 +18,7 @@ export function useCounter(entityId?: string, entityType?: string, counterName?:
       const { data } = await supabase.from('counters').select('value').eq('entity_id', entityId).eq('entity_type', entityType).eq('counter_name', counterName).single()
       setValue(data?.value || 0)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, counterName, supabase])
+  }, [entityId, entityType, counterName])
   useEffect(() => { fetch() }, [fetch])
   return { value, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useCounters(entityId?: string, entityType?: string) {
       const { data: result } = await supabase.from('counters').select('*').eq('entity_id', entityId).eq('entity_type', entityType)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -50,7 +50,7 @@ export function useTopCounters(counterName?: string, entityType?: string, limit 
       const { data: result } = await supabase.from('counters').select('entity_id, value').eq('counter_name', counterName).eq('entity_type', entityType).order('value', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [counterName, entityType, limit, supabase])
+  }, [counterName, entityType, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

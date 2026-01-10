@@ -49,7 +49,7 @@ export function usePointTransactions(userId?: string, options?: { type?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTransactions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [userId, options?.type, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function usePointRules(options?: { action?: string; is_active?: boolean }
       const { data } = await query.order('name', { ascending: true })
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.action, options?.is_active, supabase])
+  }, [options?.action, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function usePointRewards(options?: { is_active?: boolean; reward_type?: s
       const { data } = await query.order('points_required', { ascending: true })
       setRewards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.reward_type, options?.affordable_for, supabase])
+  }, [options?.is_active, options?.reward_type, options?.affordable_for])
   useEffect(() => { fetch() }, [fetch])
   return { rewards, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function usePointRedemptions(userId?: string, options?: { status?: string
       const { data } = await query.order('redeemed_at', { ascending: false }).limit(options?.limit || 50)
       setRedemptions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { redemptions, isLoading, refresh: fetch }
 }

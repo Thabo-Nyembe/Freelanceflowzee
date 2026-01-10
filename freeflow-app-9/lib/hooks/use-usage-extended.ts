@@ -18,7 +18,7 @@ export function useUsage(entityId?: string, entityType?: string, usageType?: str
       const { data } = await supabase.from('usage').select('*').eq('entity_id', entityId).eq('entity_type', entityType).eq('usage_type', usageType).order('recorded_at', { ascending: false }).limit(1).single()
       setUsage(data)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, usageType, supabase])
+  }, [entityId, entityType, usageType])
   useEffect(() => { fetch() }, [fetch])
   return { usage, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useUsageHistory(entityId?: string, entityType?: string, usageTyp
       const { data: result } = await supabase.from('usage').select('*').eq('entity_id', entityId).eq('entity_type', entityType).eq('usage_type', usageType).order('recorded_at', { ascending: false }).limit(30)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, usageType, supabase])
+  }, [entityId, entityType, usageType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUsageSummary(entityId?: string, entityType?: string, usageTyp
       setTotal(sum)
       setAverage(count > 0 ? sum / count : 0)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, usageType, supabase])
+  }, [entityId, entityType, usageType])
   useEffect(() => { fetch() }, [fetch])
   return { total, average, isLoading, refresh: fetch }
 }

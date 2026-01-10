@@ -38,7 +38,7 @@ export function useAgentConfigurations(options?: { agentType?: string; isActive?
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.agentType, options?.isActive, options?.userId, supabase])
+  }, [options?.agentType, options?.isActive, options?.userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useAgentExecutions(options?: { agentConfigId?: string; status?: 
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.agentConfigId, options?.status, options?.userId, options?.limit, supabase])
+  }, [options?.agentConfigId, options?.status, options?.userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useAgentLogs(executionId?: string, options?: { level?: string; l
       const { data: result } = await query.order('created_at', { ascending: true }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [executionId, options?.level, options?.limit, supabase])
+  }, [executionId, options?.level, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -110,7 +110,7 @@ export function useAgentMetrics(agentConfigId?: string, options?: { startDate?: 
       const { data: result } = await query.order('period_start', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [agentConfigId, options?.startDate, options?.endDate, supabase])
+  }, [agentConfigId, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useUsers(options?: { role?: string; is_active?: boolean; search?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setUsers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.role, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.role, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { users, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useUserSessions(userId?: string, options?: { is_active?: boolean
       setSessions(data || [])
       setActiveSessions(data?.filter(s => s.is_active).length || 0)
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, options?.limit, supabase])
+  }, [userId, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sessions, activeSessions, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useUserDevices(userId?: string, options?: { is_active?: boolean 
       const { data } = await query.order('last_active_at', { ascending: false })
       setDevices(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, supabase])
+  }, [userId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { devices, isLoading, refresh: fetch }
 }
@@ -132,7 +132,7 @@ export function useUserSearch(query?: string, options?: { exclude_ids?: string[]
       const { data } = await dbQuery.limit(options?.limit || 10)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [query, options?.exclude_ids, options?.limit, supabase])
+  }, [query, options?.exclude_ids, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -170,7 +170,7 @@ export function useRecentUsers(options?: { days?: number; limit?: number }) {
       const { data } = await supabase.from('users').select('*, user_profiles(*)').gte('created_at', sinceDate.toISOString()).order('created_at', { ascending: false }).limit(options?.limit || 20)
       setUsers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.days, options?.limit, supabase])
+  }, [options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { users, isLoading, refresh: fetch }
 }
@@ -214,7 +214,7 @@ export function useUserVerifications(userId?: string, options?: { verification_t
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setVerifications(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.verification_type, options?.is_used, options?.limit, supabase])
+  }, [userId, options?.verification_type, options?.is_used, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { verifications, isLoading, refresh: fetch }
 }

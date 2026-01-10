@@ -34,7 +34,7 @@ export function useInvoicingTemplates(options?: { user_id?: string; is_active?: 
       const { data } = await query.order('is_default', { ascending: false }).order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_active, supabase])
+  }, [options?.user_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useInvoicingSchedules(userId?: string, options?: { client_id?: s
       const { data } = await query.order('next_invoice_date', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.client_id, options?.is_active, supabase])
+  }, [userId, options?.client_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function useInvoicingDisputes(options?: { invoice_id?: string; client_id?
       const { data } = await query.order('created_at', { ascending: false })
       setDisputes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.invoice_id, options?.client_id, options?.status, supabase])
+  }, [options?.invoice_id, options?.client_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { disputes, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useUpcomingScheduledInvoices(userId?: string, daysAhead?: number
       const { data } = await supabase.from('invoicing_schedules').select('*').eq('user_id', userId).eq('is_active', true).lte('next_invoice_date', futureDate.toISOString()).order('next_invoice_date', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, daysAhead, supabase])
+  }, [userId, daysAhead])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }

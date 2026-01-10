@@ -35,7 +35,7 @@ export function useImports(options?: { user_id?: string; type?: string; status?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setImports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { imports, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUserImports(userId?: string, options?: { type?: string; statu
       const { data } = await query.order('created_at', { ascending: false })
       setImports(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.status, supabase])
+  }, [userId, options?.type, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { imports, isLoading, refresh: fetch }
 }
@@ -93,7 +93,7 @@ export function useImportErrors(importId?: string, options?: { limit?: number })
     if (!importId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('import_errors').select('*').eq('import_id', importId).order('created_at', { ascending: false }).limit(options?.limit || 100); setErrors(data || []) } finally { setIsLoading(false) }
-  }, [importId, options?.limit, supabase])
+  }, [importId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { errors, isLoading, refresh: fetch }
 }
@@ -128,7 +128,7 @@ export function useImportHistory(userId?: string, options?: { type?: string; lim
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

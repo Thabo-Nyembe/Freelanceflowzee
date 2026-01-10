@@ -38,7 +38,7 @@ export function useTransactions(options?: { transaction_type?: string; status?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setTransactions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.transaction_type, options?.status, options?.sender_id, options?.recipient_id, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.transaction_type, options?.status, options?.sender_id, options?.recipient_id, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useMyTransactions(userId?: string, options?: { role?: 'sender' |
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTransactions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.role, options?.status, options?.limit, supabase])
+  }, [userId, options?.role, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }
@@ -145,7 +145,7 @@ export function useTransactionLogs(transactionId?: string, options?: { action?: 
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [transactionId, options?.action, options?.limit, supabase])
+  }, [transactionId, options?.action, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -172,7 +172,7 @@ export function useTransactionStats(options?: { from_date?: string; to_date?: st
         failed: transactions.filter(t => t.status === 'failed').length
       })
     } finally { setIsLoading(false) }
-  }, [options?.from_date, options?.to_date, options?.transaction_type, supabase])
+  }, [options?.from_date, options?.to_date, options?.transaction_type])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -190,7 +190,7 @@ export function usePendingTransactions(options?: { sender_id?: string; recipient
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 50)
       setTransactions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.sender_id, options?.recipient_id, options?.limit, supabase])
+  }, [options?.sender_id, options?.recipient_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }

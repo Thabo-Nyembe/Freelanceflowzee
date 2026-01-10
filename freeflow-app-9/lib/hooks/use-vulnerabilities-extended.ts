@@ -35,7 +35,7 @@ export function useVulnerabilities(options?: { severity?: string; status?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setVulnerabilities(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.severity, options?.status, options?.affected_component, options?.limit, supabase])
+  }, [options?.severity, options?.status, options?.affected_component, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { vulnerabilities, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useVulnerabilityScans(options?: { status?: string; limit?: numbe
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setScans(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.limit, supabase])
+  }, [options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { scans, isLoading, refresh: fetch }
 }

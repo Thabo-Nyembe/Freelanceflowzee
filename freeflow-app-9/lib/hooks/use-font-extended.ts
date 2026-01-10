@@ -35,7 +35,7 @@ export function useFonts(options?: { family_id?: string; style?: string; is_acti
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setFonts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.family_id, options?.style, options?.is_active, options?.limit, supabase])
+  }, [options?.family_id, options?.style, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { fonts, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useFontFamilies(options?: { category?: string; limit?: number })
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setFamilies(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { families, isLoading, refresh: fetch }
 }

@@ -34,7 +34,7 @@ export function useForums(options?: { is_active?: boolean; is_private?: boolean;
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setForums(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.is_private, options?.limit, supabase])
+  }, [options?.is_active, options?.is_private, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { forums, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useTopics(options?: { forum_id?: string; category_id?: string; a
       const { data } = await query.order('is_pinned', { ascending: false }).order('last_activity_at', { ascending: false }).limit(options?.limit || 50)
       setTopics(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.forum_id, options?.category_id, options?.author_id, options?.is_pinned, options?.limit, supabase])
+  }, [options?.forum_id, options?.category_id, options?.author_id, options?.is_pinned, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { topics, isLoading, refresh: fetch }
 }
@@ -96,7 +96,7 @@ export function useTopicPosts(topicId?: string, options?: { limit?: number; offs
       const { data } = await supabase.from('forum_posts').select('*, forum_reactions(*)').eq('topic_id', topicId).order('created_at', { ascending: true }).range(options?.offset || 0, (options?.offset || 0) + (options?.limit || 50) - 1)
       setPosts(data || [])
     } finally { setIsLoading(false) }
-  }, [topicId, options?.limit, options?.offset, supabase])
+  }, [topicId, options?.limit, options?.offset])
   useEffect(() => { fetch() }, [fetch])
   return { posts, isLoading, refresh: fetch }
 }
@@ -123,7 +123,7 @@ export function useIsModerator(forumId?: string, userId?: string) {
     if (!forumId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_moderators').select('*').eq('forum_id', forumId).eq('user_id', userId).single(); setIsModerator(!!data); setPermissions(data?.permissions || []) } finally { setIsLoading(false) }
-  }, [forumId, userId, supabase])
+  }, [forumId, userId])
   useEffect(() => { check() }, [check])
   return { isModerator, permissions, isLoading, recheck: check }
 }
@@ -160,7 +160,7 @@ export function useUserTopics(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('forum_topics').select('*, forums(*)').eq('author_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 20); setTopics(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { topics, isLoading, refresh: fetch }
 }

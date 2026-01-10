@@ -74,7 +74,7 @@ export function useUserSyncs(userId?: string, options?: { isActive?: boolean }) 
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, supabase])
+  }, [userId, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -90,7 +90,7 @@ export function useSyncLogs(syncId?: string, limit = 20) {
       const { data: result } = await supabase.from('sync_logs').select('*').eq('sync_id', syncId).order('completed_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [syncId, limit, supabase])
+  }, [syncId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

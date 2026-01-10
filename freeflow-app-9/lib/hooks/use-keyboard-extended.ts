@@ -35,7 +35,7 @@ export function useUserShortcuts(userId?: string, options?: { context?: string; 
       const { data } = await query.order('key_combination', { ascending: true })
       setShortcuts(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.context, options?.is_enabled, supabase])
+  }, [userId, options?.context, options?.is_enabled])
   useEffect(() => { fetch() }, [fetch])
   return { shortcuts, isLoading, refresh: fetch }
 }

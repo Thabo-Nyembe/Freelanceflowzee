@@ -34,7 +34,7 @@ export function useSavedItems(options?: { user_id?: string; item_type?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.item_type, options?.limit, supabase])
+  }, [options?.user_id, options?.item_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useSavedSearches(options?: { user_id?: string; search_type?: str
       const { data } = await query.order('last_used_at', { ascending: false })
       setSearches(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.search_type, supabase])
+  }, [options?.user_id, options?.search_type])
   useEffect(() => { fetch() }, [fetch])
   return { searches, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useSavedFilters(options?: { user_id?: string; filter_type?: stri
       const { data } = await query.order('name', { ascending: true })
       setFilters(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.filter_type, supabase])
+  }, [options?.user_id, options?.filter_type])
   useEffect(() => { fetch() }, [fetch])
   return { filters, isLoading, refresh: fetch }
 }
@@ -89,7 +89,7 @@ export function useSavedViews(options?: { user_id?: string; view_type?: string; 
       const { data } = await query.order('name', { ascending: true })
       setViews(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.view_type, options?.is_default, supabase])
+  }, [options?.user_id, options?.view_type, options?.is_default])
   useEffect(() => { fetch() }, [fetch])
   return { views, isLoading, refresh: fetch }
 }

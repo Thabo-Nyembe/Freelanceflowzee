@@ -35,7 +35,7 @@ export function useMotions(options?: { user_id?: string; type?: string; status?:
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setMotions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { motions, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useMyMotions(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('motions').select('*').eq('user_id', userId).order('updated_at', { ascending: false }).limit(options?.limit || 50); setMotions(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { motions, isLoading, refresh: fetch }
 }

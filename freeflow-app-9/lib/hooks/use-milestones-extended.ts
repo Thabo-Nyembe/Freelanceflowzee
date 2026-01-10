@@ -36,7 +36,7 @@ export function useMilestones(projectId?: string, options?: { status?: string; o
       const { data } = await query.order('due_date', { ascending: true }).limit(options?.limit || 50)
       setMilestones(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.status, options?.owner_id, options?.priority, options?.limit, supabase])
+  }, [projectId, options?.status, options?.owner_id, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useMilestoneTasks(milestoneId?: string, options?: { status?: str
       const { data } = await query.order('due_date', { ascending: true })
       setTasks(data || [])
     } finally { setIsLoading(false) }
-  }, [milestoneId, options?.status, options?.assignee_id, supabase])
+  }, [milestoneId, options?.status, options?.assignee_id])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useMilestoneProgress(milestoneId?: string, options?: { limit?: n
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_progress').select('*').eq('milestone_id', milestoneId).order('recorded_at', { ascending: false }).limit(options?.limit || 50); setProgress(data || []) } finally { setIsLoading(false) }
-  }, [milestoneId, options?.limit, supabase])
+  }, [milestoneId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useMilestoneUpdates(milestoneId?: string, options?: { limit?: nu
     if (!milestoneId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('milestone_updates').select('*').eq('milestone_id', milestoneId).order('created_at', { ascending: false }).limit(options?.limit || 20); setUpdates(data || []) } finally { setIsLoading(false) }
-  }, [milestoneId, options?.limit, supabase])
+  }, [milestoneId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { updates, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useUpcomingMilestones(projectId?: string, options?: { days?: num
       const { data } = await supabase.from('milestones').select('*, milestone_tasks(*)').eq('project_id', projectId).in('status', ['pending', 'in_progress']).gte('due_date', now.toISOString()).lte('due_date', futureDate.toISOString()).order('due_date', { ascending: true }).limit(options?.limit || 10)
       setMilestones(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.days, options?.limit, supabase])
+  }, [projectId, options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { milestones, isLoading, refresh: fetch }
 }

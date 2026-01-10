@@ -37,7 +37,7 @@ export function useQueueJobs(options?: { queueName?: string; jobType?: string; s
       const { data: result } = await query.order('priority', { ascending: false }).order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.queueName, options?.jobType, options?.status, supabase])
+  }, [options?.queueName, options?.jobType, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

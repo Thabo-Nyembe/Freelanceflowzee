@@ -20,7 +20,7 @@ export function useAnnouncements(status?: string, targetAudience?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [status, targetAudience, supabase])
+  }, [status, targetAudience])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

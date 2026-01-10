@@ -20,7 +20,7 @@ export function useFeedItems(userId?: string, feedType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, feedType, supabase])
+  }, [userId, feedType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function useUnreadFeedCount(userId?: string, feedType?: string) {
       const { count: result } = await query
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, feedType, supabase])
+  }, [userId, feedType])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

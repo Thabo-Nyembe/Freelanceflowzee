@@ -35,7 +35,7 @@ export function useBroadcasts(options?: { user_id?: string; status?: string; cha
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBroadcasts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.channel, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.channel, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { broadcasts, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useBroadcastTemplates(options?: { user_id?: string; type?: strin
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

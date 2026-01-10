@@ -61,7 +61,7 @@ export function useProfiles(options?: { is_public?: boolean; is_verified?: boole
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setProfiles(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_public, options?.is_verified, options?.search, options?.limit, supabase])
+  }, [options?.is_public, options?.is_verified, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { profiles, isLoading, refresh: fetch }
 }
@@ -160,7 +160,7 @@ export function useProfileViews(profileId?: string, options?: { from_date?: stri
       setViews(data || [])
       setTotalViews(data?.length || 0)
     } finally { setIsLoading(false) }
-  }, [profileId, options?.from_date, options?.to_date, supabase])
+  }, [profileId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { views, totalViews, isLoading, refresh: fetch }
 }
@@ -201,7 +201,7 @@ export function useProfileSearch(searchTerm?: string, options?: { limit?: number
     if (!searchTerm || searchTerm.length < 2) { setResults([]); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('profiles').select('*, profile_skills(*)').eq('is_public', true).or(`username.ilike.%${searchTerm}%,display_name.ilike.%${searchTerm}%,headline.ilike.%${searchTerm}%`).limit(options?.limit || 20); setResults(data || []) } finally { setIsLoading(false) }
-  }, [searchTerm, options?.limit, supabase])
+  }, [searchTerm, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }

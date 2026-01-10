@@ -35,7 +35,7 @@ export function useUserLinks(userId?: string, options?: { group_id?: string; is_
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setLinks(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.group_id, options?.is_active, options?.limit, supabase])
+  }, [userId, options?.group_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { links, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useLinkClicks(linkId?: string, options?: { limit?: number }) {
     if (!linkId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('link_clicks').select('*').eq('link_id', linkId).order('clicked_at', { ascending: false }).limit(options?.limit || 100); setClicks(data || []) } finally { setIsLoading(false) }
-  }, [linkId, options?.limit, supabase])
+  }, [linkId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { clicks, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function useLinkSearch(userId?: string, query?: string, options?: { limit
     if (!userId || !query || query.length < 2) { setResults([]); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('links').select('*, link_tags(*)').eq('user_id', userId).or(`title.ilike.%${query}%,url.ilike.%${query}%`).order('created_at', { ascending: false }).limit(options?.limit || 20); setResults(data || []) } finally { setIsLoading(false) }
-  }, [userId, query, options?.limit, supabase])
+  }, [userId, query, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -151,7 +151,7 @@ export function useTopLinks(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('links').select('*').eq('user_id', userId).order('click_count', { ascending: false }).limit(options?.limit || 10); setLinks(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { links, isLoading, refresh: fetch }
 }

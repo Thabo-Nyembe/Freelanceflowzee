@@ -48,7 +48,7 @@ export function usePartners(options?: { tier_id?: string; status?: string; searc
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPartners(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.tier_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.tier_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { partners, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function usePartnerApplications(options?: { status?: string; limit?: numb
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setApplications(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.limit, supabase])
+  }, [options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { applications, isLoading, refresh: fetch }
 }
@@ -97,7 +97,7 @@ export function usePartnerReferrals(partnerId?: string, options?: { status?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setReferrals(data || [])
     } finally { setIsLoading(false) }
-  }, [partnerId, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [partnerId, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { referrals, isLoading, refresh: fetch }
 }
@@ -115,7 +115,7 @@ export function usePartnerCommissions(partnerId?: string, options?: { status?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setCommissions(data || [])
     } finally { setIsLoading(false) }
-  }, [partnerId, options?.status, options?.limit, supabase])
+  }, [partnerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { commissions, isLoading, refresh: fetch }
 }
@@ -133,7 +133,7 @@ export function usePartnerPayouts(partnerId?: string, options?: { status?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPayouts(data || [])
     } finally { setIsLoading(false) }
-  }, [partnerId, options?.status, options?.limit, supabase])
+  }, [partnerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { payouts, isLoading, refresh: fetch }
 }

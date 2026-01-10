@@ -38,7 +38,7 @@ export function useExtensions(options?: { category?: string; pricing_type?: stri
       const { data } = await query.order('install_count', { ascending: false }).limit(options?.limit || 50)
       setExtensions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.pricing_type, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.pricing_type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { extensions, isLoading, refresh: fetch }
 }
@@ -102,7 +102,7 @@ export function useUserInstalledExtensions(userId?: string, options?: { is_enabl
       const { data } = await query.order('installed_at', { ascending: false })
       setInstallations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_enabled, supabase])
+  }, [userId, options?.is_enabled])
   useEffect(() => { fetch() }, [fetch])
   return { installations, isLoading, refresh: fetch }
 }
@@ -120,7 +120,7 @@ export function useIsExtensionInstalled(extensionId?: string, userId?: string) {
       setIsInstalled(!!data)
       setInstallation(data)
     } finally { setIsLoading(false) }
-  }, [extensionId, userId, supabase])
+  }, [extensionId, userId])
   useEffect(() => { check() }, [check])
   return { isInstalled, installation, isLoading, recheck: check }
 }
@@ -136,7 +136,7 @@ export function useExtensionSettings(extensionId?: string, userId?: string) {
       const { data } = await supabase.from('extension_settings').select('*').eq('extension_id', extensionId).eq('user_id', userId).single()
       setSettings(data?.settings || {})
     } finally { setIsLoading(false) }
-  }, [extensionId, userId, supabase])
+  }, [extensionId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }
@@ -168,7 +168,7 @@ export function useExtensionReviews(extensionId?: string, options?: { limit?: nu
       const { data } = await supabase.from('extension_reviews').select('*').eq('extension_id', extensionId).order('created_at', { ascending: false }).limit(options?.limit || 20)
       setReviews(data || [])
     } finally { setIsLoading(false) }
-  }, [extensionId, options?.limit, supabase])
+  }, [extensionId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }
@@ -203,7 +203,7 @@ export function useExtensionSearch(searchTerm: string, options?: { category?: st
       const { data } = await query.order('install_count', { ascending: false }).limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, options?.category, options?.pricing_type, options?.limit, supabase])
+  }, [searchTerm, options?.category, options?.pricing_type, options?.limit])
   useEffect(() => {
     const timer = setTimeout(search, 300)
     return () => clearTimeout(timer)
@@ -223,7 +223,7 @@ export function useNewExtensions(options?: { limit?: number; days?: number }) {
       const { data } = await supabase.from('extensions').select('*').eq('status', 'published').gte('published_at', daysAgo.toISOString()).order('published_at', { ascending: false }).limit(options?.limit || 10)
       setExtensions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.limit, options?.days, supabase])
+  }, [options?.limit, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { extensions, isLoading, refresh: fetch }
 }

@@ -38,7 +38,7 @@ export function useThemes(options?: { category?: string; author_id?: string; sta
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setThemes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.author_id, options?.status, options?.is_public, options?.is_free, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.author_id, options?.status, options?.is_public, options?.is_free, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { themes, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useMyThemes(userId?: string, options?: { status?: string }) {
       const { data } = await query.order('updated_at', { ascending: false })
       setThemes(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { themes, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useThemeInstallations(options?: { theme_id?: string; user_id?: s
       const { data } = await query.order('installed_at', { ascending: false })
       setInstallations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.theme_id, options?.user_id, options?.entity_type, options?.entity_id, supabase])
+  }, [options?.theme_id, options?.user_id, options?.entity_type, options?.entity_id])
   useEffect(() => { fetch() }, [fetch])
   return { installations, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useActiveTheme(entityType?: string, entityId?: string) {
       setInstallation(data)
       setTheme(data?.themes || null)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { installation, theme, isLoading, refresh: fetch }
 }
@@ -130,7 +130,7 @@ export function useThemeAssets(themeId?: string, options?: { asset_type?: string
       const { data } = await query.order('name', { ascending: true })
       setAssets(data || [])
     } finally { setIsLoading(false) }
-  }, [themeId, options?.asset_type, supabase])
+  }, [themeId, options?.asset_type])
   useEffect(() => { fetch() }, [fetch])
   return { assets, isLoading, refresh: fetch }
 }
@@ -181,7 +181,7 @@ export function usePopularThemes(options?: { category?: string; limit?: number }
       const { data } = await query.order('install_count', { ascending: false }).limit(options?.limit || 20)
       setThemes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { themes, isLoading, refresh: fetch }
 }

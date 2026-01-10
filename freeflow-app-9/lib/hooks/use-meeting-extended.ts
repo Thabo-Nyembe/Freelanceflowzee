@@ -36,7 +36,7 @@ export function useMeetings(options?: { user_id?: string; status?: string; date_
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 50)
       setMeetings(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.date_from, options?.date_to, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.date_from, options?.date_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { meetings, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useUpcomingMeetings(userId?: string, options?: { limit?: number 
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('meetings').select('*').eq('user_id', userId).eq('status', 'scheduled').gte('start_time', new Date().toISOString()).order('start_time', { ascending: true }).limit(options?.limit || 10); setMeetings(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { meetings, isLoading, refresh: fetch }
 }

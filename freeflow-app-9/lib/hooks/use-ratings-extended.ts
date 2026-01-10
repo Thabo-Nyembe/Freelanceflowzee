@@ -39,7 +39,7 @@ export function useRatings(options: { entity_type: string; entity_id: string; mi
       const { data } = await query.limit(options.limit || 50)
       setRatings(data || [])
     } finally { setIsLoading(false) }
-  }, [options.entity_type, options.entity_id, options.min_rating, options.verified_only, options.sort_by, options.limit, supabase])
+  }, [options.entity_type, options.entity_id, options.min_rating, options.verified_only, options.sort_by, options.limit])
   useEffect(() => { fetch() }, [fetch])
   return { ratings, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useRatingSummary(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('rating_summaries').select('*').eq('entity_type', entityType).eq('entity_id', entityId).single()
       setSummary(data || { total_ratings: 0, average_rating: 0, distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } })
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useUserRating(entityType?: string, entityId?: string, userId?: s
       setRating(data)
       setHasRated(!!data)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, userId, supabase])
+  }, [entityType, entityId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { rating, hasRated, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function useMyRatings(userId?: string, options?: { entity_type?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRatings(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.entity_type, options?.limit, supabase])
+  }, [userId, options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { ratings, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useTopRated(entityType?: string, options?: { min_ratings?: numbe
       const { data } = await query.order('average_rating', { ascending: false }).limit(options?.limit || 10)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, options?.min_ratings, options?.limit, supabase])
+  }, [entityType, options?.min_ratings, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -139,7 +139,7 @@ export function useRecentRatings(options?: { entity_type?: string; limit?: numbe
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setRatings(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.limit, supabase])
+  }, [options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { ratings, isLoading, refresh: fetch }
 }
@@ -156,7 +156,7 @@ export function useRatingReports(options?: { status?: string; limit?: number }) 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.limit, supabase])
+  }, [options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -174,7 +174,7 @@ export function useAverageRating(entityType?: string, entityId?: string) {
       setAverage(data?.average_rating || 0)
       setCount(data?.total_ratings || 0)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { average, count, isLoading, refresh: fetch }
 }
@@ -190,7 +190,7 @@ export function useRatingDistribution(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('rating_summaries').select('distribution').eq('entity_type', entityType).eq('entity_id', entityId).single()
       setDistribution(data?.distribution || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 })
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { distribution, isLoading, refresh: fetch }
 }

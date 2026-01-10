@@ -48,7 +48,7 @@ export function usePages(options?: { user_id?: string; is_published?: boolean; t
       const { data } = await query.order('title', { ascending: true }).limit(options?.limit || 50)
       setPages(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_published, options?.template_id, options?.limit, supabase])
+  }, [options?.user_id, options?.is_published, options?.template_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { pages, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useMyPages(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('pages').select('*').eq('user_id', userId).order('updated_at', { ascending: false }).limit(options?.limit || 50); setPages(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { pages, isLoading, refresh: fetch }
 }

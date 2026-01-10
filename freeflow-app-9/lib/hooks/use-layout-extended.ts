@@ -20,7 +20,7 @@ export function useLayouts(layoutType?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [layoutType, isActive, supabase])
+  }, [layoutType, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function useUserLayout(userId?: string, layoutType?: string) {
       const { data: result } = await query.single()
       setData(result)
     } finally { setIsLoading(false) }
-  }, [userId, layoutType, supabase])
+  }, [userId, layoutType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

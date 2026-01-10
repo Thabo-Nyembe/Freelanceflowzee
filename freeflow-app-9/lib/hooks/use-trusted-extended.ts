@@ -37,7 +37,7 @@ export function useTrustedDevices(userId?: string, options?: { onlyActive?: bool
       const { data: result } = await query.order('last_used_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.onlyActive, supabase])
+  }, [userId, options?.onlyActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useDeviceTrustCheck(userId?: string, deviceFingerprint?: string)
       setIsTrusted(!!data)
       setDevice(data)
     } finally { setIsLoading(false) }
-  }, [userId, deviceFingerprint, supabase])
+  }, [userId, deviceFingerprint])
   useEffect(() => { check() }, [check])
   return { isTrusted, device, isLoading, recheck: check }
 }
@@ -105,7 +105,7 @@ export function useSecureFileDeliveries(userId?: string, options?: { isActive?: 
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, options?.limit, supabase])
+  }, [userId, options?.isActive, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -128,7 +128,7 @@ export function useSecureDeliveryValidation(deliveryId?: string, accessCode?: st
       setDelivery(data)
       setIsValid(true)
     } finally { setIsLoading(false) }
-  }, [deliveryId, accessCode, supabase])
+  }, [deliveryId, accessCode])
   useEffect(() => { validate() }, [validate])
   return { isValid, delivery, error, isLoading, revalidate: validate }
 }

@@ -35,7 +35,7 @@ export function usePipelines(options?: { project_id?: string; status?: string; b
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPipelines(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.status, options?.branch, options?.limit, supabase])
+  }, [options?.project_id, options?.status, options?.branch, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { pipelines, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function usePipelineJobs(pipelineId?: string, stageId?: string) {
       const { data } = await query.order('created_at', { ascending: true })
       setJobs(data || [])
     } finally { setIsLoading(false) }
-  }, [pipelineId, stageId, supabase])
+  }, [pipelineId, stageId])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function useRecentPipelines(projectId?: string, limit?: number) {
     if (!projectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('ci_pipelines').select('*').eq('project_id', projectId).order('created_at', { ascending: false }).limit(limit || 10); setPipelines(data || []) } finally { setIsLoading(false) }
-  }, [projectId, limit, supabase])
+  }, [projectId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { pipelines, isLoading, refresh: fetch }
 }

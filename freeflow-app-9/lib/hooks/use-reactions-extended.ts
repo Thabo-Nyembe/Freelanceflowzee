@@ -33,7 +33,7 @@ export function useReactions(options: { entity_type: string; entity_id: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options.limit || 100)
       setReactions(data || [])
     } finally { setIsLoading(false) }
-  }, [options.entity_type, options.entity_id, options.reaction_type, options.limit, supabase])
+  }, [options.entity_type, options.entity_id, options.reaction_type, options.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reactions, isLoading, refresh: fetch }
 }
@@ -49,7 +49,7 @@ export function useReactionSummary(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('reaction_summaries').select('*').eq('entity_type', entityType).eq('entity_id', entityId).single()
       setSummary(data || { total_reactions: 0, reaction_counts: {} })
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function useUserReaction(entityType?: string, entityId?: string, userId?:
       const { data } = await supabase.from('reactions').select('reaction_type').eq('entity_type', entityType).eq('entity_id', entityId).eq('user_id', userId).single()
       setReaction(data?.reaction_type || null)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, userId, supabase])
+  }, [entityType, entityId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { reaction, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useReactionTypes(options?: { category?: string; is_active?: bool
       const { data } = await query.order('order', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -101,7 +101,7 @@ export function useBulkReactions(entityType?: string, entityIds?: string[]) {
       data?.forEach(s => { map[s.entity_id] = s })
       setSummaryMap(map)
     } finally { setIsLoading(false) }
-  }, [entityType, entityIds?.join(','), supabase])
+  }, [entityType, entityIds?.join(',')])
   useEffect(() => { fetch() }, [fetch])
   return { summaryMap, isLoading, refresh: fetch }
 }
@@ -119,7 +119,7 @@ export function useBulkUserReactions(entityType?: string, entityIds?: string[], 
       data?.forEach(r => { map[r.entity_id] = r.reaction_type })
       setReactionMap(map)
     } finally { setIsLoading(false) }
-  }, [entityType, entityIds?.join(','), userId, supabase])
+  }, [entityType, entityIds?.join(','), userId])
   useEffect(() => { fetch() }, [fetch])
   return { reactionMap, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useReactors(entityType?: string, entityId?: string, reactionType
       const { data } = await supabase.from('reactions').select('*, users(*)').eq('entity_type', entityType).eq('entity_id', entityId).eq('reaction_type', reactionType).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReactors(data?.map(r => r.users) || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, reactionType, options?.limit, supabase])
+  }, [entityType, entityId, reactionType, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reactors, isLoading, refresh: fetch }
 }
@@ -153,7 +153,7 @@ export function useMyReactions(userId?: string, options?: { entity_type?: string
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setReactions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.entity_type, options?.limit, supabase])
+  }, [userId, options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reactions, isLoading, refresh: fetch }
 }
@@ -169,7 +169,7 @@ export function useMostReacted(entityType?: string, options?: { limit?: number }
       const { data } = await supabase.from('reaction_summaries').select('*').eq('entity_type', entityType).order('total_reactions', { ascending: false }).limit(options?.limit || 10)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, options?.limit, supabase])
+  }, [entityType, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -187,7 +187,7 @@ export function useReactionCounts(entityType?: string, entityId?: string) {
       setCounts(data?.reaction_counts || {})
       setTotal(data?.total_reactions || 0)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { counts, total, isLoading, refresh: fetch }
 }
@@ -206,7 +206,7 @@ export function useTopReactionTypes(entityType?: string, options?: { limit?: num
       const sorted = Object.entries(counts).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, options?.limit || 10)
       setTypes(sorted)
     } finally { setIsLoading(false) }
-  }, [entityType, options?.limit, supabase])
+  }, [entityType, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }

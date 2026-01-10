@@ -36,7 +36,7 @@ export function useGroups(options?: { type?: string; privacy?: string; category?
       const { data } = await query.order('member_count', { ascending: false }).limit(options?.limit || 50)
       setGroups(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.privacy, options?.category, options?.search, options?.limit, supabase])
+  }, [options?.type, options?.privacy, options?.category, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useGroupMembers(groupId?: string, options?: { role?: string; lim
       const { data } = await query.order('joined_at', { ascending: false }).limit(options?.limit || 100)
       setMembers(data || [])
     } finally { setIsLoading(false) }
-  }, [groupId, options?.role, options?.limit, supabase])
+  }, [groupId, options?.role, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useIsMember(groupId?: string, userId?: string) {
     if (!groupId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('group_members').select('*').eq('group_id', groupId).eq('user_id', userId).single(); setIsMember(!!data); setMemberData(data) } finally { setIsLoading(false) }
-  }, [groupId, userId, supabase])
+  }, [groupId, userId])
   useEffect(() => { check() }, [check])
   return { isMember, memberData, isLoading, recheck: check }
 }
@@ -125,7 +125,7 @@ export function useGroupPosts(groupId?: string, options?: { type?: string; limit
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPosts(data || [])
     } finally { setIsLoading(false) }
-  }, [groupId, options?.type, options?.limit, supabase])
+  }, [groupId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { posts, isLoading, refresh: fetch }
 }
@@ -143,7 +143,7 @@ export function useGroupEvents(groupId?: string, options?: { upcoming?: boolean;
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 20)
       setEvents(data || [])
     } finally { setIsLoading(false) }
-  }, [groupId, options?.upcoming, options?.limit, supabase])
+  }, [groupId, options?.upcoming, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { events, isLoading, refresh: fetch }
 }

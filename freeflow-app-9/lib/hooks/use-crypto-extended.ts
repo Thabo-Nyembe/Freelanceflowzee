@@ -70,7 +70,7 @@ export function useCryptoTransactions(walletId?: string, options?: { txType?: st
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [walletId, options?.txType, options?.status, options?.limit, supabase])
+  }, [walletId, options?.txType, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -88,7 +88,7 @@ export function useCryptoPrices(options?: { currencies?: string[]; networks?: st
       const { data: result } = await query.order('updated_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.currencies, options?.networks, supabase])
+  }, [options?.currencies, options?.networks])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -104,7 +104,7 @@ export function useCryptoPrice(currency?: string, network?: string) {
       const { data } = await supabase.from('crypto_prices').select('*').eq('currency', currency).eq('network', network).single()
       setPrice(data)
     } finally { setIsLoading(false) }
-  }, [currency, network, supabase])
+  }, [currency, network])
   useEffect(() => { fetch() }, [fetch])
   return { price, isLoading, refresh: fetch }
 }

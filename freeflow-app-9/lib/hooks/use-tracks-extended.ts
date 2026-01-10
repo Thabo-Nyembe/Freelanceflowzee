@@ -38,7 +38,7 @@ export function useTracks(options?: { track_type?: string; category?: string; di
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTracks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.track_type, options?.category, options?.difficulty, options?.status, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.track_type, options?.category, options?.difficulty, options?.status, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tracks, isLoading, refresh: fetch }
 }
@@ -65,7 +65,7 @@ export function useTrackEnrollment(trackId?: string, userId?: string) {
     if (!trackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_enrollments').select('*').eq('track_id', trackId).eq('user_id', userId).single(); setEnrollment(data); setIsEnrolled(!!data) } finally { setIsLoading(false) }
-  }, [trackId, userId, supabase])
+  }, [trackId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { enrollment, isEnrolled, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useUserEnrollments(userId?: string, options?: { status?: string;
       const { data } = await query.order('enrolled_at', { ascending: false }).limit(options?.limit || 50)
       setEnrollments(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { enrollments, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useTrackProgress(trackId?: string, userId?: string) {
       setProgress(progressData)
       setStats({ completedCount, totalItems: items.length, overallProgress })
     } finally { setIsLoading(false) }
-  }, [trackId, userId, supabase])
+  }, [trackId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, stats, isLoading, refresh: fetch }
 }
@@ -123,7 +123,7 @@ export function useTrackCompletion(trackId?: string, userId?: string) {
     if (!trackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_completions').select('*').eq('track_id', trackId).eq('user_id', userId).single(); setCompletion(data); setIsCompleted(!!data) } finally { setIsLoading(false) }
-  }, [trackId, userId, supabase])
+  }, [trackId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { completion, isCompleted, isLoading, refresh: fetch }
 }
@@ -150,7 +150,7 @@ export function useTrackCertificate(trackId?: string, userId?: string) {
     if (!trackId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('track_certificates').select('*, tracks(*)').eq('track_id', trackId).eq('user_id', userId).single(); setCertificate(data); setHasCertificate(!!data) } finally { setIsLoading(false) }
-  }, [trackId, userId, supabase])
+  }, [trackId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { certificate, hasCertificate, isLoading, refresh: fetch }
 }
@@ -168,7 +168,7 @@ export function usePopularTracks(options?: { category?: string; difficulty?: str
       const { data } = await query.order('enrollment_count', { ascending: false }).limit(options?.limit || 20)
       setTracks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.difficulty, options?.limit, supabase])
+  }, [options?.category, options?.difficulty, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tracks, isLoading, refresh: fetch }
 }
@@ -202,7 +202,7 @@ export function useMyCreatedTracks(userId?: string, options?: { status?: string 
       const { data } = await query.order('updated_at', { ascending: false })
       setTracks(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { tracks, isLoading, refresh: fetch }
 }

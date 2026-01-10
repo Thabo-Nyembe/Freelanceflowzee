@@ -36,7 +36,7 @@ export function useLocales(options?: { languageCode?: string; isEnabled?: boolea
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.languageCode, options?.isEnabled, supabase])
+  }, [options?.languageCode, options?.isEnabled])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useLocaleStrings(localeCode?: string, namespace?: string) {
       const stringsMap = data?.reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {}) || {}
       setStrings(stringsMap)
     } finally { setIsLoading(false) }
-  }, [localeCode, namespace, supabase])
+  }, [localeCode, namespace])
   useEffect(() => { fetch() }, [fetch])
   return { strings, isLoading, refresh: fetch }
 }

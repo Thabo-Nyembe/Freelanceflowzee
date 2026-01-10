@@ -35,7 +35,7 @@ export function useDocumentationList(options?: { category_id?: string; is_publis
       const { data } = await query.order('title', { ascending: true }).limit(options?.limit || 50)
       setDocs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.is_published, options?.search, options?.limit, supabase])
+  }, [options?.category_id, options?.is_published, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { docs, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function usePublishedDocumentation(options?: { category_id?: string; limi
       const { data } = await query.order('title', { ascending: true }).limit(options?.limit || 50)
       setDocs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category_id, options?.limit, supabase])
+  }, [options?.category_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { docs, isLoading, refresh: fetch }
 }

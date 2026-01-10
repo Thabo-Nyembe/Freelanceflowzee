@@ -37,7 +37,7 @@ export function useUpdates(options?: { productId?: string; status?: string; upda
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.productId, options?.status, options?.updateType, supabase])
+  }, [options?.productId, options?.status, options?.updateType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useUpdateCheck(currentVersion?: string, productId?: string) {
       setHasUpdates(data && data.length > 0)
       setHasMandatory(data?.some(u => u.is_mandatory) || false)
     } finally { setIsLoading(false) }
-  }, [currentVersion, productId, supabase])
+  }, [currentVersion, productId])
   useEffect(() => { check() }, [check])
   return { hasUpdates, hasMandatory, updates, isLoading, check }
 }

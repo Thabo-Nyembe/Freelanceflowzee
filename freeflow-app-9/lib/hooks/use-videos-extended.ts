@@ -35,7 +35,7 @@ export function useVideos(options?: { user_id?: string; status?: string; is_publ
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setVideos(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.is_public, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.is_public, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { videos, isLoading, refresh: fetch }
 }

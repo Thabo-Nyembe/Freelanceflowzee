@@ -36,7 +36,7 @@ export function useInsights(options?: { type?: string; source?: string; created_
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInsights(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.source, options?.created_by, options?.is_public, options?.limit, supabase])
+  }, [options?.type, options?.source, options?.created_by, options?.is_public, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { insights, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useInsightReports(options?: { created_by?: string; limit?: numbe
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.created_by, options?.limit, supabase])
+  }, [options?.created_by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useInsightDashboards(options?: { created_by?: string; is_public?
       const { data } = await query.order('is_default', { ascending: false }).order('name', { ascending: true })
       setDashboards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.created_by, options?.is_public, supabase])
+  }, [options?.created_by, options?.is_public])
   useEffect(() => { fetch() }, [fetch])
   return { dashboards, isLoading, refresh: fetch }
 }
@@ -116,7 +116,7 @@ export function useInsightAlerts(options?: { insight_id?: string; created_by?: s
       const { data } = await query.order('created_at', { ascending: false })
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.insight_id, options?.created_by, options?.is_active, supabase])
+  }, [options?.insight_id, options?.created_by, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function useInsightSchedules(options?: { created_by?: string; is_active?:
       const { data } = await query.order('next_run', { ascending: true })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.created_by, options?.is_active, supabase])
+  }, [options?.created_by, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }

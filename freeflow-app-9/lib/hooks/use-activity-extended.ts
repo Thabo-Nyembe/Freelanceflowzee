@@ -20,7 +20,7 @@ export function useActivities(userId?: string, itemType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, itemType, supabase])
+  }, [userId, itemType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -37,7 +37,7 @@ export function useActivityFeed(userId?: string, followingIds: string[] = []) {
       const { data: result } = await supabase.from('activities').select('*').in('user_id', allIds).order('created_at', { ascending: false }).limit(50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, followingIds, supabase])
+  }, [userId, followingIds])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

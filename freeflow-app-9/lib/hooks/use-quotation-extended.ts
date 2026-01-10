@@ -35,7 +35,7 @@ export function useQuotations(options?: { user_id?: string; client_id?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setQuotations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.client_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.client_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { quotations, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useExpiringQuotations(userId?: string, daysUntilExpiry?: number)
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const futureDate = new Date(); futureDate.setDate(futureDate.getDate() + (daysUntilExpiry || 7)); const { data } = await supabase.from('quotations').select('*').eq('user_id', userId).eq('status', 'sent').lte('valid_until', futureDate.toISOString()).gte('valid_until', new Date().toISOString()).order('valid_until', { ascending: true }); setQuotations(data || []) } finally { setIsLoading(false) }
-  }, [userId, daysUntilExpiry, supabase])
+  }, [userId, daysUntilExpiry])
   useEffect(() => { fetch() }, [fetch])
   return { quotations, isLoading, refresh: fetch }
 }

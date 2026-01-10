@@ -35,7 +35,7 @@ export function useChurnPredictions(options?: { risk_level?: string; status?: st
       const { data } = await query.order('risk_score', { ascending: false }).limit(options?.limit || 50)
       setPredictions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.risk_level, options?.status, options?.min_score, options?.limit, supabase])
+  }, [options?.risk_level, options?.status, options?.min_score, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { predictions, isLoading, refresh: fetch }
 }
@@ -47,7 +47,7 @@ export function useHighRiskCustomers(threshold?: number, limit?: number) {
   const supabase = createClient()
     setIsLoading(true)
     try { const { data } = await supabase.from('churn_predictions').select('*').eq('status', 'active').gte('risk_score', threshold || 70).order('risk_score', { ascending: false }).limit(limit || 50); setCustomers(data || []) } finally { setIsLoading(false) }
-  }, [threshold, limit, supabase])
+  }, [threshold, limit])
   useEffect(() => { fetch() }, [fetch])
   return { customers, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useChurnInterventions(options?: { customer_id?: string; status?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInterventions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.status, options?.limit, supabase])
+  }, [options?.customer_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { interventions, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function useChurnAnalysis(options?: { date_from?: string; date_to?: strin
       const { data } = await query.order('analysis_date', { ascending: false })
       setAnalysis(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.date_from, options?.date_to, supabase])
+  }, [options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { analysis, isLoading, refresh: fetch }
 }

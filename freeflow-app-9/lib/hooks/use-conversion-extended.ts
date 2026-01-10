@@ -36,7 +36,7 @@ export function useConversions(options?: { goal_id?: string; funnel_id?: string;
       const { data } = await query.order('converted_at', { ascending: false }).limit(options?.limit || 50)
       setConversions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.goal_id, options?.funnel_id, options?.date_from, options?.date_to, options?.limit, supabase])
+  }, [options?.goal_id, options?.funnel_id, options?.date_from, options?.date_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { conversions, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useConversionGoals(options?: { type?: string; is_active?: boolea
       const { data } = await query.order('name', { ascending: true })
       setGoals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }
@@ -92,7 +92,7 @@ export function useConversionRate(goalId?: string, options?: { date_from?: strin
       const rateValue = goal?.target_value && goal.target_value > 0 ? ((conversions || 0) / goal.target_value) * 100 : 0
       setRate({ conversions: conversions || 0, target: goal?.target_value || 0, rate: rateValue })
     } finally { setIsLoading(false) }
-  }, [goalId, options?.date_from, options?.date_to, supabase])
+  }, [goalId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { rate, isLoading, refresh: fetch }
 }
@@ -120,7 +120,7 @@ export function useFunnelAnalysis(funnelId?: string, options?: { date_from?: str
       }))
       setAnalysis({ steps })
     } finally { setIsLoading(false) }
-  }, [funnelId, options?.date_from, options?.date_to, supabase])
+  }, [funnelId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { analysis, isLoading, refresh: fetch }
 }
@@ -143,7 +143,7 @@ export function useConversionStats(options?: { date_from?: string; date_to?: str
       const bySource = data.reduce((acc: Record<string, number>, c) => { if (c.source) acc[c.source] = (acc[c.source] || 0) + 1; return acc }, {})
       setStats({ total, totalValue, byGoal, bySource })
     } finally { setIsLoading(false) }
-  }, [options?.date_from, options?.date_to, supabase])
+  }, [options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

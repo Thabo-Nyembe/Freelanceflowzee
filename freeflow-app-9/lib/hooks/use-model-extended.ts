@@ -36,7 +36,7 @@ export function useModels(options?: { user_id?: string; type?: string; framework
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setModels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.framework, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.framework, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { models, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useModelPredictions(modelId?: string, options?: { limit?: number
     if (!modelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('model_predictions').select('*').eq('model_id', modelId).order('created_at', { ascending: false }).limit(options?.limit || 100); setPredictions(data || []) } finally { setIsLoading(false) }
-  }, [modelId, options?.limit, supabase])
+  }, [modelId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { predictions, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useMyModels(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('models').select('*').eq('user_id', userId).order('updated_at', { ascending: false }).limit(options?.limit || 50); setModels(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { models, isLoading, refresh: fetch }
 }

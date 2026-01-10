@@ -38,7 +38,7 @@ export function useSystems(options?: { system_type?: string; environment?: strin
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setSystems(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.system_type, options?.environment, options?.status, options?.is_active, options?.owner_id, options?.search, options?.limit, supabase])
+  }, [options?.system_type, options?.environment, options?.status, options?.is_active, options?.owner_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { systems, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useSystemHealth(systemId?: string, options?: { from_date?: strin
       setHealth(healthList)
       setLatestHealth(healthList[0] || null)
     } finally { setIsLoading(false) }
-  }, [systemId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [systemId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { health, latestHealth, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useSystemLogs(systemId?: string, options?: { level?: string; cat
       const { data } = await query.order('logged_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [systemId, options?.level, options?.category, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [systemId, options?.level, options?.category, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -120,7 +120,7 @@ export function useSystemMetrics(systemId?: string, options?: { metric_name?: st
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [systemId, options?.metric_name, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [systemId, options?.metric_name, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -139,7 +139,7 @@ export function useSystemAlerts(options?: { system_id?: string; status?: string;
       const { data } = await query.order('triggered_at', { ascending: false }).limit(options?.limit || 50)
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.system_id, options?.status, options?.severity, options?.limit, supabase])
+  }, [options?.system_id, options?.status, options?.severity, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -163,7 +163,7 @@ export function useActiveAlerts(options?: { severity?: string; limit?: number })
         info: alertList.filter(a => a.severity === 'info').length
       })
     } finally { setIsLoading(false) }
-  }, [options?.severity, options?.limit, supabase])
+  }, [options?.severity, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, counts, isLoading, refresh: fetch }
 }

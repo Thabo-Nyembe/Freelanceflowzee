@@ -37,7 +37,7 @@ export function useQuotes(options?: { author_id?: string; client_id?: string; or
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setQuotes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.client_id, options?.organization_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.author_id, options?.client_id, options?.organization_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { quotes, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useQuoteComments(quoteId?: string, options?: { is_internal?: boo
       const { data } = await query.order('created_at', { ascending: true })
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [quoteId, options?.is_internal, supabase])
+  }, [quoteId, options?.is_internal])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -99,7 +99,7 @@ export function useMyQuotes(userId?: string, options?: { status?: string; limit?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setQuotes(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { quotes, isLoading, refresh: fetch }
 }
@@ -117,7 +117,7 @@ export function useClientQuotes(clientId?: string, options?: { status?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setQuotes(data || [])
     } finally { setIsLoading(false) }
-  }, [clientId, options?.status, options?.limit, supabase])
+  }, [clientId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { quotes, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function usePendingQuotes(options?: { author_id?: string; organization_id
       const { data } = await query.order('sent_at', { ascending: false }).limit(options?.limit || 50)
       setQuotes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.organization_id, options?.limit, supabase])
+  }, [options?.author_id, options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { quotes, isLoading, refresh: fetch }
 }
@@ -154,7 +154,7 @@ export function useExpiringQuotes(options?: { days?: number; author_id?: string;
       const { data } = await query.order('valid_until', { ascending: true }).limit(options?.limit || 20)
       setQuotes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.days, options?.author_id, options?.limit, supabase])
+  }, [options?.days, options?.author_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { quotes, isLoading, refresh: fetch }
 }
@@ -186,7 +186,7 @@ export function useQuoteStats(options?: { author_id?: string; organization_id?: 
       const conversionRate = sentOrResponded > 0 ? Math.round((accepted / sentOrResponded) * 100) : 0
       setStats({ total, draft, sent, accepted, declined, expired, totalValue, acceptedValue, conversionRate })
     } finally { setIsLoading(false) }
-  }, [options?.author_id, options?.organization_id, options?.from_date, options?.to_date, supabase])
+  }, [options?.author_id, options?.organization_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -204,7 +204,7 @@ export function useQuoteTemplates(options?: { category?: string; search?: string
       const { data } = await query.order('usage_count', { ascending: false }).limit(options?.limit || 50)
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

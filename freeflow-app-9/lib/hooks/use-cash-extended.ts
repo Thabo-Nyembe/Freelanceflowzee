@@ -35,7 +35,7 @@ export function useCashAccounts(options?: { user_id?: string; type?: string; is_
       const { data } = await query.order('name', { ascending: true })
       setAccounts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.is_active, supabase])
+  }, [options?.user_id, options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { accounts, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useCashTransactions(accountId?: string, options?: { type?: strin
       const { data } = await query.order('date', { ascending: false }).limit(options?.limit || 50)
       setTransactions(data || [])
     } finally { setIsLoading(false) }
-  }, [accountId, options?.type, options?.date_from, options?.date_to, options?.limit, supabase])
+  }, [accountId, options?.type, options?.date_from, options?.date_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useCashFlow(userId?: string, options?: { date_from?: string; dat
       const outflow = data?.filter(t => t.type === 'outflow').reduce((sum, t) => sum + t.amount, 0) || 0
       setCashFlow({ inflow, outflow, net: inflow - outflow })
     } finally { setIsLoading(false) }
-  }, [userId, options?.date_from, options?.date_to, supabase])
+  }, [userId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { cashFlow, isLoading, refresh: fetch }
 }
@@ -114,7 +114,7 @@ export function useCashForecasts(userId?: string, options?: { date_from?: string
       const { data } = await query.order('date', { ascending: true })
       setForecasts(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.date_from, options?.date_to, supabase])
+  }, [userId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { forecasts, isLoading, refresh: fetch }
 }

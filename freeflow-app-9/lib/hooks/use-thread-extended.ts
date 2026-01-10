@@ -20,7 +20,7 @@ export function useThreads(channelId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [channelId, status, supabase])
+  }, [channelId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

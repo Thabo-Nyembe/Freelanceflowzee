@@ -39,7 +39,7 @@ export function useJobs(options?: { company_id?: string; status?: string; type?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setJobs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.company_id, options?.status, options?.type, options?.location, options?.experience_level, options?.category_id, options?.search, options?.limit, supabase])
+  }, [options?.company_id, options?.status, options?.type, options?.location, options?.experience_level, options?.category_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function usePublishedJobs(options?: { type?: string; location?: string; l
       const { data } = await query.order('published_at', { ascending: false }).limit(options?.limit || 50)
       setJobs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.location, options?.limit, supabase])
+  }, [options?.type, options?.location, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useJobApplications(jobId?: string, options?: { status?: string; 
       const { data } = await query.order('applied_at', { ascending: false }).limit(options?.limit || 100)
       setApplications(data || [])
     } finally { setIsLoading(false) }
-  }, [jobId, options?.status, options?.limit, supabase])
+  }, [jobId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { applications, isLoading, refresh: fetch }
 }
@@ -93,7 +93,7 @@ export function useUserApplications(userId?: string, options?: { status?: string
       const { data } = await query.order('applied_at', { ascending: false })
       setApplications(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { applications, isLoading, refresh: fetch }
 }
@@ -145,7 +145,7 @@ export function useHasApplied(jobId?: string, userId?: string) {
     if (!jobId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('job_applications').select('*').eq('job_id', jobId).eq('applicant_id', userId).single(); setHasApplied(!!data); setApplication(data) } finally { setIsLoading(false) }
-  }, [jobId, userId, supabase])
+  }, [jobId, userId])
   useEffect(() => { check() }, [check])
   return { hasApplied, application, isLoading, recheck: check }
 }
@@ -163,7 +163,7 @@ export function useCompanyJobs(companyId?: string, options?: { status?: string }
       const { data } = await query.order('created_at', { ascending: false })
       setJobs(data || [])
     } finally { setIsLoading(false) }
-  }, [companyId, options?.status, supabase])
+  }, [companyId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }

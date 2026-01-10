@@ -38,7 +38,7 @@ export function useRentals(options?: { customer_id?: string; user_id?: string; s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRentals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.customer_id, options?.user_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.customer_id, options?.user_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rentals, isLoading, refresh: fetch }
 }
@@ -114,7 +114,7 @@ export function useRentalInventory(options?: { category?: string; is_available?:
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setInventory(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_available, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.is_available, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { inventory, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useRentalStats(options?: { from_date?: string; to_date?: string 
       const totalRevenue = rentals.filter(r => r.status === 'completed').reduce((sum, r) => sum + (r.total_amount || 0), 0)
       setStats({ total, active, completed, cancelled, totalRevenue })
     } finally { setIsLoading(false) }
-  }, [options?.from_date, options?.to_date, supabase])
+  }, [options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -156,7 +156,7 @@ export function useCustomerRentals(customerId?: string, options?: { status?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setRentals(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.status, options?.limit, supabase])
+  }, [customerId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rentals, isLoading, refresh: fetch }
 }
@@ -173,7 +173,7 @@ export function useUpcomingReturns(options?: { days?: number; limit?: number }) 
       const { data } = await supabase.from('rentals').select('*, rental_items(*), customers(*)').eq('status', 'active').gte('end_date', now.toISOString()).lte('end_date', futureDate.toISOString()).order('end_date', { ascending: true }).limit(options?.limit || 20)
       setRentals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.days, options?.limit, supabase])
+  }, [options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rentals, isLoading, refresh: fetch }
 }

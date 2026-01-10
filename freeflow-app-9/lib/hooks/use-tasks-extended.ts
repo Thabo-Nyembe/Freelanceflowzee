@@ -47,7 +47,7 @@ export function useTasks(options?: { project_id?: string; status?: string; prior
       }
       setTasks(result)
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.status, options?.priority, options?.assignee_id, options?.parent_id, options?.overdue, options?.search, options?.limit, supabase])
+  }, [options?.project_id, options?.status, options?.priority, options?.assignee_id, options?.parent_id, options?.overdue, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useMyTasks(userId?: string, options?: { status?: string; priorit
       const { data } = await query.order('due_date', { ascending: true }).limit(options?.limit || 100)
       setTasks(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.priority, options?.limit, supabase])
+  }, [userId, options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }
@@ -116,7 +116,7 @@ export function useTaskComments(taskId?: string, options?: { limit?: number }) {
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('task_comments').select('*, users(*)').eq('task_id', taskId).is('parent_id', null).order('created_at', { ascending: true }).limit(options?.limit || 100); setComments(data || []) } finally { setIsLoading(false) }
-  }, [taskId, options?.limit, supabase])
+  }, [taskId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -139,7 +139,7 @@ export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; f
       setTimeLogs(logs)
       setTotalHours(logs.reduce((sum, l) => sum + (l.hours || 0), 0))
     } finally { setIsLoading(false) }
-  }, [taskId, options?.user_id, options?.from_date, options?.to_date, supabase])
+  }, [taskId, options?.user_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { timeLogs, totalHours, isLoading, refresh: fetch }
 }
@@ -183,7 +183,7 @@ export function useOverdueTasks(options?: { project_id?: string; assignee_id?: s
       }
       setTasks(result)
     } finally { setIsLoading(false) }
-  }, [options?.project_id, options?.assignee_id, options?.limit, supabase])
+  }, [options?.project_id, options?.assignee_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tasks, isLoading, refresh: fetch }
 }

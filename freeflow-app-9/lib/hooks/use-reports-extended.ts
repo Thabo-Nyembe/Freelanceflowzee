@@ -39,7 +39,7 @@ export function useReports(options?: { user_id?: string; organization_id?: strin
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.organization_id, options?.type, options?.template_id, options?.status, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.user_id, options?.organization_id, options?.type, options?.template_id, options?.status, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useMyReports(userId?: string, options?: { type?: string; status?
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.status, options?.limit, supabase])
+  }, [userId, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useReportTemplates(options?: { type?: string; category?: string;
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.category, options?.is_active, supabase])
+  }, [options?.type, options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -116,7 +116,7 @@ export function useReportExports(reportId?: string, options?: { limit?: number }
     if (!reportId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('report_exports').select('*, users(*)').eq('report_id', reportId).order('created_at', { ascending: false }).limit(options?.limit || 20); setExports(data || []) } finally { setIsLoading(false) }
-  }, [reportId, options?.limit, supabase])
+  }, [reportId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { exports, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function usePublicReports(options?: { type?: string; search?: string; lim
       const { data } = await query.order('run_count', { ascending: false }).limit(options?.limit || 20)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.search, options?.limit, supabase])
+  }, [options?.type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -150,7 +150,7 @@ export function useRecentReports(userId?: string, options?: { limit?: number }) 
       const { data } = await supabase.from('reports').select('*, report_templates(*)').eq('user_id', userId).not('last_run_at', 'is', null).order('last_run_at', { ascending: false }).limit(options?.limit || 10)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function useScheduledReports(options?: { is_active?: boolean; limit?: num
       const { data } = await query.order('next_run_at', { ascending: true }).limit(options?.limit || 50)
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.limit, supabase])
+  }, [options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }

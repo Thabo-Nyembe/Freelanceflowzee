@@ -58,7 +58,7 @@ export function useOnlineUsers(options?: { channel_id?: string; limit?: number }
       const { data } = await query.order('last_seen', { ascending: false }).limit(options?.limit || 100)
       setUsers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.channel_id, options?.limit, supabase])
+  }, [options?.channel_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { users, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useBulkPresence(userIds?: string[]) {
       data?.forEach(p => { map[p.user_id] = p })
       setPresenceMap(map)
     } finally { setIsLoading(false) }
-  }, [userIds?.join(','), supabase])
+  }, [userIds?.join(',')])
   useEffect(() => { fetch() }, [fetch])
   return { presenceMap, isLoading, refresh: fetch }
 }
@@ -171,7 +171,7 @@ export function usePresenceHistory(userId?: string, options?: { from_date?: stri
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 100)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [userId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

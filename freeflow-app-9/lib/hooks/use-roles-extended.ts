@@ -36,7 +36,7 @@ export function useRoles(options?: { group_id?: string; is_active?: boolean; is_
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setRoles(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.group_id, options?.is_active, options?.is_system, options?.search, options?.limit, supabase])
+  }, [options?.group_id, options?.is_active, options?.is_system, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { roles, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useRoleUsers(roleId?: string, options?: { limit?: number }) {
       const { data } = await supabase.from('role_assignments').select('*, users(*)').eq('role_id', roleId).or('expires_at.is.null,expires_at.gt.' + new Date().toISOString()).limit(options?.limit || 100)
       setUsers(data || [])
     } finally { setIsLoading(false) }
-  }, [roleId, options?.limit, supabase])
+  }, [roleId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { users, isLoading, refresh: fetch }
 }
@@ -116,7 +116,7 @@ export function useRoleTemplates(options?: { category?: string; is_active?: bool
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

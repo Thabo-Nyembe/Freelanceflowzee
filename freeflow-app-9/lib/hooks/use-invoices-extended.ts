@@ -35,7 +35,7 @@ export function useInvoices(options?: { user_id?: string; client_id?: string; st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInvoices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.client_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.client_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { invoices, isLoading, refresh: fetch }
 }

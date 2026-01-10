@@ -37,7 +37,7 @@ export function useScripts(options?: { scriptType?: string; language?: string; i
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.scriptType, options?.language, options?.isActive, supabase])
+  }, [options?.scriptType, options?.language, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useScriptExecutions(scriptId?: string, limit = 50) {
       const { data: result } = await supabase.from('script_executions').select('*').eq('script_id', scriptId).order('executed_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [scriptId, limit, supabase])
+  }, [scriptId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

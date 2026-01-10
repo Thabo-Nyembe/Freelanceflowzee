@@ -20,7 +20,7 @@ export function useEvents(status?: string, eventType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [status, eventType, supabase])
+  }, [status, eventType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -42,7 +42,7 @@ export function useWalletTransactions(walletId?: string, options?: { type?: stri
     if (!walletId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('wallet_transactions').select('*').eq('wallet_id', walletId); if (options?.type) query = query.eq('type', options.type); const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50); setTransactions(data || []) } finally { setIsLoading(false) }
-  }, [walletId, options?.type, options?.limit, supabase])
+  }, [walletId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { transactions, isLoading, refresh: fetch }
 }

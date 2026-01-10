@@ -35,7 +35,7 @@ export function useLiveStreams(options?: { user_id?: string; status?: string; ca
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setStreams(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.category, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { streams, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useActiveStreams(options?: { category?: string; limit?: number }
       const { data } = await query.order('viewer_count', { ascending: false }).limit(options?.limit || 20)
       setStreams(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { streams, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useLiveChat(streamId?: string, options?: { limit?: number }) {
     if (!streamId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('live_chat').select('*').eq('stream_id', streamId).order('sent_at', { ascending: true }).limit(options?.limit || 100); setMessages(data || []) } finally { setIsLoading(false) }
-  }, [streamId, options?.limit, supabase])
+  }, [streamId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
 
   useEffect(() => {
@@ -145,7 +145,7 @@ export function useMyStreams(userId?: string, options?: { status?: string }) {
       const { data } = await query.order('created_at', { ascending: false })
       setStreams(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { streams, isLoading, refresh: fetch }
 }
@@ -162,7 +162,7 @@ export function useScheduledStreams(options?: { user_id?: string; limit?: number
       const { data } = await query.order('scheduled_at', { ascending: true }).limit(options?.limit || 20)
       setStreams(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.limit, supabase])
+  }, [options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { streams, isLoading, refresh: fetch }
 }

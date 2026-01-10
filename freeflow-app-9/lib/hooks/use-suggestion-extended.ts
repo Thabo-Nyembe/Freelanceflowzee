@@ -40,7 +40,7 @@ export function useSuggestions(options?: { user_id?: string; type?: string; stat
       const { data } = await query.order('score', { ascending: false }).order('priority', { ascending: false }).limit(options?.limit || 50)
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.target_id, options?.target_type, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.target_id, options?.target_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { suggestions, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function usePendingSuggestions(userId?: string, options?: { type?: string
       const { data } = await query.order('score', { ascending: false }).order('priority', { ascending: false }).limit(options?.limit || 20)
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { suggestions, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useTopSuggestions(userId?: string, options?: { type?: string; li
       const { data } = await query.order('score', { ascending: false }).limit(options?.limit || 5)
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { suggestions, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useSuggestionsByType(userId?: string, type?: string, options?: {
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, type, options?.status, options?.limit, supabase])
+  }, [userId, type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { suggestions, isLoading, refresh: fetch }
 }
@@ -151,7 +151,7 @@ export function useAcceptedSuggestions(userId?: string, options?: { type?: strin
       const { data } = await query.order('accepted_at', { ascending: false }).limit(options?.limit || 50)
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { suggestions, isLoading, refresh: fetch }
 }
@@ -197,7 +197,7 @@ export function useSuggestionCount(userId?: string, options?: { type?: string; s
       const { count: total } = await query
       setCount(total || 0)
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.status, supabase])
+  }, [userId, options?.type, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -215,7 +215,7 @@ export function useRelatedSuggestions(suggestionId?: string, options?: { limit?:
       const { data } = await supabase.from('suggestions').select('*').eq('user_id', suggestion.user_id).eq('type', suggestion.type).neq('id', suggestionId).eq('status', 'pending').order('score', { ascending: false }).limit(options?.limit || 5)
       setSuggestions(data || [])
     } finally { setIsLoading(false) }
-  }, [suggestionId, options?.limit, supabase])
+  }, [suggestionId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { suggestions, isLoading, refresh: fetch }
 }

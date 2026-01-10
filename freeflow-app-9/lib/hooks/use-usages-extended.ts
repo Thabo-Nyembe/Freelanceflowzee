@@ -37,7 +37,7 @@ export function useUsages(options?: { user_id?: string; resource_type?: string; 
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setUsages(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.resource_type, options?.metric_name, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.user_id, options?.resource_type, options?.metric_name, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { usages, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useUsageSummary(userId?: string, period: string = 'monthly') {
       })
       setSummary(result)
     } finally { setIsLoading(false) }
-  }, [userId, period, supabase])
+  }, [userId, period])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useLimitStatus(userId?: string, resourceType?: string, metricNam
         periodStart: periodStart.toISOString()
       })
     } finally { setIsLoading(false) }
-  }, [userId, resourceType, metricName, supabase])
+  }, [userId, resourceType, metricName])
   useEffect(() => { fetch() }, [fetch])
   return { status, isLoading, refresh: fetch }
 }
@@ -150,7 +150,7 @@ export function useUsageAlerts(userId?: string, options?: { alert_type?: string;
       setAlerts(data || [])
       setUnreadCount(data?.filter(a => !a.is_read).length || 0)
     } finally { setIsLoading(false) }
-  }, [userId, options?.alert_type, options?.is_read, options?.limit, supabase])
+  }, [userId, options?.alert_type, options?.is_read, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, unreadCount, isLoading, refresh: fetch }
 }
@@ -163,7 +163,7 @@ export function useUsageReports(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('usage_reports').select('*').eq('user_id', userId).order('generated_at', { ascending: false }).limit(options?.limit || 20); setReports(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -181,7 +181,7 @@ export function useUsageBilling(userId?: string, options?: { status?: string; li
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setBilling(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { billing, isLoading, refresh: fetch }
 }
@@ -202,7 +202,7 @@ export function useResourceUsage(userId?: string, resourceType?: string, options
       })
       setUsage(result)
     } finally { setIsLoading(false) }
-  }, [userId, resourceType, options?.period, supabase])
+  }, [userId, resourceType, options?.period])
   useEffect(() => { fetch() }, [fetch])
   return { usage, isLoading, refresh: fetch }
 }
@@ -255,7 +255,7 @@ export function useUsageTrend(userId?: string, metricName?: string, options?: { 
       })
       setTrend(Object.entries(dailyTotals).map(([date, total]) => ({ date, total })))
     } finally { setIsLoading(false) }
-  }, [userId, metricName, options?.days, supabase])
+  }, [userId, metricName, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { trend, isLoading, refresh: fetch }
 }

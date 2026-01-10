@@ -34,7 +34,7 @@ export function useAttributionSources(options?: { user_id?: string; type?: strin
       const { data } = await query.order('click_count', { ascending: false }).limit(options?.limit || 50)
       setSources(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sources, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useTopAttributionSources(userId?: string, options?: { by?: 'clic
       const { data } = await supabase.from('attribution_sources').select('*').eq('user_id', userId).order(orderBy, { ascending: false }).limit(options?.limit || 10)
       setSources(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.by, options?.limit, supabase])
+  }, [userId, options?.by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { sources, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useAttributionConversions(sourceId?: string, options?: { limit?:
     if (!sourceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('attribution_conversions').select('*').eq('source_id', sourceId).order('created_at', { ascending: false }).limit(options?.limit || 50); setConversions(data || []) } finally { setIsLoading(false) }
-  }, [sourceId, options?.limit, supabase])
+  }, [sourceId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { conversions, isLoading, refresh: fetch }
 }

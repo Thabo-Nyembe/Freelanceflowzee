@@ -38,7 +38,7 @@ export function useInteractions(options?: { user_id?: string; target_id?: string
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setInteractions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.target_id, options?.target_type, options?.interaction_type, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.user_id, options?.target_id, options?.target_type, options?.interaction_type, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { interactions, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useUserInteractions(userId?: string, options?: { target_type?: s
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInteractions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.target_type, options?.limit, supabase])
+  }, [userId, options?.target_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { interactions, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useTargetInteractions(targetId?: string, targetType?: string, op
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setInteractions(data || [])
     } finally { setIsLoading(false) }
-  }, [targetId, targetType, options?.interaction_type, options?.limit, supabase])
+  }, [targetId, targetType, options?.interaction_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { interactions, isLoading, refresh: fetch }
 }
@@ -92,7 +92,7 @@ export function useInteractionTypes(options?: { category?: string; is_active?: b
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -105,7 +105,7 @@ export function useInteractionLogs(interactionId?: string, options?: { limit?: n
     if (!interactionId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('interaction_logs').select('*').eq('interaction_id', interactionId).order('logged_at', { ascending: false }).limit(options?.limit || 50); setLogs(data || []) } finally { setIsLoading(false) }
-  }, [interactionId, options?.limit, supabase])
+  }, [interactionId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function useInteractionAnalytics(options?: { target_type?: string; intera
       const { data } = await query.order('date', { ascending: false }).limit(30)
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.target_type, options?.interaction_type, options?.from_date, options?.to_date, supabase])
+  }, [options?.target_type, options?.interaction_type, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }
@@ -143,7 +143,7 @@ export function useInteractionRules(options?: { trigger_type?: string; is_active
       const { data } = await query.order('name', { ascending: true })
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.trigger_type, options?.is_active, supabase])
+  }, [options?.trigger_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -161,7 +161,7 @@ export function useInteractionCount(targetId?: string, targetType?: string, inte
       const { count: c } = await query
       setCount(c || 0)
     } finally { setIsLoading(false) }
-  }, [targetId, targetType, interactionType, supabase])
+  }, [targetId, targetType, interactionType])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }

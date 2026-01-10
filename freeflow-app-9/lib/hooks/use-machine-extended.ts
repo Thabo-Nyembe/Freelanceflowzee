@@ -35,7 +35,7 @@ export function useMLModels(options?: { model_type?: string; status?: string; or
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setModels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.model_type, options?.status, options?.organization_id, options?.limit, supabase])
+  }, [options?.model_type, options?.status, options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { models, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useTrainingJobs(modelId?: string, options?: { status?: string; l
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setJobs(data || [])
     } finally { setIsLoading(false) }
-  }, [modelId, options?.status, options?.limit, supabase])
+  }, [modelId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useDatasets(options?: { organization_id?: string; status?: strin
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setDatasets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.status, options?.limit, supabase])
+  }, [options?.organization_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { datasets, isLoading, refresh: fetch }
 }
@@ -136,7 +136,7 @@ export function usePredictions(modelId?: string, options?: { limit?: number }) {
     if (!modelId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('machine_predictions').select('*').eq('model_id', modelId).order('created_at', { ascending: false }).limit(options?.limit || 100); setPredictions(data || []) } finally { setIsLoading(false) }
-  }, [modelId, options?.limit, supabase])
+  }, [modelId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { predictions, isLoading, refresh: fetch }
 }

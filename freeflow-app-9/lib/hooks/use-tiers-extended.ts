@@ -35,7 +35,7 @@ export function useTiers(options?: { tier_type?: string; is_public?: boolean; st
       const { data } = await query.order('tier_level', { ascending: true }).limit(options?.limit || 20)
       setTiers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.tier_type, options?.is_public, options?.status, options?.limit, supabase])
+  }, [options?.tier_type, options?.is_public, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tiers, isLoading, refresh: fetch }
 }
@@ -110,7 +110,7 @@ export function useTierPricing(tierId?: string, options?: { billing_period?: str
       const { data } = await query.order('price', { ascending: true })
       setPricing(data || [])
     } finally { setIsLoading(false) }
-  }, [tierId, options?.billing_period, supabase])
+  }, [tierId, options?.billing_period])
   useEffect(() => { fetch() }, [fetch])
   return { pricing, isLoading, refresh: fetch }
 }
@@ -128,7 +128,7 @@ export function useTierSubscription(entityType?: string, entityId?: string) {
       setSubscription(data)
       setTier(data?.tiers || null)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { subscription, tier, isLoading, refresh: fetch }
 }
@@ -147,7 +147,7 @@ export function useFeatureAccess(entityType?: string, entityId?: string, feature
       setFeature(feat || null)
       setHasAccess(feat?.is_enabled || false)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, featureKey, supabase])
+  }, [entityType, entityId, featureKey])
   useEffect(() => { fetch() }, [fetch])
   return { hasAccess, feature, isLoading, refresh: fetch }
 }
@@ -174,7 +174,7 @@ export function useLimitCheck(entityType?: string, entityId?: string, limitKey?:
         setRemaining(null)
       }
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, limitKey, currentUsage, supabase])
+  }, [entityType, entityId, limitKey, currentUsage])
   useEffect(() => { fetch() }, [fetch])
   return { withinLimit, limit, remaining, isLoading, refresh: fetch }
 }

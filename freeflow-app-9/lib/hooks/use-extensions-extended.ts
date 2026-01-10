@@ -36,7 +36,7 @@ export function useExtensions(options?: { category?: string; status?: string; de
       const { data } = await query.order('install_count', { ascending: false }).limit(options?.limit || 50)
       setExtensions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.status, options?.developer_id, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.status, options?.developer_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { extensions, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUserExtensions(userId?: string, options?: { is_active?: boole
       const { data } = await query.order('installed_at', { ascending: false })
       setExtensions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, supabase])
+  }, [userId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { extensions, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useIsExtensionInstalled(extensionId?: string, userId?: string) {
     if (!extensionId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extension_installs').select('*').eq('extension_id', extensionId).eq('user_id', userId).single(); setIsInstalled(!!data); setInstall(data) } finally { setIsLoading(false) }
-  }, [extensionId, userId, supabase])
+  }, [extensionId, userId])
   useEffect(() => { check() }, [check])
   return { isInstalled, install, isLoading, recheck: check }
 }
@@ -81,7 +81,7 @@ export function useExtensionSettings(extensionId?: string, userId?: string) {
     if (!extensionId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('extension_settings').select('*').eq('extension_id', extensionId).eq('user_id', userId).single(); setSettings(data?.settings || null) } finally { setIsLoading(false) }
-  }, [extensionId, userId, supabase])
+  }, [extensionId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { settings, isLoading, refresh: fetch }
 }

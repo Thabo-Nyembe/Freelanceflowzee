@@ -35,7 +35,7 @@ export function useUserDashboards(userId?: string, options?: { type?: string; is
       const { data } = await query.order('name', { ascending: true })
       setDashboards(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.is_default, supabase])
+  }, [userId, options?.type, options?.is_default])
   useEffect(() => { fetch() }, [fetch])
   return { dashboards, isLoading, refresh: fetch }
 }
@@ -92,7 +92,7 @@ export function useDefaultDashboard(userId?: string, type?: string) {
       const { data } = await query.single()
       setDashboard(data)
     } finally { setIsLoading(false) }
-  }, [userId, type, supabase])
+  }, [userId, type])
   useEffect(() => { fetch() }, [fetch])
   return { dashboard, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function usePublicDashboards(options?: { type?: string; limit?: number })
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setDashboards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { dashboards, isLoading, refresh: fetch }
 }

@@ -38,7 +38,7 @@ export function useRecommendations(options: { user_id: string; entity_type?: str
       const { data } = await query.order('score', { ascending: false }).limit(options.limit || 20)
       setRecommendations(data || [])
     } finally { setIsLoading(false) }
-  }, [options.user_id, options.entity_type, options.model_id, options.status, options.min_score, options.limit, supabase])
+  }, [options.user_id, options.entity_type, options.model_id, options.status, options.min_score, options.limit])
   useEffect(() => { fetch() }, [fetch])
   return { recommendations, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useTopRecommendations(userId?: string, entityType?: string, limi
       const { data } = await supabase.from('recommendations').select('*').eq('user_id', userId).eq('entity_type', entityType).eq('status', 'active').order('score', { ascending: false }).limit(limit || 10)
       setRecommendations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, entityType, limit, supabase])
+  }, [userId, entityType, limit])
   useEffect(() => { fetch() }, [fetch])
   return { recommendations, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useRecommendationModels(options?: { type?: string; is_active?: b
       const { data } = await query.order('name', { ascending: true })
       setModels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { models, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useRecommendationStats(options?: { model_id?: string; entity_typ
       const conversionRate = accepted > 0 ? Math.round((converted / accepted) * 100) : 0
       setStats({ total, active, accepted, dismissed, converted, acceptanceRate, conversionRate })
     } finally { setIsLoading(false) }
-  }, [options?.model_id, options?.entity_type, options?.from_date, options?.to_date, supabase])
+  }, [options?.model_id, options?.entity_type, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useSimilarItems(entityType?: string, entityId?: string, limit?: 
       const { data } = await supabase.from('recommendation_scores').select('*').eq('source_entity_type', entityType).eq('source_entity_id', entityId).order('similarity_score', { ascending: false }).limit(limit || 10)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, limit, supabase])
+  }, [entityType, entityId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -147,7 +147,7 @@ export function useMyRecommendationHistory(userId?: string, options?: { entity_t
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.entity_type, options?.limit, supabase])
+  }, [userId, options?.entity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -165,7 +165,7 @@ export function usePersonalizedRecommendations(userId?: string, options?: { cate
       const { data } = await query.order('score', { ascending: false }).limit(options?.limit || 20)
       setRecommendations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.categories?.join(','), options?.limit, supabase])
+  }, [userId, options?.categories?.join(','), options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { recommendations, isLoading, refresh: fetch }
 }

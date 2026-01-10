@@ -38,7 +38,7 @@ export function useTutorials(options?: { category?: string; difficulty?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setTutorials(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.difficulty, options?.is_published, options?.is_featured, options?.author_id, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.difficulty, options?.is_published, options?.is_featured, options?.author_id, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tutorials, isLoading, refresh: fetch }
 }
@@ -64,7 +64,7 @@ export function useTutorialProgress(tutorialId?: string, userId?: string) {
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_progress').select('*').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setProgress(data) } finally { setIsLoading(false) }
-  }, [tutorialId, userId, supabase])
+  }, [tutorialId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -83,7 +83,7 @@ export function useMyTutorialProgress(userId?: string, options?: { is_completed?
       const { data } = await query.order('last_accessed_at', { ascending: false }).limit(options?.limit || 50)
       setProgress(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_completed, options?.limit, supabase])
+  }, [userId, options?.is_completed, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -96,7 +96,7 @@ export function useTutorialCompletions(tutorialId?: string, options?: { limit?: 
     if (!tutorialId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_completions').select('*, users(*)').eq('tutorial_id', tutorialId).order('completed_at', { ascending: false }).limit(options?.limit || 50); setCompletions(data || []) } finally { setIsLoading(false) }
-  }, [tutorialId, options?.limit, supabase])
+  }, [tutorialId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { completions, count: completions.length, isLoading, refresh: fetch }
 }
@@ -109,7 +109,7 @@ export function useMyBookmarks(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_bookmarks').select('*, tutorials(*)').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setBookmarks(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookmarks, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useIsBookmarked(tutorialId?: string, userId?: string) {
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_bookmarks').select('id').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setIsBookmarked(!!data) } finally { setIsLoading(false) }
-  }, [tutorialId, userId, supabase])
+  }, [tutorialId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { isBookmarked, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useTutorialRatings(tutorialId?: string, options?: { limit?: numb
       setRatings(allRatings)
       setAverage(allRatings.length > 0 ? allRatings.reduce((sum, r) => sum + r.rating, 0) / allRatings.length : 0)
     } finally { setIsLoading(false) }
-  }, [tutorialId, options?.limit, supabase])
+  }, [tutorialId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { ratings, average: Math.round(average * 10) / 10, count: ratings.length, isLoading, refresh: fetch }
 }
@@ -154,7 +154,7 @@ export function useMyRating(tutorialId?: string, userId?: string) {
     if (!tutorialId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('tutorial_ratings').select('*').eq('tutorial_id', tutorialId).eq('user_id', userId).single(); setRating(data) } finally { setIsLoading(false) }
-  }, [tutorialId, userId, supabase])
+  }, [tutorialId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { rating, isLoading, refresh: fetch }
 }
@@ -171,7 +171,7 @@ export function useFeaturedTutorials(options?: { category?: string; limit?: numb
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 10)
       setTutorials(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tutorials, isLoading, refresh: fetch }
 }
@@ -188,7 +188,7 @@ export function usePopularTutorials(options?: { category?: string; limit?: numbe
       const { data } = await query.order('view_count', { ascending: false }).limit(options?.limit || 10)
       setTutorials(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tutorials, isLoading, refresh: fetch }
 }

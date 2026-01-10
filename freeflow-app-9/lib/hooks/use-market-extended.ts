@@ -35,7 +35,7 @@ export function useMarkets(options?: { type?: string; region?: string; is_active
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setMarkets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.region, options?.is_active, options?.limit, supabase])
+  }, [options?.type, options?.region, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { markets, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useMarketData(marketId?: string, options?: { date_from?: string;
       const { data: result } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [marketId, options?.date_from, options?.date_to, options?.limit, supabase])
+  }, [marketId, options?.date_from, options?.date_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useMarketTrends(options?: { market_id?: string; type?: string; l
       const { data } = await query.order('trend_score', { ascending: false }).limit(options?.limit || 20)
       setTrends(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.market_id, options?.type, options?.limit, supabase])
+  }, [options?.market_id, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { trends, isLoading, refresh: fetch }
 }

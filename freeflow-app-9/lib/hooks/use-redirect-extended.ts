@@ -52,7 +52,7 @@ export function useRedirects(filters?: { userId?: string; isActive?: boolean }) 
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [filters?.userId, filters?.isActive, supabase])
+  }, [filters?.userId, filters?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

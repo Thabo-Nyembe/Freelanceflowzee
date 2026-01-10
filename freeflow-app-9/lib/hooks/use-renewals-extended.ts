@@ -35,7 +35,7 @@ export function useRenewals(options?: { user_id?: string; status?: string; type?
       const { data } = await query.order('renewal_date', { ascending: true }).limit(options?.limit || 50)
       setRenewals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.type, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { renewals, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useUpcomingRenewals(userId?: string, daysAhead?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const futureDate = new Date(); futureDate.setDate(futureDate.getDate() + (daysAhead || 30)); const { data } = await supabase.from('renewals').select('*').eq('user_id', userId).eq('status', 'pending').lte('renewal_date', futureDate.toISOString()).gte('renewal_date', new Date().toISOString()).order('renewal_date', { ascending: true }); setRenewals(data || []) } finally { setIsLoading(false) }
-  }, [userId, daysAhead, supabase])
+  }, [userId, daysAhead])
   useEffect(() => { fetch() }, [fetch])
   return { renewals, isLoading, refresh: fetch }
 }

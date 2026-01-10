@@ -37,7 +37,7 @@ export function useNotes(userId?: string, options?: { folder_id?: string; is_arc
       const { data } = await query.order('is_pinned', { ascending: false }).order('updated_at', { ascending: false }).limit(options?.limit || 100)
       setNotes(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.folder_id, options?.is_archived, options?.is_pinned, options?.search, options?.limit, supabase])
+  }, [userId, options?.folder_id, options?.is_archived, options?.is_pinned, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useNoteFolders(userId?: string, parentId?: string | null) {
       const { data } = await query.order('name', { ascending: true })
       setFolders(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, parentId, supabase])
+  }, [userId, parentId])
   useEffect(() => { fetch() }, [fetch])
   return { folders, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useNoteVersions(noteId?: string, options?: { limit?: number }) {
     if (!noteId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('note_versions').select('*').eq('note_id', noteId).order('created_at', { ascending: false }).limit(options?.limit || 20); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [noteId, options?.limit, supabase])
+  }, [noteId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -152,7 +152,7 @@ export function useRecentNotes(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('notes').select('*, note_folders(*)').eq('user_id', userId).eq('is_archived', false).order('updated_at', { ascending: false }).limit(options?.limit || 10); setNotes(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }

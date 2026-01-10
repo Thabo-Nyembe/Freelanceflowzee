@@ -35,7 +35,7 @@ export function useLearningPaths(options?: { category?: string; difficulty?: str
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPaths(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.difficulty, options?.status, options?.limit, supabase])
+  }, [options?.category, options?.difficulty, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { paths, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useMyLearningProgress(userId?: string, options?: { status?: stri
       const { data } = await query.order('updated_at', { ascending: false })
       setProgress(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function usePathProgress(userId?: string, pathId?: string) {
     if (!userId || !pathId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('learning_progress').select('*, learning_paths(*)').eq('user_id', userId).eq('path_id', pathId).single(); setProgress(data) } finally { setIsLoading(false) }
-  }, [userId, pathId, supabase])
+  }, [userId, pathId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -123,7 +123,7 @@ export function useLearningSearch(query?: string, options?: { category?: string;
       const { data } = await dbQuery.order('enrollment_count', { ascending: false }).limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [query, options?.category, options?.limit, supabase])
+  }, [query, options?.category, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -153,7 +153,7 @@ export function useModuleCompletions(userId?: string, pathId?: string) {
       const { data: completions } = await supabase.from('learning_module_completions').select('module_id').eq('user_id', userId).in('module_id', moduleIds)
       setCompletedModules(completions?.map(c => c.module_id) || [])
     } finally { setIsLoading(false) }
-  }, [userId, pathId, supabase])
+  }, [userId, pathId])
   useEffect(() => { fetch() }, [fetch])
   return { completedModules, isLoading, refresh: fetch }
 }

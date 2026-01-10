@@ -34,7 +34,7 @@ export function usePlatforms(options?: { type?: string; status?: string; limit?:
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setPlatforms(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.status, options?.limit, supabase])
+  }, [options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { platforms, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function usePlatformAnalytics(platformId?: string, options?: { date_from?
       const { data } = await query.order('date', { ascending: false })
       setAnalytics(data || [])
     } finally { setIsLoading(false) }
-  }, [platformId, options?.date_from, options?.date_to, supabase])
+  }, [platformId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }

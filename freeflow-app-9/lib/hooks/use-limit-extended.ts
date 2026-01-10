@@ -18,7 +18,7 @@ export function useLimit(entityId?: string, entityType?: string, limitType?: str
       const { data } = await supabase.from('limits').select('*').eq('entity_id', entityId).eq('entity_type', entityType).eq('limit_type', limitType).single()
       setLimit(data)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, limitType, supabase])
+  }, [entityId, entityType, limitType])
   useEffect(() => { fetch() }, [fetch])
   return { limit, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useLimits(entityId?: string, entityType?: string) {
       const { data: result } = await supabase.from('limits').select('*').eq('entity_id', entityId).eq('entity_type', entityType)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useLimitCheck(entityId?: string, entityType?: string, limitType?
         setRemaining(Math.max(0, data.max_value - currentValue))
       }
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, limitType, currentValue, supabase])
+  }, [entityId, entityType, limitType, currentValue])
   useEffect(() => { check() }, [check])
   return { allowed, remaining, isLoading, refresh: check }
 }

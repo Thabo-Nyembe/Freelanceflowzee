@@ -37,7 +37,7 @@ export function useExperiences(options?: { host_id?: string; category?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setExperiences(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.host_id, options?.category, options?.status, options?.price_max, options?.search, options?.limit, supabase])
+  }, [options?.host_id, options?.category, options?.status, options?.price_max, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { experiences, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useExperienceBookings(experienceId?: string, options?: { status?
       const { data } = await query.order('scheduled_date', { ascending: true }).limit(options?.limit || 50)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [experienceId, options?.status, options?.date_from, options?.limit, supabase])
+  }, [experienceId, options?.status, options?.date_from, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -75,7 +75,7 @@ export function useUserExperienceBookings(userId?: string, options?: { status?: 
       const { data } = await query.order('scheduled_date', { ascending: options?.upcoming ?? true }).limit(options?.limit || 50)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.upcoming, options?.limit, supabase])
+  }, [userId, options?.status, options?.upcoming, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -88,7 +88,7 @@ export function useExperienceReviews(experienceId?: string, options?: { limit?: 
     if (!experienceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('experience_reviews').select('*').eq('experience_id', experienceId).order('created_at', { ascending: false }).limit(options?.limit || 20); setReviews(data || []) } finally { setIsLoading(false) }
-  }, [experienceId, options?.limit, supabase])
+  }, [experienceId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reviews, isLoading, refresh: fetch }
 }

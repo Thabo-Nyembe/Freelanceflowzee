@@ -39,7 +39,7 @@ export function useReminders(options?: { user_id?: string; entity_type?: string;
       const { data } = await query.order('remind_at', { ascending: true }).limit(options?.limit || 50)
       setReminders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.entity_type, options?.entity_id, options?.status, options?.priority, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.user_id, options?.entity_type, options?.entity_id, options?.status, options?.priority, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useUpcomingReminders(userId?: string, options?: { hours?: number
       const { data } = await supabase.from('reminders').select('*, reminder_recipients(*)').eq('user_id', userId).eq('status', 'pending').gte('remind_at', now.toISOString()).lte('remind_at', futureDate.toISOString()).order('remind_at', { ascending: true }).limit(options?.limit || 20)
       setReminders(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.hours, options?.limit, supabase])
+  }, [userId, options?.hours, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useOverdueReminders(userId?: string, options?: { limit?: number 
       const { data } = await supabase.from('reminders').select('*, reminder_recipients(*)').eq('user_id', userId).eq('status', 'pending').lt('remind_at', now.toISOString()).order('remind_at', { ascending: false }).limit(options?.limit || 20)
       setReminders(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }
@@ -124,7 +124,7 @@ export function useReminderTemplates(options?: { category?: string; is_active?: 
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -153,7 +153,7 @@ export function useMyPendingReminders(userId?: string, options?: { limit?: numbe
       const { data } = await supabase.from('reminders').select('*').eq('user_id', userId).eq('status', 'pending').order('remind_at', { ascending: true }).limit(options?.limit || 50)
       setReminders(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }
@@ -169,7 +169,7 @@ export function useSnoozedReminders(userId?: string, options?: { limit?: number 
       const { data } = await supabase.from('reminders').select('*').eq('user_id', userId).eq('status', 'snoozed').order('snoozed_until', { ascending: true }).limit(options?.limit || 20)
       setReminders(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }
@@ -185,7 +185,7 @@ export function useHighPriorityReminders(userId?: string, options?: { limit?: nu
       const { data } = await supabase.from('reminders').select('*').eq('user_id', userId).eq('priority', 'high').eq('status', 'pending').order('remind_at', { ascending: true }).limit(options?.limit || 20)
       setReminders(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reminders, isLoading, refresh: fetch }
 }

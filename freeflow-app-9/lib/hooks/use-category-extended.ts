@@ -21,7 +21,7 @@ export function useCategories(parentId?: string | null, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [parentId, isActive, supabase])
+  }, [parentId, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

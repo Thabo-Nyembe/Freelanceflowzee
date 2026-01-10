@@ -38,7 +38,7 @@ export function useReservations(options?: { resource_id?: string; user_id?: stri
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 50)
       setReservations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.resource_id, options?.user_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit, supabase])
+  }, [options?.resource_id, options?.user_id, options?.status, options?.from_date, options?.to_date, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reservations, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useMyReservations(userId?: string, options?: { status?: string; 
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 50)
       setReservations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.upcoming_only, options?.limit, supabase])
+  }, [userId, options?.status, options?.upcoming_only, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reservations, isLoading, refresh: fetch }
 }
@@ -89,7 +89,7 @@ export function useReservationResources(options?: { category?: string; is_availa
       const { data } = await query.order('name', { ascending: true })
       setResources(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_available, options?.location, supabase])
+  }, [options?.category, options?.is_available, options?.location])
   useEffect(() => { fetch() }, [fetch])
   return { resources, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useAvailableSlots(resourceId?: string, date?: string, options?: 
       }
       setSlots(generatedSlots)
     } finally { setIsLoading(false) }
-  }, [resourceId, date, options?.duration, supabase])
+  }, [resourceId, date, options?.duration])
   useEffect(() => { fetch() }, [fetch])
   return { slots, isLoading, refresh: fetch }
 }
@@ -181,7 +181,7 @@ export function useUpcomingReservations(options?: { resource_id?: string; days?:
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 50)
       setReservations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.resource_id, options?.days, options?.limit, supabase])
+  }, [options?.resource_id, options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reservations, isLoading, refresh: fetch }
 }
@@ -207,7 +207,7 @@ export function useReservationStats(options?: { resource_id?: string; from_date?
       const totalGuests = reservations.filter(r => r.status !== 'cancelled').reduce((sum, r) => sum + (r.guests || 1), 0)
       setStats({ total, pending, confirmed, completed, cancelled, totalGuests })
     } finally { setIsLoading(false) }
-  }, [options?.resource_id, options?.from_date, options?.to_date, supabase])
+  }, [options?.resource_id, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

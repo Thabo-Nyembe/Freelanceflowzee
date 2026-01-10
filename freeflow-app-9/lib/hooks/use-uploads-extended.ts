@@ -38,7 +38,7 @@ export function useUploads(options?: { uploaded_by?: string; mime_type?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setUploads(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.uploaded_by, options?.mime_type, options?.status, options?.folder_id, options?.is_public, options?.search, options?.limit, supabase])
+  }, [options?.uploaded_by, options?.mime_type, options?.status, options?.folder_id, options?.is_public, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { uploads, isLoading, refresh: fetch }
 }
@@ -57,7 +57,7 @@ export function useMyUploads(userId?: string, options?: { status?: string; folde
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setUploads(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.folder_id, options?.limit, supabase])
+  }, [userId, options?.status, options?.folder_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { uploads, isLoading, refresh: fetch }
 }
@@ -151,7 +151,7 @@ export function useSharedWithMe(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('upload_shares').select('*, uploads(*)').eq('shared_with', userId).eq('is_active', true).order('created_at', { ascending: false }).limit(options?.limit || 50); setUploads(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { uploads, isLoading, refresh: fetch }
 }
@@ -170,7 +170,7 @@ export function useRecentUploads(userId?: string, options?: { days?: number; lim
       const { data } = await supabase.from('uploads').select('*').eq('uploaded_by', userId).eq('status', 'completed').gte('created_at', sinceDate.toISOString()).order('created_at', { ascending: false }).limit(options?.limit || 20)
       setUploads(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.days, options?.limit, supabase])
+  }, [userId, options?.days, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { uploads, isLoading, refresh: fetch }
 }
@@ -183,7 +183,7 @@ export function useUploadsByType(userId?: string, mimeTypePrefix?: string, optio
     if (!userId || !mimeTypePrefix) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('uploads').select('*').eq('uploaded_by', userId).eq('status', 'completed').ilike('mime_type', `${mimeTypePrefix}%`).order('created_at', { ascending: false }).limit(options?.limit || 50); setUploads(data || []) } finally { setIsLoading(false) }
-  }, [userId, mimeTypePrefix, options?.limit, supabase])
+  }, [userId, mimeTypePrefix, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { uploads, isLoading, refresh: fetch }
 }

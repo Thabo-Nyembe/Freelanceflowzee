@@ -163,7 +163,7 @@ export function useGalleryProofingSelections(galleryId?: string, clientId?: stri
       const { data: result } = await query.order('selected_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [galleryId, clientId, supabase])
+  }, [galleryId, clientId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

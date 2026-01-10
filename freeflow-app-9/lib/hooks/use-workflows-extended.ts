@@ -34,7 +34,7 @@ export function useWorkflows(options?: { user_id?: string; is_active?: boolean; 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setWorkflows(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_active, options?.limit, supabase])
+  }, [options?.user_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { workflows, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useWorkflowRuns(workflowId?: string, options?: { status?: string
     if (!workflowId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('workflow_runs').select('*').eq('workflow_id', workflowId); if (options?.status) query = query.eq('status', options.status); const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50); setRuns(data || []) } finally { setIsLoading(false) }
-  }, [workflowId, options?.status, options?.limit, supabase])
+  }, [workflowId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { runs, isLoading, refresh: fetch }
 }

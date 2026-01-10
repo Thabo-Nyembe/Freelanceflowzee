@@ -34,7 +34,7 @@ export function useWebhooks(options?: { user_id?: string; is_active?: boolean; l
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setWebhooks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_active, options?.limit, supabase])
+  }, [options?.user_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { webhooks, isLoading, refresh: fetch }
 }
@@ -51,7 +51,7 @@ export function useWebhookEvents(options?: { event_type?: string; limit?: number
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setEvents(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.event_type, options?.limit, supabase])
+  }, [options?.event_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { events, isLoading, refresh: fetch }
 }
@@ -64,7 +64,7 @@ export function useWebhookDeliveries(webhookId?: string, options?: { status?: st
     if (!webhookId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('webhook_deliveries').select('*').eq('webhook_id', webhookId); if (options?.status) query = query.eq('status', options.status); const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50); setDeliveries(data || []) } finally { setIsLoading(false) }
-  }, [webhookId, options?.status, options?.limit, supabase])
+  }, [webhookId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { deliveries, isLoading, refresh: fetch }
 }
@@ -77,7 +77,7 @@ export function useWebhookLogs(webhookId?: string, options?: { limit?: number })
     if (!webhookId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('webhook_logs').select('*').eq('webhook_id', webhookId).order('created_at', { ascending: false }).limit(options?.limit || 100); setLogs(data || []) } finally { setIsLoading(false) }
-  }, [webhookId, options?.limit, supabase])
+  }, [webhookId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

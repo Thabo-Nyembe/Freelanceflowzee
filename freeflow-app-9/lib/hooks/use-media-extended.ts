@@ -20,7 +20,7 @@ export function useMedia(userId?: string, mediaType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, mediaType, supabase])
+  }, [userId, mediaType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

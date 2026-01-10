@@ -34,7 +34,7 @@ export function useAppearanceThemes(options?: { category?: string; is_public?: b
       const { data } = await query.order('name', { ascending: true })
       setThemes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_public, supabase])
+  }, [options?.category, options?.is_public])
   useEffect(() => { fetch() }, [fetch])
   return { themes, isLoading, refresh: fetch }
 }
@@ -64,7 +64,7 @@ export function usePublicThemes(options?: { category?: string; limit?: number })
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setThemes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.limit, supabase])
+  }, [options?.category, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { themes, isLoading, refresh: fetch }
 }

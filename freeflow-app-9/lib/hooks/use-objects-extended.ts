@@ -37,7 +37,7 @@ export function useObjects(options?: { type_id?: string; owner_id?: string; orga
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setObjects(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.owner_id, options?.organization_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.type_id, options?.owner_id, options?.organization_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { objects, isLoading, refresh: fetch }
 }
@@ -89,7 +89,7 @@ export function useObjectRelationships(objectId?: string, options?: { direction?
       const { data } = await query
       setRelationships(data || [])
     } finally { setIsLoading(false) }
-  }, [objectId, options?.direction, options?.type, supabase])
+  }, [objectId, options?.direction, options?.type])
   useEffect(() => { fetch() }, [fetch])
   return { relationships, isLoading, refresh: fetch }
 }
@@ -102,7 +102,7 @@ export function useObjectVersions(objectId?: string, options?: { limit?: number 
     if (!objectId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('object_versions').select('*').eq('object_id', objectId).order('version', { ascending: false }).limit(options?.limit || 20); setVersions(data || []) } finally { setIsLoading(false) }
-  }, [objectId, options?.limit, supabase])
+  }, [objectId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -135,7 +135,7 @@ export function useObjectsByType(typeSlug?: string, options?: { organization_id?
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setObjects(data || [])
     } finally { setIsLoading(false) }
-  }, [typeSlug, options?.organization_id, options?.limit, supabase])
+  }, [typeSlug, options?.organization_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { objects, isLoading, refresh: fetch }
 }
@@ -153,7 +153,7 @@ export function useRelatedObjects(objectId?: string, relationshipType?: string) 
       const { data } = await query
       setRelated(data?.map(r => ({ ...r.target, relationship: r })) || [])
     } finally { setIsLoading(false) }
-  }, [objectId, relationshipType, supabase])
+  }, [objectId, relationshipType])
   useEffect(() => { fetch() }, [fetch])
   return { related, isLoading, refresh: fetch }
 }

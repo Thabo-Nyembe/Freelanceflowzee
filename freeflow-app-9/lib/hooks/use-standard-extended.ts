@@ -38,7 +38,7 @@ export function useStandards(options?: { standardType?: string; category?: strin
       const { data: result } = await query.order('code', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.standardType, options?.category, options?.isMandatory, options?.isActive, supabase])
+  }, [options?.standardType, options?.category, options?.isMandatory, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useEntityCompliance(entityType?: string, entityId?: string) {
       const { data: result } = await supabase.from('standard_compliance').select('*, standards(*)').eq('entity_type', entityType).eq('entity_id', entityId)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

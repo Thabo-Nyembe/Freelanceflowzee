@@ -35,7 +35,7 @@ export function useDepartments(options?: { parent_id?: string; is_active?: boole
       const { data } = await query.order('name', { ascending: true })
       setDepartments(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.parent_id, options?.is_active, options?.search, supabase])
+  }, [options?.parent_id, options?.is_active, options?.search])
   useEffect(() => { fetch() }, [fetch])
   return { departments, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function useDepartmentBudget(departmentId?: string, fiscalYear?: string) 
     if (!departmentId || !fiscalYear) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('department_budgets').select('*').eq('department_id', departmentId).eq('fiscal_year', fiscalYear).single(); setBudget(data) } finally { setIsLoading(false) }
-  }, [departmentId, fiscalYear, supabase])
+  }, [departmentId, fiscalYear])
   useEffect(() => { fetch() }, [fetch])
   return { budget, isLoading, refresh: fetch }
 }
@@ -92,7 +92,7 @@ export function useDepartmentGoals(departmentId?: string, options?: { status?: s
       const { data } = await query.order('created_at', { ascending: false })
       setGoals(data || [])
     } finally { setIsLoading(false) }
-  }, [departmentId, options?.status, supabase])
+  }, [departmentId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }

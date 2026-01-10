@@ -36,7 +36,7 @@ export function useChats(userId?: string, options?: { type?: string; limit?: num
       const { data } = await query.order('last_message_at', { ascending: false }).limit(options?.limit || 50)
       setChats(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.limit, supabase])
+  }, [userId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { chats, isLoading, refresh: fetch }
 }
@@ -49,7 +49,7 @@ export function useChatMessages(chatId?: string, options?: { limit?: number }) {
     if (!chatId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('chat_messages').select('*').eq('chat_id', chatId).eq('is_deleted', false).order('created_at', { ascending: false }).limit(options?.limit || 50); setMessages((data || []).reverse()) } finally { setIsLoading(false) }
-  }, [chatId, options?.limit, supabase])
+  }, [chatId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }
@@ -117,11 +117,11 @@ export function useTypingIndicator(chatId?: string, userId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [chatId, userId, supabase])
+  }, [chatId, userId])
   const setTyping = useCallback((isTyping: boolean) => {
     if (!chatId || !userId) return
     const channel = supabase.channel(`typing_${chatId}`)
     channel.track({ userId, isTyping })
-  }, [chatId, userId, supabase])
+  }, [chatId, userId])
   return { typingUsers, setTyping }
 }

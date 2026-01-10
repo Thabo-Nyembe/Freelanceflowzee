@@ -40,7 +40,7 @@ export function useNotifications(userId?: string, options?: { type?: string; isR
       setData(result || [])
       setTotal(count || 0)
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.isRead, options?.limit, supabase])
+  }, [userId, options?.type, options?.isRead, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, total, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useNotificationTemplates(options?: { type?: string; isActive?: b
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.isActive, supabase])
+  }, [options?.type, options?.isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -158,7 +158,7 @@ export function useNotificationStats(userId?: string, options?: { startDate?: st
       const { data: result } = await query.order('period_start', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.startDate, options?.endDate, supabase])
+  }, [userId, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

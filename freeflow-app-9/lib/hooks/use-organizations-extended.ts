@@ -36,7 +36,7 @@ export function useOrganizations(options?: { owner_id?: string; status?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setOrganizations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.status, options?.type, options?.search, options?.limit, supabase])
+  }, [options?.owner_id, options?.status, options?.type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { organizations, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useOrganizationMembers(organizationId?: string, options?: { role
       const { data } = await query.order('joined_at', { ascending: false })
       setMembers(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.role, options?.department_id, options?.status, supabase])
+  }, [organizationId, options?.role, options?.department_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -107,7 +107,7 @@ export function useOrganizationInvitations(organizationId?: string, options?: { 
       const { data } = await query.order('created_at', { ascending: false })
       setInvitations(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.status, supabase])
+  }, [organizationId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { invitations, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useOrganizationDepartments(organizationId?: string, options?: { 
       const { data } = await query.order('name', { ascending: true })
       setDepartments(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.parent_id, supabase])
+  }, [organizationId, options?.parent_id])
   useEffect(() => { fetch() }, [fetch])
   return { departments, isLoading, refresh: fetch }
 }

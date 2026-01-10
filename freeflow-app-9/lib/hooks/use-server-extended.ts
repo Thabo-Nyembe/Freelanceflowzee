@@ -35,7 +35,7 @@ export function useServers(options?: { status?: string; type?: string; region?: 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setServers(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.type, options?.region, options?.limit, supabase])
+  }, [options?.status, options?.type, options?.region, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { servers, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useServerMetrics(serverId?: string, options?: { metric_type?: st
     if (!serverId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const since = new Date(); since.setHours(since.getHours() - (options?.hours || 24)); let query = supabase.from('server_metrics').select('*').eq('server_id', serverId).gte('created_at', since.toISOString()); if (options?.metric_type) query = query.eq('metric_type', options.metric_type); const { data } = await query.order('created_at', { ascending: false }); setMetrics(data || []) } finally { setIsLoading(false) }
-  }, [serverId, options?.metric_type, options?.hours, supabase])
+  }, [serverId, options?.metric_type, options?.hours])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -61,7 +61,7 @@ export function useServerLogs(serverId?: string, options?: { level?: string; lim
     if (!serverId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('server_logs').select('*').eq('server_id', serverId); if (options?.level) query = query.eq('level', options.level); const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100); setLogs(data || []) } finally { setIsLoading(false) }
-  }, [serverId, options?.level, options?.limit, supabase])
+  }, [serverId, options?.level, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

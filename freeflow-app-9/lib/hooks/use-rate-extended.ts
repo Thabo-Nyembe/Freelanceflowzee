@@ -35,7 +35,7 @@ export function useRates(options?: { type?: string; is_active?: boolean; currenc
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setRates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, options?.currency, options?.limit, supabase])
+  }, [options?.type, options?.is_active, options?.currency, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { rates, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useRateLimits(options?: { endpoint?: string; is_active?: boolean
       const { data } = await query.order('endpoint', { ascending: true })
       setLimits(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.endpoint, options?.is_active, supabase])
+  }, [options?.endpoint, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { limits, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useRateCards(options?: { type?: string; is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setCards(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { cards, isLoading, refresh: fetch }
 }
@@ -84,7 +84,7 @@ export function useRateHistory(rateId?: string, options?: { limit?: number }) {
     if (!rateId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('rate_history').select('*').eq('rate_id', rateId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [rateId, options?.limit, supabase])
+  }, [rateId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

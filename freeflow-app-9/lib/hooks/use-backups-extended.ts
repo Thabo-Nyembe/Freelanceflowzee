@@ -35,7 +35,7 @@ export function useBackups(options?: { user_id?: string; type?: string; status?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setBackups(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { backups, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useLatestBackup(userId?: string, source?: string) {
       const { data } = await query.order('completed_at', { ascending: false }).limit(1).single()
       setBackup(data)
     } finally { setIsLoading(false) }
-  }, [userId, source, supabase])
+  }, [userId, source])
   useEffect(() => { fetch() }, [fetch])
   return { backup, isLoading, refresh: fetch }
 }

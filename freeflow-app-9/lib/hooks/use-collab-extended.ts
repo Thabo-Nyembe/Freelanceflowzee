@@ -35,7 +35,7 @@ export function useCollabSpaces(options?: { owner_id?: string; visibility?: stri
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setSpaces(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.visibility, options?.type, options?.limit, supabase])
+  }, [options?.owner_id, options?.visibility, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { spaces, isLoading, refresh: fetch }
 }
@@ -66,7 +66,7 @@ export function useCollabDocuments(spaceId?: string, options?: { type?: string; 
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setDocuments(data || [])
     } finally { setIsLoading(false) }
-  }, [spaceId, options?.type, options?.limit, supabase])
+  }, [spaceId, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { documents, isLoading, refresh: fetch }
 }

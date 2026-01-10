@@ -36,7 +36,7 @@ export function useStatuses(options?: { entity_type?: string; group_id?: string;
       const { data } = await query.order('order_index', { ascending: true }).limit(options?.limit || 100)
       setStatuses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.group_id, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.entity_type, options?.group_id, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { statuses, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useStatusGroups(options?: { entity_type?: string; is_active?: bo
       const { data } = await query.order('name', { ascending: true })
       setGroups(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.is_active, supabase])
+  }, [options?.entity_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { groups, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useCurrentStatus(entityType?: string, entityId?: string) {
       const { data } = await supabase.from('status_history').select('*, statuses(*)').eq('entity_type', entityType).eq('entity_id', entityId).order('changed_at', { ascending: false }).limit(1).single()
       setCurrentStatus(data?.statuses || null)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { currentStatus, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useStatusHistory(entityType?: string, entityId?: string, options
       const { data } = await supabase.from('status_history').select('*, statuses(*), from_status:from_status_id(*), users(*)').eq('entity_type', entityType).eq('entity_id', entityId).order('changed_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.limit, supabase])
+  }, [entityType, entityId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }

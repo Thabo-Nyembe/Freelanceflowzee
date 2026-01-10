@@ -20,7 +20,7 @@ export function useReminders(userId?: string, status?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, status, supabase])
+  }, [userId, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -37,7 +37,7 @@ export function useUpcomingReminders(userId?: string, limit = 10) {
       const { data: result } = await supabase.from('reminders').select('*').eq('user_id', userId).eq('status', 'pending').gte('remind_at', now).order('remind_at', { ascending: true }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

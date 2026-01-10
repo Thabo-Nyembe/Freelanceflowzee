@@ -35,7 +35,7 @@ export function useCloudProviders(options?: { user_id?: string; type?: string; s
       const { data } = await query.order('name', { ascending: true })
       setProviders(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, supabase])
+  }, [options?.user_id, options?.type, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { providers, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useCloudResources(providerId?: string, options?: { type?: string
       const { data } = await query.order('name', { ascending: true })
       setResources(data || [])
     } finally { setIsLoading(false) }
-  }, [providerId, options?.type, options?.status, supabase])
+  }, [providerId, options?.type, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { resources, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useCloudCosts(providerId?: string, options?: { date_from?: strin
       const { data } = await query.order('period', { ascending: false })
       setCosts(data || [])
     } finally { setIsLoading(false) }
-  }, [providerId, options?.date_from, options?.date_to, supabase])
+  }, [providerId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { costs, isLoading, refresh: fetch }
 }
@@ -113,7 +113,7 @@ export function useCloudCostSummary(userId?: string, period?: string) {
       })
       setSummary({ total, byProvider })
     } finally { setIsLoading(false) }
-  }, [userId, period, supabase])
+  }, [userId, period])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }

@@ -39,7 +39,7 @@ export function useSalaries(options?: { employee_id?: string; structure_id?: str
       const { data } = await query.order('effective_from', { ascending: false }).limit(options?.limit || 50)
       setSalaries(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.employee_id, options?.structure_id, options?.grade_id, options?.status, options?.effective_date, options?.limit, supabase])
+  }, [options?.employee_id, options?.structure_id, options?.grade_id, options?.status, options?.effective_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { salaries, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useEmployeeSalary(employeeId?: string, effectiveDate?: string) {
       const { data } = await supabase.from('salaries').select('*, salary_components(*), salary_deductions(*), salary_structures(*), salary_grades(*)').eq('employee_id', employeeId).eq('status', 'active').lte('effective_from', date).or(`effective_until.is.null,effective_until.gte.${date}`).order('effective_from', { ascending: false }).limit(1).single()
       setSalary(data)
     } finally { setIsLoading(false) }
-  }, [employeeId, effectiveDate, supabase])
+  }, [employeeId, effectiveDate])
   useEffect(() => { fetch() }, [fetch])
   return { salary, isLoading, refresh: fetch }
 }
@@ -101,7 +101,7 @@ export function useSalaryHistory(employeeId?: string, options?: { from_date?: st
       const { data } = await query.order('changed_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [employeeId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [employeeId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -136,7 +136,7 @@ export function useSalaryGrades(structureId?: string, options?: { is_active?: bo
       const { data } = await query.order('level', { ascending: true })
       setGrades(data || [])
     } finally { setIsLoading(false) }
-  }, [structureId, options?.is_active, supabase])
+  }, [structureId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { grades, isLoading, refresh: fetch }
 }

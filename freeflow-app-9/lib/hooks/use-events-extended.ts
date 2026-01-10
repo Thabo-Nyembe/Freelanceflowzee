@@ -40,7 +40,7 @@ export function useEvents(options?: { organizerId?: string; calendarId?: string;
       const { data: result } = await query.order('start_date', { ascending: true }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.organizerId, options?.calendarId, options?.startDate, options?.endDate, options?.status, options?.limit, supabase])
+  }, [options?.organizerId, options?.calendarId, options?.startDate, options?.endDate, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useEventAttendees(eventId?: string, options?: { status?: string 
       const { data: result } = await query.order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [eventId, options?.status, supabase])
+  }, [eventId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useEventRegistrations(eventId?: string, options?: { status?: str
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [eventId, options?.status, options?.limit, supabase])
+  }, [eventId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -126,7 +126,7 @@ export function useUserEvents(userId?: string, options?: { upcoming?: boolean; l
       const { data: result } = await query.order('start_date', { ascending: true }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.upcoming, options?.limit, supabase])
+  }, [userId, options?.upcoming, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

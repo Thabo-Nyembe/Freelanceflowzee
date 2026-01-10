@@ -36,7 +36,7 @@ export function useGoals(options?: { user_id?: string; status?: string; category
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setGoals(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.category_id, options?.priority, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.category_id, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUserGoals(userId?: string, options?: { status?: string }) {
       const { data } = await query.order('created_at', { ascending: false })
       setGoals(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, supabase])
+  }, [userId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useGoalProgress(goalId?: string, options?: { from_date?: string;
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 50)
       setProgress(data || [])
     } finally { setIsLoading(false) }
-  }, [goalId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [goalId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { progress, isLoading, refresh: fetch }
 }
@@ -155,7 +155,7 @@ export function useUpcomingGoals(userId?: string, daysAhead?: number) {
       const { data } = await supabase.from('goals').select('*').eq('user_id', userId).eq('status', 'active').lte('target_date', futureDate.toISOString()).order('target_date', { ascending: true })
       setGoals(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, daysAhead, supabase])
+  }, [userId, daysAhead])
   useEffect(() => { fetch() }, [fetch])
   return { goals, isLoading, refresh: fetch }
 }

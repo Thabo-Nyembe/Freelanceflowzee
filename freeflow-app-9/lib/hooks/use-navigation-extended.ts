@@ -20,7 +20,7 @@ export function useNavigations(navigationType?: string, isActive?: boolean) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [navigationType, isActive, supabase])
+  }, [navigationType, isActive])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,7 +39,7 @@ export function useNavigationItems(navigationId?: string, parentId?: string | nu
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [navigationId, parentId, supabase])
+  }, [navigationId, parentId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

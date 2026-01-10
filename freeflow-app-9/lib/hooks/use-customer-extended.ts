@@ -39,7 +39,7 @@ export function useCustomers(userId?: string, options?: { status?: string; segme
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.segment_id, options?.tag, options?.limit, supabase])
+  }, [userId, options?.status, options?.segment_id, options?.tag, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useCustomerSearch(userId: string, searchTerm: string) {
       const { data } = await supabase.from('customers').select('*').eq('user_id', userId).or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,company.ilike.%${searchTerm}%`).limit(20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, searchTerm, supabase])
+  }, [userId, searchTerm])
   useEffect(() => {
     const timer = setTimeout(search, 300)
     return () => clearTimeout(timer)
@@ -74,7 +74,7 @@ export function useCustomerNotes(customerId?: string, options?: { limit?: number
       const { data } = await supabase.from('customer_notes').select('*').eq('customer_id', customerId).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setNotes(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.limit, supabase])
+  }, [customerId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notes, isLoading, refresh: fetch }
 }
@@ -92,7 +92,7 @@ export function useCustomerActivities(customerId?: string, options?: { activity_
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setActivities(data || [])
     } finally { setIsLoading(false) }
-  }, [customerId, options?.activity_type, options?.limit, supabase])
+  }, [customerId, options?.activity_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { activities, isLoading, refresh: fetch }
 }
@@ -167,7 +167,7 @@ export function useTopCustomers(userId?: string, options?: { by?: 'lifetime_valu
       const { data } = await supabase.from('customers').select('*').eq('user_id', userId).eq('status', 'active').order(orderBy, { ascending: false }).limit(options?.limit || 10)
       setCustomers(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.by, options?.limit, supabase])
+  }, [userId, options?.by, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { customers, isLoading, refresh: fetch }
 }
@@ -183,7 +183,7 @@ export function useRecentCustomers(userId?: string, options?: { limit?: number }
       const { data } = await supabase.from('customers').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 10)
       setCustomers(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { customers, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useSchedules(options?: { userId?: string; isActive?: boolean; en
       const { data: result } = await query.order('next_run_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.userId, options?.isActive, options?.entityType, supabase])
+  }, [options?.userId, options?.isActive, options?.entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useScheduleRuns(scheduleId?: string, limit = 20) {
       const { data: result } = await supabase.from('schedule_runs').select('*').eq('schedule_id', scheduleId).order('executed_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [scheduleId, limit, supabase])
+  }, [scheduleId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useUpcomingSchedules(userId?: string, limit = 10) {
       const { data: result } = await query.order('next_run_at', { ascending: true }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

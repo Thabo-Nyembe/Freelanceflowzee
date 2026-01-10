@@ -35,7 +35,7 @@ export function useUserLibraries(userId?: string, options?: { type?: string; is_
       const { data } = await query.order('name', { ascending: true })
       setLibraries(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.is_public, supabase])
+  }, [userId, options?.type, options?.is_public])
   useEffect(() => { fetch() }, [fetch])
   return { libraries, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useLibraryItems(libraryId?: string, options?: { type?: string; c
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [libraryId, options?.type, options?.collection_id, options?.limit, supabase])
+  }, [libraryId, options?.type, options?.collection_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -106,7 +106,7 @@ export function useLibraryFavorites(userId?: string, options?: { limit?: number 
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_favorites').select('*, library_items(*, libraries(*))').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setFavorites(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { favorites, isLoading, refresh: fetch }
 }
@@ -119,7 +119,7 @@ export function useIsFavorite(userId?: string, itemId?: string) {
     if (!userId || !itemId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_favorites').select('id').eq('user_id', userId).eq('item_id', itemId).single(); setIsFavorite(!!data) } finally { setIsLoading(false) }
-  }, [userId, itemId, supabase])
+  }, [userId, itemId])
   useEffect(() => { check() }, [check])
   return { isFavorite, isLoading, recheck: check }
 }
@@ -132,7 +132,7 @@ export function useLibrarySearch(libraryId?: string, query?: string, options?: {
     if (!libraryId || !query || query.length < 2) { setResults([]); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('library_items').select('*').eq('library_id', libraryId).ilike('title', `%${query}%`).order('created_at', { ascending: false }).limit(options?.limit || 20); setResults(data || []) } finally { setIsLoading(false) }
-  }, [libraryId, query, options?.limit, supabase])
+  }, [libraryId, query, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }
@@ -149,7 +149,7 @@ export function usePublicLibraries(options?: { type?: string; limit?: number }) 
       const { data } = await query.order('item_count', { ascending: false }).limit(options?.limit || 20)
       setLibraries(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { libraries, isLoading, refresh: fetch }
 }

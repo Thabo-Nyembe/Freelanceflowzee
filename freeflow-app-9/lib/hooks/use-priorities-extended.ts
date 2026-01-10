@@ -34,7 +34,7 @@ export function usePriorities(options?: { organization_id?: string; is_active?: 
       const { data } = await query.order('level', { ascending: false }).limit(options?.limit || 50)
       setPriorities(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.is_active, options?.limit, supabase])
+  }, [options?.organization_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { priorities, isLoading, refresh: fetch }
 }
@@ -64,7 +64,7 @@ export function usePriorityAssignment(entityType?: string, entityId?: string) {
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('priority_assignments').select('*, priorities(*)').eq('entity_type', entityType).eq('entity_id', entityId).single(); setAssignment(data) } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { assignment, isLoading, refresh: fetch }
 }
@@ -90,7 +90,7 @@ export function usePriorityHistory(entityType?: string, entityId?: string, optio
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('priority_history').select('*, old_priority:priorities!old_priority_id(*), new_priority:priorities!new_priority_id(*), users(*)').eq('entity_type', entityType).eq('entity_id', entityId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.limit, supabase])
+  }, [entityType, entityId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function useHighPriorityItems(entityType?: string, options?: { organizati
       const filtered = data?.filter(a => a.priorities?.level >= (options?.min_level || 3)) || []
       setItems(filtered)
     } finally { setIsLoading(false) }
-  }, [entityType, options?.organization_id, options?.min_level, options?.limit, supabase])
+  }, [entityType, options?.organization_id, options?.min_level, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }

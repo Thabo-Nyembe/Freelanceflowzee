@@ -18,7 +18,7 @@ export function useStatus(entityId?: string, entityType?: string) {
       const { data } = await supabase.from('statuses').select('*').eq('entity_id', entityId).eq('entity_type', entityType).single()
       setStatus(data)
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { status, isLoading, refresh: fetch }
 }
@@ -34,7 +34,7 @@ export function useStatusHistory(entityId?: string, entityType?: string) {
       const { data: result } = await supabase.from('status_history').select('*').eq('entity_id', entityId).eq('entity_type', entityType).order('changed_at', { ascending: false }).limit(20)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityId, entityType, supabase])
+  }, [entityId, entityType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

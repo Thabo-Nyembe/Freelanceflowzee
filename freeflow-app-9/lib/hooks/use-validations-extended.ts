@@ -35,7 +35,7 @@ export function useValidations(options?: { entity_type?: string; is_active?: boo
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setValidations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.entity_type, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { validations, isLoading, refresh: fetch }
 }
@@ -67,7 +67,7 @@ export function useValidationResults(validationId?: string, options?: { is_valid
       const { data } = await query.order('executed_at', { ascending: false }).limit(options?.limit || 50)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [validationId, options?.is_valid, options?.entity_id, options?.limit, supabase])
+  }, [validationId, options?.is_valid, options?.entity_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { results, isLoading, refresh: fetch }
 }
@@ -85,7 +85,7 @@ export function useValidationSchemas(options?: { is_active?: boolean; search?: s
       const { data } = await query.order('name', { ascending: true })
       setSchemas(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.search, supabase])
+  }, [options?.is_active, options?.search])
   useEffect(() => { fetch() }, [fetch])
   return { schemas, isLoading, refresh: fetch }
 }
@@ -103,7 +103,7 @@ export function useValidationLogs(validationId?: string, options?: { status?: st
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [validationId, options?.status, options?.limit, supabase])
+  }, [validationId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function useValidationStats(validationId?: string, options?: { from_date?
         pass_rate: results.length > 0 ? Math.round((results.filter(r => r.is_valid).length / results.length) * 100) : 0
       })
     } finally { setIsLoading(false) }
-  }, [validationId, options?.from_date, options?.to_date, supabase])
+  }, [validationId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -159,7 +159,7 @@ export function useEntityValidations(entityType?: string, options?: { is_active?
       const { data } = await query.order('name', { ascending: true })
       setValidations(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, options?.is_active, supabase])
+  }, [entityType, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { validations, isLoading, refresh: fetch }
 }
@@ -209,7 +209,7 @@ export function useLatestValidationResult(validationId?: string, entityId?: stri
       const { data } = await query.order('executed_at', { ascending: false }).limit(1).single()
       setResult(data)
     } finally { setIsLoading(false) }
-  }, [validationId, entityId, supabase])
+  }, [validationId, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { result, isLoading, refresh: fetch }
 }

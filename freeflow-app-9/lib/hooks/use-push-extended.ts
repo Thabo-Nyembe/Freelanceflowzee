@@ -34,7 +34,7 @@ export function usePushNotifications(options?: { user_id?: string; status?: stri
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setNotifications(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { notifications, isLoading, refresh: fetch }
 }
@@ -64,7 +64,7 @@ export function usePushCampaigns(options?: { status?: string; limit?: number }) 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCampaigns(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.limit, supabase])
+  }, [options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { campaigns, isLoading, refresh: fetch }
 }

@@ -80,7 +80,7 @@ export function useCRMNotes(entityType?: string, entityId?: string) {
     if (!entityType || !entityId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data: result } = await supabase.from('crm_notes').select('*').eq('entity_type', entityType).eq('entity_id', entityId).order('created_at', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

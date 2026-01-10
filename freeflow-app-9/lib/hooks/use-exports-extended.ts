@@ -35,7 +35,7 @@ export function useUserExports(userId?: string, options?: { type?: string; statu
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setExports(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.status, options?.limit, supabase])
+  }, [userId, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { exports, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useRecentExports(userId?: string, limit?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('exports').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(limit || 10); setExports(data || []) } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { exports, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function useExportTemplates(options?: { type?: string; is_public?: boolea
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_public, supabase])
+  }, [options?.type, options?.is_public])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -97,7 +97,7 @@ export function useExportSchedules(userId?: string, options?: { is_active?: bool
       const { data } = await query.order('created_at', { ascending: false })
       setSchedules(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, supabase])
+  }, [userId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { schedules, isLoading, refresh: fetch }
 }

@@ -40,7 +40,7 @@ export function useBudgets(options?: { userId?: string; organizationId?: string;
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.userId, options?.organizationId, options?.projectId, options?.isActive, options?.category, supabase])
+  }, [options?.userId, options?.organizationId, options?.projectId, options?.isActive, options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useBudgetsByCategory(options?: { userId?: string; organizationId
       })
       setData(byCategory)
     } finally { setIsLoading(false) }
-  }, [options?.userId, options?.organizationId, supabase])
+  }, [options?.userId, options?.organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function useBudgetSummary(options?: { userId?: string; organizationId?: s
         overBudgetCount: overBudget
       })
     } finally { setIsLoading(false) }
-  }, [options?.userId, options?.organizationId, supabase])
+  }, [options?.userId, options?.organizationId])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }
@@ -161,7 +161,7 @@ export function useBudgetAlerts(userId?: string, threshold: number = 80) {
       }))
       setAlerts(alertList)
     } finally { setIsLoading(false) }
-  }, [userId, threshold, supabase])
+  }, [userId, threshold])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }

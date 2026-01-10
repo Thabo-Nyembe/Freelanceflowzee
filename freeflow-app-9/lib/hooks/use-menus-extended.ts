@@ -35,7 +35,7 @@ export function useMenus(organizationId?: string, options?: { type?: string; is_
       const { data } = await query.order('name', { ascending: true })
       setMenus(data || [])
     } finally { setIsLoading(false) }
-  }, [organizationId, options?.type, options?.is_active, supabase])
+  }, [organizationId, options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { menus, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useMenuItems(menuId?: string, options?: { category_id?: string; 
       const { data } = await query.order('sort_order', { ascending: true })
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [menuId, options?.category_id, options?.is_available, supabase])
+  }, [menuId, options?.category_id, options?.is_available])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }

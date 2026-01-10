@@ -38,7 +38,7 @@ export function useHealthChecks(options?: { serviceName?: string; checkType?: st
       const { data: result } = await query.order('service_name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.serviceName, options?.checkType, options?.status, options?.isCritical, supabase])
+  }, [options?.serviceName, options?.checkType, options?.status, options?.isCritical])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useHealthCheckResults(checkId?: string, limit = 100) {
       const { data: result } = await supabase.from('health_check_results').select('*').eq('check_id', checkId).order('checked_at', { ascending: false }).limit(limit)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [checkId, limit, supabase])
+  }, [checkId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

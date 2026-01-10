@@ -21,7 +21,7 @@ export function useAssets(userId?: string, assetType?: string, status?: string) 
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, assetType, status, supabase])
+  }, [userId, assetType, status])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -39,7 +39,7 @@ export function useAssetLibrary(libraryId?: string, assetType?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [libraryId, assetType, supabase])
+  }, [libraryId, assetType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

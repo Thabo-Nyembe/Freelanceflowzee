@@ -35,7 +35,7 @@ export function useKpis(options?: { organization_id?: string; category_id?: stri
       const { data } = await query.order('name', { ascending: true })
       setKpis(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.organization_id, options?.category_id, options?.status, supabase])
+  }, [options?.organization_id, options?.category_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { kpis, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useKpiValues(kpiId?: string, options?: { from_date?: string; to_
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 100)
       setValues(data || [])
     } finally { setIsLoading(false) }
-  }, [kpiId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [kpiId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { values, isLoading, refresh: fetch }
 }
@@ -161,7 +161,7 @@ export function useKpiTrend(kpiId?: string, options?: { periods?: number }) {
     if (!kpiId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('kpi_values').select('value, recorded_at').eq('kpi_id', kpiId).order('recorded_at', { ascending: true }).limit(options?.periods || 12); setTrend(data || []) } finally { setIsLoading(false) }
-  }, [kpiId, options?.periods, supabase])
+  }, [kpiId, options?.periods])
   useEffect(() => { fetch() }, [fetch])
   return { trend, isLoading, refresh: fetch }
 }

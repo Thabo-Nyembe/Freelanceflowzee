@@ -34,7 +34,7 @@ export function useTools(options?: { type?: string; is_active?: boolean; limit?:
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTools(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, options?.limit, supabase])
+  }, [options?.type, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { tools, isLoading, refresh: fetch }
 }
@@ -60,7 +60,7 @@ export function useToolUsage(toolId?: string, options?: { days?: number }) {
     if (!toolId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const since = new Date(); since.setDate(since.getDate() - (options?.days || 30)); const { data } = await supabase.from('tool_usage').select('*').eq('tool_id', toolId).gte('created_at', since.toISOString()).order('created_at', { ascending: false }); setUsage(data || []) } finally { setIsLoading(false) }
-  }, [toolId, options?.days, supabase])
+  }, [toolId, options?.days])
   useEffect(() => { fetch() }, [fetch])
   return { usage, isLoading, refresh: fetch }
 }

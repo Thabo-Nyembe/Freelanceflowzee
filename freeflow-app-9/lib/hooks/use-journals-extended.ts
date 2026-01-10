@@ -35,7 +35,7 @@ export function useJournals(userId?: string, options?: { type?: string; is_archi
       const { data } = await query.order('updated_at', { ascending: false })
       setJournals(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.type, options?.is_archived, supabase])
+  }, [userId, options?.type, options?.is_archived])
   useEffect(() => { fetch() }, [fetch])
   return { journals, isLoading, refresh: fetch }
 }
@@ -68,7 +68,7 @@ export function useJournalEntries(journalId?: string, options?: { from_date?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setEntries(data || [])
     } finally { setIsLoading(false) }
-  }, [journalId, options?.from_date, options?.to_date, options?.mood_id, options?.limit, supabase])
+  }, [journalId, options?.from_date, options?.to_date, options?.mood_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { entries, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function useJournalPrompts(options?: { category?: string; is_active?: boo
       const { data } = await query.order('created_at', { ascending: false })
       setPrompts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { prompts, isLoading, refresh: fetch }
 }
@@ -111,7 +111,7 @@ export function useFavoriteEntries(userId?: string, options?: { limit?: number }
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('journal_entries').select('*, journals(*)').eq('user_id', userId).eq('is_favorite', true).order('created_at', { ascending: false }).limit(options?.limit || 20); setEntries(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { entries, isLoading, refresh: fetch }
 }
@@ -124,7 +124,7 @@ export function useRecentEntries(userId?: string, limit?: number) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('journal_entries').select('*, journals(title)').eq('user_id', userId).order('created_at', { ascending: false }).limit(limit || 10); setEntries(data || []) } finally { setIsLoading(false) }
-  }, [userId, limit, supabase])
+  }, [userId, limit])
   useEffect(() => { fetch() }, [fetch])
   return { entries, isLoading, refresh: fetch }
 }
@@ -137,7 +137,7 @@ export function useJournalSearch(userId?: string, query?: string, options?: { li
     if (!userId || !query || query.length < 2) { setResults([]); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('journal_entries').select('*, journals(*)').eq('user_id', userId).or(`title.ilike.%${query}%,content.ilike.%${query}%`).order('created_at', { ascending: false }).limit(options?.limit || 20); setResults(data || []) } finally { setIsLoading(false) }
-  }, [userId, query, options?.limit, supabase])
+  }, [userId, query, options?.limit])
   useEffect(() => { search() }, [search])
   return { results, isLoading, search }
 }

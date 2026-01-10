@@ -36,7 +36,7 @@ export function usePlaylists(options?: { owner_id?: string; visibility?: string;
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setPlaylists(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.owner_id, options?.visibility, options?.type, options?.search, options?.limit, supabase])
+  }, [options?.owner_id, options?.visibility, options?.type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { playlists, isLoading, refresh: fetch }
 }
@@ -101,7 +101,7 @@ export function usePlaylistFollowers(playlistId?: string, options?: { limit?: nu
     if (!playlistId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlist_followers').select('*, users(*)').eq('playlist_id', playlistId).order('followed_at', { ascending: false }).limit(options?.limit || 50); setFollowers(data || []) } finally { setIsLoading(false) }
-  }, [playlistId, options?.limit, supabase])
+  }, [playlistId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { followers, isLoading, refresh: fetch }
 }
@@ -114,7 +114,7 @@ export function useIsFollowing(playlistId?: string, userId?: string) {
     if (!playlistId || !userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('playlist_followers').select('id').eq('playlist_id', playlistId).eq('user_id', userId).single(); setIsFollowing(!!data) } finally { setIsLoading(false) }
-  }, [playlistId, userId, supabase])
+  }, [playlistId, userId])
   useEffect(() => { fetch() }, [fetch])
   return { isFollowing, isLoading, refresh: fetch }
 }
@@ -133,7 +133,7 @@ export function useFollowedPlaylists(userId?: string, options?: { limit?: number
       const { data } = await supabase.from('playlists').select('*, playlist_items(count)').in('id', playlistIds).limit(options?.limit || 50)
       setPlaylists(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { playlists, isLoading, refresh: fetch }
 }
@@ -151,7 +151,7 @@ export function usePublicPlaylists(options?: { type?: string; search?: string; l
       const { data } = await query.order('follower_count', { ascending: false }).limit(options?.limit || 50)
       setPlaylists(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.search, options?.limit, supabase])
+  }, [options?.type, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { playlists, isLoading, refresh: fetch }
 }
@@ -173,7 +173,7 @@ export function usePlaylistAnalytics(playlistId?: string, options?: { from_date?
       const shares = data?.filter(a => a.action === 'share').length || 0
       setAnalytics({ plays, uniqueListeners, shares })
     } finally { setIsLoading(false) }
-  }, [playlistId, options?.from_date, options?.to_date, supabase])
+  }, [playlistId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { analytics, isLoading, refresh: fetch }
 }

@@ -35,7 +35,7 @@ export function useRenderJobs(options?: { user_id?: string; status?: string; tem
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setJobs(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.template_id, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.template_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { jobs, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useRenderTemplates(options?: { type?: string; is_active?: boolea
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }

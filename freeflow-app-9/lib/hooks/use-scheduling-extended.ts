@@ -35,7 +35,7 @@ export function useSchedulingSlots(options?: { user_id?: string; is_available?: 
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 100)
       setSlots(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_available, options?.date, options?.limit, supabase])
+  }, [options?.user_id, options?.is_available, options?.date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { slots, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useSchedulingRules(options?: { user_id?: string; is_active?: boo
       const { data } = await query.order('priority', { ascending: true })
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.is_active, supabase])
+  }, [options?.user_id, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -71,7 +71,7 @@ export function useSchedulingBlocks(options?: { user_id?: string; block_type?: s
       const { data } = await query.order('start_time', { ascending: true })
       setBlocks(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.block_type, supabase])
+  }, [options?.user_id, options?.block_type])
   useEffect(() => { fetch() }, [fetch])
   return { blocks, isLoading, refresh: fetch }
 }

@@ -98,7 +98,7 @@ export function useAppVersions(options?: { platform?: string; status?: string; l
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setVersions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.platform, options?.status, options?.limit, supabase])
+  }, [options?.platform, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }

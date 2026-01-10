@@ -58,7 +58,7 @@ export function useFriendStatus(userId?: string, otherUserId?: string) {
         setStatus('none')
       }
     } finally { setIsLoading(false) }
-  }, [userId, otherUserId, supabase])
+  }, [userId, otherUserId])
   useEffect(() => { check() }, [check])
   return { status, isRequester, isLoading, refresh: check }
 }

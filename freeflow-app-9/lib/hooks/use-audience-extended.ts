@@ -35,7 +35,7 @@ export function useAudienceSegments(options?: { user_id?: string; type?: string;
       const { data } = await query.order('member_count', { ascending: false }).limit(options?.limit || 50)
       setSegments(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { segments, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useAudienceMembers(segmentId?: string, options?: { limit?: numbe
     if (!segmentId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('audience_members').select('*').eq('segment_id', segmentId).order('joined_at', { ascending: false }).limit(options?.limit || 50); setMembers(data || []) } finally { setIsLoading(false) }
-  }, [segmentId, options?.limit, supabase])
+  }, [segmentId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { members, isLoading, refresh: fetch }
 }
@@ -81,7 +81,7 @@ export function useLargestAudienceSegments(userId?: string, options?: { limit?: 
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('audience_segments').select('*').eq('user_id', userId).eq('status', 'active').order('member_count', { ascending: false }).limit(options?.limit || 10); setSegments(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { segments, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useIsMemberOfSegment(segmentId?: string, memberId?: string) {
     if (!segmentId || !memberId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('audience_members').select('id').eq('segment_id', segmentId).eq('member_id', memberId).single(); setIsMember(!!data) } finally { setIsLoading(false) }
-  }, [segmentId, memberId, supabase])
+  }, [segmentId, memberId])
   useEffect(() => { check() }, [check])
   return { isMember, isLoading, recheck: check }
 }

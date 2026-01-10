@@ -35,7 +35,7 @@ export function useMetrics(options?: { category?: string; organization_id?: stri
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setMetrics(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.organization_id, options?.is_active, options?.limit, supabase])
+  }, [options?.category, options?.organization_id, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { metrics, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useMetricValues(metricId?: string, options?: { from_date?: strin
       const { data } = await query.order('recorded_at', { ascending: false }).limit(options?.limit || 1000)
       setValues(data || [])
     } finally { setIsLoading(false) }
-  }, [metricId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [metricId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { values, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useMetricAlerts(options?: { metric_id?: string; status?: string;
       const { data } = await query.order('triggered_at', { ascending: false }).limit(options?.limit || 50)
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.metric_id, options?.status, options?.severity, options?.limit, supabase])
+  }, [options?.metric_id, options?.status, options?.severity, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }
@@ -121,7 +121,7 @@ export function useMetricDashboards(userId?: string, options?: { organization_id
       const { data } = await query.order('name', { ascending: true })
       setDashboards(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.organization_id, supabase])
+  }, [userId, options?.organization_id])
   useEffect(() => { fetch() }, [fetch])
   return { dashboards, isLoading, refresh: fetch }
 }
@@ -173,7 +173,7 @@ export function useMetricSummary(metricId?: string, options?: { period?: 'day' |
       const change = previousSum ? ((currentSum - previousSum) / previousSum) * 100 : 0
       setSummary({ current: currentSum, previous: previousSum, change, min, max, avg })
     } finally { setIsLoading(false) }
-  }, [metricId, options?.period, supabase])
+  }, [metricId, options?.period])
   useEffect(() => { fetch() }, [fetch])
   return { summary, isLoading, refresh: fetch }
 }

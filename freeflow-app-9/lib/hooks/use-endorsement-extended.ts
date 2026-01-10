@@ -20,7 +20,7 @@ export function useEndorsements(userId?: string, skillId?: string) {
       const { data: result } = await query
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, skillId, supabase])
+  }, [userId, skillId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -38,7 +38,7 @@ export function useEndorsementCount(userId?: string, skillId?: string) {
       const { count: result } = await query
       setCount(result || 0)
     } finally { setIsLoading(false) }
-  }, [userId, skillId, supabase])
+  }, [userId, skillId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useHasEndorsed(endorserId?: string, endorsedUserId?: string, ski
       const { data } = await supabase.from('endorsements').select('id').eq('endorser_id', endorserId).eq('endorsed_user_id', endorsedUserId).eq('skill_id', skillId).single()
       setHasEndorsed(!!data)
     } finally { setIsLoading(false) }
-  }, [endorserId, endorsedUserId, skillId, supabase])
+  }, [endorserId, endorsedUserId, skillId])
   useEffect(() => { check() }, [check])
   return { hasEndorsed, isLoading, refresh: check }
 }

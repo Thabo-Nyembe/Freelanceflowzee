@@ -34,7 +34,7 @@ export function usePlugins(options?: { category?: string; status?: string; limit
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setPlugins(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.status, options?.limit, supabase])
+  }, [options?.category, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { plugins, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useUserPlugins(userId?: string, options?: { is_active?: boolean 
       const { data } = await query.order('installed_at', { ascending: false })
       setPlugins(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, supabase])
+  }, [userId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { plugins, isLoading, refresh: fetch }
 }

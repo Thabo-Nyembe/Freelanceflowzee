@@ -36,7 +36,7 @@ export function useMacros(options?: { user_id?: string; organization_id?: string
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setMacros(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.organization_id, options?.category, options?.is_enabled, options?.limit, supabase])
+  }, [options?.user_id, options?.organization_id, options?.category, options?.is_enabled, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { macros, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function useMacroExecutions(macroId?: string, options?: { status?: string
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setExecutions(data || [])
     } finally { setIsLoading(false) }
-  }, [macroId, options?.status, options?.limit, supabase])
+  }, [macroId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { executions, isLoading, refresh: fetch }
 }
@@ -138,7 +138,7 @@ export function useRecentExecutions(userId?: string, options?: { limit?: number 
       const { data } = await supabase.from('macro_executions').select('*, macros(name)').in('macro_id', macroIds).order('started_at', { ascending: false }).limit(options?.limit || 20)
       setExecutions(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { executions, isLoading, refresh: fetch }
 }

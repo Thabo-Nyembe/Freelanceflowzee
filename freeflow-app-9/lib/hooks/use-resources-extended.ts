@@ -40,7 +40,7 @@ export function useResources(options?: { type_id?: string; category?: string; st
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setResources(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.category, options?.status, options?.location, options?.owner_id, options?.organization_id, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.type_id, options?.category, options?.status, options?.location, options?.owner_id, options?.organization_id, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { resources, isLoading, refresh: fetch }
 }
@@ -58,7 +58,7 @@ export function useResourceTypes(options?: { category?: string; is_active?: bool
       const { data } = await query.order('name', { ascending: true })
       setTypes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.is_active, supabase])
+  }, [options?.category, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { types, isLoading, refresh: fetch }
 }
@@ -76,7 +76,7 @@ export function useResourceAllocations(resourceId?: string, options?: { status?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAllocations(data || [])
     } finally { setIsLoading(false) }
-  }, [resourceId, options?.status, options?.limit, supabase])
+  }, [resourceId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { allocations, isLoading, refresh: fetch }
 }
@@ -95,7 +95,7 @@ export function useResourceAvailability(resourceId?: string, options?: { from_da
       const { data } = await query.order('date', { ascending: true })
       setAvailability(data || [])
     } finally { setIsLoading(false) }
-  }, [resourceId, options?.from_date, options?.to_date, supabase])
+  }, [resourceId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { availability, isLoading, refresh: fetch }
 }
@@ -115,7 +115,7 @@ export function useResourceUsage(resourceId?: string, options?: { from_date?: st
       const { data } = await query.order('start_time', { ascending: false }).limit(options?.limit || 100)
       setUsage(data || [])
     } finally { setIsLoading(false) }
-  }, [resourceId, options?.from_date, options?.to_date, options?.user_id, options?.limit, supabase])
+  }, [resourceId, options?.from_date, options?.to_date, options?.user_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { usage, isLoading, refresh: fetch }
 }
@@ -133,7 +133,7 @@ export function useAvailableResources(options?: { type_id?: string; category?: s
       const { data } = await query.order('name', { ascending: true })
       setResources(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type_id, options?.category, supabase])
+  }, [options?.type_id, options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { resources, isLoading, refresh: fetch }
 }
@@ -175,7 +175,7 @@ export function useMyAllocatedResources(userId?: string, options?: { status?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setResources(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { resources, isLoading, refresh: fetch }
 }

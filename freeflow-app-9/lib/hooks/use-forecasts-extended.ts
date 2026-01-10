@@ -36,7 +36,7 @@ export function useForecasts(options?: { type?: string; status?: string; created
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setForecasts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.status, options?.created_by, options?.target_metric, options?.limit, supabase])
+  }, [options?.type, options?.status, options?.created_by, options?.target_metric, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { forecasts, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useForecastModels(options?: { type?: string; is_active?: boolean
       const { data } = await query.order('created_at', { ascending: false })
       setModels(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { models, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useForecastPredictions(forecastId?: string, options?: { from_dat
       const { data } = await query.order('date', { ascending: true })
       setPredictions(data || [])
     } finally { setIsLoading(false) }
-  }, [forecastId, options?.from_date, options?.to_date, supabase])
+  }, [forecastId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { predictions, isLoading, refresh: fetch }
 }

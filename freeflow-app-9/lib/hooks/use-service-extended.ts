@@ -34,7 +34,7 @@ export function useServices(options?: { status?: string; type?: string; limit?: 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setServices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.type, options?.limit, supabase])
+  }, [options?.status, options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { services, isLoading, refresh: fetch }
 }
@@ -47,7 +47,7 @@ export function useServiceInstances(serviceId?: string, options?: { status?: str
     if (!serviceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { let query = supabase.from('service_instances').select('*').eq('service_id', serviceId); if (options?.status) query = query.eq('status', options.status); const { data } = await query.order('created_at', { ascending: false }); setInstances(data || []) } finally { setIsLoading(false) }
-  }, [serviceId, options?.status, supabase])
+  }, [serviceId, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { instances, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function usePresets(options?: { presetType?: string; category?: string; i
       const { data: result } = await query.order('usage_count', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.presetType, options?.category, options?.isPublic, supabase])
+  }, [options?.presetType, options?.category, options?.isPublic])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useDefaultPreset(presetType?: string, workspaceId?: string) {
       const { data } = await query.single()
       setPreset(data)
     } finally { setIsLoading(false) }
-  }, [presetType, workspaceId, supabase])
+  }, [presetType, workspaceId])
   useEffect(() => { fetch() }, [fetch])
   return { preset, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useMyPresets(userId?: string, presetType?: string) {
       const { data: result } = await query.order('updated_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, presetType, supabase])
+  }, [userId, presetType])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

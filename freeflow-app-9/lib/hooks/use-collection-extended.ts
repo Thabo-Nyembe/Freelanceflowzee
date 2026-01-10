@@ -35,7 +35,7 @@ export function useCollections(options?: { user_id?: string; type?: string; visi
       const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
       setCollections(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.visibility, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.visibility, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { collections, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useCollectionItems(collectionId?: string, options?: { item_type?
       const { data } = await query.order('position', { ascending: true }).limit(options?.limit || 100)
       setItems(data || [])
     } finally { setIsLoading(false) }
-  }, [collectionId, options?.item_type, options?.limit, supabase])
+  }, [collectionId, options?.item_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { items, isLoading, refresh: fetch }
 }
@@ -96,7 +96,7 @@ export function usePublicCollections(options?: { type?: string; limit?: number }
       const { data } = await query.order('item_count', { ascending: false }).limit(options?.limit || 50)
       setCollections(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.limit, supabase])
+  }, [options?.type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { collections, isLoading, refresh: fetch }
 }

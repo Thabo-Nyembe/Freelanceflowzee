@@ -35,7 +35,7 @@ export function useComments(targetType?: string, targetId?: string, options?: { 
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 50)
       setComments(data || [])
     } finally { setIsLoading(false) }
-  }, [targetType, targetId, options?.parent_id, options?.limit, supabase])
+  }, [targetType, targetId, options?.parent_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useCommentsRealtime(targetType?: string, targetId?: string) {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [targetType, targetId, supabase])
+  }, [targetType, targetId])
   return { comments }
 }
 
@@ -90,7 +90,7 @@ export function useCommentCount(targetType?: string, targetId?: string) {
     if (!targetType || !targetId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { count: total } = await supabase.from('comments').select('*', { count: 'exact', head: true }).eq('target_type', targetType).eq('target_id', targetId); setCount(total || 0) } finally { setIsLoading(false) }
-  }, [targetType, targetId, supabase])
+  }, [targetType, targetId])
   useEffect(() => { fetch() }, [fetch])
   return { count, isLoading, refresh: fetch }
 }
@@ -103,7 +103,7 @@ export function useUserComments(userId?: string, options?: { limit?: number }) {
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('comments').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50); setComments(data || []) } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function useHabits(options?: { user_id?: string; category_id?: string; fr
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setHabits(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.category_id, options?.frequency, options?.is_active, options?.limit, supabase])
+  }, [options?.user_id, options?.category_id, options?.frequency, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { habits, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useUserHabits(userId?: string, options?: { is_active?: boolean }
       const { data } = await query.order('created_at', { ascending: false })
       setHabits(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.is_active, supabase])
+  }, [userId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { habits, isLoading, refresh: fetch }
 }
@@ -73,7 +73,7 @@ export function useHabitLogs(habitId?: string, options?: { from_date?: string; t
       const { data } = await query.order('completed_at', { ascending: false }).limit(options?.limit || 100)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [habitId, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [habitId, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }

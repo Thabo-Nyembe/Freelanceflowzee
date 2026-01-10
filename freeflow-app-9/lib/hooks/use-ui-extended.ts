@@ -34,7 +34,7 @@ export function useUiComponents(options?: { type?: string; is_active?: boolean; 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setComponents(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, options?.limit, supabase])
+  }, [options?.type, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { components, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useUiThemes(options?: { is_active?: boolean; is_default?: boolea
       const { data } = await query.order('name', { ascending: true })
       setThemes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.is_default, supabase])
+  }, [options?.is_active, options?.is_default])
   useEffect(() => { fetch() }, [fetch])
   return { themes, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useUiLayouts(options?: { type?: string; is_active?: boolean }) {
       const { data } = await query.order('name', { ascending: true })
       setLayouts(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_active, supabase])
+  }, [options?.type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { layouts, isLoading, refresh: fetch }
 }

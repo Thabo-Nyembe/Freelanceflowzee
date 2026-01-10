@@ -36,7 +36,7 @@ export function useStates(options?: { machine_id?: string; state_type?: string; 
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 100)
       setStates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.machine_id, options?.state_type, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.machine_id, options?.state_type, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { states, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useStateMachines(options?: { entity_type?: string; is_active?: b
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setMachines(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.entity_type, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { machines, isLoading, refresh: fetch }
 }
@@ -98,7 +98,7 @@ export function useCurrentState(entityType?: string, entityId?: string, machineI
       const { data } = await supabase.from('state_history').select('*, states(*)').eq('entity_type', entityType).eq('entity_id', entityId).eq('machine_id', machineId).order('transitioned_at', { ascending: false }).limit(1).single()
       setCurrentState(data?.states || null)
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, machineId, supabase])
+  }, [entityType, entityId, machineId])
   useEffect(() => { fetch() }, [fetch])
   return { currentState, isLoading, refresh: fetch }
 }
@@ -116,7 +116,7 @@ export function useStateHistory(entityType?: string, entityId?: string, machineI
       const { data } = await query.order('transitioned_at', { ascending: false }).limit(options?.limit || 50)
       setHistory(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, machineId, options?.limit, supabase])
+  }, [entityType, entityId, machineId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -134,7 +134,7 @@ export function useAvailableTransitions(entityType?: string, entityId?: string, 
       const { data } = await supabase.from('state_transitions').select('*, to_state:to_state_id(*)').eq('from_state_id', currentHistory.state_id).eq('is_active', true)
       setTransitions(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, machineId, supabase])
+  }, [entityType, entityId, machineId])
   useEffect(() => { fetch() }, [fetch])
   return { transitions, isLoading, refresh: fetch }
 }

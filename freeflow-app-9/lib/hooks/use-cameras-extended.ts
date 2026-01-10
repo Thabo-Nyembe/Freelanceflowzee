@@ -35,7 +35,7 @@ export function useCameras(options?: { user_id?: string; status?: string; is_act
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setCameras(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.is_active, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { cameras, isLoading, refresh: fetch }
 }
@@ -54,7 +54,7 @@ export function useCameraRecordings(cameraId?: string, options?: { date_from?: s
       const { data } = await query.order('started_at', { ascending: false }).limit(options?.limit || 50)
       setRecordings(data || [])
     } finally { setIsLoading(false) }
-  }, [cameraId, options?.date_from, options?.date_to, options?.limit, supabase])
+  }, [cameraId, options?.date_from, options?.date_to, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { recordings, isLoading, refresh: fetch }
 }
@@ -72,7 +72,7 @@ export function useCameraAlerts(cameraId?: string, options?: { is_acknowledged?:
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setAlerts(data || [])
     } finally { setIsLoading(false) }
-  }, [cameraId, options?.is_acknowledged, options?.limit, supabase])
+  }, [cameraId, options?.is_acknowledged, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { alerts, isLoading, refresh: fetch }
 }

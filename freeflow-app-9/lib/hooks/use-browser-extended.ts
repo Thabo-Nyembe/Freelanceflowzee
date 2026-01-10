@@ -35,7 +35,7 @@ export function useUserBrowserHistory(userId?: string, options?: { limit?: numbe
       const { data: result } = await supabase.from('browser_info').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(options?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -59,7 +59,7 @@ export function useBrowserStats(options?: { startDate?: string; endDate?: string
       })
       setStats(result)
     } finally { setIsLoading(false) }
-  }, [options?.startDate, options?.endDate, supabase])
+  }, [options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -114,7 +114,7 @@ export function useUserExtensions(userId?: string, options?: { isActive?: boolea
       const { data: result } = await query.order('installed_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.isActive, options?.browser, supabase])
+  }, [userId, options?.isActive, options?.browser])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

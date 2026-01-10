@@ -36,7 +36,7 @@ export function useErrorLogs(options?: { type?: string; severity?: string; statu
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 100)
       setErrors(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.severity, options?.status, options?.source, options?.limit, supabase])
+  }, [options?.type, options?.severity, options?.status, options?.source, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { errors, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useRecentErrors(options?: { limit?: number; severity?: string })
       const { data } = await query.order('occurred_at', { ascending: false }).limit(options?.limit || 20)
       setErrors(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.limit, options?.severity, supabase])
+  }, [options?.limit, options?.severity])
   useEffect(() => { fetch() }, [fetch])
   return { errors, isLoading, refresh: fetch }
 }
@@ -88,7 +88,7 @@ export function useErrorReports(options?: { status?: string; priority?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.priority, options?.limit, supabase])
+  }, [options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }

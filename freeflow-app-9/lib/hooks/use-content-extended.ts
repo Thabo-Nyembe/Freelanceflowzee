@@ -56,7 +56,7 @@ export function useContents(filters?: { user_id?: string; content_type?: string;
       const { data: result } = await query.order('created_at', { ascending: false }).limit(filters?.limit || 50)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [filters?.user_id, filters?.content_type, filters?.status, filters?.category_id, filters?.tag, filters?.limit, supabase])
+  }, [filters?.user_id, filters?.content_type, filters?.status, filters?.category_id, filters?.tag, filters?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -74,7 +74,7 @@ export function usePublishedContent(options?: { content_type?: string; category_
       const { data: result } = await query.order('published_at', { ascending: false }).limit(options?.limit || 20)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.content_type, options?.category_id, options?.limit, supabase])
+  }, [options?.content_type, options?.category_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -106,7 +106,7 @@ export function useContentVersions(contentId?: string, options?: { limit?: numbe
       const { data } = await supabase.from('content_versions').select('*').eq('content_id', contentId).order('version_number', { ascending: false }).limit(options?.limit || 20)
       setVersions(data || [])
     } finally { setIsLoading(false) }
-  }, [contentId, options?.limit, supabase])
+  }, [contentId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { versions, isLoading, refresh: fetch }
 }
@@ -162,7 +162,7 @@ export function useContentSearch(searchTerm: string, options?: { content_type?: 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setResults(data || [])
     } finally { setIsLoading(false) }
-  }, [searchTerm, options?.content_type, options?.status, options?.limit, supabase])
+  }, [searchTerm, options?.content_type, options?.status, options?.limit])
   useEffect(() => {
     const timer = setTimeout(search, 300)
     return () => clearTimeout(timer)
@@ -204,7 +204,7 @@ export function usePopularContent(options?: { content_type?: string; limit?: num
       const { data: result } = await query.order('view_count', { ascending: false }).limit(options?.limit || 10)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.content_type, options?.limit, supabase])
+  }, [options?.content_type, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -225,7 +225,7 @@ export function useRelatedContent(contentId?: string, options?: { limit?: number
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 5)
       setRelated(data || [])
     } finally { setIsLoading(false) }
-  }, [contentId, options?.limit, supabase])
+  }, [contentId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { related, isLoading, refresh: fetch }
 }

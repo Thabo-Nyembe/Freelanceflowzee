@@ -36,7 +36,7 @@ export function useEducationPrograms(options?: { category?: string; level?: stri
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setPrograms(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.category, options?.level, options?.is_published, options?.search, options?.limit, supabase])
+  }, [options?.category, options?.level, options?.is_published, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { programs, isLoading, refresh: fetch }
 }
@@ -82,7 +82,7 @@ export function useUserProgress(userId?: string, programId?: string) {
       const completed = progressData?.filter(p => p.completed).length || 0
       setCompletionPercent(totalMaterials && totalMaterials > 0 ? (completed / totalMaterials) * 100 : 0)
     } finally { setIsLoading(false) }
-  }, [userId, programId, supabase])
+  }, [userId, programId])
   useEffect(() => { fetch() }, [fetch])
   return { progress, completionPercent, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function useQuizAttempts(userId?: string, quizId?: string) {
     if (!userId || !quizId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('education_quiz_attempts').select('*').eq('user_id', userId).eq('quiz_id', quizId).order('completed_at', { ascending: false }); setAttempts(data || []) } finally { setIsLoading(false) }
-  }, [userId, quizId, supabase])
+  }, [userId, quizId])
   useEffect(() => { fetch() }, [fetch])
   return { attempts, isLoading, refresh: fetch }
 }

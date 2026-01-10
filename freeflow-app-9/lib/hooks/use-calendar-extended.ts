@@ -50,7 +50,7 @@ export function useCalendarEvents(calendarId?: string, start?: string, end?: str
       const { data: result } = await supabase.from('calendar_events').select('*').eq('calendar_id', calendarId).gte('start_time', start).lte('end_time', end).order('start_time', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [calendarId, start, end, supabase])
+  }, [calendarId, start, end])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

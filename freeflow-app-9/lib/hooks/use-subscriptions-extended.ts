@@ -54,7 +54,7 @@ export function useUserSubscriptions(userId?: string, options?: { status?: strin
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.includeAll, supabase])
+  }, [userId, options?.status, options?.includeAll])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useSubscriptionUsage(subscriptionId?: string, options?: { featur
       const { data: result } = await query.order('timestamp', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [subscriptionId, options?.feature, options?.startDate, options?.endDate, supabase])
+  }, [subscriptionId, options?.feature, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -137,7 +137,7 @@ export function useSubscriptionFeatureLimit(subscriptionId?: string, feature?: s
       const total = usageData?.reduce((sum, u) => sum + u.quantity, 0) || 0
       setUsage({ used: total, limit, remaining: Math.max(0, limit - total), isWithinLimit: total < limit })
     } finally { setIsLoading(false) }
-  }, [subscriptionId, feature, limit, supabase])
+  }, [subscriptionId, feature, limit])
   useEffect(() => { fetch() }, [fetch])
   return { usage, isLoading, refresh: fetch }
 }
@@ -155,7 +155,7 @@ export function useActiveSubscriptions(options?: { planId?: string; billingCycle
       const { data: result } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.planId, options?.billingCycle, options?.limit, supabase])
+  }, [options?.planId, options?.billingCycle, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

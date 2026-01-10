@@ -35,7 +35,7 @@ export function useProjectDependencies(projectId?: string, options?: { type?: st
       const { data } = await query.order('name', { ascending: true })
       setDependencies(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.type, options?.is_dev, supabase])
+  }, [projectId, options?.type, options?.is_dev])
   useEffect(() => { fetch() }, [fetch])
   return { dependencies, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useProjectVulnerabilities(projectId?: string, options?: { severi
       const { data } = await query.order('severity', { ascending: false })
       setVulnerabilities(data || [])
     } finally { setIsLoading(false) }
-  }, [projectId, options?.severity, options?.status, supabase])
+  }, [projectId, options?.severity, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { vulnerabilities, isLoading, refresh: fetch }
 }

@@ -38,7 +38,7 @@ export function useExpenses(options?: { user_id?: string; category_id?: string; 
       const { data } = await query.order('date', { ascending: false }).limit(options?.limit || 50)
       setExpenses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.category_id, options?.status, options?.date_from, options?.date_to, options?.is_billable, options?.limit, supabase])
+  }, [options?.user_id, options?.category_id, options?.status, options?.date_from, options?.date_to, options?.is_billable, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { expenses, isLoading, refresh: fetch }
 }
@@ -86,7 +86,7 @@ export function useExpenseReports(userId?: string, options?: { status?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 20)
       setReports(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { reports, isLoading, refresh: fetch }
 }
@@ -124,7 +124,7 @@ export function useExpenseStats(userId?: string, options?: { date_from?: string;
       const byCategory = data.reduce((acc: Record<string, number>, e) => { const key = e.category_id || 'uncategorized'; acc[key] = (acc[key] || 0) + (e.amount || 0); return acc }, {})
       setStats({ total, approved, pending, rejected, byCategory })
     } finally { setIsLoading(false) }
-  }, [userId, options?.date_from, options?.date_to, supabase])
+  }, [userId, options?.date_from, options?.date_to])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

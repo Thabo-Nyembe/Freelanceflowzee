@@ -72,7 +72,7 @@ export function useAvailabilityCheck(userId?: string, dateTime?: Date) {
       if (!daySchedule || !daySchedule.is_available) { setIsAvailable(false); return }
       setIsAvailable(timeString >= daySchedule.start_time && timeString <= daySchedule.end_time)
     } finally { setIsLoading(false) }
-  }, [userId, dateTime, supabase])
+  }, [userId, dateTime])
   useEffect(() => { check() }, [check])
   return { isAvailable, isLoading, recheck: check }
 }
@@ -103,7 +103,7 @@ export function useAvailableSlots(userId?: string, date?: string, duration?: num
       }
       setSlots(result)
     } finally { setIsLoading(false) }
-  }, [userId, date, duration, supabase])
+  }, [userId, date, duration])
   useEffect(() => { fetch() }, [fetch])
   return { slots, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useAvailabilityExceptions(scheduleId?: string, options?: { start
       const { data: result } = await query.order('date', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [scheduleId, options?.startDate, options?.endDate, supabase])
+  }, [scheduleId, options?.startDate, options?.endDate])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

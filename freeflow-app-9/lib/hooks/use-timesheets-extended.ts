@@ -37,7 +37,7 @@ export function useTimesheets(options?: { user_id?: string; status?: string; per
       const { data } = await query.order('period_start', { ascending: false }).limit(options?.limit || 50)
       setTimesheets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.status, options?.period_type, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.user_id, options?.status, options?.period_type, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { timesheets, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useMyTimesheets(userId?: string, options?: { status?: string; li
       const { data } = await query.order('period_start', { ascending: false }).limit(options?.limit || 20)
       setTimesheets(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { timesheets, isLoading, refresh: fetch }
 }
@@ -79,7 +79,7 @@ export function useTimesheetEntries(timesheetId?: string, options?: { date?: str
       const billable = data?.filter(e => e.is_billable).reduce((sum, e) => sum + (e.hours || 0), 0) || 0
       setTotals({ total, billable, nonBillable: total - billable })
     } finally { setIsLoading(false) }
-  }, [timesheetId, options?.date, options?.project_id, options?.is_billable, supabase])
+  }, [timesheetId, options?.date, options?.project_id, options?.is_billable])
   useEffect(() => { fetch() }, [fetch])
   return { entries, totals, isLoading, refresh: fetch }
 }
@@ -108,7 +108,7 @@ export function usePendingApprovals(approverId?: string, options?: { limit?: num
       const { data } = await supabase.from('timesheets').select('*, users(*), timesheet_entries(hours, is_billable)').eq('status', 'submitted').order('submitted_at', { ascending: true }).limit(options?.limit || 50)
       setTimesheets(data || [])
     } finally { setIsLoading(false) }
-  }, [approverId, options?.limit, supabase])
+  }, [approverId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { timesheets, isLoading, refresh: fetch }
 }
@@ -126,7 +126,7 @@ export function useTimesheetProjects(options?: { is_active?: boolean; search?: s
       const { data } = await query.order('name', { ascending: true })
       setProjects(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.search, supabase])
+  }, [options?.is_active, options?.search])
   useEffect(() => { fetch() }, [fetch])
   return { projects, isLoading, refresh: fetch }
 }
@@ -175,7 +175,7 @@ export function useTimesheetStats(userId?: string, options?: { from_date?: strin
         timesheetCount: data?.length || 0
       })
     } finally { setIsLoading(false) }
-  }, [userId, options?.from_date, options?.to_date, supabase])
+  }, [userId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -201,7 +201,7 @@ export function useCurrentTimesheet(userId?: string, periodType: string = 'weekl
       const { data } = await supabase.from('timesheets').select('*, timesheet_entries(*, timesheet_projects(*), timesheet_categories(*))').eq('user_id', userId).eq('period_start', periodStart.toISOString().split('T')[0]).single()
       setTimesheet(data)
     } finally { setIsLoading(false) }
-  }, [userId, periodType, supabase])
+  }, [userId, periodType])
   useEffect(() => { fetch() }, [fetch])
   return { timesheet, isLoading, refresh: fetch }
 }

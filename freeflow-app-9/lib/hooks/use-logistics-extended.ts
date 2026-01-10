@@ -34,7 +34,7 @@ export function useShipments(options?: { status?: string; carrier_id?: string; l
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setShipments(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.status, options?.carrier_id, options?.limit, supabase])
+  }, [options?.status, options?.carrier_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { shipments, isLoading, refresh: fetch }
 }
@@ -95,7 +95,7 @@ export function useWarehouses(options?: { is_active?: boolean; region?: string }
       const { data } = await query.order('name', { ascending: true })
       setWarehouses(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.region, supabase])
+  }, [options?.is_active, options?.region])
   useEffect(() => { fetch() }, [fetch])
   return { warehouses, isLoading, refresh: fetch }
 }
@@ -129,7 +129,7 @@ export function useWarehouseInventory(warehouseId?: string, options?: { low_stoc
       }
       setInventory(filtered)
     } finally { setIsLoading(false) }
-  }, [warehouseId, options?.low_stock, supabase])
+  }, [warehouseId, options?.low_stock])
   useEffect(() => { fetch() }, [fetch])
   return { inventory, isLoading, refresh: fetch }
 }
@@ -147,7 +147,7 @@ export function useRoutes(options?: { origin_id?: string; destination_id?: strin
       const { data } = await query.order('name', { ascending: true })
       setRoutes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.origin_id, options?.destination_id, supabase])
+  }, [options?.origin_id, options?.destination_id])
   useEffect(() => { fetch() }, [fetch])
   return { routes, isLoading, refresh: fetch }
 }
@@ -179,7 +179,7 @@ export function useShipmentStats(options?: { from_date?: string; to_date?: strin
       data?.forEach(s => { statusCounts[s.status] = (statusCounts[s.status] || 0) + 1 })
       setStats({ total: data?.length || 0, byStatus: statusCounts })
     } finally { setIsLoading(false) }
-  }, [options?.from_date, options?.to_date, supabase])
+  }, [options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

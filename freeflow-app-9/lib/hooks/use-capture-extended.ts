@@ -35,7 +35,7 @@ export function useCaptures(options?: { user_id?: string; type?: string; status?
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCaptures(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.user_id, options?.type, options?.status, options?.limit, supabase])
+  }, [options?.user_id, options?.type, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { captures, isLoading, refresh: fetch }
 }
@@ -48,7 +48,7 @@ export function useCaptureFrames(captureId?: string, options?: { limit?: number 
     if (!captureId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('capture_frames').select('*').eq('capture_id', captureId).order('frame_number', { ascending: true }).limit(options?.limit || 100); setFrames(data || []) } finally { setIsLoading(false) }
-  }, [captureId, options?.limit, supabase])
+  }, [captureId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { frames, isLoading, refresh: fetch }
 }

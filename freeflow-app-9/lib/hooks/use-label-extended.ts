@@ -36,7 +36,7 @@ export function useLabels(options?: { labelType?: string; workspaceId?: string }
       const { data: result } = await query.order('name', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.labelType, options?.workspaceId, supabase])
+  }, [options?.labelType, options?.workspaceId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -52,7 +52,7 @@ export function useEntityLabels(entityType?: string, entityId?: string) {
       const { data: result } = await supabase.from('entity_labels').select('label_id, labels(*)').eq('entity_type', entityType).eq('entity_id', entityId)
       setData(result?.map(el => el.labels) || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -70,7 +70,7 @@ export function useLabelSearch(query?: string, labelType?: string) {
       const { data: result } = await dbQuery.order('usage_count', { ascending: false }).limit(10)
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [query, labelType, supabase])
+  }, [query, labelType])
   useEffect(() => { search() }, [search])
   return { data, isLoading, search }
 }

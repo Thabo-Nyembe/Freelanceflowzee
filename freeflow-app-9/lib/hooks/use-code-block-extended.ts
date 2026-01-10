@@ -37,7 +37,7 @@ export function useCodeBlocks(options?: { language?: string; entityType?: string
       const { data: result } = await query.order('created_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.language, options?.entityType, options?.entityId, supabase])
+  }, [options?.language, options?.entityType, options?.entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useEntityCodeBlocks(entityType?: string, entityId?: string) {
       const { data: result } = await supabase.from('code_blocks').select('*').eq('entity_type', entityType).eq('entity_id', entityId).order('created_at', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

@@ -36,7 +36,7 @@ export function usePrices(options?: { product_id?: string; type?: string; curren
       const { data } = await query.order('amount', { ascending: true }).limit(options?.limit || 100)
       setPrices(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.product_id, options?.type, options?.currency, options?.is_active, options?.limit, supabase])
+  }, [options?.product_id, options?.type, options?.currency, options?.is_active, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { prices, isLoading, refresh: fetch }
 }
@@ -80,7 +80,7 @@ export function usePriceDiscounts(priceId?: string, options?: { is_active?: bool
       const { data } = await query.order('created_at', { ascending: false })
       setDiscounts(data || [])
     } finally { setIsLoading(false) }
-  }, [priceId, options?.is_active, supabase])
+  }, [priceId, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { discounts, isLoading, refresh: fetch }
 }
@@ -93,7 +93,7 @@ export function usePriceHistory(priceId?: string, options?: { limit?: number }) 
     if (!priceId) { setIsLoading(false); return }
     setIsLoading(true)
     try { const { data } = await supabase.from('price_history').select('*').eq('price_id', priceId).order('changed_at', { ascending: false }).limit(options?.limit || 50); setHistory(data || []) } finally { setIsLoading(false) }
-  }, [priceId, options?.limit, supabase])
+  }, [priceId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { history, isLoading, refresh: fetch }
 }
@@ -141,7 +141,7 @@ export function usePriceLists(options?: { is_active?: boolean; currency?: string
       const { data } = await query.order('name', { ascending: true })
       setLists(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.is_active, options?.currency, supabase])
+  }, [options?.is_active, options?.currency])
   useEffect(() => { fetch() }, [fetch])
   return { lists, isLoading, refresh: fetch }
 }
@@ -185,7 +185,7 @@ export function useCalculatedPrice(priceId?: string, quantity?: number, discount
       const total = subtotal - discount
       setCalculation({ unitPrice, quantity, subtotal, discount, total, currency: price.currency })
     } finally { setIsLoading(false) }
-  }, [priceId, quantity, discountCode, supabase])
+  }, [priceId, quantity, discountCode])
   useEffect(() => { fetch() }, [fetch])
   return { calculation, isLoading, refresh: fetch }
 }

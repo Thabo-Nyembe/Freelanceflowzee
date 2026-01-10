@@ -38,7 +38,7 @@ export function useSlots(options?: { entity_type?: string; entity_id?: string; f
       const { data } = await query.order('start_time', { ascending: true }).limit(options?.limit || 100)
       setSlots(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.entity_id, options?.from_date, options?.to_date, options?.is_available, options?.has_capacity, options?.limit, supabase])
+  }, [options?.entity_type, options?.entity_id, options?.from_date, options?.to_date, options?.is_available, options?.has_capacity, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { slots, isLoading, refresh: fetch }
 }
@@ -56,7 +56,7 @@ export function useSlotBookings(slotId?: string, options?: { status?: string; li
       const { data } = await query.order('booked_at', { ascending: false }).limit(options?.limit || 50)
       setBookings(data || [])
     } finally { setIsLoading(false) }
-  }, [slotId, options?.status, options?.limit, supabase])
+  }, [slotId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -78,7 +78,7 @@ export function useUserSlotBookings(userId?: string, options?: { status?: string
       }
       setBookings(bookings)
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.from_date, options?.limit, supabase])
+  }, [userId, options?.status, options?.from_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { bookings, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function useAvailableSlots(entityType?: string, entityId?: string, date?:
       const { data } = await supabase.from('slots').select('*').eq('entity_type', entityType).eq('entity_id', entityId).eq('is_available', true).gte('start_time', date).lt('start_time', date + 'T23:59:59').or('capacity.is.null,booked_count.lt.capacity').order('start_time', { ascending: true })
       setSlots(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, date, supabase])
+  }, [entityType, entityId, date])
   useEffect(() => { fetch() }, [fetch])
   return { slots, isLoading, refresh: fetch }
 }
@@ -112,7 +112,7 @@ export function useSlotTemplates(options?: { entity_type?: string; is_active?: b
       const { data } = await query.order('name', { ascending: true })
       setTemplates(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.is_active, supabase])
+  }, [options?.entity_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { templates, isLoading, refresh: fetch }
 }
@@ -131,7 +131,7 @@ export function useSlotBlocks(entityType?: string, entityId?: string, options?: 
       const { data } = await query.order('start_time', { ascending: true })
       setBlocks(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.from_date, options?.to_date, supabase])
+  }, [entityType, entityId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { blocks, isLoading, refresh: fetch }
 }
@@ -155,7 +155,7 @@ export function useSlotStats(entityType?: string, entityId?: string, options?: {
       const bookings = slots.reduce((sum, s) => sum + (s.booked_count || 0), 0)
       setStats({ total, available, booked, bookings })
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, options?.from_date, options?.to_date, supabase])
+  }, [entityType, entityId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

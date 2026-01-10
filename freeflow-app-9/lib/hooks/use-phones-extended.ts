@@ -75,7 +75,7 @@ export function usePhoneCalls(phoneId?: string, options?: { direction?: string; 
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setCalls(data || [])
     } finally { setIsLoading(false) }
-  }, [phoneId, options?.direction, options?.status, options?.from_date, options?.limit, supabase])
+  }, [phoneId, options?.direction, options?.status, options?.from_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { calls, isLoading, refresh: fetch }
 }
@@ -94,7 +94,7 @@ export function usePhoneSms(phoneId?: string, options?: { direction?: string; st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setMessages(data || [])
     } finally { setIsLoading(false) }
-  }, [phoneId, options?.direction, options?.status, options?.limit, supabase])
+  }, [phoneId, options?.direction, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { messages, isLoading, refresh: fetch }
 }
@@ -125,7 +125,7 @@ export function usePhoneLogs(phoneId?: string, options?: { action?: string; limi
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setLogs(data || [])
     } finally { setIsLoading(false) }
-  }, [phoneId, options?.action, options?.limit, supabase])
+  }, [phoneId, options?.action, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { logs, isLoading, refresh: fetch }
 }
@@ -144,7 +144,7 @@ export function useRecentCalls(userId?: string, options?: { limit?: number }) {
       const { data } = await supabase.from('phone_calls').select('*, phone_numbers(*)').in('phone_id', phoneIds).order('created_at', { ascending: false }).limit(options?.limit || 20)
       setCalls(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.limit, supabase])
+  }, [userId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { calls, isLoading, refresh: fetch }
 }
@@ -168,7 +168,7 @@ export function useCallStats(phoneId?: string, options?: { from_date?: string; t
       const totalDuration = data?.reduce((sum, c) => sum + (c.duration || 0), 0) || 0
       setStats({ totalCalls, inbound, outbound, missed, totalDuration })
     } finally { setIsLoading(false) }
-  }, [phoneId, options?.from_date, options?.to_date, supabase])
+  }, [phoneId, options?.from_date, options?.to_date])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }

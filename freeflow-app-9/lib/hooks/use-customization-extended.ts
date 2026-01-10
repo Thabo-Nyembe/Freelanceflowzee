@@ -35,7 +35,7 @@ export function useCustomizations(options?: { type?: string; is_global?: boolean
       const { data } = await query.order('name', { ascending: true })
       setCustomizations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_global, options?.is_active, supabase])
+  }, [options?.type, options?.is_global, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { customizations, isLoading, refresh: fetch }
 }
@@ -53,7 +53,7 @@ export function useCustomizationPresets(options?: { type?: string; is_default?: 
       const { data } = await query.order('name', { ascending: true })
       setPresets(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.type, options?.is_default, supabase])
+  }, [options?.type, options?.is_default])
   useEffect(() => { fetch() }, [fetch])
   return { presets, isLoading, refresh: fetch }
 }
@@ -91,7 +91,7 @@ export function useCustomizationValue(userId?: string, customizationId?: string)
       const { data: defaultValue } = await supabase.from('customizations').select('default_value').eq('id', customizationId).single()
       setValue(defaultValue?.default_value || null)
     } finally { setIsLoading(false) }
-  }, [userId, customizationId, supabase])
+  }, [userId, customizationId])
   useEffect(() => { fetch() }, [fetch])
   return { value, isLoading, refresh: fetch }
 }

@@ -37,7 +37,7 @@ export function useDebugSessions(options?: { sessionType?: string; status?: stri
       const { data: result } = await query.order('started_at', { ascending: false })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [options?.sessionType, options?.status, options?.userId, supabase])
+  }, [options?.sessionType, options?.status, options?.userId])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }
@@ -55,7 +55,7 @@ export function useDebugLogs(sessionId?: string, level?: string) {
       const { data: result } = await query.order('timestamp', { ascending: true })
       setData(result || [])
     } finally { setIsLoading(false) }
-  }, [sessionId, level, supabase])
+  }, [sessionId, level])
   useEffect(() => { fetch() }, [fetch])
   return { data, isLoading, refresh: fetch }
 }

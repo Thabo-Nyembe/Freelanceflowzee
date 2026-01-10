@@ -38,7 +38,7 @@ export function useRegistrations(options?: { event_id?: string; entity_type?: st
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.event_id, options?.entity_type, options?.entity_id, options?.user_id, options?.status, options?.search, options?.limit, supabase])
+  }, [options?.event_id, options?.entity_type, options?.entity_id, options?.user_id, options?.status, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { registrations, isLoading, refresh: fetch }
 }
@@ -69,7 +69,7 @@ export function useRegistrationFields(entityType?: string, entityId?: string) {
       const { data } = await query.order('order', { ascending: true })
       setFields(data || [])
     } finally { setIsLoading(false) }
-  }, [entityType, entityId, supabase])
+  }, [entityType, entityId])
   useEffect(() => { fetch() }, [fetch])
   return { fields, isLoading, refresh: fetch }
 }
@@ -100,7 +100,7 @@ export function useMyRegistrations(userId?: string, options?: { status?: string;
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 50)
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
-  }, [userId, options?.status, options?.limit, supabase])
+  }, [userId, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { registrations, isLoading, refresh: fetch }
 }
@@ -120,7 +120,7 @@ export function useWaitlist(options?: { event_id?: string; entity_type?: string;
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 100)
       setWaitlist(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.event_id, options?.entity_type, options?.entity_id, options?.status, options?.limit, supabase])
+  }, [options?.event_id, options?.entity_type, options?.entity_id, options?.status, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { waitlist, isLoading, refresh: fetch }
 }
@@ -146,7 +146,7 @@ export function useRegistrationStats(options?: { event_id?: string; entity_type?
       const checkInRate = confirmed > 0 ? Math.round((checkedIn / confirmed) * 100) : 0
       setStats({ total, pending, confirmed, checkedIn, cancelled, checkInRate })
     } finally { setIsLoading(false) }
-  }, [options?.event_id, options?.entity_type, options?.entity_id, supabase])
+  }, [options?.event_id, options?.entity_type, options?.entity_id])
   useEffect(() => { fetch() }, [fetch])
   return { stats, isLoading, refresh: fetch }
 }
@@ -164,7 +164,7 @@ export function useConfirmedRegistrations(options?: { event_id?: string; entity_
       const { data } = await query.order('confirmed_at', { ascending: false }).limit(options?.limit || 100)
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.event_id, options?.entity_id, options?.limit, supabase])
+  }, [options?.event_id, options?.entity_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { registrations, isLoading, refresh: fetch }
 }
@@ -182,7 +182,7 @@ export function usePendingRegistrations(options?: { event_id?: string; entity_id
       const { data } = await query.order('created_at', { ascending: true }).limit(options?.limit || 50)
       setRegistrations(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.event_id, options?.entity_id, options?.limit, supabase])
+  }, [options?.event_id, options?.entity_id, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { registrations, isLoading, refresh: fetch }
 }

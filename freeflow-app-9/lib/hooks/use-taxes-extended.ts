@@ -36,7 +36,7 @@ export function useTaxes(options?: { tax_type?: string; jurisdiction?: string; i
       const { data } = await query.order('name', { ascending: true }).limit(options?.limit || 50)
       setTaxes(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.tax_type, options?.jurisdiction, options?.is_active, options?.search, options?.limit, supabase])
+  }, [options?.tax_type, options?.jurisdiction, options?.is_active, options?.search, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { taxes, isLoading, refresh: fetch }
 }
@@ -63,7 +63,7 @@ export function useTaxRates(taxId?: string, options?: { effective_date?: string;
       })
       setCurrentRate(current || null)
     } finally { setIsLoading(false) }
-  }, [taxId, options?.effective_date, options?.category, supabase])
+  }, [taxId, options?.effective_date, options?.category])
   useEffect(() => { fetch() }, [fetch])
   return { rates, currentRate, isLoading, refresh: fetch }
 }
@@ -82,7 +82,7 @@ export function useTaxRules(taxId?: string, options?: { rule_type?: string; is_a
       const { data } = await query.order('priority', { ascending: true })
       setRules(data || [])
     } finally { setIsLoading(false) }
-  }, [taxId, options?.rule_type, options?.is_active, supabase])
+  }, [taxId, options?.rule_type, options?.is_active])
   useEffect(() => { fetch() }, [fetch])
   return { rules, isLoading, refresh: fetch }
 }
@@ -102,7 +102,7 @@ export function useTaxExemptions(options?: { entity_type?: string; entity_id?: s
       const { data } = await query.order('valid_from', { ascending: false })
       setExemptions(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.entity_type, options?.entity_id, options?.tax_id, options?.status, supabase])
+  }, [options?.entity_type, options?.entity_id, options?.tax_id, options?.status])
   useEffect(() => { fetch() }, [fetch])
   return { exemptions, isLoading, refresh: fetch }
 }
@@ -122,7 +122,7 @@ export function useTaxFilings(options?: { tax_id?: string; status?: string; from
       const { data } = await query.order('period_end', { ascending: false }).limit(options?.limit || 50)
       setFilings(data || [])
     } finally { setIsLoading(false) }
-  }, [options?.tax_id, options?.status, options?.from_date, options?.to_date, options?.limit, supabase])
+  }, [options?.tax_id, options?.status, options?.from_date, options?.to_date, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { filings, isLoading, refresh: fetch }
 }
@@ -146,7 +146,7 @@ export function useApplicableTaxes(params?: { jurisdiction?: string; category?: 
       }
       setTaxes(result)
     } finally { setIsLoading(false) }
-  }, [params?.jurisdiction, params?.category, params?.entity_type, params?.entity_id, supabase])
+  }, [params?.jurisdiction, params?.category, params?.entity_type, params?.entity_id])
   useEffect(() => { fetch() }, [fetch])
   return { taxes, isLoading, refresh: fetch }
 }
