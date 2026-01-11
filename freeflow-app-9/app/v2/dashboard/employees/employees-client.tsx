@@ -2111,7 +2111,7 @@ export default function EmployeesClient() {
                 <div className="space-y-2 mt-2">
                   <Input placeholder="Key Result 1" />
                   <Input placeholder="Key Result 2" />
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => { toast.info('Additional key result fields can be added after goal creation') }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => { toast.info('Key results', { description: 'Additional fields can be added after goal creation' }) }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>
               </div>
             </div>

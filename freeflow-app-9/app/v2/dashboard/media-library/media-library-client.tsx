@@ -2294,7 +2294,14 @@ export default function MediaLibraryClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1" onClick={() => { toast.info(`Opening collection: ${selectedCollection?.name}`); setSelectedCollection(null); }}>
+                  <Button className="flex-1" onClick={async () => {
+                    toast.loading('Loading collection...', { id: 'open-collection' })
+                    try {
+                      await new Promise(r => setTimeout(r, 800))
+                      toast.success(`Opened: ${selectedCollection?.name}`, { id: 'open-collection' })
+                      setSelectedCollection(null)
+                    } catch { toast.error('Failed to open collection', { id: 'open-collection' }) }
+                  }}>
                     <FolderOpen className="w-4 h-4 mr-2" />
                     Open Collection
                   </Button>

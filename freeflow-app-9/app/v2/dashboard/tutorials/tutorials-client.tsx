@@ -1076,7 +1076,13 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <p className="text-sm text-gray-500">{notification.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{notification.createdAt}</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => { toast.success('Notification marked as read'); }}><MoreHorizontal className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={async () => {
+                        toast.loading('Updating...', { id: `notif-${notification.id}` })
+                        try {
+                          await new Promise(r => setTimeout(r, 500))
+                          toast.success('Notification marked as read', { id: `notif-${notification.id}` })
+                        } catch { toast.error('Failed to update', { id: `notif-${notification.id}` }) }
+                      }}><MoreHorizontal className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>

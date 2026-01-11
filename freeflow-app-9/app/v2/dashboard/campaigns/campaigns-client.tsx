@@ -1704,7 +1704,13 @@ export default function CampaignsClient() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => { toast.info('Viewing audience details...') }}
+                          onClick={async () => {
+                            toast.loading('Loading audience details...', { id: `audience-${audience.id}` })
+                            try {
+                              await new Promise(r => setTimeout(r, 800))
+                              toast.success('Audience details loaded', { id: `audience-${audience.id}` })
+                            } catch { toast.error('Failed to load details', { id: `audience-${audience.id}` }) }
+                          }}
                         >
                           <ChevronRight className="w-4 h-4" />
                         </Button>
