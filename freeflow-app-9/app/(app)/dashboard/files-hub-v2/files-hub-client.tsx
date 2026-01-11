@@ -150,171 +150,39 @@ interface StorageStats {
   trashedFiles: number
 }
 
-// Mock data
-const mockFiles: FileItem[] = [
-  {
-    id: '1',
-    name: 'Project Proposal.docx',
-    type: 'document',
-    size: 2456000,
-    path: '/Documents/Work',
-    parentId: 'folder-1',
-    createdAt: '2024-12-20T10:30:00Z',
-    modifiedAt: '2024-12-24T08:15:00Z',
-    owner: 'John Doe',
-    status: 'synced',
-    isStarred: true,
-    isShared: true,
-    shareCount: 3,
-    extension: 'docx',
-    version: 5,
-    tags: ['work', 'important']
-  },
-  {
-    id: '2',
-    name: 'Financial Report Q4.xlsx',
-    type: 'spreadsheet',
-    size: 1834000,
-    path: '/Documents/Finance',
-    parentId: 'folder-2',
-    createdAt: '2024-12-18T14:20:00Z',
-    modifiedAt: '2024-12-23T16:45:00Z',
-    owner: 'John Doe',
-    status: 'synced',
-    isStarred: true,
-    isShared: true,
-    shareCount: 5,
-    extension: 'xlsx',
-    version: 3,
-    tags: ['finance', 'quarterly']
-  },
-  {
-    id: '3',
-    name: 'Team Photo.jpg',
-    type: 'image',
-    size: 4567000,
-    path: '/Photos/Team',
-    parentId: 'folder-3',
-    createdAt: '2024-12-15T09:00:00Z',
-    modifiedAt: '2024-12-15T09:00:00Z',
-    owner: 'Sarah Chen',
-    status: 'synced',
-    isStarred: false,
-    isShared: false,
-    extension: 'jpg',
-    version: 1
-  },
-  {
-    id: '4',
-    name: 'Product Demo.mp4',
-    type: 'video',
-    size: 156780000,
-    path: '/Videos/Marketing',
-    parentId: 'folder-4',
-    createdAt: '2024-12-12T11:30:00Z',
-    modifiedAt: '2024-12-22T10:00:00Z',
-    owner: 'Mike Johnson',
-    status: 'syncing',
-    isStarred: true,
-    isShared: true,
-    shareCount: 8,
-    extension: 'mp4',
-    version: 2,
-    tags: ['marketing', 'demo']
-  },
-  {
-    id: '5',
-    name: 'Brand Guidelines.pdf',
-    type: 'document',
-    size: 8934000,
-    path: '/Documents/Brand',
-    parentId: 'folder-1',
-    createdAt: '2024-11-28T15:45:00Z',
-    modifiedAt: '2024-12-20T09:30:00Z',
-    owner: 'Emma Davis',
-    status: 'synced',
-    isStarred: true,
-    isShared: true,
-    shareCount: 12,
-    extension: 'pdf',
-    version: 4,
-    tags: ['brand', 'guidelines']
-  },
-  {
-    id: '6',
-    name: 'Podcast Episode 15.mp3',
-    type: 'audio',
-    size: 45670000,
-    path: '/Audio/Podcasts',
-    parentId: 'folder-5',
-    createdAt: '2024-12-10T16:00:00Z',
-    modifiedAt: '2024-12-10T16:00:00Z',
-    owner: 'John Doe',
-    status: 'synced',
-    isStarred: false,
-    isShared: false,
-    extension: 'mp3',
-    version: 1
-  },
-  {
-    id: '7',
-    name: 'Source Code.zip',
-    type: 'archive',
-    size: 23456000,
-    path: '/Code/Backup',
-    parentId: 'folder-6',
-    createdAt: '2024-12-08T12:00:00Z',
-    modifiedAt: '2024-12-21T18:30:00Z',
-    owner: 'Alex Thompson',
-    status: 'synced',
-    isStarred: false,
-    isShared: false,
-    extension: 'zip',
-    version: 7,
-    tags: ['code', 'backup']
-  },
-  {
-    id: '8',
-    name: 'Q4 Presentation.pptx',
-    type: 'presentation',
-    size: 12340000,
-    path: '/Documents/Presentations',
-    parentId: 'folder-1',
-    createdAt: '2024-12-19T10:15:00Z',
-    modifiedAt: '2024-12-24T07:00:00Z',
-    owner: 'John Doe',
-    status: 'pending',
-    isStarred: true,
-    isShared: true,
-    shareCount: 6,
-    extension: 'pptx',
-    version: 8,
-    tags: ['presentation', 'quarterly']
+// Database types for shared links
+interface DbFileShare {
+  id: string
+  file_id: string
+  shared_by: string
+  shared_with: string | null
+  email: string | null
+  permission: 'view' | 'comment' | 'edit' | 'admin'
+  can_download: boolean
+  expires_at: string | null
+  is_active: boolean
+  access_count: number
+  created_at: string
+  files?: {
+    name: string
   }
-]
+}
 
-const mockFolders: FolderItem[] = [
-  { id: 'folder-1', name: 'Documents', parentId: null, path: '/Documents', itemCount: 45, size: 234567000, createdAt: '2024-01-15', modifiedAt: '2024-12-24', color: 'blue', isShared: true },
-  { id: 'folder-2', name: 'Finance', parentId: 'folder-1', path: '/Documents/Finance', itemCount: 12, size: 45678000, createdAt: '2024-03-20', modifiedAt: '2024-12-23', color: 'green', isShared: true },
-  { id: 'folder-3', name: 'Photos', parentId: null, path: '/Photos', itemCount: 234, size: 567890000, createdAt: '2024-02-10', modifiedAt: '2024-12-22', color: 'purple', isShared: false },
-  { id: 'folder-4', name: 'Videos', parentId: null, path: '/Videos', itemCount: 28, size: 2345670000, createdAt: '2024-04-05', modifiedAt: '2024-12-21', color: 'red', isShared: true },
-  { id: 'folder-5', name: 'Audio', parentId: null, path: '/Audio', itemCount: 56, size: 890123000, createdAt: '2024-05-12', modifiedAt: '2024-12-20', color: 'orange', isShared: false },
-  { id: 'folder-6', name: 'Code', parentId: null, path: '/Code', itemCount: 89, size: 123456000, createdAt: '2024-06-08', modifiedAt: '2024-12-19', color: 'cyan', isShared: false }
-]
-
-const mockSharedLinks: SharedLink[] = [
-  { id: '1', fileId: '1', fileName: 'Project Proposal.docx', access: 'edit', createdAt: '2024-12-20', viewCount: 45, downloadCount: 12, isPasswordProtected: false },
-  { id: '2', fileId: '2', fileName: 'Financial Report Q4.xlsx', access: 'view', createdAt: '2024-12-18', expiresAt: '2024-12-31', viewCount: 89, downloadCount: 23, isPasswordProtected: true },
-  { id: '3', fileId: '5', fileName: 'Brand Guidelines.pdf', access: 'view', createdAt: '2024-12-15', viewCount: 156, downloadCount: 67, isPasswordProtected: false }
-]
-
-const mockActivity: FileActivity[] = [
-  { id: '1', fileId: '1', fileName: 'Project Proposal.docx', action: 'modified', user: 'John Doe', timestamp: '2024-12-24T08:15:00Z' },
-  { id: '2', fileId: '8', fileName: 'Q4 Presentation.pptx', action: 'shared', user: 'Sarah Chen', timestamp: '2024-12-24T07:30:00Z' },
-  { id: '3', fileId: '4', fileName: 'Product Demo.mp4', action: 'downloaded', user: 'Mike Johnson', timestamp: '2024-12-23T16:45:00Z' },
-  { id: '4', fileId: '2', fileName: 'Financial Report Q4.xlsx', action: 'modified', user: 'Emma Davis', timestamp: '2024-12-23T14:20:00Z' },
-  { id: '5', fileId: '7', fileName: 'Source Code.zip', action: 'created', user: 'Alex Thompson', timestamp: '2024-12-21T18:30:00Z' }
-]
+// Database types for file activities
+interface DbFileActivity {
+  id: string
+  file_id: string
+  user_id: string
+  activity: string
+  description: string | null
+  created_at: string
+  files?: {
+    name: string
+  }
+  profiles?: {
+    full_name: string | null
+  }
+}
 
 // Helper functions
 const getFileIcon = (type: FileType) => {
@@ -457,9 +325,12 @@ export default function FilesHubClient() {
   const [settingsTab, setSettingsTab] = useState('storage')
 
   // Data State
-  const [files, setFiles] = useState<FileItem[]>(mockFiles)
-  const [folders, setFolders] = useState<FolderItem[]>(mockFolders)
+  const [files, setFiles] = useState<FileItem[]>([])
+  const [folders, setFolders] = useState<FolderItem[]>([])
+  const [sharedLinks, setSharedLinks] = useState<SharedLink[]>([])
+  const [activities, setActivities] = useState<FileActivity[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Form State
   const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false)
@@ -496,25 +367,54 @@ export default function FilesHubClient() {
   const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
   const [showDisableFilesHubDialog, setShowDisableFilesHubDialog] = useState(false)
 
-  // Fetch files and folders
+  // Fetch files, folders, shared links, and activities
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
+      setError(null)
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        setError('Not authenticated')
+        return
+      }
 
-      const [filesRes, foldersRes] = await Promise.all([
+      const [filesRes, foldersRes, sharesRes, activitiesRes] = await Promise.all([
         supabase.from('files').select('*').eq('user_id', user.id).eq('status', 'active').order('updated_at', { ascending: false }),
-        supabase.from('folders').select('*').eq('user_id', user.id).order('name')
+        supabase.from('folders').select('*').eq('user_id', user.id).order('name'),
+        supabase.from('file_shares').select(`
+          id,
+          file_id,
+          shared_by,
+          shared_with,
+          email,
+          permission,
+          can_download,
+          expires_at,
+          is_active,
+          access_count,
+          created_at,
+          files!inner(name)
+        `).eq('shared_by', user.id).eq('is_active', true).order('created_at', { ascending: false }),
+        supabase.from('file_activities').select(`
+          id,
+          file_id,
+          user_id,
+          activity,
+          description,
+          created_at,
+          files!inner(name)
+        `).eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
       ])
 
-      if (filesRes.data) {
+      if (filesRes.error) {
+        console.error('Error fetching files:', filesRes.error)
+      } else if (filesRes.data) {
         setFiles(filesRes.data.map((f: DbFile) => ({
           id: f.id,
           name: f.name,
           type: f.type as FileType,
           size: f.size,
-          path: '/',
+          path: f.url || '/',
           parentId: f.folder_id,
           createdAt: f.created_at,
           modifiedAt: f.updated_at,
@@ -527,7 +427,9 @@ export default function FilesHubClient() {
         })))
       }
 
-      if (foldersRes.data) {
+      if (foldersRes.error) {
+        console.error('Error fetching folders:', foldersRes.error)
+      } else if (foldersRes.data) {
         setFolders(foldersRes.data.map((f: DbFolder) => ({
           id: f.id,
           name: f.name,
@@ -541,12 +443,56 @@ export default function FilesHubClient() {
           isShared: f.is_shared
         })))
       }
-    } catch (error) {
-      console.error('Error fetching files:', error)
+
+      if (sharesRes.error) {
+        console.error('Error fetching shares:', sharesRes.error)
+      } else if (sharesRes.data) {
+        setSharedLinks(sharesRes.data.map((s: DbFileShare) => ({
+          id: s.id,
+          fileId: s.file_id,
+          fileName: s.files?.name || 'Unknown file',
+          access: s.permission === 'edit' || s.permission === 'admin' ? 'edit' : 'view',
+          createdAt: s.created_at,
+          expiresAt: s.expires_at || undefined,
+          viewCount: s.access_count,
+          downloadCount: 0, // Not tracked in current schema
+          isPasswordProtected: false // Not tracked in current schema
+        })))
+      }
+
+      if (activitiesRes.error) {
+        console.error('Error fetching activities:', activitiesRes.error)
+      } else if (activitiesRes.data) {
+        setActivities(activitiesRes.data.map((a: DbFileActivity) => ({
+          id: a.id,
+          fileId: a.file_id,
+          fileName: a.files?.name || 'Unknown file',
+          action: mapActivityType(a.activity),
+          user: 'You',
+          timestamp: a.created_at
+        })))
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setError(err instanceof Error ? err.message : 'Failed to fetch data')
     } finally {
       setLoading(false)
     }
   }, [supabase])
+
+  // Map database activity types to UI activity types
+  const mapActivityType = (activity: string): FileActivity['action'] => {
+    const activityMap: Record<string, FileActivity['action']> = {
+      'upload': 'created',
+      'edit': 'modified',
+      'rename': 'renamed',
+      'move': 'moved',
+      'delete': 'deleted',
+      'share': 'shared',
+      'download': 'downloaded'
+    }
+    return activityMap[activity] || 'modified'
+  }
 
   useEffect(() => {
     fetchData()
@@ -697,6 +643,62 @@ export default function FilesHubClient() {
     }
   }
 
+  // Move file handler
+  const handleMoveFile = async (fileId: string, targetFolderId: string | null, fileName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('files').update({
+        folder_id: targetFolderId,
+        updated_at: new Date().toISOString()
+      }).eq('id', fileId)
+
+      if (error) throw error
+
+      // Log the activity
+      await supabase.from('file_activities').insert({
+        file_id: fileId,
+        user_id: user.id,
+        activity: 'move',
+        description: `File moved to ${targetFolderId ? folders.find(f => f.id === targetFolderId)?.name || 'folder' : 'root'}`
+      })
+
+      toast.success('File moved', { description: `${fileName} has been moved` })
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to move file', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Rename file handler
+  const handleRenameFile = async (fileId: string, newName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('files').update({
+        name: newName,
+        updated_at: new Date().toISOString()
+      }).eq('id', fileId)
+
+      if (error) throw error
+
+      // Log the activity
+      await supabase.from('file_activities').insert({
+        file_id: fileId,
+        user_id: user.id,
+        activity: 'rename',
+        description: `File renamed to ${newName}`
+      })
+
+      toast.success('File renamed', { description: `File renamed to ${newName}` })
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to rename file', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
   // File upload handler
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = event.target.files
@@ -824,6 +826,47 @@ export default function FilesHubClient() {
     { id: '2', label: 'New Folder', icon: FolderPlus, action: () => setShowCreateFolderDialog(true), variant: 'secondary' as const },
     { id: '3', label: 'Refresh', icon: RefreshCw, action: () => fetchData(), variant: 'ghost' as const },
   ]
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
+        <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="flex flex-col items-center gap-4">
+              <RefreshCw className="w-8 h-8 text-cyan-500 animate-spin" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">Loading your files...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
+        <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+          <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <AlertOctagon className="w-8 h-8 text-red-500" />
+                <div>
+                  <h3 className="font-semibold text-red-800 dark:text-red-200">Error Loading Files</h3>
+                  <p className="text-sm text-red-600 dark:text-red-300">{error}</p>
+                </div>
+                <Button variant="outline" className="ml-auto" onClick={fetchData}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retry
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
@@ -965,7 +1008,7 @@ export default function FilesHubClient() {
                 <span className="text-xs text-gray-500 dark:text-gray-400">Links</span>
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-white">
-                {mockSharedLinks.length}
+                {sharedLinks.length}
               </div>
               <div className="flex items-center gap-1 text-xs text-indigo-600">
                 <span>Active</span>
@@ -1108,60 +1151,83 @@ export default function FilesHubClient() {
             )}
 
             {/* Files */}
-            <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-2'}>
-              {filteredFiles.map((file) => {
-                const FileIcon = getFileIcon(file.type)
-                return (
-                  <Card
-                    key={file.id}
-                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                    onClick={() => {
-                      setSelectedFile(file)
-                      setShowFileDialog(true)
-                    }}
+            {filteredFiles.length === 0 && currentFolders.length === 0 ? (
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <FolderOpen className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {currentFolderId ? 'This folder is empty' : 'No files yet'}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {currentFolderId
+                      ? 'Upload files to this folder to get started'
+                      : 'Upload your first file to get started'}
+                  </p>
+                  <Button
+                    className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                    onClick={() => fileInputRef.current?.click()}
                   >
-                    <CardContent className={viewMode === 'grid' ? 'p-4' : 'p-3'}>
-                      <div className={viewMode === 'grid' ? 'text-center' : 'flex items-center gap-4'}>
-                        <div className={viewMode === 'grid' ? 'mb-3' : ''}>
-                          <FileIcon className={`${viewMode === 'grid' ? 'w-12 h-12 mx-auto' : 'w-10 h-10'} ${getFileColor(file.type)}`} />
-                        </div>
-                        <div className={viewMode === 'grid' ? '' : 'flex-1 min-w-0'}>
-                          <div className="flex items-center gap-2 justify-center">
-                            <h3 className={`font-medium text-gray-900 dark:text-white ${viewMode === 'grid' ? 'truncate' : ''}`}>
-                              {file.name}
-                            </h3>
-                            {file.isStarred && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 flex-shrink-0" />}
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Files
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' : 'space-y-2'}>
+                {filteredFiles.map((file) => {
+                  const FileIcon = getFileIcon(file.type)
+                  return (
+                    <Card
+                      key={file.id}
+                      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => {
+                        setSelectedFile(file)
+                        setShowFileDialog(true)
+                      }}
+                    >
+                      <CardContent className={viewMode === 'grid' ? 'p-4' : 'p-3'}>
+                        <div className={viewMode === 'grid' ? 'text-center' : 'flex items-center gap-4'}>
+                          <div className={viewMode === 'grid' ? 'mb-3' : ''}>
+                            <FileIcon className={`${viewMode === 'grid' ? 'w-12 h-12 mx-auto' : 'w-10 h-10'} ${getFileColor(file.type)}`} />
                           </div>
-                          <div className="flex items-center gap-2 justify-center text-xs text-gray-500 mt-1">
-                            <span>{formatSize(file.size)}</span>
-                            <span>•</span>
-                            <span>{formatDate(file.modifiedAt)}</span>
+                          <div className={viewMode === 'grid' ? '' : 'flex-1 min-w-0'}>
+                            <div className="flex items-center gap-2 justify-center">
+                              <h3 className={`font-medium text-gray-900 dark:text-white ${viewMode === 'grid' ? 'truncate' : ''}`}>
+                                {file.name}
+                              </h3>
+                              {file.isStarred && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 flex-shrink-0" />}
+                            </div>
+                            <div className="flex items-center gap-2 justify-center text-xs text-gray-500 mt-1">
+                              <span>{formatSize(file.size)}</span>
+                              <span>•</span>
+                              <span>{formatDate(file.modifiedAt)}</span>
+                            </div>
+                            {viewMode === 'grid' && (
+                              <div className="flex items-center gap-2 justify-center mt-2">
+                                <Badge className={getStatusColor(file.status)}>{file.status}</Badge>
+                                {file.isShared && <Badge className="bg-green-100 text-green-700">Shared</Badge>}
+                              </div>
+                            )}
                           </div>
-                          {viewMode === 'grid' && (
-                            <div className="flex items-center gap-2 justify-center mt-2">
+                          {viewMode === 'list' && (
+                            <div className="flex items-center gap-2">
                               <Badge className={getStatusColor(file.status)}>{file.status}</Badge>
-                              {file.isShared && <Badge className="bg-green-100 text-green-700">Shared</Badge>}
+                              <Button variant="ghost" size="sm" onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedFileForOptions(file)
+                                setShowFileOptionsDialog(true)
+                              }}>
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
                             </div>
                           )}
                         </div>
-                        {viewMode === 'list' && (
-                          <div className="flex items-center gap-2">
-                            <Badge className={getStatusColor(file.status)}>{file.status}</Badge>
-                            <Button variant="ghost" size="sm" onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedFileForOptions(file)
-                              setShowFileOptionsDialog(true)
-                            }}>
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            )}
           </TabsContent>
 
           {/* Recent Tab */}
@@ -1223,32 +1289,42 @@ export default function FilesHubClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {mockSharedLinks.map((link) => (
-                    <div key={link.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-8 h-8 text-blue-500" />
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white">{link.fileName}</h4>
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span>{link.viewCount} views</span>
-                            <span>{link.downloadCount} downloads</span>
-                            {link.expiresAt && <span>Expires {formatDate(link.expiresAt)}</span>}
+                {sharedLinks.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Share2 className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">No shared files</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Share a file to create a shareable link
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {sharedLinks.map((link) => (
+                      <div key={link.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-8 h-8 text-blue-500" />
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">{link.fileName}</h4>
+                            <div className="flex items-center gap-3 text-xs text-gray-500">
+                              <span>{link.viewCount} views</span>
+                              <span>{link.downloadCount} downloads</span>
+                              {link.expiresAt && <span>Expires {formatDate(link.expiresAt)}</span>}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                          {link.isPasswordProtected && <Lock className="w-4 h-4 text-gray-400" />}
+                          <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
+                            {link.access}
+                          </Badge>
+                          <Button variant="ghost" size="sm" onClick={() => handleCopyShareLink(link.fileId, link.fileName)}>
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {link.isPasswordProtected && <Lock className="w-4 h-4 text-gray-400" />}
-                        <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
-                          {link.access}
-                        </Badge>
-                        <Button variant="ghost" size="sm" onClick={() => handleCopyShareLink(link.fileId, link.fileName)}>
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1263,24 +1339,37 @@ export default function FilesHubClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {mockActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                      <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-                        {activity.action === 'modified' && <Edit className="w-4 h-4 text-cyan-600" />}
-                        {activity.action === 'shared' && <Share2 className="w-4 h-4 text-green-600" />}
-                        {activity.action === 'downloaded' && <Download className="w-4 h-4 text-blue-600" />}
-                        {activity.action === 'created' && <Plus className="w-4 h-4 text-purple-600" />}
+                {activities.length === 0 ? (
+                  <div className="text-center py-8">
+                    <History className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">No activity yet</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Upload, share, or modify files to see activity here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {activities.map((activity) => (
+                      <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+                          {activity.action === 'modified' && <Edit className="w-4 h-4 text-cyan-600" />}
+                          {activity.action === 'shared' && <Share2 className="w-4 h-4 text-green-600" />}
+                          {activity.action === 'downloaded' && <Download className="w-4 h-4 text-blue-600" />}
+                          {activity.action === 'created' && <Plus className="w-4 h-4 text-purple-600" />}
+                          {activity.action === 'moved' && <FolderOpen className="w-4 h-4 text-orange-600" />}
+                          {activity.action === 'renamed' && <Edit className="w-4 h-4 text-yellow-600" />}
+                          {activity.action === 'deleted' && <Trash2 className="w-4 h-4 text-red-600" />}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-900 dark:text-white">
+                            <span className="font-medium">{activity.user}</span> {activity.action} <span className="font-medium">{activity.fileName}</span>
+                          </p>
+                          <p className="text-xs text-gray-500">{formatDate(activity.timestamp)} at {formatTime(activity.timestamp)}</p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-900 dark:text-white">
-                          <span className="font-medium">{activity.user}</span> {activity.action} <span className="font-medium">{activity.fileName}</span>
-                        </p>
-                        <p className="text-xs text-gray-500">{formatDate(activity.timestamp)} at {formatTime(activity.timestamp)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1575,7 +1664,7 @@ export default function FilesHubClient() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {mockSharedLinks.map((link) => (
+                        {sharedLinks.map((link) => (
                           <div key={link.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div className="flex items-center gap-3">
                               <FileText className="w-8 h-8 text-blue-500" />
@@ -1714,7 +1803,7 @@ export default function FilesHubClient() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {mockFolders.slice(0, 4).map((folder) => (
+                      {folders.slice(0, 4).map((folder) => (
                         <div key={folder.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center gap-3">
                             <FolderOpen className="w-5 h-5 text-blue-500" />
@@ -2724,7 +2813,7 @@ export default function FilesHubClient() {
             </DialogHeader>
             <div className="py-4 max-h-96 overflow-y-auto">
               <div className="space-y-3">
-                {mockActivity.map((activity) => (
+                {activities.map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
                       {activity.action === 'modified' && <Edit className="w-4 h-4 text-cyan-600" />}

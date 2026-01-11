@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { useNotifications, type NotificationStatus, type NotificationType, type NotificationPriority } from '@/lib/hooks/use-notifications'
+import { useNotificationsV2, type NotificationV2, type NotificationStatusV2, type NotificationTypeV2, type NotificationPriorityV2, type NotificationChannelV2 } from '@/lib/hooks/use-notifications-v2'
+import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -300,12 +301,40 @@ const mockABTests: ABTest[] = [
 export default function NotificationsClient() {
   const router = useRouter()
   const supabase = createClient()
-  const { notifications: dbNotifications, loading, createNotification, updateNotification, deleteNotification, refetch } = useNotifications()
+
+  // Use the new comprehensive notifications hook with real Supabase data
+  const [statusFilter, setStatusFilter] = useState<NotificationStatusV2 | 'all'>('all')
+  const [channelFilter, setChannelFilter] = useState<NotificationChannelV2 | 'all'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const {
+    notifications: dbNotifications,
+    unreadNotifications,
+    starredNotifications,
+    archivedNotifications,
+    stats: notificationStats,
+    isLoading: loading,
+    error: notificationError,
+    refresh: refetchNotifications,
+    markAsRead,
+    markAsUnread,
+    markAllAsRead,
+    toggleStar,
+    archiveNotification: archiveNotif,
+    deleteNotification: deleteNotif,
+    clearAll,
+    createNotification
+  } = useNotificationsV2({
+    filters: {
+      status: statusFilter,
+      channel: channelFilter,
+      search: searchQuery
+    },
+    realtime: true,
+    limit: 100
+  })
 
   const [activeTab, setActiveTab] = useState('inbox')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [channelFilter, setChannelFilter] = useState<string>('all')
   const [showCreateCampaign, setShowCreateCampaign] = useState(false)
   const [showCreateAutomation, setShowCreateAutomation] = useState(false)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
@@ -353,36 +382,52 @@ export default function NotificationsClient() {
     scheduled: false
   })
 
-  // Filter notifications
-  const filteredNotifications = useMemo(() => {
-    return mockNotifications.filter(n => {
-      if (statusFilter !== 'all' && n.status !== statusFilter) return false
-      if (channelFilter !== 'all' && n.channel !== channelFilter) return false
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase()
-        return n.title.toLowerCase().includes(query) || n.message.toLowerCase().includes(query)
-      }
-      return true
-    })
-  }, [statusFilter, channelFilter, searchQuery])
+  // Transform database notifications to match the UI notification format
+  const transformedNotifications = useMemo((): Notification[] => {
+    return dbNotifications.map(n => ({
+      id: n.id,
+      title: n.title,
+      message: n.message,
+      type: n.type as 'info' | 'success' | 'warning' | 'error' | 'system',
+      priority: n.priority as 'low' | 'normal' | 'high' | 'urgent',
+      status: n.status as 'unread' | 'read' | 'dismissed' | 'archived',
+      channel: n.channel as ChannelType,
+      createdAt: n.created_at,
+      readAt: n.read_at || undefined,
+      actionUrl: n.action_url || undefined,
+      actionLabel: n.action_label || undefined,
+      sender: n.sender || undefined,
+      category: n.category || 'general',
+      isStarred: n.is_starred
+    }))
+  }, [dbNotifications])
 
-  // Calculate stats
+  // Filter notifications - now using real data
+  const filteredNotifications = useMemo(() => {
+    // Since filtering is already done by the hook, just return the transformed notifications
+    // Additional client-side filtering can be done here if needed
+    return transformedNotifications
+  }, [transformedNotifications])
+
+  // Calculate stats - using real notification data
   const stats = useMemo(() => {
     const totalSent = mockCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
     const totalDelivered = mockCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
     const totalOpened = mockCampaigns.reduce((sum, c) => sum + c.stats.opened, 0)
     const totalClicked = mockCampaigns.reduce((sum, c) => sum + c.stats.clicked, 0)
     return {
-      totalNotifications: mockNotifications.length,
-      unread: mockNotifications.filter(n => n.status === 'unread').length,
-      starred: mockNotifications.filter(n => n.isStarred).length,
+      // Use real notification stats from Supabase
+      totalNotifications: notificationStats.total,
+      unread: notificationStats.unread,
+      starred: notificationStats.starred,
+      // Campaign stats (still using mock data for campaigns)
       totalSent,
       deliveryRate: totalSent > 0 ? ((totalDelivered / totalSent) * 100).toFixed(1) : '0',
       openRate: totalDelivered > 0 ? ((totalOpened / totalDelivered) * 100).toFixed(1) : '0',
       clickRate: totalOpened > 0 ? ((totalClicked / totalOpened) * 100).toFixed(1) : '0',
       activeAutomations: mockAutomations.filter(a => a.status === 'active').length
     }
-  }, [])
+  }, [notificationStats])
 
   const statsCards = [
     { label: 'Total', value: stats.totalNotifications.toString(), icon: Bell, color: 'from-violet-500 to-purple-600' },
@@ -462,12 +507,11 @@ export default function NotificationsClient() {
       await createNotification({
         title: campaignForm.title,
         message: campaignForm.message,
-        notification_type: 'info' as NotificationType,
-        status: 'unread' as NotificationStatus,
-        priority: 'normal' as NotificationPriority,
-        is_read: false,
-        send_in_app: true,
-        metadata: { channel: campaignForm.channel, segment: campaignForm.segment, campaign_name: campaignForm.name }
+        type: 'info' as NotificationTypeV2,
+        priority: 'normal' as NotificationPriorityV2,
+        channel: (campaignForm.channel || 'in_app') as NotificationChannelV2,
+        category: 'campaign',
+        data: { segment: campaignForm.segment, campaign_name: campaignForm.name }
       })
       toast.success('Campaign sent', { description: `"${campaignForm.name}" delivered successfully` })
       setShowCreateCampaign(false)
@@ -485,11 +529,10 @@ export default function NotificationsClient() {
       await createNotification({
         title: notification.title,
         message: notification.message,
-        notification_type: (notification.type || 'info') as NotificationType,
-        status: 'unread' as NotificationStatus,
-        priority: (notification.priority || 'normal') as NotificationPriority,
-        is_read: false,
-        send_in_app: true
+        type: (notification.type || 'info') as NotificationTypeV2,
+        priority: (notification.priority || 'normal') as NotificationPriorityV2,
+        channel: (notification.channel || 'in_app') as NotificationChannelV2,
+        category: notification.category || 'general'
       })
       toast.success('Notification sent', { description: `"${notification.title}" delivered successfully` })
     } catch (err) {
@@ -502,12 +545,8 @@ export default function NotificationsClient() {
   const handleMarkAsRead = async (notification: Notification) => {
     setIsSubmitting(true)
     try {
-      // Find matching DB notification by title if possible
-      const dbNotif = dbNotifications.find(n => n.title === notification.title)
-      if (dbNotif) {
-        await updateNotification(dbNotif.id, { is_read: true, read_at: new Date().toISOString(), status: 'read' })
-      }
-      toast.success('Marked as read')
+      // Use the notification ID directly
+      await markAsRead(notification.id)
     } catch (err) {
       toast.error('Failed to mark as read')
     } finally {
@@ -515,15 +554,21 @@ export default function NotificationsClient() {
     }
   }
 
-  const handleStarNotification = async (notification: Notification) => {
-    const action = notification.isStarred ? 'removed from' : 'added to'
+  const handleMarkAllAsRead = async () => {
     setIsSubmitting(true)
     try {
-      const dbNotif = dbNotifications.find(n => n.title === notification.title)
-      if (dbNotif) {
-        await updateNotification(dbNotif.id, { metadata: { ...dbNotif.metadata, starred: !notification.isStarred } })
-      }
-      toast.success('Star updated', { description: `Notification ${action} starred` })
+      await markAllAsRead()
+    } catch (err) {
+      toast.error('Failed to mark all as read')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleStarNotification = async (notification: Notification) => {
+    setIsSubmitting(true)
+    try {
+      await toggleStar(notification.id)
     } catch (err) {
       toast.error('Failed to update star')
     } finally {
@@ -534,11 +579,7 @@ export default function NotificationsClient() {
   const handleArchiveNotification = async (notification: Notification) => {
     setIsSubmitting(true)
     try {
-      const dbNotif = dbNotifications.find(n => n.title === notification.title)
-      if (dbNotif) {
-        await updateNotification(dbNotif.id, { status: 'archived' })
-      }
-      toast.success('Notification archived')
+      await archiveNotif(notification.id)
       setSelectedNotification(null)
     } catch (err) {
       toast.error('Failed to archive notification')
@@ -550,11 +591,7 @@ export default function NotificationsClient() {
   const handleDeleteNotification = async (notification: Notification) => {
     setIsSubmitting(true)
     try {
-      const dbNotif = dbNotifications.find(n => n.title === notification.title)
-      if (dbNotif) {
-        await deleteNotification(dbNotif.id)
-      }
-      toast.success('Notification deleted')
+      await deleteNotif(notification.id)
       setSelectedNotification(null)
     } catch (err) {
       toast.error('Failed to delete notification')
@@ -590,7 +627,8 @@ export default function NotificationsClient() {
 
   const handleExportNotifications = async () => {
     try {
-      const dataStr = JSON.stringify(dbNotifications.length > 0 ? dbNotifications : mockNotifications, null, 2)
+      // Export real notifications from Supabase
+      const dataStr = JSON.stringify(dbNotifications, null, 2)
       const blob = new Blob([dataStr], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -681,14 +719,72 @@ export default function NotificationsClient() {
 
           {/* Inbox Tab */}
           <TabsContent value="inbox" className="mt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('all')}>All</Button>
-              <Button variant={statusFilter === 'unread' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('unread')}>Unread</Button>
-              <Button variant={statusFilter === 'read' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('read')}>Read</Button>
-              <Button variant={statusFilter === 'archived' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('archived')}>Archived</Button>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('all')}>All</Button>
+                <Button variant={statusFilter === 'unread' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('unread')}>Unread</Button>
+                <Button variant={statusFilter === 'read' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('read')}>Read</Button>
+                <Button variant={statusFilter === 'archived' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('archived')}>Archived</Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => refetchNotifications()} disabled={loading}>
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+                {stats.unread > 0 && (
+                  <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={isSubmitting}>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Mark All Read
+                  </Button>
+                )}
+              </div>
             </div>
+
+            {/* Error State */}
+            {notificationError && (
+              <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 mb-4">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <AlertOctagon className="h-5 w-5 text-red-600" />
+                    <div>
+                      <p className="font-medium text-red-700 dark:text-red-300">Error loading notifications</p>
+                      <p className="text-sm text-red-600 dark:text-red-400">{notificationError.message}</p>
+                    </div>
+                    <Button variant="outline" size="sm" className="ml-auto" onClick={() => refetchNotifications()}>
+                      Retry
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
+                {/* Loading State */}
+                {loading && (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-violet-600 mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">Loading notifications...</p>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {!loading && filteredNotifications.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <Inbox className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-lg font-medium text-gray-900 dark:text-white mb-1">No notifications</p>
+                    <p className="text-gray-500 dark:text-gray-400">
+                      {statusFilter !== 'all'
+                        ? `No ${statusFilter} notifications found`
+                        : 'You\'re all caught up! Check back later.'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Notifications List */}
+                {!loading && filteredNotifications.length > 0 && (
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredNotifications.map(notification => {
                     const ChannelIcon = getChannelIcon(notification.channel)
@@ -718,6 +814,7 @@ export default function NotificationsClient() {
                     )
                   })}
                 </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
