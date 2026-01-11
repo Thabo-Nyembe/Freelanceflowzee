@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
+import { useConversations } from '@/lib/hooks/use-conversations'
+import type { Chat, ChatMessage } from '@/lib/hooks/use-conversations'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
@@ -241,7 +243,7 @@ export default function MessagesClient() {
   const [recipientId, setRecipientId] = useState('')
   const [messageSubject, setMessageSubject] = useState('')
 
-  // Real Supabase hook for messages
+  // Real Supabase hook for messages (legacy)
   const {
     messages: supabaseMessages,
     loading: messagesLoading,
@@ -252,6 +254,38 @@ export default function MessagesClient() {
     deleteMessage,
     refetch: refetchMessages
   } = useMessages({ limit: 100 })
+
+  // NEW: Real Supabase hook for conversations/chats
+  const {
+    chats: supabaseChats,
+    messages: chatMessages,
+    currentChat,
+    typingUsers,
+    currentUserId,
+    totalUnread,
+    directChats,
+    groupChats,
+    channels: supabaseChannels,
+    pinnedMessages,
+    chatsLoading,
+    messagesLoading: chatMessagesLoading,
+    sending,
+    chatsError,
+    messagesError: chatMessagesError,
+    fetchChats,
+    fetchMessages: fetchChatMessages,
+    selectChat,
+    sendMessage: sendChatMessage,
+    editMessage: editChatMessage,
+    deleteMessage: deleteChatMessage,
+    markAsRead,
+    addReaction,
+    removeReaction,
+    pinMessage,
+    createChat,
+    setTyping,
+    searchMessages
+  } = useConversations({ enableRealtime: true })
 
   // Settings
   const [settings, setSettings] = useState({
@@ -278,31 +312,117 @@ export default function MessagesClient() {
   const [showAllMentionsDialog, setShowAllMentionsDialog] = useState(false)
   const [showReactionsDialog, setShowReactionsDialog] = useState(false)
 
-  // Stats
+  // Stats - now uses real Supabase data when available
   const stats = useMemo(() => {
-    const totalMessages = mockMessages.length * 150
-    const totalChannels = mockChannels.length
-    const unreadMessages = mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
+    // Use real data from Supabase when available, fallback to mock data
+    const hasRealData = supabaseChats.length > 0
+
+    const totalMessages = hasRealData
+      ? chatMessages.length + (supabaseMessages?.length || 0)
+      : mockMessages.length * 150
+    const totalChannels = hasRealData
+      ? supabaseChats.length
+      : mockChannels.length
+    const unreadMessages = hasRealData
+      ? totalUnread
+      : mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
     const activeThreads = mockThreads.filter(t => t.isUnread).length
     const totalFiles = mockFiles.length * 25
     const totalCalls = mockCalls.length * 12
     const onlineMembers = mockUsers.filter(u => u.status === 'online').length
     const mentions = mockMentions.filter(m => !m.isRead).length
-    return { totalMessages, totalChannels, unreadMessages, activeThreads, totalFiles, totalCalls, onlineMembers, mentions }
-  }, [])
+    return {
+      totalMessages,
+      totalChannels,
+      unreadMessages,
+      activeThreads,
+      totalFiles,
+      totalCalls,
+      onlineMembers,
+      mentions,
+      hasRealData
+    }
+  }, [supabaseChats, chatMessages, supabaseMessages, totalUnread])
 
+  // Filtered channels - merges real Supabase data with mock data
   const filteredChannels = useMemo(() => {
+    // Start with mock channels as fallback
     let channels = mockChannels
+
+    // If we have real Supabase chats, convert them to Channel format
+    if (supabaseChats.length > 0) {
+      const supabaseAsChannels: Channel[] = supabaseChats.map(chat => ({
+        id: chat.id,
+        name: chat.name,
+        type: chat.type === 'channel' ? 'public' : chat.type === 'group' ? 'private' : 'direct',
+        description: chat.description || undefined,
+        topic: '',
+        members: [],
+        memberCount: chat.member_count || 0,
+        unreadCount: chat.unread_count || 0,
+        isMuted: false,
+        isStarred: false,
+        isPinned: false,
+        lastActivity: chat.last_message_at || chat.updated_at,
+        createdAt: chat.created_at,
+        createdBy: currentUser
+      }))
+      // Merge: real data first, then mock data
+      channels = [...supabaseAsChannels, ...mockChannels]
+    }
+
     if (channelFilter === 'unread') channels = channels.filter(c => c.unreadCount > 0)
     else if (channelFilter === 'starred') channels = channels.filter(c => c.isStarred)
     if (searchQuery) channels = channels.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
     return channels
-  }, [channelFilter, searchQuery])
+  }, [channelFilter, searchQuery, supabaseChats])
 
+  // Messages for selected channel - uses real Supabase messages when available
   const channelMessages = useMemo(() => {
     if (!selectedChannel) return []
+
+    // If this is a Supabase chat, use real messages
+    const isSupabaseChat = supabaseChats.some(c => c.id === selectedChannel.id)
+    if (isSupabaseChat && chatMessages.length > 0) {
+      // Convert ChatMessage to Message format for display
+      return chatMessages.map(msg => ({
+        id: msg.id,
+        channelId: msg.chat_id,
+        content: msg.text,
+        author: {
+          id: msg.sender?.id || msg.sender_id,
+          name: msg.sender?.name || 'Unknown',
+          displayName: msg.sender?.name || 'Unknown',
+          email: msg.sender?.email || '',
+          status: 'online' as UserStatus
+        },
+        createdAt: msg.created_at,
+        editedAt: msg.edited_at || undefined,
+        status: msg.status as MessageStatus,
+        reactions: (msg.reactions || []).map(r => ({
+          type: r.emoji as ReactionType,
+          count: 1,
+          users: [{ id: r.user_id, name: '', displayName: '', email: '', status: 'online' as UserStatus }],
+          hasReacted: r.user_id === currentUserId
+        })),
+        threadCount: 0,
+        threadParticipants: [],
+        attachments: (msg.attachments || []).map(a => ({
+          id: a.id,
+          type: a.type as 'file' | 'image' | 'video' | 'audio',
+          name: a.name,
+          url: a.url,
+          size: a.size_bytes
+        })),
+        mentions: [],
+        isPinned: msg.is_pinned,
+        isBookmarked: false
+      })) as Message[]
+    }
+
+    // Fallback to mock messages
     return mockMessages.filter(m => m.channelId === selectedChannel.id && !m.parentId)
-  }, [selectedChannel])
+  }, [selectedChannel, chatMessages, supabaseChats, currentUserId])
 
   const publicChannels = filteredChannels.filter(c => c.type === 'public')
   const privateChannels = filteredChannels.filter(c => c.type === 'private')
@@ -358,39 +478,72 @@ export default function MessagesClient() {
       return
     }
 
-    try {
-      await createMessage({
-        body: messageInput,
-        subject: messageSubject || null,
-        recipient_id: recipientId || currentUser.id,
-        sender_id: currentUser.id,
-        message_type: 'direct' as const,
-        status: 'sent' as const,
-        priority: 'normal' as const,
-        folder: 'inbox',
-        is_read: false,
-        is_pinned: false,
-        is_starred: false,
-        is_important: false,
-        is_spam: false,
-        is_forwarded: false,
-        is_encrypted: false,
-        is_scheduled: false,
-        has_attachments: false,
-        attachment_count: 0,
-        reaction_count: 0
-      })
-      setMessageInput('')
-      setMessageSubject('')
-      toast.success('Message sent', { description: 'Your message has been delivered' })
-    } catch (error) {
-      toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+    // Check if we're in a real Supabase chat
+    const isSupabaseChat = selectedChannel && supabaseChats.some(c => c.id === selectedChannel.id)
+
+    if (isSupabaseChat && selectedChannel) {
+      // Use the new conversations hook for real chats
+      try {
+        // Select the chat first to ensure currentChat is set
+        await selectChat(selectedChannel.id)
+
+        const result = await sendChatMessage(messageInput.trim(), 'text')
+        if (result.success) {
+          setMessageInput('')
+          setMessageSubject('')
+          toast.success('Message sent', { description: 'Your message has been delivered' })
+        } else {
+          toast.error('Failed to send message', { description: result.error || 'Unknown error' })
+        }
+      } catch (error) {
+        toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      }
+    } else {
+      // Fallback to legacy messages table
+      try {
+        await createMessage({
+          body: messageInput,
+          subject: messageSubject || null,
+          recipient_id: recipientId || currentUser.id,
+          sender_id: currentUser.id,
+          message_type: 'direct' as const,
+          status: 'sent' as const,
+          priority: 'normal' as const,
+          folder: 'inbox',
+          is_read: false,
+          is_pinned: false,
+          is_starred: false,
+          is_important: false,
+          is_spam: false,
+          is_forwarded: false,
+          is_encrypted: false,
+          is_scheduled: false,
+          has_attachments: false,
+          attachment_count: 0,
+          reaction_count: 0
+        })
+        setMessageInput('')
+        setMessageSubject('')
+        toast.success('Message sent', { description: 'Your message has been delivered' })
+      } catch (error) {
+        toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+      }
     }
   }
 
   const handleDeleteMessage = async (messageId: string) => {
+    // Check if this is a Supabase chat message
+    const isChatMessage = chatMessages.some(m => m.id === messageId)
+
     try {
-      await deleteMessage(messageId)
+      if (isChatMessage) {
+        const result = await deleteChatMessage(messageId)
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to delete message')
+        }
+      } else {
+        await deleteMessage(messageId)
+      }
       toast.success('Message deleted', { description: 'The message has been removed' })
     } catch (error) {
       toast.error('Failed to delete message', { description: error instanceof Error ? error.message : 'Unknown error' })
@@ -398,15 +551,40 @@ export default function MessagesClient() {
   }
 
   const handleMarkAsRead = async (messageId: string) => {
+    // Check if this is a Supabase chat
+    const chatMessage = chatMessages.find(m => m.id === messageId)
+
     try {
-      await updateMessage(messageId, {
-        is_read: true,
-        read_at: new Date().toISOString(),
-        status: 'read' as const
-      })
+      if (chatMessage) {
+        // Mark the entire chat as read
+        const result = await markAsRead(chatMessage.chat_id)
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to mark as read')
+        }
+      } else {
+        // Legacy message
+        await updateMessage(messageId, {
+          is_read: true,
+          read_at: new Date().toISOString(),
+          status: 'read' as const
+        })
+      }
       toast.success('Marked as read', { description: 'Message marked as read' })
     } catch (error) {
       toast.error('Failed to mark as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Handler for marking entire chat as read
+  const handleMarkChatAsRead = async (chatId: string) => {
+    try {
+      const result = await markAsRead(chatId)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to mark chat as read')
+      }
+      toast.success('Chat marked as read', { description: 'All messages marked as read' })
+    } catch (error) {
+      toast.error('Failed to mark chat as read', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
@@ -436,10 +614,20 @@ export default function MessagesClient() {
   }
 
   const handlePinMessage = async (messageId: string, currentPinned: boolean) => {
+    // Check if this is a Supabase chat message
+    const isChatMessage = chatMessages.some(m => m.id === messageId)
+
     try {
-      await updateMessage(messageId, {
-        is_pinned: !currentPinned
-      })
+      if (isChatMessage) {
+        const result = await pinMessage(messageId, !currentPinned)
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to update pin')
+        }
+      } else {
+        await updateMessage(messageId, {
+          is_pinned: !currentPinned
+        })
+      }
       toast.success(currentPinned ? 'Message unpinned' : 'Message pinned', {
         description: currentPinned ? 'Message has been unpinned' : 'Message has been pinned'
       })
@@ -461,10 +649,98 @@ export default function MessagesClient() {
     }
   }
 
-  const handleCreateChannel = () => {
+  const handleCreateChannel = async () => {
     const channelName = prompt('Enter new channel name:')
     if (channelName) {
-      toast.success('Channel created', { description: `#${channelName} is now available` })
+      try {
+        const result = await createChat({
+          name: channelName,
+          type: 'channel',
+          description: `Channel for ${channelName} discussions`
+        })
+        if (result.success) {
+          toast.success('Channel created', { description: `#${channelName} is now available` })
+          // Refresh chats list
+          fetchChats()
+        } else {
+          toast.error('Failed to create channel', { description: result.error || 'Unknown error' })
+        }
+      } catch (error) {
+        toast.error('Failed to create channel', { description: error instanceof Error ? error.message : 'Unknown error' })
+      }
+    }
+  }
+
+  // Handler for creating new direct message chat
+  const handleCreateDirectMessage = async (userId: string, userName: string) => {
+    try {
+      const result = await createChat({
+        name: `Chat with ${userName}`,
+        type: 'direct',
+        memberIds: [userId]
+      })
+      if (result.success && result.chat) {
+        toast.success('Chat created', { description: `Started conversation with ${userName}` })
+        // Select the new chat
+        await selectChat(result.chat.id)
+      } else {
+        toast.error('Failed to start chat', { description: result.error || 'Unknown error' })
+      }
+    } catch (error) {
+      toast.error('Failed to start chat', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Handler for creating group chat
+  const handleCreateGroupChat = async () => {
+    const groupName = prompt('Enter group name:')
+    if (groupName) {
+      try {
+        const result = await createChat({
+          name: groupName,
+          type: 'group',
+          description: `Group chat: ${groupName}`
+        })
+        if (result.success) {
+          toast.success('Group created', { description: `${groupName} is now available` })
+          fetchChats()
+        } else {
+          toast.error('Failed to create group', { description: result.error || 'Unknown error' })
+        }
+      } catch (error) {
+        toast.error('Failed to create group', { description: error instanceof Error ? error.message : 'Unknown error' })
+      }
+    }
+  }
+
+  // Handler for adding reaction to chat message
+  const handleAddReaction = async (messageId: string, emoji: string) => {
+    try {
+      const result = await addReaction(messageId, emoji)
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to add reaction')
+      }
+    } catch (error) {
+      toast.error('Failed to add reaction', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Handler for selecting a conversation
+  const handleSelectConversation = async (channelId: string) => {
+    const channel = filteredChannels.find(c => c.id === channelId)
+    setSelectedChannel(channel || null)
+
+    // If it's a Supabase chat, also select it via the hook
+    const isSupabaseChat = supabaseChats.some(c => c.id === channelId)
+    if (isSupabaseChat) {
+      await selectChat(channelId)
+    }
+  }
+
+  // Handle typing indicator
+  const handleTyping = (isTyping: boolean) => {
+    if (currentChat) {
+      setTyping(isTyping)
     }
   }
 
@@ -487,21 +763,36 @@ export default function MessagesClient() {
   }
 
   const handleMarkAllAsRead = async () => {
-    if (!supabaseMessages || supabaseMessages.length === 0) {
-      toast.warning('No messages to mark as read')
-      return
-    }
+    let totalMarked = 0
 
     try {
-      const unreadMessages = supabaseMessages.filter(m => !m.is_read)
-      for (const msg of unreadMessages) {
-        await updateMessage(msg.id, {
-          is_read: true,
-          read_at: new Date().toISOString(),
-          status: 'read' as const
-        })
+      // Mark all Supabase chats as read
+      if (supabaseChats.length > 0) {
+        const unreadChats = supabaseChats.filter(c => (c.unread_count || 0) > 0)
+        for (const chat of unreadChats) {
+          await markAsRead(chat.id)
+          totalMarked += chat.unread_count || 0
+        }
       }
-      toast.success('All messages marked as read', { description: `${unreadMessages.length} messages updated` })
+
+      // Also mark legacy messages as read
+      if (supabaseMessages && supabaseMessages.length > 0) {
+        const unreadMessages = supabaseMessages.filter(m => !m.is_read)
+        for (const msg of unreadMessages) {
+          await updateMessage(msg.id, {
+            is_read: true,
+            read_at: new Date().toISOString(),
+            status: 'read' as const
+          })
+          totalMarked++
+        }
+      }
+
+      if (totalMarked > 0) {
+        toast.success('All messages marked as read', { description: `${totalMarked} messages updated` })
+      } else {
+        toast.info('No unread messages', { description: 'All messages are already read' })
+      }
     } catch (error) {
       toast.error('Failed to mark all as read', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -594,9 +885,33 @@ export default function MessagesClient() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Slack-level team communication platform
-                {messagesLoading && <span className="ml-2 text-blue-500">(Loading...)</span>}
-                {messagesError && <span className="ml-2 text-red-500">(Error loading messages)</span>}
-                {supabaseMessages && <span className="ml-2 text-green-500">({supabaseMessages.length} messages from Supabase)</span>}
+                {/* Loading states */}
+                {(chatsLoading || messagesLoading) && (
+                  <span className="ml-2 text-blue-500 inline-flex items-center gap-1">
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                    Loading...
+                  </span>
+                )}
+                {/* Error states */}
+                {(chatsError || messagesError) && (
+                  <span className="ml-2 text-red-500 inline-flex items-center gap-1">
+                    <AlertOctagon className="w-3 h-3" />
+                    Error loading data
+                  </span>
+                )}
+                {/* Real-time connection status */}
+                {stats.hasRealData && !chatsLoading && !chatsError && (
+                  <span className="ml-2 text-green-500 inline-flex items-center gap-1">
+                    <Radio className="w-3 h-3" />
+                    Live ({supabaseChats.length} chats, {chatMessages.length} messages)
+                  </span>
+                )}
+                {/* Typing indicator */}
+                {typingUsers.length > 0 && (
+                  <span className="ml-2 text-purple-500 italic">
+                    {typingUsers.map(t => t.user_name).join(', ')} typing...
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -616,8 +931,8 @@ export default function MessagesClient() {
             }}>
               <Filter className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={mutating}>
-              <CheckCheck className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={mutating || sending}>
+              {(mutating || sending) ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <CheckCheck className="w-4 h-4 mr-2" />}
               Mark All Read
             </Button>
             <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white" onClick={() => {
@@ -761,7 +1076,7 @@ export default function MessagesClient() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {publicChannels.map(channel => (
-                        <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedChannel(channel)}>
+                        <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => handleSelectConversation(channel.id)}>
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
                               <Hash className="w-5 h-5 text-gray-500" />
@@ -797,7 +1112,7 @@ export default function MessagesClient() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       {privateChannels.map(channel => (
-                        <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                        <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => handleSelectConversation(channel.id)}>
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
                               <Lock className="w-5 h-5 text-gray-500" />
@@ -823,7 +1138,7 @@ export default function MessagesClient() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {directMessages.map(channel => (
-                      <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <div key={channel.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => handleSelectConversation(channel.id)}>
                         <div className="flex items-center gap-3">
                           <div className="relative">
                             <Avatar>
@@ -972,28 +1287,35 @@ export default function MessagesClient() {
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[500px]">
-                    <div className="space-y-2">
-                      {mockChannels.map(channel => (
-                        <div key={channel.id} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${selectedChannel?.id === channel.id ? 'bg-purple-100 dark:bg-purple-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`} onClick={() => setSelectedChannel(channel)}>
-                          {channel.type === 'direct' ? (
-                            <Avatar className="w-8 h-8">
-                              <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                          ) : (
-                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
-                              {channel.type === 'private' ? <Lock className="w-4 h-4" /> : <Hash className="w-4 h-4" />}
+                    {chatsLoading ? (
+                      <div className="flex items-center justify-center h-32">
+                        <RefreshCw className="w-6 h-6 animate-spin text-purple-500" />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {/* Show Supabase chats first, then mock channels */}
+                        {filteredChannels.map(channel => (
+                          <div key={channel.id} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${selectedChannel?.id === channel.id ? 'bg-purple-100 dark:bg-purple-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`} onClick={() => handleSelectConversation(channel.id)}>
+                            {channel.type === 'direct' ? (
+                              <Avatar className="w-8 h-8">
+                                <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                            ) : (
+                              <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+                                {channel.type === 'private' ? <Lock className="w-4 h-4" /> : <Hash className="w-4 h-4" />}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{channel.type === 'direct' ? channel.name : `#${channel.name}`}</p>
+                              <p className="text-xs text-gray-500 truncate">{formatTime(channel.lastActivity)}</p>
                             </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{channel.type === 'direct' ? channel.name : `#${channel.name}`}</p>
-                            <p className="text-xs text-gray-500 truncate">{formatTime(channel.lastActivity)}</p>
+                            {channel.unreadCount > 0 && (
+                              <Badge className="bg-red-500 text-white text-xs">{channel.unreadCount}</Badge>
+                            )}
                           </div>
-                          {channel.unreadCount > 0 && (
-                            <Badge className="bg-red-500 text-white text-xs">{channel.unreadCount}</Badge>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </ScrollArea>
                 </CardContent>
               </Card>
@@ -1028,43 +1350,103 @@ export default function MessagesClient() {
                       </div>
                     </CardHeader>
                     <ScrollArea className="flex-1 p-4">
-                      <div className="space-y-4">
-                        {channelMessages.map(message => (
-                          <div key={message.id} className="flex gap-3 group">
-                            <Avatar>
-                              <AvatarFallback>{message.author.displayName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-sm">{message.author.displayName}</span>
-                                <span className="text-xs text-gray-500">{formatTime(message.createdAt)}</span>
-                                {message.isPinned && <Pin className="w-3 h-3 text-yellow-500" />}
-                              </div>
-                              <p className="text-sm mt-1">{message.content}</p>
-                              {message.reactions.length > 0 && (
-                                <div className="flex gap-1 mt-2">
-                                  {message.reactions.map((reaction, idx) => (
-                                    <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs">
-                                      {getReactionIcon(reaction.type)} {reaction.count}
-                                    </Button>
-                                  ))}
-                                </div>
-                              )}
-                              {message.threadCount > 0 && (
-                                <button className="flex items-center gap-2 mt-2 text-xs text-blue-600 hover:underline" onClick={() => { setSelectedThread(message); setShowThreadPanel(true); }}>
-                                  {message.threadCount} replies <ChevronRight className="w-3 h-3" />
-                                </button>
-                              )}
+                      {chatMessagesLoading ? (
+                        <div className="flex items-center justify-center h-32">
+                          <RefreshCw className="w-6 h-6 animate-spin text-purple-500" />
+                          <span className="ml-2 text-gray-500">Loading messages...</span>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {channelMessages.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+                              <MessageSquare className="w-8 h-8 mb-2 opacity-50" />
+                              <p>No messages yet</p>
+                              <p className="text-sm">Start the conversation!</p>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          ) : (
+                            channelMessages.map(message => (
+                              <div key={message.id} className="flex gap-3 group">
+                                <Avatar>
+                                  <AvatarFallback>{message.author.displayName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-semibold text-sm">{message.author.displayName}</span>
+                                    <span className="text-xs text-gray-500">{formatTime(message.createdAt)}</span>
+                                    {message.isPinned && <Pin className="w-3 h-3 text-yellow-500" />}
+                                  </div>
+                                  <p className="text-sm mt-1">{message.content}</p>
+                                  {message.reactions.length > 0 && (
+                                    <div className="flex gap-1 mt-2">
+                                      {message.reactions.map((reaction, idx) => (
+                                        <Button key={idx} variant="outline" size="sm" className="h-6 px-2 text-xs" onClick={() => handleAddReaction(message.id, reaction.type)}>
+                                          {getReactionIcon(reaction.type)} {reaction.count}
+                                        </Button>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {message.threadCount > 0 && (
+                                    <button className="flex items-center gap-2 mt-2 text-xs text-blue-600 hover:underline" onClick={() => { setSelectedThread(message); setShowThreadPanel(true); }}>
+                                      {message.threadCount} replies <ChevronRight className="w-3 h-3" />
+                                    </button>
+                                  )}
+                                  {/* Message actions on hover */}
+                                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 mt-1">
+                                    <Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => handleAddReaction(message.id, 'thumbsup')}>
+                                      <ThumbsUp className="w-3 h-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => handlePinMessage(message.id, message.isPinned)}>
+                                      <Pin className="w-3 h-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => handleDeleteMessage(message.id)}>
+                                      <Trash2 className="w-3 h-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                          {/* Typing indicator */}
+                          {typingUsers.length > 0 && (
+                            <div className="flex items-center gap-2 text-sm text-gray-500 italic">
+                              <div className="flex gap-1">
+                                <span className="animate-bounce">.</span>
+                                <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>.</span>
+                                <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>.</span>
+                              </div>
+                              {typingUsers.map(t => t.user_name).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </ScrollArea>
                     <div className="p-4 border-t">
                       <div className="flex gap-2">
-                        <Input placeholder={`Message #${selectedChannel.name}`} value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="flex-1" onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} />
-                        <Button onClick={handleSendMessage} disabled={mutating || !messageInput.trim()}>
-                          <Send className="w-4 h-4" />
+                        <Input
+                          placeholder={`Message ${selectedChannel.type === 'direct' ? selectedChannel.name : '#' + selectedChannel.name}`}
+                          value={messageInput}
+                          onChange={(e) => {
+                            setMessageInput(e.target.value)
+                            // Trigger typing indicator when user starts typing
+                            if (e.target.value && !messageInput) {
+                              handleTyping(true)
+                            } else if (!e.target.value && messageInput) {
+                              handleTyping(false)
+                            }
+                          }}
+                          onBlur={() => handleTyping(false)}
+                          className="flex-1"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault()
+                              handleSendMessage()
+                              handleTyping(false)
+                            }
+                          }}
+                          disabled={sending}
+                        />
+                        <Button onClick={handleSendMessage} disabled={mutating || sending || !messageInput.trim()}>
+                          {sending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                         </Button>
                       </div>
                     </div>

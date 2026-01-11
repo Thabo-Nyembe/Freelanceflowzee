@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus } from '@/lib/hooks/use-calendar-events'
+import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus, type CreateCalendarEventInput, type UpdateCalendarEventInput } from '@/lib/hooks/use-calendar-events'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -17,7 +17,8 @@ import {
   Search, Settings, List, CalendarDays,
   Globe, Link2, CheckCircle2, Edit2, Trash2,
   Copy, ExternalLink, Download, Share2,
-  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare, FileText
+  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare, FileText,
+  AlertCircle, Loader2, RefreshCw
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -252,22 +253,19 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
     try {
       await createEvent({
         title: newEventForm.title,
-        start_time: newEventForm.startTime,
-        end_time: newEventForm.endTime,
+        start_time: new Date(newEventForm.startTime).toISOString(),
+        end_time: new Date(newEventForm.endTime).toISOString(),
         event_type: newEventForm.eventType,
         location: newEventForm.location || null,
         description: newEventForm.description || null,
         status: 'confirmed',
         all_day: false,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      } as any)
+      })
       setShowNewEvent(false)
       setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
-      toast.success('Event created successfully')
-      refetch()
-    } catch (error) {
-      console.error('Failed to create event:', error)
-      toast.error('Failed to create event')
+    } catch (err) {
+      console.error('Failed to create event:', err)
     }
   }
   const displayEvents = (events && events.length > 0) ? events : (initialEvents || [])
@@ -435,17 +433,15 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
       await updateEvent({
         id: selectedEvent.id,
         title: editForm.title,
-        start_time: editForm.startTime,
-        end_time: editForm.endTime,
+        start_time: editForm.startTime ? new Date(editForm.startTime).toISOString() : undefined,
+        end_time: editForm.endTime ? new Date(editForm.endTime).toISOString() : undefined,
         location: editForm.location || null,
         description: editForm.description || null
-      } as any)
-      toast.success('Event updated successfully')
+      })
       setIsEditing(false)
       setSelectedEvent(null)
-      refetch()
     } catch (err) {
-      toast.error('Failed to update event')
+      console.error('Failed to update event:', err)
     }
   }
 
@@ -453,12 +449,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const handleDeleteEvent = async (event: CalendarEvent) => {
     if (!confirm(`Delete "${event.title}"?`)) return
     try {
-      await deleteEvent({ id: event.id } as any)
-      toast.success(`"${event.title}" removed`)
+      await deleteEvent({ id: event.id })
       setSelectedEvent(null)
-      refetch()
     } catch (err) {
-      toast.error('Failed to delete event')
+      console.error('Failed to delete event:', err)
     }
   }
 
@@ -669,6 +663,35 @@ END:VCALENDAR`
             </Card>
           ))}
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center gap-3 py-4 px-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+            <span className="text-blue-700 dark:text-blue-400 font-medium">Loading calendar events...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-between gap-3 py-4 px-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <span className="text-red-700 dark:text-red-400 font-medium">
+                {error.message || 'Failed to load calendar events'}
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="border-red-300 text-red-600 hover:bg-red-100"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        )}
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

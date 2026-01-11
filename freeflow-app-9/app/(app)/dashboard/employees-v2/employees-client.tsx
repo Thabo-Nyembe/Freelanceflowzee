@@ -1,8 +1,17 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee, Employee as DBEmployee } from '@/lib/hooks/use-employees'
+import {
+  useEmployees,
+  useCreateEmployee,
+  useUpdateEmployee,
+  useDeleteEmployee,
+  useToggleEmployeeStatus,
+  Employee as DBEmployee,
+  EmployeeStatus as DBEmployeeStatus
+} from '@/lib/hooks/use-employees'
 import { toast } from 'sonner'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,7 +30,7 @@ import {
   Settings, Download, Upload, Edit3, Trash2, Bell, BookOpen, Cake,
   Plane, Umbrella, Coffee, Home, BarChart3, TrendingDown, ArrowUpRight,
   UserCheck, UserMinus, Layers, Wallet, Shield, Lock, Key, Plus,
-  Play, FileCheck, Clipboard, Activity
+  Play, FileCheck, Clipboard, Activity, AlertCircle, RefreshCw
 } from 'lucide-react'
 
 // Real button handlers
@@ -330,11 +339,23 @@ export default function EmployeesClient() {
   const [compensationTab, setCompensationTab] = useState('salary')
   const [performanceTab, setPerformanceTab] = useState('reviews')
 
-  // Database integration
-  const { data: dbEmployees, loading: employeesLoading, refetch } = useEmployees({ status: 'active' })
+  // Database integration - now with search and department filtering
+  const {
+    data: dbEmployees,
+    loading: employeesLoading,
+    error: employeesError,
+    stats: dbStats,
+    departments: dbDepartments,
+    refetch
+  } = useEmployees({
+    search: searchQuery,
+    department: departmentFilter !== 'all' ? departmentFilter : undefined,
+    enableRealtime: true
+  })
   const { mutate: createEmployee, loading: creating } = useCreateEmployee()
   const { mutate: updateEmployee, loading: updating } = useUpdateEmployee()
   const { mutate: deleteEmployee, loading: deleting } = useDeleteEmployee()
+  const { toggle: toggleStatus, loading: togglingStatus } = useToggleEmployeeStatus()
 
   // Edit dialog state
   const [showEditDialog, setShowEditDialog] = useState(false)
@@ -368,23 +389,30 @@ export default function EmployeesClient() {
       return
     }
     try {
-      await createEmployee({
+      const result = await createEmployee({
         employee_name: newEmployeeForm.name,
         email: newEmployeeForm.email,
         department: newEmployeeForm.department || null,
         position: newEmployeeForm.position || null,
         job_title: newEmployeeForm.position || null,
         start_date: newEmployeeForm.startDate || null,
+        hire_date: newEmployeeForm.startDate || null,
         status: 'active',
         employment_type: 'full-time',
         currency: 'USD'
-      } as any)
-      setShowAddDialog(false)
-      setNewEmployeeForm({ name: '', email: '', department: '', position: '', startDate: '' })
-      toast.success('Employee added successfully')
-      refetch()
+      })
+      if (result) {
+        setShowAddDialog(false)
+        setNewEmployeeForm({ name: '', email: '', department: '', position: '', startDate: '' })
+        toast.success('Employee added successfully')
+        // Refetch not needed due to real-time subscription, but call it anyway for immediate UI update
+        refetch()
+      } else {
+        toast.error('Failed to create employee')
+      }
     } catch (error) {
       console.error('Failed to create employee:', error)
+      toast.error('Failed to create employee')
     }
   }
 
@@ -410,19 +438,24 @@ export default function EmployeesClient() {
       return
     }
     try {
-      await updateEmployee({
+      const result = await updateEmployee({
         employee_name: editEmployeeForm.employee_name,
         email: editEmployeeForm.email,
         department: editEmployeeForm.department || null,
         position: editEmployeeForm.position || null,
         job_title: editEmployeeForm.position || null,
         phone: editEmployeeForm.phone || null,
-        status: editEmployeeForm.status as any
-      } as any, employeeToEdit.id)
-      setShowEditDialog(false)
-      setEmployeeToEdit(null)
-      toast.success('Employee updated successfully')
-      refetch()
+        status: editEmployeeForm.status as DBEmployeeStatus
+      }, employeeToEdit.id)
+      if (result) {
+        setShowEditDialog(false)
+        setEmployeeToEdit(null)
+        toast.success('Employee updated successfully')
+        // Refetch not needed due to real-time subscription, but call it anyway
+        refetch()
+      } else {
+        toast.error('Failed to update employee')
+      }
     } catch (error) {
       console.error('Failed to update employee:', error)
       toast.error('Failed to update employee')
@@ -432,15 +465,30 @@ export default function EmployeesClient() {
   // Handle terminating an employee
   const handleTerminateEmployee = async (employee: DBEmployee) => {
     try {
-      await updateEmployee({
-        status: 'terminated',
-        termination_date: new Date().toISOString().split('T')[0]
-      } as any, employee.id)
-      toast.success(`${employee.employee_name} has been terminated`)
-      refetch()
+      const result = await toggleStatus(employee.id, 'terminated')
+      if (result) {
+        toast.success(`${employee.employee_name} has been terminated`)
+      } else {
+        toast.error('Failed to terminate employee')
+      }
     } catch (error) {
       console.error('Failed to terminate employee:', error)
       toast.error('Failed to terminate employee')
+    }
+  }
+
+  // Handle toggling employee status (active/inactive)
+  const handleToggleStatus = async (employee: DBEmployee, newStatus: DBEmployeeStatus) => {
+    try {
+      const result = await toggleStatus(employee.id, newStatus)
+      if (result) {
+        toast.success(`${employee.employee_name} status changed to ${newStatus}`)
+      } else {
+        toast.error('Failed to update employee status')
+      }
+    } catch (error) {
+      console.error('Failed to toggle status:', error)
+      toast.error('Failed to update employee status')
     }
   }
 
@@ -477,16 +525,31 @@ export default function EmployeesClient() {
     })
   }, [searchQuery, departmentFilter])
 
-  const stats = useMemo(() => ({
-    total: mockEmployees.length,
-    active: mockEmployees.filter(e => e.status === 'active').length,
-    onboarding: mockEmployees.filter(e => e.status === 'onboarding').length,
-    avgPerformance: (mockEmployees.filter(e => e.performanceScore > 0).reduce((sum, e) => sum + e.performanceScore, 0) / mockEmployees.filter(e => e.performanceScore > 0).length).toFixed(0),
-    pendingTimeOff: mockTimeOffRequests.filter(r => r.status === 'pending').length,
-    pendingReviews: mockReviews.filter(r => r.status !== 'completed').length,
-    totalPayroll: mockEmployees.reduce((sum, e) => sum + e.salary, 0),
-    avgTenure: '2.3'
-  }), [])
+  // Combine database stats with mock stats - prioritize real data when available
+  const stats = useMemo(() => {
+    const hasDbData = dbEmployees && dbEmployees.length > 0
+
+    // Use real data if available, otherwise fall back to mock
+    const total = hasDbData ? dbStats.total : mockEmployees.length
+    const active = hasDbData ? dbStats.active : mockEmployees.filter(e => e.status === 'active').length
+    const onboarding = hasDbData ? dbStats.onboarding : mockEmployees.filter(e => e.status === 'onboarding').length
+    const avgPerformance = hasDbData && dbStats.avgPerformance > 0
+      ? dbStats.avgPerformance.toFixed(0)
+      : (mockEmployees.filter(e => e.performanceScore > 0).reduce((sum, e) => sum + e.performanceScore, 0) / mockEmployees.filter(e => e.performanceScore > 0).length).toFixed(0)
+    const totalPayroll = hasDbData ? dbStats.totalPayroll : mockEmployees.reduce((sum, e) => sum + e.salary, 0)
+    const avgTenure = hasDbData && dbStats.avgTenure > 0 ? dbStats.avgTenure.toFixed(1) : '2.3'
+
+    return {
+      total,
+      active,
+      onboarding,
+      avgPerformance,
+      pendingTimeOff: mockTimeOffRequests.filter(r => r.status === 'pending').length,
+      pendingReviews: mockReviews.filter(r => r.status !== 'completed').length,
+      totalPayroll,
+      avgTenure
+    }
+  }, [dbEmployees, dbStats])
 
   const statsCards = [
     { label: 'Total Employees', value: stats.total.toString(), icon: Users, color: 'from-blue-500 to-blue-600', trend: '+3' },
@@ -688,17 +751,92 @@ export default function EmployeesClient() {
                 <Button key={dept} variant={departmentFilter === dept.toLowerCase() ? 'default' : 'outline'} size="sm" onClick={() => setDepartmentFilter(dept.toLowerCase())} className={departmentFilter === dept.toLowerCase() ? 'bg-blue-600' : ''}>{dept === 'all' ? 'All Departments' : dept}</Button>
               ))}
             </div>
-            {/* Database Employees Section */}
+            {/* Database Employees Section - Real Supabase Data */}
+            <div className="flex items-center justify-between mt-8">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Users className="h-5 w-5 text-green-600" />
+                Your Employees {dbEmployees && dbEmployees.length > 0 && `(${dbEmployees.length})`}
+                {employeesLoading && (
+                  <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />
+                )}
+              </h3>
+              <div className="flex items-center gap-2">
+                {employeesError && (
+                  <span className="text-sm text-red-500 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    Error loading
+                  </span>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => refetch()}
+                  disabled={employeesLoading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${employeesLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+            </div>
+
+            {/* Loading State */}
+            {employeesLoading && !dbEmployees?.length && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+                {[1, 2, 3].map(i => (
+                  <Card key={i} className="border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="h-20 bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse" />
+                    <CardContent className="pt-10 pb-4">
+                      <Skeleton className="h-6 w-32 mb-2" />
+                      <Skeleton className="h-4 w-24 mb-4" />
+                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-4 w-3/4" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Error State */}
+            {employeesError && !employeesLoading && (
+              <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 mt-4">
+                <CardContent className="p-6 text-center">
+                  <AlertCircle className="h-12 w-12 mx-auto text-red-500 mb-3" />
+                  <h4 className="font-semibold text-red-700 dark:text-red-400 mb-2">
+                    Failed to load employees
+                  </h4>
+                  <p className="text-sm text-red-600 dark:text-red-300 mb-4">
+                    {employeesError.message}
+                  </p>
+                  <Button onClick={() => refetch()} variant="outline" className="text-red-600 border-red-300">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Try Again
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Empty State */}
+            {!employeesLoading && !employeesError && (!dbEmployees || dbEmployees.length === 0) && (
+              <Card className="border-dashed border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 mt-4">
+                <CardContent className="p-8 text-center">
+                  <Users className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                  <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    No employees yet
+                  </h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Add your first employee to get started with HR management
+                  </p>
+                  <Button onClick={() => setShowAddDialog(true)} className="bg-gradient-to-r from-blue-600 to-indigo-600">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add First Employee
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Employee Cards - Real Data */}
             {dbEmployees && dbEmployees.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Users className="h-5 w-5 text-blue-600" />
-                    Your Employees ({dbEmployees.length})
-                  </h3>
-                  {employeesLoading && <span className="text-sm text-gray-500">Loading...</span>}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                   {dbEmployees.map(employee => (
                     <Card key={employee.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow overflow-hidden">
                       <div className="h-20 bg-gradient-to-r from-green-500 to-emerald-600 relative">
@@ -777,10 +915,34 @@ export default function EmployeesClient() {
                                 size="sm"
                                 className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
                                 onClick={() => handleTerminateEmployee(employee)}
-                                disabled={updating}
+                                disabled={togglingStatus}
                               >
                                 <UserMinus className="h-4 w-4 mr-1" />
                                 Terminate
+                              </Button>
+                            )}
+                            {employee.status === 'terminated' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                onClick={() => handleToggleStatus(employee, 'active')}
+                                disabled={togglingStatus}
+                              >
+                                <UserCheck className="h-4 w-4 mr-1" />
+                                Reactivate
+                              </Button>
+                            )}
+                            {employee.status === 'on-leave' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                onClick={() => handleToggleStatus(employee, 'active')}
+                                disabled={togglingStatus}
+                              >
+                                <UserCheck className="h-4 w-4 mr-1" />
+                                Return
                               </Button>
                             )}
                           </div>
@@ -788,11 +950,10 @@ export default function EmployeesClient() {
                       </CardContent>
                     </Card>
                   ))}
-                </div>
-              </>
+              </div>
             )}
 
-            {/* Mock Employees Section */}
+            {/* Mock Employees Section - Sample Data */}
             <div className="flex items-center justify-between mt-8">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-blue-600" />
