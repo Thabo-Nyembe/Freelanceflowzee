@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { useSupportTickets, SupportTicket, SupportStats } from '@/lib/hooks/use-support-tickets'
-import { createSupportTicket, deleteSupportTicket, resolveTicket, escalateTicket } from '@/app/actions/support-tickets'
+import { useSupportTickets, useTicketReplies, SupportTicket, SupportStats, TicketReply } from '@/lib/hooks/use-support-tickets'
+import { createSupportTicket, deleteSupportTicket, updateSupportTicket, resolveTicket, escalateTicket, assignTicket, closeTicket, reopenTicket } from '@/app/actions/support-tickets'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -205,12 +205,169 @@ const mockSupportTicketsActivities = [
 
 // Quick actions will be defined inside the component to access state setters
 
+// TicketRepliesSection component that uses the useTicketReplies hook
+function TicketRepliesSection({
+  ticketId,
+  onReplySubmit
+}: {
+  ticketId: string
+  onReplySubmit?: () => void
+}) {
+  const { replies, loading: repliesLoading, addReply } = useTicketReplies(ticketId)
+  const [replyContent, setReplyContent] = useState('')
+  const [replyType, setReplyType] = useState<'public' | 'internal'>('public')
+  const [isSending, setIsSending] = useState(false)
+
+  const handleReplySubmit = async () => {
+    if (!replyContent.trim()) {
+      toast.error('Please enter a reply')
+      return
+    }
+    setIsSending(true)
+    try {
+      await addReply(replyContent, replyType === 'internal')
+      setReplyContent('')
+      toast.success(replyType === 'public' ? 'Reply sent!' : 'Internal note added!')
+      onReplySubmit?.()
+    } catch (error) {
+      toast.error('Failed to send reply')
+    } finally {
+      setIsSending(false)
+    }
+  }
+
+  if (repliesLoading) {
+    return (
+      <div className="space-y-4">
+        <h4 className="font-semibold">Conversation</h4>
+        <div className="flex items-center justify-center h-[200px]">
+          <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <h4 className="font-semibold">Conversation ({replies.length} messages)</h4>
+      <ScrollArea className="h-[300px]">
+        <div className="space-y-4">
+          {replies.length === 0 ? (
+            <div className="text-center text-muted-foreground py-8">
+              <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p>No messages yet. Start the conversation!</p>
+            </div>
+          ) : (
+            replies.map((reply: TicketReply) => (
+              <div
+                key={reply.id}
+                className={`flex gap-3 ${reply.is_internal ? 'bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg' : ''}`}
+              >
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={`https://avatar.vercel.sh/${reply.author_name || 'user'}`} />
+                  <AvatarFallback>{(reply.author_name || 'U').slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-sm">{reply.author_name || 'Unknown'}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {reply.author_type}
+                    </Badge>
+                    {reply.is_internal && (
+                      <Badge className="bg-yellow-100 text-yellow-700 text-xs">
+                        <Lock className="w-3 h-3 mr-1" />
+                        Internal
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(reply.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap">{reply.message}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Reply Box */}
+      <div className="border rounded-lg">
+        <div className="flex items-center gap-2 p-2 border-b">
+          <button
+            onClick={() => setReplyType('public')}
+            className={`px-3 py-1 rounded text-sm ${
+              replyType === 'public'
+                ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
+                : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4 inline mr-1" />
+            Public Reply
+          </button>
+          <button
+            onClick={() => setReplyType('internal')}
+            className={`px-3 py-1 rounded text-sm ${
+              replyType === 'internal'
+                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <Lock className="w-4 h-4 inline mr-1" />
+            Internal Note
+          </button>
+        </div>
+        <textarea
+          value={replyContent}
+          onChange={(e) => setReplyContent(e.target.value)}
+          placeholder={replyType === 'public' ? 'Type your reply to the customer...' : 'Add an internal note...'}
+          className="w-full p-3 resize-none focus:outline-none dark:bg-gray-800"
+          rows={4}
+        />
+        <div className="flex items-center justify-between p-2 border-t bg-gray-50 dark:bg-gray-800/50">
+          <div className="flex items-center gap-2">
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+              <Paperclip className="w-4 h-4" />
+            </button>
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+              <Bot className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            onClick={handleReplySubmit}
+            disabled={!replyContent.trim() || isSending}
+            className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2 disabled:opacity-50"
+          >
+            {isSending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            {replyType === 'public' ? 'Send Reply' : 'Add Note'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function SupportTicketsClient({ initialTickets, initialStats }: SupportTicketsClientProps) {
-  const { tickets, loading, getStats } = useSupportTickets()
+  const {
+    tickets,
+    loading,
+    error,
+    fetchTickets,
+    createTicket,
+    updateTicket,
+    deleteTicket: deleteTicketFromHook,
+    assignTicket: assignTicketFromHook,
+    resolveTicket: resolveTicketFromHook,
+    closeTicket: closeTicketFromHook,
+    reopenTicket: reopenTicketFromHook,
+    getStats
+  } = useSupportTickets()
+
   const displayTickets = tickets.length > 0 ? tickets : initialTickets
   const stats = tickets.length > 0 ? getStats() : (initialStats || defaultStats)
 
   const [activeTab, setActiveTab] = useState('inbox')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeView, setActiveView] = useState<'unassigned' | 'mine' | 'pending' | 'solved' | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all')
   const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>('all')
@@ -321,60 +478,135 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
       toast.error('Please enter a subject')
       return
     }
+    setIsSubmitting(true)
     try {
-      await createSupportTicket(formData)
+      // Use the hook's createTicket which handles Supabase operations
+      await createTicket({
+        subject: formData.subject,
+        description: formData.description,
+        category: formData.category as any,
+        priority: formData.priority === 'medium' ? 'normal' : formData.priority as any,
+        customer_name: formData.customer_name,
+        customer_email: formData.customer_email
+      })
       toast.success('Ticket created successfully!')
       setShowCreateModal(false)
       setFormData({ subject: '', description: '', category: 'general', priority: 'medium', customer_name: '', customer_email: '' })
     } catch (error) {
       toast.error('Failed to create ticket')
       console.error('Failed to create:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  const handleReply = useCallback(() => {
-    if (!replyContent.trim()) {
-      toast.error('Please enter a reply')
-      return
-    }
-    if (!selectedTicket) return
-    // In production, this would call an API to send the reply
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: replyType === 'public' ? 'Sending reply...' : 'Adding internal note...',
-        success: replyType === 'public' ? 'Reply sent!' : 'Internal note added!',
-        error: 'Failed to send reply'
-      }
-    )
-    setReplyContent('')
-  }, [replyContent, selectedTicket, replyType])
+  // handleReply is now handled by TicketRepliesSection component
 
   const handleUseMacro = (macro: Macro) => {
     setReplyContent(macro.content)
     setShowMacrosModal(false)
   }
 
-  const handleCloseTicket = (ticket: Ticket) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Closing ticket...',
-        success: `Ticket #${ticket.id} has been closed`,
-        error: 'Failed to close ticket'
+  const handleCloseTicket = async (ticketId: string) => {
+    setIsSubmitting(true)
+    try {
+      await closeTicketFromHook(ticketId)
+      toast.success('Ticket closed successfully')
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket(null)
       }
-    )
+    } catch (error) {
+      toast.error('Failed to close ticket')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleEscalateTicket = (ticket: Ticket) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Escalating ticket...',
-        success: `Ticket #${ticket.id} has been escalated`,
-        error: 'Failed to escalate ticket'
+  const handleEscalateTicket = async (ticketId: string) => {
+    setIsSubmitting(true)
+    try {
+      await updateTicket(ticketId, { priority: 'urgent' })
+      toast.success('Ticket escalated to urgent')
+    } catch (error) {
+      toast.error('Failed to escalate ticket')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleResolveTicket = async (ticketId: string) => {
+    setIsSubmitting(true)
+    try {
+      await resolveTicketFromHook(ticketId, 'Resolved via support dashboard')
+      toast.success('Ticket resolved successfully')
+    } catch (error) {
+      toast.error('Failed to resolve ticket')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleReopenTicket = async (ticketId: string) => {
+    setIsSubmitting(true)
+    try {
+      await reopenTicketFromHook(ticketId)
+      toast.success('Ticket reopened')
+    } catch (error) {
+      toast.error('Failed to reopen ticket')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    setIsSubmitting(true)
+    try {
+      await deleteTicketFromHook(ticketId)
+      toast.success('Ticket deleted')
+      if (selectedTicket?.id === ticketId) {
+        setSelectedTicket(null)
       }
-    )
+    } catch (error) {
+      toast.error('Failed to delete ticket')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleAssignTicket = async (ticketId: string, assigneeId: string) => {
+    setIsSubmitting(true)
+    try {
+      await assignTicketFromHook(ticketId, assigneeId)
+      toast.success('Ticket assigned')
+    } catch (error) {
+      toast.error('Failed to assign ticket')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdateStatus = async (ticketId: string, status: SupportTicket['status']) => {
+    setIsSubmitting(true)
+    try {
+      await updateTicket(ticketId, { status })
+      toast.success(`Status updated to ${status.replace('_', ' ')}`)
+    } catch (error) {
+      toast.error('Failed to update status')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdatePriority = async (ticketId: string, priority: SupportTicket['priority']) => {
+    setIsSubmitting(true)
+    try {
+      await updateTicket(ticketId, { priority })
+      toast.success(`Priority updated to ${priority}`)
+    } catch (error) {
+      toast.error('Failed to update priority')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleMergeTickets = () => {
@@ -399,6 +631,46 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     )
   }
 
+  // Show loading state
+  if (loading && displayTickets.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-[1800px] mx-auto">
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="text-center">
+              <RefreshCw className="w-12 h-12 animate-spin text-teal-600 mx-auto mb-4" />
+              <p className="text-lg text-muted-foreground">Loading support tickets...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error && displayTickets.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-[1800px] mx-auto">
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <p className="text-lg text-red-600 mb-2">Failed to load tickets</p>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <button
+                onClick={() => fetchTickets()}
+                className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2 mx-auto"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -410,6 +682,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                 <Ticket className="w-8 h-8 text-white" />
               </div>
               Support Center
+              {loading && <RefreshCw className="w-5 h-5 animate-spin text-teal-600 ml-2" />}
             </h1>
             <p className="text-muted-foreground">Zendesk-style ticket management and customer support</p>
           </div>
@@ -703,118 +976,58 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       </div>
 
-                      {/* Conversation */}
-                      <div className="space-y-4">
-                        <h4 className="font-semibold">Conversation</h4>
-                        <ScrollArea className="h-[300px]">
-                          <div className="space-y-4">
-                            {mockMessages.map(message => (
-                              <div
-                                key={message.id}
-                                className={`flex gap-3 ${message.type === 'internal' ? 'bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg' : ''}`}
-                              >
-                                <Avatar className="w-8 h-8">
-                                  <AvatarImage src={`https://avatar.vercel.sh/${message.sender}`} />
-                                  <AvatarFallback>{message.sender.slice(0, 2)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm">{message.sender}</span>
-                                    {message.type === 'internal' && (
-                                      <Badge className="bg-yellow-100 text-yellow-700 text-xs">
-                                        <Lock className="w-3 h-3 mr-1" />
-                                        Internal
-                                      </Badge>
-                                    )}
-                                    <span className="text-xs text-muted-foreground">
-                                      {new Date(message.createdAt).toLocaleString()}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm">{message.content}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </div>
-
-                      {/* Reply Box */}
-                      <div className="border rounded-lg">
-                        <div className="flex items-center gap-2 p-2 border-b">
-                          <button
-                            onClick={() => setReplyType('public')}
-                            className={`px-3 py-1 rounded text-sm ${
-                              replyType === 'public'
-                                ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
-                                : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
-                            }`}
-                          >
-                            <MessageSquare className="w-4 h-4 inline mr-1" />
-                            Public Reply
-                          </button>
-                          <button
-                            onClick={() => setReplyType('internal')}
-                            className={`px-3 py-1 rounded text-sm ${
-                              replyType === 'internal'
-                                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
-                            }`}
-                          >
-                            <Lock className="w-4 h-4 inline mr-1" />
-                            Internal Note
-                          </button>
-                          <div className="flex-1" />
-                          <button
-                            onClick={() => setShowMacrosModal(true)}
-                            className="px-3 py-1 rounded text-sm text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
-                          >
-                            <Zap className="w-4 h-4 inline mr-1" />
-                            Macros
-                          </button>
-                        </div>
-                        <textarea
-                          value={replyContent}
-                          onChange={(e) => setReplyContent(e.target.value)}
-                          placeholder={replyType === 'public' ? 'Type your reply to the customer...' : 'Add an internal note...'}
-                          className="w-full p-3 resize-none focus:outline-none dark:bg-gray-800"
-                          rows={4}
-                        />
-                        <div className="flex items-center justify-between p-2 border-t bg-gray-50 dark:bg-gray-800/50">
-                          <div className="flex items-center gap-2">
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                              <Paperclip className="w-4 h-4" />
-                            </button>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                              <Bot className="w-4 h-4" />
-                            </button>
-                          </div>
-                          <button
-                            onClick={handleReply}
-                            disabled={!replyContent.trim()}
-                            className="px-4 py-2 bg-teal-600 text-white rounded-lg flex items-center gap-2 disabled:opacity-50"
-                          >
-                            <Send className="w-4 h-4" />
-                            {replyType === 'public' ? 'Send Reply' : 'Add Note'}
-                          </button>
-                        </div>
-                      </div>
+                      {/* Conversation - Now using real Supabase data */}
+                      <TicketRepliesSection
+                        ticketId={selectedTicket.id}
+                        onReplySubmit={() => {
+                          // Optionally update first_response_at if this is the first response
+                          if (!selectedTicket.first_response_at) {
+                            updateTicket(selectedTicket.id, {
+                              first_response_at: new Date().toISOString()
+                            } as any)
+                          }
+                        }}
+                      />
 
                       {/* Quick Actions */}
                       <div className="flex items-center gap-2 pt-2">
+                        {selectedTicket.status !== 'resolved' && selectedTicket.status !== 'closed' ? (
+                          <button
+                            onClick={() => handleResolveTicket(selectedTicket.id)}
+                            disabled={isSubmitting}
+                            className="px-3 py-1.5 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded text-sm flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Resolve
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleReopenTicket(selectedTicket.id)}
+                            disabled={isSubmitting}
+                            className="px-3 py-1.5 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded text-sm flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                            Reopen
+                          </button>
+                        )}
                         <button
-                          onClick={() => resolveTicket(selectedTicket.id)}
-                          className="px-3 py-1.5 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded text-sm flex items-center gap-1"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          Resolve
-                        </button>
-                        <button
-                          onClick={() => escalateTicket(selectedTicket.id)}
-                          className="px-3 py-1.5 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded text-sm flex items-center gap-1"
+                          onClick={() => handleEscalateTicket(selectedTicket.id)}
+                          disabled={isSubmitting || selectedTicket.priority === 'urgent'}
+                          className="px-3 py-1.5 bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 rounded text-sm flex items-center gap-1 disabled:opacity-50"
                         >
                           <Flag className="w-4 h-4" />
                           Escalate
                         </button>
+                        {selectedTicket.status !== 'closed' && (
+                          <button
+                            onClick={() => handleCloseTicket(selectedTicket.id)}
+                            disabled={isSubmitting}
+                            className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <Lock className="w-4 h-4" />
+                            Close
+                          </button>
+                        )}
                         <button className="px-3 py-1.5 bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded text-sm flex items-center gap-1">
                           <Merge className="w-4 h-4" />
                           Merge
@@ -825,8 +1038,9 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                         </button>
                         <div className="flex-1" />
                         <button
-                          onClick={() => deleteSupportTicket(selectedTicket.id)}
-                          className="px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-sm flex items-center gap-1"
+                          onClick={() => handleDeleteTicket(selectedTicket.id)}
+                          disabled={isSubmitting}
+                          className="px-3 py-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded text-sm flex items-center gap-1 disabled:opacity-50"
                         >
                           <Trash2 className="w-4 h-4" />
                           Delete

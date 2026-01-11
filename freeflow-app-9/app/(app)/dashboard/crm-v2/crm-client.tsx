@@ -39,19 +39,15 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Centralized Mock Data - Investor-Ready
+// Centralized Mock Data - For features not yet stored in Supabase
 import {
-  crmContacts,
   crmCompanies,
-  crmDeals,
-  crmActivities,
   crmReports,
   crmAutomations,
   crmAIInsights,
   crmCollaborators,
   crmPredictions,
   crmQuickActions,
-  crmPipelineStages,
 } from '@/lib/mock-data/adapters'
 
 // Types
@@ -151,18 +147,23 @@ interface Automation {
   lastRun: string
 }
 
-// Use centralized mock data - mapped to local variable names for compatibility
-const mockContacts = crmContacts as Contact[]
+// Pipeline stages configuration
+const PIPELINE_STAGES: { id: DealStage; label: string; color: string }[] = [
+  { id: 'prospecting', label: 'Prospecting', color: 'sky' },
+  { id: 'qualification', label: 'Qualification', color: 'indigo' },
+  { id: 'proposal', label: 'Proposal', color: 'amber' },
+  { id: 'negotiation', label: 'Negotiation', color: 'orange' },
+  { id: 'closed_won', label: 'Closed Won', color: 'emerald' },
+  { id: 'closed_lost', label: 'Closed Lost', color: 'red' }
+]
+
+// Use mock data for reports, automations, and AI features (not stored in DB yet)
 const mockCompanies = crmCompanies as Company[]
-const mockDeals = crmDeals as Deal[]
-const mockActivities = crmActivities as CrmActivity[]
 const mockReports = crmReports as Report[]
 const mockAutomations = crmAutomations as Automation[]
-const PIPELINE_STAGES = crmPipelineStages as { id: DealStage; label: string; color: string }[]
 const mockAIInsights = crmAIInsights
 const mockCrmCollaborators = crmCollaborators
 const mockCrmPredictions = crmPredictions
-const mockCrmActivitiesFeed = crmActivities
 const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
@@ -200,8 +201,8 @@ export default function CrmClient() {
     onSuccess: () => refetchActivities()
   })
 
-  // Use DB data or fallback to mock data
-  const contacts: Contact[] = dbContacts.length > 0 ? dbContacts.map((c: any) => ({
+  // Transform database data to UI format - no mock fallback, show empty state for real data
+  const contacts: Contact[] = dbContacts.map((c: any) => ({
     id: c.id,
     name: c.contact_name || c.name || 'Unknown',
     email: c.email || '',
@@ -210,7 +211,7 @@ export default function CrmClient() {
     title: c.job_title || c.title || '',
     type: c.contact_type || 'lead',
     status: c.status || 'new',
-    dealValue: c.deal_value || 0,
+    dealValue: parseFloat(c.deal_value) || 0,
     dealStage: c.deal_stage || null,
     leadScore: c.lead_score || 50,
     probability: c.probability_percentage || 0,
@@ -224,35 +225,66 @@ export default function CrmClient() {
     meetingCount: c.meeting_count || 0,
     createdAt: c.created_at,
     avatar: (c.contact_name || c.name || 'U').charAt(0).toUpperCase()
-  })) : mockContacts
+  }))
 
-  const deals: Deal[] = dbDeals.length > 0 ? dbDeals.map((d: any) => ({
-    id: d.id,
-    name: d.deal_name || d.name || 'Untitled Deal',
-    company: d.company_name || d.company || '',
-    contact: d.contact_name || d.contact || '',
-    value: d.deal_value || d.value || 0,
-    stage: d.deal_stage || d.stage || 'prospecting',
-    probability: d.probability_percentage || d.probability || 0,
-    expectedClose: d.expected_close_date || d.expectedClose || new Date().toISOString(),
-    owner: d.owner_name || d.owner || 'Unassigned',
-    createdAt: d.created_at,
-    lastActivity: d.updated_at || d.created_at,
-    products: d.products || []
-  })) : mockDeals
+  const deals: Deal[] = dbDeals.map((d: any) => {
+    // Map database stage values to UI stage values
+    const stageMap: Record<string, DealStage> = {
+      'discovery': 'prospecting',
+      'qualification': 'qualification',
+      'proposal': 'proposal',
+      'negotiation': 'negotiation',
+      'closed-won': 'closed_won',
+      'closed_won': 'closed_won',
+      'closed-lost': 'closed_lost',
+      'closed_lost': 'closed_lost',
+      'prospecting': 'prospecting',
+    }
+    const rawStage = d.deal_stage || d.stage || 'prospecting'
+    const mappedStage = stageMap[rawStage] || 'prospecting'
 
-  const activities: CrmActivity[] = dbActivities.length > 0 ? dbActivities.map((a: any) => ({
-    id: a.id,
-    type: a.activity_type || a.type || 'note',
-    title: a.title || 'Activity',
-    description: a.description || '',
-    contactId: a.contact_id || '',
-    contactName: a.contact_name || 'Unknown',
-    timestamp: a.activity_date || a.created_at,
-    completed: a.completed || false,
-    outcome: a.outcome || null,
-    duration: a.duration_minutes || a.duration || null
-  })) : mockActivities
+    return {
+      id: d.id,
+      name: d.deal_name || d.name || 'Untitled Deal',
+      company: d.company_name || d.company || '',
+      contact: d.contact_name || d.contact || '',
+      value: parseFloat(d.deal_value || d.value) || 0,
+      stage: mappedStage,
+      probability: d.probability_percentage || d.probability || 0,
+      expectedClose: d.expected_close_date || d.expectedClose || new Date().toISOString(),
+      owner: d.owner_name || d.owner || 'Unassigned',
+      createdAt: d.created_at,
+      lastActivity: d.updated_at || d.created_at,
+      products: d.products || []
+    }
+  })
+
+  const activities: CrmActivity[] = dbActivities.map((a: any) => {
+    // Map database activity type to UI type
+    const typeMap: Record<string, ActivityType> = {
+      'call': 'call',
+      'email': 'email',
+      'meeting': 'meeting',
+      'note': 'note',
+      'task': 'task',
+      'deal-update': 'note',
+    }
+    const rawType = a.activity_type || a.type || 'note'
+    const mappedType = typeMap[rawType] || 'note'
+
+    return {
+      id: a.id,
+      type: mappedType,
+      title: a.subject || a.title || 'Activity',
+      description: a.description || '',
+      contactId: a.contact_id || '',
+      contactName: a.contact_name || 'Unknown',
+      timestamp: a.activity_date || a.due_date || a.created_at,
+      completed: a.status === 'completed' || a.completed || !!a.completed_at,
+      outcome: a.outcome || null,
+      duration: a.duration_minutes || a.duration || null
+    }
+  })
 
   const [companies] = useState<Company[]>(mockCompanies)
   const [reports] = useState<Report[]>(mockReports)
@@ -1191,7 +1223,26 @@ export default function CrmClient() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredContacts.map(contact => (
+                      {contactsLoading ? (
+                        <tr>
+                          <td colSpan={7} className="py-12 text-center">
+                            <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-500 mb-2" />
+                            <p className="text-gray-500">Loading contacts...</p>
+                          </td>
+                        </tr>
+                      ) : filteredContacts.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-12 text-center">
+                            <Users className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                            <p className="text-gray-500 font-medium">No contacts yet</p>
+                            <p className="text-sm text-gray-400 mb-4">Get started by adding your first contact</p>
+                            <Button onClick={() => setShowAddContactDialog(true)} className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Contact
+                            </Button>
+                          </td>
+                        </tr>
+                      ) : filteredContacts.map(contact => (
                         <tr key={contact.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedContact(contact)}>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
@@ -1387,17 +1438,36 @@ export default function CrmClient() {
             </Card>
 
             <div className="space-y-4">
-              {deals.map(deal => (
+              {dealsLoading ? (
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="py-12 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-amber-500 mb-2" />
+                    <p className="text-gray-500">Loading deals...</p>
+                  </CardContent>
+                </Card>
+              ) : deals.length === 0 ? (
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="py-12 text-center">
+                    <Briefcase className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                    <p className="text-gray-500 font-medium">No deals yet</p>
+                    <p className="text-sm text-gray-400 mb-4">Create your first deal to start tracking opportunities</p>
+                    <Button onClick={() => setShowAddDealDialog(true)} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Deal
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : deals.map(deal => (
                 <Card key={deal.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedDeal(deal)}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium text-lg">
-                          {deal.company.charAt(0)}
+                          {deal.company.charAt(0) || 'D'}
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">{deal.name}</h3>
-                          <p className="text-sm text-gray-500">{deal.company} • {deal.contact}</p>
+                          <p className="text-sm text-gray-500">{deal.company} {deal.contact ? `• ${deal.contact}` : ''}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -1471,39 +1541,52 @@ export default function CrmClient() {
                     <CardTitle>Upcoming Activities</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {activities.filter(a => !a.completed).map(activity => (
-                        <div key={activity.id} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className={`p-2 rounded-lg ${
-                            activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                            activity.type === 'call' ? 'bg-green-100 text-green-600' :
-                            activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {getActivityIcon(activity.type)}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{activity.title}</p>
-                            <p className="text-sm text-gray-500">{activity.description}</p>
-                            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                              <Users className="w-3 h-3" />
-                              {activity.contactName}
-                              <span className="mx-1">•</span>
-                              <Clock className="w-3 h-3" />
-                              {new Date(activity.timestamp).toLocaleString()}
+                    {activitiesLoading ? (
+                      <div className="py-8 text-center">
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto text-purple-500 mb-2" />
+                        <p className="text-sm text-gray-500">Loading activities...</p>
+                      </div>
+                    ) : activities.filter(a => !a.completed).length === 0 ? (
+                      <div className="py-8 text-center">
+                        <Activity className="w-10 h-10 mx-auto text-gray-300 mb-2" />
+                        <p className="text-gray-500 font-medium text-sm">No upcoming activities</p>
+                        <p className="text-xs text-gray-400">Use the quick actions to log activities</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {activities.filter(a => !a.completed).map(activity => (
+                          <div key={activity.id} className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className={`p-2 rounded-lg ${
+                              activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                              activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                              activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {getActivityIcon(activity.type)}
                             </div>
+                            <div className="flex-1">
+                              <p className="font-medium">{activity.title}</p>
+                              <p className="text-sm text-gray-500">{activity.description}</p>
+                              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                                <Users className="w-3 h-3" />
+                                {activity.contactName}
+                                <span className="mx-1">•</span>
+                                <Clock className="w-3 h-3" />
+                                {new Date(activity.timestamp).toLocaleString()}
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleCompleteActivity(activity.id)}
+                              title="Mark as complete"
+                            >
+                              <CheckCircle2 className="w-5 h-5 text-gray-400 hover:text-green-500" />
+                            </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleCompleteActivity(activity.id)}
-                            title="Mark as complete"
-                          >
-                            <CheckCircle2 className="w-5 h-5 text-gray-400 hover:text-green-500" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -1512,30 +1595,37 @@ export default function CrmClient() {
                     <CardTitle>Completed Activities</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {activities.filter(a => a.completed).map(activity => (
-                        <div key={activity.id} className="flex items-start gap-4 p-4 border-l-2 border-green-500 bg-gray-50 dark:bg-gray-800 rounded-r-lg">
-                          <div className={`p-2 rounded-lg ${
-                            activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                            activity.type === 'call' ? 'bg-green-100 text-green-600' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
-                            {getActivityIcon(activity.type)}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{activity.title}</p>
-                            <p className="text-sm text-gray-500">{activity.description}</p>
-                            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                              <Users className="w-3 h-3" />
-                              {activity.contactName}
-                              <span className="mx-1">•</span>
-                              {formatTimeAgo(activity.timestamp)}
+                    {activities.filter(a => a.completed).length === 0 ? (
+                      <div className="py-8 text-center">
+                        <CheckCircle className="w-10 h-10 mx-auto text-gray-300 mb-2" />
+                        <p className="text-gray-500 font-medium text-sm">No completed activities yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {activities.filter(a => a.completed).map(activity => (
+                          <div key={activity.id} className="flex items-start gap-4 p-4 border-l-2 border-green-500 bg-gray-50 dark:bg-gray-800 rounded-r-lg">
+                            <div className={`p-2 rounded-lg ${
+                              activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                              activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {getActivityIcon(activity.type)}
                             </div>
+                            <div className="flex-1">
+                              <p className="font-medium">{activity.title}</p>
+                              <p className="text-sm text-gray-500">{activity.description}</p>
+                              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                                <Users className="w-3 h-3" />
+                                {activity.contactName}
+                                <span className="mx-1">•</span>
+                                {formatTimeAgo(activity.timestamp)}
+                              </div>
+                            </div>
+                            <CheckCircle className="w-5 h-5 text-green-500" />
                           </div>
-                          <CheckCircle className="w-5 h-5 text-green-500" />
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
