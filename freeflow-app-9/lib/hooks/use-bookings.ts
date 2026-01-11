@@ -1,5 +1,7 @@
-import { useSupabaseQuery } from './use-supabase-query'
-import { useSupabaseMutation } from './use-supabase-mutation'
+'use client'
+
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export type BookingType = 'appointment' | 'reservation' | 'session' | 'class' | 'event' | 'rental' | 'service' | 'consultation' | 'custom'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show' | 'rescheduled' | 'waitlisted'
@@ -77,7 +79,6 @@ export interface Booking {
   last_synced_at?: string
   created_at: string
   updated_at: string
-  deleted_at?: string
 }
 
 export interface UseBookingsOptions {
@@ -85,51 +86,307 @@ export interface UseBookingsOptions {
   status?: BookingStatus | 'all'
   paymentStatus?: PaymentStatus | 'all'
   limit?: number
+  enableRealtime?: boolean
 }
 
 export function useBookings(options: UseBookingsOptions = {}) {
-  const { bookingType, status, paymentStatus, limit } = options
+  const { bookingType, status, paymentStatus, limit = 50, enableRealtime = true } = options
+  const supabase = createClient()
 
-  const filters: Record<string, any> = {}
-  if (bookingType && bookingType !== 'all') filters.booking_type = bookingType
-  if (status && status !== 'all') filters.status = status
-  if (paymentStatus && paymentStatus !== 'all') filters.payment_status = paymentStatus
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+  const [realtimeStatus, setRealtimeStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
 
-  const queryOptions: any = {
-    table: 'bookings',
-    filters,
-    orderBy: { column: 'start_time', ascending: false },
-    limit: limit || 50,
-    realtime: true,
-    softDelete: false // bookings table doesn't have deleted_at column
-  }
+  // Fetch bookings from Supabase
+  const fetchBookings = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  const { data, loading, error, refetch } = useSupabaseQuery<Booking>(queryOptions)
+      let query = supabase
+        .from('bookings')
+        .select('*')
+        .order('start_time', { ascending: false })
+        .limit(limit)
 
-  const { create, update, remove } = useSupabaseMutation({
-    table: 'bookings'
-  })
+      // Apply filters
+      if (bookingType && bookingType !== 'all') {
+        query = query.eq('booking_type', bookingType)
+      }
+      if (status && status !== 'all') {
+        query = query.eq('status', status)
+      }
+      if (paymentStatus && paymentStatus !== 'all') {
+        query = query.eq('payment_status', paymentStatus)
+      }
 
-  // Wrapper functions with proper typing
-  const createBooking = async (bookingData: Partial<Booking>) => {
-    return await create(bookingData)
-  }
+      const { data, error: queryError } = await query
 
-  const updateBooking = async (id: string, bookingData: Partial<Booking>) => {
-    return await update(id, bookingData)
-  }
+      if (queryError) {
+        throw new Error(queryError.message)
+      }
 
-  const deleteBooking = async (id: string) => {
-    return await remove(id)
-  }
+      setBookings(data || [])
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to fetch bookings')
+      setError(error)
+      console.error('Error fetching bookings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, bookingType, status, paymentStatus, limit])
+
+  // Set up real-time subscription
+  useEffect(() => {
+    fetchBookings()
+
+    if (!enableRealtime) return
+
+    setRealtimeStatus('connecting')
+
+    const channel = supabase
+      .channel('bookings-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'bookings' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newBooking = payload.new as Booking
+            // Check if the new booking matches our filters
+            const matchesFilters =
+              (!bookingType || bookingType === 'all' || newBooking.booking_type === bookingType) &&
+              (!status || status === 'all' || newBooking.status === status) &&
+              (!paymentStatus || paymentStatus === 'all' || newBooking.payment_status === paymentStatus)
+
+            if (matchesFilters) {
+              setBookings(prev => [newBooking, ...prev].slice(0, limit))
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedBooking = payload.new as Booking
+            setBookings(prev =>
+              prev.map(booking =>
+                booking.id === updatedBooking.id ? updatedBooking : booking
+              )
+            )
+          } else if (payload.eventType === 'DELETE') {
+            const deletedId = payload.old.id
+            setBookings(prev => prev.filter(booking => booking.id !== deletedId))
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          setRealtimeStatus('connected')
+        } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          setRealtimeStatus('disconnected')
+        }
+      })
+
+    return () => {
+      supabase.removeChannel(channel)
+      setRealtimeStatus('disconnected')
+    }
+  }, [fetchBookings, supabase, enableRealtime, bookingType, status, paymentStatus, limit])
+
+  // Create a new booking
+  const createBooking = useCallback(async (bookingData: Partial<Booking>) => {
+    try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({
+          ...bookingData,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      // Optimistically add to local state (realtime will sync if there's a mismatch)
+      if (data) {
+        setBookings(prev => [data as Booking, ...prev].slice(0, limit))
+      }
+
+      return data as Booking
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create booking')
+      console.error('Error creating booking:', error)
+      throw error
+    }
+  }, [supabase, limit])
+
+  // Update an existing booking
+  const updateBooking = useCallback(async (id: string, bookingData: Partial<Booking>) => {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .update({
+          ...bookingData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      // Optimistically update local state
+      if (data) {
+        setBookings(prev =>
+          prev.map(booking =>
+            booking.id === id ? (data as Booking) : booking
+          )
+        )
+      }
+
+      return data as Booking
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update booking')
+      console.error('Error updating booking:', error)
+      throw error
+    }
+  }, [supabase])
+
+  // Delete a booking (hard delete since bookings table doesn't have deleted_at)
+  const deleteBooking = useCallback(async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', id)
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      // Optimistically remove from local state
+      setBookings(prev => prev.filter(booking => booking.id !== id))
+
+      return true
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete booking')
+      console.error('Error deleting booking:', error)
+      throw error
+    }
+  }, [supabase])
+
+  // Confirm a booking
+  const confirmBooking = useCallback(async (id: string) => {
+    return updateBooking(id, {
+      status: 'confirmed' as BookingStatus,
+      confirmed_at: new Date().toISOString(),
+      confirmation_code: `CONF-${Date.now().toString(36).toUpperCase()}`
+    })
+  }, [updateBooking])
+
+  // Cancel a booking
+  const cancelBooking = useCallback(async (id: string, reason?: string) => {
+    return updateBooking(id, {
+      status: 'cancelled' as BookingStatus,
+      cancelled_at: new Date().toISOString(),
+      cancellation_reason: reason || 'Cancelled by user'
+    })
+  }, [updateBooking])
+
+  // Complete a booking
+  const completeBooking = useCallback(async (id: string) => {
+    return updateBooking(id, {
+      status: 'completed' as BookingStatus,
+      actual_end_time: new Date().toISOString()
+    })
+  }, [updateBooking])
+
+  // Reschedule a booking
+  const rescheduleBooking = useCallback(async (id: string, newStartTime: string, newEndTime: string) => {
+    return updateBooking(id, {
+      start_time: newStartTime,
+      end_time: newEndTime,
+      status: 'rescheduled' as BookingStatus
+    })
+  }, [updateBooking])
+
+  // Computed booking lists
+  const upcomingBookings = useMemo(() => {
+    const now = new Date()
+    return bookings
+      .filter(b => new Date(b.start_time) > now && !['cancelled', 'completed', 'no_show'].includes(b.status))
+      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+  }, [bookings])
+
+  const pastBookings = useMemo(() => {
+    const now = new Date()
+    return bookings.filter(b => new Date(b.end_time) < now)
+  }, [bookings])
+
+  const todayBookings = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0]
+    return bookings.filter(b => b.start_time.startsWith(today))
+  }, [bookings])
+
+  const pendingBookings = useMemo(() => {
+    return bookings.filter(b => b.status === 'pending')
+  }, [bookings])
+
+  const confirmedBookings = useMemo(() => {
+    return bookings.filter(b => b.status === 'confirmed')
+  }, [bookings])
+
+  // Stats
+  const stats = useMemo(() => {
+    const total = bookings.length
+    const confirmed = bookings.filter(b => b.status === 'confirmed').length
+    const pending = bookings.filter(b => b.status === 'pending').length
+    const completed = bookings.filter(b => b.status === 'completed').length
+    const cancelled = bookings.filter(b => b.status === 'cancelled').length
+    const totalRevenue = bookings.reduce((sum, b) => sum + (b.price || 0), 0)
+    const paidRevenue = bookings.filter(b => b.payment_status === 'paid').reduce((sum, b) => sum + (b.price || 0), 0)
+    const pendingPayments = bookings.filter(b => b.payment_status !== 'paid').reduce((sum, b) => sum + (b.balance_due || 0), 0)
+
+    return {
+      total,
+      confirmed,
+      pending,
+      completed,
+      cancelled,
+      totalRevenue,
+      paidRevenue,
+      pendingPayments,
+      noShowRate: total > 0 ? ((cancelled / total) * 100).toFixed(1) : '0',
+      conversionRate: total > 0 ? ((completed / total) * 100).toFixed(1) : '0'
+    }
+  }, [bookings])
 
   return {
-    bookings: data,
+    bookings,
     loading,
     error,
+    realtimeStatus,
+    stats,
+    upcomingBookings,
+    pastBookings,
+    todayBookings,
+    pendingBookings,
+    confirmedBookings,
     createBooking,
     updateBooking,
     deleteBooking,
-    refetch
+    confirmBooking,
+    cancelBooking,
+    completeBooking,
+    rescheduleBooking,
+    refetch: fetchBookings
   }
 }

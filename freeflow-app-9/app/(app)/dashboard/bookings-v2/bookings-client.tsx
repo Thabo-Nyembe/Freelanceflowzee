@@ -109,7 +109,25 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('availability')
 
-  const { bookings, loading, error, createBooking, updateBooking, deleteBooking, refetch } = useBookings({ bookingType: bookingTypeFilter, status: statusFilter, paymentStatus: paymentStatusFilter })
+  const {
+    bookings,
+    loading,
+    error,
+    realtimeStatus,
+    stats: hookStats,
+    createBooking,
+    updateBooking,
+    deleteBooking,
+    confirmBooking: hookConfirmBooking,
+    cancelBooking: hookCancelBooking,
+    rescheduleBooking: hookRescheduleBooking,
+    refetch
+  } = useBookings({
+    bookingType: bookingTypeFilter,
+    status: statusFilter,
+    paymentStatus: paymentStatusFilter,
+    enableRealtime: true
+  })
 
   // Form state for new booking
   const [newBookingForm, setNewBookingForm] = useState({
@@ -247,7 +265,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         addVideoMeeting: false,
         requirePayment: false
       })
-      refetch()
+      // No need to call refetch - real-time subscription handles updates
     } catch (error: any) {
       toast.error('Error', { description: error.message || 'Failed to create booking' })
     }
@@ -255,15 +273,10 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
   const handleConfirmBooking = async (booking: Booking) => {
     try {
-      await updateBooking(booking.id, {
-        status: 'confirmed' as BookingStatus,
-        confirmed_at: new Date().toISOString(),
-        confirmation_code: `CONF-${Date.now().toString(36).toUpperCase()}`
-      })
+      await hookConfirmBooking(booking.id)
       toast.success('Booking Confirmed', {
         description: `Booking for ${booking.customer_name || 'client'} has been confirmed`
       })
-      refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
@@ -274,15 +287,10 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
   const handleCancelBooking = async (booking: Booking) => {
     try {
-      await updateBooking(booking.id, {
-        status: 'cancelled' as BookingStatus,
-        cancelled_at: new Date().toISOString(),
-        cancellation_reason: 'Cancelled by user'
-      })
+      await hookCancelBooking(booking.id, 'Cancelled by user')
       toast.success('Booking Cancelled', {
         description: `Booking for ${booking.customer_name || 'client'} has been cancelled`
       })
-      refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
@@ -310,17 +318,16 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     const endTime = new Date(startTime.getTime() + booking.duration_minutes * 60000)
 
     try {
-      await updateBooking(rescheduleData.bookingId, {
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        status: 'rescheduled' as BookingStatus
-      })
+      await hookRescheduleBooking(
+        rescheduleData.bookingId,
+        startTime.toISOString(),
+        endTime.toISOString()
+      )
       toast.success('Booking Rescheduled', {
         description: `Booking has been rescheduled to ${startTime.toLocaleDateString()}`
       })
       setShowRescheduleDialog(false)
       setRescheduleData(null)
-      refetch()
       if (selectedBooking?.id === rescheduleData.bookingId) {
         setSelectedBooking(null)
       }
@@ -339,7 +346,6 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       toast.success('Booking Deleted', {
         description: `Booking "${booking.title}" has been deleted`
       })
-      refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
       }
@@ -553,8 +559,19 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-medium backdrop-blur-sm">
                     Booking Pro
                   </span>
-                  <span className="px-3 py-1 bg-emerald-500/30 rounded-full text-sm font-medium backdrop-blur-sm">
-                    Auto-Sync
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm flex items-center gap-1.5 ${
+                    realtimeStatus === 'connected' ? 'bg-emerald-500/30' :
+                    realtimeStatus === 'connecting' ? 'bg-amber-500/30' :
+                    'bg-red-500/30'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${
+                      realtimeStatus === 'connected' ? 'bg-emerald-400 animate-pulse' :
+                      realtimeStatus === 'connecting' ? 'bg-amber-400 animate-pulse' :
+                      'bg-red-400'
+                    }`} />
+                    {realtimeStatus === 'connected' ? 'Live Sync' :
+                     realtimeStatus === 'connecting' ? 'Connecting...' :
+                     'Disconnected'}
                   </span>
                 </div>
                 <h1 className="text-4xl font-bold mb-2">Booking System</h1>
@@ -716,6 +733,13 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                     </Tabs>
                   </DialogContent>
                 </Dialog>
+                <button
+                  onClick={() => refetch()}
+                  className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all"
+                  title="Refresh bookings"
+                >
+                  <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+                </button>
                 <button className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all">
                   <Bell className="h-5 w-5" />
                 </button>
@@ -1851,12 +1875,46 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
           <div className="space-y-4">
             {loading && (
-              <div className="text-center py-8">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-sky-600 border-r-transparent"></div>
+              <div className="text-center py-12">
+                <div className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-solid border-sky-600 border-r-transparent mb-4"></div>
+                <p className="text-gray-500 dark:text-gray-400">Loading bookings from database...</p>
               </div>
             )}
 
-            {filteredBookings.map(booking => (
+            {error && (
+              <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+                <AlertTriangle className="h-10 w-10 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-2">Error Loading Bookings</h3>
+                <p className="text-red-600 dark:text-red-300 mb-4">{error.message}</p>
+                <Button
+                  onClick={() => refetch()}
+                  variant="outline"
+                  className="border-red-300 text-red-600 hover:bg-red-50"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            )}
+
+            {!loading && !error && filteredBookings.length === 0 && (
+              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No Bookings Found</h3>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  {searchQuery ? 'No bookings match your search criteria.' : 'You don\'t have any bookings yet.'}
+                </p>
+                <Button
+                  onClick={() => setShowNewBooking(true)}
+                  className="bg-sky-600 hover:bg-sky-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create First Booking
+                </Button>
+              </div>
+            )}
+
+            {!loading && !error && filteredBookings.map(booking => (
               <div
                 key={booking.id}
                 className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border hover:shadow-md transition-all cursor-pointer group"
@@ -2265,7 +2323,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             <AIInsightsPanel
               insights={mockBookingsAIInsights}
               title="Booking Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">

@@ -345,8 +345,22 @@ export default function TimeTrackingClient() {
     submitEntry,
     lockEntry,
     loading: entriesLoading,
+    error: entriesError,
     refetch
   } = useTimeTracking()
+
+  // Track database connection status for UI feedback
+  const [isDbConnected, setIsDbConnected] = useState<boolean | null>(null)
+
+  // Check database connection on mount
+  useEffect(() => {
+    if (entriesError) {
+      setIsDbConnected(false)
+      console.error('Time tracking database error:', entriesError)
+    } else if (dbTimeEntries !== undefined) {
+      setIsDbConnected(true)
+    }
+  }, [entriesError, dbTimeEntries])
 
   // Track the active running entry ID
   const [activeTimerEntryId, setActiveTimerEntryId] = useState<string | null>(null)
@@ -564,22 +578,34 @@ export default function TimeTrackingClient() {
     return () => clearInterval(interval)
   }, [isTimerRunning])
 
+  // Compute stats from real database entries when available, fallback to mock data
   const stats = useMemo(() => {
-    const totalHours = mockEntries.reduce((sum, e) => sum + e.durationHours, 0)
-    const billableHours = mockEntries.filter(e => e.isBillable).reduce((sum, e) => sum + e.durationHours, 0)
-    const totalRevenue = mockEntries.reduce((sum, e) => sum + e.billableAmount, 0)
-    const running = mockEntries.filter(e => e.status === 'running').length
+    // Use database entries if available, otherwise fallback to mock
+    const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
+      duration_hours: e.durationHours,
+      is_billable: e.isBillable,
+      billable_amount: e.billableAmount,
+      status: e.status
+    }))
+
+    const totalHours = entries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0)
+    const billableEntries = entries.filter((e: any) => e.is_billable)
+    const billableHours = billableEntries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0)
+    const totalRevenue = billableEntries.reduce((sum: number, e: any) => sum + (e.billable_amount || 0), 0)
+    const running = entries.filter((e: any) => e.status === 'running').length
+
     return {
       totalHours: totalHours.toFixed(1),
       billableHours: billableHours.toFixed(1),
       billablePercent: totalHours > 0 ? ((billableHours / totalHours) * 100).toFixed(0) : '0',
       totalRevenue,
-      entries: mockEntries.length,
+      entries: entries.length,
       running,
       projects: mockProjects.filter(p => p.status === 'active').length,
-      teamOnline: mockTeam.filter(t => t.isOnline).length
+      teamOnline: mockTeam.filter(t => t.isOnline).length,
+      isUsingRealData: dbTimeEntries && dbTimeEntries.length > 0
     }
-  }, [])
+  }, [dbTimeEntries])
 
   const statsCards = [
     { label: 'Total Hours', value: `${stats.totalHours}h`, icon: Clock, color: 'from-amber-500 to-amber-600', trend: '+2.5h' },
@@ -911,13 +937,58 @@ export default function TimeTrackingClient() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center"><Timer className="h-6 w-6 text-white" /></div>
-            <div><h1 className="text-2xl font-bold text-gray-900 dark:text-white">Time Tracking</h1><p className="text-gray-500 dark:text-gray-400">Toggl level time management</p></div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Time Tracking</h1>
+                {/* Database connection indicator */}
+                {isDbConnected === true && (
+                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-1 inline-block"></span>
+                    Live
+                  </Badge>
+                )}
+                {isDbConnected === false && (
+                  <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs">
+                    <span className="w-2 h-2 bg-amber-500 rounded-full mr-1 inline-block"></span>
+                    Demo Mode
+                  </Badge>
+                )}
+                {entriesLoading && (
+                  <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs">
+                    <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                    Syncing
+                  </Badge>
+                )}
+              </div>
+              <p className="text-gray-500 dark:text-gray-400">Toggl level time management</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => refetch()} disabled={entriesLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${entriesLoading ? 'animate-spin' : ''}`} />Refresh
+            </Button>
             <Button variant="outline" onClick={() => setShowEntryDialog(true)}><Plus className="h-4 w-4 mr-2" />Manual Entry</Button>
-            <Button variant="outline" onClick={handleExportTimesheet}><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button variant="outline" onClick={() => handleExportTimesheet('csv')}><Download className="h-4 w-4 mr-2" />Export</Button>
           </div>
         </div>
+
+        {/* Error Banner - show when database connection fails */}
+        {entriesError && (
+          <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <div>
+                  <p className="font-medium text-amber-800 dark:text-amber-200">Database Connection Issue</p>
+                  <p className="text-sm text-amber-600 dark:text-amber-400">Using demo data. Your changes will not be saved. {entriesError.message}</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => refetch()} className="border-amber-300 text-amber-700 hover:bg-amber-100">
+                <RefreshCw className="h-4 w-4 mr-2" />Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Live Timer Bar */}
         <Card className="border-gray-200 dark:border-gray-700">
@@ -1067,14 +1138,16 @@ export default function TimeTrackingClient() {
                             )}
                             <Button variant="ghost" size="icon" onClick={() => {
                               setEditingEntryId(entry.id)
+                              // Map database field names to form field names
+                              const startDate = entry.start_time ? new Date(entry.start_time) : new Date()
                               setNewEntryForm({
-                                description: entry.description,
-                                projectId: entry.project || '',
-                                date: entry.date,
-                                duration: entry.duration,
-                                startTime: entry.startTime,
-                                endTime: entry.endTime || '',
-                                isBillable: entry.billable
+                                description: entry.title || entry.description || '',
+                                projectId: entry.project_id || '',
+                                date: startDate.toISOString().split('T')[0],
+                                duration: entry.duration_hours ? `${entry.duration_hours.toFixed(1)}h` : '',
+                                startTime: startDate.toTimeString().slice(0, 5),
+                                endTime: entry.end_time ? new Date(entry.end_time).toTimeString().slice(0, 5) : '',
+                                isBillable: entry.is_billable ?? true
                               })
                               setShowEntryDialog(true)
                             }} title="Edit entry"><Edit2 className="h-4 w-4" /></Button>
@@ -1085,6 +1158,21 @@ export default function TimeTrackingClient() {
                     </div>
                   )
                 })}
+                {/* Loading skeleton for entries */}
+                {entriesLoading && (!dbTimeEntries || dbTimeEntries.length === 0) && (
+                  <div className="space-y-4 p-4">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="animate-pulse flex items-center justify-between">
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                        </div>
+                        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {/* Empty state when not loading */}
                 {(!dbTimeEntries || dbTimeEntries.length === 0) && !entriesLoading && (
                   <div className="p-8 text-center text-gray-500">
                     <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
@@ -2488,25 +2576,49 @@ export default function TimeTrackingClient() {
               <div className="grid grid-cols-2 gap-4"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => { setShowEntryDialog(false); setEditingEntryId(null) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={async () => {
+            <DialogFooter><Button variant="outline" onClick={() => { setShowEntryDialog(false); setEditingEntryId(null); setNewEntryForm({ description: '', projectId: '', date: new Date().toISOString().split('T')[0], duration: '', startTime: '', endTime: '', isBillable: true }) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={async () => {
               if (editingEntryId) {
                 try {
+                  // Parse duration from form
+                  let durationSeconds = 0
+                  const durationStr = newEntryForm.duration
+                  if (durationStr) {
+                    if (durationStr.includes('h') || durationStr.includes('m')) {
+                      const hours = durationStr.match(/(\d+(?:\.\d+)?)h/)?.[1] || '0'
+                      const mins = durationStr.match(/(\d+)m/)?.[1] || '0'
+                      durationSeconds = (parseFloat(hours) * 3600) + (parseInt(mins) * 60)
+                    } else {
+                      durationSeconds = parseFloat(durationStr) * 3600
+                    }
+                  }
+
+                  const project = mockProjects.find(p => p.id === newEntryForm.projectId)
+                  const billableAmount = newEntryForm.isBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0
+
                   await updateEntry(editingEntryId, {
                     title: newEntryForm.description,
                     description: newEntryForm.description,
-                    project_id: newEntryForm.projectId,
-                    is_billable: newEntryForm.isBillable
+                    project_id: newEntryForm.projectId || undefined,
+                    is_billable: newEntryForm.isBillable,
+                    start_time: newEntryForm.startTime ? `${newEntryForm.date}T${newEntryForm.startTime}:00` : undefined,
+                    end_time: newEntryForm.endTime ? `${newEntryForm.date}T${newEntryForm.endTime}:00` : undefined,
+                    duration_seconds: durationSeconds || undefined,
+                    duration_hours: durationSeconds ? durationSeconds / 3600 : undefined,
+                    billable_amount: billableAmount || undefined,
+                    hourly_rate: project?.hourlyRate
                   })
                   toast.success('Time entry updated successfully')
                   setShowEntryDialog(false)
                   setEditingEntryId(null)
+                  setNewEntryForm({ description: '', projectId: '', date: new Date().toISOString().split('T')[0], duration: '', startTime: '', endTime: '', isBillable: true })
                 } catch (error) {
+                  console.error('Update entry error:', error)
                   toast.error('Failed to update entry')
                 }
               } else {
                 handleCreateManualEntry()
               }
-            }} disabled={entriesLoading || !newEntryForm.description || !newEntryForm.projectId}>{entriesLoading ? 'Saving...' : (editingEntryId ? 'Update Entry' : 'Save Entry')}</Button></DialogFooter>
+            }} disabled={entriesLoading || !newEntryForm.description}>{entriesLoading ? 'Saving...' : (editingEntryId ? 'Update Entry' : 'Save Entry')}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
