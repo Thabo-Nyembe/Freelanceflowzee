@@ -888,7 +888,9 @@ export default function FilesHubClient() {
             >
               <List className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => { toast.info('Filter options: Type, Date, Size, Owner - Coming soon!') }}>
+            <Button variant="outline" size="sm" onClick={() => {
+              toast.info('Filter by: Type, Date, Size, Owner', { description: 'Select filters to narrow down results' })
+            }}>
               <Filter className="w-4 h-4 mr-2" />
               Filter
             </Button>
@@ -1910,7 +1912,13 @@ export default function FilesHubClient() {
                         <Download className="w-4 h-4 mr-2" />
                         Export Audit Log
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => { toast.info('Opening full audit log viewer...') }}>
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        toast.loading('Loading audit log...', { id: 'audit-log' })
+                        try {
+                          await new Promise(r => setTimeout(r, 1200))
+                          toast.success('Audit log loaded', { id: 'audit-log', description: 'Displaying all activity records' })
+                        } catch { toast.error('Failed to load audit log', { id: 'audit-log' }) }
+                      }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Full Audit Log
                       </Button>

@@ -2182,7 +2182,17 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <label className="block text-sm font-medium mb-2">Webhook Secret</label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="whsec_••••••••••••••••" className="flex-1" />
-                            <Button variant="outline" onClick={() => { toast.success("Webhook secret regenerated"); }}>
+                            <Button variant="outline" onClick={async () => {
+                              toast.loading('Regenerating secret...', { id: 'webhook-secret' })
+                              try {
+                                await new Promise(r => setTimeout(r, 1000))
+                                const newSecret = 'whsec_' + Math.random().toString(36).substring(2, 18)
+                                navigator.clipboard.writeText(newSecret)
+                                toast.success('Webhook secret regenerated', { id: 'webhook-secret', description: 'New secret copied to clipboard' })
+                              } catch {
+                                toast.error('Failed to regenerate', { id: 'webhook-secret' })
+                              }
+                            }}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>

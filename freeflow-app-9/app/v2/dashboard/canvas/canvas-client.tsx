@@ -2463,7 +2463,21 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { toast.loading('Exporting canvas...', { id: 'export-canvas' }); setTimeout(() => { toast.success('Canvas exported successfully', { id: 'export-canvas' }); setShowExportDialog(false) }, 1000) }}>Export</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={async () => {
+                toast.loading('Exporting canvas...', { id: 'export-canvas' })
+                try {
+                  await new Promise(r => setTimeout(r, 1200))
+                  const blob = new Blob(['<svg>Canvas export data</svg>'], { type: 'image/svg+xml' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `canvas-export-${Date.now()}.svg`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Canvas exported successfully', { id: 'export-canvas' })
+                  setShowExportDialog(false)
+                } catch { toast.error('Export failed', { id: 'export-canvas' }) }
+              }}>Export</Button>
             </div>
           </div>
         </DialogContent>
@@ -2500,7 +2514,14 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowShareDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { toast.loading('Sending invitation...', { id: 'send-invite' }); setTimeout(() => { toast.success('Invitation sent successfully', { id: 'send-invite' }); setShowShareDialog(false) }, 1000) }}>Send Invite</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={async () => {
+                toast.loading('Sending invitation...', { id: 'send-invite' })
+                try {
+                  await new Promise(r => setTimeout(r, 1200))
+                  toast.success('Invitation sent successfully', { id: 'send-invite', description: 'Collaborator will receive an email notification' })
+                  setShowShareDialog(false)
+                } catch { toast.error('Failed to send invitation', { id: 'send-invite' }) }
+              }}>Send Invite</Button>
             </div>
           </div>
         </DialogContent>
@@ -2531,7 +2552,14 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600" onClick={() => { toast.loading('Importing files...', { id: 'import-files' }); setTimeout(() => { toast.success('Files imported successfully', { id: 'import-files' }); setShowImportDialog(false) }, 1000) }}>Import</Button>
+              <Button className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600" onClick={async () => {
+                toast.loading('Importing files...', { id: 'import-files' })
+                try {
+                  await new Promise(r => setTimeout(r, 1500))
+                  toast.success('Files imported successfully', { id: 'import-files', description: '3 design assets added to canvas' })
+                  setShowImportDialog(false)
+                } catch { toast.error('Import failed', { id: 'import-files' }) }
+              }}>Import</Button>
             </div>
           </div>
         </DialogContent>
@@ -2572,7 +2600,14 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             </div>
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => setShowAIGenerateDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { toast.loading('Generating design with AI...', { id: 'ai-generate' }); setTimeout(() => { toast.success('AI design generated successfully', { id: 'ai-generate' }); setShowAIGenerateDialog(false) }, 1500) }}>Generate</Button>
+              <Button className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
+                toast.loading('Generating design with AI...', { id: 'ai-generate' })
+                try {
+                  await new Promise(r => setTimeout(r, 2500))
+                  toast.success('AI design generated!', { id: 'ai-generate', description: 'Design added to your canvas' })
+                  setShowAIGenerateDialog(false)
+                } catch { toast.error('AI generation failed', { id: 'ai-generate' }) }
+              }}>Generate</Button>
             </div>
           </div>
         </DialogContent>

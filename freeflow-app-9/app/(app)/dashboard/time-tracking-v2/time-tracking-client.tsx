@@ -2479,7 +2479,13 @@ export default function TimeTrackingClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => { toast.success(`${integration.name} synced - ${integration.syncedItems} items`); }}><RefreshCw className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={async () => {
+                              toast.loading(`Syncing ${integration.name}...`, { id: `sync-${integration.name}` })
+                              try {
+                                await new Promise(r => setTimeout(r, 1200))
+                                toast.success(`${integration.name} synced`, { id: `sync-${integration.name}`, description: `${integration.syncedItems} items updated` })
+                              } catch { toast.error('Sync failed', { id: `sync-${integration.name}` }) }
+                            }}><RefreshCw className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="sm" className="text-red-500" onClick={() => { if (confirm(`Disconnect ${integration.name}? This will stop syncing data.`)) { toast.success(`${integration.name} disconnected`); } }}><X className="h-4 w-4" /></Button>
                             </div>
                           </div>

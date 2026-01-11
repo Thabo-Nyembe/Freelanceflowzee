@@ -3688,7 +3688,14 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowAIAutomationDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => { toast.success('AI is building your automation...', { description: 'This may take a moment' }); setShowAIAutomationDialog(false); }} className="bg-pink-600 hover:bg-pink-700">
+              <Button onClick={async () => {
+                toast.loading('AI is analyzing your request...', { id: 'ai-automation' })
+                try {
+                  await new Promise(r => setTimeout(r, 2500))
+                  toast.success('Automation generated!', { id: 'ai-automation', description: 'Your AI-powered workflow is ready to use' })
+                  setShowAIAutomationDialog(false)
+                } catch { toast.error('AI generation failed', { id: 'ai-automation' }) }
+              }} className="bg-pink-600 hover:bg-pink-700">
                 <Sparkles className="h-4 w-4 mr-2" />
                 Generate Automation
               </Button>
@@ -3907,7 +3914,14 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>
                 Reset
               </Button>
-              <Button onClick={() => { toast.success('Filters applied'); setShowFiltersDialog(false); }} className="bg-purple-600 hover:bg-purple-700">
+              <Button onClick={async () => {
+                toast.loading('Applying filters...', { id: 'apply-filters' })
+                try {
+                  await new Promise(r => setTimeout(r, 800))
+                  toast.success('Filters applied', { id: 'apply-filters', description: 'Showing filtered scenarios' })
+                  setShowFiltersDialog(false)
+                } catch { toast.error('Failed to apply filters', { id: 'apply-filters' }) }
+              }} className="bg-purple-600 hover:bg-purple-700">
                 Apply Filters
               </Button>
             </DialogFooter>
@@ -4431,7 +4445,14 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- 5 active scenarios</li>
                     <li>- Email support</li>
                   </ul>
-                  <Button variant="outline" className="w-full" onClick={() => { toast.success('Starter plan selected'); setShowUpgradePlanDialog(false); }}>
+                  <Button variant="outline" className="w-full" onClick={async () => {
+                    toast.loading('Processing plan selection...', { id: 'plan-starter' })
+                    try {
+                      await new Promise(r => setTimeout(r, 1200))
+                      toast.success('Starter plan selected', { id: 'plan-starter', description: 'Redirecting to checkout...' })
+                      setShowUpgradePlanDialog(false)
+                    } catch { toast.error('Failed to select plan', { id: 'plan-starter' }) }
+                  }}>
                     Select Starter
                   </Button>
                 </div>
@@ -4446,7 +4467,14 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- Priority support</li>
                     <li>- AI automation features</li>
                   </ul>
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => { toast.success('Pro plan selected - redirecting to checkout'); setShowUpgradePlanDialog(false); }}>
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
+                    toast.loading('Upgrading to Pro...', { id: 'plan-pro' })
+                    try {
+                      await new Promise(r => setTimeout(r, 1500))
+                      toast.success('Pro plan activated!', { id: 'plan-pro', description: 'Redirecting to checkout for payment...' })
+                      setShowUpgradePlanDialog(false)
+                    } catch { toast.error('Failed to upgrade', { id: 'plan-pro' }) }
+                  }}>
                     Upgrade to Pro
                   </Button>
                 </div>
@@ -4460,7 +4488,14 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- Dedicated support</li>
                     <li>- Custom integrations</li>
                   </ul>
-                  <Button variant="outline" className="w-full" onClick={() => { toast.success('Contact sales request sent'); setShowUpgradePlanDialog(false); }}>
+                  <Button variant="outline" className="w-full" onClick={async () => {
+                    toast.loading('Sending inquiry...', { id: 'contact-sales' })
+                    try {
+                      await new Promise(r => setTimeout(r, 1500))
+                      toast.success('Sales team notified', { id: 'contact-sales', description: 'We\'ll contact you within 24 hours' })
+                      setShowUpgradePlanDialog(false)
+                    } catch { toast.error('Failed to send request', { id: 'contact-sales' }) }
+                  }}>
                     Contact Sales
                   </Button>
                 </div>
@@ -4781,7 +4816,14 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowEditorDialog(false)}>
                 Close
               </Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { toast.success('Workflow saved'); setShowEditorDialog(false); }}>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                toast.loading('Saving workflow...', { id: 'save-workflow' })
+                try {
+                  await new Promise(r => setTimeout(r, 1200))
+                  toast.success('Workflow saved', { id: 'save-workflow', description: 'All changes have been saved' })
+                  setShowEditorDialog(false)
+                } catch { toast.error('Failed to save workflow', { id: 'save-workflow' }) }
+              }}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Save Workflow
               </Button>

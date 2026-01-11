@@ -1264,7 +1264,10 @@ export default function TeamHubClient() {
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleOpenReactions}><Smile className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStartThread(message)}><MessageCircle className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { toast.success('Message saved', { description: 'Added to your bookmarks' }) }}><Bookmark className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                                  setSavedItems(prev => [...prev, { id: `saved-${Date.now()}`, type: 'message', title: message.content.substring(0, 30), time: new Date().toLocaleTimeString() }])
+                                  toast.success('Message saved', { description: 'Added to your bookmarks' })
+                                }}><Bookmark className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied!', { description: 'Message copied to clipboard' }) }}><MoreVertical className="w-3.5 h-3.5" /></Button>
                               </div>
                             </div>

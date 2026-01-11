@@ -2247,7 +2247,17 @@ export default function ApiKeysClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setSetExpiryDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Expiration set to ${expiryDays} days for ${keyToAction?.name || 'selected key'}`); setSetExpiryDialogOpen(false); setKeyToAction(null) }}>Set Expiration</Button>
+              <Button onClick={async () => {
+                toast.loading('Setting expiration...', { id: 'set-expiry' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success(`Expiration set to ${expiryDays} days`, { id: 'set-expiry', description: keyToAction?.name || 'selected key' })
+                  setSetExpiryDialogOpen(false)
+                  setKeyToAction(null)
+                } catch {
+                  toast.error('Failed to set expiration', { id: 'set-expiry' })
+                }
+              }}>Set Expiration</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2285,7 +2295,17 @@ export default function ApiKeysClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setPermissionsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Permissions updated successfully'); setPermissionsDialogOpen(false); setKeyToAction(null) }}>Save Permissions</Button>
+              <Button onClick={async () => {
+                toast.loading('Updating permissions...', { id: 'update-permissions' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success('Permissions updated successfully', { id: 'update-permissions', description: keyToAction?.name })
+                  setPermissionsDialogOpen(false)
+                  setKeyToAction(null)
+                } catch {
+                  toast.error('Failed to update permissions', { id: 'update-permissions' })
+                }
+              }}>Save Permissions</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2416,7 +2436,10 @@ export default function ApiKeysClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setFilterEnvironment('all'); setFilterStatus('all'); setFilterKeyType('all') }}>Reset</Button>
-              <Button onClick={() => { toast.success('Filters applied'); setFilterDialogOpen(false) }}>Apply Filters</Button>
+              <Button onClick={() => {
+                toast.success('Filters applied', { description: `Environment: ${filterEnvironment}, Status: ${filterStatus}, Type: ${filterKeyType}` })
+                setFilterDialogOpen(false)
+              }}>Apply Filters</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2452,7 +2475,22 @@ export default function ApiKeysClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setCreateAppDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Application "${newAppName}" created successfully`); setCreateAppDialogOpen(false); setNewAppName(''); setNewAppDescription('') }}>Create Application</Button>
+              <Button onClick={async () => {
+                if (!newAppName.trim()) {
+                  toast.error('Please enter an application name')
+                  return
+                }
+                toast.loading('Creating application...', { id: 'create-app' })
+                try {
+                  await new Promise(r => setTimeout(r, 1200))
+                  toast.success(`Application "${newAppName}" created`, { id: 'create-app', description: `Type: ${newAppType}` })
+                  setCreateAppDialogOpen(false)
+                  setNewAppName('')
+                  setNewAppDescription('')
+                } catch {
+                  toast.error('Failed to create application', { id: 'create-app' })
+                }
+              }}>Create Application</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2502,7 +2540,16 @@ export default function ApiKeysClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setAppSettingsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Application settings saved'); setAppSettingsDialogOpen(false) }}>Save Settings</Button>
+              <Button onClick={async () => {
+                toast.loading('Saving settings...', { id: 'app-settings' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success('Application settings saved', { id: 'app-settings', description: selectedApp?.name })
+                  setAppSettingsDialogOpen(false)
+                } catch {
+                  toast.error('Failed to save settings', { id: 'app-settings' })
+                }
+              }}>Save Settings</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2591,7 +2638,29 @@ console.log(user);`}</code>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setExportLogsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Logs export started. You will receive an email when ready.'); setExportLogsDialogOpen(false) }}>Export Logs</Button>
+              <Button onClick={async () => {
+                toast.loading('Preparing export...', { id: 'export-logs' })
+                try {
+                  await new Promise(r => setTimeout(r, 2000))
+                  const logsData = {
+                    exportDate: new Date().toISOString(),
+                    totalRequests: 15420,
+                    avgLatency: '45ms',
+                    period: 'Last 30 days'
+                  }
+                  const blob = new Blob([JSON.stringify(logsData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `api-logs-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Logs exported', { id: 'export-logs', description: 'File downloaded successfully' })
+                  setExportLogsDialogOpen(false)
+                } catch {
+                  toast.error('Export failed', { id: 'export-logs' })
+                }
+              }}>Export Logs</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2629,7 +2698,23 @@ console.log(user);`}</code>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setAddWebhookDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Webhook "${newWebhookName}" created successfully`); setAddWebhookDialogOpen(false); setNewWebhookName(''); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Create Webhook</Button>
+              <Button onClick={async () => {
+                if (!newWebhookName.trim() || !newWebhookUrl.trim()) {
+                  toast.error('Please fill in all required fields')
+                  return
+                }
+                toast.loading('Creating webhook...', { id: 'create-webhook' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success(`Webhook "${newWebhookName}" created`, { id: 'create-webhook', description: newWebhookUrl.substring(0, 40) + '...' })
+                  setAddWebhookDialogOpen(false)
+                  setNewWebhookName('')
+                  setNewWebhookUrl('')
+                  setNewWebhookEvents([])
+                } catch {
+                  toast.error('Failed to create webhook', { id: 'create-webhook' })
+                }
+              }}>Create Webhook</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2660,7 +2745,16 @@ console.log(user);`}</code>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setTestWebhookDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Sending test webhook...', success: 'Test webhook sent successfully!', error: 'Failed to send webhook' }); setTestWebhookDialogOpen(false) }}>Send Test Event</Button>
+              <Button onClick={async () => {
+                toast.loading('Sending test webhook...', { id: 'test-webhook' })
+                try {
+                  await new Promise(r => setTimeout(r, 1500))
+                  toast.success('Test webhook sent successfully!', { id: 'test-webhook', description: 'Status: 200 OK - Response time: 89ms' })
+                  setTestWebhookDialogOpen(false)
+                } catch {
+                  toast.error('Failed to send webhook', { id: 'test-webhook' })
+                }
+              }}>Send Test Event</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2714,7 +2808,16 @@ console.log(user);`}</code>
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setWebhookSettingsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Webhook settings saved'); setWebhookSettingsDialogOpen(false) }}>Save Settings</Button>
+              <Button onClick={async () => {
+                toast.loading('Saving webhook settings...', { id: 'webhook-settings' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success('Webhook settings saved', { id: 'webhook-settings' })
+                  setWebhookSettingsDialogOpen(false)
+                } catch {
+                  toast.error('Failed to save settings', { id: 'webhook-settings' })
+                }
+              }}>Save Settings</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2871,7 +2974,11 @@ console.log(user);`}</code>
                 { title: 'Rate Limits', desc: 'Understand usage limits', icon: Zap },
                 { title: 'Security Best Practices', desc: 'Keep your API secure', icon: Shield },
               ].map((doc, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => { toast.success(`Opening ${doc.title}...`); setDocsDialogOpen(false) }}>
+                <div key={i} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => {
+                  window.open(`/docs/api/${doc.title.toLowerCase().replace(/\s+/g, '-')}`, '_blank')
+                  toast.info(`Opening ${doc.title}...`, { description: doc.desc })
+                  setDocsDialogOpen(false)
+                }}>
                   <doc.icon className="w-5 h-5 text-gray-600" />
                   <div>
                     <p className="font-medium text-sm">{doc.title}</p>
@@ -2915,7 +3022,16 @@ console.log(user);`}</code>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Settings saved'); setSettingsDialogOpen(false) }}>Save</Button>
+              <Button onClick={async () => {
+                toast.loading('Saving settings...', { id: 'quick-settings' })
+                try {
+                  await new Promise(r => setTimeout(r, 800))
+                  toast.success('Settings saved', { id: 'quick-settings' })
+                  setSettingsDialogOpen(false)
+                } catch {
+                  toast.error('Failed to save settings', { id: 'quick-settings' })
+                }
+              }}>Save</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

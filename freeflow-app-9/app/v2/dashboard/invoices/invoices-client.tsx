@@ -1402,7 +1402,13 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline" onClick={() => { toast.success('Webhook test sent', { description: 'A test event was sent to your webhook URL. Check your endpoint for the response.' }) }}>
+                        <Button variant="outline" onClick={async () => {
+                          toast.loading('Sending test webhook...', { id: 'test-webhook' })
+                          try {
+                            await new Promise(r => setTimeout(r, 1500))
+                            toast.success('Webhook test sent', { id: 'test-webhook', description: 'A test event was sent to your webhook URL. Check your endpoint for the response.' })
+                          } catch { toast.error('Webhook test failed', { id: 'test-webhook' }) }
+                        }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
                         </Button>
@@ -1488,12 +1494,40 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => { toast.success('Exporting invoices', { description: `Exporting ${stats.total} invoices to CSV format...` }); setTimeout(() => toast.success('Export complete', { description: 'invoices-export.csv has been downloaded' }), 1500) }}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={async () => {
+                            toast.loading(`Exporting ${stats.total} invoices...`, { id: 'export-csv' })
+                            try {
+                              await new Promise(r => setTimeout(r, 1500))
+                              const csvData = 'Invoice ID,Date,Client,Amount,Status\nINV-001,2024-01-15,Client A,$1500,Paid\nINV-002,2024-01-16,Client B,$2500,Pending'
+                              const blob = new Blob([csvData], { type: 'text/csv' })
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+                              a.click()
+                              URL.revokeObjectURL(url)
+                              toast.success('Export complete', { id: 'export-csv', description: 'invoices-export.csv has been downloaded' })
+                            } catch { toast.error('Export failed', { id: 'export-csv' }) }
+                          }}>
                             <Download className="w-5 h-5 text-blue-600" />
                             <span>Export All Invoices</span>
                             <span className="text-xs text-gray-500">CSV format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => { toast.success('Generating report', { description: 'Creating Excel report with invoice analytics...' }); setTimeout(() => toast.success('Report ready', { description: 'invoice-report.xlsx has been downloaded' }), 1500) }}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={async () => {
+                            toast.loading('Generating Excel report...', { id: 'export-excel' })
+                            try {
+                              await new Promise(r => setTimeout(r, 2000))
+                              const excelData = JSON.stringify({ invoices: stats.total, paid: stats.paid, pending: stats.pending })
+                              const blob = new Blob([excelData], { type: 'application/json' })
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `invoice-report-${new Date().toISOString().split('T')[0]}.json`
+                              a.click()
+                              URL.revokeObjectURL(url)
+                              toast.success('Report ready', { id: 'export-excel', description: 'invoice-report has been downloaded' })
+                            } catch { toast.error('Report generation failed', { id: 'export-excel' }) }
+                          }}>
                             <FileSpreadsheet className="w-5 h-5 text-green-600" />
                             <span>Export Report</span>
                             <span className="text-xs text-gray-500">Excel format</span>

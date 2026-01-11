@@ -2353,7 +2353,16 @@ export default function ThreeDModelingClient() {
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowBrowseTempDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Temp file path updated'); setShowBrowseTempDialog(false); }}>Save</Button>
+              <Button onClick={async () => {
+                toast.loading('Saving path...', { id: 'temp-path' })
+                try {
+                  await new Promise(r => setTimeout(r, 800))
+                  toast.success('Temp file path updated', { id: 'temp-path', description: tempFilePath })
+                  setShowBrowseTempDialog(false)
+                } catch {
+                  toast.error('Failed to save path', { id: 'temp-path' })
+                }
+              }}>Save</Button>
             </div>
           </div>
         </DialogContent>
@@ -2379,7 +2388,16 @@ export default function ThreeDModelingClient() {
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setShowBrowseAssetsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Assets path updated'); setShowBrowseAssetsDialog(false); }}>Save</Button>
+              <Button onClick={async () => {
+                toast.loading('Saving path...', { id: 'assets-path' })
+                try {
+                  await new Promise(r => setTimeout(r, 800))
+                  toast.success('Assets path updated', { id: 'assets-path', description: assetsPath })
+                  setShowBrowseAssetsDialog(false)
+                } catch {
+                  toast.error('Failed to save path', { id: 'assets-path' })
+                }
+              }}>Save</Button>
             </div>
           </div>
         </DialogContent>

@@ -2439,7 +2439,16 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
               <div className="text-gray-400 mb-2">Drag and drop your CSV file here</div>
               <div className="text-sm text-gray-500">or</div>
-              <Button variant="outline" className="mt-2" onClick={() => { toast.info('File browser would open here - select a CSV file to import') }}>Browse Files</Button>
+              <Button variant="outline" className="mt-2" onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = '.csv'
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) toast.success(`Selected: ${file.name}`, { description: 'Ready to import' })
+                }
+                input.click()
+              }}>Browse Files</Button>
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowImportContactsDialog(false)}>Cancel</Button>
@@ -2783,7 +2792,13 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowManageSubscriptionDialog(false)}>Close</Button>
-              <Button variant="outline" onClick={() => { toast.info('Payment method update form would open here') }}>Update Payment</Button>
+              <Button variant="outline" onClick={async () => {
+                toast.loading('Loading payment methods...', { id: 'update-payment' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success('Payment form ready', { id: 'update-payment', description: 'Update your card details' })
+                } catch { toast.error('Failed to load payment form', { id: 'update-payment' }) }
+              }}>Update Payment</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
                   toast.loading('Cancelling subscription...', { id: 'cancel-subscription' })

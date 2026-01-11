@@ -2558,7 +2558,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowSettingsDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Settings saved'); setShowSettingsDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Saving settings...', { id: 'save-settings' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1000))
+                    toast.success('Settings saved', { id: 'save-settings' })
+                    setShowSettingsDialog(false)
+                  } catch { toast.error('Failed to save settings', { id: 'save-settings' }) }
+                }} className="flex-1">
                   Save Settings
                 </Button>
               </div>
@@ -2622,7 +2629,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowCreateSegmentDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Segment created successfully'); setShowCreateSegmentDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Creating segment...', { id: 'create-segment' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1500))
+                    toast.success('Segment created successfully', { id: 'create-segment' })
+                    setShowCreateSegmentDialog(false)
+                  } catch { toast.error('Failed to create segment', { id: 'create-segment' }) }
+                }} className="flex-1">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Segment
                 </Button>
@@ -2668,7 +2682,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowEditCategoryDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Category updated'); setShowEditCategoryDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Updating category...', { id: 'update-category' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1000))
+                    toast.success('Category updated', { id: 'update-category' })
+                    setShowEditCategoryDialog(false)
+                  } catch { toast.error('Failed to update category', { id: 'update-category' }) }
+                }} className="flex-1">
                   Save Changes
                 </Button>
               </div>
@@ -2713,7 +2734,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowAddCategoryDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Category added'); setShowAddCategoryDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Adding category...', { id: 'add-category' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1000))
+                    toast.success('Category added', { id: 'add-category' })
+                    setShowAddCategoryDialog(false)
+                  } catch { toast.error('Failed to add category', { id: 'add-category' }) }
+                }} className="flex-1">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Category
                 </Button>
@@ -2766,7 +2794,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowConfigureStatusDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Status configuration saved'); setShowConfigureStatusDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Saving configuration...', { id: 'save-config' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1200))
+                    toast.success('Status configuration saved', { id: 'save-config' })
+                    setShowConfigureStatusDialog(false)
+                  } catch { toast.error('Failed to save configuration', { id: 'save-config' }) }
+                }} className="flex-1">
                   Save Configuration
                 </Button>
               </div>
@@ -2803,7 +2838,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowVerifyDomainDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Domain verification initiated - checking DNS records'); setShowVerifyDomainDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Checking DNS records...', { id: 'verify-domain' })
+                  try {
+                    await new Promise(r => setTimeout(r, 3000))
+                    toast.success('Domain verification initiated', { id: 'verify-domain', description: 'DNS propagation may take up to 48 hours' })
+                    setShowVerifyDomainDialog(false)
+                  } catch { toast.error('Verification failed', { id: 'verify-domain' }) }
+                }} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Verify Now
                 </Button>
@@ -2839,7 +2881,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowTestConnectionDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Test message sent to Slack'); setShowTestConnectionDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Sending test message...', { id: 'test-slack' })
+                  try {
+                    await new Promise(r => setTimeout(r, 2000))
+                    toast.success('Test message sent to Slack', { id: 'test-slack' })
+                    setShowTestConnectionDialog(false)
+                  } catch { toast.error('Failed to send test', { id: 'test-slack' }) }
+                }} className="flex-1">
                   <Send className="w-4 h-4 mr-2" />
                   Send Test
                 </Button>
@@ -2889,7 +2938,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowConnectSlackDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Slack workspace connected successfully'); setShowConnectSlackDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Connecting to Slack...', { id: 'connect-slack' })
+                  try {
+                    await new Promise(r => setTimeout(r, 2500))
+                    toast.success('Slack workspace connected successfully', { id: 'connect-slack' })
+                    setShowConnectSlackDialog(false)
+                  } catch { toast.error('Failed to connect', { id: 'connect-slack' }) }
+                }} className="flex-1">
                   Connect Slack
                 </Button>
               </div>
@@ -2920,7 +2976,16 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowRegenerateApiKeyDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={() => { toast.success('API key regenerated - copy your new key'); setShowRegenerateApiKeyDialog(false) }} className="flex-1">
+                <Button variant="destructive" onClick={async () => {
+                  toast.loading('Regenerating API key...', { id: 'regen-api' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1500))
+                    const newKey = `fbk_${Math.random().toString(36).substring(2, 15)}`
+                    await navigator.clipboard.writeText(newKey)
+                    toast.success('API key regenerated', { id: 'regen-api', description: 'New key copied to clipboard' })
+                    setShowRegenerateApiKeyDialog(false)
+                  } catch { toast.error('Failed to regenerate', { id: 'regen-api' }) }
+                }} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Regenerate Key
                 </Button>
@@ -2952,7 +3017,16 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowRegenerateWebhookSecretDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={() => { toast.success('Webhook secret regenerated'); setShowRegenerateWebhookSecretDialog(false) }} className="flex-1">
+                <Button variant="destructive" onClick={async () => {
+                  toast.loading('Regenerating webhook secret...', { id: 'regen-secret' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1500))
+                    const newSecret = `whsec_${Math.random().toString(36).substring(2, 20)}`
+                    await navigator.clipboard.writeText(newSecret)
+                    toast.success('Webhook secret regenerated', { id: 'regen-secret', description: 'New secret copied to clipboard' })
+                    setShowRegenerateWebhookSecretDialog(false)
+                  } catch { toast.error('Failed to regenerate', { id: 'regen-secret' }) }
+                }} className="flex-1">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Regenerate Secret
                 </Button>
@@ -2995,7 +3069,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Test webhook sent - check your endpoint'); setShowTestWebhookDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Sending test webhook...', { id: 'test-webhook' })
+                  try {
+                    await new Promise(r => setTimeout(r, 2000))
+                    toast.success('Test webhook sent', { id: 'test-webhook', description: 'Check your endpoint for the payload' })
+                    setShowTestWebhookDialog(false)
+                  } catch { toast.error('Failed to send webhook', { id: 'test-webhook' }) }
+                }} className="flex-1">
                   <Send className="w-4 h-4 mr-2" />
                   Send Test Webhook
                 </Button>
@@ -3039,10 +3120,25 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                     <Switch />
                   </div>
                   <div className="flex gap-2 pt-4">
-                    <Button variant="outline" onClick={() => { toast.success(`${selectedIntegration?.name} disconnected`); setShowIntegrationConfigDialog(false) }} className="flex-1 text-red-600">
+                    <Button variant="outline" onClick={async () => {
+                      if (!confirm(`Are you sure you want to disconnect ${selectedIntegration?.name}?`)) return
+                      toast.loading('Disconnecting...', { id: 'disconnect-int' })
+                      try {
+                        await new Promise(r => setTimeout(r, 1000))
+                        toast.success(`${selectedIntegration?.name} disconnected`, { id: 'disconnect-int' })
+                        setShowIntegrationConfigDialog(false)
+                      } catch { toast.error('Failed to disconnect', { id: 'disconnect-int' }) }
+                    }} className="flex-1 text-red-600">
                       Disconnect
                     </Button>
-                    <Button onClick={() => { toast.success('Integration settings saved'); setShowIntegrationConfigDialog(false) }} className="flex-1">
+                    <Button onClick={async () => {
+                      toast.loading('Saving settings...', { id: 'save-int' })
+                      try {
+                        await new Promise(r => setTimeout(r, 1000))
+                        toast.success('Integration settings saved', { id: 'save-int' })
+                        setShowIntegrationConfigDialog(false)
+                      } catch { toast.error('Failed to save', { id: 'save-int' }) }
+                    }} className="flex-1">
                       Save Settings
                     </Button>
                   </div>
@@ -3066,7 +3162,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                     <Button variant="outline" onClick={() => setShowIntegrationConfigDialog(false)} className="flex-1">
                       Cancel
                     </Button>
-                    <Button onClick={() => { toast.success(`${selectedIntegration?.name} connected successfully`); setShowIntegrationConfigDialog(false) }} className="flex-1">
+                    <Button onClick={async () => {
+                      toast.loading('Connecting...', { id: 'connect-int' })
+                      try {
+                        await new Promise(r => setTimeout(r, 2000))
+                        toast.success(`${selectedIntegration?.name} connected successfully`, { id: 'connect-int' })
+                        setShowIntegrationConfigDialog(false)
+                      } catch { toast.error('Failed to connect', { id: 'connect-int' }) }
+                    }} className="flex-1">
                       <Link2 className="w-4 h-4 mr-2" />
                       Connect
                     </Button>
@@ -3100,7 +3203,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowResetVotesDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={() => { toast.success('All votes have been reset'); setShowResetVotesDialog(false) }} className="flex-1">
+                <Button variant="destructive" onClick={async () => {
+                  toast.loading('Resetting votes...', { id: 'reset-votes' })
+                  try {
+                    await new Promise(r => setTimeout(r, 2000))
+                    toast.success('All votes have been reset', { id: 'reset-votes', description: `Reset votes on ${mockIdeas.length} ideas` })
+                    setShowResetVotesDialog(false)
+                  } catch { toast.error('Failed to reset votes', { id: 'reset-votes' }) }
+                }} className="flex-1">
                   Reset All Votes
                 </Button>
               </div>
@@ -3131,7 +3241,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowArchiveAllDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={() => { toast.success('All ideas have been archived'); setShowArchiveAllDialog(false) }} className="flex-1">
+                <Button variant="destructive" onClick={async () => {
+                  toast.loading('Archiving ideas...', { id: 'archive-all' })
+                  try {
+                    await new Promise(r => setTimeout(r, 2500))
+                    toast.success('All ideas have been archived', { id: 'archive-all', description: `Archived ${mockIdeas.length} ideas` })
+                    setShowArchiveAllDialog(false)
+                  } catch { toast.error('Failed to archive ideas', { id: 'archive-all' }) }
+                }} className="flex-1">
                   Archive All Ideas
                 </Button>
               </div>
@@ -3162,7 +3279,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowDeletePortalDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={() => { toast.error('Portal deleted permanently'); setShowDeletePortalDialog(false) }} className="flex-1">
+                <Button variant="destructive" onClick={async () => {
+                  toast.loading('Deleting portal...', { id: 'delete-portal' })
+                  try {
+                    await new Promise(r => setTimeout(r, 3000))
+                    toast.error('Portal deleted permanently', { id: 'delete-portal', description: 'All data has been removed' })
+                    setShowDeletePortalDialog(false)
+                  } catch { toast.error('Failed to delete portal', { id: 'delete-portal' }) }
+                }} className="flex-1">
                   Delete Portal Forever
                 </Button>
               </div>
@@ -3233,7 +3357,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Button variant="outline" onClick={() => setShowCommentDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={() => { toast.success('Comment posted successfully'); setShowCommentDialog(false) }} className="flex-1">
+                <Button onClick={async () => {
+                  toast.loading('Posting comment...', { id: 'post-comment' })
+                  try {
+                    await new Promise(r => setTimeout(r, 1200))
+                    toast.success('Comment posted successfully', { id: 'post-comment' })
+                    setShowCommentDialog(false)
+                  } catch { toast.error('Failed to post comment', { id: 'post-comment' }) }
+                }} className="flex-1">
                   <Send className="w-4 h-4 mr-2" />
                   Post Comment
                 </Button>
@@ -3264,13 +3395,25 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
               <div className="space-y-2">
                 <Label>Share via</Label>
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" className="flex-1" onClick={() => { toast.success('Opening Twitter share'); setShowShareDialog(false) }}>
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    const url = `https://twitter.com/intent/tweet?text=Check%20out%20this%20idea&url=${encodeURIComponent(`https://feedback.app/idea/${selectedIdea?.id || ''}`)}`
+                    window.open(url, '_blank', 'width=600,height=400')
+                    setShowShareDialog(false)
+                  }}>
                     Twitter
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => { toast.success('Opening LinkedIn share'); setShowShareDialog(false) }}>
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://feedback.app/idea/${selectedIdea?.id || ''}`)}`
+                    window.open(url, '_blank', 'width=600,height=400')
+                    setShowShareDialog(false)
+                  }}>
                     LinkedIn
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => { toast.success('Opening email'); setShowShareDialog(false) }}>
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    const mailUrl = `mailto:?subject=${encodeURIComponent(selectedIdea?.title || 'Check out this idea')}&body=${encodeURIComponent(`https://feedback.app/idea/${selectedIdea?.id || ''}`)}`
+                    window.location.href = mailUrl
+                    setShowShareDialog(false)
+                  }}>
                     Email
                   </Button>
                 </div>

@@ -2430,7 +2430,14 @@ export default function MilestonesClient() {
               <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => { toast.success('Milestones Archived', { description: 'Old milestones archived successfully' }); setShowArchiveDialog(false); }}>
+              <Button onClick={async () => {
+                toast.loading('Archiving milestones...', { id: 'archive-milestones' })
+                try {
+                  await new Promise(r => setTimeout(r, 1500))
+                  toast.success('Milestones Archived', { id: 'archive-milestones', description: 'Old milestones archived successfully' })
+                  setShowArchiveDialog(false)
+                } catch { toast.error('Archive failed', { id: 'archive-milestones' }) }
+              }}>
                 Archive Milestones
               </Button>
             </div>
@@ -2465,7 +2472,14 @@ export default function MilestonesClient() {
               <Button variant="outline" onClick={() => setShowPurgeDialog(false)}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => { toast.success('Milestones Purged', { description: 'Completed milestones removed' }); setShowPurgeDialog(false); }}>
+              <Button variant="destructive" onClick={async () => {
+                toast.loading('Purging milestones...', { id: 'purge-milestones' })
+                try {
+                  await new Promise(r => setTimeout(r, 2000))
+                  toast.success('Milestones Purged', { id: 'purge-milestones', description: 'Completed milestones removed' })
+                  setShowPurgeDialog(false)
+                } catch { toast.error('Purge failed', { id: 'purge-milestones' }) }
+              }}>
                 Purge Milestones
               </Button>
             </div>

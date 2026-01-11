@@ -1922,7 +1922,10 @@ export default function BugsClient() {
                               <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
                               <span className="font-medium">{label.name}</span>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => { toast.info('Label Editor', { description: 'Opening label editor for ' + label.name + '...' }) }}>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              window.open(`/dashboard/bugs-v2/labels/${label.id}`, '_blank')
+                              toast.info('Label Editor', { description: `Opening label editor for ${label.name}...` })
+                            }}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1978,7 +1981,12 @@ export default function BugsClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => { toast.info('Create Custom Status', { description: 'Opening status creation dialog...' }) }}>
+                      <Button variant="outline" className="w-full" onClick={() => {
+                        const statusName = prompt('Enter custom status name:')
+                        if (statusName) {
+                          toast.success('Custom status created', { description: statusName })
+                        }
+                      }}>
                         <Plus className="w-4 h-4 mr-2" />
                         Add Custom Status
                       </Button>

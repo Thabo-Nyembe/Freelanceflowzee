@@ -2971,7 +2971,18 @@ export default function ExtensionsClient() {
               <p className="text-sm text-muted-foreground mb-4">
                 Drag and drop your extension folder here, or click to browse
               </p>
-              <Button variant="outline" onClick={() => { toast.info('Opening file browser...') }}>Browse Files</Button>
+              <Button variant="outline" onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.webkitdirectory = true
+                input.onchange = (e) => {
+                  const files = (e.target as HTMLInputElement).files
+                  if (files && files.length > 0) {
+                    toast.success(`Selected folder with ${files.length} files`, { description: 'Ready to load extension' })
+                  }
+                }
+                input.click()
+              }}>Browse Files</Button>
             </div>
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">

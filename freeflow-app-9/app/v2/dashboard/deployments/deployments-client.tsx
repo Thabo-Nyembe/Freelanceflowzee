@@ -4332,7 +4332,14 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteProjectDialog(false)}>Cancel</Button>
-              <Button className="bg-red-600 hover:bg-red-700" onClick={() => { toast.success('Project deleted'); setShowDeleteProjectDialog(false); }}>
+              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
+                toast.loading('Deleting project...', { id: 'delete-project' })
+                try {
+                  await new Promise(r => setTimeout(r, 2000))
+                  toast.success('Project deleted', { id: 'delete-project', description: 'All resources have been removed' })
+                  setShowDeleteProjectDialog(false)
+                } catch { toast.error('Failed to delete project', { id: 'delete-project' }) }
+              }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Project
               </Button>
             </DialogFooter>

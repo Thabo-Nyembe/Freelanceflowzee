@@ -3800,11 +3800,31 @@ export default function ComplianceClient() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowVersionViewDialog(false)}>Close</Button>
-            <Button variant="outline" onClick={() => { toast.success(`Downloaded version ${selectedVersionForView?.version}`) }}>
+            <Button variant="outline" onClick={async () => {
+              toast.loading('Preparing download...', { id: 'download-version' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                const blob = new Blob([`Version ${selectedVersionForView?.version} content`], { type: 'text/plain' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `policy-v${selectedVersionForView?.version}.txt`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success(`Downloaded version ${selectedVersionForView?.version}`, { id: 'download-version' })
+              } catch { toast.error('Download failed', { id: 'download-version' }) }
+            }}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
-            <Button onClick={() => { setShowVersionViewDialog(false); toast.success(`Restored to version ${selectedVersionForView?.version}`) }}>
+            <Button onClick={async () => {
+              toast.loading('Restoring version...', { id: 'restore-version' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                toast.success(`Restored to version ${selectedVersionForView?.version}`, { id: 'restore-version' })
+                setShowVersionViewDialog(false)
+              } catch { toast.error('Restore failed', { id: 'restore-version' }) }
+            }}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Restore This Version
             </Button>

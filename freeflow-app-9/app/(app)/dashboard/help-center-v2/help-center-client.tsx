@@ -2983,7 +2983,16 @@ export default function HelpCenterClient() {
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => setShowTranslateDialog(false)}>Close</Button>
-            <Button onClick={() => { toast.success('Translation queue initiated'); setShowTranslateDialog(false); }}>
+            <Button onClick={async () => {
+              toast.loading('Initiating translation queue...', { id: 'translate-queue' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                toast.success('Translation queue initiated', { id: 'translate-queue', description: 'Articles will be translated within 24 hours' })
+                setShowTranslateDialog(false)
+              } catch {
+                toast.error('Failed to start translation', { id: 'translate-queue' })
+              }
+            }}>
               <Languages className="w-4 h-4 mr-2" />
               Start Translation
             </Button>
@@ -3017,7 +3026,16 @@ export default function HelpCenterClient() {
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => setShowSubcategoryDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Subcategory created'); setShowSubcategoryDialog(false); }}>
+            <Button onClick={async () => {
+              toast.loading('Creating subcategory...', { id: 'create-subcategory' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success('Subcategory created', { id: 'create-subcategory' })
+                setShowSubcategoryDialog(false)
+              } catch {
+                toast.error('Failed to create subcategory', { id: 'create-subcategory' })
+              }
+            }}>
               <Plus className="w-4 h-4 mr-2" />
               Create Subcategory
             </Button>
@@ -3056,7 +3074,16 @@ export default function HelpCenterClient() {
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => setShowOrganizeDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Order saved'); setShowOrganizeDialog(false); }}>
+            <Button onClick={async () => {
+              toast.loading('Saving order...', { id: 'save-order' })
+              try {
+                await new Promise(r => setTimeout(r, 800))
+                toast.success('Order saved', { id: 'save-order' })
+                setShowOrganizeDialog(false)
+              } catch {
+                toast.error('Failed to save order', { id: 'save-order' })
+              }
+            }}>
               Save Order
             </Button>
           </div>

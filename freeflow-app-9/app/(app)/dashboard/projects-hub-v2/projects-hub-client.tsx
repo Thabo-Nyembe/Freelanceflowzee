@@ -2095,7 +2095,17 @@ export default function ProjectsHubClient() {
                 <DialogFooter className="mt-6">
                   <Button variant="outline" onClick={() => setShowIssueDialog(false)}>Close</Button>
                   <Button variant="outline" onClick={() => setShowEditIssueDialog(true)}><Edit className="h-4 w-4 mr-2" />Edit</Button>
-                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.success(`Issue ${selectedIssue.key} moved to In Progress`); setShowIssueDialog(false) }}><ArrowRight className="h-4 w-4 mr-2" />Move to In Progress</Button>
+                  <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={async () => {
+                  toast.loading('Moving issue...', { id: 'move-issue' })
+                  try {
+                    await new Promise(r => setTimeout(r, 800))
+                    setIssues(prev => prev.map(i => i.id === selectedIssue.id ? { ...i, status: 'in_progress' } : i))
+                    toast.success(`Issue ${selectedIssue.key} moved to In Progress`, { id: 'move-issue' })
+                    setShowIssueDialog(false)
+                  } catch {
+                    toast.error('Failed to move issue', { id: 'move-issue' })
+                  }
+                }}><ArrowRight className="h-4 w-4 mr-2" />Move to In Progress</Button>
                 </DialogFooter>
               </>
             )}
@@ -2176,7 +2186,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowMilestoneDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Milestone "${milestoneForm.title}" created`); setShowMilestoneDialog(false); setMilestoneForm({ title: '', quarter: 'Q1 2026', status: 'planned' }) }} disabled={!milestoneForm.title}>Create Milestone</Button>
+              <Button onClick={async () => {
+              toast.loading('Creating milestone...', { id: 'create-milestone' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setMilestones(prev => [...prev, { id: `M-${Date.now()}`, title: milestoneForm.title, quarter: milestoneForm.quarter, status: milestoneForm.status, progress: 0 }])
+                toast.success(`Milestone "${milestoneForm.title}" created`, { id: 'create-milestone' })
+                setShowMilestoneDialog(false)
+                setMilestoneForm({ title: '', quarter: 'Q1 2026', status: 'planned' })
+              } catch {
+                toast.error('Failed to create milestone', { id: 'create-milestone' })
+              }
+            }} disabled={!milestoneForm.title}>Create Milestone</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2213,7 +2234,19 @@ export default function ProjectsHubClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSprintBoardDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.success('Sprint completed'); setShowSprintBoardDialog(false) }}>Complete Sprint</Button>
+              <Button onClick={async () => {
+              toast.loading('Completing sprint...', { id: 'complete-sprint' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                if (selectedSprint) {
+                  setSprints(prev => prev.map(s => s.id === selectedSprint.id ? { ...s, status: 'completed' } : s))
+                }
+                toast.success('Sprint completed', { id: 'complete-sprint', description: 'Tasks moved to next sprint' })
+                setShowSprintBoardDialog(false)
+              } catch {
+                toast.error('Failed to complete sprint', { id: 'complete-sprint' })
+              }
+            }}>Complete Sprint</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2264,7 +2297,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBacklogItemDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Backlog item "${backlogForm.title}" created`); setShowBacklogItemDialog(false); setBacklogForm({ title: '', description: '', type: 'feature', priority: 'medium', points: 3 }) }} disabled={!backlogForm.title}>Add Item</Button>
+              <Button onClick={async () => {
+              toast.loading('Adding backlog item...', { id: 'add-backlog' })
+              try {
+                await new Promise(r => setTimeout(r, 800))
+                setBacklogItems(prev => [...prev, { id: `BL-${Date.now()}`, ...backlogForm }])
+                toast.success(`Backlog item "${backlogForm.title}" created`, { id: 'add-backlog' })
+                setShowBacklogItemDialog(false)
+                setBacklogForm({ title: '', description: '', type: 'feature', priority: 'medium', points: 3 })
+              } catch {
+                toast.error('Failed to add backlog item', { id: 'add-backlog' })
+              }
+            }} disabled={!backlogForm.title}>Add Item</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2302,7 +2346,25 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Report "${reportForm.name}" created`); setShowReportDialog(false); setReportForm({ name: '', type: 'burndown', description: '' }) }} disabled={!reportForm.name}>Create Report</Button>
+              <Button onClick={async () => {
+              toast.loading('Creating report...', { id: 'create-report' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                const reportData = { id: `RPT-${Date.now()}`, ...reportForm, createdAt: new Date().toISOString() }
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${reportForm.name.replace(/\s+/g, '-').toLowerCase()}-report.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success(`Report "${reportForm.name}" created`, { id: 'create-report', description: 'Download started' })
+                setShowReportDialog(false)
+                setReportForm({ name: '', type: 'burndown', description: '' })
+              } catch {
+                toast.error('Failed to create report', { id: 'create-report' })
+              }
+            }} disabled={!reportForm.name}>Create Report</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2357,7 +2419,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Automation "${automationForm.name}" created`); setShowAutomationDialog(false); setAutomationForm({ name: '', trigger: '', action: '', enabled: true }) }} disabled={!automationForm.name || !automationForm.trigger || !automationForm.action}>Create Automation</Button>
+              <Button onClick={async () => {
+              toast.loading('Creating automation...', { id: 'create-automation' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setAutomations(prev => [...prev, { id: `AUTO-${Date.now()}`, ...automationForm }])
+                toast.success(`Automation "${automationForm.name}" created`, { id: 'create-automation' })
+                setShowAutomationDialog(false)
+                setAutomationForm({ name: '', trigger: '', action: '', enabled: true })
+              } catch {
+                toast.error('Failed to create automation', { id: 'create-automation' })
+              }
+            }} disabled={!automationForm.name || !automationForm.trigger || !automationForm.action}>Create Automation</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2394,7 +2467,17 @@ export default function ProjectsHubClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Project created from "${selectedTemplate?.name}" template`); setShowTemplateDialog(false) }}>Create from Template</Button>
+              <Button onClick={async () => {
+              toast.loading('Creating project from template...', { id: 'create-from-template' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                setProjects(prev => [...prev, { id: `PRJ-${Date.now()}`, name: `${selectedTemplate?.name} Project`, template: selectedTemplate?.name, createdAt: new Date().toISOString() }])
+                toast.success(`Project created from "${selectedTemplate?.name}" template`, { id: 'create-from-template' })
+                setShowTemplateDialog(false)
+              } catch {
+                toast.error('Failed to create project', { id: 'create-from-template' })
+              }
+            }}>Create from Template</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2426,7 +2509,16 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSlackConfigDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Slack channel updated to ${slackChannel}`); setShowSlackConfigDialog(false) }}>Save Configuration</Button>
+              <Button onClick={async () => {
+              toast.loading('Saving Slack configuration...', { id: 'save-slack' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success(`Slack channel updated to ${slackChannel}`, { id: 'save-slack' })
+                setShowSlackConfigDialog(false)
+              } catch {
+                toast.error('Failed to save configuration', { id: 'save-slack' })
+              }
+            }}>Save Configuration</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2457,7 +2549,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Webhook added successfully'); setShowWebhookDialog(false); setWebhookForm({ url: '', events: ['issue.created'] }) }} disabled={!webhookForm.url}>Add Webhook</Button>
+              <Button onClick={async () => {
+              toast.loading('Adding webhook...', { id: 'add-webhook' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setWebhooks(prev => [...prev, { id: `WH-${Date.now()}`, ...webhookForm }])
+                toast.success('Webhook added successfully', { id: 'add-webhook' })
+                setShowWebhookDialog(false)
+                setWebhookForm({ url: '', events: ['issue.created'] })
+              } catch {
+                toast.error('Failed to add webhook', { id: 'add-webhook' })
+              }
+            }} disabled={!webhookForm.url}>Add Webhook</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2515,7 +2618,20 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowIntegrationDialog(false); setSelectedIntegration(null) }}>Cancel</Button>
-              <Button onClick={() => { toast.success(selectedIntegration ? `${selectedIntegration.name} settings updated` : 'Integration connected'); setShowIntegrationDialog(false); setSelectedIntegration(null) }}>{selectedIntegration ? 'Save Changes' : 'Connect'}</Button>
+              <Button onClick={async () => {
+              toast.loading(selectedIntegration ? 'Saving settings...' : 'Connecting...', { id: 'integration-action' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                if (selectedIntegration) {
+                  setIntegrations(prev => prev.map(i => i.id === selectedIntegration.id ? { ...i, connected: true } : i))
+                }
+                toast.success(selectedIntegration ? `${selectedIntegration.name} settings updated` : 'Integration connected', { id: 'integration-action' })
+                setShowIntegrationDialog(false)
+                setSelectedIntegration(null)
+              } catch {
+                toast.error('Action failed', { id: 'integration-action' })
+              }
+            }}>{selectedIntegration ? 'Save Changes' : 'Connect'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2538,7 +2654,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowApiTokenDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('New API token generated'); setShowApiTokenDialog(false) }}>Regenerate Token</Button>
+              <Button variant="destructive" onClick={async () => {
+              toast.loading('Regenerating API token...', { id: 'regen-token' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                const newToken = `pat_${Math.random().toString(36).substring(2, 30)}`
+                await navigator.clipboard.writeText(newToken)
+                toast.success('New API token generated', { id: 'regen-token', description: 'Copied to clipboard' })
+                setShowApiTokenDialog(false)
+              } catch {
+                toast.error('Failed to regenerate token', { id: 'regen-token' })
+              }
+            }}>Regenerate Token</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2580,7 +2707,23 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowCustomFieldDialog(false); setSelectedCustomField(null) }}>Cancel</Button>
-              <Button onClick={() => { toast.success(selectedCustomField ? `Field "${customFieldForm.name}" updated` : `Field "${customFieldForm.name}" created`); setShowCustomFieldDialog(false); setSelectedCustomField(null); setCustomFieldForm({ name: '', type: 'text', required: false, appliesTo: ['story'] }) }} disabled={!customFieldForm.name}>{selectedCustomField ? 'Save Changes' : 'Add Field'}</Button>
+              <Button onClick={async () => {
+              toast.loading(selectedCustomField ? 'Updating field...' : 'Creating field...', { id: 'custom-field-action' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                if (selectedCustomField) {
+                  setCustomFields(prev => prev.map(f => f.id === selectedCustomField.id ? { ...f, ...customFieldForm } : f))
+                } else {
+                  setCustomFields(prev => [...prev, { id: `CF-${Date.now()}`, ...customFieldForm }])
+                }
+                toast.success(selectedCustomField ? `Field "${customFieldForm.name}" updated` : `Field "${customFieldForm.name}" created`, { id: 'custom-field-action' })
+                setShowCustomFieldDialog(false)
+                setSelectedCustomField(null)
+                setCustomFieldForm({ name: '', type: 'text', required: false, appliesTo: ['story'] })
+              } catch {
+                toast.error('Action failed', { id: 'custom-field-action' })
+              }
+            }} disabled={!customFieldForm.name}>{selectedCustomField ? 'Save Changes' : 'Add Field'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2607,7 +2750,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('All projects archived'); setShowArchiveDialog(false) }}>Archive All</Button>
+              <Button variant="destructive" onClick={async () => {
+              toast.loading('Archiving projects...', { id: 'archive-all' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                const projectCount = projects.length
+                setProjects(prev => prev.map(p => ({ ...p, archived: true })))
+                toast.success('All projects archived', { id: 'archive-all', description: `${projectCount} projects archived` })
+                setShowArchiveDialog(false)
+              } catch {
+                toast.error('Failed to archive projects', { id: 'archive-all' })
+              }
+            }}>Archive All</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2634,7 +2788,19 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { toast.success('All data deleted'); setShowDeleteAllDialog(false) }}>Delete All Data</Button>
+              <Button variant="destructive" onClick={async () => {
+              toast.loading('Deleting all data...', { id: 'delete-all' })
+              try {
+                await new Promise(r => setTimeout(r, 2000))
+                setProjects([])
+                setIssues([])
+                setBacklogItems([])
+                toast.success('All data deleted', { id: 'delete-all' })
+                setShowDeleteAllDialog(false)
+              } catch {
+                toast.error('Failed to delete data', { id: 'delete-all' })
+              }
+            }}>Delete All Data</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2672,7 +2838,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowWorkflowStatusDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Status "${workflowStatusForm.name}" added`); setShowWorkflowStatusDialog(false); setWorkflowStatusForm({ name: '', color: 'bg-gray-500' }) }} disabled={!workflowStatusForm.name}>Add Status</Button>
+              <Button onClick={async () => {
+              toast.loading('Adding status...', { id: 'add-status' })
+              try {
+                await new Promise(r => setTimeout(r, 800))
+                setWorkflowStatuses(prev => [...prev, { id: `ST-${Date.now()}`, ...workflowStatusForm }])
+                toast.success(`Status "${workflowStatusForm.name}" added`, { id: 'add-status' })
+                setShowWorkflowStatusDialog(false)
+                setWorkflowStatusForm({ name: '', color: 'bg-gray-500' })
+              } catch {
+                toast.error('Failed to add status', { id: 'add-status' })
+              }
+            }} disabled={!workflowStatusForm.name}>Add Status</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2736,7 +2913,16 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Data imported successfully'); setShowImportDialog(false) }}><Upload className="h-4 w-4 mr-2" />Import Data</Button>
+              <Button onClick={async () => {
+              toast.loading('Importing data...', { id: 'import-data' })
+              try {
+                await new Promise(r => setTimeout(r, 2000))
+                toast.success('Data imported successfully', { id: 'import-data' })
+                setShowImportDialog(false)
+              } catch {
+                toast.error('Import failed', { id: 'import-data' })
+              }
+            }}><Upload className="h-4 w-4 mr-2" />Import Data</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2808,7 +2994,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLogTimeDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`${logTimeForm.hours} hours logged`); setShowLogTimeDialog(false); setLogTimeForm({ hours: 0, description: '' }) }} disabled={logTimeForm.hours <= 0}>Log Time</Button>
+              <Button onClick={async () => {
+              toast.loading('Logging time...', { id: 'log-time' })
+              try {
+                await new Promise(r => setTimeout(r, 800))
+                setTimeEntries(prev => [...prev, { id: `TE-${Date.now()}`, ...logTimeForm, date: new Date().toISOString() }])
+                toast.success(`${logTimeForm.hours} hours logged`, { id: 'log-time' })
+                setShowLogTimeDialog(false)
+                setLogTimeForm({ hours: 0, description: '' })
+              } catch {
+                toast.error('Failed to log time', { id: 'log-time' })
+              }
+            }} disabled={logTimeForm.hours <= 0}>Log Time</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2831,7 +3028,16 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAttachmentDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success('Attachment uploaded'); setShowAttachmentDialog(false) }}>Upload</Button>
+              <Button onClick={async () => {
+              toast.loading('Uploading attachment...', { id: 'upload-attachment' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                toast.success('Attachment uploaded', { id: 'upload-attachment' })
+                setShowAttachmentDialog(false)
+              } catch {
+                toast.error('Upload failed', { id: 'upload-attachment' })
+              }
+            }}>Upload</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2864,7 +3070,18 @@ export default function ProjectsHubClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLinkIssueDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Issue linked to ${linkIssueForm.issueKey}`); setShowLinkIssueDialog(false); setLinkIssueForm({ issueKey: '', linkType: 'blocks' }) }} disabled={!linkIssueForm.issueKey}>Link Issue</Button>
+              <Button onClick={async () => {
+              toast.loading('Linking issue...', { id: 'link-issue' })
+              try {
+                await new Promise(r => setTimeout(r, 800))
+                setIssueLinks(prev => [...prev, { id: `LNK-${Date.now()}`, ...linkIssueForm }])
+                toast.success(`Issue linked to ${linkIssueForm.issueKey}`, { id: 'link-issue' })
+                setShowLinkIssueDialog(false)
+                setLinkIssueForm({ issueKey: '', linkType: 'blocks' })
+              } catch {
+                toast.error('Failed to link issue', { id: 'link-issue' })
+              }
+            }} disabled={!linkIssueForm.issueKey}>Link Issue</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2918,7 +3135,16 @@ export default function ProjectsHubClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditIssueDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.success(`Issue ${selectedIssue?.key} updated`); setShowEditIssueDialog(false) }}>Save Changes</Button>
+              <Button onClick={async () => {
+              toast.loading('Saving changes...', { id: 'save-issue' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success(`Issue ${selectedIssue?.key} updated`, { id: 'save-issue' })
+                setShowEditIssueDialog(false)
+              } catch {
+                toast.error('Failed to save changes', { id: 'save-issue' })
+              }
+            }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

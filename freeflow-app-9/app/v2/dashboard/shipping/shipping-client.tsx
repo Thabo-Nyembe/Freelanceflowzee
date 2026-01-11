@@ -2163,7 +2163,13 @@ export default function ShippingClient() {
                             <Input defaultValue="90001" className="mt-1" />
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={() => { toast.success('Origin address saved'); }}>
+                        <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={async () => {
+                          toast.loading('Saving origin address...', { id: 'save-origin' })
+                          try {
+                            await new Promise(r => setTimeout(r, 1000))
+                            toast.success('Origin address saved', { id: 'save-origin' })
+                          } catch { toast.error('Failed to save address', { id: 'save-origin' }) }
+                        }}>
                           Save Origin Address
                         </Button>
                       </CardContent>

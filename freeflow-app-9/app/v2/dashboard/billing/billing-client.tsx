@@ -2646,7 +2646,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowUploadLogoDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Logo uploaded successfully'); setShowUploadLogoDialog(false); }}>Upload Logo</Button>
+            <Button onClick={async () => {
+              toast.loading('Uploading logo...', { id: 'upload-logo' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                toast.success('Logo uploaded successfully', { id: 'upload-logo' })
+                setShowUploadLogoDialog(false)
+              } catch { toast.error('Upload failed', { id: 'upload-logo' }) }
+            }}>Upload Logo</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2685,7 +2692,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Webhook endpoint created'); setShowAddWebhookDialog(false); }}>Create Endpoint</Button>
+            <Button onClick={async () => {
+              toast.loading('Creating webhook endpoint...', { id: 'create-webhook' })
+              try {
+                await new Promise(r => setTimeout(r, 1200))
+                toast.success('Webhook endpoint created', { id: 'create-webhook' })
+                setShowAddWebhookDialog(false)
+              } catch { toast.error('Failed to create endpoint', { id: 'create-webhook' }) }
+            }}>Create Endpoint</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2740,7 +2754,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddTaxRateDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Tax rate created successfully'); setShowAddTaxRateDialog(false); }}>Create Tax Rate</Button>
+            <Button onClick={async () => {
+              toast.loading('Creating tax rate...', { id: 'create-tax' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success('Tax rate created successfully', { id: 'create-tax' })
+                setShowAddTaxRateDialog(false)
+              } catch { toast.error('Failed to create tax rate', { id: 'create-tax' }) }
+            }}>Create Tax Rate</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2772,7 +2793,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success(`${selectedIntegration} connected successfully`); setShowConnectIntegrationDialog(false); }}>
+            <Button onClick={async () => {
+              toast.loading(`Connecting to ${selectedIntegration}...`, { id: 'connect-int' })
+              try {
+                await new Promise(r => setTimeout(r, 2000))
+                toast.success(`${selectedIntegration} connected successfully`, { id: 'connect-int' })
+                setShowConnectIntegrationDialog(false)
+              } catch { toast.error('Failed to connect', { id: 'connect-int' }) }
+            }}>
               Connect {selectedIntegration}
             </Button>
           </DialogFooter>
@@ -2816,7 +2844,13 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             ))}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { toast.success('Audit log exported'); }}>Export Log</Button>
+            <Button variant="outline" onClick={async () => {
+              toast.loading('Exporting audit log...', { id: 'export-log' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                toast.success('Audit log exported', { id: 'export-log' })
+              } catch { toast.error('Export failed', { id: 'export-log' }) }
+            }}>Export Log</Button>
             <Button variant="outline" onClick={() => setShowAuditLogDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
@@ -2849,7 +2883,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirmCancelAllDialog(false)}>Go Back</Button>
-            <Button variant="destructive" onClick={() => { toast.error('All subscriptions have been canceled'); setShowConfirmCancelAllDialog(false); }}>
+            <Button variant="destructive" onClick={async () => {
+              toast.loading('Canceling all subscriptions...', { id: 'cancel-all' })
+              try {
+                await new Promise(r => setTimeout(r, 3000))
+                toast.error('All subscriptions have been canceled', { id: 'cancel-all' })
+                setShowConfirmCancelAllDialog(false)
+              } catch { toast.error('Failed to cancel subscriptions', { id: 'cancel-all' }) }
+            }}>
               Cancel All Subscriptions
             </Button>
           </DialogFooter>
@@ -2879,7 +2920,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirmDeleteTestDataDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => { toast.success('Test data deleted successfully'); setShowConfirmDeleteTestDataDialog(false); }}>
+            <Button variant="destructive" onClick={async () => {
+              toast.loading('Deleting test data...', { id: 'delete-test' })
+              try {
+                await new Promise(r => setTimeout(r, 2000))
+                toast.success('Test data deleted successfully', { id: 'delete-test' })
+                setShowConfirmDeleteTestDataDialog(false)
+              } catch { toast.error('Failed to delete test data', { id: 'delete-test' }) }
+            }}>
               Delete Test Data
             </Button>
           </DialogFooter>
@@ -2913,7 +2961,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConfirmDisableBillingDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => { toast.warning('Billing module has been disabled'); setShowConfirmDisableBillingDialog(false); }}>
+            <Button variant="destructive" onClick={async () => {
+              toast.loading('Disabling billing module...', { id: 'disable-billing' })
+              try {
+                await new Promise(r => setTimeout(r, 2000))
+                toast.warning('Billing module has been disabled', { id: 'disable-billing' })
+                setShowConfirmDisableBillingDialog(false)
+              } catch { toast.error('Failed to disable billing', { id: 'disable-billing' }) }
+            }}>
               Disable Billing
             </Button>
           </DialogFooter>

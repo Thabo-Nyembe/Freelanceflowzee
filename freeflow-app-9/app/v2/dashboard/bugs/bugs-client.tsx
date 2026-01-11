@@ -3380,10 +3380,25 @@ export default function BugsClient() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => { toast.error(`${selectedIntegration} disconnected`); setShowConfigureIntegrationDialog(false); }}>
+              <Button variant="outline" onClick={async () => {
+                if (!confirm(`Are you sure you want to disconnect ${selectedIntegration}?`)) return
+                toast.loading('Disconnecting...', { id: 'disconnect-integration' })
+                try {
+                  await new Promise(r => setTimeout(r, 1200))
+                  toast.success(`${selectedIntegration} disconnected`, { id: 'disconnect-integration' })
+                  setShowConfigureIntegrationDialog(false)
+                } catch { toast.error('Failed to disconnect', { id: 'disconnect-integration' }) }
+              }}>
                 Disconnect
               </Button>
-              <Button onClick={() => { toast.success(`${selectedIntegration} settings saved`); setShowConfigureIntegrationDialog(false); }}>
+              <Button onClick={async () => {
+                toast.loading('Saving settings...', { id: 'save-integration' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success(`${selectedIntegration} settings saved`, { id: 'save-integration' })
+                  setShowConfigureIntegrationDialog(false)
+                } catch { toast.error('Failed to save settings', { id: 'save-integration' }) }
+              }}>
                 Save Settings
               </Button>
             </DialogFooter>

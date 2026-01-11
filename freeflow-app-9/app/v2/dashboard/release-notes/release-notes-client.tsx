@@ -1772,7 +1772,13 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         <Label className="font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="rn_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => { toast.info('API key visibility toggled') }}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => {
+                          const input = document.querySelector('input[value="rn_live_xxxxxxxxxxxxxxxxxxxxx"]') as HTMLInputElement
+                          if (input) {
+                            input.type = input.type === 'password' ? 'text' : 'password'
+                            toast.info(input.type === 'password' ? 'API key hidden' : 'API key revealed')
+                          }
+                        }}><Eye className="h-4 w-4" /></Button>
                           <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('rn_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('Key copied to clipboard'); }}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
@@ -1845,7 +1851,10 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </div>
                           <div className="flex items-center gap-2">
                             {template.isDefault && <Badge className="bg-orange-100 text-orange-700">Default</Badge>}
-                            <Button variant="ghost" size="sm" onClick={() => { toast.info('Template settings coming soon') }}><Settings className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              toast.info(`Editing ${template.name} template`, { description: 'Template editor opening...' })
+                              setShowCreateTemplateDialog(true)
+                            }}><Settings className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}

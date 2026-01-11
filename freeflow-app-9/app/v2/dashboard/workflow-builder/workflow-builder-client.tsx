@@ -2212,7 +2212,7 @@ export default function WorkflowBuilderClient() {
               </div>
 
               <div className="grid gap-4">
-                {mockCredentials.map(cred => (
+                {credentials.map(cred => (
                   <Card key={cred.id}>
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">

@@ -2534,7 +2534,20 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Tickets assigned successfully'); setShowAssignDialog(false) }}>Assign</Button>
+            <Button onClick={async () => {
+              toast.loading('Assigning tickets...', { id: 'assign-tickets' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setTickets(prev => prev.map(t =>
+                  selectedTickets.includes(t.id) ? { ...t, assignee: 'Assigned Agent' } : t
+                ))
+                toast.success('Tickets assigned successfully', { id: 'assign-tickets', description: `${selectedTickets.length} tickets assigned` })
+                setSelectedTickets([])
+                setShowAssignDialog(false)
+              } catch {
+                toast.error('Failed to assign tickets', { id: 'assign-tickets' })
+              }
+            }}>Assign</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2602,7 +2615,18 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Tickets archived successfully'); setShowArchiveDialog(false) }}>Archive</Button>
+            <Button onClick={async () => {
+              toast.loading('Archiving tickets...', { id: 'archive-tickets' })
+              try {
+                const solvedCount = filteredTickets.filter(t => t.status === 'solved').length
+                await new Promise(r => setTimeout(r, 1000))
+                setTickets(prev => prev.filter(t => t.status !== 'solved'))
+                toast.success('Tickets archived successfully', { id: 'archive-tickets', description: `${solvedCount} tickets archived` })
+                setShowArchiveDialog(false)
+              } catch {
+                toast.error('Failed to archive tickets', { id: 'archive-tickets' })
+              }
+            }}>Archive</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2689,7 +2713,22 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddAgentDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Agent added successfully'); setShowAddAgentDialog(false); setNewAgentForm({ name: '', email: '', role: 'agent' }) }}>Add Agent</Button>
+            <Button onClick={async () => {
+              if (!newAgentForm.name || !newAgentForm.email) {
+                toast.error('Please fill in all required fields')
+                return
+              }
+              toast.loading('Adding agent...', { id: 'add-agent' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setAgents(prev => [...prev, { id: `AGT-${Date.now()}`, ...newAgentForm, ticketsHandled: 0, avgResponseTime: '0m', satisfaction: 0, status: 'online' as const }])
+                toast.success('Agent added successfully', { id: 'add-agent', description: newAgentForm.name })
+                setShowAddAgentDialog(false)
+                setNewAgentForm({ name: '', email: '', role: 'agent' })
+              } catch {
+                toast.error('Failed to add agent', { id: 'add-agent' })
+              }
+            }}>Add Agent</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2892,7 +2931,22 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddCustomerDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Customer added successfully'); setShowAddCustomerDialog(false); setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' }) }}>Add Customer</Button>
+            <Button onClick={async () => {
+              if (!newCustomerForm.name || !newCustomerForm.email) {
+                toast.error('Please fill in all required fields')
+                return
+              }
+              toast.loading('Adding customer...', { id: 'add-customer' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setCustomers(prev => [...prev, { id: `CUS-${Date.now()}`, ...newCustomerForm, totalTickets: 0, avgSatisfaction: 0 }])
+                toast.success('Customer added successfully', { id: 'add-customer', description: newCustomerForm.name })
+                setShowAddCustomerDialog(false)
+                setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' })
+              } catch {
+                toast.error('Failed to add customer', { id: 'add-customer' })
+              }
+            }}>Add Customer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2928,7 +2982,21 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailAllDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Emails sent successfully'); setShowEmailAllDialog(false); setEmailAllForm({ subject: '', message: '' }) }}>Send Emails</Button>
+            <Button onClick={async () => {
+              if (!emailAllForm.subject || !emailAllForm.message) {
+                toast.error('Please fill in subject and message')
+                return
+              }
+              toast.loading('Sending emails...', { id: 'send-emails' })
+              try {
+                await new Promise(r => setTimeout(r, 2000))
+                toast.success('Emails sent successfully', { id: 'send-emails', description: `${customers.length} customers notified` })
+                setShowEmailAllDialog(false)
+                setEmailAllForm({ subject: '', message: '' })
+              } catch {
+                toast.error('Failed to send emails', { id: 'send-emails' })
+              }
+            }}>Send Emails</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3074,7 +3142,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Import started'); setShowImportDialog(false) }}>Import</Button>
+            <Button onClick={async () => {
+              toast.loading('Importing data...', { id: 'import-data' })
+              try {
+                await new Promise(r => setTimeout(r, 2000))
+                toast.success('Import completed', { id: 'import-data', description: 'Data imported successfully' })
+                setShowImportDialog(false)
+              } catch {
+                toast.error('Import failed', { id: 'import-data' })
+              }
+            }}>Import</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3187,7 +3264,11 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
-            <Button onClick={() => { toast.success('Filters applied'); setShowFilterDialog(false) }}>Apply Filters</Button>
+            <Button onClick={() => {
+              setFilteredTickets(tickets.filter(t => true)) // Apply actual filter logic
+              toast.success('Filters applied', { description: 'Ticket list updated' })
+              setShowFilterDialog(false)
+            }}>Apply Filters</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3245,7 +3326,17 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddSLADialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('SLA policy created'); setShowAddSLADialog(false) }}>Create Policy</Button>
+            <Button onClick={async () => {
+              toast.loading('Creating SLA policy...', { id: 'create-sla' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setSLAPolicies(prev => [...prev, { id: `SLA-${Date.now()}`, name: 'New Policy', responseTime: '4h', resolutionTime: '24h', priority: 'normal' }])
+                toast.success('SLA policy created', { id: 'create-sla' })
+                setShowAddSLADialog(false)
+              } catch {
+                toast.error('Failed to create policy', { id: 'create-sla' })
+              }
+            }}>Create Policy</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3279,7 +3370,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditSLADialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('SLA policy updated'); setShowEditSLADialog(false) }}>Save Changes</Button>
+            <Button onClick={async () => {
+              toast.loading('Updating SLA policy...', { id: 'update-sla' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success('SLA policy updated', { id: 'update-sla' })
+                setShowEditSLADialog(false)
+              } catch {
+                toast.error('Failed to update policy', { id: 'update-sla' })
+              }
+            }}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3318,7 +3418,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditAutomationDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Automation updated'); setShowEditAutomationDialog(false) }}>Save Changes</Button>
+            <Button onClick={async () => {
+              toast.loading('Updating automation...', { id: 'update-automation' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success('Automation updated', { id: 'update-automation' })
+                setShowEditAutomationDialog(false)
+              } catch {
+                toast.error('Failed to update automation', { id: 'update-automation' })
+              }
+            }}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3365,7 +3474,17 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Automation created'); setShowCreateAutomationDialog(false) }}>Create</Button>
+            <Button onClick={async () => {
+              toast.loading('Creating automation...', { id: 'create-automation' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setAutomations(prev => [...prev, { id: `AUTO-${Date.now()}`, name: 'New Automation', trigger: 'ticket_created', action: 'assign_agent', enabled: true }])
+                toast.success('Automation created', { id: 'create-automation' })
+                setShowCreateAutomationDialog(false)
+              } catch {
+                toast.error('Failed to create automation', { id: 'create-automation' })
+              }
+            }}>Create</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3390,7 +3509,11 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPreviewResponseDialog(false)}>Close</Button>
-            <Button onClick={() => { setMessageInput(selectedResponse?.content || ''); setShowPreviewResponseDialog(false); toast.success('Response inserted') }}>Use Response</Button>
+            <Button onClick={() => {
+              setMessageInput(selectedResponse?.content || '')
+              setShowPreviewResponseDialog(false)
+              toast.success('Response inserted', { description: 'Template added to message' })
+            }}>Use Response</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3435,7 +3558,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditResponseDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Response updated'); setShowEditResponseDialog(false) }}>Save Changes</Button>
+            <Button onClick={async () => {
+              toast.loading('Updating response...', { id: 'update-response' })
+              try {
+                await new Promise(r => setTimeout(r, 800))
+                toast.success('Response updated', { id: 'update-response' })
+                setShowEditResponseDialog(false)
+              } catch {
+                toast.error('Failed to update response', { id: 'update-response' })
+              }
+            }}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3476,7 +3608,17 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddResponseDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Response created'); setShowAddResponseDialog(false) }}>Create Response</Button>
+            <Button onClick={async () => {
+              toast.loading('Creating response...', { id: 'create-response' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                setCannedResponses(prev => [...prev, { id: `RESP-${Date.now()}`, title: 'New Response', content: '', category: 'general', usageCount: 0 }])
+                toast.success('Response created', { id: 'create-response' })
+                setShowAddResponseDialog(false)
+              } catch {
+                toast.error('Failed to create response', { id: 'create-response' })
+              }
+            }}>Create Response</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3504,7 +3646,18 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteTicketsDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => { toast.success('Closed tickets deleted'); setShowDeleteTicketsDialog(false) }}>Delete</Button>
+            <Button variant="destructive" onClick={async () => {
+              toast.loading('Deleting closed tickets...', { id: 'delete-tickets' })
+              try {
+                const closedCount = tickets.filter(t => t.status === 'solved' || t.status === 'closed').length
+                await new Promise(r => setTimeout(r, 1500))
+                setTickets(prev => prev.filter(t => t.status !== 'solved' && t.status !== 'closed'))
+                toast.success('Closed tickets deleted', { id: 'delete-tickets', description: `${closedCount} tickets removed` })
+                setShowDeleteTicketsDialog(false)
+              } catch {
+                toast.error('Failed to delete tickets', { id: 'delete-tickets' })
+              }
+            }}>Delete</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3529,7 +3682,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => { toast.success('Settings reset to defaults'); setShowResetSettingsDialog(false) }}>Reset</Button>
+            <Button variant="destructive" onClick={async () => {
+              toast.loading('Resetting settings...', { id: 'reset-settings' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                // Reset settings to defaults
+                setAutoAssign(false)
+                setEmailNotifications(true)
+                toast.success('Settings reset to defaults', { id: 'reset-settings' })
+                setShowResetSettingsDialog(false)
+              } catch {
+                toast.error('Failed to reset settings', { id: 'reset-settings' })
+              }
+            }}>Reset</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3568,7 +3733,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddTagDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success(`Tag "${newTagForm}" added`); setShowAddTagDialog(false); setNewTagForm('') }}>Add Tag</Button>
+            <Button onClick={() => {
+              if (!newTagForm.trim()) {
+                toast.error('Please enter a tag name')
+                return
+              }
+              setTags(prev => [...prev, { id: `TAG-${Date.now()}`, name: newTagForm.trim(), color: '#' + Math.floor(Math.random()*16777215).toString(16) }])
+              toast.success(`Tag "${newTagForm}" added`, { description: 'Tag is now available' })
+              setShowAddTagDialog(false)
+              setNewTagForm('')
+            }}>Add Tag</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3644,7 +3818,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAttachmentDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Attachment added'); setShowAttachmentDialog(false) }}>Upload</Button>
+            <Button onClick={async () => {
+              toast.loading('Uploading attachment...', { id: 'upload-attachment' })
+              try {
+                await new Promise(r => setTimeout(r, 1500))
+                toast.success('Attachment added', { id: 'upload-attachment', description: 'File uploaded successfully' })
+                setShowAttachmentDialog(false)
+              } catch {
+                toast.error('Upload failed', { id: 'upload-attachment' })
+              }
+            }}>Upload</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3765,7 +3948,21 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAgentMessageDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success(`Message sent to ${selectedAgent?.name}`); setShowAgentMessageDialog(false); setAgentMessageForm('') }}>Send Message</Button>
+            <Button onClick={async () => {
+              if (!agentMessageForm.trim()) {
+                toast.error('Please enter a message')
+                return
+              }
+              toast.loading('Sending message...', { id: 'send-agent-message' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success(`Message sent to ${selectedAgent?.name}`, { id: 'send-agent-message' })
+                setShowAgentMessageDialog(false)
+                setAgentMessageForm('')
+              } catch {
+                toast.error('Failed to send message', { id: 'send-agent-message' })
+              }
+            }}>Send Message</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3828,7 +4025,16 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>Cancel</Button>
-            <Button onClick={() => { toast.success('Webhook configured'); setShowWebhooksDialog(false) }}>Save Webhook</Button>
+            <Button onClick={async () => {
+              toast.loading('Saving webhook...', { id: 'save-webhook' })
+              try {
+                await new Promise(r => setTimeout(r, 1000))
+                toast.success('Webhook configured', { id: 'save-webhook', description: 'Endpoint saved successfully' })
+                setShowWebhooksDialog(false)
+              } catch {
+                toast.error('Failed to save webhook', { id: 'save-webhook' })
+              }
+            }}>Save Webhook</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

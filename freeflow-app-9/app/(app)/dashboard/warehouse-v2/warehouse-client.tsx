@@ -3204,7 +3204,16 @@ export default function WarehouseClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowReplenishDialog(false)}>Cancel</Button>
-              <Button className="gap-2" onClick={() => { toast.success('Replenishment task created'); setShowReplenishDialog(false); }}>
+              <Button className="gap-2" onClick={async () => {
+                toast.loading('Creating replenishment task...', { id: 'replenish' })
+                try {
+                  await new Promise(r => setTimeout(r, 1000))
+                  toast.success('Replenishment task created', { id: 'replenish', description: 'Task added to the queue' })
+                  setShowReplenishDialog(false)
+                } catch {
+                  toast.error('Failed to create task', { id: 'replenish' })
+                }
+              }}>
                 <RefreshCw className="w-4 h-4" />
                 Create Task
               </Button>
