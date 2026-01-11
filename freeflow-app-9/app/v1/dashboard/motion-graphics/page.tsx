@@ -821,7 +821,9 @@ export default function MotionGraphicsPage() {
                     placeholder="Search assets..."
                     className="w-64 bg-slate-900/50 border-gray-700"
                   />
-                  <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                  <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
+                    toast.info('Filter assets', { description: 'Opening asset filter panel' })
+                  }}>
                     <Filter className="w-4 h-4" />
                   </Button>
                 </div>

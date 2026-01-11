@@ -548,7 +548,14 @@ export default function AIVoiceSynthesisPage() {
                         </>
                       )}
                     </Button>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" onClick={() => {
+                      if (!text.trim()) {
+                        toast.error('Please enter text to preview')
+                        return
+                      }
+                      setIsPlaying(!isPlaying)
+                      toast.info(isPlaying ? 'Preview paused' : 'Playing preview', { description: 'Text-to-speech preview' })
+                    }}>
                       <Play className="w-4 h-4" />
                     </Button>
                   </div>

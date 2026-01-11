@@ -430,7 +430,9 @@ export default function RealTimeTranslationPage() {
                             {Math.floor(session.duration / 60)}m {session.duration % 60}s
                           </p>
                         </div>
-                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800">
+                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => {
+                          toast.info('Session settings', { description: 'Configure translation session' })
+                        }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>

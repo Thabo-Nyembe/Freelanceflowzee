@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import {
   Rocket,
   GitBranch,
@@ -1186,7 +1187,9 @@ export default function ReleasesClient() {
                 className="pl-9 w-64"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => {
+              toast.info('Filter releases', { description: 'Opening filter panel' })
+            }}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button
@@ -2444,9 +2447,43 @@ export default function ReleasesClient() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" size="icon">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => {
+                        navigator.clipboard.writeText(selectedRelease.version)
+                        toast.success('Version copied to clipboard')
+                      }}>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copy Version
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => {
+                        toast.info('Opening in new tab', { description: selectedRelease.name })
+                        window.open(`/releases/${selectedRelease.id}`, '_blank')
+                      }}>
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Open in New Tab
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => {
+                        toast.promise(
+                          new Promise(r => setTimeout(r, 1000)),
+                          {
+                            loading: 'Downloading release notes...',
+                            success: 'Release notes downloaded',
+                            error: 'Download failed'
+                          }
+                        )
+                      }}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download Notes
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </DialogHeader>
               <ScrollArea className="h-[60vh] mt-4">

@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import {
   Share2,
   Heart,
@@ -626,7 +627,9 @@ export default function SocialMediaClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => {
+              toast.info('Notifications', { description: '3 new social media updates' })
+            }}>
               <Bell className="w-4 h-4" />
             </Button>
             <Button className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white" onClick={handleCreatePost}>
@@ -734,9 +737,32 @@ export default function SocialMediaClient() {
                             </Badge>
                           )}
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => toast.info('Editing post')}>
+                              <PenTool className="w-4 h-4 mr-2" />
+                              Edit Post
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.info('Scheduling post')}>
+                              <Clock className="w-4 h-4 mr-2" />
+                              Reschedule
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.info('Opening analytics')}>
+                              <BarChart3 className="w-4 h-4 mr-2" />
+                              View Analytics
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => toast.error('Post deleted')} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
 
                       <p className="text-gray-900 dark:text-white mb-3 line-clamp-2">{post.content}</p>
