@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { useSettings } from '@/hooks/use-settings'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -271,6 +273,36 @@ export default function SettingsClient() {
   const supabase = createClient()
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  // Use the useSettings hook for centralized settings management
+  const {
+    notifications: hookNotifications,
+    security: hookSecurity,
+    appearance: hookAppearance,
+    privacy: hookPrivacy,
+    apiKeys,
+    sessions: hookSessions,
+    isLoading: isSettingsLoading,
+    isSaving: isSettingsSaving,
+    error: settingsError,
+    hasUnsavedChanges,
+    updateNotifications,
+    updateSecurity,
+    updateAppearance,
+    updatePrivacy,
+    generateApiKey,
+    revokeApiKey,
+    fetchApiKeys,
+    enable2FA,
+    verify2FA,
+    disable2FA,
+    terminateSession: hookTerminateSession,
+    terminateAllSessions: hookTerminateAllSessions,
+    changePassword: hookChangePassword,
+    exportSettings,
+    refresh: refreshSettings
+  } = useSettings({ autoSave: false })
 
   // Form state with Supabase data
   const [profile, setProfile] = useState<UserProfile>(mockProfile)
@@ -285,6 +317,13 @@ export default function SettingsClient() {
   const [showPassword, setShowPassword] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+
+  // API Keys state
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false)
+  const [newApiKeyName, setNewApiKeyName] = useState('')
+  const [newApiKeyPermissions, setNewApiKeyPermissions] = useState<string[]>(['read'])
+  const [generatedApiKey, setGeneratedApiKey] = useState<string | null>(null)
 
   // Password form state
   const [currentPassword, setCurrentPassword] = useState('')
@@ -332,6 +371,36 @@ export default function SettingsClient() {
     const updated = { ...parsed, ...updates }
     localStorage.setItem('freeflow-settings', JSON.stringify(updated))
   }
+
+  // Sync hook data with local state when hook data changes
+  useEffect(() => {
+    if (!isSettingsLoading && hookAppearance) {
+      setTheme(hookAppearance.theme as ThemeMode)
+      setAccentColor(hookAppearance.accentColor || '#3B82F6')
+      setHighContrast(hookAppearance.highContrast || false)
+      setFontScale(hookAppearance.fontSize === 'large' ? 'large' : 'default')
+    }
+  }, [isSettingsLoading, hookAppearance])
+
+  // Sync security settings from hook
+  useEffect(() => {
+    if (!isSettingsLoading && hookSecurity) {
+      setSecurity(prev => ({
+        ...prev,
+        twoFactorEnabled: hookSecurity.twoFactorAuth || false,
+        twoFactorMethod: hookSecurity.twoFactorMethod === 'authenticator' ? 'app' : (hookSecurity.twoFactorMethod || 'app'),
+        loginNotifications: hookSecurity.loginAlerts || true,
+        passwordLastChanged: hookSecurity.passwordLastChanged || prev.passwordLastChanged
+      }))
+    }
+  }, [isSettingsLoading, hookSecurity])
+
+  // Mark initial load complete
+  useEffect(() => {
+    if (!isSettingsLoading && isInitialLoad) {
+      setIsInitialLoad(false)
+    }
+  }, [isSettingsLoading, isInitialLoad])
 
   // Fetch user and settings on mount
   useEffect(() => {
@@ -490,7 +559,10 @@ export default function SettingsClient() {
 
   // Save profile to Supabase
   const handleSaveProfile = async () => {
-    if (!userId) return
+    if (!userId) {
+      toast.error('Error', { description: 'Please sign in to save your profile' })
+      return
+    }
     setIsSaving(true)
     try {
       const { error } = await supabase
@@ -509,8 +581,16 @@ export default function SettingsClient() {
       if (error) throw error
       toast.success('Profile saved', { description: 'Your profile has been updated' })
       setSaveMessage('Profile saved successfully!')
+      setLastSaved(new Date())
     } catch (error: any) {
-      toast.error('Error', { description: error.message || 'Failed to save profile' })
+      console.error('Profile save error:', error)
+      toast.error('Failed to save profile', {
+        description: error.message || 'Please try again later',
+        action: {
+          label: 'Retry',
+          onClick: () => handleSaveProfile()
+        }
+      })
     } finally {
       setIsSaving(false)
       setTimeout(() => setSaveMessage(''), 3000)
@@ -719,17 +799,196 @@ export default function SettingsClient() {
     ))
   }
 
+  // API Key Management handlers
+  const handleGenerateApiKey = async () => {
+    if (!newApiKeyName.trim()) {
+      toast.error('Please enter a name for your API key')
+      return
+    }
+    setIsSaving(true)
+    try {
+      const result = await generateApiKey({
+        name: newApiKeyName,
+        permissions: newApiKeyPermissions
+      })
+      if (result.success && result.apiKey) {
+        setGeneratedApiKey(result.apiKey.key)
+        toast.success('API key generated', {
+          description: 'Copy your key now - it will not be shown again!'
+        })
+        setNewApiKeyName('')
+        setNewApiKeyPermissions(['read'])
+        setLastSaved(new Date())
+      } else {
+        toast.error('Failed to generate API key', { description: result.error })
+      }
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to generate API key' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleRevokeApiKey = async (keyId: string) => {
+    try {
+      const result = await revokeApiKey(keyId)
+      if (result.success) {
+        toast.success('API key revoked', { description: 'The key has been deactivated' })
+        refreshSettings()
+      } else {
+        toast.error('Failed to revoke key', { description: result.error })
+      }
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to revoke API key' })
+    }
+  }
+
+  const handleCopyApiKey = (key: string) => {
+    navigator.clipboard.writeText(key)
+    toast.success('API key copied to clipboard')
+  }
+
+  // Enhanced appearance save that uses the hook
+  const handleSaveAppearance = async () => {
+    setIsSaving(true)
+    try {
+      const result = await updateAppearance({
+        theme: theme,
+        accentColor: accentColor,
+        highContrast: highContrast,
+        fontSize: fontScale === 'large' ? 'large' : 'medium'
+      })
+      if (result.success) {
+        toast.success('Appearance saved', { description: 'Your preferences have been updated' })
+        setLastSaved(new Date())
+      } else {
+        toast.error('Failed to save appearance')
+      }
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to save appearance' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Enhanced notifications save using the hook
+  const handleSaveNotificationsEnhanced = async () => {
+    setIsSaving(true)
+    try {
+      // Convert notification preferences to hook format
+      const notifSettings = {
+        emailNotifications: notifications.some(n => n.email),
+        pushNotifications: notifications.some(n => n.push),
+        inAppNotifications: notifications.some(n => n.inApp),
+        smsNotifications: notifications.some(n => n.sms),
+        quietHoursEnabled: doNotDisturb
+      }
+      const result = await updateNotifications(notifSettings)
+      if (result.success) {
+        toast.success('Notifications saved', { description: 'Your preferences have been updated' })
+        setLastSaved(new Date())
+      }
+      // Also save to direct Supabase for category-level preferences
+      await handleSaveNotifications()
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to save notifications' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Refresh all settings from Supabase
+  const handleRefreshSettings = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      await refreshSettings()
+      toast.success('Settings refreshed', { description: 'Your settings have been reloaded' })
+    } catch (error: any) {
+      toast.error('Error', { description: 'Failed to refresh settings' })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [refreshSettings])
+
   const statCards = [
     { label: 'Profile', value: `${stats.profileCompleteness}%`, change: 5.0, icon: User, color: 'from-blue-500 to-cyan-500' },
     { label: 'Security', value: `${stats.securityScore}%`, change: 8.5, icon: Shield, color: 'from-green-500 to-emerald-500' },
-    { label: 'Storage', value: `${stats.storageUsed} GB`, change: 12.3, icon: HardDrive, color: 'from-purple-500 to-pink-500' },
+    { label: 'API Keys', value: apiKeys.length.toString(), change: 0, icon: Key, color: 'from-purple-500 to-pink-500' },
     { label: 'Integrations', value: stats.connectedIntegrations.toString(), change: 0, icon: Link2, color: 'from-orange-500 to-amber-500' },
     { label: 'Sessions', value: sessions.filter(s => s.status === 'active').length.toString(), change: 0, icon: Monitor, color: 'from-indigo-500 to-violet-500' },
     { label: 'Plan', value: billing.plan.toUpperCase(), change: 0, icon: CreditCard, color: 'from-rose-500 to-red-500' },
-    { label: 'Notifications', value: 'On', change: 0, icon: Bell, color: 'from-yellow-500 to-orange-500' },
-    { label: 'Account Age', value: '1y 2m', change: 0, icon: Calendar, color: 'from-teal-500 to-green-500' }
+    { label: 'Notifications', value: doNotDisturb ? 'DND' : 'On', change: 0, icon: Bell, color: 'from-yellow-500 to-orange-500' },
+    { label: 'Theme', value: theme.charAt(0).toUpperCase() + theme.slice(1), change: 0, icon: Palette, color: 'from-teal-500 to-green-500' }
   ]
 
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-12 h-12 rounded-xl" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-48" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+
+        {/* Stats Grid Skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Card key={i} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <Skeleton className="h-8 w-8 rounded-lg mb-2" />
+                <Skeleton className="h-6 w-16 mb-1" />
+                <Skeleton className="h-4 w-12" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Tabs Skeleton */}
+        <div className="space-y-6">
+          <Skeleton className="h-12 w-full max-w-3xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-6 space-y-4">
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                  <div className="space-y-4 pt-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-24 w-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-6">
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-6 space-y-4">
+                  <Skeleton className="h-6 w-32" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Show loading skeleton during initial load
+  if (isInitialLoad && (isLoading || isSettingsLoading)) {
+    return <LoadingSkeleton />
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -746,12 +1005,34 @@ export default function SettingsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Save Status Indicator */}
+            {(isSaving || isSettingsSaving) && (
+              <Badge className="bg-blue-100 text-blue-700 animate-pulse">
+                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                Saving...
+              </Badge>
+            )}
             {saveMessage && (
               <Badge className="bg-green-100 text-green-700">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
                 {saveMessage}
               </Badge>
             )}
+            {lastSaved && !saveMessage && !isSaving && (
+              <span className="text-xs text-gray-500">
+                Last saved: {lastSaved.toLocaleTimeString()}
+              </span>
+            )}
+            {settingsError && (
+              <Badge className="bg-red-100 text-red-700">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                Error loading settings
+              </Badge>
+            )}
+            <Button variant="outline" size="sm" onClick={handleRefreshSettings} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
             <Button variant="outline" onClick={handleExportData}>
               <Download className="w-4 h-4 mr-2" />
               Export Data
@@ -999,10 +1280,17 @@ export default function SettingsClient() {
                       />
                     </div>
 
-                    <Button onClick={handleSaveProfile} disabled={isSaving}>
-                      <Save className="w-4 h-4 mr-2" />
-                      {isSaving ? 'Saving...' : 'Save Changes'}
-                    </Button>
+                    <div className="flex items-center gap-4">
+                      <Button onClick={handleSaveProfile} disabled={isSaving || isSettingsSaving}>
+                        <Save className="w-4 h-4 mr-2" />
+                        {isSaving || isSettingsSaving ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                      {lastSaved && (
+                        <span className="text-sm text-gray-500">
+                          Last saved: {lastSaved.toLocaleTimeString()}
+                        </span>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -1460,10 +1748,16 @@ export default function SettingsClient() {
                     </tbody>
                   </table>
                 </div>
-                <div className="mt-6">
-                  <Button onClick={handleSaveNotifications} disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save Preferences'}
+                <div className="mt-6 flex items-center gap-4">
+                  <Button onClick={handleSaveNotificationsEnhanced} disabled={isSaving || isSettingsSaving}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSaving || isSettingsSaving ? 'Saving...' : 'Save Preferences'}
                   </Button>
+                  {lastSaved && (
+                    <span className="text-sm text-gray-500">
+                      Last saved: {lastSaved.toLocaleTimeString()}
+                    </span>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1813,9 +2107,13 @@ export default function SettingsClient() {
                   <p className="text-pink-100">Customize your visual experience</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => { setTheme('system'); toast.success('Appearance settings reset to defaults'); }}>
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => { setTheme('system'); setAccentColor('#3B82F6'); setHighContrast(false); setFontScale('default'); toast.success('Appearance settings reset to defaults'); }}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Reset to Defaults
+                  </Button>
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={handleSaveAppearance} disabled={isSaving}>
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSaving ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </div>
               </div>
@@ -2092,30 +2390,154 @@ export default function SettingsClient() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-6">
                 {/* Developer Settings */}
-                <Card className="border-0 shadow-sm">
+                <Card className="border-0 shadow-sm" data-developer-section>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Code className="w-5 h-5 text-blue-500" />
-                      Developer Settings
+                      API Keys Management
                     </CardTitle>
-                    <CardDescription>Configure developer tools and API access</CardDescription>
+                    <CardDescription>Create and manage API keys for programmatic access</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    <div className="space-y-2">
-                      <Label>API Key</Label>
-                      <div className="flex gap-2">
-                        <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                        <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER'); toast.success('API key copied to clipboard'); }}>
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={async () => { if (confirm('Are you sure you want to regenerate your API key? Your old key will stop working immediately.')) { try { const res = await fetch('/api/user/api-keys', { method: 'POST' }); if (res.ok) { toast.success('New API key generated - refresh to see new key'); } else { toast.error('Failed to regenerate API key'); } } catch { toast.error('Failed to regenerate API key'); } } }}>Regenerate</Button>
+                    {/* Generate New API Key Section */}
+                    <div className="p-4 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg space-y-4">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Generate New API Key
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Key Name</Label>
+                          <Input
+                            placeholder="e.g., Production API Key"
+                            value={newApiKeyName}
+                            onChange={(e) => setNewApiKeyName(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Permissions</Label>
+                          <Select
+                            value={newApiKeyPermissions.join(',')}
+                            onValueChange={(value) => setNewApiKeyPermissions(value.split(','))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select permissions" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="read">Read Only</SelectItem>
+                              <SelectItem value="read,write">Read & Write</SelectItem>
+                              <SelectItem value="read,write,delete">Full Access</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">Never share your API key publicly</p>
+                      <Button
+                        onClick={handleGenerateApiKey}
+                        disabled={isSaving || !newApiKeyName.trim()}
+                        className="w-full md:w-auto"
+                      >
+                        <Key className="w-4 h-4 mr-2" />
+                        {isSaving ? 'Generating...' : 'Generate API Key'}
+                      </Button>
                     </div>
 
-                    <div className="space-y-2">
+                    {/* Generated Key Display */}
+                    {generatedApiKey && (
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg space-y-3">
+                        <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                          <CheckCircle2 className="w-5 h-5" />
+                          <span className="font-medium">API Key Generated Successfully!</span>
+                        </div>
+                        <p className="text-sm text-green-600 dark:text-green-500">
+                          Copy this key now - it will not be shown again.
+                        </p>
+                        <div className="flex gap-2">
+                          <Input
+                            type="text"
+                            value={generatedApiKey}
+                            readOnly
+                            className="font-mono text-sm bg-white dark:bg-gray-800"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleCopyApiKey(generatedApiKey)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setGeneratedApiKey(null)}
+                        >
+                          Dismiss
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Existing API Keys List */}
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Your API Keys</h4>
+                      {apiKeys.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <Key className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                          <p>No API keys created yet</p>
+                          <p className="text-sm">Create your first API key above</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {apiKeys.map((key) => (
+                            <div
+                              key={key.id}
+                              className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                  <Key className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <div>
+                                  <p className="font-medium">{key.name}</p>
+                                  <p className="text-sm text-gray-500 font-mono">
+                                    {key.prefix}...
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {key.permissions?.join(', ') || 'read'}
+                                    </Badge>
+                                    {key.lastUsedAt && (
+                                      <span className="text-xs text-gray-400">
+                                        Last used: {formatTimeAgo(key.lastUsedAt)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => {
+                                    if (confirm(`Are you sure you want to revoke "${key.name}"? This action cannot be undone.`)) {
+                                      handleRevokeApiKey(key.id)
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-1" />
+                                  Revoke
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 pt-4 border-t">
                       <Label>Webhook URL</Label>
                       <Input placeholder="https://your-app.com/webhooks" />
+                      <p className="text-xs text-muted-foreground">Receive real-time notifications via webhooks</p>
                     </div>
 
                     <div className="border-t pt-4 space-y-4">

@@ -460,12 +460,19 @@ export default function AIAssistantClient() {
     fetchMessages,
     createConversation,
     sendMessage,
+    sendMessageWithAI,
     updateConversation,
     deleteConversation,
     toggleStar: hookToggleStar,
     toggleArchive,
     setActiveConversation
   } = useAIAssistant()
+
+  // State for streaming AI response
+  const [streamingResponse, setStreamingResponse] = useState('')
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+  const [aiActionItems, setAiActionItems] = useState<Array<{ title: string; priority: string }>>([])
+  const [aiError, setAiError] = useState<string | null>(null)
 
   const [activeTab, setActiveTab] = useState('chat')
   const [assistants, setAssistants] = useState<Assistant[]>(mockAssistants)
@@ -550,46 +557,83 @@ export default function AIAssistantClient() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Handle send message - real Supabase operation
+  // Handle send message - real AI API call
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return
+
+    const messageToSend = inputMessage.trim()
+    setInputMessage('')
+    setAiError(null)
+    setStreamingResponse('')
+    setAiSuggestions([])
+    setAiActionItems([])
 
     try {
       // Create conversation if none active
       if (!activeConversation) {
-        const newConv = await createConversation(
-          'New Chat',
+        await createConversation(
+          messageToSend.slice(0, 50) + (messageToSend.length > 50 ? '...' : ''),
           selectedMode,
           selectedModel
         )
-        toast.success('Conversation created', {
-          description: 'New conversation started'
-        })
       }
 
-      // Send the message
+      // Send the message and get AI response
       setIsTyping(true)
-      await sendMessage(inputMessage, 'user')
-      setInputMessage('')
 
-      // Simulate AI response (in production, this would be an API call)
-      setTimeout(async () => {
-        await sendMessage(
-          'I understand your request. Let me help you with that...\n\nHere\'s a comprehensive solution based on your requirements.',
-          'assistant'
-        )
-        setIsTyping(false)
-      }, 1500)
-
-      toast.success('Message sent', {
-        description: 'Your message has been sent'
+      // Use streaming for real-time response
+      const result = await sendMessageWithAI(messageToSend, {
+        mode: selectedMode,
+        model: selectedModel,
+        stream: true,
+        onStreamChunk: (chunk: string) => {
+          setStreamingResponse(prev => prev + chunk)
+        }
       })
+
+      // Clear streaming response after it's saved to messages
+      setStreamingResponse('')
+
+      if (result.success && result.response) {
+        // Update suggestions and action items
+        if (result.response.suggestions) {
+          setAiSuggestions(result.response.suggestions)
+        }
+        if (result.response.actionItems) {
+          setAiActionItems(result.response.actionItems)
+        }
+      } else if (result.error) {
+        setAiError(result.error)
+        toast.error('AI Error', {
+          description: result.error
+        })
+      }
     } catch (err) {
       console.error('Error sending message:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get AI response'
+      setAiError(errorMessage)
       toast.error('Failed to send message', {
-        description: err instanceof Error ? err.message : 'Please try again'
+        description: errorMessage
       })
+    } finally {
       setIsTyping(false)
+    }
+  }
+
+  // Handle suggestion click - send suggestion as new message
+  const handleSuggestionClick = (suggestion: string) => {
+    setInputMessage(suggestion)
+    inputRef.current?.focus()
+  }
+
+  // Retry failed AI request
+  const handleRetryAI = () => {
+    if (messages.length > 0) {
+      const lastUserMessage = [...messages].reverse().find(m => m.role === 'user')
+      if (lastUserMessage) {
+        setInputMessage(lastUserMessage.content)
+        setAiError(null)
+      }
     }
   }
 
@@ -1471,8 +1515,29 @@ export default function AIAssistantClient() {
                           </div>
                         ))}
 
-                        {/* Typing Indicator */}
-                        {isTyping && (
+                        {/* Streaming Response */}
+                        {streamingResponse && (
+                          <div className="flex gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 flex items-center justify-center">
+                              <Bot className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                            </div>
+                            <div className="flex-1 max-w-[80%]">
+                              <div className="inline-block p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl text-gray-900 dark:text-white">
+                                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
+                                  {streamingResponse}
+                                  <span className="inline-block w-2 h-4 bg-violet-600 animate-pulse ml-1" />
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Loader2 className="h-3 w-3 animate-spin text-violet-500" />
+                                <span className="text-xs text-gray-400">AI is responding...</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Typing Indicator (when no streaming yet) */}
+                        {isTyping && !streamingResponse && (
                           <div className="flex gap-4">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 flex items-center justify-center">
                               <Bot className="h-5 w-5 text-violet-600 dark:text-violet-400" />
@@ -1484,6 +1549,46 @@ export default function AIAssistantClient() {
                                 <div className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                               </div>
                             </div>
+                          </div>
+                        )}
+
+                        {/* AI Error Message */}
+                        {aiError && (
+                          <div className="flex gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="flex-1 max-w-[80%]">
+                              <div className="inline-block p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl">
+                                <p className="text-red-700 dark:text-red-300 font-medium mb-1">AI Error</p>
+                                <p className="text-sm text-red-600 dark:text-red-400">{aiError}</p>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                <button
+                                  onClick={handleRetryAI}
+                                  className="flex items-center gap-1 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm"
+                                >
+                                  <RefreshCw className="h-3 w-3" />
+                                  Retry
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* AI Suggestions */}
+                        {aiSuggestions.length > 0 && !isTyping && !streamingResponse && (
+                          <div className="flex flex-wrap gap-2 mt-4 pl-14">
+                            <span className="text-xs text-gray-400 w-full mb-1">Suggestions:</span>
+                            {aiSuggestions.map((suggestion, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => handleSuggestionClick(suggestion)}
+                                className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 rounded-full text-sm hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
                           </div>
                         )}
 

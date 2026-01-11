@@ -244,6 +244,190 @@ export function useAIAssistant(
     }
   }, [supabase, activeConversation])
 
+  // Send message to AI and get real response
+  const sendMessageWithAI = useCallback(async (
+    content: string,
+    options?: {
+      mode?: 'chat' | 'code' | 'creative' | 'analysis'
+      model?: string
+      systemPrompt?: string
+      stream?: boolean
+      onStreamChunk?: (chunk: string) => void
+    }
+  ): Promise<{
+    success: boolean
+    response?: {
+      content: string
+      suggestions?: string[]
+      actionItems?: Array<{ title: string; priority: string }>
+      metadata?: Record<string, unknown>
+    }
+    error?: string
+  }> => {
+    if (!activeConversation) throw new Error('No active conversation')
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+
+    setIsSending(true)
+    setError(null)
+
+    try {
+      // Save user message first
+      const { data: userMsgData, error: userMsgError } = await supabase
+        .from('ai_messages')
+        .insert({
+          conversation_id: activeConversation.id,
+          user_id: user.id,
+          role: 'user',
+          content,
+          model: activeConversation.model
+        })
+        .select()
+        .single()
+
+      if (userMsgError) throw userMsgError
+      setMessages(prev => [...prev, userMsgData])
+
+      // Call AI API
+      const { mode, model, systemPrompt, stream, onStreamChunk } = options || {}
+
+      if (stream && onStreamChunk) {
+        // Streaming response
+        const response = await fetch('/api/ai/assistant-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: content,
+            conversationId: activeConversation.id,
+            mode: mode || activeConversation.mode,
+            model: model || activeConversation.model,
+            systemPrompt,
+            stream: true,
+            includeHistory: true
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('AI service error')
+        }
+
+        const reader = response.body?.getReader()
+        if (!reader) throw new Error('No response stream')
+
+        const decoder = new TextDecoder()
+        let fullContent = ''
+        let tokens = { prompt: 0, completion: 0 }
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value)
+          const lines = chunk.split('\n')
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                if (data.type === 'text') {
+                  fullContent += data.content
+                  onStreamChunk(data.content)
+                } else if (data.type === 'done') {
+                  tokens = data.tokens || tokens
+                } else if (data.type === 'error') {
+                  throw new Error(data.content)
+                }
+              } catch (e) {
+                // Ignore JSON parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+
+        // Save AI response
+        const { data: aiMsgData, error: aiMsgError } = await supabase
+          .from('ai_messages')
+          .insert({
+            conversation_id: activeConversation.id,
+            user_id: user.id,
+            role: 'assistant',
+            content: fullContent,
+            model: model || activeConversation.model,
+            prompt_tokens: tokens.prompt,
+            completion_tokens: tokens.completion,
+            total_tokens: tokens.prompt + tokens.completion
+          })
+          .select()
+          .single()
+
+        if (!aiMsgError && aiMsgData) {
+          setMessages(prev => [...prev, aiMsgData])
+        }
+
+        return {
+          success: true,
+          response: {
+            content: fullContent,
+            metadata: { tokens, streamed: true }
+          }
+        }
+      } else {
+        // Non-streaming response
+        const response = await fetch('/api/ai/assistant-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: content,
+            conversationId: activeConversation.id,
+            mode: mode || activeConversation.mode,
+            model: model || activeConversation.model,
+            systemPrompt,
+            stream: false,
+            includeHistory: true
+          })
+        })
+
+        const result = await response.json()
+
+        if (!result.success) {
+          throw new Error(result.error || 'AI service error')
+        }
+
+        // Save AI response
+        const { data: aiMsgData, error: aiMsgError } = await supabase
+          .from('ai_messages')
+          .insert({
+            conversation_id: activeConversation.id,
+            user_id: user.id,
+            role: 'assistant',
+            content: result.response.content,
+            model: model || activeConversation.model,
+            prompt_tokens: result.response.metadata?.tokens?.prompt || 0,
+            completion_tokens: result.response.metadata?.tokens?.completion || 0,
+            total_tokens: result.response.metadata?.tokens?.prompt + result.response.metadata?.tokens?.completion || 0
+          })
+          .select()
+          .single()
+
+        if (!aiMsgError && aiMsgData) {
+          setMessages(prev => [...prev, aiMsgData])
+        }
+
+        return {
+          success: true,
+          response: result.response
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get AI response'
+      setError(errorMessage)
+      return { success: false, error: errorMessage }
+    } finally {
+      setIsSending(false)
+    }
+  }, [supabase, activeConversation])
+
   const updateConversation = useCallback(async (
     conversationId: string,
     updates: Partial<Pick<AIConversation, 'title' | 'is_archived' | 'is_starred' | 'system_prompt' | 'tags'>>
@@ -299,6 +483,7 @@ export function useAIAssistant(
     fetchMessages,
     createConversation,
     sendMessage,
+    sendMessageWithAI,
     updateConversation,
     deleteConversation,
     toggleStar,
