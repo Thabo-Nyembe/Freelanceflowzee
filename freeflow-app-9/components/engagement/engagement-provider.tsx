@@ -42,17 +42,22 @@ function useSafeSession() {
   const [sessionUserId, setSessionUserId] = useState<string | undefined>(undefined)
 
   useEffect(() => {
+    let isMounted = true
     // Fetch session directly from API to avoid SessionProvider requirement
     fetch('/api/auth/session')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Session fetch failed')
+        return res.json()
+      })
       .then(data => {
-        if (data?.user?.id) {
+        if (isMounted && data?.user?.id) {
           setSessionUserId(data.user.id)
         }
       })
       .catch(() => {
         // Session fetch failed, continue without user ID
       })
+    return () => { isMounted = false }
   }, [])
 
   return sessionUserId

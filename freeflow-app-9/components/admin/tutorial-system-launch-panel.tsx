@@ -1,10 +1,12 @@
+'use client'
+
 /**
  * Tutorial System Launch Panel
- * 
+ *
  * A comprehensive admin interface for launching and managing the KAZI interactive tutorial system.
  * Provides controls for system launch, component status monitoring, configuration options,
  * system health metrics, and user onboarding analytics.
- * 
+ *
  * @version 1.0.0
  * @date August 6, 2025
  */
