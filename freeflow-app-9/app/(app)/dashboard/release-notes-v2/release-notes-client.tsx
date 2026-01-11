@@ -2231,7 +2231,7 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
             <AIInsightsPanel
               insights={mockReleaseNotesAIInsights}
               title="Release Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

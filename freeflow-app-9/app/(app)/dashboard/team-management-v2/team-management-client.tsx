@@ -2442,7 +2442,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
             <AIInsightsPanel
               insights={teamManagementAIInsights}
               title="Team Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

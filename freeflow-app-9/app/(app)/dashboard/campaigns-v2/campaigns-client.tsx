@@ -2664,7 +2664,7 @@ export default function CampaignsClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockCampaignAIInsights}
-          onAskQuestion={(q) => console.log('Campaign Question:', q)}
+          onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
         />
         <PredictiveAnalytics predictions={mockCampaignPredictions} />
       </div>

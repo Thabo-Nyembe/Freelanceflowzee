@@ -2396,7 +2396,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => console.log('Financial Question:', q)}
+            onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
           />
           <PredictiveAnalytics predictions={mockFinancialPredictions} />
         </div>

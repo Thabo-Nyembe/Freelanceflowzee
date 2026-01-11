@@ -2262,7 +2262,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             <AIInsightsPanel
               insights={mockCapacityAIInsights}
               title="Capacity Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

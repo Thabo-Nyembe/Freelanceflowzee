@@ -2941,7 +2941,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             <AIInsightsPanel
               insights={mockLeadGenAIInsights}
               title="Lead Gen Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

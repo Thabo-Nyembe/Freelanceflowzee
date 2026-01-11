@@ -2374,7 +2374,7 @@ export default function HelpDocsClient() {
             <AIInsightsPanel
               insights={mockHelpDocsAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

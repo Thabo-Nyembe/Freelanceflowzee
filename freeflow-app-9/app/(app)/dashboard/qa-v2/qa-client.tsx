@@ -2620,7 +2620,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <AIInsightsPanel
               insights={mockQAAIInsights}
               title="QA Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

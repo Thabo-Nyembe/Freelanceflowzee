@@ -2113,7 +2113,7 @@ export default function ExtensionsClient() {
             <AIInsightsPanel
               insights={mockExtensionsAIInsights}
               title="Extensions Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

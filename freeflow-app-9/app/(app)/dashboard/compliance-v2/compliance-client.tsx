@@ -2329,7 +2329,7 @@ export default function ComplianceClient() {
             <AIInsightsPanel
               insights={mockComplianceAIInsights}
               title="Compliance Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

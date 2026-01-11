@@ -1673,7 +1673,8 @@ export default function MediaLibraryClient({
 
     const starPromise = async () => {
       let updated = 0
-      for (const assetId of selectedAssets) {
+      const assetIds = Array.from(selectedAssets)
+      for (const assetId of assetIds) {
         try {
           await fileMutation.update(assetId, { is_starred: true })
           updated++

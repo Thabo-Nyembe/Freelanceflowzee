@@ -2145,7 +2145,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             <AIInsightsPanel
               insights={mockInventoryAIInsights}
               title="Inventory Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
 

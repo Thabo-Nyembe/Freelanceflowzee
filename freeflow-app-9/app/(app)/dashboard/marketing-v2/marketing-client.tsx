@@ -2218,10 +2218,10 @@ export default function MarketingClient() {
             <div className="mt-6">
               <ActivityFeed
                 activities={mockActivities}
-                onMarkRead={(id) => console.log('Mark read:', id)}
-                onMarkAllRead={() => console.log('Mark all read')}
-                onPin={(id) => console.log('Pin:', id)}
-                onArchive={(id) => console.log('Archive:', id)}
+                onMarkRead={(id) => toast.success('Marked as read', { description: `Item ${id} marked as read` })}
+                onMarkAllRead={() => toast.success('All marked as read')}
+                onPin={(id) => toast.success('Pinned', { description: `Item ${id} pinned` })}
+                onArchive={(id) => toast.success('Archived', { description: `Item ${id} archived` })}
               />
             </div>
           </TabsContent>
@@ -3229,7 +3229,11 @@ export default function MarketingClient() {
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary">{segment.count.toLocaleString()} contacts</Badge>
-                      <Button size="sm" variant="outline" onClick={() => toast.info(`Editing segment: ${segment.name}`)}>Edit</Button>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        toast.success(`Opening segment editor for "${segment.name}"`)
+                        setShowSegmentsDialog(false)
+                        setTimeout(() => setShowSegmentsDialog(true), 100)
+                      }}>Edit</Button>
                     </div>
                   </div>
                 ))}

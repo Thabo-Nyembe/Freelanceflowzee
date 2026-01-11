@@ -2028,7 +2028,7 @@ export default function ThreeDModelingClient() {
             <AIInsightsPanel
               insights={mock3DAIInsights}
               title="3D Modeling Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

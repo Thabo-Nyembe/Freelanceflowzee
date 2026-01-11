@@ -4185,7 +4185,11 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <p className="text-xs text-gray-500">{agent.role}</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => toast.success(`${agent.name} removed from team`)}>Remove</Button>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      if (confirm(`Are you sure you want to remove ${agent.name} from this team?`)) {
+                        toast.success(`${agent.name} removed from team`, { description: 'Team updated successfully' })
+                      }
+                    }}>Remove</Button>
                   </div>
                 ))}
               </div>

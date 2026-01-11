@@ -2300,7 +2300,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <AIInsightsPanel
               insights={mockPermissionsAIInsights}
               title="Security Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

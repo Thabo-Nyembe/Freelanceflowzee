@@ -2228,7 +2228,7 @@ export default function TeamHubClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={teamHubAIInsights}
-            onAskQuestion={(q) => console.log('Team Question:', q)}
+            onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
           />
           <PredictiveAnalytics predictions={teamHubPredictions} />
         </div>

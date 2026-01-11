@@ -2323,7 +2323,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             <AIInsightsPanel
               insights={mockBookingsAIInsights}
               title="Booking Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

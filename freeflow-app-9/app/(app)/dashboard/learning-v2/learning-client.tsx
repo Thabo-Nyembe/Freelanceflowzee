@@ -2072,7 +2072,7 @@ export default function LearningClient() {
             <AIInsightsPanel
               insights={mockLearningAIInsights}
               title="Learning Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">

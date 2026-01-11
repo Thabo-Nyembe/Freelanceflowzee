@@ -785,7 +785,10 @@ export default function AICreateClient() {
                 <span className="text-sm text-gray-500">credits</span>
               </div>
             </div>
-            <Button variant="outline" onClick={() => toast.info('Upgrade options will be available soon. Contact support for Pro plans.')}>
+            <Button variant="outline" onClick={() => {
+              toast.info('Opening upgrade options...', { description: 'Choose a plan that fits your needs' })
+              window.location.href = '/dashboard/pricing-v2'
+            }}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>
@@ -2281,7 +2284,7 @@ export default function AICreateClient() {
             <AIInsightsPanel
               insights={mockAICreateInsights}
               title="AI Creation Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
