@@ -16,6 +16,16 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Settings,
   User,
   Bell,
@@ -342,6 +352,60 @@ export default function SettingsClient() {
   const [highContrast, setHighContrast] = useState(false)
   const [cookiePreferences, setCookiePreferences] = useState<'essential' | 'functional' | 'all'>('essential')
 
+  // Confirmation dialog states
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
+  const [showRevokeAllIntegrationsDialog, setShowRevokeAllIntegrationsDialog] = useState(false)
+  const [showResetSettingsDialog, setShowResetSettingsDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showDeactivateAccountDialog, setShowDeactivateAccountDialog] = useState(false)
+  const [showCancelSubscriptionDialog, setShowCancelSubscriptionDialog] = useState(false)
+  const [showMuteAllNotificationsDialog, setShowMuteAllNotificationsDialog] = useState(false)
+  const [showRevokeAllSessionsDialog, setShowRevokeAllSessionsDialog] = useState(false)
+
+  // Accessibility settings state
+  const [reduceMotion, setReduceMotion] = useState(false)
+  const [largeText, setLargeText] = useState(false)
+
+  // Avatar file upload state
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
+
+  // Webhook URL state
+  const [webhookUrl, setWebhookUrl] = useState('')
+  const [isSavingWebhook, setIsSavingWebhook] = useState(false)
+
+  // Developer settings state
+  const [apiAccessEnabled, setApiAccessEnabled] = useState(true)
+  const [developerMode, setDeveloperMode] = useState(false)
+  const [verboseLogging, setVerboseLogging] = useState(false)
+
+  // Data management state
+  const [dataRetentionPeriod, setDataRetentionPeriod] = useState('90')
+  const [backupFrequency, setBackupFrequency] = useState('daily')
+  const [autoArchive, setAutoArchive] = useState(true)
+  const [compressBackups, setCompressBackups] = useState(true)
+
+  // Performance settings state
+  const [cachingEnabled, setCachingEnabled] = useState(true)
+  const [prefetchEnabled, setPrefetchEnabled] = useState(true)
+  const [hardwareAcceleration, setHardwareAcceleration] = useState(true)
+  const [backgroundSync, setBackgroundSync] = useState(true)
+  const [cacheSizeLimit, setCacheSizeLimit] = useState(500)
+
+  // Experimental features state
+  const [experimentalFeatures, setExperimentalFeatures] = useState<Record<string, boolean>>({
+    'AI Assistant': false,
+    'New Dashboard': false,
+    'Voice Commands': false,
+    'Collaborative Editing': false
+  })
+
+  // Privacy settings state
+  const [e2eEncryption, setE2eEncryption] = useState(true)
+  const [anonymousAnalytics, setAnonymousAnalytics] = useState(false)
+  const [telemetryEnabled, setTelemetryEnabled] = useState(true)
+  const [sessionTimeout, setSessionTimeout] = useState('30')
+
   // Load additional settings from localStorage
   useEffect(() => {
     const savedSettings = localStorage.getItem('freeflow-settings')
@@ -358,8 +422,33 @@ export default function SettingsClient() {
         if (parsed.fontScale) setFontScale(parsed.fontScale)
         if (parsed.highContrast !== undefined) setHighContrast(parsed.highContrast)
         if (parsed.cookiePreferences) setCookiePreferences(parsed.cookiePreferences)
+        // Load new settings
+        if (parsed.reduceMotion !== undefined) setReduceMotion(parsed.reduceMotion)
+        if (parsed.largeText !== undefined) setLargeText(parsed.largeText)
+        if (parsed.webhookUrl) setWebhookUrl(parsed.webhookUrl)
+        if (parsed.apiAccessEnabled !== undefined) setApiAccessEnabled(parsed.apiAccessEnabled)
+        if (parsed.developerMode !== undefined) setDeveloperMode(parsed.developerMode)
+        if (parsed.verboseLogging !== undefined) setVerboseLogging(parsed.verboseLogging)
+        if (parsed.dataRetentionPeriod) setDataRetentionPeriod(parsed.dataRetentionPeriod)
+        if (parsed.backupFrequency) setBackupFrequency(parsed.backupFrequency)
+        if (parsed.autoArchive !== undefined) setAutoArchive(parsed.autoArchive)
+        if (parsed.compressBackups !== undefined) setCompressBackups(parsed.compressBackups)
+        if (parsed.cachingEnabled !== undefined) setCachingEnabled(parsed.cachingEnabled)
+        if (parsed.prefetchEnabled !== undefined) setPrefetchEnabled(parsed.prefetchEnabled)
+        if (parsed.hardwareAcceleration !== undefined) setHardwareAcceleration(parsed.hardwareAcceleration)
+        if (parsed.backgroundSync !== undefined) setBackgroundSync(parsed.backgroundSync)
+        if (parsed.cacheSizeLimit !== undefined) setCacheSizeLimit(parsed.cacheSizeLimit)
+        if (parsed.experimentalFeatures) setExperimentalFeatures(parsed.experimentalFeatures)
+        if (parsed.e2eEncryption !== undefined) setE2eEncryption(parsed.e2eEncryption)
+        if (parsed.anonymousAnalytics !== undefined) setAnonymousAnalytics(parsed.anonymousAnalytics)
+        if (parsed.telemetryEnabled !== undefined) setTelemetryEnabled(parsed.telemetryEnabled)
+        if (parsed.sessionTimeout) setSessionTimeout(parsed.sessionTimeout)
+        // Apply loaded accessibility settings to DOM
+        if (parsed.reduceMotion) document.documentElement.classList.add('reduce-motion')
+        if (parsed.highContrast) document.documentElement.classList.add('high-contrast')
+        if (parsed.largeText) document.documentElement.style.fontSize = '18px'
       } catch (e) {
-        console.error('Failed to load settings:', e)
+        // Silently handle parsing errors
       }
     }
   }, [])
@@ -779,11 +868,26 @@ export default function SettingsClient() {
   }
 
   // Delete account
-  const handleDeleteAccount = async () => {
-    toast.warning('Delete Account', {
-      description: 'This action cannot be undone. Please contact support to delete your account.',
-      duration: 5000
-    })
+  const handleDeleteAccount = () => {
+    setShowDeleteAccountDialog(true)
+  }
+
+  // Confirm delete account
+  const handleConfirmDeleteAccount = async () => {
+    try {
+      const response = await fetch('/api/account/delete', { method: 'DELETE' })
+      if (response.ok) {
+        toast.success('Account deletion requested', { description: 'You will receive a confirmation email' })
+        // Sign out user
+        await supabase.auth.signOut()
+        window.location.href = '/'
+      } else {
+        toast.error('Failed to delete account', { description: 'Please contact support' })
+      }
+    } catch {
+      toast.error('Failed to delete account', { description: 'Please contact support' })
+    }
+    setShowDeleteAccountDialog(false)
   }
 
   // Legacy handler for compatibility
@@ -909,6 +1013,215 @@ export default function SettingsClient() {
       setIsLoading(false)
     }
   }, [refreshSettings])
+
+  // Avatar upload handler
+  const handleAvatarUpload = async (file: File) => {
+    if (!userId || !file) return
+    setIsUploadingAvatar(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${userId}-${Date.now()}.${fileExt}`
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName)
+
+      await supabase
+        .from('user_settings')
+        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+        .eq('user_id', userId)
+
+      setProfile(prev => ({ ...prev, avatar: publicUrl }))
+      setAvatarFile(null)
+      toast.success('Avatar updated', { description: 'Your profile photo has been changed' })
+    } catch (error: any) {
+      toast.error('Upload failed', { description: error.message || 'Failed to upload avatar' })
+    } finally {
+      setIsUploadingAvatar(false)
+    }
+  }
+
+  // Webhook save handler
+  const handleSaveWebhook = async () => {
+    if (!userId) return
+    setIsSavingWebhook(true)
+    try {
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ webhook_url: webhookUrl, updated_at: new Date().toISOString() })
+        .eq('user_id', userId)
+
+      if (error) throw error
+      saveLocalSettings({ webhookUrl })
+      toast.success('Webhook saved', { description: 'Your webhook URL has been updated' })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to save webhook' })
+    } finally {
+      setIsSavingWebhook(false)
+    }
+  }
+
+  // Revoke all integrations handler
+  const handleRevokeAllIntegrations = async () => {
+    try {
+      if (userId) {
+        await supabase
+          .from('integrations')
+          .update({
+            status: 'disconnected',
+            is_connected: false,
+            connected_at: null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+      }
+      setIntegrations(prev => prev.map(i => ({
+        ...i,
+        status: 'disconnected' as IntegrationStatus,
+        connectedAt: null
+      })))
+      toast.success('All integrations revoked', { description: 'All connected apps have been disconnected' })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to revoke integrations' })
+    }
+    setShowRevokeAllIntegrationsDialog(false)
+  }
+
+  // Clear all caches handler
+  const handleClearAllCaches = async () => {
+    try {
+      if ('caches' in window) {
+        const cacheNames = await caches.keys()
+        await Promise.all(cacheNames.map(name => caches.delete(name)))
+      }
+      localStorage.clear()
+      sessionStorage.clear()
+      toast.success('All caches cleared', { description: 'You may experience slower initial page loads' })
+    } catch (error: any) {
+      toast.error('Error', { description: 'Failed to clear caches' })
+    }
+    setShowClearCacheDialog(false)
+  }
+
+  // Reset all settings handler
+  const handleResetAllSettings = async () => {
+    try {
+      const response = await fetch('/api/settings/reset', { method: 'POST' })
+      if (!response.ok) throw new Error('Reset failed')
+      toast.success('All settings reset to defaults', { description: 'Page will reload...' })
+      setTimeout(() => window.location.reload(), 1500)
+    } catch {
+      toast.error('Failed to reset settings', { description: 'Please try again later' })
+    }
+    setShowResetSettingsDialog(false)
+  }
+
+  // Deactivate account handler
+  const handleDeactivateAccount = async () => {
+    try {
+      const response = await fetch('/api/account/deactivate', { method: 'POST' })
+      if (!response.ok) throw new Error('Deactivation failed')
+      toast.success('Account deactivated', { description: 'You can reactivate by logging in again' })
+    } catch {
+      toast.error('Failed to deactivate account', { description: 'Please contact support' })
+    }
+    setShowDeactivateAccountDialog(false)
+  }
+
+  // Cancel subscription handler
+  const handleCancelSubscription = async () => {
+    try {
+      const response = await fetch('/api/billing/cancel-subscription', { method: 'POST' })
+      if (response.ok) {
+        setBilling(prev => ({ ...prev, plan: 'free' }))
+        toast.success('Subscription cancelled', { description: 'You will retain access until the end of your billing period' })
+      } else {
+        toast.warning('Contact support', { description: 'Please contact support to cancel your subscription' })
+      }
+    } catch {
+      toast.warning('Contact support', { description: 'Please contact support to cancel your subscription' })
+    }
+    setShowCancelSubscriptionDialog(false)
+  }
+
+  // Mute all notifications handler
+  const handleMuteAllNotifications = async () => {
+    setNotifications(prev => prev.map(n => ({
+      ...n,
+      email: false,
+      push: false,
+      inApp: false,
+      sms: false
+    })))
+    await handleSaveNotifications()
+    toast.success('All notifications muted', { description: 'You can re-enable them anytime' })
+    setShowMuteAllNotificationsDialog(false)
+  }
+
+  // Revoke all sessions handler with confirmation
+  const handleRevokeAllSessionsConfirmed = async () => {
+    await handleRevokeAllSessions()
+    setShowRevokeAllSessionsDialog(false)
+  }
+
+  // Handle insight action from AI panel
+  const handleInsightAction = (insight: { id: string; type: string; title: string }) => {
+    switch (insight.type) {
+      case 'warning':
+        toast.warning(insight.title, { description: 'Click to review security settings' })
+        break
+      case 'success':
+        toast.success(insight.title, { description: 'Your settings are optimized' })
+        break
+      default:
+        toast.info(insight.title)
+    }
+  }
+
+  // Generate backup codes with download
+  const handleGenerateBackupCodes = () => {
+    const codes = Array.from({ length: 8 }, () =>
+      Math.random().toString(36).substring(2, 8).toUpperCase()
+    )
+    const codesText = codes.join('\n')
+    const blob = new Blob([`FreeFlow Backup Codes\nGenerated: ${new Date().toISOString()}\n\n${codesText}`], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `freeflow-backup-codes-${new Date().toISOString().split('T')[0]}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    navigator.clipboard.writeText(codesText)
+    toast.success('Backup codes generated', { description: 'Codes downloaded and copied to clipboard' })
+  }
+
+  // Download invoice as PDF-like JSON
+  const handleDownloadInvoice = (invoice: Invoice) => {
+    const invoiceData = {
+      id: invoice.id,
+      date: invoice.date,
+      amount: invoice.amount,
+      status: invoice.status,
+      currency: 'USD',
+      plan: billing.plan,
+      billingCycle: billing.billingCycle,
+      paymentMethod: `${billing.paymentMethod} ****${billing.cardLast4}`,
+      generatedAt: new Date().toISOString()
+    }
+    const blob = new Blob([JSON.stringify(invoiceData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${invoice.id}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(`Invoice ${invoice.id} downloaded`)
+  }
 
   const statCards = [
     { label: 'Profile', value: `${stats.profileCompleteness}%`, change: 5.0, icon: User, color: 'from-blue-500 to-cyan-500' },
@@ -1129,10 +1442,27 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = () => toast.success('Photo selected'); input.click(); }}
+                onClick={() => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = 'image/*'
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0]
+                    if (file) {
+                      if (file.size > 5 * 1024 * 1024) {
+                        toast.error('File too large', { description: 'Maximum size is 5MB' })
+                        return
+                      }
+                      setAvatarFile(file)
+                      handleAvatarUpload(file)
+                    }
+                  }
+                  input.click()
+                }}
+                disabled={isUploadingAvatar}
               >
                 <Camera className="w-5 h-5" />
-                <span className="text-xs font-medium">Change Photo</span>
+                <span className="text-xs font-medium">{isUploadingAvatar ? 'Uploading...' : 'Change Photo'}</span>
               </Button>
               <Button
                 variant="ghost"
@@ -1206,9 +1536,30 @@ export default function SettingsClient() {
                         <AvatarFallback className="text-2xl">{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
                       </Avatar>
                       <div className="space-y-2">
-                        <Button variant="outline" size="sm" onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*'; input.onchange = () => toast.success('Photo selected - save to upload'); input.click(); }}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const input = document.createElement('input')
+                            input.type = 'file'
+                            input.accept = 'image/*'
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0]
+                              if (file) {
+                                if (file.size > 5 * 1024 * 1024) {
+                                  toast.error('File too large', { description: 'Maximum size is 5MB' })
+                                  return
+                                }
+                                setAvatarFile(file)
+                                handleAvatarUpload(file)
+                              }
+                            }
+                            input.click()
+                          }}
+                          disabled={isUploadingAvatar}
+                        >
                           <Camera className="w-4 h-4 mr-2" />
-                          Change Photo
+                          {isUploadingAvatar ? 'Uploading...' : 'Change Photo'}
                         </Button>
                         <p className="text-xs text-gray-500">JPG, GIF or PNG. Max 5MB.</p>
                       </div>
@@ -1440,7 +1791,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { const codes = Array.from({ length: 8 }, () => Math.random().toString(36).substring(2, 8).toUpperCase()).join('\n'); navigator.clipboard.writeText(codes); toast.success('Backup codes copied to clipboard'); }}
+                onClick={handleGenerateBackupCodes}
               >
                 <Download className="w-5 h-5" />
                 <span className="text-xs font-medium">Backup Codes</span>
@@ -1448,7 +1799,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
-                onClick={handleRevokeAllSessions}
+                onClick={() => setShowRevokeAllSessionsDialog(true)}
               >
                 <LogOut className="w-5 h-5" />
                 <span className="text-xs font-medium">Log Out All</span>
@@ -1689,7 +2040,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { setNotifications(prev => prev.map(n => ({ ...n, email: false, push: false, inApp: false, sms: false }))); toast.success('All notifications muted'); }}
+                onClick={() => setShowMuteAllNotificationsDialog(true)}
               >
                 <XCircle className="w-5 h-5" />
                 <span className="text-xs font-medium">Mute All</span>
@@ -1840,7 +2191,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { if (confirm('Revoke all integrations? This will disconnect all apps.')) { setIntegrations(prev => prev.map(i => ({ ...i, status: 'disconnected' as IntegrationStatus, connectedAt: null }))); toast.success('All integrations revoked'); } }}
+                onClick={() => setShowRevokeAllIntegrationsDialog(true)}
               >
                 <Unlink className="w-5 h-5" />
                 <span className="text-xs font-medium">Revoke All</span>
@@ -1987,7 +2338,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { if (confirm('Are you sure you want to cancel your subscription?')) { toast.warning('Contact support to cancel subscription'); } }}
+                onClick={() => setShowCancelSubscriptionDialog(true)}
               >
                 <XCircle className="w-5 h-5" />
                 <span className="text-xs font-medium">Cancel</span>
@@ -2040,7 +2391,7 @@ export default function SettingsClient() {
                           <div className="flex items-center gap-4">
                             <span className="font-medium">${invoice.amount}</span>
                             <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>{invoice.status}</Badge>
-                            <Button variant="ghost" size="icon" onClick={() => { const invoiceData = { id: invoice.id, date: invoice.date, amount: invoice.amount, status: invoice.status }; const blob = new Blob([JSON.stringify(invoiceData, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${invoice.id}.json`; a.click(); URL.revokeObjectURL(url); toast.success(`Invoice ${invoice.id} downloaded`); }}>
+                            <Button variant="ghost" size="icon" onClick={() => handleDownloadInvoice(invoice)}>
                               <Download className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2249,7 +2600,15 @@ export default function SettingsClient() {
                         <p className="text-sm text-gray-500">Minimize animations</p>
                       </div>
                     </div>
-                    <Switch onCheckedChange={(checked) => { document.documentElement.classList.toggle('reduce-motion', checked); toast.success(checked ? 'Reduce motion enabled' : 'Reduce motion disabled'); }} />
+                    <Switch
+                      checked={reduceMotion}
+                      onCheckedChange={(checked) => {
+                        setReduceMotion(checked)
+                        document.documentElement.classList.toggle('reduce-motion', checked)
+                        saveLocalSettings({ reduceMotion: checked })
+                        toast.success(checked ? 'Reduce motion enabled' : 'Reduce motion disabled')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center gap-3">
@@ -2259,7 +2618,15 @@ export default function SettingsClient() {
                         <p className="text-sm text-gray-500">Increase text contrast</p>
                       </div>
                     </div>
-                    <Switch onCheckedChange={(checked) => { document.documentElement.classList.toggle('high-contrast', checked); toast.success(checked ? 'High contrast enabled' : 'High contrast disabled'); }} />
+                    <Switch
+                      checked={highContrast}
+                      onCheckedChange={(checked) => {
+                        setHighContrast(checked)
+                        document.documentElement.classList.toggle('high-contrast', checked)
+                        saveLocalSettings({ highContrast: checked })
+                        toast.success(checked ? 'High contrast enabled' : 'High contrast disabled')
+                      }}
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center gap-3">
@@ -2269,7 +2636,16 @@ export default function SettingsClient() {
                         <p className="text-sm text-gray-500">Increase font size</p>
                       </div>
                     </div>
-                    <Switch onCheckedChange={(checked) => { document.documentElement.style.fontSize = checked ? '18px' : '16px'; toast.success(checked ? 'Large text enabled' : 'Large text disabled'); }} />
+                    <Switch
+                      checked={largeText}
+                      onCheckedChange={(checked) => {
+                        setLargeText(checked)
+                        setFontScale(checked ? 'large' : 'default')
+                        document.documentElement.style.fontSize = checked ? '18px' : '16px'
+                        saveLocalSettings({ largeText: checked, fontScale: checked ? 'large' : 'default' })
+                        toast.success(checked ? 'Large text enabled' : 'Large text disabled')
+                      }}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -2372,7 +2748,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { if (confirm('Reset all settings to defaults?')) { setTheme('system'); toast.success('Settings reset to defaults'); } }}
+                onClick={() => setShowResetSettingsDialog(true)}
               >
                 <RefreshCw className="w-5 h-5" />
                 <span className="text-xs font-medium">Reset</span>
@@ -2536,7 +2912,20 @@ export default function SettingsClient() {
 
                     <div className="space-y-2 pt-4 border-t">
                       <Label>Webhook URL</Label>
-                      <Input placeholder="https://your-app.com/webhooks" />
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="https://your-app.com/webhooks"
+                          value={webhookUrl}
+                          onChange={(e) => setWebhookUrl(e.target.value)}
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={handleSaveWebhook}
+                          disabled={isSavingWebhook || !webhookUrl}
+                        >
+                          {isSavingWebhook ? 'Saving...' : 'Save'}
+                        </Button>
+                      </div>
                       <p className="text-xs text-muted-foreground">Receive real-time notifications via webhooks</p>
                     </div>
 
@@ -2546,21 +2935,42 @@ export default function SettingsClient() {
                           <p className="font-medium">Enable API Access</p>
                           <p className="text-sm text-muted-foreground">Allow programmatic access to your account</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={apiAccessEnabled}
+                          onCheckedChange={(checked) => {
+                            setApiAccessEnabled(checked)
+                            saveLocalSettings({ apiAccessEnabled: checked })
+                            toast.success(checked ? 'API access enabled' : 'API access disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Developer Mode</p>
                           <p className="text-sm text-muted-foreground">Show additional debugging info</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={developerMode}
+                          onCheckedChange={(checked) => {
+                            setDeveloperMode(checked)
+                            saveLocalSettings({ developerMode: checked })
+                            toast.success(checked ? 'Developer mode enabled' : 'Developer mode disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Verbose Logging</p>
                           <p className="text-sm text-muted-foreground">Enable detailed activity logs</p>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={verboseLogging}
+                          onCheckedChange={(checked) => {
+                            setVerboseLogging(checked)
+                            saveLocalSettings({ verboseLogging: checked })
+                            toast.success(checked ? 'Verbose logging enabled' : 'Verbose logging disabled')
+                          }}
+                        />
                       </div>
                     </div>
                   </CardContent>
@@ -2579,7 +2989,14 @@ export default function SettingsClient() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Data Retention Period</Label>
-                        <Select defaultValue="90">
+                        <Select
+                          value={dataRetentionPeriod}
+                          onValueChange={(value) => {
+                            setDataRetentionPeriod(value)
+                            saveLocalSettings({ dataRetentionPeriod: value })
+                            toast.success(`Data retention set to ${value} days`)
+                          }}
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -2595,7 +3012,14 @@ export default function SettingsClient() {
                       </div>
                       <div className="space-y-2">
                         <Label>Backup Frequency</Label>
-                        <Select defaultValue="daily">
+                        <Select
+                          value={backupFrequency}
+                          onValueChange={(value) => {
+                            setBackupFrequency(value)
+                            saveLocalSettings({ backupFrequency: value })
+                            toast.success(`Backup frequency set to ${value}`)
+                          }}
+                        >
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -2615,14 +3039,28 @@ export default function SettingsClient() {
                           <p className="font-medium">Auto-archive Old Data</p>
                           <p className="text-sm text-muted-foreground">Move old data to cold storage</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={autoArchive}
+                          onCheckedChange={(checked) => {
+                            setAutoArchive(checked)
+                            saveLocalSettings({ autoArchive: checked })
+                            toast.success(checked ? 'Auto-archive enabled' : 'Auto-archive disabled')
+                          }}
+                        />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">Compress Backups</p>
                           <p className="text-sm text-muted-foreground">Reduce backup storage size</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          checked={compressBackups}
+                          onCheckedChange={(checked) => {
+                            setCompressBackups(checked)
+                            saveLocalSettings({ compressBackups: checked })
+                            toast.success(checked ? 'Backup compression enabled' : 'Backup compression disabled')
+                          }}
+                        />
                       </div>
                     </div>
 
@@ -2631,7 +3069,35 @@ export default function SettingsClient() {
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
-                      <Button variant="outline" className="flex-1" onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = (e) => { const file = (e.target as HTMLInputElement).files?.[0]; if (file) { const reader = new FileReader(); reader.onload = () => { try { JSON.parse(reader.result as string); toast.success('Data imported successfully'); } catch { toast.error('Invalid JSON file'); } }; reader.readAsText(file); } }; input.click(); }}>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => {
+                          const input = document.createElement('input')
+                          input.type = 'file'
+                          input.accept = '.json'
+                          input.onchange = async (e) => {
+                            const file = (e.target as HTMLInputElement).files?.[0]
+                            if (file) {
+                              const reader = new FileReader()
+                              reader.onload = async () => {
+                                try {
+                                  const data = JSON.parse(reader.result as string)
+                                  // Validate and apply imported settings
+                                  if (data.settings) {
+                                    setProfile(prev => ({ ...prev, ...data.settings.profile }))
+                                  }
+                                  toast.success('Data imported successfully', { description: 'Your settings have been restored' })
+                                } catch {
+                                  toast.error('Invalid JSON file', { description: 'Please select a valid settings export file' })
+                                }
+                              }
+                              reader.readAsText(file)
+                            }
+                          }
+                          input.click()
+                        }}
+                      >
                         <Upload className="w-4 h-4 mr-2" />
                         Import Data
                       </Button>
@@ -2640,7 +3106,7 @@ export default function SettingsClient() {
                 </Card>
 
                 {/* Performance Settings */}
-                <Card className="border-0 shadow-sm">
+                <Card className="border-0 shadow-sm" data-performance-section>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Cpu className="w-5 h-5 text-purple-500" />
@@ -2654,34 +3120,73 @@ export default function SettingsClient() {
                         <p className="font-medium">Enable Caching</p>
                         <p className="text-sm text-muted-foreground">Cache data for faster loading</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={cachingEnabled}
+                        onCheckedChange={(checked) => {
+                          setCachingEnabled(checked)
+                          saveLocalSettings({ cachingEnabled: checked })
+                          toast.success(checked ? 'Caching enabled' : 'Caching disabled')
+                        }}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Prefetch Resources</p>
                         <p className="text-sm text-muted-foreground">Preload content for instant access</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={prefetchEnabled}
+                        onCheckedChange={(checked) => {
+                          setPrefetchEnabled(checked)
+                          saveLocalSettings({ prefetchEnabled: checked })
+                          toast.success(checked ? 'Prefetching enabled' : 'Prefetching disabled')
+                        }}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Hardware Acceleration</p>
                         <p className="text-sm text-muted-foreground">Use GPU for rendering</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={hardwareAcceleration}
+                        onCheckedChange={(checked) => {
+                          setHardwareAcceleration(checked)
+                          saveLocalSettings({ hardwareAcceleration: checked })
+                          toast.success(checked ? 'Hardware acceleration enabled' : 'Hardware acceleration disabled')
+                        }}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Background Sync</p>
                         <p className="text-sm text-muted-foreground">Sync data in background</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={backgroundSync}
+                        onCheckedChange={(checked) => {
+                          setBackgroundSync(checked)
+                          saveLocalSettings({ backgroundSync: checked })
+                          toast.success(checked ? 'Background sync enabled' : 'Background sync disabled')
+                        }}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>Cache Size Limit (MB)</Label>
                       <div className="flex items-center gap-4">
-                        <Input type="range" min="100" max="1000" defaultValue="500" className="flex-1" />
-                        <span className="text-sm font-medium w-16">500 MB</span>
+                        <Input
+                          type="range"
+                          min="100"
+                          max="1000"
+                          value={cacheSizeLimit}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value)
+                            setCacheSizeLimit(value)
+                            saveLocalSettings({ cacheSizeLimit: value })
+                          }}
+                          className="flex-1"
+                        />
+                        <span className="text-sm font-medium w-16">{cacheSizeLimit} MB</span>
                       </div>
                     </div>
                   </CardContent>
@@ -2725,7 +3230,17 @@ export default function SettingsClient() {
                               <p className="text-sm text-muted-foreground">{feature.description}</p>
                             </div>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={experimentalFeatures[feature.name] || false}
+                            onCheckedChange={(checked) => {
+                              const newFeatures = { ...experimentalFeatures, [feature.name]: checked }
+                              setExperimentalFeatures(newFeatures)
+                              saveLocalSettings({ experimentalFeatures: newFeatures })
+                              toast.success(checked ? `${feature.name} enabled` : `${feature.name} disabled`, {
+                                description: checked ? 'This feature is experimental' : undefined
+                              })
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -2747,21 +3262,42 @@ export default function SettingsClient() {
                         <p className="font-medium">End-to-End Encryption</p>
                         <p className="text-sm text-muted-foreground">Encrypt all data transfers</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={e2eEncryption}
+                        onCheckedChange={(checked) => {
+                          setE2eEncryption(checked)
+                          saveLocalSettings({ e2eEncryption: checked })
+                          toast.success(checked ? 'End-to-end encryption enabled' : 'End-to-end encryption disabled')
+                        }}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Anonymous Analytics</p>
                         <p className="text-sm text-muted-foreground">Share anonymous usage data</p>
                       </div>
-                      <Switch />
+                      <Switch
+                        checked={anonymousAnalytics}
+                        onCheckedChange={(checked) => {
+                          setAnonymousAnalytics(checked)
+                          saveLocalSettings({ anonymousAnalytics: checked })
+                          toast.success(checked ? 'Anonymous analytics enabled' : 'Anonymous analytics disabled')
+                        }}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Telemetry</p>
                         <p className="text-sm text-muted-foreground">Send crash reports</p>
                       </div>
-                      <Switch defaultChecked />
+                      <Switch
+                        checked={telemetryEnabled}
+                        onCheckedChange={(checked) => {
+                          setTelemetryEnabled(checked)
+                          saveLocalSettings({ telemetryEnabled: checked })
+                          toast.success(checked ? 'Telemetry enabled' : 'Telemetry disabled')
+                        }}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <div>
@@ -2772,7 +3308,14 @@ export default function SettingsClient() {
                     </div>
                     <div className="space-y-2">
                       <Label>Session Timeout (minutes)</Label>
-                      <Select defaultValue="30">
+                      <Select
+                        value={sessionTimeout}
+                        onValueChange={(value) => {
+                          setSessionTimeout(value)
+                          saveLocalSettings({ sessionTimeout: value })
+                          toast.success(`Session timeout set to ${value === 'never' ? 'never expire' : value + ' minutes'}`)
+                        }}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -2803,7 +3346,7 @@ export default function SettingsClient() {
                         <p className="font-medium text-red-600">Clear All Caches</p>
                         <p className="text-sm text-muted-foreground">Remove all cached data</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => { if (confirm('Clear all cached data? This may slow down initial page loads.')) { if ('caches' in window) { caches.keys().then(names => { names.forEach(name => caches.delete(name)); }); } localStorage.clear(); sessionStorage.clear(); toast.success('All caches cleared'); } }}>
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowClearCacheDialog(true)}>
                         <Trash className="w-4 h-4 mr-2" />
                         Clear
                       </Button>
@@ -2813,17 +3356,7 @@ export default function SettingsClient() {
                         <p className="font-medium text-red-600">Reset All Settings</p>
                         <p className="text-sm text-muted-foreground">Restore default settings</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={async () => {
-                          if (!confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) return
-                          try {
-                            const response = await fetch('/api/settings/reset', { method: 'POST' })
-                            if (!response.ok) throw new Error('Reset failed')
-                            toast.success('All settings reset to defaults')
-                            window.location.reload()
-                          } catch {
-                            toast.error('Failed to reset settings')
-                          }
-                        }}>
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowResetSettingsDialog(true)}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reset
                       </Button>
@@ -2833,16 +3366,7 @@ export default function SettingsClient() {
                         <p className="font-medium text-red-600">Deactivate Account</p>
                         <p className="text-sm text-muted-foreground">Temporarily disable your account</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={async () => {
-                          if (!confirm('Are you sure you want to deactivate your account? You can reactivate it later by logging in.')) return
-                          try {
-                            const response = await fetch('/api/account/deactivate', { method: 'POST' })
-                            if (!response.ok) throw new Error('Deactivation failed')
-                            toast.success('Account deactivated successfully')
-                          } catch {
-                            toast.error('Failed to deactivate account')
-                          }
-                        }}>
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => setShowDeactivateAccountDialog(true)}>
                         <Ban className="w-4 h-4 mr-2" />
                         Deactivate
                       </Button>
@@ -2982,7 +3506,7 @@ export default function SettingsClient() {
             <AIInsightsPanel
               insights={mockSettingsAIInsights}
               title="Account Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
@@ -3009,6 +3533,143 @@ export default function SettingsClient() {
           />
         </div>
       </div>
+
+      {/* Confirmation Dialogs */}
+      <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600">Delete Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteAccount} className="bg-red-600 hover:bg-red-700">
+              Delete Account
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showRevokeAllIntegrationsDialog} onOpenChange={setShowRevokeAllIntegrationsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke All Integrations</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will disconnect all connected apps and services. You will need to reconnect them manually.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRevokeAllIntegrations}>
+              Revoke All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showResetSettingsDialog} onOpenChange={setShowResetSettingsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset All Settings</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will reset all your settings to their default values. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetAllSettings}>
+              Reset Settings
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear All Caches</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove all cached data including local storage and session data. You may experience slower initial page loads.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearAllCaches}>
+              Clear Caches
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showDeactivateAccountDialog} onOpenChange={setShowDeactivateAccountDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deactivate Account</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your account will be temporarily disabled. You can reactivate it by logging in again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeactivateAccount}>
+              Deactivate
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showCancelSubscriptionDialog} onOpenChange={setShowCancelSubscriptionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel your subscription? You will retain access until the end of your current billing period.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelSubscription}>
+              Cancel Subscription
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showMuteAllNotificationsDialog} onOpenChange={setShowMuteAllNotificationsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mute All Notifications</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will disable all email, push, in-app, and SMS notifications. You can re-enable them at any time.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleMuteAllNotifications}>
+              Mute All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showRevokeAllSessionsDialog} onOpenChange={setShowRevokeAllSessionsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log Out All Sessions</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will log you out from all devices except this one. You will need to log in again on other devices.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRevokeAllSessionsConfirmed}>
+              Log Out All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

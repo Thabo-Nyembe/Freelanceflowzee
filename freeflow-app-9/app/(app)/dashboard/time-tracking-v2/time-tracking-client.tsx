@@ -332,6 +332,59 @@ export default function TimeTrackingClient() {
     cityStateZip: 'New York, NY 10001'
   })
 
+  // Client form state
+  const [clientFormData, setClientFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    currency: 'USD',
+    address: '',
+    notes: '',
+    hourlyRate: ''
+  })
+
+  // Tag form state
+  const [tagFormData, setTagFormData] = useState({
+    name: '',
+    color: 'blue'
+  })
+
+  // Project form state
+  const [projectFormData, setProjectFormData] = useState({
+    name: '',
+    clientId: '',
+    hourlyRate: '',
+    budget: '',
+    isBillable: true
+  })
+
+  // Invoice form state
+  const [invoiceFormData, setInvoiceFormData] = useState({
+    clientName: '',
+    projectId: '',
+    fromDate: '',
+    toDate: '',
+    dueDate: ''
+  })
+
+  // Report form state
+  const [reportFormData, setReportFormData] = useState({
+    name: '',
+    type: '',
+    dateRange: '',
+    groupBy: '',
+    isScheduled: false
+  })
+
+  // Filter state for timesheet and reports
+  const [filters, setFilters] = useState({
+    projectId: '',
+    dateFrom: '',
+    dateTo: '',
+    status: '',
+    billableOnly: false
+  })
+
   // Database integration - use real time tracking hook with all CRUD operations
   const {
     timeEntries: dbTimeEntries,
@@ -1087,15 +1140,39 @@ export default function TimeTrackingClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Today's Entries {entriesLoading && <span className="text-sm font-normal text-gray-500">(Loading...)</span>}</CardTitle>
-                <span className="text-sm text-gray-500">
-                  Total: {dbTimeEntries && dbTimeEntries.length > 0
-                    ? dbTimeEntries.filter((e: any) => new Date(e.start_time).toDateString() === new Date().toDateString())
-                        .reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0).toFixed(1)
-                    : mockEntries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h
-                </span>
+                <div className="flex items-center gap-4">
+                  {/* Filter Controls */}
+                  <div className="flex items-center gap-2">
+                    <Select value={filters.projectId} onValueChange={(value) => setFilters(prev => ({ ...prev, projectId: value }))}>
+                      <SelectTrigger className="w-40 h-8 text-xs"><SelectValue placeholder="All Projects" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Projects</SelectItem>
+                        {mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Input type="date" className="w-36 h-8 text-xs" value={filters.dateFrom} onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))} placeholder="From" />
+                    <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => setFilters({ projectId: '', dateFrom: '', dateTo: '', status: '', billableOnly: false })}>Clear</Button>
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    Total: {(() => {
+                      const entries = dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
+                        start_time: e.startTime,
+                        project_id: e.projectId,
+                        duration_hours: e.durationHours
+                      }))
+                      const filteredEntries = entries.filter((e: any) => {
+                        const matchDate = !filters.dateFrom || new Date(e.start_time).toDateString() === new Date(filters.dateFrom).toDateString()
+                        const matchProject = !filters.projectId || e.project_id === filters.projectId
+                        const isToday = new Date(e.start_time).toDateString() === new Date().toDateString()
+                        return (filters.dateFrom ? matchDate : isToday) && matchProject
+                      })
+                      return filteredEntries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0).toFixed(1)
+                    })()}h
+                  </span>
+                </div>
               </CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
-                {/* Show database entries if available, otherwise show mock data */}
+                {/* Show database entries if available, otherwise show mock data - with filtering */}
                 {(dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
                   id: e.id,
                   title: e.title,
@@ -1106,7 +1183,13 @@ export default function TimeTrackingClient() {
                   end_time: e.endTime,
                   duration_hours: e.durationHours,
                   billable_amount: e.billableAmount
-                }))).map((entry: any) => {
+                }))).filter((entry: any) => {
+                  const matchDate = !filters.dateFrom || new Date(entry.start_time).toDateString() === new Date(filters.dateFrom).toDateString()
+                  const matchProject = !filters.projectId || entry.project_id === filters.projectId
+                  const isToday = new Date(entry.start_time).toDateString() === new Date().toDateString()
+                  const matchBillable = !filters.billableOnly || entry.is_billable
+                  return (filters.dateFrom ? matchDate : isToday) && matchProject && matchBillable
+                }).map((entry: any) => {
                   const project = mockProjects.find(p => p.id === entry.project_id)
                   return (
                     <div key={entry.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
@@ -2539,7 +2622,21 @@ export default function TimeTrackingClient() {
             <AIInsightsPanel
               insights={mockTimeTrackingAIInsights}
               title="Time Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                if (insight.type === 'warning') {
+                  toast.promise(
+                    (async () => {
+                      await new Promise(r => setTimeout(r, 500))
+                      return insight
+                    })(),
+                    { loading: 'Reviewing insight...', success: `Acknowledged: ${insight.title}`, error: 'Failed to process insight' }
+                  )
+                } else if (insight.type === 'success') {
+                  toast.success(`Great job! ${insight.description}`)
+                } else {
+                  toast.info(insight.description)
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2623,87 +2720,192 @@ export default function TimeTrackingClient() {
         </Dialog>
 
         {/* Invoice Dialog */}
-        <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
+        <Dialog open={showInvoiceDialog} onOpenChange={(open) => {
+          setShowInvoiceDialog(open)
+          if (!open) setInvoiceFormData({ clientName: '', projectId: '', fromDate: '', toDate: '', dueDate: '' })
+        }}>
           <DialogContent><DialogHeader><DialogTitle>Create Invoice</DialogTitle><DialogDescription>Generate invoice from tracked time</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
-              <div><Label>Project</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>From Date</Label><Input type="date" className="mt-1" /></div><div><Label>To Date</Label><Input type="date" className="mt-1" /></div></div>
-              <div><Label>Due Date</Label><Input type="date" className="mt-1" /></div>
+              <div><Label>Client</Label><Select value={invoiceFormData.clientName} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, clientName: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Project</Label><Select value={invoiceFormData.projectId} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.filter(p => !invoiceFormData.clientName || p.client === invoiceFormData.clientName).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>From Date</Label><Input type="date" className="mt-1" value={invoiceFormData.fromDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, fromDate: e.target.value }))} /></div><div><Label>To Date</Label><Input type="date" className="mt-1" value={invoiceFormData.toDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, toDate: e.target.value }))} /></div></div>
+              <div><Label>Due Date</Label><Input type="date" className="mt-1" value={invoiceFormData.dueDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, dueDate: e.target.value }))} /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { const entries = dbTimeEntries || []; const billableEntries = entries.filter((e: any) => e.is_billable); const totalHours = billableEntries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0); const totalAmount = billableEntries.reduce((sum: number, e: any) => sum + (e.billable_amount || 0), 0); toast.success(`Invoice generated: ${billableEntries.length} entries, ${totalHours.toFixed(1)}h, $${totalAmount.toFixed(2)}`); setShowInvoiceDialog(false) }}>Generate Invoice</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+              if (!invoiceFormData.clientName) {
+                toast.error('Please select a client')
+                return
+              }
+              toast.promise(
+                (async () => {
+                  const entries = dbTimeEntries || []
+                  const filteredEntries = entries.filter((e: any) => {
+                    const matchProject = !invoiceFormData.projectId || e.project_id === invoiceFormData.projectId
+                    const matchBillable = e.is_billable
+                    const entryDate = new Date(e.start_time)
+                    const matchFromDate = !invoiceFormData.fromDate || entryDate >= new Date(invoiceFormData.fromDate)
+                    const matchToDate = !invoiceFormData.toDate || entryDate <= new Date(invoiceFormData.toDate)
+                    return matchProject && matchBillable && matchFromDate && matchToDate
+                  })
+                  const totalHours = filteredEntries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0)
+                  const totalAmount = filteredEntries.reduce((sum: number, e: any) => sum + (e.billable_amount || 0), 0)
+                  await new Promise(r => setTimeout(r, 800))
+                  return { entries: filteredEntries.length, hours: totalHours, amount: totalAmount }
+                })(),
+                {
+                  loading: 'Generating invoice...',
+                  success: (data) => `Invoice created: ${data.entries} entries, ${data.hours.toFixed(1)}h, $${data.amount.toFixed(2)}`,
+                  error: 'Failed to generate invoice'
+                }
+              )
+              setShowInvoiceDialog(false)
+              setInvoiceFormData({ clientName: '', projectId: '', fromDate: '', toDate: '', dueDate: '' })
+            }}>Generate Invoice</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Client Dialog */}
-        <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
-          <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Add New Client</DialogTitle><DialogDescription>Create a new client for billing and project tracking</DialogDescription></DialogHeader>
+        <Dialog open={showClientDialog} onOpenChange={(open) => {
+          setShowClientDialog(open)
+          if (!open) setClientFormData({ name: '', email: '', phone: '', currency: 'USD', address: '', notes: '', hourlyRate: '' })
+        }}>
+          <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>{selectedClient ? 'Edit Client' : 'Add New Client'}</DialogTitle><DialogDescription>{selectedClient ? 'Update client details' : 'Create a new client for billing and project tracking'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4"><div><Label>Client Name</Label><Input placeholder="Company name" className="mt-1" /></div><div><Label>Email</Label><Input type="email" placeholder="billing@company.com" className="mt-1" /></div></div>
-              <div className="grid grid-cols-2 gap-4"><div><Label>Phone</Label><Input placeholder="+1 555-0100" className="mt-1" /></div><div><Label>Currency</Label><Select defaultValue="USD"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="CAD">CAD</SelectItem></SelectContent></Select></div></div>
-              <div><Label>Address</Label><Input placeholder="123 Business Ave, City, State ZIP" className="mt-1" /></div>
-              <div><Label>Notes</Label><Input placeholder="Additional notes about this client" className="mt-1" /></div>
-              <div><Label>Default Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" /></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Client Name</Label><Input placeholder="Company name" className="mt-1" value={clientFormData.name} onChange={(e) => setClientFormData(prev => ({ ...prev, name: e.target.value }))} /></div><div><Label>Email</Label><Input type="email" placeholder="billing@company.com" className="mt-1" value={clientFormData.email} onChange={(e) => setClientFormData(prev => ({ ...prev, email: e.target.value }))} /></div></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Phone</Label><Input placeholder="+1 555-0100" className="mt-1" value={clientFormData.phone} onChange={(e) => setClientFormData(prev => ({ ...prev, phone: e.target.value }))} /></div><div><Label>Currency</Label><Select value={clientFormData.currency} onValueChange={(value) => setClientFormData(prev => ({ ...prev, currency: value }))}><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="CAD">CAD</SelectItem></SelectContent></Select></div></div>
+              <div><Label>Address</Label><Input placeholder="123 Business Ave, City, State ZIP" className="mt-1" value={clientFormData.address} onChange={(e) => setClientFormData(prev => ({ ...prev, address: e.target.value }))} /></div>
+              <div><Label>Notes</Label><Input placeholder="Additional notes about this client" className="mt-1" value={clientFormData.notes} onChange={(e) => setClientFormData(prev => ({ ...prev, notes: e.target.value }))} /></div>
+              <div><Label>Default Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" value={clientFormData.hourlyRate} onChange={(e) => setClientFormData(prev => ({ ...prev, hourlyRate: e.target.value }))} /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowClientDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { toast.success('Client created successfully'); setShowClientDialog(false) }}>Create Client</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => { setShowClientDialog(false); setSelectedClient(null) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+              if (!clientFormData.name) {
+                toast.error('Client name is required')
+                return
+              }
+              toast.promise(
+                (async () => {
+                  await new Promise(r => setTimeout(r, 800))
+                  return clientFormData.name
+                })(),
+                {
+                  loading: selectedClient ? 'Updating client...' : 'Creating client...',
+                  success: (name) => `${selectedClient ? 'Updated' : 'Created'} client: ${name}`,
+                  error: `Failed to ${selectedClient ? 'update' : 'create'} client`
+                }
+              )
+              setShowClientDialog(false)
+              setSelectedClient(null)
+              setClientFormData({ name: '', email: '', phone: '', currency: 'USD', address: '', notes: '', hourlyRate: '' })
+            }}>{selectedClient ? 'Update Client' : 'Create Client'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Tag Dialog */}
-        <Dialog open={showTagDialog} onOpenChange={setShowTagDialog}>
+        <Dialog open={showTagDialog} onOpenChange={(open) => {
+          setShowTagDialog(open)
+          if (!open) setTagFormData({ name: '', color: 'blue' })
+        }}>
           <DialogContent><DialogHeader><DialogTitle>Create New Tag</DialogTitle><DialogDescription>Add a tag to categorize time entries</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Tag Name</Label><Input placeholder="e.g., development, meeting, review" className="mt-1" /></div>
+              <div><Label>Tag Name</Label><Input placeholder="e.g., development, meeting, review" className="mt-1" value={tagFormData.name} onChange={(e) => setTagFormData(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div><Label>Color</Label>
                 <div className="flex gap-2 mt-2">
                   {['red', 'orange', 'amber', 'green', 'blue', 'indigo', 'purple', 'pink'].map(color => (
-                    <button key={color} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all`} />
+                    <button key={color} onClick={() => setTagFormData(prev => ({ ...prev, color }))} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all ${tagFormData.color === color ? 'ring-2 ring-offset-2 ring-gray-800' : ''}`} />
                   ))}
                 </div>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowTagDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { toast.success('Tag created successfully'); setShowTagDialog(false) }}>Create Tag</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowTagDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+              if (!tagFormData.name) {
+                toast.error('Tag name is required')
+                return
+              }
+              toast.promise(
+                (async () => {
+                  await new Promise(r => setTimeout(r, 500))
+                  return tagFormData.name
+                })(),
+                {
+                  loading: 'Creating tag...',
+                  success: (name) => `Tag "${name}" created successfully`,
+                  error: 'Failed to create tag'
+                }
+              )
+              setShowTagDialog(false)
+              setTagFormData({ name: '', color: 'blue' })
+            }}>Create Tag</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Report Builder Dialog */}
-        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <Dialog open={showReportDialog} onOpenChange={(open) => {
+          setShowReportDialog(open)
+          if (!open) setReportFormData({ name: '', type: '', dateRange: '', groupBy: '', isScheduled: false })
+        }}>
           <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>Create New Report</DialogTitle><DialogDescription>Build a custom report with your preferred filters</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" /></div>
+              <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" value={reportFormData.name} onChange={(e) => setReportFormData(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Report Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="summary">Summary</SelectItem><SelectItem value="detailed">Detailed</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="project">By Project</SelectItem><SelectItem value="client">By Client</SelectItem><SelectItem value="team">Team</SelectItem></SelectContent></Select></div>
-                <div><Label>Date Range</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select range" /></SelectTrigger><SelectContent><SelectItem value="week">This Week</SelectItem><SelectItem value="month">This Month</SelectItem><SelectItem value="quarter">This Quarter</SelectItem><SelectItem value="year">This Year</SelectItem><SelectItem value="custom">Custom Range</SelectItem></SelectContent></Select></div>
+                <div><Label>Report Type</Label><Select value={reportFormData.type} onValueChange={(value) => setReportFormData(prev => ({ ...prev, type: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="summary">Summary</SelectItem><SelectItem value="detailed">Detailed</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="project">By Project</SelectItem><SelectItem value="client">By Client</SelectItem><SelectItem value="team">Team</SelectItem></SelectContent></Select></div>
+                <div><Label>Date Range</Label><Select value={reportFormData.dateRange} onValueChange={(value) => setReportFormData(prev => ({ ...prev, dateRange: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select range" /></SelectTrigger><SelectContent><SelectItem value="week">This Week</SelectItem><SelectItem value="month">This Month</SelectItem><SelectItem value="quarter">This Quarter</SelectItem><SelectItem value="year">This Year</SelectItem><SelectItem value="custom">Custom Range</SelectItem></SelectContent></Select></div>
               </div>
               <div><Label>Filters</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">All Projects</Badge>
-                  <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">Billable Only</Badge>
+                  <Badge variant="outline" className={`cursor-pointer hover:bg-amber-50 ${!filters.projectId ? 'bg-amber-100' : ''}`} onClick={() => setFilters(prev => ({ ...prev, projectId: '' }))}>All Projects</Badge>
+                  <Badge variant="outline" className={`cursor-pointer hover:bg-amber-50 ${filters.billableOnly ? 'bg-amber-100' : ''}`} onClick={() => setFilters(prev => ({ ...prev, billableOnly: !prev.billableOnly }))}>Billable Only</Badge>
                   <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">All Team Members</Badge>
                   <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">Active Clients</Badge>
                 </div>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div><p className="font-medium">Schedule Report</p><p className="text-sm text-gray-500">Automatically run and email this report</p></div>
-                <Switch />
+                <Switch checked={reportFormData.isScheduled} onCheckedChange={(checked) => setReportFormData(prev => ({ ...prev, isScheduled: checked }))} />
               </div>
-              <div><Label>Group By</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select grouping" /></SelectTrigger><SelectContent><SelectItem value="day">Day</SelectItem><SelectItem value="week">Week</SelectItem><SelectItem value="project">Project</SelectItem><SelectItem value="client">Client</SelectItem><SelectItem value="member">Team Member</SelectItem></SelectContent></Select></div>
+              <div><Label>Group By</Label><Select value={reportFormData.groupBy} onValueChange={(value) => setReportFormData(prev => ({ ...prev, groupBy: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select grouping" /></SelectTrigger><SelectContent><SelectItem value="day">Day</SelectItem><SelectItem value="week">Week</SelectItem><SelectItem value="project">Project</SelectItem><SelectItem value="client">Client</SelectItem><SelectItem value="member">Team Member</SelectItem></SelectContent></Select></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button><Button variant="outline" onClick={() => { const entries = dbTimeEntries || mockEntries; const totalHours = entries.reduce((sum: any, e: any) => sum + (e.duration_hours || e.durationHours || 0), 0); toast.success(`Report preview: ${entries.length} entries, ${totalHours.toFixed(1)} total hours`); }}><Eye className="h-4 w-4 mr-2" />Preview</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { toast.success('Report saved successfully'); setShowReportDialog(false) }}>Save Report</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button><Button variant="outline" onClick={() => {
+              const entries = dbTimeEntries || mockEntries
+              const filteredEntries = entries.filter((e: any) => !filters.billableOnly || (e.is_billable || e.isBillable))
+              const totalHours = filteredEntries.reduce((sum: any, e: any) => sum + (e.duration_hours || e.durationHours || 0), 0)
+              const totalRevenue = filteredEntries.reduce((sum: any, e: any) => sum + (e.billable_amount || e.billableAmount || 0), 0)
+              toast.success(`Report preview: ${filteredEntries.length} entries, ${totalHours.toFixed(1)}h, $${totalRevenue.toFixed(2)}`)
+            }}><Eye className="h-4 w-4 mr-2" />Preview</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+              if (!reportFormData.name) {
+                toast.error('Report name is required')
+                return
+              }
+              toast.promise(
+                (async () => {
+                  await new Promise(r => setTimeout(r, 800))
+                  return reportFormData.name
+                })(),
+                {
+                  loading: 'Saving report...',
+                  success: (name) => `Report "${name}" saved successfully${reportFormData.isScheduled ? ' (scheduled)' : ''}`,
+                  error: 'Failed to save report'
+                }
+              )
+              setShowReportDialog(false)
+              setReportFormData({ name: '', type: '', dateRange: '', groupBy: '', isScheduled: false })
+            }}>Save Report</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* New Project Dialog */}
-        <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
+        <Dialog open={showProjectDialog} onOpenChange={(open) => {
+          setShowProjectDialog(open)
+          if (!open) setProjectFormData({ name: '', clientId: '', hourlyRate: '', budget: '', isBillable: true })
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Create New Project</DialogTitle>
               <DialogDescription>Add a new project for time tracking</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Project Name</Label><Input placeholder="Enter project name" className="mt-1" /></div>
+              <div><Label>Project Name</Label><Input placeholder="Enter project name" className="mt-1" value={projectFormData.name} onChange={(e) => setProjectFormData(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div><Label>Client</Label>
-                <Select>
+                <Select value={projectFormData.clientId} onValueChange={(value) => setProjectFormData(prev => ({ ...prev, clientId: value }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger>
                   <SelectContent>
                     {mockClients.map(client => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
@@ -2711,29 +2913,34 @@ export default function TimeTrackingClient() {
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Hourly Rate ($)</Label><Input type="number" placeholder="0.00" className="mt-1" /></div>
-                <div><Label>Budget ($)</Label><Input type="number" placeholder="0.00" className="mt-1" /></div>
+                <div><Label>Hourly Rate ($)</Label><Input type="number" placeholder="0.00" className="mt-1" value={projectFormData.hourlyRate} onChange={(e) => setProjectFormData(prev => ({ ...prev, hourlyRate: e.target.value }))} /></div>
+                <div><Label>Budget ($)</Label><Input type="number" placeholder="0.00" className="mt-1" value={projectFormData.budget} onChange={(e) => setProjectFormData(prev => ({ ...prev, budget: e.target.value }))} /></div>
               </div>
               <div className="flex items-center justify-between">
                 <Label>Billable Project</Label>
-                <Switch defaultChecked />
+                <Switch checked={projectFormData.isBillable} onCheckedChange={(checked) => setProjectFormData(prev => ({ ...prev, isBillable: checked }))} />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowProjectDialog(false)}>Cancel</Button>
               <Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+                if (!projectFormData.name) {
+                  toast.error('Project name is required')
+                  return
+                }
                 toast.promise(
                   (async () => {
                     await new Promise(resolve => setTimeout(resolve, 800))
-                    return true
+                    return projectFormData.name
                   })(),
                   {
                     loading: 'Creating project...',
-                    success: 'Project created successfully',
+                    success: (name) => `Project "${name}" created successfully`,
                     error: 'Failed to create project'
                   }
                 )
                 setShowProjectDialog(false)
+                setProjectFormData({ name: '', clientId: '', hourlyRate: '', budget: '', isBillable: true })
               }}>Create Project</Button>
             </DialogFooter>
           </DialogContent>

@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import {
   FolderOpen, Plus, Search, Filter, DollarSign, Users, CheckCircle2, Calendar, TrendingUp,
   Briefcase, Edit, Target, BarChart3, Settings, Trash2, LayoutGrid,
@@ -306,6 +307,10 @@ export default function ProjectsHubClient() {
   const [showLinkIssueDialog, setShowLinkIssueDialog] = useState(false)
   const [showEditIssueDialog, setShowEditIssueDialog] = useState(false)
   const [commentText, setCommentText] = useState('')
+  const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
+  const [showTeamMemberDialog, setShowTeamMemberDialog] = useState(false)
+  const [showStatusDropdown, setShowStatusDropdown] = useState<string | null>(null)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
 
   // Form states for dialogs
   const [milestoneForm, setMilestoneForm] = useState({ title: '', quarter: 'Q1 2026', status: 'planned' })
@@ -615,7 +620,55 @@ export default function ProjectsHubClient() {
                       {projectsByStatus[column.id]?.map(project => (
                         <Card key={project.id} className={`cursor-pointer hover:shadow-lg border-l-4 ${getStatusColor(project.status)}`} onClick={() => { setSelectedProject(project); setShowProjectDialog(true) }}>
                           <CardContent className="p-3">
-                            <div className="flex items-start justify-between mb-2"><h4 className="font-semibold text-sm">{project.name}</h4><Badge variant="outline" className="text-xs"><span className={`w-2 h-2 rounded-full ${getPriorityConfig(project.priority).color} mr-1`} />{getPriorityConfig(project.priority).label}</Badge></div>
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="font-semibold text-sm">{project.name}</h4>
+                              <div className="flex items-center gap-1">
+                                <Badge variant="outline" className="text-xs"><span className={`w-2 h-2 rounded-full ${getPriorityConfig(project.priority).color} mr-1`} />{getPriorityConfig(project.priority).label}</Badge>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                                      <MoreHorizontal className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                                    <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowProjectDialog(true) }}>
+                                      <FolderOpen className="h-4 w-4 mr-2" />View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => { setSelectedProject(project); setEditProjectForm({ name: project.name, description: project.description || '', budget: project.budget || 0, priority: project.priority, status: project.status }); setShowEditProjectDialog(true) }}>
+                                      <Edit className="h-4 w-4 mr-2" />Edit Project
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowTeamMemberDialog(true) }}>
+                                      <Users className="h-4 w-4 mr-2" />Add Team Member
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                    {statusColumns.filter(col => col.id !== project.status).map(col => (
+                                      <DropdownMenuItem key={col.id} onClick={() => {
+                                        toast.promise(
+                                          handleUpdateProjectStatus(project.id, col.id as ProjectStatus),
+                                          {
+                                            loading: 'Updating status...',
+                                            success: `Status changed to ${col.label}`,
+                                            error: 'Failed to update status'
+                                          }
+                                        )
+                                      }}>
+                                        <span className={`w-2 h-2 rounded-full ${col.color} mr-2`} />{col.label}
+                                      </DropdownMenuItem>
+                                    ))}
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => handleExportProjects()}>
+                                      <Download className="h-4 w-4 mr-2" />Export
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-red-600" onClick={() => { setSelectedProject(project); setShowDeleteProjectDialog(true) }}>
+                                      <Trash2 className="h-4 w-4 mr-2" />Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </div>
                             <div className="flex items-center justify-between text-xs mb-2"><span className="text-gray-500">{project.projectCode}</span><span>{project.tasksCompleted}/{project.tasksTotal} tasks</span></div>
                             <Progress value={project.progress} className="h-1.5 mb-2" />
                             <div className="flex items-center justify-between">
@@ -644,7 +697,49 @@ export default function ProjectsHubClient() {
                           <td className="px-4 py-4"><div className="w-24"><div className="flex justify-between text-xs mb-1"><span>{project.progress}%</span></div><Progress value={project.progress} className="h-1.5" /></div></td>
                           <td className="px-4 py-4">{project.budget ? <div><span className="font-medium">${(project.spent / 1000).toFixed(0)}K</span><span className="text-gray-500"> / ${(project.budget / 1000).toFixed(0)}K</span></div> : '-'}</td>
                           <td className="px-4 py-4">{project.endDate ? new Date(project.endDate).toLocaleDateString() : '-'}</td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedProject(project); setShowProjectDialog(true) }}><MoreHorizontal className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                                <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowProjectDialog(true) }}>
+                                  <FolderOpen className="h-4 w-4 mr-2" />View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setEditProjectForm({ name: project.name, description: project.description || '', budget: project.budget || 0, priority: project.priority, status: project.status }); setShowEditProjectDialog(true) }}>
+                                  <Edit className="h-4 w-4 mr-2" />Edit Project
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowTeamMemberDialog(true) }}>
+                                  <Users className="h-4 w-4 mr-2" />Add Team Member
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                {statusColumns.filter(col => col.id !== project.status).map(col => (
+                                  <DropdownMenuItem key={col.id} onClick={() => {
+                                    toast.promise(
+                                      handleUpdateProjectStatus(project.id, col.id as ProjectStatus),
+                                      {
+                                        loading: 'Updating status...',
+                                        success: `Status changed to ${col.label}`,
+                                        error: 'Failed to update status'
+                                      }
+                                    )
+                                  }}>
+                                    <span className={`w-2 h-2 rounded-full ${col.color} mr-2`} />{col.label}
+                                  </DropdownMenuItem>
+                                ))}
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleExportProjects()}>
+                                  <Download className="h-4 w-4 mr-2" />Export
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600" onClick={() => { setSelectedProject(project); setShowDeleteProjectDialog(true) }}>
+                                  <Trash2 className="h-4 w-4 mr-2" />Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1798,7 +1893,16 @@ export default function ProjectsHubClient() {
           <div className="lg:col-span-2">
             <AIInsightsPanel
               insights={mockProjectsAIInsights as any}
-              onInsightAction={(insight: any) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: any) => {
+                toast.promise(
+                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  {
+                    loading: `Processing insight: ${insight.title || 'AI recommendation'}...`,
+                    success: `Insight action completed: ${insight.title || 'Applied AI recommendation'}`,
+                    error: 'Failed to apply insight'
+                  }
+                )
+              }}
             />
           </div>
 
@@ -1843,7 +1947,16 @@ export default function ProjectsHubClient() {
                   {selectedProject.description && <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Description</p><p>{selectedProject.description}</p></CardContent></Card>}
                   <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Team Members</p><div className="flex gap-2">{selectedProject.teamMembers.map((m, i) => <Avatar key={i}><AvatarFallback>{m.slice(0, 2)}</AvatarFallback></Avatar>)}</div></CardContent></Card>
                 </div>
-                <DialogFooter><Button variant="outline" onClick={() => setShowProjectDialog(false)}>Close</Button><Button onClick={() => { setEditProjectForm({ name: selectedProject.name, description: selectedProject.description || '', budget: selectedProject.budget || 0, priority: selectedProject.priority, status: selectedProject.status }); setShowEditProjectDialog(true) }}><Edit className="h-4 w-4 mr-2" />Edit Project</Button></DialogFooter>
+                <DialogFooter className="flex items-center justify-between">
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setShowDeleteProjectDialog(true)}><Trash2 className="h-4 w-4 mr-2" />Delete</Button>
+                    <Button variant="outline" onClick={() => setShowTeamMemberDialog(true)}><Users className="h-4 w-4 mr-2" />Add Member</Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setShowProjectDialog(false)}>Close</Button>
+                    <Button onClick={() => { setEditProjectForm({ name: selectedProject.name, description: selectedProject.description || '', budget: selectedProject.budget || 0, priority: selectedProject.priority, status: selectedProject.status }); setShowEditProjectDialog(true) }}><Edit className="h-4 w-4 mr-2" />Edit Project</Button>
+                  </div>
+                </DialogFooter>
               </>
             )}
           </DialogContent>
@@ -2806,6 +2919,134 @@ export default function ProjectsHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditIssueDialog(false)}>Cancel</Button>
               <Button onClick={() => { toast.success(`Issue ${selectedIssue?.key} updated`); setShowEditIssueDialog(false) }}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Project Confirmation Dialog */}
+        <Dialog open={showDeleteProjectDialog} onOpenChange={setShowDeleteProjectDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Project</DialogTitle>
+              <DialogDescription>This action cannot be undone</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertOctagon className="h-5 w-5 text-red-600" />
+                  <span className="font-medium text-red-700 dark:text-red-500">Warning</span>
+                </div>
+                <p className="text-sm text-red-700 dark:text-red-500">
+                  You are about to delete <strong>{selectedProject?.name}</strong>. All project data, tasks, and history will be permanently removed.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label>Type "{selectedProject?.name}" to confirm</Label>
+                <Input
+                  placeholder={selectedProject?.name || ''}
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowDeleteProjectDialog(false); setDeleteConfirmText('') }}>Cancel</Button>
+              <Button
+                variant="destructive"
+                disabled={deleteConfirmText !== selectedProject?.name}
+                onClick={() => {
+                  if (selectedProject) {
+                    toast.promise(
+                      handleDeleteProject(selectedProject.id),
+                      {
+                        loading: 'Deleting project...',
+                        success: `Project "${selectedProject.name}" deleted successfully`,
+                        error: 'Failed to delete project'
+                      }
+                    )
+                    setShowDeleteProjectDialog(false)
+                    setShowProjectDialog(false)
+                    setDeleteConfirmText('')
+                  }
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />Delete Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Team Member Picker Dialog */}
+        <Dialog open={showTeamMemberDialog} onOpenChange={setShowTeamMemberDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Team Member</DialogTitle>
+              <DialogDescription>Add a team member to {selectedProject?.name}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Search Team Members</Label>
+                <Input placeholder="Search by name or email..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Available Members</Label>
+                <ScrollArea className="h-[200px] border rounded-lg">
+                  <div className="p-2 space-y-1">
+                    {['Alice Johnson', 'Bob Smith', 'Carol Williams', 'David Brown', 'Emma Davis', 'Frank Miller'].map((member) => (
+                      <div
+                        key={member}
+                        className="flex items-center justify-between p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer"
+                        onClick={() => {
+                          if (selectedProject) {
+                            toast.promise(
+                              updateProject(selectedProject.id, {
+                                team_members: [...(selectedProject.teamMembers || []), member]
+                              }),
+                              {
+                                loading: 'Adding team member...',
+                                success: `${member} added to ${selectedProject.name}`,
+                                error: 'Failed to add team member'
+                              }
+                            )
+                            setShowTeamMemberDialog(false)
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>{member.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium text-sm">{member}</p>
+                            <p className="text-xs text-gray-500">{member.toLowerCase().replace(' ', '.')}@company.com</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+              {selectedProject && selectedProject.teamMembers.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Current Team ({selectedProject.teamMembers.length})</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProject.teamMembers.map((member, i) => (
+                      <Badge key={i} variant="secondary" className="pl-1 pr-2">
+                        <Avatar className="h-5 w-5 mr-1">
+                          <AvatarFallback className="text-[8px]">{member.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        {member}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTeamMemberDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

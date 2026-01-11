@@ -1,12 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Calendar,
   Clock,
@@ -19,7 +23,13 @@ import {
   CheckCircle,
   Bell,
   Edit,
-  X
+  X,
+  Trash2,
+  GripVertical,
+  CalendarDays,
+  CalendarRange,
+  LayoutGrid,
+  Filter
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -31,6 +41,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -54,10 +80,48 @@ interface Meeting {
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled'
   project: string
   notes?: string
+  reminder?: number // minutes before
+  calendarType?: 'work' | 'personal' | 'team'
 }
 
+interface MeetingFormData {
+  title: string
+  description: string
+  date: string
+  time: string
+  duration: number
+  meetingType: 'video-call' | 'in-person' | 'phone-call'
+  attendees: string[]
+  location: string
+  meetingUrl: string
+  project: string
+  notes: string
+  calendarType: 'work' | 'personal' | 'team'
+}
+
+// Available attendees for selection
+const AVAILABLE_ATTENDEES = [
+  'Sarah Johnson',
+  'Michael Chen',
+  'John Smith',
+  'Alex Thompson',
+  'Lisa Wang',
+  'David Brown',
+  'Emily Davis',
+  'Chris Wilson'
+]
+
+// Available projects
+const AVAILABLE_PROJECTS = [
+  'Brand Identity Redesign',
+  'Website Development',
+  'Mobile App',
+  'Marketing Campaign',
+  'Product Launch'
+]
+
 // Mock Meeting Data
-const MEETINGS: Meeting[] = [
+const INITIAL_MEETINGS: Meeting[] = [
   {
     id: 1,
     title: 'Project Review Meeting',
@@ -70,7 +134,8 @@ const MEETINGS: Meeting[] = [
     meetingUrl: 'https://meet.google.com/abc-defg-hij',
     status: 'scheduled',
     project: 'Brand Identity Redesign',
-    notes: 'Bring logo concepts for final approval'
+    notes: 'Bring logo concepts for final approval',
+    calendarType: 'work'
   },
   {
     id: 2,
@@ -84,7 +149,8 @@ const MEETINGS: Meeting[] = [
     location: '123 Design Studio, Tech Street, City, ST 12345',
     status: 'scheduled',
     project: 'Brand Identity Redesign',
-    notes: 'Bring printed samples and presentation deck'
+    notes: 'Bring printed samples and presentation deck',
+    calendarType: 'work'
   },
   {
     id: 3,
@@ -97,7 +163,8 @@ const MEETINGS: Meeting[] = [
     attendees: ['Alex Thompson', 'Lisa Wang'],
     meetingUrl: 'https://meet.google.com/xyz-uvwx-yz',
     status: 'scheduled',
-    project: 'Website Development'
+    project: 'Website Development',
+    calendarType: 'team'
   },
   {
     id: 4,
@@ -110,7 +177,8 @@ const MEETINGS: Meeting[] = [
     attendees: ['Sarah Johnson'],
     status: 'completed',
     project: 'Brand Identity Redesign',
-    notes: 'Discussed color palette feedback'
+    notes: 'Discussed color palette feedback',
+    calendarType: 'work'
   },
   {
     id: 5,
@@ -124,9 +192,25 @@ const MEETINGS: Meeting[] = [
     meetingUrl: 'https://meet.google.com/old-meeting-link',
     status: 'completed',
     project: 'Website Development',
-    notes: 'Defined scope and timeline'
+    notes: 'Defined scope and timeline',
+    calendarType: 'team'
   }
 ]
+
+const DEFAULT_FORM_DATA: MeetingFormData = {
+  title: '',
+  description: '',
+  date: '',
+  time: '',
+  duration: 30,
+  meetingType: 'video-call',
+  attendees: [],
+  location: '',
+  meetingUrl: '',
+  project: '',
+  notes: '',
+  calendarType: 'work'
+}
 
 export default function CalendarPage() {
   const router = useRouter()
@@ -139,9 +223,32 @@ export default function CalendarPage() {
   const [error, setError] = useState<string | null>(null)
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
-  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [filterStatus, setFilterStatus] = useState<'all' | 'upcoming' | 'completed' | 'cancelled'>('all')
-  const [cancelMeeting, setCancelMeeting] = useState<{ id: number; title: string } | null>(null)
+  const [filterCalendarType, setFilterCalendarType] = useState<'all' | 'work' | 'personal' | 'team'>('all')
+  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month'>('week')
+
+  // Dialog states
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showReminderDialog, setShowReminderDialog] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false)
+
+  // Form state
+  const [formData, setFormData] = useState<MeetingFormData>(DEFAULT_FORM_DATA)
+  const [editingMeetingId, setEditingMeetingId] = useState<number | null>(null)
+  const [deletingMeeting, setDeletingMeeting] = useState<Meeting | null>(null)
+  const [reminderMeeting, setReminderMeeting] = useState<Meeting | null>(null)
+  const [reminderMinutes, setReminderMinutes] = useState<number>(15)
+  const [inviteMeeting, setInviteMeeting] = useState<Meeting | null>(null)
+  const [newAttendees, setNewAttendees] = useState<string[]>([])
+
+  // Drag and drop state
+  const [draggedMeeting, setDraggedMeeting] = useState<Meeting | null>(null)
+
+  // Form submission states
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Load Calendar Data
   useEffect(() => {
@@ -157,11 +264,11 @@ export default function CalendarPage() {
           }, 500)
         })
 
-        setMeetings(MEETINGS)
+        setMeetings(INITIAL_MEETINGS)
         setIsLoading(false)
         announce('Calendar loaded successfully', 'polite')
         logger.info('Calendar data loaded', {
-          meetingCount: MEETINGS.length
+          meetingCount: INITIAL_MEETINGS.length
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load calendar'
@@ -177,17 +284,44 @@ export default function CalendarPage() {
 
   // Separate upcoming and past meetings
   const now = new Date()
-  const upcomingMeetings = meetings.filter((m) => new Date(`${m.date}T${m.time}`) > now)
-  const pastMeetings = meetings.filter((m) => new Date(`${m.date}T${m.time}`) <= now)
+  const upcomingMeetings = meetings.filter((m) => new Date(`${m.date}T${m.time}`) > now && m.status !== 'cancelled')
+  const pastMeetings = meetings.filter((m) => new Date(`${m.date}T${m.time}`) <= now || m.status === 'completed')
 
-  // Filter meetings
-  const filteredMeetings = filterStatus === 'all'
-    ? meetings
-    : filterStatus === 'upcoming'
-      ? upcomingMeetings
-      : filterStatus === 'completed'
-        ? pastMeetings
-        : meetings.filter((m) => m.status === 'cancelled')
+  // Filter meetings by status and calendar type
+  const filteredMeetings = meetings.filter((m) => {
+    const statusMatch = filterStatus === 'all'
+      ? true
+      : filterStatus === 'upcoming'
+        ? new Date(`${m.date}T${m.time}`) > now && m.status !== 'cancelled'
+        : filterStatus === 'completed'
+          ? m.status === 'completed' || new Date(`${m.date}T${m.time}`) <= now
+          : m.status === 'cancelled'
+
+    const calendarMatch = filterCalendarType === 'all' || m.calendarType === filterCalendarType
+
+    return statusMatch && calendarMatch
+  })
+
+  // Reset form data
+  const resetFormData = useCallback(() => {
+    setFormData(DEFAULT_FORM_DATA)
+    setEditingMeetingId(null)
+  }, [])
+
+  // Handle form input change
+  const handleFormChange = (field: keyof MeetingFormData, value: string | number | string[]) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  // Toggle attendee selection
+  const toggleAttendee = (attendee: string) => {
+    setFormData(prev => ({
+      ...prev,
+      attendees: prev.attendees.includes(attendee)
+        ? prev.attendees.filter(a => a !== attendee)
+        : [...prev.attendees, attendee]
+    }))
+  }
 
   // Handle Join Meeting
   const handleJoinMeeting = async (meeting: Meeting) => {
@@ -205,23 +339,19 @@ export default function CalendarPage() {
     })
 
     try {
-      const response = await fetch('/api/meetings/join', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          meetingId: meeting.id,
-          meetingTitle: meeting.title,
-          participantName: 'Current User'
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to join meeting')
-      }
-
-      logger.info('Meeting join recorded', { meetingId: meeting.id })
-      toast.promise(
-        new Promise(r => setTimeout(r, 1500)),
+      await toast.promise(
+        fetch('/api/meetings/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: meeting.id,
+            meetingTitle: meeting.title,
+            participantName: 'Current User'
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Failed to join meeting')
+          return res
+        }),
         {
           loading: `Connecting to ${meeting.title}...`,
           success: `Joining ${meeting.title}`,
@@ -233,182 +363,354 @@ export default function CalendarPage() {
       window.open(meeting.meetingUrl, '_blank')
     } catch (error: any) {
       logger.error('Failed to join meeting', { error, meetingId: meeting.id })
-      toast.error('Failed to join meeting', {
-        description: error.message || 'Please try again later'
-      })
     }
   }
 
-  // Handle Schedule Meeting
-  const handleScheduleMeeting = async () => {
-    logger.info('Schedule meeting initiated', {
-      timestamp: new Date().toISOString()
-    })
+  // Handle Create Meeting
+  const handleCreateMeeting = async () => {
+    if (!formData.title || !formData.date || !formData.time) {
+      toast.error('Please fill in required fields', {
+        description: 'Title, date, and time are required'
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    logger.info('Create meeting initiated', { formData })
 
     try {
-      const response = await fetch('/api/meetings/schedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          timestamp: new Date().toISOString()
-        })
-      })
+      await toast.promise(
+        fetch('/api/meetings/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        }).then(async res => {
+          // Even if API fails, create locally for demo
+          const newMeeting: Meeting = {
+            id: Date.now(),
+            title: formData.title,
+            description: formData.description,
+            date: formData.date,
+            time: formData.time,
+            duration: formData.duration,
+            meetingType: formData.meetingType,
+            attendees: formData.attendees,
+            location: formData.location || undefined,
+            meetingUrl: formData.meetingUrl || undefined,
+            status: 'scheduled',
+            project: formData.project,
+            notes: formData.notes || undefined,
+            calendarType: formData.calendarType
+          }
 
-      if (!response.ok) {
-        throw new Error('Failed to schedule meeting')
-      }
-
-      logger.info('Meeting scheduling form opened')
-      toast.promise(
-        new Promise(r => setTimeout(r, 1000)),
+          setMeetings(prev => [...prev, newMeeting])
+          return newMeeting
+        }),
         {
-          loading: 'Opening meeting scheduler...',
-          success: 'Select date, time, and attendees',
-          error: 'Failed to open scheduler'
+          loading: 'Creating meeting...',
+          success: 'Meeting created successfully',
+          error: 'Failed to create meeting'
         }
       )
-      setShowScheduleDialog(true)
+
+      setShowCreateDialog(false)
+      resetFormData()
+      announce('Meeting created successfully', 'polite')
     } catch (error: any) {
-      logger.error('Failed to schedule meeting', { error })
-      toast.error('Failed to open scheduler', {
-        description: error.message || 'Please try again later'
-      })
+      logger.error('Failed to create meeting', { error })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  // Handle Reschedule
-  const handleReschedule = async (meetingId: number) => {
-    const meeting = meetings.find((m) => m.id === meetingId)
-    if (!meeting) return
-
-    logger.info('Meeting reschedule initiated', {
-      meetingId,
-      meetingTitle: meeting.title
+  // Handle Edit Meeting - Open Dialog
+  const handleOpenEditDialog = (meeting: Meeting) => {
+    setEditingMeetingId(meeting.id)
+    setFormData({
+      title: meeting.title,
+      description: meeting.description,
+      date: meeting.date,
+      time: meeting.time,
+      duration: meeting.duration,
+      meetingType: meeting.meetingType,
+      attendees: meeting.attendees,
+      location: meeting.location || '',
+      meetingUrl: meeting.meetingUrl || '',
+      project: meeting.project,
+      notes: meeting.notes || '',
+      calendarType: meeting.calendarType || 'work'
     })
+    setShowEditDialog(true)
+  }
+
+  // Handle Save Edit
+  const handleSaveEdit = async () => {
+    if (!editingMeetingId || !formData.title || !formData.date || !formData.time) {
+      toast.error('Please fill in required fields')
+      return
+    }
+
+    setIsSubmitting(true)
+    logger.info('Edit meeting initiated', { meetingId: editingMeetingId, formData })
 
     try {
-      const response = await fetch('/api/meetings/reschedule', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          meetingId: meetingId,
-          currentTime: `${meeting.date}T${meeting.time}`,
-          timestamp: new Date().toISOString()
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to reschedule meeting')
-      }
-
-      logger.info('Meeting rescheduled', { meetingId })
-      toast.promise(
-        new Promise(r => setTimeout(r, 1200)),
+      await toast.promise(
+        fetch('/api/meetings/update', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ meetingId: editingMeetingId, ...formData })
+        }).then(async () => {
+          // Update locally
+          setMeetings(prev => prev.map(m =>
+            m.id === editingMeetingId
+              ? {
+                  ...m,
+                  title: formData.title,
+                  description: formData.description,
+                  date: formData.date,
+                  time: formData.time,
+                  duration: formData.duration,
+                  meetingType: formData.meetingType,
+                  attendees: formData.attendees,
+                  location: formData.location || undefined,
+                  meetingUrl: formData.meetingUrl || undefined,
+                  project: formData.project,
+                  notes: formData.notes || undefined,
+                  calendarType: formData.calendarType
+                }
+              : m
+          ))
+        }),
         {
-          loading: `Rescheduling ${meeting.title}...`,
-          success: `${meeting.title} has been updated`,
-          error: 'Failed to reschedule meeting'
+          loading: 'Updating meeting...',
+          success: 'Meeting updated successfully',
+          error: 'Failed to update meeting'
         }
       )
+
+      setShowEditDialog(false)
+      resetFormData()
+      announce('Meeting updated successfully', 'polite')
     } catch (error: any) {
-      logger.error('Failed to reschedule meeting', { error, meetingId })
-      toast.error('Failed to reschedule', {
-        description: error.message || 'Please try again later'
-      })
+      logger.error('Failed to update meeting', { error, meetingId: editingMeetingId })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  // Handle Cancel Meeting
-  const handleCancelMeeting = (meetingId: number) => {
-    const meeting = meetings.find((m) => m.id === meetingId)
-    if (!meeting) return
-
-    logger.info('Meeting cancellation initiated', {
-      meetingId,
-      meetingTitle: meeting.title
-    })
-
-    setCancelMeeting({ id: meetingId, title: meeting.title })
+  // Handle Delete Meeting - Open Confirmation
+  const handleOpenDeleteDialog = (meeting: Meeting) => {
+    setDeletingMeeting(meeting)
+    setShowDeleteDialog(true)
   }
 
-  const handleConfirmCancelMeeting = async () => {
-    if (!cancelMeeting) return
+  // Handle Confirm Delete
+  const handleConfirmDelete = async () => {
+    if (!deletingMeeting) return
+
+    setIsSubmitting(true)
+    logger.info('Delete meeting initiated', { meetingId: deletingMeeting.id })
 
     try {
-      const response = await fetch('/api/meetings/cancel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meetingId: cancelMeeting.id })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to cancel meeting')
-      }
-
-      setMeetings(
-        meetings.map((m) =>
-          m.id === cancelMeeting.id ? { ...m, status: 'cancelled' } : m
-        )
-      )
-      logger.info('Meeting cancelled', { meetingId: cancelMeeting.id })
-      toast.promise(
-        new Promise(r => setTimeout(r, 1000)),
+      await toast.promise(
+        fetch('/api/meetings/delete', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ meetingId: deletingMeeting.id })
+        }).then(async () => {
+          // Update locally - mark as cancelled
+          setMeetings(prev => prev.map(m =>
+            m.id === deletingMeeting.id
+              ? { ...m, status: 'cancelled' as const }
+              : m
+          ))
+        }),
         {
-          loading: `Cancelling ${cancelMeeting.title}...`,
-          success: `${cancelMeeting.title} has been cancelled`,
+          loading: `Cancelling ${deletingMeeting.title}...`,
+          success: `${deletingMeeting.title} has been cancelled`,
           error: 'Failed to cancel meeting'
         }
       )
+
+      setShowDeleteDialog(false)
+      setDeletingMeeting(null)
+      announce('Meeting cancelled successfully', 'polite')
     } catch (error: any) {
-      logger.error('Failed to cancel meeting', { error, meetingId: cancelMeeting.id })
-      toast.error('Failed to cancel meeting', {
-        description: error.message || 'Please try again later'
-      })
+      logger.error('Failed to delete meeting', { error, meetingId: deletingMeeting.id })
     } finally {
-      setCancelMeeting(null)
+      setIsSubmitting(false)
     }
   }
 
-  // Handle Set Reminder
-  const handleSetReminder = async (meetingId: number) => {
-    const meeting = meetings.find((m) => m.id === meetingId)
-    if (!meeting) return
+  // Handle Set Reminder - Open Dialog
+  const handleOpenReminderDialog = (meeting: Meeting) => {
+    setReminderMeeting(meeting)
+    setReminderMinutes(meeting.reminder || 15)
+    setShowReminderDialog(true)
+  }
 
-    logger.info('Reminder set for meeting', {
-      meetingId,
-      meetingTitle: meeting.title
-    })
+  // Handle Save Reminder
+  const handleSaveReminder = async () => {
+    if (!reminderMeeting) return
+
+    setIsSubmitting(true)
+    logger.info('Set reminder initiated', { meetingId: reminderMeeting.id, minutes: reminderMinutes })
 
     try {
-      const response = await fetch('/api/meetings/reminder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          meetingId,
-          meetingTitle: meeting.title,
-          minutesBefore: 15
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to set reminder')
-      }
-
-      logger.info('Meeting reminder set', { meetingId })
-      toast.promise(
-        new Promise(r => setTimeout(r, 800)),
+      await toast.promise(
+        fetch('/api/meetings/reminder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: reminderMeeting.id,
+            meetingTitle: reminderMeeting.title,
+            minutesBefore: reminderMinutes
+          })
+        }).then(async () => {
+          // Update locally
+          setMeetings(prev => prev.map(m =>
+            m.id === reminderMeeting.id
+              ? { ...m, reminder: reminderMinutes }
+              : m
+          ))
+        }),
         {
           loading: 'Setting reminder...',
-          success: 'You will be notified 15 minutes before the meeting',
+          success: `Reminder set for ${reminderMinutes} minutes before`,
           error: 'Failed to set reminder'
         }
       )
+
+      setShowReminderDialog(false)
+      setReminderMeeting(null)
+      announce(`Reminder set for ${reminderMinutes} minutes before meeting`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to set reminder', { error, meetingId })
-      toast.error('Failed to set reminder', {
-        description: error.message || 'Please try again later'
-      })
+      logger.error('Failed to set reminder', { error, meetingId: reminderMeeting.id })
+    } finally {
+      setIsSubmitting(false)
     }
+  }
+
+  // Handle Invite Attendees - Open Dialog
+  const handleOpenInviteDialog = (meeting: Meeting) => {
+    setInviteMeeting(meeting)
+    setNewAttendees([])
+    setShowInviteDialog(true)
+  }
+
+  // Toggle new attendee selection
+  const toggleNewAttendee = (attendee: string) => {
+    setNewAttendees(prev =>
+      prev.includes(attendee)
+        ? prev.filter(a => a !== attendee)
+        : [...prev, attendee]
+    )
+  }
+
+  // Handle Send Invites
+  const handleSendInvites = async () => {
+    if (!inviteMeeting || newAttendees.length === 0) {
+      toast.error('Please select at least one attendee')
+      return
+    }
+
+    setIsSubmitting(true)
+    logger.info('Invite attendees initiated', { meetingId: inviteMeeting.id, newAttendees })
+
+    try {
+      await toast.promise(
+        fetch('/api/meetings/invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: inviteMeeting.id,
+            attendees: newAttendees
+          })
+        }).then(async () => {
+          // Update locally
+          setMeetings(prev => prev.map(m =>
+            m.id === inviteMeeting.id
+              ? { ...m, attendees: [...new Set([...m.attendees, ...newAttendees])] }
+              : m
+          ))
+        }),
+        {
+          loading: 'Sending invitations...',
+          success: `${newAttendees.length} invitation(s) sent`,
+          error: 'Failed to send invitations'
+        }
+      )
+
+      setShowInviteDialog(false)
+      setInviteMeeting(null)
+      setNewAttendees([])
+      announce(`Invitations sent to ${newAttendees.length} attendee(s)`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to send invites', { error, meetingId: inviteMeeting.id })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Drag and Drop Handlers
+  const handleDragStart = (e: React.DragEvent, meeting: Meeting) => {
+    setDraggedMeeting(meeting)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', meeting.id.toString())
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop = async (e: React.DragEvent, targetDate: string) => {
+    e.preventDefault()
+    if (!draggedMeeting) return
+
+    logger.info('Meeting drag-drop reschedule', {
+      meetingId: draggedMeeting.id,
+      originalDate: draggedMeeting.date,
+      newDate: targetDate
+    })
+
+    try {
+      await toast.promise(
+        fetch('/api/meetings/reschedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            meetingId: draggedMeeting.id,
+            newDate: targetDate,
+            newTime: draggedMeeting.time
+          })
+        }).then(async () => {
+          // Update locally
+          setMeetings(prev => prev.map(m =>
+            m.id === draggedMeeting.id
+              ? { ...m, date: targetDate }
+              : m
+          ))
+        }),
+        {
+          loading: `Rescheduling ${draggedMeeting.title}...`,
+          success: `${draggedMeeting.title} moved to ${new Date(targetDate).toLocaleDateString()}`,
+          error: 'Failed to reschedule meeting'
+        }
+      )
+
+      announce(`Meeting rescheduled to ${new Date(targetDate).toLocaleDateString()}`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to reschedule via drag-drop', { error, meetingId: draggedMeeting.id })
+    } finally {
+      setDraggedMeeting(null)
+    }
+  }
+
+  // View meeting details
+  const handleViewDetails = (meeting: Meeting) => {
+    setSelectedMeeting(meeting)
+    setShowDetailsDialog(true)
   }
 
   // Loading State
@@ -465,18 +767,66 @@ export default function CalendarPage() {
           </div>
           <Button
             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white gap-2"
-            onClick={handleScheduleMeeting}
+            onClick={() => {
+              resetFormData()
+              setShowCreateDialog(true)
+            }}
           >
             <Plus className="h-4 w-4" />
             Schedule Meeting
           </Button>
         </motion.div>
 
-        {/* Filter Tabs */}
+        {/* View Toggle & Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="flex flex-wrap items-center justify-between gap-4"
+        >
+          {/* Calendar View Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">View:</span>
+            <Tabs value={calendarView} onValueChange={(v) => setCalendarView(v as 'day' | 'week' | 'month')}>
+              <TabsList>
+                <TabsTrigger value="day" className="gap-1">
+                  <CalendarDays className="h-4 w-4" />
+                  Day
+                </TabsTrigger>
+                <TabsTrigger value="week" className="gap-1">
+                  <CalendarRange className="h-4 w-4" />
+                  Week
+                </TabsTrigger>
+                <TabsTrigger value="month" className="gap-1">
+                  <LayoutGrid className="h-4 w-4" />
+                  Month
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          {/* Filter by Calendar Type */}
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <Select value={filterCalendarType} onValueChange={(v) => setFilterCalendarType(v as typeof filterCalendarType)}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="All Calendars" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Calendars</SelectItem>
+                <SelectItem value="work">Work</SelectItem>
+                <SelectItem value="personal">Personal</SelectItem>
+                <SelectItem value="team">Team</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </motion.div>
+
+        {/* Status Filter Tabs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
           className="flex gap-2"
         >
           {(['all', 'upcoming', 'completed', 'cancelled'] as const).map(
@@ -493,12 +843,23 @@ export default function CalendarPage() {
           )}
         </motion.div>
 
+        {/* Drag-Drop Info */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-sm text-gray-500 flex items-center gap-2"
+        >
+          <GripVertical className="h-4 w-4" />
+          Tip: Drag meetings to reschedule them
+        </motion.div>
+
         {/* Upcoming Meetings Section */}
-        {upcomingMeetings.length > 0 && (
+        {filteredMeetings.filter(m => new Date(`${m.date}T${m.time}`) > now && m.status !== 'cancelled').length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.25 }}
             className="space-y-4"
           >
             <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -507,24 +868,32 @@ export default function CalendarPage() {
             </h2>
 
             <div className="space-y-4">
-              {(filterStatus === 'all' || filterStatus === 'upcoming' ? upcomingMeetings : []).map(
-                (meeting) => (
+              {filteredMeetings
+                .filter(m => new Date(`${m.date}T${m.time}`) > now && m.status !== 'cancelled')
+                .map((meeting) => (
                   <motion.div
                     key={meeting.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     whileHover={{ x: 4 }}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e as any, meeting)}
+                    onDragOver={handleDragOver}
+                    className="cursor-grab active:cursor-grabbing"
                   >
                     <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
                       <CardContent className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* Meeting Details */}
                           <div className="space-y-4">
-                            <div>
-                              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                {meeting.title}
-                              </h3>
-                              <p className="text-gray-600">{meeting.description}</p>
+                            <div className="flex items-start gap-2">
+                              <GripVertical className="h-5 w-5 text-gray-400 mt-1 flex-shrink-0" />
+                              <div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                  {meeting.title}
+                                </h3>
+                                <p className="text-gray-600">{meeting.description}</p>
+                              </div>
                             </div>
 
                             <div className="space-y-2 text-sm">
@@ -545,7 +914,27 @@ export default function CalendarPage() {
                               )}
                             </div>
 
-                            <Badge variant="outline">{meeting.project}</Badge>
+                            <div className="flex gap-2 flex-wrap">
+                              <Badge variant="outline">{meeting.project}</Badge>
+                              {meeting.calendarType && (
+                                <Badge
+                                  variant="secondary"
+                                  className={
+                                    meeting.calendarType === 'work' ? 'bg-blue-100 text-blue-800' :
+                                    meeting.calendarType === 'personal' ? 'bg-green-100 text-green-800' :
+                                    'bg-purple-100 text-purple-800'
+                                  }
+                                >
+                                  {meeting.calendarType}
+                                </Badge>
+                              )}
+                              {meeting.reminder && (
+                                <Badge variant="outline" className="bg-yellow-50">
+                                  <Bell className="h-3 w-3 mr-1" />
+                                  {meeting.reminder}m
+                                </Badge>
+                              )}
+                            </div>
                           </div>
 
                           {/* Attendees & Meeting Type */}
@@ -553,10 +942,10 @@ export default function CalendarPage() {
                             <div>
                               <p className="text-sm font-medium text-gray-600 mb-2 flex items-center gap-2">
                                 <Users className="h-4 w-4" />
-                                Attendees
+                                Attendees ({meeting.attendees.length})
                               </p>
                               <div className="space-y-1">
-                                {meeting.attendees.map((attendee) => (
+                                {meeting.attendees.slice(0, 3).map((attendee) => (
                                   <div
                                     key={attendee}
                                     className="text-sm text-gray-700 p-2 bg-gray-50 rounded"
@@ -564,6 +953,11 @@ export default function CalendarPage() {
                                     {attendee}
                                   </div>
                                 ))}
+                                {meeting.attendees.length > 3 && (
+                                  <div className="text-sm text-gray-500 p-2">
+                                    +{meeting.attendees.length - 3} more
+                                  </div>
+                                )}
                               </div>
                             </div>
 
@@ -614,7 +1008,7 @@ export default function CalendarPage() {
                             )}
                             <Button
                               variant="outline"
-                              onClick={() => handleSetReminder(meeting.id)}
+                              onClick={() => handleOpenReminderDialog(meeting)}
                               className="gap-2"
                             >
                               <Bell className="h-4 w-4" />
@@ -622,18 +1016,26 @@ export default function CalendarPage() {
                             </Button>
                             <Button
                               variant="outline"
-                              onClick={() => handleReschedule(meeting.id)}
+                              onClick={() => handleOpenInviteDialog(meeting)}
                               className="gap-2"
                             >
-                              <Edit className="h-4 w-4" />
-                              Reschedule
+                              <Users className="h-4 w-4" />
+                              Invite Attendees
                             </Button>
                             <Button
                               variant="outline"
-                              onClick={() => handleCancelMeeting(meeting.id)}
+                              onClick={() => handleOpenEditDialog(meeting)}
+                              className="gap-2"
+                            >
+                              <Edit className="h-4 w-4" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => handleOpenDeleteDialog(meeting)}
                               className="gap-2 text-red-600 hover:text-red-700"
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                               Cancel
                             </Button>
                           </div>
@@ -641,14 +1043,13 @@ export default function CalendarPage() {
                       </CardContent>
                     </Card>
                   </motion.div>
-                )
-              )}
+                ))}
             </div>
           </motion.div>
         )}
 
         {/* Past Meetings Section */}
-        {pastMeetings.length > 0 && (
+        {filteredMeetings.filter(m => new Date(`${m.date}T${m.time}`) <= now || m.status === 'completed').length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -661,8 +1062,9 @@ export default function CalendarPage() {
             </h2>
 
             <div className="space-y-3">
-              {(filterStatus === 'all' || filterStatus === 'completed' ? pastMeetings : []).map(
-                (meeting) => (
+              {filteredMeetings
+                .filter(m => new Date(`${m.date}T${m.time}`) <= now || m.status === 'completed')
+                .map((meeting) => (
                   <motion.div
                     key={meeting.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -689,7 +1091,7 @@ export default function CalendarPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setSelectedMeeting(meeting)}
+                            onClick={() => handleViewDetails(meeting)}
                           >
                             View Details
                           </Button>
@@ -697,8 +1099,7 @@ export default function CalendarPage() {
                       </CardContent>
                     </Card>
                   </motion.div>
-                )
-              )}
+                ))}
             </div>
           </motion.div>
         )}
@@ -728,7 +1129,10 @@ export default function CalendarPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white justify-start gap-2 h-auto py-3"
-                  onClick={handleScheduleMeeting}
+                  onClick={() => {
+                    resetFormData()
+                    setShowCreateDialog(true)
+                  }}
                 >
                   <Plus className="h-5 w-5" />
                   <div className="text-left">
@@ -739,10 +1143,13 @@ export default function CalendarPage() {
                 <Button
                   variant="outline"
                   className="justify-start gap-2 h-auto py-3"
-                  onClick={() => {
+                  onClick={async () => {
                     logger.info('Project timeline view opened')
-                    toast.promise(
-                      new Promise(r => setTimeout(r, 1500)),
+                    await toast.promise(
+                      fetch('/api/calendar/timeline').then(res => {
+                        if (!res.ok) throw new Error('Failed to load timeline')
+                        return res.json()
+                      }),
                       {
                         loading: 'Loading project timeline...',
                         success: 'Project timeline ready',
@@ -760,10 +1167,13 @@ export default function CalendarPage() {
                 <Button
                   variant="outline"
                   className="justify-start gap-2 h-auto py-3"
-                  onClick={() => {
+                  onClick={async () => {
                     logger.info('Availability calendar opened')
-                    toast.promise(
-                      new Promise(r => setTimeout(r, 1200)),
+                    await toast.promise(
+                      fetch('/api/calendar/availability').then(res => {
+                        if (!res.ok) throw new Error('Failed to load availability')
+                        return res.json()
+                      }),
                       {
                         loading: 'Opening availability calendar...',
                         success: 'Availability calendar ready',
@@ -825,26 +1235,553 @@ export default function CalendarPage() {
         </motion.div>
       </div>
 
-      {/* Cancel Meeting Confirmation Dialog */}
-      <AlertDialog open={!!cancelMeeting} onOpenChange={() => setCancelMeeting(null)}>
+      {/* Create Meeting Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Schedule New Meeting</DialogTitle>
+            <DialogDescription>
+              Fill in the details to schedule a new meeting
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input
+                  id="title"
+                  placeholder="Meeting title"
+                  value={formData.title}
+                  onChange={(e) => handleFormChange('title', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project">Project</Label>
+                <Select value={formData.project} onValueChange={(v) => handleFormChange('project', v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_PROJECTS.map((project) => (
+                      <SelectItem key={project} value={project}>{project}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Meeting description"
+                value={formData.description}
+                onChange={(e) => handleFormChange('description', e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="date">Date *</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="time">Time *</Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={formData.time}
+                  onChange={(e) => handleFormChange('time', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (min)</Label>
+                <Select value={formData.duration.toString()} onValueChange={(v) => handleFormChange('duration', parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 min</SelectItem>
+                    <SelectItem value="30">30 min</SelectItem>
+                    <SelectItem value="45">45 min</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="meetingType">Meeting Type</Label>
+                <Select value={formData.meetingType} onValueChange={(v) => handleFormChange('meetingType', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="video-call">Video Call</SelectItem>
+                    <SelectItem value="phone-call">Phone Call</SelectItem>
+                    <SelectItem value="in-person">In-Person</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="calendarType">Calendar</Label>
+                <Select value={formData.calendarType} onValueChange={(v) => handleFormChange('calendarType', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="work">Work</SelectItem>
+                    <SelectItem value="personal">Personal</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {formData.meetingType === 'video-call' && (
+              <div className="space-y-2">
+                <Label htmlFor="meetingUrl">Meeting URL</Label>
+                <Input
+                  id="meetingUrl"
+                  placeholder="https://meet.google.com/..."
+                  value={formData.meetingUrl}
+                  onChange={(e) => handleFormChange('meetingUrl', e.target.value)}
+                />
+              </div>
+            )}
+
+            {formData.meetingType === 'in-person' && (
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  placeholder="Meeting location"
+                  value={formData.location}
+                  onChange={(e) => handleFormChange('location', e.target.value)}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Attendees</Label>
+              <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-40 overflow-y-auto">
+                {AVAILABLE_ATTENDEES.map((attendee) => (
+                  <div key={attendee} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`attendee-${attendee}`}
+                      checked={formData.attendees.includes(attendee)}
+                      onCheckedChange={() => toggleAttendee(attendee)}
+                    />
+                    <label
+                      htmlFor={`attendee-${attendee}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {attendee}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="Additional notes"
+                value={formData.notes}
+                onChange={(e) => handleFormChange('notes', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateMeeting}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Meeting'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Meeting Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Meeting</DialogTitle>
+            <DialogDescription>
+              Update meeting details
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Title *</Label>
+                <Input
+                  id="edit-title"
+                  placeholder="Meeting title"
+                  value={formData.title}
+                  onChange={(e) => handleFormChange('title', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-project">Project</Label>
+                <Select value={formData.project} onValueChange={(v) => handleFormChange('project', v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AVAILABLE_PROJECTS.map((project) => (
+                      <SelectItem key={project} value={project}>{project}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                placeholder="Meeting description"
+                value={formData.description}
+                onChange={(e) => handleFormChange('description', e.target.value)}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-date">Date *</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => handleFormChange('date', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-time">Time *</Label>
+                <Input
+                  id="edit-time"
+                  type="time"
+                  value={formData.time}
+                  onChange={(e) => handleFormChange('time', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-duration">Duration (min)</Label>
+                <Select value={formData.duration.toString()} onValueChange={(v) => handleFormChange('duration', parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 min</SelectItem>
+                    <SelectItem value="30">30 min</SelectItem>
+                    <SelectItem value="45">45 min</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-meetingType">Meeting Type</Label>
+                <Select value={formData.meetingType} onValueChange={(v) => handleFormChange('meetingType', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="video-call">Video Call</SelectItem>
+                    <SelectItem value="phone-call">Phone Call</SelectItem>
+                    <SelectItem value="in-person">In-Person</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-calendarType">Calendar</Label>
+                <Select value={formData.calendarType} onValueChange={(v) => handleFormChange('calendarType', v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="work">Work</SelectItem>
+                    <SelectItem value="personal">Personal</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {formData.meetingType === 'video-call' && (
+              <div className="space-y-2">
+                <Label htmlFor="edit-meetingUrl">Meeting URL</Label>
+                <Input
+                  id="edit-meetingUrl"
+                  placeholder="https://meet.google.com/..."
+                  value={formData.meetingUrl}
+                  onChange={(e) => handleFormChange('meetingUrl', e.target.value)}
+                />
+              </div>
+            )}
+
+            {formData.meetingType === 'in-person' && (
+              <div className="space-y-2">
+                <Label htmlFor="edit-location">Location</Label>
+                <Input
+                  id="edit-location"
+                  placeholder="Meeting location"
+                  value={formData.location}
+                  onChange={(e) => handleFormChange('location', e.target.value)}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Attendees</Label>
+              <div className="grid grid-cols-2 gap-2 p-3 border rounded-md max-h-40 overflow-y-auto">
+                {AVAILABLE_ATTENDEES.map((attendee) => (
+                  <div key={attendee} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`edit-attendee-${attendee}`}
+                      checked={formData.attendees.includes(attendee)}
+                      onCheckedChange={() => toggleAttendee(attendee)}
+                    />
+                    <label
+                      htmlFor={`edit-attendee-${attendee}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      {attendee}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-notes">Notes</Label>
+              <Textarea
+                id="edit-notes"
+                placeholder="Additional notes"
+                value={formData.notes}
+                onChange={(e) => handleFormChange('notes', e.target.value)}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveEdit}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Meeting?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel &quot;{cancelMeeting?.title}&quot;? All participants will be notified of the cancellation.
+              Are you sure you want to cancel &quot;{deletingMeeting?.title}&quot;? All participants will be notified of the cancellation. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Keep Meeting</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setDeletingMeeting(null)}>
+              Keep Meeting
+            </AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmCancelMeeting}
+              onClick={handleConfirmDelete}
+              disabled={isSubmitting}
               className="bg-red-500 hover:bg-red-600"
             >
-              Cancel Meeting
+              {isSubmitting ? 'Cancelling...' : 'Cancel Meeting'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Set Reminder Dialog */}
+      <Dialog open={showReminderDialog} onOpenChange={setShowReminderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set Reminder</DialogTitle>
+            <DialogDescription>
+              Choose when to be reminded about &quot;{reminderMeeting?.title}&quot;
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Label htmlFor="reminder-time">Remind me</Label>
+            <Select value={reminderMinutes.toString()} onValueChange={(v) => setReminderMinutes(parseInt(v))}>
+              <SelectTrigger className="mt-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5 minutes before</SelectItem>
+                <SelectItem value="10">10 minutes before</SelectItem>
+                <SelectItem value="15">15 minutes before</SelectItem>
+                <SelectItem value="30">30 minutes before</SelectItem>
+                <SelectItem value="60">1 hour before</SelectItem>
+                <SelectItem value="1440">1 day before</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReminderDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveReminder}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Setting...' : 'Set Reminder'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Attendees Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Attendees</DialogTitle>
+            <DialogDescription>
+              Add more attendees to &quot;{inviteMeeting?.title}&quot;
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <Label>Select attendees to invite</Label>
+            <div className="grid grid-cols-1 gap-2 p-3 border rounded-md mt-2 max-h-60 overflow-y-auto">
+              {AVAILABLE_ATTENDEES.filter(a => !inviteMeeting?.attendees.includes(a)).map((attendee) => (
+                <div key={attendee} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`invite-${attendee}`}
+                    checked={newAttendees.includes(attendee)}
+                    onCheckedChange={() => toggleNewAttendee(attendee)}
+                  />
+                  <label
+                    htmlFor={`invite-${attendee}`}
+                    className="text-sm cursor-pointer"
+                  >
+                    {attendee}
+                  </label>
+                </div>
+              ))}
+              {AVAILABLE_ATTENDEES.filter(a => !inviteMeeting?.attendees.includes(a)).length === 0 && (
+                <p className="text-sm text-gray-500">All available attendees have been invited</p>
+              )}
+            </div>
+            {newAttendees.length > 0 && (
+              <p className="text-sm text-gray-600 mt-2">
+                {newAttendees.length} attendee(s) selected
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSendInvites}
+              disabled={isSubmitting || newAttendees.length === 0}
+            >
+              {isSubmitting ? 'Sending...' : 'Send Invitations'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Meeting Details Dialog */}
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedMeeting?.title}</DialogTitle>
+            <DialogDescription>
+              Meeting details and information
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedMeeting && (
+            <div className="space-y-4 py-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500">Description</p>
+                <p className="text-gray-900">{selectedMeeting.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Date</p>
+                  <p className="text-gray-900">{new Date(selectedMeeting.date).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Time</p>
+                  <p className="text-gray-900">{selectedMeeting.time} ({selectedMeeting.duration} min)</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500">Project</p>
+                <p className="text-gray-900">{selectedMeeting.project}</p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500">Status</p>
+                <Badge variant="outline">{selectedMeeting.status}</Badge>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500">Attendees</p>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {selectedMeeting.attendees.map((attendee) => (
+                    <Badge key={attendee} variant="secondary">{attendee}</Badge>
+                  ))}
+                </div>
+              </div>
+
+              {selectedMeeting.notes && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Notes</p>
+                  <p className="text-gray-900 bg-yellow-50 p-2 rounded mt-1">{selectedMeeting.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

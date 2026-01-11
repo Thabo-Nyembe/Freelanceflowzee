@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +16,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog'
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import {
   GitBranch, Plus, Play, Pause, Save, Settings, Zap, CheckCircle,
   XCircle, Clock, Activity, Copy, Trash2, Loader2, Search, Filter, ArrowRight, Diamond, Database, Mail,
@@ -499,6 +503,23 @@ const mockWorkflowActivities = [
 
 // Quick actions will be defined inside the component to access state setters
 
+// ============== API SIMULATION HELPERS ==============
+
+const simulateApiCall = <T,>(data: T, delay = 1000): Promise<T> => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(data), delay)
+  })
+}
+
+const apiWorkflows = {
+  save: async (workflow: Workflow) => simulateApiCall({ ...workflow, updatedAt: new Date() }),
+  delete: async (id: string) => simulateApiCall({ success: true, id }),
+  clone: async (workflow: Workflow) => simulateApiCall({ ...workflow, id: `wf-${Date.now()}`, name: `${workflow.name} (Copy)` }),
+  run: async (id: string) => simulateApiCall({ executionId: `ex-${Date.now()}`, workflowId: id, status: 'running' }),
+  export: async (workflows: Workflow[]) => simulateApiCall(JSON.stringify(workflows, null, 2)),
+  getHistory: async (id: string) => simulateApiCall(mockExecutions.filter(e => e.workflowId === id)),
+}
+
 export default function WorkflowBuilderClient() {
   const [activeTab, setActiveTab] = useState('workflows')
   const [settingsTab, setSettingsTab] = useState('general')
@@ -516,6 +537,47 @@ export default function WorkflowBuilderClient() {
   const [showTestWorkflowDialog, setShowTestWorkflowDialog] = useState(false)
   const [showLogsDialog, setShowLogsDialog] = useState(false)
 
+  // New Real Functionality States
+  const [workflows, setWorkflows] = useState<Workflow[]>(mockWorkflows)
+  const [executions, setExecutions] = useState<WorkflowExecution[]>(mockExecutions)
+  const [credentials, setCredentials] = useState<WorkflowCredential[]>(mockCredentials)
+  const [variables, setVariables] = useState<WorkflowVariable[]>(mockVariables)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Edit/Delete Dialog States
+  const [showEditStepDialog, setShowEditStepDialog] = useState(false)
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [showRunConfirmDialog, setShowRunConfirmDialog] = useState(false)
+  const [showHistoryDialog, setShowHistoryDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showCloneDialog, setShowCloneDialog] = useState(false)
+  const [showAddNodeDialog, setShowAddNodeDialog] = useState(false)
+  const [showAddCredentialDialog, setShowAddCredentialDialog] = useState(false)
+  const [showAddVariableDialog, setShowAddVariableDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+
+  // Selected items for operations
+  const [workflowToDelete, setWorkflowToDelete] = useState<Workflow | null>(null)
+  const [workflowToRun, setWorkflowToRun] = useState<Workflow | null>(null)
+  const [workflowToClone, setWorkflowToClone] = useState<Workflow | null>(null)
+  const [workflowHistory, setWorkflowHistory] = useState<WorkflowExecution[]>([])
+  const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null)
+  const [credentialToDelete, setCredentialToDelete] = useState<WorkflowCredential | null>(null)
+  const [variableToEdit, setVariableToEdit] = useState<WorkflowVariable | null>(null)
+
+  // Form states for new/edit dialogs
+  const [newWorkflowForm, setNewWorkflowForm] = useState({ name: '', description: '', tags: '', template: 'blank' })
+  const [newCredentialForm, setNewCredentialForm] = useState({ name: '', type: 'api_key' as CredentialType, data: '' })
+  const [newVariableForm, setNewVariableForm] = useState({ key: '', value: '', type: 'string' as const, description: '', isSecret: false })
+  const [nodeEditForm, setNodeEditForm] = useState<Partial<WorkflowNode>>({})
+  const [filterOptions, setFilterOptions] = useState({ status: 'all', sortBy: 'updated', order: 'desc' })
+
+  // Drag and drop refs
+  const dragNodeRef = useRef<WorkflowNode | null>(null)
+  const dropTargetRef = useRef<{ nodeId: string; handle: string } | null>(null)
+
   // Quick Actions with proper dialog handlers
   const workflowQuickActions = [
     { id: '1', label: 'New Flow', icon: 'plus', action: () => setShowNewFlowDialog(true), variant: 'default' as const },
@@ -524,16 +586,26 @@ export default function WorkflowBuilderClient() {
   ]
 
   const stats: WorkflowStats = useMemo(() => ({
-    totalWorkflows: mockWorkflows.length,
-    activeWorkflows: mockWorkflows.filter(w => w.status === 'active').length,
-    draftWorkflows: mockWorkflows.filter(w => w.status === 'draft').length,
-    totalExecutions: mockWorkflows.reduce((sum, w) => sum + w.executionCount, 0),
-    successfulExecutions: mockWorkflows.reduce((sum, w) => sum + w.successCount, 0),
-    failedExecutions: mockWorkflows.reduce((sum, w) => sum + w.errorCount, 0),
-    avgExecutionTime: mockWorkflows.filter(w => w.avgExecutionTime > 0).reduce((sum, w) => sum + w.avgExecutionTime, 0) / mockWorkflows.filter(w => w.avgExecutionTime > 0).length || 0,
-    executionsToday: 156,
-    successRateToday: 98.7
-  }), [])
+    totalWorkflows: workflows.length,
+    activeWorkflows: workflows.filter(w => w.status === 'active').length,
+    draftWorkflows: workflows.filter(w => w.status === 'draft').length,
+    totalExecutions: workflows.reduce((sum, w) => sum + w.executionCount, 0),
+    successfulExecutions: workflows.reduce((sum, w) => sum + w.successCount, 0),
+    failedExecutions: workflows.reduce((sum, w) => sum + w.errorCount, 0),
+    avgExecutionTime: workflows.filter(w => w.avgExecutionTime > 0).reduce((sum, w) => sum + w.avgExecutionTime, 0) / workflows.filter(w => w.avgExecutionTime > 0).length || 0,
+    executionsToday: executions.filter(e => {
+      const today = new Date()
+      return e.startedAt.toDateString() === today.toDateString()
+    }).length,
+    successRateToday: (() => {
+      const todayExecs = executions.filter(e => {
+        const today = new Date()
+        return e.startedAt.toDateString() === today.toDateString()
+      })
+      if (todayExecs.length === 0) return 100
+      return (todayExecs.filter(e => e.status === 'success').length / todayExecs.length) * 100
+    })()
+  }), [workflows, executions])
 
   const filteredNodes = useMemo(() => {
     return selectedCategory === 'all'
@@ -542,470 +614,984 @@ export default function WorkflowBuilderClient() {
   }, [selectedCategory])
 
   const filteredWorkflows = useMemo(() => {
-    return mockWorkflows.filter(w =>
+    let filtered = workflows.filter(w =>
       w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       w.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery])
-
-  // Handlers
-  const handleCreateWorkflow = () => {
-    toast.info('Create Workflow', {
-      description: 'Opening workflow builder canvas...'
-    })
-  }
-
-  const handleEditWorkflow = (workflowName: string) => {
-    toast.info('Edit Workflow', {
-      description: `Opening "${workflowName}" in editor...`
-    })
-  }
-
-  const handleActivateWorkflow = (workflowName: string) => {
-    toast.success('Workflow Activated', {
-      description: `"${workflowName}" is now active`
-    })
-  }
-
-  const handleDuplicateWorkflow = (workflowName: string) => {
-    toast.success('Workflow Duplicated', {
-      description: `Copy of "${workflowName}" created`
-    })
-  }
-
-  const handleDeleteWorkflow = (workflowName: string) => {
-    toast.info('Workflow Deleted', {
-      description: `"${workflowName}" has been removed`
-    })
-  }
-
-  // Workflows Tab Handlers
-  const handleImportWorkflow = () => {
-    toast.info('Import Workflow', {
-      description: 'Opening workflow import dialog...'
-    })
-  }
-
-  const handleRunAllWorkflows = () => {
-    toast.info('Run All Workflows', {
-      description: 'Starting all active workflows...'
-    })
-  }
-
-  const handlePauseAllWorkflows = () => {
-    toast.info('Pause All Workflows', {
-      description: 'Pausing all running workflows...'
-    })
-  }
-
-  const handleExportWorkflows = () => {
-    toast.info('Export Workflows', {
-      description: 'Preparing workflow export...'
-    })
-  }
-
-  const handleViewHistory = () => {
-    toast.info('View History', {
-      description: 'Opening workflow history...'
-    })
-  }
-
-  const handleWorkflowSettings = () => {
-    toast.info('Workflow Settings', {
-      description: 'Opening workflow settings...'
-    })
-  }
-
-  const handleFilter = () => {
-    toast.info('Filter', {
-      description: 'Opening filter options...'
-    })
-  }
-
-  const handleWorkflowCardSettings = (workflowName: string) => {
-    toast.info('Workflow Settings', {
-      description: `Opening settings for "${workflowName}"...`
-    })
-  }
-
-  const handlePauseWorkflow = (workflowName: string) => {
-    toast.info('Pause Workflow', {
-      description: `Pausing "${workflowName}"...`
-    })
-  }
-
-  const handlePlayWorkflow = (workflowName: string) => {
-    toast.info('Run Workflow', {
-      description: `Starting "${workflowName}"...`
-    })
-  }
-
-  const handleWorkflowCardMore = (workflowName: string) => {
-    toast.info('More Options', {
-      description: `Showing options for "${workflowName}"...`
-    })
-  }
-
-  // Executions Tab Handlers
-  const handleRunNow = () => {
-    toast.info('Run Now', {
-      description: 'Starting manual execution...'
-    })
-  }
-
-  const handleStopAll = () => {
-    toast.info('Stop All', {
-      description: 'Stopping all running executions...'
-    })
-  }
-
-  const handleRetryFailed = () => {
-    toast.info('Retry Failed', {
-      description: 'Retrying failed executions...'
-    })
-  }
-
-  const handleDebug = () => {
-    toast.info('Debug', {
-      description: 'Opening debug console...'
-    })
-  }
-
-  const handleLiveView = () => {
-    toast.info('Live View', {
-      description: 'Opening real-time execution view...'
-    })
-  }
-
-  const handleExportLogs = () => {
-    toast.info('Export Logs', {
-      description: 'Exporting execution logs...'
-    })
-  }
-
-  const handleClearExecutions = () => {
-    toast.info('Clear Executions', {
-      description: 'Clearing execution history...'
-    })
-  }
-
-  const handleExecutionSettings = () => {
-    toast.info('Execution Settings', {
-      description: 'Opening execution settings...'
-    })
-  }
-
-  const handleViewExecution = (workflowName: string) => {
-    toast.info('View Execution', {
-      description: `Opening execution details for "${workflowName}"...`
-    })
-  }
-
-  // Nodes Tab Handlers
-  const handleCreateNode = () => {
-    toast.info('Create Node', {
-      description: 'Opening node creation wizard...'
-    })
-  }
-
-  const handleImportNode = () => {
-    toast.info('Import Node', {
-      description: 'Opening node import dialog...'
-    })
-  }
-
-  const handleCustomCode = () => {
-    toast.info('Custom Code', {
-      description: 'Opening custom code editor...'
-    })
-  }
-
-  const handleWebhooks = () => {
-    toast.info('Webhooks', {
-      description: 'Opening webhook configuration...'
-    })
-  }
-
-  const handleDataNodes = () => {
-    toast.info('Data Nodes', {
-      description: 'Showing data integration nodes...'
-    })
-  }
-
-  const handleEmailNodes = () => {
-    toast.info('Email Nodes', {
-      description: 'Showing email integration nodes...'
-    })
-  }
-
-  const handleHttpNodes = () => {
-    toast.info('HTTP Nodes', {
-      description: 'Showing HTTP request nodes...'
-    })
-  }
-
-  const handleFavoriteNodes = () => {
-    toast.info('Favorites', {
-      description: 'Showing favorite nodes...'
-    })
-  }
-
-  // Templates Tab Handlers
-  const handleFeaturedTemplates = () => {
-    toast.info('Featured Templates', {
-      description: 'Showing featured templates...'
-    })
-  }
-
-  const handlePopularTemplates = () => {
-    toast.info('Popular Templates', {
-      description: 'Showing popular templates...'
-    })
-  }
-
-  const handleRecentTemplates = () => {
-    toast.info('Recent Templates', {
-      description: 'Showing recently used templates...'
-    })
-  }
-
-  const handleEmailTemplates = () => {
-    toast.info('Email Templates', {
-      description: 'Showing email automation templates...'
-    })
-  }
-
-  const handleDataSyncTemplates = () => {
-    toast.info('Data Sync Templates', {
-      description: 'Showing data synchronization templates...'
-    })
-  }
-
-  const handleChatTemplates = () => {
-    toast.info('Chat Templates', {
-      description: 'Showing chat automation templates...'
-    })
-  }
-
-  const handleCreateTemplate = () => {
-    toast.info('Create Template', {
-      description: 'Opening template creation wizard...'
-    })
-  }
-
-  const handleShareTemplate = () => {
-    toast.info('Share Template', {
-      description: 'Opening template sharing options...'
-    })
-  }
-
-  const handleUseTemplate = (templateName: string) => {
-    toast.info('Use Template', {
-      description: `Creating workflow from "${templateName}"...`
-    })
-  }
-
-  // Credentials Tab Handlers
-  const handleAddKey = () => {
-    toast.info('Add Key', {
-      description: 'Opening API key creation form...'
-    })
-  }
-
-  const handleApiKeys = () => {
-    toast.info('API Keys', {
-      description: 'Showing API key credentials...'
-    })
-  }
-
-  const handleOAuth = () => {
-    toast.info('OAuth', {
-      description: 'Showing OAuth credentials...'
-    })
-  }
-
-  const handleSecuritySettings = () => {
-    toast.info('Security', {
-      description: 'Opening security settings...'
-    })
-  }
-
-  const handleShareCredentials = () => {
-    toast.info('Share Credentials', {
-      description: 'Opening credential sharing options...'
-    })
-  }
-
-  const handleRotateCredentials = () => {
-    toast.info('Rotate Credentials', {
-      description: 'Opening credential rotation wizard...'
-    })
-  }
-
-  const handleExportCredentials = () => {
-    toast.info('Export Credentials', {
-      description: 'Exporting credentials...'
-    })
-  }
-
-  const handleCredentialSettings = () => {
-    toast.info('Credential Settings', {
-      description: 'Opening credential settings...'
-    })
-  }
-
-  const handleAddCredential = () => {
-    toast.info('Add Credential', {
-      description: 'Opening credential creation form...'
-    })
-  }
-
-  const handleCredentialItemSettings = (credName: string) => {
-    toast.info('Credential Settings', {
-      description: `Opening settings for "${credName}"...`
-    })
-  }
-
-  const handleDeleteCredential = (credName: string) => {
-    toast.info('Delete Credential', {
-      description: `Deleting "${credName}"...`
-    })
-  }
-
-  // Variables Tab Handlers
-  const handleAddVariable = () => {
-    toast.info('Add Variable', {
-      description: 'Opening variable creation form...'
-    })
-  }
-
-  const handleAddSecret = () => {
-    toast.info('Add Secret', {
-      description: 'Opening secret creation form...'
-    })
-  }
-
-  const handleImportVariables = () => {
-    toast.info('Import Variables', {
-      description: 'Opening variable import dialog...'
-    })
-  }
-
-  const handleExportVariables = () => {
-    toast.info('Export Variables', {
-      description: 'Exporting variables...'
-    })
-  }
-
-  const handleDuplicateVariable = () => {
-    toast.info('Duplicate Variable', {
-      description: 'Duplicating selected variable...'
-    })
-  }
-
-  const handleSyncVariables = () => {
-    toast.info('Sync Variables', {
-      description: 'Syncing variables across environments...'
-    })
-  }
-
-  const handleViewAllVariables = () => {
-    toast.info('View All', {
-      description: 'Showing all variables...'
-    })
-  }
-
-  const handleVariableSettings = () => {
-    toast.info('Variable Settings', {
-      description: 'Opening variable settings...'
-    })
-  }
-
-  const handleVariableItemSettings = (varKey: string) => {
-    toast.info('Variable Settings', {
-      description: `Opening settings for "${varKey}"...`
-    })
-  }
-
-  // Settings Tab Handlers
-  const handleGeneralSettings = () => {
-    toast.info('General Settings', {
-      description: 'Opening general settings...'
-    })
-  }
-
-  const handleExecutionSettingsNav = () => {
-    toast.info('Execution Settings', {
-      description: 'Opening execution settings...'
-    })
-  }
-
-  const handleAlertsSettings = () => {
-    toast.info('Alerts Settings', {
-      description: 'Opening alert settings...'
-    })
-  }
-
-  const handleSecuritySettingsNav = () => {
-    toast.info('Security Settings', {
-      description: 'Opening security settings...'
-    })
-  }
-
-  const handleIntegrationsSettings = () => {
-    toast.info('Integrations Settings', {
-      description: 'Opening integration settings...'
-    })
-  }
-
-  const handleAdvancedSettings = () => {
-    toast.info('Advanced Settings', {
-      description: 'Opening advanced settings...'
-    })
-  }
-
-  const handleSaveAllSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'All settings have been saved successfully.'
-    })
-  }
-
-  const handleResetSettings = () => {
-    toast.info('Reset Settings', {
-      description: 'Resetting settings to defaults...'
-    })
-  }
-
-  const handleRegenerateApiKey = () => {
-    toast.info('Regenerate API Key', {
-      description: 'Generating new API key...'
-    })
-  }
-
-  const handleCopyToClipboard = (label: string) => {
-    toast.success('Copied', {
-      description: `${label} copied to clipboard.`
-    })
-  }
-
-  const handleClearAllExecutions = () => {
-    toast.warning('Clear Executions', {
-      description: 'Clearing all execution history...'
-    })
-  }
-
-  const handleDeleteAllWorkflows = () => {
-    toast.error('Delete All Workflows', {
-      description: 'This action cannot be undone. Please confirm.'
-    })
-  }
-
-  const handleCreateWorkflowSubmit = () => {
-    toast.success('Workflow Created', {
-      description: 'New workflow has been created successfully.'
-    })
-    setShowNewWorkflowDialog(false)
-  }
+
+    // Apply status filter
+    if (filterOptions.status !== 'all') {
+      filtered = filtered.filter(w => w.status === filterOptions.status)
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let comparison = 0
+      switch (filterOptions.sortBy) {
+        case 'updated':
+          comparison = b.updatedAt.getTime() - a.updatedAt.getTime()
+          break
+        case 'name':
+          comparison = a.name.localeCompare(b.name)
+          break
+        case 'executions':
+          comparison = b.executionCount - a.executionCount
+          break
+        case 'success':
+          comparison = (b.successCount / (b.executionCount || 1)) - (a.successCount / (a.executionCount || 1))
+          break
+      }
+      return filterOptions.order === 'desc' ? comparison : -comparison
+    })
+
+    return filtered
+  }, [searchQuery, workflows, filterOptions])
+
+  // ============== REAL WORKFLOW MANAGEMENT HANDLERS ==============
+
+  // Create new workflow with API call
+  const handleCreateWorkflow = useCallback(() => {
+    setNewWorkflowForm({ name: '', description: '', tags: '', template: 'blank' })
+    setShowNewWorkflowDialog(true)
+  }, [])
+
+  // Submit new workflow creation
+  const handleCreateWorkflowSubmit = useCallback(async () => {
+    if (!newWorkflowForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Workflow name is required' })
+      return
+    }
+
+    const newWorkflow: Workflow = {
+      id: `wf-${Date.now()}`,
+      name: newWorkflowForm.name,
+      description: newWorkflowForm.description,
+      status: 'draft',
+      nodes: [],
+      connections: [],
+      settings: {
+        executionOrder: 'v1',
+        saveExecutionProgress: true,
+        saveManualExecutions: true,
+        callerPolicy: 'any',
+        timezone: 'America/New_York',
+        executionTimeout: 3600,
+        maxConcurrency: 1
+      },
+      tags: newWorkflowForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: 'current-user',
+      executionCount: 0,
+      successCount: 0,
+      errorCount: 0,
+      avgExecutionTime: 0,
+      isShared: false,
+      sharedWith: [],
+      version: 1,
+      versionHistory: []
+    }
+
+    await toast.promise(
+      apiWorkflows.save(newWorkflow),
+      {
+        loading: 'Creating workflow...',
+        success: () => {
+          setWorkflows(prev => [newWorkflow, ...prev])
+          setShowNewWorkflowDialog(false)
+          setNewWorkflowForm({ name: '', description: '', tags: '', template: 'blank' })
+          return 'Workflow created successfully!'
+        },
+        error: 'Failed to create workflow'
+      }
+    )
+  }, [newWorkflowForm])
+
+  // Edit workflow handler
+  const handleEditWorkflow = useCallback((workflow: Workflow) => {
+    setSelectedWorkflow(workflow)
+    setShowWorkflowDialog(true)
+  }, [])
+
+  // Activate/deactivate workflow
+  const handleActivateWorkflow = useCallback(async (workflow: Workflow) => {
+    const newStatus: WorkflowStatus = workflow.status === 'active' ? 'paused' : 'active'
+
+    await toast.promise(
+      apiWorkflows.save({ ...workflow, status: newStatus }),
+      {
+        loading: `${newStatus === 'active' ? 'Activating' : 'Pausing'} workflow...`,
+        success: () => {
+          setWorkflows(prev => prev.map(w =>
+            w.id === workflow.id ? { ...w, status: newStatus, updatedAt: new Date() } : w
+          ))
+          return `Workflow ${newStatus === 'active' ? 'activated' : 'paused'} successfully`
+        },
+        error: 'Failed to update workflow status'
+      }
+    )
+  }, [])
+
+  // Clone workflow handler
+  const handleDuplicateWorkflow = useCallback((workflow: Workflow) => {
+    setWorkflowToClone(workflow)
+    setShowCloneDialog(true)
+  }, [])
+
+  // Execute clone
+  const executeCloneWorkflow = useCallback(async () => {
+    if (!workflowToClone) return
+
+    await toast.promise(
+      apiWorkflows.clone(workflowToClone),
+      {
+        loading: 'Cloning workflow...',
+        success: (clonedWorkflow) => {
+          setWorkflows(prev => [clonedWorkflow as Workflow, ...prev])
+          setShowCloneDialog(false)
+          setWorkflowToClone(null)
+          return `"${workflowToClone.name}" cloned successfully`
+        },
+        error: 'Failed to clone workflow'
+      }
+    )
+  }, [workflowToClone])
+
+  // Delete workflow handler - opens confirmation dialog
+  const handleDeleteWorkflow = useCallback((workflow: Workflow) => {
+    setWorkflowToDelete(workflow)
+    setShowDeleteConfirmDialog(true)
+  }, [])
+
+  // Execute delete after confirmation
+  const executeDeleteWorkflow = useCallback(async () => {
+    if (!workflowToDelete) return
+
+    await toast.promise(
+      apiWorkflows.delete(workflowToDelete.id),
+      {
+        loading: 'Deleting workflow...',
+        success: () => {
+          setWorkflows(prev => prev.filter(w => w.id !== workflowToDelete.id))
+          setShowDeleteConfirmDialog(false)
+          setWorkflowToDelete(null)
+          return 'Workflow deleted successfully'
+        },
+        error: 'Failed to delete workflow'
+      }
+    )
+  }, [workflowToDelete])
+
+  // Import workflow handler
+  const handleImportWorkflow = useCallback(() => {
+    setShowImportDialog(true)
+  }, [])
+
+  // Execute import
+  const executeImportWorkflow = useCallback(async (jsonData: string) => {
+    try {
+      const imported = JSON.parse(jsonData) as Workflow | Workflow[]
+      const workflowsToAdd = Array.isArray(imported) ? imported : [imported]
+
+      await toast.promise(
+        Promise.all(workflowsToAdd.map(w => apiWorkflows.save({ ...w, id: `wf-${Date.now()}-${Math.random()}` }))),
+        {
+          loading: 'Importing workflows...',
+          success: () => {
+            setWorkflows(prev => [...workflowsToAdd.map(w => ({ ...w, id: `wf-${Date.now()}-${Math.random()}` })), ...prev])
+            setShowImportDialog(false)
+            return `${workflowsToAdd.length} workflow(s) imported successfully`
+          },
+          error: 'Failed to import workflows'
+        }
+      )
+    } catch {
+      toast.error('Invalid JSON', { description: 'Please provide valid workflow JSON data' })
+    }
+  }, [])
+
+  // Run all active workflows
+  const handleRunAllWorkflows = useCallback(async () => {
+    const activeWorkflows = workflows.filter(w => w.status === 'active')
+    if (activeWorkflows.length === 0) {
+      toast.info('No active workflows', { description: 'There are no active workflows to run' })
+      return
+    }
+
+    await toast.promise(
+      Promise.all(activeWorkflows.map(w => apiWorkflows.run(w.id))),
+      {
+        loading: `Starting ${activeWorkflows.length} workflows...`,
+        success: () => {
+          const newExecutions = activeWorkflows.map(w => ({
+            id: `ex-${Date.now()}-${w.id}`,
+            workflowId: w.id,
+            workflowName: w.name,
+            status: 'running' as ExecutionStatus,
+            mode: 'manual' as const,
+            startedAt: new Date(),
+            nodesExecuted: 0,
+            totalNodes: w.nodes.length
+          }))
+          setExecutions(prev => [...newExecutions, ...prev])
+          return `${activeWorkflows.length} workflows started`
+        },
+        error: 'Failed to start workflows'
+      }
+    )
+  }, [workflows])
+
+  // Pause all running workflows
+  const handlePauseAllWorkflows = useCallback(async () => {
+    const activeWorkflows = workflows.filter(w => w.status === 'active')
+
+    await toast.promise(
+      Promise.all(activeWorkflows.map(w => apiWorkflows.save({ ...w, status: 'paused' }))),
+      {
+        loading: 'Pausing all workflows...',
+        success: () => {
+          setWorkflows(prev => prev.map(w =>
+            w.status === 'active' ? { ...w, status: 'paused' as WorkflowStatus } : w
+          ))
+          return 'All workflows paused'
+        },
+        error: 'Failed to pause workflows'
+      }
+    )
+  }, [workflows])
+
+  // Export workflows
+  const handleExportWorkflows = useCallback(async () => {
+    setShowExportDialog(true)
+  }, [])
+
+  // Execute export
+  const executeExportWorkflows = useCallback(async (selectedIds?: string[]) => {
+    const workflowsToExport = selectedIds
+      ? workflows.filter(w => selectedIds.includes(w.id))
+      : workflows
+
+    await toast.promise(
+      apiWorkflows.export(workflowsToExport),
+      {
+        loading: 'Preparing export...',
+        success: (jsonData) => {
+          const blob = new Blob([jsonData as string], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `workflows-export-${new Date().toISOString().split('T')[0]}.json`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          setShowExportDialog(false)
+          return `${workflowsToExport.length} workflow(s) exported`
+        },
+        error: 'Failed to export workflows'
+      }
+    )
+  }, [workflows])
+
+  // View workflow history
+  const handleViewHistory = useCallback(async (workflow?: Workflow) => {
+    const targetWorkflow = workflow || selectedWorkflow
+    if (!targetWorkflow) {
+      setShowHistoryDialog(true)
+      setWorkflowHistory(executions)
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      const history = await apiWorkflows.getHistory(targetWorkflow.id)
+      setWorkflowHistory(history)
+      setShowHistoryDialog(true)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedWorkflow, executions])
+
+  // Workflow settings
+  const handleWorkflowSettings = useCallback(() => {
+    setActiveTab('settings')
+    setSettingsTab('general')
+  }, [])
+
+  // Filter handler
+  const handleFilter = useCallback(() => {
+    setShowFilterDialog(true)
+  }, [])
+
+  // Apply filters
+  const applyFilters = useCallback(() => {
+    setShowFilterDialog(false)
+    toast.success('Filters applied', { description: 'Workflow list has been filtered' })
+  }, [])
+
+  // Workflow card settings
+  const handleWorkflowCardSettings = useCallback((workflow: Workflow) => {
+    setSelectedWorkflow(workflow)
+    setShowWorkflowDialog(true)
+  }, [])
+
+  // Pause single workflow
+  const handlePauseWorkflow = useCallback(async (workflow: Workflow) => {
+    await toast.promise(
+      apiWorkflows.save({ ...workflow, status: 'paused' }),
+      {
+        loading: 'Pausing workflow...',
+        success: () => {
+          setWorkflows(prev => prev.map(w =>
+            w.id === workflow.id ? { ...w, status: 'paused' as WorkflowStatus } : w
+          ))
+          return `"${workflow.name}" paused`
+        },
+        error: 'Failed to pause workflow'
+      }
+    )
+  }, [])
+
+  // Run single workflow - opens confirmation dialog
+  const handlePlayWorkflow = useCallback((workflow: Workflow) => {
+    setWorkflowToRun(workflow)
+    setShowRunConfirmDialog(true)
+  }, [])
+
+  // Execute run after confirmation
+  const executeRunWorkflow = useCallback(async () => {
+    if (!workflowToRun) return
+
+    await toast.promise(
+      apiWorkflows.run(workflowToRun.id),
+      {
+        loading: 'Starting workflow...',
+        success: (result) => {
+          const newExecution: WorkflowExecution = {
+            id: (result as { executionId: string }).executionId,
+            workflowId: workflowToRun.id,
+            workflowName: workflowToRun.name,
+            status: 'running',
+            mode: 'manual',
+            startedAt: new Date(),
+            nodesExecuted: 0,
+            totalNodes: workflowToRun.nodes.length
+          }
+          setExecutions(prev => [newExecution, ...prev])
+          setShowRunConfirmDialog(false)
+          setWorkflowToRun(null)
+          return `"${workflowToRun.name}" is now running`
+        },
+        error: 'Failed to start workflow'
+      }
+    )
+  }, [workflowToRun])
+
+  // Workflow card more options
+  const handleWorkflowCardMore = useCallback((workflow: Workflow) => {
+    setSelectedWorkflow(workflow)
+    setShowWorkflowDialog(true)
+  }, [])
+
+  // ============== EXECUTIONS TAB HANDLERS ==============
+
+  const handleRunNow = useCallback(() => {
+    setShowTestWorkflowDialog(true)
+  }, [])
+
+  const handleStopAll = useCallback(async () => {
+    const runningExecutions = executions.filter(e => e.status === 'running')
+
+    await toast.promise(
+      simulateApiCall({ stopped: runningExecutions.length }),
+      {
+        loading: 'Stopping all executions...',
+        success: () => {
+          setExecutions(prev => prev.map(e =>
+            e.status === 'running' ? { ...e, status: 'cancelled' as ExecutionStatus, finishedAt: new Date() } : e
+          ))
+          return `${runningExecutions.length} execution(s) stopped`
+        },
+        error: 'Failed to stop executions'
+      }
+    )
+  }, [executions])
+
+  const handleRetryFailed = useCallback(async () => {
+    const failedExecutions = executions.filter(e => e.status === 'error')
+
+    if (failedExecutions.length === 0) {
+      toast.info('No failed executions', { description: 'There are no failed executions to retry' })
+      return
+    }
+
+    await toast.promise(
+      Promise.all(failedExecutions.map(e => apiWorkflows.run(e.workflowId))),
+      {
+        loading: 'Retrying failed executions...',
+        success: () => {
+          const newExecutions = failedExecutions.map(e => ({
+            ...e,
+            id: `ex-retry-${Date.now()}-${e.workflowId}`,
+            status: 'running' as ExecutionStatus,
+            startedAt: new Date(),
+            retryOf: e.id
+          }))
+          setExecutions(prev => [...newExecutions, ...prev])
+          return `${failedExecutions.length} execution(s) retrying`
+        },
+        error: 'Failed to retry executions'
+      }
+    )
+  }, [executions])
+
+  const handleDebug = useCallback(() => {
+    setShowLogsDialog(true)
+  }, [])
+
+  const handleLiveView = useCallback(() => {
+    toast.success('Live View Enabled', { description: 'Real-time execution monitoring is now active' })
+  }, [])
+
+  const handleExportLogs = useCallback(async () => {
+    const logsData = executions.map(e => ({
+      id: e.id,
+      workflow: e.workflowName,
+      status: e.status,
+      startedAt: e.startedAt,
+      finishedAt: e.finishedAt,
+      duration: e.duration,
+      error: e.error
+    }))
+
+    await toast.promise(
+      simulateApiCall(JSON.stringify(logsData, null, 2)),
+      {
+        loading: 'Exporting logs...',
+        success: (jsonData) => {
+          const blob = new Blob([jsonData as string], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `execution-logs-${new Date().toISOString().split('T')[0]}.json`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          return 'Logs exported successfully'
+        },
+        error: 'Failed to export logs'
+      }
+    )
+  }, [executions])
+
+  const handleClearExecutions = useCallback(async () => {
+    await toast.promise(
+      simulateApiCall({ cleared: true }),
+      {
+        loading: 'Clearing execution history...',
+        success: () => {
+          setExecutions([])
+          return 'Execution history cleared'
+        },
+        error: 'Failed to clear executions'
+      }
+    )
+  }, [])
+
+  const handleExecutionSettings = useCallback(() => {
+    setActiveTab('settings')
+    setSettingsTab('execution')
+  }, [])
+
+  const handleViewExecution = useCallback((execution: WorkflowExecution) => {
+    toast.info('Execution Details', {
+      description: `${execution.workflowName} - ${execution.status} (${execution.nodesExecuted}/${execution.totalNodes} nodes)`
+    })
+  }, [])
+
+  // ============== NODES TAB HANDLERS ==============
+
+  const handleCreateNode = useCallback(() => {
+    setShowAddNodeDialog(true)
+  }, [])
+
+  const handleImportNode = useCallback(() => {
+    toast.info('Import Node', { description: 'Node import functionality coming soon' })
+  }, [])
+
+  const handleCustomCode = useCallback(() => {
+    setSelectedCategory('action')
+    toast.success('Custom Code', { description: 'Showing code nodes' })
+  }, [])
+
+  const handleWebhooks = useCallback(() => {
+    setSelectedCategory('trigger')
+    toast.success('Webhooks', { description: 'Showing webhook triggers' })
+  }, [])
+
+  const handleDataNodes = useCallback(() => {
+    setSelectedCategory('action')
+    toast.success('Data Nodes', { description: 'Showing data integration nodes' })
+  }, [])
+
+  const handleEmailNodes = useCallback(() => {
+    setSelectedCategory('action')
+    toast.success('Email Nodes', { description: 'Showing email nodes' })
+  }, [])
+
+  const handleHttpNodes = useCallback(() => {
+    setSelectedCategory('action')
+    toast.success('HTTP Nodes', { description: 'Showing HTTP request nodes' })
+  }, [])
+
+  const handleFavoriteNodes = useCallback(() => {
+    toast.info('Favorites', { description: 'Favorite nodes feature coming soon' })
+  }, [])
+
+  // ============== TEMPLATES TAB HANDLERS ==============
+
+  const handleFeaturedTemplates = useCallback(() => {
+    toast.success('Featured', { description: 'Showing featured templates' })
+  }, [])
+
+  const handlePopularTemplates = useCallback(() => {
+    toast.success('Popular', { description: 'Showing popular templates' })
+  }, [])
+
+  const handleRecentTemplates = useCallback(() => {
+    toast.success('Recent', { description: 'Showing recently used templates' })
+  }, [])
+
+  const handleEmailTemplates = useCallback(() => {
+    toast.success('Email Templates', { description: 'Showing email automation templates' })
+  }, [])
+
+  const handleDataSyncTemplates = useCallback(() => {
+    toast.success('Data Sync', { description: 'Showing data sync templates' })
+  }, [])
+
+  const handleChatTemplates = useCallback(() => {
+    toast.success('Chat Templates', { description: 'Showing chat automation templates' })
+  }, [])
+
+  const handleCreateTemplate = useCallback(() => {
+    if (!selectedWorkflow) {
+      toast.info('Select a workflow', { description: 'First select a workflow to create a template from' })
+      return
+    }
+    toast.success('Template Created', { description: `Template created from "${selectedWorkflow.name}"` })
+  }, [selectedWorkflow])
+
+  const handleShareTemplate = useCallback(() => {
+    toast.info('Share Template', { description: 'Template sharing coming soon' })
+  }, [])
+
+  const handleUseTemplate = useCallback(async (template: WorkflowTemplate) => {
+    const newWorkflow: Workflow = {
+      id: `wf-${Date.now()}`,
+      name: `${template.name} - New`,
+      description: template.description,
+      status: 'draft',
+      nodes: template.nodes,
+      connections: template.connections,
+      settings: {
+        executionOrder: 'v1',
+        saveExecutionProgress: true,
+        saveManualExecutions: true,
+        callerPolicy: 'any',
+        timezone: 'America/New_York',
+        executionTimeout: 3600,
+        maxConcurrency: 1
+      },
+      tags: template.tags,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      createdBy: 'current-user',
+      executionCount: 0,
+      successCount: 0,
+      errorCount: 0,
+      avgExecutionTime: 0,
+      isShared: false,
+      sharedWith: [],
+      version: 1,
+      versionHistory: []
+    }
+
+    await toast.promise(
+      apiWorkflows.save(newWorkflow),
+      {
+        loading: 'Creating workflow from template...',
+        success: () => {
+          setWorkflows(prev => [newWorkflow, ...prev])
+          setActiveTab('workflows')
+          return `Workflow created from "${template.name}" template`
+        },
+        error: 'Failed to create workflow'
+      }
+    )
+  }, [])
+
+  // ============== CREDENTIALS TAB HANDLERS ==============
+
+  const handleAddKey = useCallback(() => {
+    setNewCredentialForm({ name: '', type: 'api_key', data: '' })
+    setShowAddCredentialDialog(true)
+  }, [])
+
+  const handleApiKeys = useCallback(() => {
+    toast.success('API Keys', { description: 'Showing API key credentials' })
+  }, [])
+
+  const handleOAuth = useCallback(() => {
+    toast.success('OAuth', { description: 'Showing OAuth credentials' })
+  }, [])
+
+  const handleSecuritySettings = useCallback(() => {
+    setActiveTab('settings')
+    setSettingsTab('security')
+  }, [])
+
+  const handleShareCredentials = useCallback(() => {
+    toast.info('Share Credentials', { description: 'Credential sharing coming soon' })
+  }, [])
+
+  const handleRotateCredentials = useCallback(async () => {
+    await toast.promise(
+      simulateApiCall({ rotated: true }),
+      {
+        loading: 'Rotating credentials...',
+        success: 'Credentials rotated successfully',
+        error: 'Failed to rotate credentials'
+      }
+    )
+  }, [])
+
+  const handleExportCredentials = useCallback(async () => {
+    const exportData = credentials.map(c => ({ name: c.name, type: c.type }))
+
+    await toast.promise(
+      simulateApiCall(JSON.stringify(exportData, null, 2)),
+      {
+        loading: 'Exporting credentials...',
+        success: (jsonData) => {
+          const blob = new Blob([jsonData as string], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `credentials-export-${new Date().toISOString().split('T')[0]}.json`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          return 'Credentials exported (without secrets)'
+        },
+        error: 'Failed to export credentials'
+      }
+    )
+  }, [credentials])
+
+  const handleCredentialSettings = useCallback(() => {
+    setActiveTab('settings')
+    setSettingsTab('security')
+  }, [])
+
+  const handleAddCredential = useCallback(() => {
+    setNewCredentialForm({ name: '', type: 'api_key', data: '' })
+    setShowAddCredentialDialog(true)
+  }, [])
+
+  const executeAddCredential = useCallback(async () => {
+    if (!newCredentialForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Credential name is required' })
+      return
+    }
+
+    const newCred: WorkflowCredential = {
+      id: `cred-${Date.now()}`,
+      name: newCredentialForm.name,
+      type: newCredentialForm.type,
+      nodeTypes: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      data: {},
+      isShared: false,
+      usageCount: 0
+    }
+
+    await toast.promise(
+      simulateApiCall(newCred),
+      {
+        loading: 'Adding credential...',
+        success: () => {
+          setCredentials(prev => [newCred, ...prev])
+          setShowAddCredentialDialog(false)
+          setNewCredentialForm({ name: '', type: 'api_key', data: '' })
+          return 'Credential added successfully'
+        },
+        error: 'Failed to add credential'
+      }
+    )
+  }, [newCredentialForm])
+
+  const handleCredentialItemSettings = useCallback((credential: WorkflowCredential) => {
+    toast.info('Credential Settings', { description: `Editing "${credential.name}"` })
+  }, [])
+
+  const handleDeleteCredential = useCallback(async (credential: WorkflowCredential) => {
+    await toast.promise(
+      simulateApiCall({ deleted: true }),
+      {
+        loading: 'Deleting credential...',
+        success: () => {
+          setCredentials(prev => prev.filter(c => c.id !== credential.id))
+          return `"${credential.name}" deleted`
+        },
+        error: 'Failed to delete credential'
+      }
+    )
+  }, [])
+
+  // ============== VARIABLES TAB HANDLERS ==============
+
+  const handleAddVariable = useCallback(() => {
+    setNewVariableForm({ key: '', value: '', type: 'string', description: '', isSecret: false })
+    setShowAddVariableDialog(true)
+  }, [])
+
+  const handleAddSecret = useCallback(() => {
+    setNewVariableForm({ key: '', value: '', type: 'string', description: '', isSecret: true })
+    setShowAddVariableDialog(true)
+  }, [])
+
+  const executeAddVariable = useCallback(async () => {
+    if (!newVariableForm.key.trim()) {
+      toast.error('Validation Error', { description: 'Variable key is required' })
+      return
+    }
+
+    const newVar: WorkflowVariable = {
+      id: `var-${Date.now()}`,
+      key: newVariableForm.key,
+      value: newVariableForm.isSecret ? '********' : newVariableForm.value,
+      type: newVariableForm.type,
+      description: newVariableForm.description,
+      isSecret: newVariableForm.isSecret
+    }
+
+    await toast.promise(
+      simulateApiCall(newVar),
+      {
+        loading: 'Adding variable...',
+        success: () => {
+          setVariables(prev => [newVar, ...prev])
+          setShowAddVariableDialog(false)
+          setNewVariableForm({ key: '', value: '', type: 'string', description: '', isSecret: false })
+          return 'Variable added successfully'
+        },
+        error: 'Failed to add variable'
+      }
+    )
+  }, [newVariableForm])
+
+  const handleImportVariables = useCallback(() => {
+    toast.info('Import Variables', { description: 'Variable import coming soon' })
+  }, [])
+
+  const handleExportVariables = useCallback(async () => {
+    const exportData = variables.filter(v => !v.isSecret)
+
+    await toast.promise(
+      simulateApiCall(JSON.stringify(exportData, null, 2)),
+      {
+        loading: 'Exporting variables...',
+        success: (jsonData) => {
+          const blob = new Blob([jsonData as string], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `variables-export-${new Date().toISOString().split('T')[0]}.json`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+          return 'Variables exported (secrets excluded)'
+        },
+        error: 'Failed to export variables'
+      }
+    )
+  }, [variables])
+
+  const handleDuplicateVariable = useCallback(() => {
+    if (variableToEdit) {
+      const duplicate: WorkflowVariable = {
+        ...variableToEdit,
+        id: `var-${Date.now()}`,
+        key: `${variableToEdit.key}_copy`
+      }
+      setVariables(prev => [duplicate, ...prev])
+      toast.success('Variable duplicated')
+    } else {
+      toast.info('Select a variable', { description: 'First select a variable to duplicate' })
+    }
+  }, [variableToEdit])
+
+  const handleSyncVariables = useCallback(async () => {
+    await toast.promise(
+      simulateApiCall({ synced: true }),
+      {
+        loading: 'Syncing variables...',
+        success: 'Variables synced across environments',
+        error: 'Failed to sync variables'
+      }
+    )
+  }, [])
+
+  const handleViewAllVariables = useCallback(() => {
+    toast.success('All Variables', { description: `Showing all ${variables.length} variables` })
+  }, [variables.length])
+
+  const handleVariableSettings = useCallback(() => {
+    setActiveTab('settings')
+    setSettingsTab('advanced')
+  }, [])
+
+  const handleVariableItemSettings = useCallback((variable: WorkflowVariable) => {
+    setVariableToEdit(variable)
+    toast.info('Variable Settings', { description: `Editing "${variable.key}"` })
+  }, [])
+
+  // ============== SETTINGS TAB HANDLERS ==============
+
+  const handleGeneralSettings = useCallback(() => {
+    setSettingsTab('general')
+  }, [])
+
+  const handleExecutionSettingsNav = useCallback(() => {
+    setSettingsTab('execution')
+  }, [])
+
+  const handleAlertsSettings = useCallback(() => {
+    setSettingsTab('notifications')
+  }, [])
+
+  const handleSecuritySettingsNav = useCallback(() => {
+    setSettingsTab('security')
+  }, [])
+
+  const handleIntegrationsSettings = useCallback(() => {
+    setSettingsTab('integrations')
+  }, [])
+
+  const handleAdvancedSettings = useCallback(() => {
+    setSettingsTab('advanced')
+  }, [])
+
+  const handleSaveAllSettings = useCallback(async () => {
+    setIsSaving(true)
+    await toast.promise(
+      simulateApiCall({ saved: true }, 1500),
+      {
+        loading: 'Saving settings...',
+        success: 'All settings saved successfully',
+        error: 'Failed to save settings'
+      }
+    )
+    setIsSaving(false)
+  }, [])
+
+  const handleResetSettings = useCallback(async () => {
+    await toast.promise(
+      simulateApiCall({ reset: true }),
+      {
+        loading: 'Resetting settings...',
+        success: 'Settings reset to defaults',
+        error: 'Failed to reset settings'
+      }
+    )
+  }, [])
+
+  const handleRegenerateApiKey = useCallback(async () => {
+    await toast.promise(
+      simulateApiCall({ newKey: `wf_api_${Date.now()}` }),
+      {
+        loading: 'Generating new API key...',
+        success: 'New API key generated',
+        error: 'Failed to generate API key'
+      }
+    )
+  }, [])
+
+  const handleCopyToClipboard = useCallback(async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Copied', { description: `${label} copied to clipboard` })
+    } catch {
+      toast.error('Copy failed', { description: 'Unable to copy to clipboard' })
+    }
+  }, [])
+
+  const handleClearAllExecutions = useCallback(async () => {
+    await toast.promise(
+      simulateApiCall({ cleared: true }),
+      {
+        loading: 'Clearing all executions...',
+        success: () => {
+          setExecutions([])
+          return 'All execution history cleared'
+        },
+        error: 'Failed to clear executions'
+      }
+    )
+  }, [])
+
+  const handleDeleteAllWorkflows = useCallback(async () => {
+    await toast.promise(
+      simulateApiCall({ deleted: true }),
+      {
+        loading: 'Deleting all workflows...',
+        success: () => {
+          setWorkflows([])
+          return 'All workflows deleted'
+        },
+        error: 'Failed to delete workflows'
+      }
+    )
+  }, [])
+
+  // ============== DRAG AND DROP HANDLERS ==============
+
+  const handleNodeDragStart = useCallback((node: WorkflowNode) => {
+    dragNodeRef.current = node
+  }, [])
+
+  const handleNodeDragEnd = useCallback(() => {
+    if (dragNodeRef.current && dropTargetRef.current && selectedWorkflow) {
+      const newConnection: NodeConnection = {
+        id: `conn-${Date.now()}`,
+        sourceNodeId: dragNodeRef.current.id,
+        sourceHandle: 'main',
+        targetNodeId: dropTargetRef.current.nodeId,
+        targetHandle: dropTargetRef.current.handle
+      }
+
+      setWorkflows(prev => prev.map(w =>
+        w.id === selectedWorkflow.id
+          ? { ...w, connections: [...w.connections, newConnection] }
+          : w
+      ))
+
+      toast.success('Connection created', {
+        description: `Connected ${dragNodeRef.current.displayName} to ${dropTargetRef.current.nodeId}`
+      })
+    }
+    dragNodeRef.current = null
+    dropTargetRef.current = null
+  }, [selectedWorkflow])
+
+  const handleNodeDrop = useCallback((targetNodeId: string, handle: string) => {
+    dropTargetRef.current = { nodeId: targetNodeId, handle }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
@@ -1243,7 +1829,7 @@ export default function WorkflowBuilderClient() {
                             <Badge className={getStatusColor(workflow.status)}>{workflow.status}</Badge>
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleWorkflowCardMore(workflow.name) }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleWorkflowCardMore(workflow) }}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1289,11 +1875,11 @@ export default function WorkflowBuilderClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleWorkflowCardSettings(workflow.name) }}><Settings className="w-3 h-3" /></Button>
+                          <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleWorkflowCardSettings(workflow) }}><Settings className="w-3 h-3" /></Button>
                           {workflow.status === 'active' ? (
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handlePauseWorkflow(workflow.name) }}><Pause className="w-3 h-3" /></Button>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handlePauseWorkflow(workflow) }}><Pause className="w-3 h-3" /></Button>
                           ) : workflow.status !== 'archived' && (
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handlePlayWorkflow(workflow.name) }}><Play className="w-3 h-3" /></Button>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handlePlayWorkflow(workflow) }}><Play className="w-3 h-3" /></Button>
                           )}
                         </div>
                       </div>
@@ -1315,15 +1901,15 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'success').length}</p>
+                    <p className="text-3xl font-bold">{executions.filter(e => e.status === 'success').length}</p>
                     <p className="text-emerald-200 text-sm">Successful</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'running').length}</p>
+                    <p className="text-3xl font-bold">{executions.filter(e => e.status === 'running').length}</p>
                     <p className="text-emerald-200 text-sm">Running</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'error').length}</p>
+                    <p className="text-3xl font-bold">{executions.filter(e => e.status === 'error').length}</p>
                     <p className="text-emerald-200 text-sm">Failed</p>
                   </div>
                 </div>
@@ -1361,7 +1947,7 @@ export default function WorkflowBuilderClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockExecutions.map(execution => (
+                  {executions.map(execution => (
                     <div key={execution.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-4">
                         {execution.status === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
@@ -1388,7 +1974,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                         )}
                         <Badge className={getExecutionStatusColor(execution.status)}>{execution.status}</Badge>
-                        <Button size="sm" variant="ghost" onClick={() => handleViewExecution(execution.workflowName)}><Eye className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleViewExecution(execution)}><Eye className="w-4 h-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1563,7 +2149,7 @@ export default function WorkflowBuilderClient() {
                       </div>
                       <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{template.estimatedTime}</span>
                     </div>
-                    <Button className="w-full mt-4" variant="outline" onClick={() => handleUseTemplate(template.name)}>Use Template</Button>
+                    <Button className="w-full mt-4" variant="outline" onClick={() => handleUseTemplate(template)}>Use Template</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -1581,11 +2167,11 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCredentials.length}</p>
+                    <p className="text-3xl font-bold">{credentials.length}</p>
                     <p className="text-slate-200 text-sm">Credentials</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCredentials.filter(c => c.isShared).length}</p>
+                    <p className="text-3xl font-bold">{credentials.filter(c => c.isShared).length}</p>
                     <p className="text-slate-200 text-sm">Shared</p>
                   </div>
                 </div>

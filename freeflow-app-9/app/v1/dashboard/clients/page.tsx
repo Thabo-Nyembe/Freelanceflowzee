@@ -455,6 +455,28 @@ export default function ClientsPage() {
   // AI Panel State
   const [showAIPanel, setShowAIPanel] = useState(true)
 
+  // Notes Dialog State
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
+  const [noteText, setNoteText] = useState('')
+  const [isSavingNote, setIsSavingNote] = useState(false)
+
+  // History Dialog State
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+  const [clientHistory, setClientHistory] = useState<Array<{
+    id: string
+    action: string
+    description: string
+    timestamp: string
+    user: string
+  }>>([])
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+
+  // Email Dialog State
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  const [emailSubject, setEmailSubject] = useState('')
+  const [emailBody, setEmailBody] = useState('')
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+
   // Filtered and Sorted Clients
   const filteredAndSortedClients = useMemo(() => {
     const filtered = state.clients.filter(client => {
@@ -997,6 +1019,9 @@ export default function ClientsPage() {
       let importedCount = 0
       let errorCount = 0
 
+      // Import addClient function
+      const { addClient } = await import('@/lib/clients-queries')
+
       for (let i = 0; i < clientsData.length; i++) {
         const clientData = clientsData[i]
         setImportProgress(Math.round((i / clientsData.length) * 100))
@@ -1178,6 +1203,226 @@ export default function ClientsPage() {
       toast.error('Failed to update status', {
         description: error.message || 'Please try again later'
       })
+    }
+  }
+
+  // Handler: Add Note to Client
+  const handleAddNote = (client: Client) => {
+    logger.info('Add note to client', { clientId: client.id, name: client.name })
+    dispatch({ type: 'SELECT_CLIENT', client })
+    setNoteText(client.notes || '')
+    setIsAddNoteModalOpen(true)
+  }
+
+  const saveClientNote = async () => {
+    if (!state.selectedClient || !userId) {
+      toast.error('Please select a client')
+      return
+    }
+
+    logger.info('Saving client note', { clientId: state.selectedClient.id })
+
+    try {
+      setIsSavingNote(true)
+
+      const { updateClient } = await import('@/lib/clients-queries')
+
+      const { data, error } = await updateClient(userId, state.selectedClient.id, {
+        notes: noteText,
+        internal_notes: `Note updated on ${new Date().toLocaleString()}`
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to save note')
+      }
+
+      // Update local state
+      const updatedClient = {
+        ...state.selectedClient,
+        notes: noteText,
+        updatedAt: new Date().toISOString()
+      }
+
+      dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
+      setIsAddNoteModalOpen(false)
+      setNoteText('')
+
+      toast.success('Note saved', {
+        description: `Note updated for ${state.selectedClient.name}`
+      })
+      announce('Note saved successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to save note', { error, clientId: state.selectedClient.id })
+      toast.error('Failed to save note', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSavingNote(false)
+    }
+  }
+
+  // Handler: View Client History
+  const handleViewHistory = async (client: Client) => {
+    logger.info('View client history', { clientId: client.id, name: client.name })
+    dispatch({ type: 'SELECT_CLIENT', client })
+    setIsHistoryModalOpen(true)
+    setIsLoadingHistory(true)
+
+    // Generate mock history based on client data
+    const history = [
+      {
+        id: `hist-${Date.now()}-1`,
+        action: 'Client Created',
+        description: `Client profile created for ${client.name}`,
+        timestamp: client.createdAt,
+        user: 'System'
+      },
+      ...(client.lastContact ? [{
+        id: `hist-${Date.now()}-2`,
+        action: 'Last Contact',
+        description: `Last contacted via email or phone`,
+        timestamp: client.lastContact,
+        user: client.assignedTo || 'Team Member'
+      }] : []),
+      {
+        id: `hist-${Date.now()}-3`,
+        action: 'Profile Updated',
+        description: `Client information was last updated`,
+        timestamp: client.updatedAt,
+        user: 'System'
+      },
+      ...(client.status === 'vip' ? [{
+        id: `hist-${Date.now()}-4`,
+        action: 'Status Changed',
+        description: `Client upgraded to VIP status`,
+        timestamp: client.updatedAt,
+        user: 'Account Manager'
+      }] : []),
+      ...(client.projects > 0 ? [{
+        id: `hist-${Date.now()}-5`,
+        action: 'Projects Completed',
+        description: `${client.projects} project(s) associated with this client`,
+        timestamp: client.updatedAt,
+        user: 'Project Team'
+      }] : [])
+    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+    // Simulate loading
+    await new Promise(resolve => setTimeout(resolve, 500))
+    setClientHistory(history)
+    setIsLoadingHistory(false)
+  }
+
+  // Handler: Send Email with Dialog
+  const handleComposeEmail = (client: Client) => {
+    logger.info('Compose email to client', { clientId: client.id, email: client.email })
+    dispatch({ type: 'SELECT_CLIENT', client })
+    setEmailSubject('')
+    setEmailBody('')
+    setIsEmailModalOpen(true)
+  }
+
+  const sendEmail = async () => {
+    if (!state.selectedClient) {
+      toast.error('Please select a client')
+      return
+    }
+
+    if (!emailSubject.trim()) {
+      toast.error('Please enter a subject')
+      return
+    }
+
+    logger.info('Sending email', { clientId: state.selectedClient.id, email: state.selectedClient.email })
+
+    try {
+      setIsSendingEmail(true)
+
+      // Open mailto with pre-filled content
+      const mailtoUrl = `mailto:${state.selectedClient.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
+      window.location.href = mailtoUrl
+
+      // Update last contact
+      if (userId) {
+        const { updateClient } = await import('@/lib/clients-queries')
+        await updateClient(userId, state.selectedClient.id, {
+          last_contact: new Date().toISOString()
+        })
+
+        const updatedClient = {
+          ...state.selectedClient,
+          lastContact: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
+      }
+
+      setIsEmailModalOpen(false)
+      setEmailSubject('')
+      setEmailBody('')
+
+      toast.success('Email client opened', {
+        description: `Composing email to ${state.selectedClient.name}`
+      })
+    } catch (error: any) {
+      logger.error('Failed to compose email', { error })
+      toast.error('Failed to open email client')
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
+
+  // Handler: Export as CSV
+  const handleExportCSV = async () => {
+    logger.info('Export clients as CSV initiated', { count: state.clients.length })
+
+    try {
+      // Define CSV headers
+      const headers = [
+        'ID', 'Name', 'Company', 'Email', 'Phone', 'Location',
+        'Status', 'Industry', 'Projects', 'Total Spend', 'Rating',
+        'Last Contact', 'Created At', 'Tags'
+      ]
+
+      // Convert clients to CSV rows
+      const rows = state.clients.map(client => [
+        client.id,
+        `"${client.name.replace(/"/g, '""')}"`,
+        `"${(client.company || '').replace(/"/g, '""')}"`,
+        client.email,
+        client.phone || '',
+        `"${(client.location || '').replace(/"/g, '""')}"`,
+        client.status,
+        client.industry || '',
+        client.projects,
+        client.totalSpend,
+        client.rating,
+        client.lastContact || '',
+        client.createdAt,
+        `"${(client.tags || []).join(', ')}"`
+      ])
+
+      // Build CSV content
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `clients-export-${new Date().toISOString().split('T')[0]}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+
+      logger.info('Clients exported as CSV successfully', { count: state.clients.length })
+      toast.success(`${state.clients.length} clients exported as CSV`)
+      setIsExportModalOpen(false)
+    } catch (error) {
+      logger.error('Failed to export clients as CSV', { error })
+      toast.error('CSV export failed')
     }
   }
 
@@ -1673,7 +1918,7 @@ export default function ClientsPage() {
                                 <MessageSquare className="h-4 w-4 mr-2" />
                                 Send Message
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleSendEmail(client)}>
+                              <DropdownMenuItem onClick={() => handleComposeEmail(client)}>
                                 <Mail className="h-4 w-4 mr-2" />
                                 Send Email
                               </DropdownMenuItem>
@@ -1682,6 +1927,14 @@ export default function ClientsPage() {
                                 Call Client
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleAddNote(client)}>
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Add Note
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleViewHistory(client)}>
+                                <Clock className="h-4 w-4 mr-2" />
+                                View History
+                              </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleViewAnalytics(client)}>
                                 <BarChart3 className="h-4 w-4 mr-2" />
                                 View Analytics
@@ -2041,24 +2294,44 @@ export default function ClientsPage() {
           <DialogHeader>
             <DialogTitle>Export Clients</DialogTitle>
             <DialogDescription>
-              Download your client database
+              Download your client database in your preferred format
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <p className="text-sm text-muted-foreground mb-4">
-              This will export {state.clients.length} clients as a JSON file.
+              Export {state.clients.length} clients from your CRM.
             </p>
-            <div className="space-y-2 text-sm">
+            <div className="space-y-2 text-sm mb-4">
               <div className="flex justify-between">
-                <span>Format:</span>
-                <span className="font-medium">JSON</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Clients:</span>
+                <span>Total Clients:</span>
                 <span className="font-medium">
                   <NumberFlow value={state.clients.length} />
                 </span>
               </div>
+              <div className="flex justify-between">
+                <span>Total Revenue:</span>
+                <span className="font-medium">
+                  ${stats.totalRevenue.toLocaleString()}
+                </span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                className="h-20 flex flex-col items-center justify-center gap-2"
+                onClick={handleExportCSV}
+              >
+                <Download className="h-6 w-6" />
+                <span>Export as CSV</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-20 flex flex-col items-center justify-center gap-2"
+                onClick={handleExport}
+              >
+                <Download className="h-6 w-6" />
+                <span>Export as JSON</span>
+              </Button>
             </div>
           </div>
           <DialogFooter>
@@ -2070,10 +2343,6 @@ export default function ClientsPage() {
               }}
             >
               Cancel
-            </Button>
-            <Button onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2239,6 +2508,195 @@ export default function ClientsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Note Modal */}
+      <Dialog open={isAddNoteModalOpen} onOpenChange={setIsAddNoteModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Add Note
+            </DialogTitle>
+            <DialogDescription>
+              Add or update notes for {state.selectedClient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-2">
+              <Label htmlFor="client-note">Note</Label>
+              <Textarea
+                id="client-note"
+                placeholder="Enter notes about this client..."
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                rows={6}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                {noteText.length} characters
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddNoteModalOpen(false)
+                setNoteText('')
+              }}
+              disabled={isSavingNote}
+            >
+              Cancel
+            </Button>
+            <Button onClick={saveClientNote} disabled={isSavingNote}>
+              {isSavingNote ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Note'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View History Modal */}
+      <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Client History
+            </DialogTitle>
+            <DialogDescription>
+              Activity timeline for {state.selectedClient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {isLoadingHistory ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : clientHistory.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No history available for this client</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {clientHistory.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex gap-4 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                  >
+                    <div className="flex-shrink-0">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        {item.action.includes('Created') && <UserPlus className="h-5 w-5 text-green-500" />}
+                        {item.action.includes('Updated') && <Edit2 className="h-5 w-5 text-blue-500" />}
+                        {item.action.includes('Contact') && <Phone className="h-5 w-5 text-purple-500" />}
+                        {item.action.includes('Status') && <Award className="h-5 w-5 text-yellow-500" />}
+                        {item.action.includes('Projects') && <Briefcase className="h-5 w-5 text-indigo-500" />}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">{item.action}</p>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(item.timestamp).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                      <p className="text-xs text-muted-foreground mt-2">By: {item.user}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsHistoryModalOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compose Email Modal */}
+      <Dialog open={isEmailModalOpen} onOpenChange={setIsEmailModalOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Compose Email
+            </DialogTitle>
+            <DialogDescription>
+              Send an email to {state.selectedClient?.name} ({state.selectedClient?.email})
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email-to">To</Label>
+              <Input
+                id="email-to"
+                value={state.selectedClient?.email || ''}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-subject">Subject *</Label>
+              <Input
+                id="email-subject"
+                placeholder="Enter email subject..."
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-body">Message</Label>
+              <Textarea
+                id="email-body"
+                placeholder="Type your message here..."
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+                rows={6}
+                className="resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsEmailModalOpen(false)
+                setEmailSubject('')
+                setEmailBody('')
+              }}
+              disabled={isSendingEmail}
+            >
+              Cancel
+            </Button>
+            <Button onClick={sendEmail} disabled={isSendingEmail || !emailSubject.trim()}>
+              {isSendingEmail ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Opening...
+                </>
+              ) : (
+                <>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

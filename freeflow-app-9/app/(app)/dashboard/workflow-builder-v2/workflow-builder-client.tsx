@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -16,6 +16,16 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   GitBranch, Plus, Play, Pause, Save, Settings, Zap, CheckCircle,
   XCircle, Clock, Activity, Copy, Trash2, Loader2, Search, Filter, ArrowRight, Diamond, Database, Mail,
@@ -576,6 +586,40 @@ export default function WorkflowBuilderClient() {
   const [showCreateWorkflowDialog, setShowCreateWorkflowDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showFilterDialog, setShowFilterDialog] = useState(false)
+
+  // Step management state
+  const [workflowSteps, setWorkflowSteps] = useState<WorkflowNode[]>([])
+  const [showAddStepDialog, setShowAddStepDialog] = useState(false)
+  const [showEditStepDialog, setShowEditStepDialog] = useState(false)
+  const [showDeleteStepDialog, setShowDeleteStepDialog] = useState(false)
+  const [selectedStep, setSelectedStep] = useState<WorkflowNode | null>(null)
+  const [newStepType, setNewStepType] = useState<NodeType>('trigger_manual')
+  const [newStepName, setNewStepName] = useState('')
+  const [newStepDescription, setNewStepDescription] = useState('')
+
+  // Run workflow state
+  const [showRunConfirmDialog, setShowRunConfirmDialog] = useState(false)
+  const [workflowToRun, setWorkflowToRun] = useState<Workflow | null>(null)
+  const [isRunning, setIsRunning] = useState(false)
+
+  // Execution history state
+  const [showExecutionHistoryDialog, setShowExecutionHistoryDialog] = useState(false)
+  const [executionHistoryWorkflow, setExecutionHistoryWorkflow] = useState<Workflow | null>(null)
+
+  // Clone workflow state
+  const [showCloneDialog, setShowCloneDialog] = useState(false)
+  const [workflowToClone, setWorkflowToClone] = useState<Workflow | null>(null)
+  const [cloneName, setCloneName] = useState('')
+
+  // Export workflow state
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [workflowToExport, setWorkflowToExport] = useState<Workflow | null>(null)
+
+  // New workflow form state
+  const [newWorkflowName, setNewWorkflowName] = useState('')
+  const [newWorkflowDescription, setNewWorkflowDescription] = useState('')
+  const [newWorkflowTags, setNewWorkflowTags] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   // Handlers
   const handleCreateWorkflow = () => setShowCreateDialog(true)
@@ -1139,20 +1183,265 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleCreateWorkflowSubmit = async () => {
-    try {
-      const response = await fetch('/api/workflows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'New Workflow', description: '', tags: [] })
+    if (!newWorkflowName.trim()) {
+      toast.error('Please enter a workflow name')
+      return
+    }
+    setIsSaving(true)
+    const createPromise = fetch('/api/workflows', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: newWorkflowName,
+        description: newWorkflowDescription,
+        tags: newWorkflowTags.split(',').map(t => t.trim()).filter(Boolean)
       })
+    }).then(async (response) => {
       if (!response.ok) throw new Error('Failed to create')
       const data = await response.json()
-      toast.success(`New workflow "${data.name || 'workflow'}" created successfully`)
       setShowNewWorkflowDialog(false)
-    } catch (error) {
-      toast.error('Failed to create workflow')
-    }
+      setNewWorkflowName('')
+      setNewWorkflowDescription('')
+      setNewWorkflowTags('')
+      return data
+    }).finally(() => setIsSaving(false))
+
+    toast.promise(createPromise, {
+      loading: 'Creating workflow...',
+      success: (data) => `Workflow "${data?.name || newWorkflowName}" created successfully!`,
+      error: 'Failed to create workflow'
+    })
   }
+
+  // Add workflow step handler
+  const handleAddStep = useCallback(() => {
+    if (!newStepName.trim()) {
+      toast.error('Please enter a step name')
+      return
+    }
+    const nodeDefinition = NODE_DEFINITIONS.find(n => n.type === newStepType)
+    const newStep: WorkflowNode = {
+      id: `step-${Date.now()}`,
+      type: newStepType,
+      name: newStepName,
+      displayName: newStepName,
+      description: newStepDescription,
+      position: { x: workflowSteps.length * 200, y: 100 },
+      parameters: {},
+      disabled: false,
+      retryOnFail: true,
+      maxTries: 3,
+      waitBetweenTries: 1000,
+      continueOnFail: false,
+      alwaysOutputData: true,
+      executeOnce: false
+    }
+
+    setWorkflowSteps(prev => [...prev, newStep])
+    setShowAddStepDialog(false)
+    setNewStepName('')
+    setNewStepDescription('')
+    setNewStepType('trigger_manual')
+    toast.success(`Step "${newStepName}" added to workflow`)
+  }, [newStepType, newStepName, newStepDescription, workflowSteps.length])
+
+  // Edit step handler
+  const handleEditStep = useCallback(() => {
+    if (!selectedStep || !newStepName.trim()) {
+      toast.error('Please enter a step name')
+      return
+    }
+
+    setWorkflowSteps(prev => prev.map(step =>
+      step.id === selectedStep.id
+        ? { ...step, name: newStepName, displayName: newStepName, description: newStepDescription, type: newStepType }
+        : step
+    ))
+    setShowEditStepDialog(false)
+    setSelectedStep(null)
+    setNewStepName('')
+    setNewStepDescription('')
+    toast.success(`Step "${newStepName}" updated successfully`)
+  }, [selectedStep, newStepName, newStepDescription, newStepType])
+
+  // Delete step handler
+  const handleDeleteStep = useCallback(() => {
+    if (!selectedStep) return
+
+    const deletePromise = new Promise<void>((resolve) => {
+      setWorkflowSteps(prev => prev.filter(step => step.id !== selectedStep.id))
+      resolve()
+    })
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting step...',
+      success: `Step "${selectedStep.displayName}" deleted`,
+      error: 'Failed to delete step'
+    })
+
+    setShowDeleteStepDialog(false)
+    setSelectedStep(null)
+  }, [selectedStep])
+
+  // Open edit step dialog
+  const openEditStepDialog = useCallback((step: WorkflowNode) => {
+    setSelectedStep(step)
+    setNewStepName(step.displayName)
+    setNewStepDescription(step.description || '')
+    setNewStepType(step.type)
+    setShowEditStepDialog(true)
+  }, [])
+
+  // Open delete step dialog
+  const openDeleteStepDialog = useCallback((step: WorkflowNode) => {
+    setSelectedStep(step)
+    setShowDeleteStepDialog(true)
+  }, [])
+
+  // Save workflow with API
+  const handleSaveWorkflow = useCallback(async (workflow: Workflow) => {
+    setIsSaving(true)
+    const savePromise = fetch(`/api/workflows/${workflow.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...workflow,
+        nodes: workflowSteps,
+        updatedAt: new Date()
+      })
+    }).then(async (response) => {
+      if (!response.ok) throw new Error('Failed to save')
+      return response.json()
+    }).finally(() => setIsSaving(false))
+
+    toast.promise(savePromise, {
+      loading: 'Saving workflow...',
+      success: `Workflow "${workflow.name}" saved successfully!`,
+      error: 'Failed to save workflow'
+    })
+  }, [workflowSteps])
+
+  // Run workflow with confirmation
+  const handleRunWorkflowWithConfirm = useCallback((workflow: Workflow) => {
+    setWorkflowToRun(workflow)
+    setShowRunConfirmDialog(true)
+  }, [])
+
+  const executeWorkflow = useCallback(async () => {
+    if (!workflowToRun) return
+
+    setIsRunning(true)
+    const runPromise = fetch('/api/workflows/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ workflowId: workflowToRun.id })
+    }).then(async (response) => {
+      if (!response.ok) throw new Error('Execution failed')
+      return response.json()
+    }).finally(() => {
+      setIsRunning(false)
+      setShowRunConfirmDialog(false)
+      setWorkflowToRun(null)
+    })
+
+    toast.promise(runPromise, {
+      loading: `Running "${workflowToRun.name}"...`,
+      success: (data) => `Workflow executed! Execution ID: ${data?.executionId || 'completed'}`,
+      error: 'Workflow execution failed'
+    })
+  }, [workflowToRun])
+
+  // View execution history
+  const handleViewExecutionHistory = useCallback((workflow: Workflow) => {
+    setExecutionHistoryWorkflow(workflow)
+    setShowExecutionHistoryDialog(true)
+  }, [])
+
+  // Clone workflow
+  const handleCloneWorkflow = useCallback((workflow: Workflow) => {
+    setWorkflowToClone(workflow)
+    setCloneName(`${workflow.name} (Copy)`)
+    setShowCloneDialog(true)
+  }, [])
+
+  const executeCloneWorkflow = useCallback(async () => {
+    if (!workflowToClone || !cloneName.trim()) {
+      toast.error('Please enter a name for the cloned workflow')
+      return
+    }
+
+    const clonePromise = fetch('/api/workflows/clone', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sourceWorkflowId: workflowToClone.id,
+        newName: cloneName
+      })
+    }).then(async (response) => {
+      if (!response.ok) throw new Error('Clone failed')
+      return response.json()
+    }).finally(() => {
+      setShowCloneDialog(false)
+      setWorkflowToClone(null)
+      setCloneName('')
+    })
+
+    toast.promise(clonePromise, {
+      loading: 'Cloning workflow...',
+      success: `Workflow cloned as "${cloneName}"!`,
+      error: 'Failed to clone workflow'
+    })
+  }, [workflowToClone, cloneName])
+
+  // Export workflow as JSON
+  const handleExportWorkflowConfig = useCallback((workflow: Workflow) => {
+    setWorkflowToExport(workflow)
+    setShowExportDialog(true)
+  }, [])
+
+  const executeExportWorkflow = useCallback(() => {
+    if (!workflowToExport) return
+
+    try {
+      const exportData = {
+        workflow: {
+          id: workflowToExport.id,
+          name: workflowToExport.name,
+          description: workflowToExport.description,
+          status: workflowToExport.status,
+          nodes: workflowToExport.nodes.length > 0 ? workflowToExport.nodes : workflowSteps,
+          connections: workflowToExport.connections,
+          settings: workflowToExport.settings,
+          tags: workflowToExport.tags,
+          version: workflowToExport.version
+        },
+        exportedAt: new Date().toISOString(),
+        exportVersion: '1.0'
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${workflowToExport.name.toLowerCase().replace(/\s+/g, '-')}-config.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Workflow "${workflowToExport.name}" exported successfully!`)
+      setShowExportDialog(false)
+      setWorkflowToExport(null)
+    } catch {
+      toast.error('Failed to export workflow')
+    }
+  }, [workflowToExport, workflowSteps])
+
+  // AI Insight action handler
+  const handleInsightAction = useCallback((insight: { id: string; type: string; title: string }) => {
+    toast.success(`Taking action on insight: ${insight.title}`)
+    // Here you would implement actual insight action logic
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
@@ -2443,7 +2732,7 @@ export default function WorkflowBuilderClient() {
             <AIInsightsPanel
               insights={mockWorkflowAIInsights}
               title="Workflow Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
@@ -2484,20 +2773,35 @@ export default function WorkflowBuilderClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Workflow Name</Label>
-              <Input placeholder="e.g., Lead Processing Pipeline" />
+              <Input
+                placeholder="e.g., Lead Processing Pipeline"
+                value={newWorkflowName}
+                onChange={(e) => setNewWorkflowName(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Textarea placeholder="Describe what this workflow does..." rows={3} />
+              <Textarea
+                placeholder="Describe what this workflow does..."
+                rows={3}
+                value={newWorkflowDescription}
+                onChange={(e) => setNewWorkflowDescription(e.target.value)}
+              />
             </div>
             <div className="space-y-2">
-              <Label>Tags</Label>
-              <Input placeholder="e.g., leads, crm, automation" />
+              <Label>Tags (comma separated)</Label>
+              <Input
+                placeholder="e.g., leads, crm, automation"
+                value={newWorkflowTags}
+                onChange={(e) => setNewWorkflowTags(e.target.value)}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNewWorkflowDialog(false)}>Cancel</Button>
-            <Button className="bg-violet-600 hover:bg-violet-700">Create Workflow</Button>
+            <Button variant="outline" onClick={() => setShowNewWorkflowDialog(false)} disabled={isSaving}>Cancel</Button>
+            <Button className="bg-violet-600 hover:bg-violet-700" onClick={handleCreateWorkflowSubmit} disabled={isSaving}>
+              {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Workflow'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2561,6 +2865,275 @@ export default function WorkflowBuilderClient() {
               </div>
             )}
           </ScrollArea>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => handleViewExecutionHistory(selectedWorkflow!)}>
+              <History className="w-4 h-4 mr-2" />View History
+            </Button>
+            <Button variant="outline" onClick={() => handleCloneWorkflow(selectedWorkflow!)}>
+              <Copy className="w-4 h-4 mr-2" />Clone
+            </Button>
+            <Button variant="outline" onClick={() => handleExportWorkflowConfig(selectedWorkflow!)}>
+              <Download className="w-4 h-4 mr-2" />Export
+            </Button>
+            <Button onClick={() => handleRunWorkflowWithConfirm(selectedWorkflow!)}>
+              <Play className="w-4 h-4 mr-2" />Run
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Step Dialog */}
+      <Dialog open={showAddStepDialog} onOpenChange={setShowAddStepDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-600" />
+              Add Workflow Step
+            </DialogTitle>
+            <DialogDescription>Configure a new step for your workflow</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Step Type</Label>
+              <Select value={newStepType} onValueChange={(v) => setNewStepType(v as NodeType)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {NODE_DEFINITIONS.map(node => (
+                    <SelectItem key={node.type} value={node.type}>
+                      <span className="flex items-center gap-2">
+                        {node.icon}
+                        {node.displayName}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Step Name</Label>
+              <Input
+                placeholder="e.g., Send Welcome Email"
+                value={newStepName}
+                onChange={(e) => setNewStepName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description (optional)</Label>
+              <Textarea
+                placeholder="Describe what this step does..."
+                rows={2}
+                value={newStepDescription}
+                onChange={(e) => setNewStepDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddStepDialog(false)}>Cancel</Button>
+            <Button className="bg-green-600 hover:bg-green-700" onClick={handleAddStep}>
+              <Plus className="w-4 h-4 mr-2" />Add Step
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Step Dialog */}
+      <Dialog open={showEditStepDialog} onOpenChange={setShowEditStepDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-blue-600" />
+              Edit Step Configuration
+            </DialogTitle>
+            <DialogDescription>Modify the step settings</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Step Type</Label>
+              <Select value={newStepType} onValueChange={(v) => setNewStepType(v as NodeType)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {NODE_DEFINITIONS.map(node => (
+                    <SelectItem key={node.type} value={node.type}>
+                      <span className="flex items-center gap-2">
+                        {node.icon}
+                        {node.displayName}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Step Name</Label>
+              <Input
+                placeholder="e.g., Send Welcome Email"
+                value={newStepName}
+                onChange={(e) => setNewStepName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description (optional)</Label>
+              <Textarea
+                placeholder="Describe what this step does..."
+                rows={2}
+                value={newStepDescription}
+                onChange={(e) => setNewStepDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditStepDialog(false)}>Cancel</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleEditStep}>
+              <Save className="w-4 h-4 mr-2" />Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Step Confirmation Dialog */}
+      <AlertDialog open={showDeleteStepDialog} onOpenChange={setShowDeleteStepDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
+              Delete Step
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the step "{selectedStep?.displayName}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDeleteStep}>
+              Delete Step
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Run Workflow Confirmation Dialog */}
+      <AlertDialog open={showRunConfirmDialog} onOpenChange={setShowRunConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5 text-green-600" />
+              Run Workflow
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to run "{workflowToRun?.name}"? This will execute all steps in the workflow.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRunning}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-green-600 hover:bg-green-700"
+              onClick={executeWorkflow}
+              disabled={isRunning}
+            >
+              {isRunning ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Running...</> : 'Run Workflow'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Execution History Dialog */}
+      <Dialog open={showExecutionHistoryDialog} onOpenChange={setShowExecutionHistoryDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-purple-600" />
+              Execution History - {executionHistoryWorkflow?.name}
+            </DialogTitle>
+            <DialogDescription>View past executions and their results</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[50vh]">
+            <div className="space-y-3 pr-4">
+              {mockExecutions
+                .filter(e => e.workflowId === executionHistoryWorkflow?.id || executionHistoryWorkflow?.name === e.workflowName)
+                .map(execution => (
+                  <div key={execution.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      {execution.status === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
+                      {execution.status === 'error' && <XCircle className="w-5 h-5 text-red-600" />}
+                      {execution.status === 'running' && <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />}
+                      <div>
+                        <p className="font-medium">Execution #{execution.id}</p>
+                        <p className="text-sm text-gray-500">{formatTimeAgo(execution.startedAt)}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <Badge className={getExecutionStatusColor(execution.status)}>{execution.status}</Badge>
+                      {execution.duration && <span className="text-sm">{formatDuration(execution.duration)}</span>}
+                    </div>
+                  </div>
+                ))}
+              {mockExecutions.filter(e => e.workflowId === executionHistoryWorkflow?.id || executionHistoryWorkflow?.name === e.workflowName).length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No execution history found for this workflow</p>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExecutionHistoryDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clone Workflow Dialog */}
+      <Dialog open={showCloneDialog} onOpenChange={setShowCloneDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Copy className="w-5 h-5 text-indigo-600" />
+              Clone Workflow
+            </DialogTitle>
+            <DialogDescription>Create a copy of "{workflowToClone?.name}"</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>New Workflow Name</Label>
+              <Input
+                placeholder="Enter name for the cloned workflow"
+                value={cloneName}
+                onChange={(e) => setCloneName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCloneDialog(false)}>Cancel</Button>
+            <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={executeCloneWorkflow}>
+              <Copy className="w-4 h-4 mr-2" />Clone Workflow
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Workflow Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-amber-600" />
+              Export Workflow
+            </DialogTitle>
+            <DialogDescription>Export "{workflowToExport?.name}" configuration as JSON</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+              <p className="text-sm"><strong>Workflow:</strong> {workflowToExport?.name}</p>
+              <p className="text-sm"><strong>Version:</strong> {workflowToExport?.version}</p>
+              <p className="text-sm"><strong>Status:</strong> {workflowToExport?.status}</p>
+              <p className="text-sm"><strong>Steps:</strong> {workflowToExport?.nodes.length || workflowSteps.length}</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+            <Button className="bg-amber-600 hover:bg-amber-700" onClick={executeExportWorkflow}>
+              <Download className="w-4 h-4 mr-2" />Download JSON
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

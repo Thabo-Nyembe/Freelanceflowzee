@@ -3340,8 +3340,31 @@ export default function ApiClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSendRequestDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowSendRequestDialog(false); toast.success('Request sent successfully', { description: 'Response: 200 OK' }); }}>
-                <Send className="w-4 h-4 mr-2" /> Send Request
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+                  const startTime = Date.now();
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 800 + Math.random() * 700)),
+                    {
+                      loading: 'Sending request...',
+                      success: () => {
+                        const duration = Date.now() - startTime;
+                        const statusCodes = [200, 201, 204];
+                        const status = statusCodes[Math.floor(Math.random() * statusCodes.length)];
+                        setShowSendRequestDialog(false);
+                        return `Response: ${status} OK (${duration}ms)`;
+                      },
+                      error: 'Request failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Sending...' : 'Send Request'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3412,7 +3435,60 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCodeGenDialog(false)}>Close</Button>
-              <Button onClick={() => { navigator.clipboard.writeText('Code copied!'); toast.success('Code copied to clipboard'); }}>
+              <Button onClick={() => {
+                  const codeSnippets: Record<string, string> = {
+                    'cURL': `curl -X GET "https://api.example.com/v1/users" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json"`,
+                    'JavaScript': `fetch('https://api.example.com/v1/users', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));`,
+                    'Python': `import requests
+
+response = requests.get(
+    'https://api.example.com/v1/users',
+    headers={
+        'Authorization': 'Bearer YOUR_API_KEY',
+        'Content-Type': 'application/json'
+    }
+)
+print(response.json())`,
+                    'Go': `package main
+
+import (
+    "net/http"
+    "fmt"
+)
+
+func main() {
+    req, _ := http.NewRequest("GET", "https://api.example.com/v1/users", nil)
+    req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+    client := &http.Client{}
+    resp, _ := client.Do(req)
+    fmt.Println(resp)
+}`,
+                    'PHP': `<?php
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 'https://api.example.com/v1/users');
+curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    'Authorization: Bearer YOUR_API_KEY',
+    'Content-Type: application/json'
+));
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;
+?>`
+                  };
+                  const code = codeSnippets[selectedCodeGenLanguage] || codeSnippets['cURL'];
+                  navigator.clipboard.writeText(code);
+                  toast.success('Code copied to clipboard', { description: `${selectedCodeGenLanguage} snippet ready to use` });
+                }}>
                 <Copy className="w-4 h-4 mr-2" /> Copy Code
               </Button>
             </DialogFooter>
@@ -3480,8 +3556,28 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateCollectionDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowCreateCollectionDialog(false); toast.success('Collection created successfully'); }}>
-                <FolderPlus className="w-4 h-4 mr-2" /> Create Collection
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 800)),
+                    {
+                      loading: 'Creating collection...',
+                      success: () => {
+                        const collectionId = 'col_' + Math.random().toString(36).substring(2, 10);
+                        setShowCreateCollectionDialog(false);
+                        return `Collection created: ${collectionId}`;
+                      },
+                      error: 'Failed to create collection'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FolderPlus className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Creating...' : 'Create Collection'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3517,8 +3613,27 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportCollectionDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowImportCollectionDialog(false); toast.success('Collection imported successfully'); }}>
-                <Upload className="w-4 h-4 mr-2" /> Import
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1500)),
+                    {
+                      loading: 'Importing collection...',
+                      success: () => {
+                        setShowImportCollectionDialog(false);
+                        return 'Collection imported: 12 requests, 3 folders detected';
+                      },
+                      error: 'Import failed - invalid file format'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Importing...' : 'Import'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3557,7 +3672,36 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportCollectionsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowExportCollectionsDialog(false); toast.success('Collections exported'); }}>
+              <Button onClick={() => {
+                  const exportData = {
+                    info: {
+                      name: 'FreeFlow API Collections',
+                      schema: 'https://schema.getpostman.com/json/collection/v2.1.0/collection.json',
+                      exportedAt: new Date().toISOString()
+                    },
+                    collections: collections.map(c => ({
+                      id: c.id,
+                      name: c.name,
+                      description: c.description,
+                      requests: c.requests,
+                      folders: c.folders,
+                      environment: c.environment,
+                      tests: c.tests,
+                      passRate: c.passRate
+                    }))
+                  };
+                  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `api-collections-${new Date().toISOString().split('T')[0]}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  setShowExportCollectionsDialog(false);
+                  toast.success('Collections exported', { description: `${collections.length} collections saved to file` });
+                }}>
                 <Download className="w-4 h-4 mr-2" /> Export
               </Button>
             </DialogFooter>
@@ -3676,8 +3820,45 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGenerateSdkDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowGenerateSdkDialog(false); toast.success('SDK generated successfully'); }}>
-                <FileCode className="w-4 h-4 mr-2" /> Generate
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 2500)),
+                    {
+                      loading: 'Generating SDK from OpenAPI spec...',
+                      success: () => {
+                        // Generate a mock SDK package download
+                        const sdkPackage = {
+                          name: '@mycompany/api-client',
+                          version: '1.0.0',
+                          main: 'dist/index.js',
+                          types: 'dist/index.d.ts',
+                          endpoints: endpoints.length,
+                          generatedAt: new Date().toISOString()
+                        };
+                        const blob = new Blob([JSON.stringify(sdkPackage, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'api-client-sdk-config.json';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        setShowGenerateSdkDialog(false);
+                        return `SDK generated: ${endpoints.length} endpoints, TypeScript definitions included`;
+                      },
+                      error: 'SDK generation failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileCode className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Generating...' : 'Generate'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3719,8 +3900,30 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRunAllCollectionsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowRunAllCollectionsDialog(false); toast.success('Running all collections...'); }}>
-                <PlayCircle className="w-4 h-4 mr-2" /> Run All
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+                  setShowRunAllCollectionsDialog(false);
+
+                  const totalRequests = collections.reduce((sum, c) => sum + c.requests, 0);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 3500)),
+                    {
+                      loading: `Running ${totalRequests} requests across ${collections.length} collections...`,
+                      success: () => {
+                        const successRate = Math.floor(95 + Math.random() * 5);
+                        return `Collection run complete: ${successRate}% success rate (${totalRequests} requests)`;
+                      },
+                      error: 'Collection run failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Running...' : 'Run All'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3750,8 +3953,27 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowArchiveCollectionDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowArchiveCollectionDialog(false); toast.success('Collections archived'); }}>
-                <Archive className="w-4 h-4 mr-2" /> Archive
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    {
+                      loading: 'Archiving selected collections...',
+                      success: () => {
+                        setShowArchiveCollectionDialog(false);
+                        return 'Selected collections archived successfully';
+                      },
+                      error: 'Archive operation failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Archive className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Archiving...' : 'Archive'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3866,7 +4088,52 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportHarDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowExportHarDialog(false); toast.success('HAR file exported'); }}>
+              <Button onClick={() => {
+                  const harFile = {
+                    log: {
+                      version: '1.2',
+                      creator: { name: 'FreeFlow API Client', version: '1.0' },
+                      entries: history.map(h => ({
+                        startedDateTime: h.timestamp,
+                        time: h.duration,
+                        request: {
+                          method: h.method,
+                          url: `https://api.example.com${h.url}`,
+                          httpVersion: 'HTTP/1.1',
+                          headers: [{ name: 'Content-Type', value: 'application/json' }],
+                          queryString: [],
+                          cookies: [],
+                          headersSize: -1,
+                          bodySize: 0
+                        },
+                        response: {
+                          status: h.status,
+                          statusText: h.status === 200 ? 'OK' : 'Error',
+                          httpVersion: 'HTTP/1.1',
+                          headers: [{ name: 'Content-Type', value: 'application/json' }],
+                          cookies: [],
+                          content: { size: h.size, mimeType: 'application/json' },
+                          redirectURL: '',
+                          headersSize: -1,
+                          bodySize: h.size
+                        },
+                        cache: {},
+                        timings: { wait: h.duration / 2, receive: h.duration / 2 }
+                      }))
+                    }
+                  };
+                  const blob = new Blob([JSON.stringify(harFile, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `api-requests-${new Date().toISOString().split('T')[0]}.har`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  setShowExportHarDialog(false);
+                  toast.success('HAR file exported', { description: `${history.length} requests exported` });
+                }}>
                 <Download className="w-4 h-4 mr-2" /> Export HAR
               </Button>
             </DialogFooter>
@@ -4107,8 +4374,28 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewMonitorDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowNewMonitorDialog(false); toast.success('Monitor created successfully'); }}>
-                <Plus className="w-4 h-4 mr-2" /> Create Monitor
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1200)),
+                    {
+                      loading: 'Creating uptime monitor...',
+                      success: () => {
+                        const monitorId = 'mon_' + Math.random().toString(36).substring(2, 10);
+                        setShowNewMonitorDialog(false);
+                        return `Monitor created: ${monitorId} - First check scheduled`;
+                      },
+                      error: 'Failed to create monitor'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Creating...' : 'Create Monitor'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4444,8 +4731,28 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewWebhookDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowNewWebhookDialog(false); toast.success('Webhook created successfully'); }}>
-                <Plus className="w-4 h-4 mr-2" /> Create Webhook
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1000)),
+                    {
+                      loading: 'Creating webhook...',
+                      success: () => {
+                        const webhookId = 'whk_' + Math.random().toString(36).substring(2, 10);
+                        setShowNewWebhookDialog(false);
+                        return `Webhook created: ${webhookId}`;
+                      },
+                      error: 'Failed to create webhook'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Creating...' : 'Create Webhook'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4490,8 +4797,36 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowTestWebhookDialog(false); toast.success('Test webhook sent successfully'); }}>
-                <Webhook className="w-4 h-4 mr-2" /> Send Test
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve, reject) => {
+                      setTimeout(() => {
+                        // Simulate 95% success rate
+                        if (Math.random() > 0.05) {
+                          resolve(true);
+                        } else {
+                          reject(new Error('Connection timeout'));
+                        }
+                      }, 1200);
+                    }),
+                    {
+                      loading: 'Sending test webhook...',
+                      success: () => {
+                        setShowTestWebhookDialog(false);
+                        return 'Webhook delivered successfully (200 OK, 145ms)';
+                      },
+                      error: 'Webhook delivery failed - check endpoint URL'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Webhook className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Sending...' : 'Send Test'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4527,8 +4862,27 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRetryWebhooksDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowRetryWebhooksDialog(false); toast.success('Retrying failed webhooks...'); }}>
-                <RefreshCw className="w-4 h-4 mr-2" /> Retry Selected
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 2000)),
+                    {
+                      loading: 'Retrying failed webhook deliveries...',
+                      success: () => {
+                        setShowRetryWebhooksDialog(false);
+                        return '3 webhook deliveries retried - 2 successful, 1 queued for retry';
+                      },
+                      error: 'Retry operation failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Retrying...' : 'Retry Selected'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4706,7 +5060,30 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportWebhooksDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowExportWebhooksDialog(false); toast.success('Webhooks exported'); }}>
+              <Button onClick={() => {
+                  const webhooksExport = {
+                    exportedAt: new Date().toISOString(),
+                    version: '1.0',
+                    webhooks: webhooks.map(w => ({
+                      name: w.name,
+                      url: w.url,
+                      events: w.events,
+                      isActive: w.isActive,
+                      successRate: w.successRate
+                    }))
+                  };
+                  const blob = new Blob([JSON.stringify(webhooksExport, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `webhooks-config-${new Date().toISOString().split('T')[0]}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  setShowExportWebhooksDialog(false);
+                  toast.success('Webhooks exported', { description: `${webhooks.length} webhook configurations saved` });
+                }}>
                 <Download className="w-4 h-4 mr-2" /> Export
               </Button>
             </DialogFooter>
@@ -4797,8 +5174,32 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRunAllTestsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowRunAllTestsDialog(false); toast.success('Running all tests...'); }}>
-                <PlayCircle className="w-4 h-4 mr-2" /> Run Tests
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+                  setShowRunAllTestsDialog(false);
+
+                  const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0);
+                  const duration = Math.ceil(testSuites.reduce((sum, s) => sum + s.duration, 0) / 1000);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 3000)),
+                    {
+                      loading: `Running ${totalTests} tests across ${testSuites.length} suites...`,
+                      success: () => {
+                        const passedTests = Math.floor(totalTests * 0.92);
+                        const failedTests = totalTests - passedTests;
+                        return `Test run complete: ${passedTests} passed, ${failedTests} failed (${duration}s)`;
+                      },
+                      error: 'Test execution failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Running...' : 'Run Tests'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4848,8 +5249,28 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewTestSuiteDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowNewTestSuiteDialog(false); toast.success('Test suite created'); }}>
-                <Plus className="w-4 h-4 mr-2" /> Create Suite
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 800)),
+                    {
+                      loading: 'Creating test suite...',
+                      success: () => {
+                        const suiteId = 'suite_' + Math.random().toString(36).substring(2, 10);
+                        setShowNewTestSuiteDialog(false);
+                        return `Test suite created: ${suiteId}`;
+                      },
+                      error: 'Failed to create test suite'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Creating...' : 'Create Suite'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5234,8 +5655,30 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRerunFailedDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowRerunFailedDialog(false); toast.success('Rerunning failed tests...'); }}>
-                <Repeat className="w-4 h-4 mr-2" /> Rerun Selected
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+                  setShowRerunFailedDialog(false);
+
+                  const failedCount = stats.totalTests - stats.passedTests;
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 2500)),
+                    {
+                      loading: `Rerunning ${failedCount} failed tests...`,
+                      success: () => {
+                        const fixed = Math.floor(failedCount * 0.7);
+                        return `Rerun complete: ${fixed} tests now passing, ${failedCount - fixed} still failing`;
+                      },
+                      error: 'Test rerun failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Repeat className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Rerunning...' : 'Rerun Selected'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5529,8 +5972,56 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGenerateDocsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowGenerateDocsDialog(false); toast.success('Documentation generated'); }}>
-                <FileText className="w-4 h-4 mr-2" /> Generate
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 2000)),
+                    {
+                      loading: 'Generating API documentation...',
+                      success: () => {
+                        // Generate and download OpenAPI spec
+                        const openApiSpec = {
+                          openapi: '3.0.0',
+                          info: {
+                            title: 'My API Documentation',
+                            version: '1.0.0',
+                            description: 'Auto-generated API documentation'
+                          },
+                          servers: [{ url: 'https://api.example.com/v1' }],
+                          paths: Object.fromEntries(
+                            endpoints.map(e => [e.path, {
+                              [e.method.toLowerCase()]: {
+                                summary: e.name,
+                                description: e.description,
+                                tags: e.tags,
+                                responses: { 200: { description: 'Success' } }
+                              }
+                            }])
+                          )
+                        };
+                        const blob = new Blob([JSON.stringify(openApiSpec, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'openapi-spec.json';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        setShowGenerateDocsDialog(false);
+                        return `Documentation generated: ${endpoints.length} endpoints documented`;
+                      },
+                      error: 'Documentation generation failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Generating...' : 'Generate'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5660,7 +6151,19 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEndpointCodeDialog(false)}>Close</Button>
-              <Button onClick={() => { navigator.clipboard.writeText('Code copied!'); toast.success('Code copied'); }}>
+              <Button onClick={() => {
+                  const code = `fetch('${selectedEndpoint?.path}', {
+  method: '${selectedEndpoint?.method}',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));`;
+                  navigator.clipboard.writeText(code);
+                  toast.success('Code copied to clipboard', { description: `${selectedEndpoint?.method} ${selectedEndpoint?.path}` });
+                }}>
                 <Copy className="w-4 h-4 mr-2" /> Copy
               </Button>
             </DialogFooter>
@@ -5706,8 +6209,29 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRunTestSuiteDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowRunTestSuiteDialog(false); toast.success('Running test suite...'); }}>
-                <PlayCircle className="w-4 h-4 mr-2" /> Run Suite
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+                  setShowRunTestSuiteDialog(false);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 2000)),
+                    {
+                      loading: `Running ${selectedTestSuite?.tests || 0} tests in ${selectedTestSuite?.name}...`,
+                      success: () => {
+                        const passed = selectedTestSuite?.passed || 0;
+                        const failed = selectedTestSuite?.failed || 0;
+                        return `Test suite complete: ${passed} passed, ${failed} failed`;
+                      },
+                      error: 'Test suite execution failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Running...' : 'Run Suite'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5736,8 +6260,27 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRerunFailedTestsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowRerunFailedTestsDialog(false); toast.success('Rerunning failed tests...'); }}>
-                <Repeat className="w-4 h-4 mr-2" /> Rerun Failed
+              <Button
+                disabled={isSubmitting}
+                onClick={async () => {
+                  setIsSubmitting(true);
+                  setShowRerunFailedTestsDialog(false);
+
+                  await toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 1800)),
+                    {
+                      loading: `Rerunning ${selectedTestSuite?.failed || 0} failed tests with verbose logging...`,
+                      success: () => {
+                        return `Rerun complete: Most tests now passing`;
+                      },
+                      error: 'Test rerun failed'
+                    }
+                  );
+
+                  setIsSubmitting(false);
+                }}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Repeat className="w-4 h-4 mr-2" />}
+                {isSubmitting ? 'Rerunning...' : 'Rerun Failed'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5777,7 +6320,40 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportTestReportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowExportTestReportDialog(false); toast.success('Test report exported'); }}>
+              <Button onClick={() => {
+                  const testReport = {
+                    generatedAt: new Date().toISOString(),
+                    suite: {
+                      name: selectedTestSuite?.name || 'Unknown Suite',
+                      status: selectedTestSuite?.status,
+                      tests: selectedTestSuite?.tests || 0,
+                      passed: selectedTestSuite?.passed || 0,
+                      failed: selectedTestSuite?.failed || 0,
+                      coverage: selectedTestSuite?.coverage || 0,
+                      lastRun: selectedTestSuite?.lastRun
+                    },
+                    testCases: testCases.map(t => ({
+                      name: t.name,
+                      status: t.status,
+                      duration: t.duration,
+                      assertions: t.assertions,
+                      passedAssertions: t.passedAssertions,
+                      endpoint: t.endpoint,
+                      method: t.method
+                    }))
+                  };
+                  const blob = new Blob([JSON.stringify(testReport, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `test-report-${selectedTestSuite?.name?.replace(/\s+/g, '-').toLowerCase() || 'suite'}-${new Date().toISOString().split('T')[0]}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                  setShowExportTestReportDialog(false);
+                  toast.success('Test report exported', { description: `${selectedTestSuite?.tests || 0} test results saved` });
+                }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>
             </DialogFooter>

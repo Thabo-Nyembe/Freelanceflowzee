@@ -292,6 +292,40 @@ export default function MessagesClient() {
   const [filterChannel, setFilterChannel] = useState<string>('all')
   const [sidebarThemeColor, setSidebarThemeColor] = useState('#4a154b')
 
+  // Reply and Forward Dialog states
+  const [showReplyDialog, setShowReplyDialog] = useState(false)
+  const [showForwardDialog, setShowForwardDialog] = useState(false)
+  const [replyMessageId, setReplyMessageId] = useState<string | null>(null)
+  const [forwardMessageId, setForwardMessageId] = useState<string | null>(null)
+  const [replyBody, setReplyBody] = useState('')
+  const [forwardRecipient, setForwardRecipient] = useState('')
+
+  // Confirmation Dialog states
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [showArchiveConfirmDialog, setShowArchiveConfirmDialog] = useState(false)
+  const [showLeaveWorkspaceDialog, setShowLeaveWorkspaceDialog] = useState(false)
+  const [deleteMessageId, setDeleteMessageId] = useState<string | null>(null)
+  const [archiveMessageId, setArchiveMessageId] = useState<string | null>(null)
+
+  // File type filters
+  const [fileTypeFilter, setFileTypeFilter] = useState<'all' | 'images' | 'videos' | 'documents' | 'code'>('all')
+
+  // Thread filters
+  const [threadFilter, setThreadFilter] = useState<'all' | 'following' | 'unread' | 'mentions' | 'archived'>('all')
+
+  // Mention filters
+  const [mentionFilter, setMentionFilter] = useState<'all' | 'unread' | 'reactions' | 'starred'>('all')
+
+  // Call scheduling dialog
+  const [showScheduleCallDialog, setShowScheduleCallDialog] = useState(false)
+  const [scheduleCallDate, setScheduleCallDate] = useState('')
+  const [scheduleCallTime, setScheduleCallTime] = useState('')
+  const [scheduleCallType, setScheduleCallType] = useState<'audio' | 'video'>('video')
+  const [scheduleCallParticipants, setScheduleCallParticipants] = useState('')
+
+  // Saved/Bookmarked messages view
+  const [showSavedMessages, setShowSavedMessages] = useState(false)
+
   // Channel state tracking
   const [mutedChannels, setMutedChannels] = useState<Set<string>>(new Set())
   const [archivedChannels, setArchivedChannels] = useState<Set<string>>(new Set())
@@ -1148,7 +1182,7 @@ export default function MessagesClient() {
     }
   }
 
-  const handleReplyToMessage = async (parentMessageId: string, replyBody: string) => {
+  const handleReplyToMessage = async (parentMessageId: string, replyBodyText: string) => {
     const parentMessage = supabaseMessages?.find(m => m.id === parentMessageId)
     if (!parentMessage) {
       toast.error('Original message not found')
@@ -1157,7 +1191,7 @@ export default function MessagesClient() {
 
     try {
       await createMessage({
-        body: replyBody,
+        body: replyBodyText,
         subject: parentMessage.subject ? `Re: ${parentMessage.subject}` : null,
         recipient_id: parentMessage.sender_id,
         sender_id: currentUser.id,
@@ -1184,6 +1218,290 @@ export default function MessagesClient() {
     } catch (error) {
       toast.error('Failed to send reply', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
+  }
+
+  // Open reply dialog
+  const handleOpenReplyDialog = (messageId: string) => {
+    setReplyMessageId(messageId)
+    setReplyBody('')
+    setShowReplyDialog(true)
+  }
+
+  // Submit reply from dialog
+  const handleSubmitReply = async () => {
+    if (!replyMessageId || !replyBody.trim()) {
+      toast.error('Reply required', { description: 'Please enter a reply message' })
+      return
+    }
+    await handleReplyToMessage(replyMessageId, replyBody)
+    setShowReplyDialog(false)
+    setReplyBody('')
+    setReplyMessageId(null)
+  }
+
+  // Open forward dialog
+  const handleOpenForwardDialog = (messageId: string) => {
+    setForwardMessageId(messageId)
+    setForwardRecipient('')
+    setShowForwardDialog(true)
+  }
+
+  // Submit forward from dialog
+  const handleSubmitForward = async () => {
+    if (!forwardMessageId || !forwardRecipient) {
+      toast.error('Recipient required', { description: 'Please select a recipient' })
+      return
+    }
+    await handleForwardMessage(forwardMessageId, forwardRecipient)
+    setShowForwardDialog(false)
+    setForwardRecipient('')
+    setForwardMessageId(null)
+  }
+
+  // Confirm delete handler
+  const handleConfirmDelete = async () => {
+    if (!deleteMessageId) return
+    await handleDeleteMessage(deleteMessageId)
+    setShowDeleteConfirmDialog(false)
+    setDeleteMessageId(null)
+  }
+
+  // Open delete confirmation
+  const handleOpenDeleteConfirm = (messageId: string) => {
+    setDeleteMessageId(messageId)
+    setShowDeleteConfirmDialog(true)
+  }
+
+  // Confirm archive handler
+  const handleConfirmArchive = async () => {
+    if (!archiveMessageId) return
+    await handleArchiveMessage(archiveMessageId)
+    setShowArchiveConfirmDialog(false)
+    setArchiveMessageId(null)
+  }
+
+  // Open archive confirmation
+  const handleOpenArchiveConfirm = (messageId: string) => {
+    setArchiveMessageId(messageId)
+    setShowArchiveConfirmDialog(true)
+  }
+
+  // Browse channels handler
+  const handleBrowseChannels = () => {
+    setChannelFilter('all')
+    toast.success('Browsing Channels', { description: `Showing all ${mockChannels.length} channels` })
+  }
+
+  // View archived channels handler
+  const handleViewArchivedChannels = async () => {
+    const archivedList = Array.from(archivedChannels)
+    if (archivedList.length === 0) {
+      toast.info('No Archived Channels', { description: 'You have no archived channels' })
+    } else {
+      toast.success('Archived Channels', {
+        description: `${archivedList.length} archived channel(s): ${archivedList.join(', ')}`,
+        action: {
+          label: 'Restore All',
+          onClick: () => {
+            setArchivedChannels(new Set())
+            sessionStorage.removeItem('archived_channels')
+            toast.success('All channels restored')
+          }
+        }
+      })
+    }
+  }
+
+  // View saved messages handler
+  const handleViewSavedMessages = async () => {
+    const savedMessages = supabaseMessages?.filter(m => m.is_starred) || []
+    const mockSaved = mockMessages.filter(m => m.isBookmarked)
+    const totalSaved = savedMessages.length + mockSaved.length
+
+    if (totalSaved === 0) {
+      toast.info('No Saved Messages', { description: 'Bookmark messages to save them here' })
+    } else {
+      setShowSavedMessages(true)
+      toast.success(`${totalSaved} Saved Messages`, { description: 'Viewing your bookmarked messages' })
+    }
+  }
+
+  // Filter files by type
+  const handleFilterFilesByType = (type: 'all' | 'images' | 'videos' | 'documents' | 'code') => {
+    setFileTypeFilter(type)
+    const typeLabels = { all: 'all files', images: 'image files', videos: 'video files', documents: 'document files', code: 'code files' }
+    toast.success(`Filtering ${typeLabels[type]}`, { description: `Showing ${type === 'all' ? 'all' : type} only` })
+  }
+
+  // Filter threads
+  const handleFilterThreads = (filter: 'all' | 'following' | 'unread' | 'mentions' | 'archived') => {
+    setThreadFilter(filter)
+    const filterLabels = { all: 'all threads', following: 'threads you follow', unread: 'unread threads', mentions: 'threads with mentions', archived: 'archived threads' }
+    const count = filter === 'unread' ? mockThreads.filter(t => t.isUnread).length :
+                  filter === 'following' ? mockThreads.filter(t => t.isFollowing).length :
+                  mockThreads.length
+    toast.success(`Showing ${filterLabels[filter]}`, { description: `Found ${count} thread(s)` })
+  }
+
+  // Filter mentions
+  const handleFilterMentions = (filter: 'all' | 'unread' | 'reactions' | 'starred') => {
+    setMentionFilter(filter)
+    const filterLabels = { all: 'all mentions', unread: 'unread mentions', reactions: 'messages with reactions', starred: 'starred mentions' }
+    toast.success(`Showing ${filterLabels[filter]}`, { description: 'Filter applied' })
+  }
+
+  // Schedule call handler
+  const handleScheduleCall = () => {
+    setShowScheduleCallDialog(true)
+  }
+
+  // Submit scheduled call
+  const handleSubmitScheduledCall = async () => {
+    if (!scheduleCallDate || !scheduleCallTime) {
+      toast.error('Date and time required', { description: 'Please select a date and time for the call' })
+      return
+    }
+
+    const scheduledDateTime = new Date(`${scheduleCallDate}T${scheduleCallTime}`)
+    const callData = {
+      type: scheduleCallType,
+      scheduled_at: scheduledDateTime.toISOString(),
+      participants: scheduleCallParticipants.split(',').map(p => p.trim()).filter(p => p),
+      created_at: new Date().toISOString()
+    }
+
+    // Store scheduled call
+    const existingCalls = JSON.parse(sessionStorage.getItem('scheduled_calls') || '[]')
+    existingCalls.push(callData)
+    sessionStorage.setItem('scheduled_calls', JSON.stringify(existingCalls))
+
+    toast.success('Call Scheduled', {
+      description: `${scheduleCallType === 'video' ? 'Video' : 'Audio'} call scheduled for ${scheduledDateTime.toLocaleString()}`
+    })
+
+    setShowScheduleCallDialog(false)
+    setScheduleCallDate('')
+    setScheduleCallTime('')
+    setScheduleCallParticipants('')
+  }
+
+  // Start huddle handler
+  const handleStartHuddle = () => {
+    toast.loading('Starting huddle...', { id: 'huddle' })
+    setTimeout(() => {
+      const huddleData = {
+        type: 'huddle',
+        started_at: new Date().toISOString(),
+        channel: selectedChannel?.name || 'Quick Huddle'
+      }
+      sessionStorage.setItem('active_huddle', JSON.stringify(huddleData))
+      toast.success('Huddle Started', {
+        id: 'huddle',
+        description: `Quick huddle in ${selectedChannel?.name || 'new channel'}`,
+        action: {
+          label: 'End Huddle',
+          onClick: () => {
+            sessionStorage.removeItem('active_huddle')
+            toast.info('Huddle ended')
+          }
+        }
+      })
+    }, 800)
+  }
+
+  // Screen share handler
+  const handleStartScreenShare = async () => {
+    try {
+      toast.loading('Requesting screen access...', { id: 'screen-share' })
+      // Check if screen sharing is supported
+      if (navigator.mediaDevices && 'getDisplayMedia' in navigator.mediaDevices) {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
+        sessionStorage.setItem('screen_share_active', JSON.stringify({ started_at: new Date().toISOString() }))
+        toast.success('Screen Share Active', {
+          id: 'screen-share',
+          description: 'Your screen is now being shared',
+          action: {
+            label: 'Stop Sharing',
+            onClick: () => {
+              stream.getTracks().forEach(track => track.stop())
+              sessionStorage.removeItem('screen_share_active')
+              toast.info('Screen sharing stopped')
+            }
+          }
+        })
+      } else {
+        toast.error('Screen sharing not supported', { id: 'screen-share', description: 'Your browser does not support screen sharing' })
+      }
+    } catch (error) {
+      toast.error('Screen share failed', { id: 'screen-share', description: 'Could not access screen. Permission may have been denied.' })
+    }
+  }
+
+  // View call recordings handler
+  const handleViewCallRecordings = () => {
+    const recordings = mockCalls.filter(c => c.isRecorded)
+    if (recordings.length === 0) {
+      toast.info('No Recordings', { description: 'No call recordings available' })
+    } else {
+      toast.success(`${recordings.length} Recording(s)`, { description: 'Showing your call recordings' })
+    }
+  }
+
+  // View call history handler
+  const handleViewCallHistory = () => {
+    const completedCalls = mockCalls.filter(c => c.status === 'ended' || c.status === 'missed')
+    toast.success('Call History', { description: `${completedCalls.length} calls in history. ${mockCalls.filter(c => c.status === 'missed').length} missed.` })
+  }
+
+  // Open call settings handler
+  const handleOpenCallSettings = () => {
+    toast.info('Call Settings', {
+      description: 'Audio: Default microphone, Video: Default camera',
+      action: {
+        label: 'Configure',
+        onClick: () => setSettingsTab('notifications')
+      }
+    })
+  }
+
+  // Open channel settings handler
+  const handleOpenChannelSettings = () => {
+    if (!selectedChannel) {
+      toast.info('Select a Channel', { description: 'Please select a channel to configure its settings' })
+      return
+    }
+    toast.success(`#${selectedChannel.name} Settings`, {
+      description: `Members: ${selectedChannel.memberCount}, Type: ${selectedChannel.type}`,
+      action: {
+        label: 'Open Settings Tab',
+        onClick: () => setSettingsTab('general')
+      }
+    })
+  }
+
+  // Leave workspace handler with confirmation
+  const handleLeaveWorkspace = () => {
+    setShowLeaveWorkspaceDialog(true)
+  }
+
+  const handleConfirmLeaveWorkspace = () => {
+    toast.loading('Leaving workspace...', { id: 'leave' })
+    setTimeout(() => {
+      sessionStorage.clear()
+      toast.success('Left Workspace', { id: 'leave', description: 'You have left the workspace. Redirecting...' })
+      setShowLeaveWorkspaceDialog(false)
+    }, 1000)
+  }
+
+  // AI Insight action handler
+  const handleAIInsightAction = (insight: { id: string; title: string; description: string }) => {
+    toast.success(`AI Insight: ${insight.title}`, {
+      description: insight.description,
+      action: {
+        label: 'Apply',
+        onClick: () => toast.info('Insight Applied', { description: 'AI recommendation has been applied' })
+      }
+    })
   }
 
   return (
@@ -1322,13 +1640,13 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Channel', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleCreateChannel() },
-                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Browse Channels', { description: 'Showing all available channels' }) },
+                { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleBrowseChannels() },
                 { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => handleInvitePeople() },
-                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.info('Starred Channels', { description: 'Filtering to show starred channels' }) } },
+                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Starred Channels', { description: `Found ${mockChannels.filter(c => c.isStarred).length} starred channels` }) } },
                 { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleOpenMarketplace() },
                 { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleCreateWorkflow() },
-                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.info('Archived Channels', { description: 'Showing archived channels' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => toast.info('Channel Settings', { description: 'Opening channel settings' }) },
+                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleViewArchivedChannels() },
+                { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => handleOpenChannelSettings() },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1540,14 +1858,14 @@ export default function MessagesClient() {
             {/* Messages Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('New Direct Message', { description: 'Select a contact to start a new DM' }) },
-                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); toast.info('Compose Message', { description: 'Use the message input below to compose your message' }) } },
-                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Reply All', { description: 'Select a message to reply to all recipients' }) },
-                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Forward Message', { description: 'Select a message to forward' }) },
-                { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Saved Messages', { description: 'Showing your saved messages' }) },
+                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSelectedChannel(directMessages[0] || null); toast.success('New Direct Message', { description: directMessages.length > 0 ? `Selected ${directMessages[0].name}` : 'No contacts available' }) } },
+                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); document.querySelector<HTMLInputElement>('input[placeholder*="Message"]')?.focus(); toast.success('Compose Message', { description: 'Start typing your message below' }) } },
+                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (channelMessages.length > 0) { handleOpenReplyDialog(channelMessages[0].id) } else { toast.info('No Messages', { description: 'Select a conversation with messages first' }) } } },
+                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { if (channelMessages.length > 0) { handleOpenForwardDialog(channelMessages[0].id) } else { toast.info('No Messages', { description: 'Select a conversation with messages first' }) } } },
+                { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleViewSavedMessages() },
                 { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleViewPinnedMessages() },
-                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Search Messages', { description: 'Use the search bar above to search messages' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Filter Messages', { description: 'Opening filter options...' }) },
+                { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Messages', { description: 'Type your search query' }) } },
+                { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => handleOpenFilterDialog() },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1698,14 +2016,14 @@ export default function MessagesClient() {
             {/* Threads Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('All Threads', { description: 'Showing all active threads' }) },
-                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Following', { description: 'Showing threads you are following' }) },
-                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Unread Threads', { description: `You have ${stats.activeThreads} unread threads` }) },
-                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('My Replies', { description: 'Showing threads you have replied to' }) },
-                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.info('Thread Mentions', { description: 'Showing threads where you were mentioned' }) },
-                { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Archived Threads', { description: 'Showing archived threads' }) },
-                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Search Threads', { description: 'Use the search bar to find threads' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Thread Settings', { description: 'Opening thread notification settings' }) },
+                { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => handleFilterThreads('all') },
+                { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleFilterThreads('following') },
+                { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => handleFilterThreads('unread') },
+                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setThreadFilter('all'); toast.success('My Replies', { description: `Showing ${mockThreads.filter(t => t.participants.some(p => p.id === currentUser.id)).length} threads with your replies` }) } },
+                { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleFilterThreads('mentions') },
+                { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleFilterThreads('archived') },
+                { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Threads', { description: 'Enter your search query' }) } },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); toast.success('Thread Settings', { description: 'Configure thread notification preferences' }) } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1790,12 +2108,12 @@ export default function MessagesClient() {
               {[
                 { icon: Phone, label: 'Start Call', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleStartCall(selectedChannel?.name || 'New Call', 'audio') },
                 { icon: Video, label: 'Video Call', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleStartCall(selectedChannel?.name || 'Video Call', 'video') },
-                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => toast.info('Start Huddle', { description: 'Starting a quick huddle session...' }) },
-                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Screen Share', { description: 'Starting screen share...' }) },
-                { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => toast.info('Schedule Call', { description: 'Opening call scheduler...' }) },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Call Recordings', { description: 'Showing your call recordings' }) },
-                { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Call History', { description: `You have made ${stats.totalCalls} calls today` }) },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Call Settings', { description: 'Opening call & audio settings' }) },
+                { icon: Headphones, label: 'Huddle', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleStartHuddle() },
+                { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => handleStartScreenShare() },
+                { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => handleScheduleCall() },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => handleViewCallRecordings() },
+                { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleViewCallHistory() },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleOpenCallSettings() },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1936,13 +2254,13 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Upload, label: 'Upload', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => handleUploadFile() },
-                { icon: FolderOpen, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Browse Files', { description: `Browsing ${stats.totalFiles} files across all channels` }) },
-                { icon: Image, label: 'Images', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Images', { description: 'Filtering to show image files only' }) },
-                { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Videos', { description: 'Filtering to show video files only' }) },
-                { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Documents', { description: 'Filtering to show document files only' }) },
-                { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.info('Code Files', { description: 'Filtering to show code snippets and files' }) },
-                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('Search Files', { description: 'Use the search bar to find files' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('File Settings', { description: 'Opening file storage settings' }) },
+                { icon: FolderOpen, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleFilterFilesByType('all') },
+                { icon: Image, label: 'Images', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleFilterFilesByType('images') },
+                { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleFilterFilesByType('videos') },
+                { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleFilterFilesByType('documents') },
+                { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleFilterFilesByType('code') },
+                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Files', { description: 'Enter your search query' }) } },
+                { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setSettingsTab('advanced'); toast.success('File Settings', { description: 'Configure storage and retention settings' }) } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2033,14 +2351,14 @@ export default function MessagesClient() {
             {/* Mentions Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: AtSign, label: 'All Mentions', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('All Mentions', { description: 'Showing all mentions and notifications' }) },
-                { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => toast.info('Unread Mentions', { description: `You have ${stats.mentions} unread mentions` }) },
-                { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => toast.info('Reactions', { description: 'Showing messages with reactions' }) },
-                { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.info('Starred Mentions', { description: 'Showing starred mentions' }) },
-                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => toast.info('Reply All', { description: 'Select a mention to reply to all' }) },
+                { icon: AtSign, label: 'All Mentions', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => handleFilterMentions('all') },
+                { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleFilterMentions('unread') },
+                { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleFilterMentions('reactions') },
+                { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleFilterMentions('starred') },
+                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { if (mockMentions.length > 0) { handleOpenReplyDialog(mockMentions[0].message.id) } else { toast.info('No Mentions', { description: 'No mentions to reply to' }) } } },
                 { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => handleMarkAllAsRead() },
-                { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Filter Mentions', { description: 'Opening filter options...' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Mention Settings', { description: 'Opening mention notification settings' }) },
+                { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => handleOpenFilterDialog() },
+                { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { setSettingsTab('notifications'); toast.success('Mention Settings', { description: 'Configure mention notification preferences' }) } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2755,11 +3073,7 @@ export default function MessagesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Leave Workspace</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Remove yourself from this workspace</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => {
-                            if (confirm('Are you sure you want to leave this workspace?')) {
-                              toast.info('Leaving workspace', { description: 'Redirecting...' })
-                            }
-                          }}>
+                          <Button variant="destructive" size="sm" onClick={handleLeaveWorkspace}>
                             <LogOut className="w-4 h-4 mr-2" />
                             Leave
                           </Button>
@@ -2804,7 +3118,7 @@ export default function MessagesClient() {
             <AIInsightsPanel
               insights={messagesAIInsights}
               title="Messaging Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => handleAIInsightAction(insight)}
             />
           </div>
           <div className="space-y-6">
@@ -3284,6 +3598,281 @@ export default function MessagesClient() {
             <Button onClick={handleApplyFilters} className="bg-purple-600 hover:bg-purple-700">
               <Filter className="w-4 h-4 mr-2" />
               Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reply Dialog */}
+      <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Reply className="w-5 h-5 text-blue-600" />
+              Reply to Message
+            </DialogTitle>
+            <DialogDescription>
+              Send a reply to this conversation
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reply-body">Your Reply</Label>
+              <Textarea
+                id="reply-body"
+                placeholder="Type your reply here..."
+                value={replyBody}
+                onChange={(e) => setReplyBody(e.target.value)}
+                className="min-h-[120px]"
+              />
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+              <Reply className="w-4 h-4 text-blue-600" />
+              <span className="text-sm text-blue-700 dark:text-blue-400">
+                Your reply will be sent to the original sender
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowReplyDialog(false); setReplyBody(''); setReplyMessageId(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitReply} disabled={mutating || !replyBody.trim()} className="bg-blue-600 hover:bg-blue-700">
+              <Send className="w-4 h-4 mr-2" />
+              Send Reply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Forward Dialog */}
+      <Dialog open={showForwardDialog} onOpenChange={setShowForwardDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Forward className="w-5 h-5 text-purple-600" />
+              Forward Message
+            </DialogTitle>
+            <DialogDescription>
+              Choose a recipient to forward this message to
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Recipient</Label>
+              <Select value={forwardRecipient} onValueChange={setForwardRecipient}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a recipient..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockUsers.filter(u => !u.isBot && u.id !== currentUser.id).map(user => (
+                    <SelectItem key={user.id} value={user.id}>
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback className="text-xs">{user.displayName.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        {user.displayName}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+              <Forward className="w-4 h-4 text-purple-600" />
+              <span className="text-sm text-purple-700 dark:text-purple-400">
+                The message will be forwarded with a "Forwarded" label
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowForwardDialog(false); setForwardRecipient(''); setForwardMessageId(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitForward} disabled={mutating || !forwardRecipient} className="bg-purple-600 hover:bg-purple-700">
+              <Forward className="w-4 h-4 mr-2" />
+              Forward Message
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Message
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this message? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <AlertOctagon className="w-4 h-4 text-red-600" />
+              <span className="text-sm text-red-700 dark:text-red-400">
+                This message will be permanently deleted
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowDeleteConfirmDialog(false); setDeleteMessageId(null); }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete} disabled={mutating}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Confirmation Dialog */}
+      <Dialog open={showArchiveConfirmDialog} onOpenChange={setShowArchiveConfirmDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-600">
+              <Archive className="w-5 h-5" />
+              Archive Message
+            </DialogTitle>
+            <DialogDescription>
+              Move this message to your archive? You can restore it later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+              <Archive className="w-4 h-4 text-amber-600" />
+              <span className="text-sm text-amber-700 dark:text-amber-400">
+                Archived messages can be found in the Archive folder
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowArchiveConfirmDialog(false); setArchiveMessageId(null); }}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmArchive} disabled={mutating} className="bg-amber-600 hover:bg-amber-700">
+              <Archive className="w-4 h-4 mr-2" />
+              Archive
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Leave Workspace Confirmation Dialog */}
+      <Dialog open={showLeaveWorkspaceDialog} onOpenChange={setShowLeaveWorkspaceDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <LogOut className="w-5 h-5" />
+              Leave Workspace
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to leave this workspace? You will lose access to all channels and messages.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <AlertOctagon className="w-4 h-4 text-red-600" />
+              <span className="text-sm text-red-700 dark:text-red-400">
+                You will need an invite to rejoin this workspace
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLeaveWorkspaceDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmLeaveWorkspace}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Leave Workspace
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Call Dialog */}
+      <Dialog open={showScheduleCallDialog} onOpenChange={setShowScheduleCallDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-sky-600" />
+              Schedule a Call
+            </DialogTitle>
+            <DialogDescription>
+              Set up a scheduled call with your team
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="call-date">Date</Label>
+                <Input
+                  id="call-date"
+                  type="date"
+                  value={scheduleCallDate}
+                  onChange={(e) => setScheduleCallDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="call-time">Time</Label>
+                <Input
+                  id="call-time"
+                  type="time"
+                  value={scheduleCallTime}
+                  onChange={(e) => setScheduleCallTime(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Call Type</Label>
+              <Select value={scheduleCallType} onValueChange={(v: 'audio' | 'video') => setScheduleCallType(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="video">
+                    <div className="flex items-center gap-2">
+                      <Video className="w-4 h-4" />
+                      Video Call
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="audio">
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4" />
+                      Audio Call
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="call-participants">Participants (optional)</Label>
+              <Input
+                id="call-participants"
+                placeholder="Enter names or emails, separated by commas"
+                value={scheduleCallParticipants}
+                onChange={(e) => setScheduleCallParticipants(e.target.value)}
+              />
+              <p className="text-xs text-gray-500">Leave empty to invite when the call starts</p>
+            </div>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-sky-50 dark:bg-sky-900/20">
+              <Calendar className="w-4 h-4 text-sky-600" />
+              <span className="text-sm text-sky-700 dark:text-sky-400">
+                Participants will receive a calendar invite
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowScheduleCallDialog(false); setScheduleCallDate(''); setScheduleCallTime(''); setScheduleCallParticipants(''); }}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitScheduledCall} disabled={!scheduleCallDate || !scheduleCallTime} className="bg-sky-600 hover:bg-sky-700">
+              <Calendar className="w-4 h-4 mr-2" />
+              Schedule Call
             </Button>
           </DialogFooter>
         </DialogContent>

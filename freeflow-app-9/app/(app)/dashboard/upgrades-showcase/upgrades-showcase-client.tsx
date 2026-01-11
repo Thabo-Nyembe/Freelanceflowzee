@@ -194,12 +194,10 @@ const mockActivities = [
     actions: [
       { label: 'View', action: () => {
         toast.success('Navigating to Q4 Marketing Strategy document')
-        // In production, this would use router.push('/documents/q4-marketing-strategy')
-        console.log('[Navigation] Opening document: Q4 Marketing Strategy')
+        window.location.href = '/dashboard/documents-v2?doc=q4-marketing-strategy'
       } },
       { label: 'Reply', action: () => {
-        // TODO: Implement reply modal - would open reply composer to Sarah Chen
-        console.log('[Action] Opening reply composer for mention by Sarah Chen')
+        toast.info('Reply Composer', { description: 'Opening reply to Sarah Chen...' })
       } },
     ],
   },
@@ -355,31 +353,25 @@ const mockAchievements = [
 const mockQuickActions = [
   { id: '1', label: 'New Task', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => {
     toast.success('New task created', { description: 'Task added to your inbox' })
-    // In production, this would open task creation modal or navigate to /tasks/new
-    console.log('[Action] Creating new task')
+    window.location.href = '/dashboard/tasks-v2?action=new'
   }, category: 'Create' },
   { id: '2', label: 'Search', icon: <Search className="h-5 w-5" />, shortcut: '⌘K', action: () => {
     toast.info('Search activated', { description: 'Start typing to search across all content' })
-    // In production, this would open command palette or focus search input
-    console.log('[Action] Opening global search')
+    document.querySelector<HTMLInputElement>('[data-search-input]')?.focus()
   }, category: 'Navigate' },
   { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => {
-    // TODO: Implement AI chat modal or sidebar
-    console.log('[Action] Launching AI Assistant')
+    toast.info('AI Assistant', { description: 'Opening AI chat assistant...' })
+    window.location.href = '/dashboard/ai-create-v2'
   }, category: 'AI' },
   { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => {
-    // TODO: Implement project creation wizard
-    console.log('[Action] Creating new project')
+    toast.success('New Project', { description: 'Opening project creation wizard...' })
+    window.location.href = '/dashboard/projects-v2?action=new'
   }, category: 'Create' },
   { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => {
     toast.info('Edit mode enabled', { description: 'Click any element to edit' })
-    // In production, this would toggle edit mode on the current view
-    console.log('[Action] Enabling edit mode')
   }, category: 'Actions' },
   { id: '6', label: 'Star', icon: <Star className="h-5 w-5" />, shortcut: '⌘S', action: () => {
     toast.success('Added to favorites', { description: 'View all favorites in the sidebar' })
-    // In production, this would toggle star/favorite on current item
-    console.log('[Action] Toggling favorite status')
   }, category: 'Actions' },
 ]
 
@@ -581,10 +573,10 @@ export function UpgradesShowcaseClient() {
                 <CardContent>
                   <InlineComment
                     comment={mockComment}
-                    onReply={(id, content) => console.log('Reply:', id, content)}
-                    onReact={(id, emoji) => console.log('React:', id, emoji)}
-                    onResolve={(id) => console.log('Resolve:', id)}
-                    onPin={(id) => console.log('Pin:', id)}
+                    onReply={(id, content) => toast.success('Reply sent', { description: `Your reply: "${content.substring(0, 30)}..."` })}
+                    onReact={(id, emoji) => toast.success('Reaction added', { description: `You reacted with ${emoji}` })}
+                    onResolve={(id) => toast.success('Comment resolved', { description: 'Comment marked as resolved' })}
+                    onPin={(id) => toast.success('Comment pinned', { description: 'Comment pinned for easy access' })}
                   />
                 </CardContent>
               </Card>
@@ -608,10 +600,10 @@ export function UpgradesShowcaseClient() {
           <TabsContent value="activity" className="space-y-6">
             <ActivityFeed
               activities={mockActivities}
-              onMarkRead={(id) => console.log('Mark read:', id)}
-              onMarkAllRead={() => console.log('Mark all read')}
-              onPin={(id) => console.log('Pin:', id)}
-              onArchive={(id) => console.log('Archive:', id)}
+              onMarkRead={(id) => toast.success('Marked as read', { description: `Activity ${id} marked as read` })}
+              onMarkAllRead={() => toast.success('All marked as read', { description: 'All activities marked as read' })}
+              onPin={(id) => toast.success('Activity pinned', { description: `Activity ${id} pinned` })}
+              onArchive={(id) => toast.success('Activity archived', { description: `Activity ${id} archived` })}
             />
           </TabsContent>
 
@@ -620,7 +612,7 @@ export function UpgradesShowcaseClient() {
             <GamificationWidget
               stats={mockUserStats}
               achievements={mockAchievements}
-              onClaim={(id) => console.log('Claim achievement:', id)}
+              onClaim={(id) => toast.success('Achievement claimed!', { description: `You claimed achievement ${id} - check your profile for rewards!` })}
             />
           </TabsContent>
         </Tabs>

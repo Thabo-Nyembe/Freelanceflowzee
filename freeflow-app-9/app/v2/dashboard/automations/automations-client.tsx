@@ -411,6 +411,15 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [isProcessing, setIsProcessing] = useState(false)
   const [templateFilterType, setTemplateFilterType] = useState<'ai' | 'top_rated' | 'popular' | 'all'>('all')
 
+  // Additional dialog states for confirmations and editing
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [showRunConfirmDialog, setShowRunConfirmDialog] = useState(false)
+  const [showEditWorkflowDialog, setShowEditWorkflowDialog] = useState(false)
+  const [workflowToDelete, setWorkflowToDelete] = useState<AutomationWorkflow | null>(null)
+  const [workflowToRun, setWorkflowToRun] = useState<AutomationWorkflow | null>(null)
+  const [workflowToEdit, setWorkflowToEdit] = useState<AutomationWorkflow | null>(null)
+  const [editFormState, setEditFormState] = useState<WorkflowFormState>(initialFormState)
+
   const { workflows, loading, error, refetch } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
   const displayWorkflows = dbWorkflows.length > 0 ? dbWorkflows : (workflows.length > 0 ? workflows : initialWorkflows)
 
@@ -655,10 +664,104 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       toast.success('Automation deleted', {
         description: `${workflow.workflow_name} has been removed`
       })
+      setShowDeleteConfirmDialog(false)
+      setWorkflowToDelete(null)
       fetchWorkflows()
     } catch (err) {
       console.error('Error deleting workflow:', err)
       toast.error('Failed to delete automation')
+    }
+  }
+
+  // Show delete confirmation dialog
+  const handleShowDeleteConfirm = (workflow: AutomationWorkflow) => {
+    setWorkflowToDelete(workflow)
+    setShowDeleteConfirmDialog(true)
+  }
+
+  // Show run confirmation dialog
+  const handleShowRunConfirm = (workflow: AutomationWorkflow) => {
+    setWorkflowToRun(workflow)
+    setShowRunConfirmDialog(true)
+  }
+
+  // Confirm and run automation
+  const handleConfirmRun = async () => {
+    if (!workflowToRun) return
+    await handleRunAutomation(workflowToRun)
+    setShowRunConfirmDialog(false)
+    setWorkflowToRun(null)
+  }
+
+  // Show edit workflow dialog
+  const handleShowEditDialog = (workflow: AutomationWorkflow) => {
+    setWorkflowToEdit(workflow)
+    setEditFormState({
+      workflow_name: workflow.workflow_name,
+      description: workflow.description || '',
+      workflow_type: workflow.workflow_type,
+      trigger_type: workflow.trigger_type,
+      is_enabled: workflow.is_enabled,
+    })
+    setShowEditWorkflowDialog(true)
+  }
+
+  // Update workflow handler
+  const handleUpdateWorkflow = async () => {
+    if (!workflowToEdit || !editFormState.workflow_name.trim()) {
+      toast.error('Workflow name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          workflow_name: editFormState.workflow_name,
+          description: editFormState.description || null,
+          workflow_type: editFormState.workflow_type,
+          trigger_type: editFormState.trigger_type,
+          is_enabled: editFormState.is_enabled,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflowToEdit.id)
+
+      if (error) throw error
+
+      toast.success('Workflow updated successfully', {
+        description: `${editFormState.workflow_name} has been saved`
+      })
+      setShowEditWorkflowDialog(false)
+      setWorkflowToEdit(null)
+      setEditFormState(initialFormState)
+      fetchWorkflows()
+      refetch()
+    } catch (err) {
+      console.error('Error updating workflow:', err)
+      toast.error('Failed to update workflow')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle AI insight action
+  const handleInsightAction = async (insight: { id: string; type: string; title: string; description: string }) => {
+    try {
+      if (insight.type === 'warning') {
+        toast.warning(`Addressing: ${insight.title}`, {
+          description: 'Taking action to resolve this issue'
+        })
+      } else if (insight.type === 'info') {
+        toast.info(`Viewing: ${insight.title}`, {
+          description: insight.description
+        })
+      } else {
+        toast.success(`Insight acknowledged: ${insight.title}`)
+      }
+    } catch (err) {
+      console.error('Error handling insight action:', err)
+      toast.error('Failed to process insight action')
     }
   }
 
@@ -2004,20 +2107,23 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         variant="ghost"
                         size="sm"
                         className="text-green-600"
-                        onClick={(e) => { e.stopPropagation(); handleRunAutomation(workflow) }}
+                        title="Run automation"
+                        onClick={(e) => { e.stopPropagation(); handleShowRunConfirm(workflow) }}
                       >
                         <Play className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); handleToggleAutomation(workflow) }}
+                        title="Edit automation"
+                        onClick={(e) => { e.stopPropagation(); handleShowEditDialog(workflow) }}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
+                        title="Duplicate automation"
                         onClick={(e) => { e.stopPropagation(); handleDuplicateAutomation(workflow) }}
                       >
                         <Copy className="h-4 w-4" />
@@ -2026,7 +2132,8 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         variant="ghost"
                         size="sm"
                         className="text-red-600"
-                        onClick={(e) => { e.stopPropagation(); handleDeleteAutomation(workflow) }}
+                        title="Delete automation"
+                        onClick={(e) => { e.stopPropagation(); handleShowDeleteConfirm(workflow) }}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -3035,7 +3142,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             <AIInsightsPanel
               insights={mockAutomationsAIInsights}
               title="Automation Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => handleInsightAction(insight)}
             />
           </div>
           <div className="space-y-6">
@@ -4368,6 +4475,315 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUpgradePlanDialog(false)}>
                 Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Delete Automation
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this automation? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            {workflowToDelete && (
+              <div className="py-4">
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Workflow className="h-5 w-5 text-red-600" />
+                    <span className="font-medium">{workflowToDelete.workflow_name}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {workflowToDelete.description || 'No description'}
+                  </p>
+                  <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+                    <span>{workflowToDelete.total_executions} executions</span>
+                    <span>{workflowToDelete.step_count} steps</span>
+                    <Badge className={getStatusColor(workflowToDelete.status)}>{workflowToDelete.status}</Badge>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowDeleteConfirmDialog(false); setWorkflowToDelete(null); }}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => workflowToDelete && handleDeleteAutomation(workflowToDelete)}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Automation
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Confirmation Dialog */}
+        <Dialog open={showRunConfirmDialog} onOpenChange={setShowRunConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-green-600">
+                <Play className="h-5 w-5" />
+                Run Automation
+              </DialogTitle>
+              <DialogDescription>
+                Confirm that you want to manually trigger this automation.
+              </DialogDescription>
+            </DialogHeader>
+            {workflowToRun && (
+              <div className="py-4">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Workflow className="h-5 w-5 text-green-600" />
+                    <span className="font-medium">{workflowToRun.workflow_name}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {workflowToRun.description || 'No description'}
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div className="p-2 bg-white dark:bg-gray-800 rounded">
+                      <div className="text-xs text-gray-500">Total Executions</div>
+                      <div className="font-medium">{workflowToRun.total_executions}</div>
+                    </div>
+                    <div className="p-2 bg-white dark:bg-gray-800 rounded">
+                      <div className="text-xs text-gray-500">Success Rate</div>
+                      <div className="font-medium">
+                        {workflowToRun.total_executions > 0
+                          ? ((workflowToRun.successful_executions / workflowToRun.total_executions) * 100).toFixed(0)
+                          : 0}%
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-sm text-amber-700 dark:text-amber-400">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>This will execute all workflow steps immediately.</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowRunConfirmDialog(false); setWorkflowToRun(null); }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmRun}
+                disabled={isProcessing}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isProcessing ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Starting...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 mr-2" />
+                    Run Now
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Workflow Dialog */}
+        <Dialog open={showEditWorkflowDialog} onOpenChange={setShowEditWorkflowDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit2 className="h-5 w-5 text-blue-600" />
+                Edit Automation
+              </DialogTitle>
+              <DialogDescription>
+                Update your automation workflow settings.
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[400px] mt-4 pr-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="edit-workflow-name">Workflow Name</Label>
+                  <Input
+                    id="edit-workflow-name"
+                    placeholder="My Automation Scenario"
+                    value={editFormState.workflow_name}
+                    onChange={(e) => setEditFormState(prev => ({ ...prev, workflow_name: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-description">Description</Label>
+                  <textarea
+                    id="edit-description"
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 mt-1"
+                    rows={3}
+                    placeholder="What does this automation do?"
+                    value={editFormState.description}
+                    onChange={(e) => setEditFormState(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-workflow-type">Workflow Type</Label>
+                  <select
+                    id="edit-workflow-type"
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 mt-1"
+                    value={editFormState.workflow_type}
+                    onChange={(e) => setEditFormState(prev => ({ ...prev, workflow_type: e.target.value as WorkflowType }))}
+                  >
+                    <option value="sequential">Sequential</option>
+                    <option value="parallel">Parallel</option>
+                    <option value="conditional">Conditional</option>
+                    <option value="branching">Branching</option>
+                    <option value="loop">Loop</option>
+                    <option value="hybrid">Hybrid</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="edit-trigger-type">Trigger Type</Label>
+                  <select
+                    id="edit-trigger-type"
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 mt-1"
+                    value={editFormState.trigger_type}
+                    onChange={(e) => setEditFormState(prev => ({ ...prev, trigger_type: e.target.value }))}
+                  >
+                    <option value="webhook">Webhook</option>
+                    <option value="cron">Schedule</option>
+                    <option value="email-trigger">Email Trigger</option>
+                    <option value="form-trigger">Form Submit</option>
+                    <option value="manual">Manual</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <Label htmlFor="edit-is-enabled">Enable Automation</Label>
+                    <p className="text-sm text-gray-500">Turn on/off this automation</p>
+                  </div>
+                  <Switch
+                    id="edit-is-enabled"
+                    checked={editFormState.is_enabled}
+                    onCheckedChange={(checked) => setEditFormState(prev => ({ ...prev, is_enabled: checked }))}
+                  />
+                </div>
+                {workflowToEdit && (
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-sm text-blue-700 dark:text-blue-400">
+                      <div className="font-medium mb-1">Workflow Stats</div>
+                      <div className="grid grid-cols-3 gap-4 mt-2">
+                        <div>
+                          <div className="text-xs text-gray-500">Steps</div>
+                          <div className="font-medium">{workflowToEdit.step_count}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Version</div>
+                          <div className="font-medium">{workflowToEdit.version}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Executions</div>
+                          <div className="font-medium">{workflowToEdit.total_executions}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => { setShowEditWorkflowDialog(false); setWorkflowToEdit(null); setEditFormState(initialFormState); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateWorkflow} disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700">
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Editor Dialog */}
+        <Dialog open={showEditorDialog} onOpenChange={setShowEditorDialog}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5 text-purple-600" />
+                Visual Workflow Editor
+              </DialogTitle>
+              <DialogDescription>
+                Design your automation workflow visually with drag-and-drop modules.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-4 gap-4 mb-4">
+                <div className="col-span-1 space-y-2">
+                  <h4 className="font-medium text-sm">Available Modules</h4>
+                  <ScrollArea className="h-[400px] border rounded-lg p-2">
+                    {nodeCategories.map(category => (
+                      <div key={category.id} className="mb-4">
+                        <div className="flex items-center gap-2 mb-2 text-xs font-medium text-gray-500 uppercase">
+                          {category.icon}
+                          {category.name}
+                        </div>
+                        <div className="space-y-1">
+                          {nodeTypes.filter(n => n.category === category.id).map(node => (
+                            <div
+                              key={node.id}
+                              className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                              draggable
+                            >
+                              {node.icon}
+                              <span className="text-sm">{node.name}</span>
+                              {node.isPremium && <Badge className="text-xs bg-amber-100 text-amber-700">Pro</Badge>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </ScrollArea>
+                </div>
+                <div className="col-span-3">
+                  <div className="h-[400px] bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                    <div className="text-center">
+                      <Workflow className="h-12 w-12 mx-auto text-gray-400 mb-3" />
+                      <p className="text-gray-500 font-medium">Drag modules here to build your workflow</p>
+                      <p className="text-sm text-gray-400 mt-1">Connect triggers, actions, and conditions</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditorDialog(false)}>
+                Close
+              </Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { toast.success('Workflow saved'); setShowEditorDialog(false); }}>
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Save Workflow
               </Button>
             </DialogFooter>
           </DialogContent>

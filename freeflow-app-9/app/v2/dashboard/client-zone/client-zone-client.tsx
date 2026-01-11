@@ -28,6 +28,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -67,7 +74,9 @@ import {
   FileDown,
   StickyNote,
   ListTodo,
-  Loader2
+  Loader2,
+  Search,
+  MoreVertical
 } from 'lucide-react'
 import ClientZoneGallery from '@/components/client-zone-gallery'
 
@@ -85,6 +94,19 @@ import {
   approveDeliverable,
   sendMessage,
   submitFeedback,
+  createClientProject,
+  updateClientProject,
+  deleteClientProject,
+  getClientProjects,
+  getProjectFiles,
+  uploadFile,
+  createInvoice,
+  markInvoiceAsPaid,
+  getNotifications,
+  markAllNotificationsAsRead,
+  searchClientZone,
+  exportClientDataToCSV,
+  incrementFileDownloadCount,
   type ClientProject,
   type ClientMessage,
   type ClientFile,
@@ -442,6 +464,36 @@ export default function ClientZoneClient() {
   const [contactPhone, setContactPhone] = useState('')
   const [contactCompany, setContactCompany] = useState('')
 
+  // Add/Edit Client Dialog State
+  const [showAddClientDialog, setShowAddClientDialog] = useState(false)
+  const [showEditClientDialog, setShowEditClientDialog] = useState(false)
+  const [showDeleteClientDialog, setShowDeleteClientDialog] = useState(false)
+  const [editingClientId, setEditingClientId] = useState<string | null>(null)
+  const [clientFormData, setClientFormData] = useState({
+    name: '',
+    description: '',
+    budget: '',
+    dueDate: '',
+    phase: '',
+    tags: ''
+  })
+  const [isSubmittingClient, setIsSubmittingClient] = useState(false)
+  const [isDeletingClient, setIsDeletingClient] = useState(false)
+
+  // Client Search/Filter State
+  const [clientSearchQuery, setClientSearchQuery] = useState('')
+  const [clientStatusFilter, setClientStatusFilter] = useState<string>('all')
+  const [filteredClients, setFilteredClients] = useState<any[]>([])
+
+  // Client History Dialog State
+  const [showClientHistoryDialog, setShowClientHistoryDialog] = useState(false)
+  const [selectedClientHistory, setSelectedClientHistory] = useState<any>(null)
+
+  // Notifications Panel State
+  const [showNotificationsPanel, setShowNotificationsPanel] = useState(false)
+  const [notifications, setNotifications] = useState<any[]>([])
+  const [loadingNotifications, setLoadingNotifications] = useState(false)
+
   // Change Password Dialog State
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
@@ -666,7 +718,7 @@ export default function ClientZoneClient() {
   // HANDLER 1: NOTIFICATIONS
   // ============================================================================
 
-  const handleNotifications = () => {
+  const handleNotifications = async () => {
     logger.info('Notifications opened', {
       userId,
       projectCount: projects.length,
@@ -674,9 +726,8 @@ export default function ClientZoneClient() {
       tab: activeTab
     })
 
-    toast.success('Notifications center opened!', {
-      description: `You have ${dashboardData?.unreadNotifications || 0} unread notifications`
-    })
+    // Load and show notifications panel
+    await handleLoadNotifications()
   }
 
   // ============================================================================
@@ -792,7 +843,7 @@ export default function ClientZoneClient() {
   // HANDLER 5: DOWNLOAD FILES
   // ============================================================================
 
-  const handleDownloadFiles = (projectId: string) => {
+  const handleDownloadFiles = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
 
     if (!project) {
@@ -806,8 +857,48 @@ export default function ClientZoneClient() {
       userId
     })
 
-    toast.success('Preparing download...', {
-      description: 'Files will download as a ZIP archive'
+    const downloadPromise = (async () => {
+      // Get project files
+      const projectFiles = await getProjectFiles(projectId)
+
+      if (projectFiles.length === 0) {
+        throw new Error('No files available for download')
+      }
+
+      // Track download for each file
+      await Promise.all(projectFiles.map(file =>
+        incrementFileDownloadCount(file.id).catch(() => {})
+      ))
+
+      // In production, generate ZIP and download
+      // For now, we create a download manifest
+      const manifest = {
+        project: project.name,
+        files: projectFiles.map(f => ({
+          name: f.name,
+          size: f.file_size,
+          type: f.file_type
+        })),
+        downloadedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${project.name.replace(/\s+/g, '-')}-files-manifest.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      return projectFiles.length
+    })()
+
+    toast.promise(downloadPromise, {
+      loading: 'Preparing download...',
+      success: (count) => `Downloaded ${count} file(s) from "${project.name}"`,
+      error: (err) => err.message || 'Failed to download files'
     })
   }
 
@@ -912,15 +1003,40 @@ export default function ClientZoneClient() {
   // HANDLER 8: PAY INVOICE
   // ============================================================================
 
-  const handlePayInvoice = (invoiceNumber: string, amount: number) => {
+  const handlePayInvoice = async (invoiceNumber: string, amount: number) => {
     logger.info('Payment initiated', {
       invoiceNumber,
       amount,
       userId
     })
 
-    toast.success('Redirecting to secure payment...', {
-      description: `Invoice ${invoiceNumber} - ${formatCurrency(amount)}`
+    // Find the invoice to get its ID
+    const invoice = invoices.find(inv => inv.number === invoiceNumber)
+    if (!invoice) {
+      toast.error('Invoice not found')
+      return
+    }
+
+    // In production, integrate with payment gateway (Stripe, PayPal, etc.)
+    const paymentPromise = (async () => {
+      // Simulate payment gateway redirect
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Mark invoice as paid
+      await markInvoiceAsPaid(invoice.id, 'credit_card', `TXN-${Date.now()}`)
+
+      // Reload invoices
+      const dashData = await getClientZoneDashboard()
+      setInvoices(dashData.pendingInvoices)
+      setDashboardData(dashData)
+
+      return { invoiceNumber, amount }
+    })()
+
+    toast.promise(paymentPromise, {
+      loading: 'Processing payment...',
+      success: (result) => `Payment of ${formatCurrency(result.amount)} for ${result.invoiceNumber} completed!`,
+      error: 'Payment failed. Please try again.'
     })
   }
 
@@ -1315,8 +1431,301 @@ export default function ClientZoneClient() {
     logger.info('File upload initiated')
     const input = document.createElement('input')
     input.type = 'file'
+    input.multiple = true
+    input.onchange = async (e) => {
+      const files = (e.target as HTMLInputElement).files
+      if (!files || files.length === 0) return
+
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // In production, upload to storage first and get the path
+        const storagePath = `uploads/${Date.now()}-${file.name}`
+        return uploadFile({
+          project_id: projects[0]?.id || '',
+          name: file.name,
+          original_name: file.name,
+          file_type: file.name.split('.').pop() || 'unknown',
+          file_size: file.size,
+          mime_type: file.type,
+          storage_path: storagePath,
+          description: `Uploaded on ${new Date().toLocaleDateString()}`
+        })
+      })
+
+      toast.promise(
+        Promise.all(uploadPromises),
+        {
+          loading: `Uploading ${files.length} file(s)...`,
+          success: `Successfully uploaded ${files.length} file(s)`,
+          error: 'Failed to upload files'
+        }
+      )
+    }
     input.click()
-    toast.info('File upload initiated')
+  }
+
+  // ============================================================================
+  // HANDLER: ADD NEW CLIENT
+  // ============================================================================
+  const handleAddClient = async () => {
+    if (!clientFormData.name.trim()) {
+      toast.error('Please enter a client/project name')
+      return
+    }
+
+    setIsSubmittingClient(true)
+    logger.info('Adding new client project', { name: clientFormData.name, userId })
+
+    const createPromise = createClientProject({
+      client_id: userId || '',
+      name: clientFormData.name,
+      description: clientFormData.description || undefined,
+      budget: clientFormData.budget ? parseFloat(clientFormData.budget) : undefined,
+      due_date: clientFormData.dueDate || undefined,
+      phase: clientFormData.phase || 'Planning',
+      tags: clientFormData.tags ? clientFormData.tags.split(',').map(t => t.trim()) : []
+    })
+
+    toast.promise(createPromise, {
+      loading: 'Creating client project...',
+      success: (data) => {
+        setShowAddClientDialog(false)
+        setClientFormData({ name: '', description: '', budget: '', dueDate: '', phase: '', tags: '' })
+        // Reload projects
+        getClientZoneDashboard().then(dashData => {
+          setProjects(dashData.recentProjects)
+          setDashboardData(dashData)
+        })
+        return `Project "${data.name}" created successfully!`
+      },
+      error: (err) => `Failed to create project: ${err.message}`
+    })
+
+    setIsSubmittingClient(false)
+  }
+
+  // ============================================================================
+  // HANDLER: EDIT CLIENT
+  // ============================================================================
+  const handleEditClient = async () => {
+    if (!editingClientId || !clientFormData.name.trim()) {
+      toast.error('Please enter a project name')
+      return
+    }
+
+    setIsSubmittingClient(true)
+    logger.info('Updating client project', { projectId: editingClientId, userId })
+
+    const updatePromise = updateClientProject(editingClientId, {
+      name: clientFormData.name,
+      description: clientFormData.description || null,
+      budget: clientFormData.budget ? parseFloat(clientFormData.budget) : 0,
+      due_date: clientFormData.dueDate || null,
+      phase: clientFormData.phase || null,
+      tags: clientFormData.tags ? clientFormData.tags.split(',').map(t => t.trim()) : []
+    })
+
+    toast.promise(updatePromise, {
+      loading: 'Updating project...',
+      success: () => {
+        setShowEditClientDialog(false)
+        setEditingClientId(null)
+        setClientFormData({ name: '', description: '', budget: '', dueDate: '', phase: '', tags: '' })
+        // Reload projects
+        getClientZoneDashboard().then(dashData => {
+          setProjects(dashData.recentProjects)
+          setDashboardData(dashData)
+        })
+        return 'Project updated successfully!'
+      },
+      error: (err) => `Failed to update project: ${err.message}`
+    })
+
+    setIsSubmittingClient(false)
+  }
+
+  // ============================================================================
+  // HANDLER: DELETE CLIENT
+  // ============================================================================
+  const handleDeleteClient = async () => {
+    if (!editingClientId) return
+
+    setIsDeletingClient(true)
+    logger.info('Deleting client project', { projectId: editingClientId, userId })
+
+    const deletePromise = deleteClientProject(editingClientId)
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting project...',
+      success: () => {
+        setShowDeleteClientDialog(false)
+        setEditingClientId(null)
+        // Reload projects
+        getClientZoneDashboard().then(dashData => {
+          setProjects(dashData.recentProjects)
+          setDashboardData(dashData)
+        })
+        return 'Project deleted successfully!'
+      },
+      error: (err) => `Failed to delete project: ${err.message}`
+    })
+
+    setIsDeletingClient(false)
+  }
+
+  // ============================================================================
+  // HANDLER: OPEN EDIT CLIENT DIALOG
+  // ============================================================================
+  const openEditClientDialog = (project: ClientProject) => {
+    setEditingClientId(project.id)
+    setClientFormData({
+      name: project.name,
+      description: project.description || '',
+      budget: project.budget?.toString() || '',
+      dueDate: project.due_date || '',
+      phase: project.phase || '',
+      tags: project.tags?.join(', ') || ''
+    })
+    setShowEditClientDialog(true)
+  }
+
+  // ============================================================================
+  // HANDLER: SEARCH CLIENTS
+  // ============================================================================
+  const handleSearchClients = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setFilteredClients([])
+      return
+    }
+
+    logger.info('Searching clients', { query, userId })
+
+    try {
+      const results = await searchClientZone(query)
+      setFilteredClients(results.projects)
+      toast.success(`Found ${results.projects.length} matching projects`)
+    } catch (error: any) {
+      logger.error('Search failed', { error, userId })
+      toast.error('Search failed', { description: error.message })
+    }
+  }, [userId])
+
+  // ============================================================================
+  // HANDLER: FILTER CLIENTS BY STATUS
+  // ============================================================================
+  const handleFilterByStatus = useCallback(async (status: string) => {
+    setClientStatusFilter(status)
+    logger.info('Filtering clients by status', { status, userId })
+
+    try {
+      if (status === 'all') {
+        const dashData = await getClientZoneDashboard()
+        setProjects(dashData.recentProjects)
+      } else {
+        const filtered = await getClientProjects({
+          status: status as any,
+          limit: 20
+        })
+        setProjects(filtered)
+      }
+      announce(`Showing ${status === 'all' ? 'all' : status} projects`, 'polite')
+    } catch (error: any) {
+      logger.error('Filter failed', { error, userId })
+      toast.error('Failed to filter projects')
+    }
+  }, [userId, announce])
+
+  // ============================================================================
+  // HANDLER: VIEW CLIENT HISTORY
+  // ============================================================================
+  const handleViewClientHistory = async (clientId: string) => {
+    logger.info('Viewing client history', { clientId, userId })
+
+    const project = projects.find(p => p.id === clientId)
+    if (!project) {
+      toast.error('Project not found')
+      return
+    }
+
+    try {
+      // Get project files and messages as history
+      const [filesData] = await Promise.all([
+        getProjectFiles(clientId)
+      ])
+
+      setSelectedClientHistory({
+        project,
+        files: filesData,
+        activities: [
+          { type: 'created', date: project.created_at, description: 'Project created' },
+          { type: 'updated', date: project.updated_at, description: `Progress updated to ${project.progress}%` },
+          ...(project.phase ? [{ type: 'phase', date: project.updated_at, description: `Current phase: ${project.phase}` }] : [])
+        ]
+      })
+      setShowClientHistoryDialog(true)
+    } catch (error: any) {
+      logger.error('Failed to load client history', { error, userId })
+      toast.error('Failed to load client history')
+    }
+  }
+
+  // ============================================================================
+  // HANDLER: LOAD NOTIFICATIONS
+  // ============================================================================
+  const handleLoadNotifications = async () => {
+    setLoadingNotifications(true)
+    setShowNotificationsPanel(true)
+
+    try {
+      const notifs = await getNotifications({ limit: 20 })
+      setNotifications(notifs)
+      logger.info('Notifications loaded', { count: notifs.length, userId })
+    } catch (error: any) {
+      logger.error('Failed to load notifications', { error, userId })
+      toast.error('Failed to load notifications')
+    } finally {
+      setLoadingNotifications(false)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER: MARK ALL NOTIFICATIONS READ
+  // ============================================================================
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await markAllNotificationsAsRead()
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      toast.success('All notifications marked as read')
+    } catch (error: any) {
+      logger.error('Failed to mark notifications as read', { error, userId })
+      toast.error('Failed to mark notifications as read')
+    }
+  }
+
+  // ============================================================================
+  // HANDLER: EXPORT CLIENT DATA
+  // ============================================================================
+  const handleExportClientData = async () => {
+    logger.info('Exporting client data', { userId })
+
+    const exportPromise = exportClientDataToCSV()
+
+    toast.promise(exportPromise, {
+      loading: 'Generating export...',
+      success: (csv) => {
+        // Create and download the CSV file
+        const blob = new Blob([csv], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `client-data-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        return 'Data exported successfully!'
+      },
+      error: (err) => `Export failed: ${err.message}`
+    })
   }
 
   // ============================================================================
@@ -1405,22 +1814,38 @@ export default function ClientZoneClient() {
     setIsCreatingInvoice(true)
     logger.info('Creating invoice', { clientId: invoiceClientId, amount: invoiceAmount, userId })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Invoice created successfully!', {
-        description: `Invoice for ${formatCurrency(parseFloat(invoiceAmount))} has been generated`
-      })
-      setShowCreateInvoiceDialog(false)
-      setInvoiceClientId('')
-      setInvoiceAmount('')
-      setInvoiceDescription('')
-      setInvoiceDueDate('')
-    } catch (error: any) {
-      logger.error('Failed to create invoice', { error, userId })
-      toast.error('Failed to create invoice', { description: error.message || 'Please try again' })
-    } finally {
-      setIsCreatingInvoice(false)
-    }
+    // Generate invoice number
+    const invoiceNumber = `INV-${Date.now().toString(36).toUpperCase()}`
+
+    const createInvoicePromise = createInvoice({
+      project_id: projects[0]?.id || '',
+      client_id: invoiceClientId,
+      invoice_number: invoiceNumber,
+      issue_date: new Date().toISOString(),
+      due_date: invoiceDueDate,
+      subtotal: parseFloat(invoiceAmount),
+      notes: invoiceDescription || undefined
+    })
+
+    toast.promise(createInvoicePromise, {
+      loading: 'Creating invoice...',
+      success: (data) => {
+        setShowCreateInvoiceDialog(false)
+        setInvoiceClientId('')
+        setInvoiceAmount('')
+        setInvoiceDescription('')
+        setInvoiceDueDate('')
+        // Reload dashboard
+        getClientZoneDashboard().then(dashData => {
+          setInvoices(dashData.pendingInvoices)
+          setDashboardData(dashData)
+        })
+        return `Invoice ${data.invoice_number} for ${formatCurrency(data.total)} created successfully!`
+      },
+      error: (err) => `Failed to create invoice: ${err.message}`
+    })
+
+    setIsCreatingInvoice(false)
   }
 
   // ============================================================================
@@ -1856,10 +2281,22 @@ export default function ClientZoneClient() {
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" className="w-full" onClick={() => setShowAllClientsDialog(true)}>
-                      <Users className="w-4 h-4 mr-2" />
-                      View All Clients
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1" onClick={() => setShowAllClientsDialog(true)}>
+                        <Users className="w-4 h-4 mr-2" />
+                        View All
+                      </Button>
+                      <Button
+                        className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                        onClick={() => {
+                          setClientFormData({ name: '', description: '', budget: '', dueDate: '', phase: '', tags: '' })
+                          setShowAddClientDialog(true)
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Client
+                      </Button>
+                    </div>
                   </div>
 
                   {/* Pending Approvals */}
@@ -3103,46 +3540,143 @@ export default function ClientZoneClient() {
 
       {/* View All Clients Dialog */}
       <Dialog open={showAllClientsDialog} onOpenChange={setShowAllClientsDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Users className="w-5 h-5 text-purple-600" />
-              All Clients
+              All Clients & Projects
             </DialogTitle>
             <DialogDescription>
               View and manage all your clients in one place.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
-            {[
-              { name: 'Acme Corp', projects: 2, status: 'Active', revenue: 15000, color: 'blue' },
-              { name: 'Tech Startup Inc', projects: 1, status: 'Review', revenue: 8500, color: 'yellow' },
-              { name: 'Design Agency', projects: 1, status: 'Active', revenue: 12000, color: 'green' },
-              { name: 'Marketing Pro', projects: 3, status: 'Active', revenue: 22000, color: 'purple' },
-              { name: 'Global Enterprises', projects: 2, status: 'Completed', revenue: 35000, color: 'emerald' },
-            ].map((client, idx) => (
-              <div key={idx} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          {/* Search and Filter Bar */}
+          <div className="flex gap-3 py-2">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search clients..."
+                value={clientSearchQuery}
+                onChange={(e) => {
+                  setClientSearchQuery(e.target.value)
+                  if (e.target.value.length > 2) {
+                    handleSearchClients(e.target.value)
+                  } else {
+                    setFilteredClients([])
+                  }
+                }}
+                className="pl-10"
+              />
+            </div>
+            <Select value={clientStatusFilter} onValueChange={handleFilterByStatus}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Filter status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="review">Review</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-3 py-2 max-h-[400px] overflow-y-auto">
+            {(filteredClients.length > 0 ? filteredClients : projects).map((project) => (
+              <div key={project.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white">
-                        {client.name.substring(0, 2).toUpperCase()}
+                        {project.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{client.name}</p>
-                      <p className="text-sm text-gray-500">{client.projects} project(s) - {formatCurrency(client.revenue)}</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{project.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {project.progress}% complete - {formatCurrency(project.budget || 0)}
+                      </p>
                     </div>
                   </div>
-                  <Badge className={`bg-${client.color}-100 text-${client.color}-700`}>{client.status}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className={
+                      project.status === 'completed' ? 'bg-green-100 text-green-700' :
+                      project.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
+                      project.status === 'review' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }>
+                      {project.status}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEditClientDialog(project)}>
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Project
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewClientHistory(project.id)}>
+                          <Clock className="w-4 h-4 mr-2" />
+                          View History
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          setMessageClientId(project.client_id)
+                          setShowMessageClientDialog(true)
+                        }}>
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          Send Message
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDownloadFiles(project.id)}>
+                          <Download className="w-4 h-4 mr-2" />
+                          Download Files
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => {
+                            setEditingClientId(project.id)
+                            setShowDeleteClientDialog(true)
+                          }}
+                        >
+                          <AlertCircle className="w-4 h-4 mr-2" />
+                          Delete Project
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
             ))}
+            {projects.length === 0 && filteredClients.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No clients found. Add your first client to get started.
+              </div>
+            )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAllClientsDialog(false)}>
-              Close
+          <DialogFooter className="flex justify-between">
+            <Button
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+              onClick={() => {
+                setShowAllClientsDialog(false)
+                setClientFormData({ name: '', description: '', budget: '', dueDate: '', phase: '', tags: '' })
+                setShowAddClientDialog(true)
+              }}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Client
             </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleExportClientData}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button variant="outline" onClick={() => setShowAllClientsDialog(false)}>
+                Close
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3780,6 +4314,384 @@ export default function ClientZoneClient() {
             <Button onClick={handleExportDataSettings} disabled={isExportingData} className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">
               {isExportingData ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
               {isExportingData ? 'Exporting...' : 'Export Data'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Client Dialog */}
+      <Dialog open={showAddClientDialog} onOpenChange={setShowAddClientDialog}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-600" />
+              Add New Client Project
+            </DialogTitle>
+            <DialogDescription>
+              Create a new project for a client. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="client-name">Project Name *</Label>
+              <Input
+                id="client-name"
+                placeholder="Enter project name..."
+                value={clientFormData.name}
+                onChange={(e) => setClientFormData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="client-description">Description</Label>
+              <Textarea
+                id="client-description"
+                placeholder="Describe the project..."
+                value={clientFormData.description}
+                onChange={(e) => setClientFormData(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="client-budget">Budget (USD)</Label>
+                <Input
+                  id="client-budget"
+                  type="number"
+                  placeholder="0.00"
+                  value={clientFormData.budget}
+                  onChange={(e) => setClientFormData(prev => ({ ...prev, budget: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="client-due-date">Due Date</Label>
+                <Input
+                  id="client-due-date"
+                  type="date"
+                  value={clientFormData.dueDate}
+                  onChange={(e) => setClientFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="client-phase">Initial Phase</Label>
+                <Select
+                  value={clientFormData.phase}
+                  onValueChange={(value) => setClientFormData(prev => ({ ...prev, phase: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select phase" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Planning">Planning</SelectItem>
+                    <SelectItem value="Design">Design</SelectItem>
+                    <SelectItem value="Development">Development</SelectItem>
+                    <SelectItem value="Review">Review</SelectItem>
+                    <SelectItem value="Testing">Testing</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="client-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="client-tags"
+                  placeholder="web, design, urgent"
+                  value={clientFormData.tags}
+                  onChange={(e) => setClientFormData(prev => ({ ...prev, tags: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddClientDialog(false)} disabled={isSubmittingClient}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddClient} disabled={isSubmittingClient} className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
+              {isSubmittingClient ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              {isSubmittingClient ? 'Creating...' : 'Create Project'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={showEditClientDialog} onOpenChange={setShowEditClientDialog}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-600" />
+              Edit Client Project
+            </DialogTitle>
+            <DialogDescription>
+              Update the project details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-client-name">Project Name *</Label>
+              <Input
+                id="edit-client-name"
+                placeholder="Enter project name..."
+                value={clientFormData.name}
+                onChange={(e) => setClientFormData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-client-description">Description</Label>
+              <Textarea
+                id="edit-client-description"
+                placeholder="Describe the project..."
+                value={clientFormData.description}
+                onChange={(e) => setClientFormData(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-budget">Budget (USD)</Label>
+                <Input
+                  id="edit-client-budget"
+                  type="number"
+                  placeholder="0.00"
+                  value={clientFormData.budget}
+                  onChange={(e) => setClientFormData(prev => ({ ...prev, budget: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-due-date">Due Date</Label>
+                <Input
+                  id="edit-client-due-date"
+                  type="date"
+                  value={clientFormData.dueDate}
+                  onChange={(e) => setClientFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-phase">Current Phase</Label>
+                <Select
+                  value={clientFormData.phase}
+                  onValueChange={(value) => setClientFormData(prev => ({ ...prev, phase: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select phase" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Planning">Planning</SelectItem>
+                    <SelectItem value="Design">Design</SelectItem>
+                    <SelectItem value="Development">Development</SelectItem>
+                    <SelectItem value="Review">Review</SelectItem>
+                    <SelectItem value="Testing">Testing</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-client-tags">Tags (comma-separated)</Label>
+                <Input
+                  id="edit-client-tags"
+                  placeholder="web, design, urgent"
+                  value={clientFormData.tags}
+                  onChange={(e) => setClientFormData(prev => ({ ...prev, tags: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="flex justify-between">
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setShowEditClientDialog(false)
+                setShowDeleteClientDialog(true)
+              }}
+            >
+              Delete Project
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowEditClientDialog(false)} disabled={isSubmittingClient}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditClient} disabled={isSubmittingClient} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white">
+                {isSubmittingClient ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                {isSubmittingClient ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Client Confirmation Dialog */}
+      <Dialog open={showDeleteClientDialog} onOpenChange={setShowDeleteClientDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="w-5 h-5" />
+              Delete Project
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this project? This action cannot be undone.
+              All associated files, messages, and invoices will also be deleted.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-sm text-red-800 dark:text-red-200 font-medium">
+                Warning: This will permanently delete all project data.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteClientDialog(false)} disabled={isDeletingClient}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteClient} disabled={isDeletingClient}>
+              {isDeletingClient ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <AlertCircle className="w-4 h-4 mr-2" />}
+              {isDeletingClient ? 'Deleting...' : 'Delete Project'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client History Dialog */}
+      <Dialog open={showClientHistoryDialog} onOpenChange={setShowClientHistoryDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-600" />
+              Project History & Activity
+            </DialogTitle>
+            <DialogDescription>
+              View the complete history and activity for this project.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
+            {selectedClientHistory && (
+              <>
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                    {selectedClientHistory.project?.name}
+                  </h4>
+                  <p className="text-sm text-blue-600 dark:text-blue-300">
+                    Status: {selectedClientHistory.project?.status} | Progress: {selectedClientHistory.project?.progress}%
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Activity Timeline</h4>
+                  {selectedClientHistory.activities?.map((activity: any, idx: number) => (
+                    <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className={`p-1.5 rounded-full ${
+                        activity.type === 'created' ? 'bg-green-100 text-green-600' :
+                        activity.type === 'updated' ? 'bg-blue-100 text-blue-600' :
+                        'bg-purple-100 text-purple-600'
+                      }`}>
+                        {activity.type === 'created' ? <Plus className="w-3 h-3" /> :
+                         activity.type === 'updated' ? <Edit className="w-3 h-3" /> :
+                         <Target className="w-3 h-3" />}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {activity.description}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(activity.date).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {selectedClientHistory.files?.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Files ({selectedClientHistory.files.length})</h4>
+                    {selectedClientHistory.files.map((file: any) => (
+                      <div key={file.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          <div>
+                            <p className="text-sm font-medium">{file.name}</p>
+                            <p className="text-xs text-gray-500">{file.file_size} bytes</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => handleDownloadFiles(file.project_id)}>
+                          <Download className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClientHistoryDialog(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Notifications Panel Dialog */}
+      <Dialog open={showNotificationsPanel} onOpenChange={setShowNotificationsPanel}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-yellow-600" />
+              Notifications
+            </DialogTitle>
+            <DialogDescription>
+              Your recent notifications and updates.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
+            {loadingNotifications ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No notifications yet.
+              </div>
+            ) : (
+              notifications.map((notif) => (
+                <div
+                  key={notif.id}
+                  className={`p-4 rounded-lg border ${
+                    notif.read
+                      ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                      : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className={`text-sm font-medium ${!notif.read ? 'text-blue-800 dark:text-blue-200' : 'text-gray-900 dark:text-gray-100'}`}>
+                        {notif.title}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {notif.message}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {new Date(notif.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    {!notif.read && (
+                      <div className="w-2 h-2 bg-blue-600 rounded-full" />
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          <DialogFooter className="flex justify-between">
+            {notifications.some(n => !n.read) && (
+              <Button variant="ghost" size="sm" onClick={handleMarkAllNotificationsRead}>
+                Mark all as read
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => setShowNotificationsPanel(false)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

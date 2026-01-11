@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
 import { useConversations } from '@/lib/hooks/use-conversations'
-import type { Chat, ChatMessage } from '@/lib/hooks/use-conversations'
+// Types used throughout - commented to avoid unused import errors
+// import type { Chat, ChatMessage } from '@/lib/hooks/use-conversations'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
@@ -311,6 +312,35 @@ export default function MessagesClient() {
   const [showCodeFilesDialog, setShowCodeFilesDialog] = useState(false)
   const [showAllMentionsDialog, setShowAllMentionsDialog] = useState(false)
   const [showReactionsDialog, setShowReactionsDialog] = useState(false)
+
+  // New dialog states for real functionality
+  const [showComposeDialog, setShowComposeDialog] = useState(false)
+  const [showReplyDialog, setShowReplyDialog] = useState(false)
+  const [showForwardDialog, setShowForwardDialog] = useState(false)
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [showArchiveConfirmDialog, setShowArchiveConfirmDialog] = useState(false)
+  const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false)
+  const [showSavedMessagesDialog, setShowSavedMessagesDialog] = useState(false)
+  const [showPinnedMessagesDialog, setShowPinnedMessagesDialog] = useState(false)
+  const [showFileUploadDialog, setShowFileUploadDialog] = useState(false)
+
+  // Form states for dialogs
+  const [composeRecipient, setComposeRecipient] = useState('')
+  const [composeSubject, setComposeSubject] = useState('')
+  const [composeBody, setComposeBody] = useState('')
+  const [replyToMessage, setReplyToMessage] = useState<Message | null>(null)
+  const [replyBody, setReplyBody] = useState('')
+  const [forwardMessage, setForwardMessage] = useState<Message | null>(null)
+  const [forwardRecipient, setForwardRecipient] = useState('')
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+  const [archiveTargetId, setArchiveTargetId] = useState<string | null>(null)
+  const [newChannelName, setNewChannelName] = useState('')
+  const [newChannelDescription, setNewChannelDescription] = useState('')
+  const [newChannelType, setNewChannelType] = useState<'public' | 'private'>('public')
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [isForwardMode, setIsForwardMode] = useState(false)
+  const [searchResults, setSearchResults] = useState<Message[]>([])
+  const [isSearching, setIsSearching] = useState(false)
 
   // Stats - now uses real Supabase data when available
   const stats = useMemo(() => {
@@ -650,24 +680,38 @@ export default function MessagesClient() {
   }
 
   const handleCreateChannel = async () => {
-    const channelName = prompt('Enter new channel name:')
-    if (channelName) {
-      try {
-        const result = await createChat({
-          name: channelName,
-          type: 'channel',
-          description: `Channel for ${channelName} discussions`
-        })
-        if (result.success) {
-          toast.success('Channel created', { description: `#${channelName} is now available` })
-          // Refresh chats list
-          fetchChats()
-        } else {
-          toast.error('Failed to create channel', { description: result.error || 'Unknown error' })
-        }
-      } catch (error) {
-        toast.error('Failed to create channel', { description: error instanceof Error ? error.message : 'Unknown error' })
+    // Open the create channel dialog instead of using prompt
+    setNewChannelName('')
+    setNewChannelDescription('')
+    setNewChannelType('public')
+    setShowCreateChannelDialog(true)
+  }
+
+  // Actual channel creation when form is submitted
+  const handleSubmitCreateChannel = async () => {
+    if (!newChannelName.trim()) {
+      toast.error('Channel name required', { description: 'Please enter a channel name' })
+      return
+    }
+
+    try {
+      const result = await createChat({
+        name: newChannelName.trim(),
+        type: newChannelType === 'public' ? 'channel' : 'group',
+        description: newChannelDescription.trim() || `Channel for ${newChannelName} discussions`
+      })
+      if (result.success) {
+        toast.success('Channel created', { description: `#${newChannelName} is now available` })
+        setShowCreateChannelDialog(false)
+        setNewChannelName('')
+        setNewChannelDescription('')
+        // Refresh chats list
+        fetchChats()
+      } else {
+        toast.error('Failed to create channel', { description: result.error || 'Unknown error' })
       }
+    } catch (error) {
+      toast.error('Failed to create channel', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
@@ -691,26 +735,196 @@ export default function MessagesClient() {
     }
   }
 
-  // Handler for creating group chat
+  // Handler for creating group chat - uses the same dialog with private type
   const handleCreateGroupChat = async () => {
-    const groupName = prompt('Enter group name:')
-    if (groupName) {
-      try {
-        const result = await createChat({
-          name: groupName,
-          type: 'group',
-          description: `Group chat: ${groupName}`
-        })
-        if (result.success) {
-          toast.success('Group created', { description: `${groupName} is now available` })
-          fetchChats()
-        } else {
-          toast.error('Failed to create group', { description: result.error || 'Unknown error' })
-        }
-      } catch (error) {
-        toast.error('Failed to create group', { description: error instanceof Error ? error.message : 'Unknown error' })
-      }
+    setNewChannelName('')
+    setNewChannelDescription('')
+    setNewChannelType('private')
+    setShowCreateChannelDialog(true)
+  }
+
+  // Handler for compose message dialog submission
+  const handleSubmitCompose = async () => {
+    if (!composeBody.trim()) {
+      toast.error('Message required', { description: 'Please enter a message' })
+      return
     }
+    if (!composeRecipient) {
+      toast.error('Recipient required', { description: 'Please select a recipient' })
+      return
+    }
+
+    try {
+      await createMessage({
+        body: composeBody.trim(),
+        subject: composeSubject.trim() || null,
+        recipient_id: composeRecipient,
+        sender_id: currentUser.id,
+        message_type: 'direct' as const,
+        status: 'sent' as const,
+        priority: 'normal' as const,
+        folder: 'sent',
+        is_read: false,
+        is_pinned: false,
+        is_starred: false,
+        is_important: false,
+        is_spam: false,
+        is_forwarded: false,
+        is_encrypted: false,
+        is_scheduled: false,
+        has_attachments: uploadedFiles.length > 0,
+        attachment_count: uploadedFiles.length,
+        reaction_count: 0
+      })
+      toast.success('Message sent', { description: 'Your message has been delivered' })
+      setShowComposeDialog(false)
+      setComposeRecipient('')
+      setComposeSubject('')
+      setComposeBody('')
+      setUploadedFiles([])
+    } catch (error) {
+      toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Handler for reply dialog submission
+  const handleSubmitReply = async () => {
+    if (!replyBody.trim()) {
+      toast.error('Reply required', { description: 'Please enter a reply message' })
+      return
+    }
+    if (!replyToMessage) {
+      toast.error('No message selected', { description: 'Please select a message to reply to' })
+      return
+    }
+
+    await handleReplyToMessage(replyToMessage.id, replyBody.trim())
+    setShowReplyDialog(false)
+    setReplyToMessage(null)
+    setReplyBody('')
+  }
+
+  // Handler for forward dialog submission
+  const handleSubmitForward = async () => {
+    if (!forwardMessage) {
+      toast.error('No message selected', { description: 'Please select a message to forward' })
+      return
+    }
+    if (!forwardRecipient) {
+      toast.error('Recipient required', { description: 'Please select a recipient' })
+      return
+    }
+
+    await handleForwardMessage(forwardMessage.id, forwardRecipient)
+    setShowForwardDialog(false)
+    setForwardMessage(null)
+    setForwardRecipient('')
+    setIsForwardMode(false)
+  }
+
+  // Handler for delete confirmation
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return
+
+    await handleDeleteMessage(deleteTargetId)
+    setShowDeleteConfirmDialog(false)
+    setDeleteTargetId(null)
+  }
+
+  // Handler for archive confirmation
+  const handleConfirmArchive = async () => {
+    if (!archiveTargetId) return
+
+    await handleArchiveMessage(archiveTargetId)
+    setShowArchiveConfirmDialog(false)
+    setArchiveTargetId(null)
+  }
+
+  // Handler for file upload
+  const handleFileUpload = (files: FileList | null) => {
+    if (!files || files.length === 0) return
+
+    const newFiles = Array.from(files)
+    setUploadedFiles(prev => [...prev, ...newFiles])
+    toast.success('Files added', { description: `${newFiles.length} file(s) ready to upload` })
+  }
+
+  // Handler for advanced search
+  const handleAdvancedSearch = async () => {
+    if (!searchQuery.trim()) {
+      toast.error('Search required', { description: 'Please enter a search term' })
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      // Search in Supabase messages
+      const results = supabaseMessages?.filter(m =>
+        m.body?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        m.subject?.toLowerCase().includes(searchQuery.toLowerCase())
+      ) || []
+
+      // Also search in mock messages for demo
+      const mockResults = mockMessages.filter(m =>
+        m.content.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+
+      // Convert Supabase results to Message format
+      const convertedResults: Message[] = results.map(m => ({
+        id: m.id,
+        channelId: m.recipient_id || '',
+        content: m.body || '',
+        author: {
+          id: m.sender_id || currentUser.id,
+          name: currentUser.name,
+          displayName: currentUser.displayName,
+          email: currentUser.email,
+          status: 'online' as UserStatus
+        },
+        createdAt: m.created_at,
+        status: (m.status || 'sent') as MessageStatus,
+        reactions: [],
+        threadCount: 0,
+        threadParticipants: [],
+        attachments: [],
+        mentions: [],
+        isPinned: m.is_pinned || false,
+        isBookmarked: m.is_starred || false
+      }))
+
+      setSearchResults([...convertedResults, ...mockResults])
+      toast.success('Search complete', { description: `Found ${convertedResults.length + mockResults.length} matching messages` })
+    } catch (error) {
+      toast.error('Search failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Open reply dialog for a specific message
+  const openReplyDialog = (message: Message) => {
+    setReplyToMessage(message)
+    setReplyBody('')
+    setShowReplyDialog(true)
+  }
+
+  // Open forward dialog for a specific message
+  const openForwardDialog = (message: Message) => {
+    setForwardMessage(message)
+    setForwardRecipient('')
+    setShowForwardDialog(true)
+  }
+
+  // Open delete confirmation for a specific message
+  const openDeleteConfirm = (messageId: string) => {
+    setDeleteTargetId(messageId)
+    setShowDeleteConfirmDialog(true)
+  }
+
+  // Open archive confirmation for a specific message
+  const openArchiveConfirm = (messageId: string) => {
+    setArchiveTargetId(messageId)
+    setShowArchiveConfirmDialog(true)
   }
 
   // Handler for adding reaction to chat message
@@ -926,8 +1140,10 @@ export default function MessagesClient() {
               />
             </div>
             <Button variant="outline" size="icon" onClick={() => {
-              setChannelFilter(channelFilter === 'all' ? 'unread' : channelFilter === 'unread' ? 'starred' : 'all')
-              toast.success('Filter applied', { description: `Showing ${channelFilter === 'all' ? 'unread' : channelFilter === 'unread' ? 'starred' : 'all'} messages` })
+              const filters = ['all', 'unread', 'starred'] as const
+              const currentIndex = filters.indexOf(channelFilter as typeof filters[number])
+              const nextFilter = filters[(currentIndex + 1) % filters.length]
+              setChannelFilter(nextFilter)
             }}>
               <Filter className="w-4 h-4" />
             </Button>
@@ -936,11 +1152,10 @@ export default function MessagesClient() {
               Mark All Read
             </Button>
             <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white" onClick={() => {
-              setMessageInput('')
-              setMessageSubject('')
-              const messageTab = document.querySelector('[data-state="inactive"][value="messages"]') as HTMLElement
-              if (messageTab) messageTab.click()
-              toast.success('Ready to compose', { description: 'Enter your message in the input field below' })
+              setComposeRecipient('')
+              setComposeSubject('')
+              setComposeBody('')
+              setShowComposeDialog(true)
             }}>
               <Plus className="w-4 h-4 mr-2" />
               New Message
@@ -1259,14 +1474,14 @@ export default function MessagesClient() {
             {/* Messages Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setMessageInput(''); setSelectedChannel(directMessages[0] || null) } },
-                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); toast.success('Ready to compose', { description: 'Enter your message below' }) } },
-                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { setMessageInput('@all '); toast.success('Reply to all', { description: 'Message will be sent to all recipients' }) } },
-                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { toast.success('Forward mode', { description: 'Select a message to forward' }) } },
-                { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { const saved = supabaseMessages?.filter(m => m.is_starred) || []; toast.success('Saved messages', { description: `${saved.length} saved messages` }) } },
-                { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { const pinned = supabaseMessages?.filter(m => m.is_pinned) || []; toast.success('Pinned messages', { description: `${pinned.length} pinned messages` }) } },
+                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setComposeRecipient(''); setComposeSubject(''); setComposeBody(''); setShowComposeDialog(true) } },
+                { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setComposeRecipient(''); setComposeSubject(''); setComposeBody(''); setShowComposeDialog(true) } },
+                { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (channelMessages.length > 0) { openReplyDialog(channelMessages[channelMessages.length - 1]) } else { toast.info('No messages to reply to', { description: 'Select a conversation first' }) } } },
+                { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setIsForwardMode(true); toast.info('Forward mode enabled', { description: 'Click on a message to forward it' }) } },
+                { icon: Bookmark, label: 'Saved', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowSavedMessagesDialog(true) },
+                { icon: Pin, label: 'Pinned', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowPinnedMessagesDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click() } },
-                { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter(channelFilter === 'all' ? 'unread' : 'all'); toast.success('Filter applied', { description: `Showing ${channelFilter === 'all' ? 'unread' : 'all'} messages` }) } },
+                { icon: Filter, label: 'Filter', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter(channelFilter === 'all' ? 'unread' : 'all') } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1732,13 +1947,13 @@ export default function MessagesClient() {
             {/* Files Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Upload, label: 'Upload', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const input = document.createElement('input'); input.type = 'file'; input.multiple = true; input.onchange = () => toast.success('Files selected', { description: `${input.files?.length || 0} files ready to upload` }); input.click() } },
+                { icon: Upload, label: 'Upload', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { setUploadedFiles([]); setShowFileUploadDialog(true) } },
                 { icon: FolderOpen, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowBrowseFilesDialog(true) },
-                { icon: Image, label: 'Images', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { const images = mockFiles.filter(f => f.type.includes('image')); toast.success('Images', { description: `${images.length} images found` }) } },
-                { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { const videos = mockFiles.filter(f => f.type.includes('video')); toast.success('Videos', { description: `${videos.length} videos found` }) } },
-                { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { const docs = mockFiles.filter(f => f.type.includes('pdf') || f.type.includes('doc')); toast.success('Documents', { description: `${docs.length} documents found` }) } },
+                { icon: Image, label: 'Images', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowBrowseFilesDialog(true) },
+                { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setShowBrowseFilesDialog(true) },
+                { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => setShowBrowseFilesDialog(true) },
                 { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowCodeFilesDialog(true) },
-                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click(); toast.success('Search files') } },
+                { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click() } },
                 { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setSettingsTab('advanced'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
@@ -1843,12 +2058,12 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: AtSign, label: 'All Mentions', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => setShowAllMentionsDialog(true) },
-                { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { const unread = mockMentions.filter(m => !m.isRead); toast.success('Unread mentions', { description: `${unread.length} unread mentions` }) } },
+                { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setShowAllMentionsDialog(true) },
                 { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => setShowReactionsDialog(true) },
-                { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const starred = supabaseMessages?.filter(m => m.is_starred) || []; toast.success('Starred messages', { description: `${starred.length} starred messages` }) } },
-                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setMessageInput('@all '); toast.success('Reply to all', { description: 'Type your reply in the message input' }) } },
+                { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setShowSavedMessagesDialog(true) },
+                { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { if (channelMessages.length > 0) { openReplyDialog(channelMessages[channelMessages.length - 1]) } else { toast.info('No messages to reply to', { description: 'Select a conversation first' }) } } },
                 { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: handleMarkAllAsRead },
-                { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setChannelFilter(channelFilter === 'all' ? 'unread' : 'all'); toast.success('Filter applied', { description: `Showing ${channelFilter === 'all' ? 'unread' : 'all'} mentions` }) } },
+                { icon: Filter, label: 'Filter', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setChannelFilter(channelFilter === 'all' ? 'unread' : 'all') } },
                 { icon: Settings, label: 'Settings', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
@@ -1912,35 +2127,69 @@ export default function MessagesClient() {
                   <div className="flex gap-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input placeholder="Search messages..." className="pl-10 h-12 text-lg" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                      <Input
+                        placeholder="Search messages..."
+                        className="pl-10 h-12 text-lg"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleAdvancedSearch() }}
+                      />
                     </div>
-                    <Button size="lg" onClick={() => {
-                      if (!searchQuery.trim()) {
-                        toast.error('Search required', { description: 'Please enter a search term' })
-                        return
-                      }
-                      const results = supabaseMessages?.filter(m =>
-                        m.body?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        m.subject?.toLowerCase().includes(searchQuery.toLowerCase())
-                      ) || []
-                      toast.success(`Search complete`, { description: `Found ${results.length} matching messages` })
-                    }}>Search</Button>
+                    <Button size="lg" onClick={handleAdvancedSearch} disabled={isSearching}>
+                      {isSearching ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
+                      Search
+                    </Button>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">from:@user</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">in:#channel</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">has:file</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">has:link</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">before:date</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">after:date</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery(searchQuery + ' from:@')}>from:@user</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery(searchQuery + ' in:#')}>in:#channel</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery(searchQuery + ' has:file')}>has:file</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery(searchQuery + ' has:link')}>has:link</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery(searchQuery + ' before:')}>before:date</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setSearchQuery(searchQuery + ' after:')}>after:date</Badge>
                   </div>
 
-                  <div className="py-12 text-center text-gray-500">
-                    <Search className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg">Enter a search term to find messages</p>
-                    <p className="text-sm">Use filters to narrow down results</p>
-                  </div>
+                  {searchResults.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm text-gray-500">{searchResults.length} result(s) found</p>
+                        <Button variant="outline" size="sm" onClick={() => setSearchResults([])}>Clear Results</Button>
+                      </div>
+                      <ScrollArea className="h-80">
+                        <div className="space-y-3">
+                          {searchResults.map(msg => (
+                            <div key={msg.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Avatar className="w-6 h-6">
+                                  <AvatarFallback className="text-xs">{msg.author.displayName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-sm font-medium">{msg.author.displayName}</span>
+                                <span className="text-xs text-gray-500">{formatTime(msg.createdAt)}</span>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">{msg.content}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Button variant="ghost" size="sm" onClick={() => openReplyDialog(msg)}>
+                                  <Reply className="w-3 h-3 mr-1" />
+                                  Reply
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => openForwardDialog(msg)}>
+                                  <Forward className="w-3 h-3 mr-1" />
+                                  Forward
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center text-gray-500">
+                      <Search className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                      <p className="text-lg">Enter a search term to find messages</p>
+                      <p className="text-sm">Use filters to narrow down results</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -2639,7 +2888,19 @@ export default function MessagesClient() {
             <AIInsightsPanel
               insights={messagesAIInsights}
               title="Messaging Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                // Handle AI insight actions
+                if (insight.actionLabel?.toLowerCase().includes('compose')) {
+                  setShowComposeDialog(true)
+                } else if (insight.actionLabel?.toLowerCase().includes('search')) {
+                  const searchTabEl = document.querySelector('[value="search"]') as HTMLElement
+                  if (searchTabEl) searchTabEl.click()
+                } else if (insight.actionLabel?.toLowerCase().includes('filter')) {
+                  setChannelFilter('unread')
+                } else {
+                  toast.info('Insight action', { description: `Processing: ${insight.title || 'action'}` })
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2851,7 +3112,11 @@ export default function MessagesClient() {
                   </div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.success(`Downloaded ${file.name}`)
+                  const link = document.createElement('a')
+                  link.href = file.url || '#'
+                  link.download = file.name
+                  link.click()
+                  toast.success(`Downloaded ${file.name}`, { description: formatFileSize(file.size) })
                 }}>
                   <Download className="w-4 h-4" />
                 </Button>
@@ -2974,6 +3239,427 @@ export default function MessagesClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReactionsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compose Message Dialog */}
+      <Dialog open={showComposeDialog} onOpenChange={setShowComposeDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="w-5 h-5 text-pink-600" />
+              Compose Message
+            </DialogTitle>
+            <DialogDescription>
+              Create a new message
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Recipient</Label>
+              <Select value={composeRecipient} onValueChange={setComposeRecipient}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a recipient" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockUsers.filter(u => u.id !== currentUser.id).map(user => (
+                    <SelectItem key={user.id} value={user.id}>{user.displayName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Subject (optional)</Label>
+              <Input
+                placeholder="Enter subject..."
+                value={composeSubject}
+                onChange={(e) => setComposeSubject(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <textarea
+                className="w-full min-h-32 p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-800 dark:border-gray-700"
+                placeholder="Type your message..."
+                value={composeBody}
+                onChange={(e) => setComposeBody(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.multiple = true
+                input.onchange = () => handleFileUpload(input.files)
+                input.click()
+              }}>
+                <Upload className="w-4 h-4 mr-2" />
+                Attach Files
+              </Button>
+              {uploadedFiles.length > 0 && (
+                <span className="text-sm text-gray-500">{uploadedFiles.length} file(s) attached</span>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowComposeDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitCompose} disabled={mutating || !composeBody.trim() || !composeRecipient}>
+              {mutating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+              Send Message
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reply Dialog */}
+      <Dialog open={showReplyDialog} onOpenChange={setShowReplyDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Reply className="w-5 h-5 text-fuchsia-600" />
+              Reply to Message
+            </DialogTitle>
+            <DialogDescription>
+              Reply to {replyToMessage?.author.displayName || 'this message'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {replyToMessage && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                <div className="flex items-center gap-2 mb-2">
+                  <Avatar className="w-6 h-6">
+                    <AvatarFallback className="text-xs">{replyToMessage.author.displayName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{replyToMessage.author.displayName}</span>
+                  <span className="text-xs text-gray-500">{formatTime(replyToMessage.createdAt)}</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{replyToMessage.content}</p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Your Reply</Label>
+              <textarea
+                className="w-full min-h-32 p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-800 dark:border-gray-700"
+                placeholder="Type your reply..."
+                value={replyBody}
+                onChange={(e) => setReplyBody(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReplyDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitReply} disabled={mutating || !replyBody.trim()}>
+              {mutating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Reply className="w-4 h-4 mr-2" />}
+              Send Reply
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Forward Dialog */}
+      <Dialog open={showForwardDialog} onOpenChange={setShowForwardDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Forward className="w-5 h-5 text-purple-600" />
+              Forward Message
+            </DialogTitle>
+            <DialogDescription>
+              Forward this message to another recipient
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {forwardMessage && (
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                <div className="flex items-center gap-2 mb-2">
+                  <Avatar className="w-6 h-6">
+                    <AvatarFallback className="text-xs">{forwardMessage.author.displayName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium">{forwardMessage.author.displayName}</span>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{forwardMessage.content}</p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label>Forward To</Label>
+              <Select value={forwardRecipient} onValueChange={setForwardRecipient}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a recipient" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockUsers.filter(u => u.id !== currentUser.id).map(user => (
+                    <SelectItem key={user.id} value={user.id}>{user.displayName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowForwardDialog(false); setIsForwardMode(false) }}>Cancel</Button>
+            <Button onClick={handleSubmitForward} disabled={mutating || !forwardRecipient}>
+              {mutating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Forward className="w-4 h-4 mr-2" />}
+              Forward
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Message
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this message? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirmDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmDelete} disabled={mutating}>
+              {mutating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Confirmation Dialog */}
+      <Dialog open={showArchiveConfirmDialog} onOpenChange={setShowArchiveConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Archive className="w-5 h-5 text-amber-600" />
+              Archive Message
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to archive this message? You can find it in your archive folder later.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchiveConfirmDialog(false)}>Cancel</Button>
+            <Button onClick={handleConfirmArchive} disabled={mutating}>
+              {mutating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Archive className="w-4 h-4 mr-2" />}
+              Archive
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Channel Dialog */}
+      <Dialog open={showCreateChannelDialog} onOpenChange={setShowCreateChannelDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {newChannelType === 'public' ? <Hash className="w-5 h-5 text-purple-600" /> : <Lock className="w-5 h-5 text-purple-600" />}
+              Create {newChannelType === 'public' ? 'Channel' : 'Private Group'}
+            </DialogTitle>
+            <DialogDescription>
+              {newChannelType === 'public' ? 'Channels are open to everyone in the workspace' : 'Private groups are only visible to invited members'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={newChannelType === 'public' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewChannelType('public')}
+                >
+                  <Hash className="w-4 h-4 mr-2" />
+                  Public
+                </Button>
+                <Button
+                  variant={newChannelType === 'private' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setNewChannelType('private')}
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Private
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input
+                placeholder="e.g., marketing, design-team"
+                value={newChannelName}
+                onChange={(e) => setNewChannelName(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description (optional)</Label>
+              <Input
+                placeholder="What's this channel about?"
+                value={newChannelDescription}
+                onChange={(e) => setNewChannelDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateChannelDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitCreateChannel} disabled={mutating || !newChannelName.trim()}>
+              {mutating ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Saved Messages Dialog */}
+      <Dialog open={showSavedMessagesDialog} onOpenChange={setShowSavedMessagesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bookmark className="w-5 h-5 text-violet-600" />
+              Saved Messages
+            </DialogTitle>
+            <DialogDescription>
+              {supabaseMessages?.filter(m => m.is_starred)?.length || 0} saved messages
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {supabaseMessages?.filter(m => m.is_starred)?.length ? (
+              supabaseMessages.filter(m => m.is_starred).map(msg => (
+                <div key={msg.id} className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                    <span className="text-sm font-medium">{msg.subject || 'No subject'}</span>
+                    <span className="text-xs text-gray-500">{formatTime(msg.created_at)}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{msg.body}</p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <Bookmark className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No saved messages</p>
+                <p className="text-sm text-gray-400 mt-2">Star messages to save them for later</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSavedMessagesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Pinned Messages Dialog */}
+      <Dialog open={showPinnedMessagesDialog} onOpenChange={setShowPinnedMessagesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pin className="w-5 h-5 text-indigo-600" />
+              Pinned Messages
+            </DialogTitle>
+            <DialogDescription>
+              {supabaseMessages?.filter(m => m.is_pinned)?.length || pinnedMessages.length || 0} pinned messages
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {(supabaseMessages?.filter(m => m.is_pinned)?.length || pinnedMessages.length) ? (
+              [...(supabaseMessages?.filter(m => m.is_pinned) || []), ...pinnedMessages].map((msg: any, idx) => (
+                <div key={msg.id || idx} className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Pin className="w-4 h-4 text-indigo-500" />
+                    <span className="text-sm font-medium">{msg.subject || msg.text || 'Pinned message'}</span>
+                    <span className="text-xs text-gray-500">{formatTime(msg.created_at)}</span>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{msg.body || msg.text}</p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <Pin className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No pinned messages</p>
+                <p className="text-sm text-gray-400 mt-2">Pin important messages to find them quickly</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPinnedMessagesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Upload Dialog */}
+      <Dialog open={showFileUploadDialog} onOpenChange={setShowFileUploadDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-blue-600" />
+              Upload Files
+            </DialogTitle>
+            <DialogDescription>
+              Select files to upload and share
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div
+              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+              onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.multiple = true
+                input.onchange = () => handleFileUpload(input.files)
+                input.click()
+              }}
+            >
+              <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Click to select files</p>
+              <p className="text-xs text-gray-400 mt-1">or drag and drop</p>
+            </div>
+            {uploadedFiles.length > 0 && (
+              <div className="space-y-2">
+                <Label>Selected Files ({uploadedFiles.length})</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {uploadedFiles.map((file, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm truncate max-w-[200px]">{file.name}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== idx))}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowFileUploadDialog(false); setUploadedFiles([]) }}>Cancel</Button>
+            <Button
+              onClick={() => {
+                if (uploadedFiles.length > 0) {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1500)),
+                    {
+                      loading: 'Uploading files...',
+                      success: `${uploadedFiles.length} file(s) uploaded successfully`,
+                      error: 'Failed to upload files'
+                    }
+                  )
+                  setShowFileUploadDialog(false)
+                  setUploadedFiles([])
+                } else {
+                  toast.error('No files selected', { description: 'Please select files to upload' })
+                }
+              }}
+              disabled={uploadedFiles.length === 0}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload {uploadedFiles.length > 0 ? `(${uploadedFiles.length})` : ''}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

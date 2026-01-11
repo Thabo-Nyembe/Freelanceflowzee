@@ -28,6 +28,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   copyToClipboard,
@@ -82,7 +87,14 @@ import {
   Sparkles,
   Target,
   Timer,
-  ArrowRight
+  ArrowRight,
+  Plus,
+  X,
+  Trash2,
+  Hash,
+  Lock,
+  Globe,
+  UsersRound
 } from "lucide-react";
 
 // A+++ UTILITIES
@@ -398,11 +410,43 @@ export default function CollaborationPage() {
   }
 
   const [showAddParticipantsDialog, setShowAddParticipantsDialog] = useState(false)
+  const [participantSearchQuery, setParticipantSearchQuery] = useState('')
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
+  const [isAddingParticipants, setIsAddingParticipants] = useState(false)
+
+  const availableParticipants = [
+    { id: 'user-1', name: 'Alex Johnson', email: 'alex@company.com', avatar: 'AJ' },
+    { id: 'user-2', name: 'Beth Williams', email: 'beth@company.com', avatar: 'BW' },
+    { id: 'user-3', name: 'Chris Brown', email: 'chris@company.com', avatar: 'CB' },
+    { id: 'user-4', name: 'Diana Moore', email: 'diana@company.com', avatar: 'DM' },
+    { id: 'user-5', name: 'Eric Taylor', email: 'eric@company.com', avatar: 'ET' },
+  ]
 
   const handleAddParticipants = () => {
     logger.info('Add participants initiated')
     setShowAddParticipantsDialog(true)
-    toast.success('Add participants - Select users to add')
+  }
+
+  const confirmAddParticipants = async () => {
+    if (selectedParticipants.length === 0) {
+      toast.error('Please select at least one participant')
+      return
+    }
+    setIsAddingParticipants(true)
+    const result = await apiPost('/api/conversations/participants', {
+      participantIds: selectedParticipants
+    }, {
+      loading: `Adding ${selectedParticipants.length} participant(s)...`,
+      success: `${selectedParticipants.length} participant(s) added successfully`,
+      error: 'Failed to add participants'
+    })
+    setIsAddingParticipants(false)
+    if (result.success) {
+      setShowAddParticipantsDialog(false)
+      setSelectedParticipants([])
+      setParticipantSearchQuery('')
+      announce(`${selectedParticipants.length} participants added`, 'polite')
+    }
   }
 
   const handleRemoveParticipant = (id: number) => {
@@ -622,11 +666,36 @@ export default function CollaborationPage() {
   // NEW ENTERPRISE HANDLERS - Chat Enhancement
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearchDialog, setShowSearchDialog] = useState(false)
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+
+  const sampleMessages = [
+    { id: 1, user: 'Sarah Anderson', content: 'Good morning team! Just reviewed the latest project updates.', time: '10:23 AM' },
+    { id: 2, user: 'Mike Chen', content: 'Thanks Sarah! I added pinpoint feedback on the design mockups.', time: '10:25 AM' },
+    { id: 3, user: 'Jessica Davis', content: 'Great work everyone! Let\'s schedule a quick sync meeting.', time: '10:28 AM' },
+    { id: 4, user: 'Robert Kim', content: 'The new designs look amazing. Great collaboration!', time: '10:30 AM' },
+    { id: 5, user: 'Emily Martinez', content: 'Here\'s the updated project timeline for everyone.', time: '10:32 AM' },
+  ]
 
   const handleSearchMessages = () => {
     logger.info('Message search activated', { resultsFound: 247 })
     setShowSearchDialog(true)
-    toast.success('Search activated - 247 messages indexed')
+  }
+
+  const performSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+    setIsSearching(true)
+    // Simulate search with local data
+    const results = sampleMessages.filter(msg =>
+      msg.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      msg.user.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    setSearchResults(results)
+    setIsSearching(false)
+    logger.info('Search completed', { query: searchQuery, resultsCount: results.length })
   }
 
   const handleSendFile = () => {
@@ -686,6 +755,10 @@ export default function CollaborationPage() {
   }
 
   const [showPollDialog, setShowPollDialog] = useState(false)
+  const [pollQuestion, setPollQuestion] = useState('')
+  const [pollOptions, setPollOptions] = useState(['', ''])
+  const [pollType, setPollType] = useState<'multiple' | 'single'>('single')
+  const [isCreatingPoll, setIsCreatingPoll] = useState(false)
 
   const handleCreatePoll = () => {
     logger.info('Poll creator opened', {
@@ -693,11 +766,63 @@ export default function CollaborationPage() {
       types: ['multiple choice', 'yes/no', 'rating', 'open text', 'ranking']
     })
     setShowPollDialog(true)
-    toast.success('Poll creator opened - 12 participants available')
+  }
+
+  const addPollOption = () => {
+    if (pollOptions.length < 6) {
+      setPollOptions([...pollOptions, ''])
+    }
+  }
+
+  const removePollOption = (index: number) => {
+    if (pollOptions.length > 2) {
+      setPollOptions(pollOptions.filter((_, i) => i !== index))
+    }
+  }
+
+  const updatePollOption = (index: number, value: string) => {
+    const newOptions = [...pollOptions]
+    newOptions[index] = value
+    setPollOptions(newOptions)
+  }
+
+  const confirmCreatePoll = async () => {
+    if (!pollQuestion.trim()) {
+      toast.error('Please enter a poll question')
+      return
+    }
+    const validOptions = pollOptions.filter(opt => opt.trim())
+    if (validOptions.length < 2) {
+      toast.error('Please provide at least 2 options')
+      return
+    }
+    setIsCreatingPoll(true)
+    const result = await apiPost('/api/polls', {
+      question: pollQuestion,
+      options: validOptions,
+      type: pollType
+    }, {
+      loading: 'Creating poll...',
+      success: 'Poll created and sent to 12 participants',
+      error: 'Failed to create poll'
+    })
+    setIsCreatingPoll(false)
+    if (result.success) {
+      setShowPollDialog(false)
+      setPollQuestion('')
+      setPollOptions(['', ''])
+      setPollType('single')
+      announce('Poll created successfully', 'polite')
+    }
   }
 
   // NEW ENTERPRISE HANDLERS - Meeting Scheduling
   const [showRecurringMeetingDialog, setShowRecurringMeetingDialog] = useState(false)
+  const [meetingTitle, setMeetingTitle] = useState('')
+  const [meetingRecurrence, setMeetingRecurrence] = useState<'daily' | 'weekly' | 'monthly'>('weekly')
+  const [meetingTime, setMeetingTime] = useState('10:00')
+  const [meetingDuration, setMeetingDuration] = useState('30')
+  const [isSchedulingMeeting, setIsSchedulingMeeting] = useState(false)
 
   const handleRecurringMeeting = () => {
     logger.info('Recurring meeting setup', {
@@ -706,7 +831,33 @@ export default function CollaborationPage() {
       integration: ['calendar sync', 'email reminders']
     })
     setShowRecurringMeetingDialog(true)
-    toast.success('Recurring meeting setup - 12 meetings currently scheduled')
+  }
+
+  const confirmScheduleRecurringMeeting = async () => {
+    if (!meetingTitle.trim()) {
+      toast.error('Please enter a meeting title')
+      return
+    }
+    setIsSchedulingMeeting(true)
+    const result = await apiPost('/api/meetings/recurring', {
+      title: meetingTitle,
+      recurrence: meetingRecurrence,
+      time: meetingTime,
+      duration: parseInt(meetingDuration)
+    }, {
+      loading: 'Scheduling recurring meeting...',
+      success: `Recurring ${meetingRecurrence} meeting "${meetingTitle}" scheduled`,
+      error: 'Failed to schedule meeting'
+    })
+    setIsSchedulingMeeting(false)
+    if (result.success) {
+      setShowRecurringMeetingDialog(false)
+      setMeetingTitle('')
+      setMeetingRecurrence('weekly')
+      setMeetingTime('10:00')
+      setMeetingDuration('30')
+      announce(`Recurring meeting scheduled`, 'polite')
+    }
   }
 
   // NEW ENTERPRISE HANDLERS - Workspace Management
@@ -773,21 +924,74 @@ export default function CollaborationPage() {
 
   // Additional missing handlers
   const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('Editor')
+  const [isInviting, setIsInviting] = useState(false)
 
   const handleInviteMember = () => {
     logger.info('Invite member initiated', { currentTeamSize: 12 })
     setShowInviteDialog(true)
-    toast.success('Invite team member - Current team: 12 members')
+  }
+
+  const confirmInviteMember = async () => {
+    if (!inviteEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+    if (!inviteEmail.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    setIsInviting(true)
+    const result = await apiPost('/api/teams/invite', {
+      email: inviteEmail,
+      role: inviteRole
+    }, {
+      loading: `Inviting ${inviteEmail}...`,
+      success: `Invitation sent to ${inviteEmail}`,
+      error: 'Failed to send invitation'
+    })
+    setIsInviting(false)
+    if (result.success) {
+      setShowInviteDialog(false)
+      setInviteEmail('')
+      setInviteRole('Editor')
+      announce(`Invitation sent to ${inviteEmail}`, 'polite')
+    }
   }
 
   const [showBulkInviteDialog, setShowBulkInviteDialog] = useState(false)
+  const [bulkEmails, setBulkEmails] = useState('')
+  const [isBulkInviting, setIsBulkInviting] = useState(false)
 
   const handleBulkInvite = () => {
     logger.info('Bulk invite initiated', {
       options: ['CSV upload', 'email list', 'integration']
     })
     setShowBulkInviteDialog(true)
-    toast.success('Bulk invite members - CSV, email list, or integration')
+  }
+
+  const confirmBulkInvite = async () => {
+    const emails = bulkEmails.split(/[\n,;]/).map(e => e.trim()).filter(e => e && e.includes('@'))
+    if (emails.length === 0) {
+      toast.error('Please enter valid email addresses')
+      return
+    }
+    setIsBulkInviting(true)
+    const result = await apiPost('/api/teams/bulk-invite', {
+      emails,
+      role: 'Editor'
+    }, {
+      loading: `Sending ${emails.length} invitations...`,
+      success: `${emails.length} invitations sent successfully`,
+      error: 'Failed to send invitations'
+    })
+    setIsBulkInviting(false)
+    if (result.success) {
+      setShowBulkInviteDialog(false)
+      setBulkEmails('')
+      announce(`${emails.length} invitations sent`, 'polite')
+    }
   }
 
   const [viewingProfile, setViewingProfile] = useState<string | null>(null)
@@ -845,13 +1049,41 @@ export default function CollaborationPage() {
   }
 
   const [showCreateWorkspaceDialog, setShowCreateWorkspaceDialog] = useState(false)
+  const [newWorkspaceName, setNewWorkspaceName] = useState('')
+  const [newWorkspaceType, setNewWorkspaceType] = useState<'private' | 'team' | 'public'>('team')
+  const [newWorkspaceDescription, setNewWorkspaceDescription] = useState('')
+  const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false)
 
   const handleCreateWorkspace = () => {
     logger.info('Create workspace initiated', {
       options: ['private', 'team', 'public']
     })
     setShowCreateWorkspaceDialog(true)
-    toast.success('Create workspace - Private, team, or public')
+  }
+
+  const confirmCreateWorkspace = async () => {
+    if (!newWorkspaceName.trim()) {
+      toast.error('Please enter a workspace name')
+      return
+    }
+    setIsCreatingWorkspace(true)
+    const result = await apiPost('/api/workspaces', {
+      name: newWorkspaceName,
+      type: newWorkspaceType,
+      description: newWorkspaceDescription
+    }, {
+      loading: `Creating workspace "${newWorkspaceName}"...`,
+      success: `Workspace "${newWorkspaceName}" created successfully`,
+      error: 'Failed to create workspace'
+    })
+    setIsCreatingWorkspace(false)
+    if (result.success) {
+      setShowCreateWorkspaceDialog(false)
+      setNewWorkspaceName('')
+      setNewWorkspaceType('team')
+      setNewWorkspaceDescription('')
+      announce(`Workspace ${newWorkspaceName} created`, 'polite')
+    }
   }
 
   const handleJoinWorkspace = async (workspaceId: string) => {
@@ -1162,12 +1394,21 @@ export default function CollaborationPage() {
                     <input
                       type="text"
                       placeholder="Type a message..."
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          handleSendMessage()
+                        }
+                      }}
                       className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <Button
                       data-testid="send-message-btn"
                       variant="default"
                       onClick={handleSendMessage}
+                      disabled={!messageInput.trim()}
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Send
@@ -3721,6 +3962,467 @@ export default function CollaborationPage() {
             <Button onClick={() => handleSendFile()}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Media
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Member Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-blue-500" />
+              Invite Team Member
+            </DialogTitle>
+            <DialogDescription>
+              Send an invitation to join your team. They will receive an email with instructions.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="invite-email">Email Address</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="colleague@company.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-role">Role</Label>
+              <Select value={inviteRole} onValueChange={setInviteRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Viewer">Viewer - Can view only</SelectItem>
+                  <SelectItem value="Contributor">Contributor - Can comment</SelectItem>
+                  <SelectItem value="Editor">Editor - Can edit</SelectItem>
+                  <SelectItem value="Admin">Admin - Full access</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Cancel</Button>
+            <Button onClick={confirmInviteMember} disabled={isInviting || !inviteEmail.trim()}>
+              {isInviting ? 'Sending...' : 'Send Invitation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Invite Dialog */}
+      <Dialog open={showBulkInviteDialog} onOpenChange={setShowBulkInviteDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-blue-500" />
+              Bulk Invite Members
+            </DialogTitle>
+            <DialogDescription>
+              Invite multiple team members at once. Enter email addresses separated by commas, semicolons, or new lines.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="bulk-emails">Email Addresses</Label>
+              <Textarea
+                id="bulk-emails"
+                placeholder="user1@company.com, user2@company.com&#10;user3@company.com"
+                value={bulkEmails}
+                onChange={(e) => setBulkEmails(e.target.value)}
+                rows={5}
+              />
+              <p className="text-xs text-gray-500">
+                {bulkEmails.split(/[\n,;]/).filter(e => e.trim() && e.includes('@')).length} valid email(s) detected
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkInviteDialog(false)}>Cancel</Button>
+            <Button onClick={confirmBulkInvite} disabled={isBulkInviting || !bulkEmails.trim()}>
+              {isBulkInviting ? 'Sending...' : 'Send Invitations'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Workspace Dialog */}
+      <Dialog open={showCreateWorkspaceDialog} onOpenChange={setShowCreateWorkspaceDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-purple-500" />
+              Create Workspace
+            </DialogTitle>
+            <DialogDescription>
+              Create a new collaborative workspace for your team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="workspace-name">Workspace Name</Label>
+              <Input
+                id="workspace-name"
+                placeholder="e.g., Q1 Marketing Campaign"
+                value={newWorkspaceName}
+                onChange={(e) => setNewWorkspaceName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="workspace-description">Description (optional)</Label>
+              <Textarea
+                id="workspace-description"
+                placeholder="Describe the purpose of this workspace..."
+                value={newWorkspaceDescription}
+                onChange={(e) => setNewWorkspaceDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Visibility</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  type="button"
+                  variant={newWorkspaceType === 'private' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-1 h-auto py-3"
+                  onClick={() => setNewWorkspaceType('private')}
+                >
+                  <Lock className="w-4 h-4" />
+                  <span className="text-xs">Private</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={newWorkspaceType === 'team' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-1 h-auto py-3"
+                  onClick={() => setNewWorkspaceType('team')}
+                >
+                  <UsersRound className="w-4 h-4" />
+                  <span className="text-xs">Team</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant={newWorkspaceType === 'public' ? 'default' : 'outline'}
+                  className="flex flex-col items-center gap-1 h-auto py-3"
+                  onClick={() => setNewWorkspaceType('public')}
+                >
+                  <Globe className="w-4 h-4" />
+                  <span className="text-xs">Public</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateWorkspaceDialog(false)}>Cancel</Button>
+            <Button onClick={confirmCreateWorkspace} disabled={isCreatingWorkspace || !newWorkspaceName.trim()}>
+              {isCreatingWorkspace ? 'Creating...' : 'Create Workspace'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Participants Dialog */}
+      <Dialog open={showAddParticipantsDialog} onOpenChange={setShowAddParticipantsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-green-500" />
+              Add Participants
+            </DialogTitle>
+            <DialogDescription>
+              Select team members to add to this conversation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="participant-search">Search Members</Label>
+              <Input
+                id="participant-search"
+                placeholder="Search by name or email..."
+                value={participantSearchQuery}
+                onChange={(e) => setParticipantSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {availableParticipants
+                .filter(p =>
+                  p.name.toLowerCase().includes(participantSearchQuery.toLowerCase()) ||
+                  p.email.toLowerCase().includes(participantSearchQuery.toLowerCase())
+                )
+                .map((participant) => (
+                  <div
+                    key={participant.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      if (selectedParticipants.includes(participant.id)) {
+                        setSelectedParticipants(prev => prev.filter(id => id !== participant.id))
+                      } else {
+                        setSelectedParticipants(prev => [...prev, participant.id])
+                      }
+                    }}
+                  >
+                    <Checkbox
+                      checked={selectedParticipants.includes(participant.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedParticipants(prev => [...prev, participant.id])
+                        } else {
+                          setSelectedParticipants(prev => prev.filter(id => id !== participant.id))
+                        }
+                      }}
+                    />
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      {participant.avatar}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{participant.name}</p>
+                      <p className="text-xs text-gray-500">{participant.email}</p>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            {selectedParticipants.length > 0 && (
+              <p className="text-sm text-blue-600">{selectedParticipants.length} participant(s) selected</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddParticipantsDialog(false)}>Cancel</Button>
+            <Button onClick={confirmAddParticipants} disabled={isAddingParticipants || selectedParticipants.length === 0}>
+              {isAddingParticipants ? 'Adding...' : `Add ${selectedParticipants.length || ''} Participant(s)`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Messages Dialog */}
+      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-blue-500" />
+              Search Messages
+            </DialogTitle>
+            <DialogDescription>
+              Search through all messages in this conversation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Search messages..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    performSearch()
+                  }
+                }}
+              />
+              <Button onClick={performSearch} disabled={isSearching}>
+                {isSearching ? 'Searching...' : 'Search'}
+              </Button>
+            </div>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {searchResults.length > 0 ? (
+                searchResults.map((result) => (
+                  <div key={result.id} className="p-3 rounded-lg border hover:bg-gray-50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{result.user}</span>
+                      <span className="text-xs text-gray-500">{result.time}</span>
+                    </div>
+                    <p className="text-sm text-gray-700">{result.content}</p>
+                  </div>
+                ))
+              ) : searchQuery && !isSearching ? (
+                <p className="text-center text-gray-500 py-4">No messages found</p>
+              ) : (
+                <p className="text-center text-gray-500 py-4">Enter a search term to find messages</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowSearchDialog(false)
+              setSearchQuery('')
+              setSearchResults([])
+            }}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Poll Dialog */}
+      <Dialog open={showPollDialog} onOpenChange={setShowPollDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-purple-500" />
+              Create Poll
+            </DialogTitle>
+            <DialogDescription>
+              Create a poll for participants to vote on.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="poll-question">Question</Label>
+              <Input
+                id="poll-question"
+                placeholder="What would you like to ask?"
+                value={pollQuestion}
+                onChange={(e) => setPollQuestion(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Options</Label>
+              {pollOptions.map((option, index) => (
+                <div key={index} className="flex gap-2">
+                  <Input
+                    placeholder={`Option ${index + 1}`}
+                    value={option}
+                    onChange={(e) => updatePollOption(index, e.target.value)}
+                  />
+                  {pollOptions.length > 2 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removePollOption(index)}
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              {pollOptions.length < 6 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addPollOption}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Option
+                </Button>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label>Poll Type</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={pollType === 'single' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPollType('single')}
+                >
+                  Single Choice
+                </Button>
+                <Button
+                  type="button"
+                  variant={pollType === 'multiple' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPollType('multiple')}
+                >
+                  Multiple Choice
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPollDialog(false)}>Cancel</Button>
+            <Button onClick={confirmCreatePoll} disabled={isCreatingPoll || !pollQuestion.trim()}>
+              {isCreatingPoll ? 'Creating...' : 'Create Poll'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recurring Meeting Dialog */}
+      <Dialog open={showRecurringMeetingDialog} onOpenChange={setShowRecurringMeetingDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-500" />
+              Schedule Recurring Meeting
+            </DialogTitle>
+            <DialogDescription>
+              Set up a meeting that repeats automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="meeting-title">Meeting Title</Label>
+              <Input
+                id="meeting-title"
+                placeholder="e.g., Weekly Team Standup"
+                value={meetingTitle}
+                onChange={(e) => setMeetingTitle(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="meeting-time">Time</Label>
+                <Input
+                  id="meeting-time"
+                  type="time"
+                  value={meetingTime}
+                  onChange={(e) => setMeetingTime(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meeting-duration">Duration (min)</Label>
+                <Select value={meetingDuration} onValueChange={setMeetingDuration}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Recurrence</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={meetingRecurrence === 'daily' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setMeetingRecurrence('daily')}
+                >
+                  Daily
+                </Button>
+                <Button
+                  type="button"
+                  variant={meetingRecurrence === 'weekly' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setMeetingRecurrence('weekly')}
+                >
+                  Weekly
+                </Button>
+                <Button
+                  type="button"
+                  variant={meetingRecurrence === 'monthly' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setMeetingRecurrence('monthly')}
+                >
+                  Monthly
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRecurringMeetingDialog(false)}>Cancel</Button>
+            <Button onClick={confirmScheduleRecurringMeeting} disabled={isSchedulingMeeting || !meetingTitle.trim()}>
+              {isSchedulingMeeting ? 'Scheduling...' : 'Schedule Meeting'}
             </Button>
           </DialogFooter>
         </DialogContent>

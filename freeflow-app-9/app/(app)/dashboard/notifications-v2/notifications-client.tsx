@@ -1264,7 +1264,14 @@ export default function NotificationsClient() {
                             <h4 className="font-semibold">{variant.name}</h4>
                             {test.winner === variant.id && <Badge className="bg-green-500">Winner</Badge>}
                             {test.status === 'running' && !test.winner && (
-                              <Button size="sm" variant="outline" onClick={() => toast.success('Winner Selected', { description: `"${variant.name}" declared as winner` })}>
+                              <Button size="sm" variant="outline" onClick={() => {
+                                setAbTests(prev => prev.map(t =>
+                                  t.id === test.id
+                                    ? { ...t, winner: variant.id, status: 'completed' as const, endDate: new Date().toISOString() }
+                                    : t
+                                ))
+                                toast.success('Winner Selected', { description: `"${variant.name}" declared as winner for "${test.name}"` })
+                              }}>
                                 Declare Winner
                               </Button>
                             )}
@@ -1291,7 +1298,23 @@ export default function NotificationsClient() {
                         }}>
                           <Send className="h-4 w-4 mr-1" />Apply Winner to Campaign
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => toast.success('Export Results', { description: `Exporting detailed results for "${test.name}"` })}>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          const csvData = [
+                            ['Variant', 'Sent', 'Delivered', 'Opened', 'Clicked', 'Converted', 'Is Winner'],
+                            ...test.variants.map(v => [
+                              v.name, v.stats.sent, v.stats.delivered, v.stats.opened,
+                              v.stats.clicked, v.stats.converted, v.id === test.winner ? 'Yes' : 'No'
+                            ])
+                          ].map(row => row.join(',')).join('\n')
+                          const blob = new Blob([csvData], { type: 'text/csv' })
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = `ab-test-${test.name.toLowerCase().replace(/\s+/g, '-')}-results.csv`
+                          a.click()
+                          URL.revokeObjectURL(url)
+                          toast.success('Export Results', { description: `Results for "${test.name}" downloaded as CSV` })
+                        }}>
                           <Download className="h-4 w-4 mr-1" />Export Results
                         </Button>
                       </div>
@@ -2991,9 +3014,18 @@ export default function NotificationsClient() {
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="text-sm font-medium mb-2">Available Variables</p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => toast.info('Variable copied', { description: '{{name}} copied to clipboard' })}>{`{{name}}`}</Badge>
-                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => toast.info('Variable copied', { description: '{{email}} copied to clipboard' })}>{`{{email}}`}</Badge>
-                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => toast.info('Variable copied', { description: '{{app_name}} copied to clipboard' })}>{`{{app_name}}`}</Badge>
+                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
+                    navigator.clipboard.writeText('{{name}}')
+                    toast.info('Variable copied', { description: '{{name}} copied to clipboard' })
+                  }}>{`{{name}}`}</Badge>
+                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
+                    navigator.clipboard.writeText('{{email}}')
+                    toast.info('Variable copied', { description: '{{email}} copied to clipboard' })
+                  }}>{`{{email}}`}</Badge>
+                  <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
+                    navigator.clipboard.writeText('{{app_name}}')
+                    toast.info('Variable copied', { description: '{{app_name}} copied to clipboard' })
+                  }}>{`{{app_name}}`}</Badge>
                 </div>
               </div>
             </div>
@@ -3039,8 +3071,16 @@ export default function NotificationsClient() {
               <div>
                 <Label>Secret Key (for signature verification)</Label>
                 <div className="flex gap-2">
-                  <Input type="password" placeholder="whsec_..." className="flex-1" />
-                  <Button variant="outline" size="sm" onClick={() => toast.success('Secret Generated', { description: 'New webhook secret generated' })}>
+                  <Input type="password" placeholder="whsec_..." className="flex-1" id="webhook-secret-input" />
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const randomBytes = Array.from(crypto.getRandomValues(new Uint8Array(24)))
+                      .map(b => b.toString(16).padStart(2, '0')).join('')
+                    const newSecret = `whsec_${randomBytes}`
+                    const input = document.getElementById('webhook-secret-input') as HTMLInputElement
+                    if (input) input.value = newSecret
+                    navigator.clipboard.writeText(newSecret)
+                    toast.success('Secret Generated', { description: 'New webhook secret generated and copied to clipboard' })
+                  }}>
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
@@ -3055,7 +3095,25 @@ export default function NotificationsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
-              <Button variant="outline" onClick={() => toast.success('Test Sent', { description: 'Test payload sent to webhook endpoint' })}>
+              <Button variant="outline" onClick={async () => {
+                const urlInput = document.querySelector('input[placeholder="https://api.example.com/webhooks"]') as HTMLInputElement
+                const url = urlInput?.value
+                if (!url) {
+                  toast.error('Missing URL', { description: 'Please enter a webhook endpoint URL' })
+                  return
+                }
+                toast.loading('Sending test payload...', { id: 'test-webhook-dialog' })
+                try {
+                  await fetch('/api/webhooks/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, event: 'test.ping' })
+                  })
+                  toast.success('Test Sent', { id: 'test-webhook-dialog', description: 'Test payload sent successfully' })
+                } catch {
+                  toast.error('Test Failed', { id: 'test-webhook-dialog', description: 'Could not send test payload' })
+                }
+              }}>
                 <TestTube className="h-4 w-4 mr-2" />Test
               </Button>
               <Button onClick={() => {
@@ -3227,7 +3285,20 @@ export default function NotificationsClient() {
                     <Input placeholder="Value" className="flex-1" />
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info('Rule added')}>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const propertySelect = document.querySelector('[data-segment-property]') as HTMLSelectElement
+                  const operatorSelect = document.querySelector('[data-segment-operator]') as HTMLSelectElement
+                  const valueInput = document.querySelector('input[placeholder="Value"]') as HTMLInputElement
+                  const property = propertySelect?.value || 'subscription'
+                  const operator = operatorSelect?.value || 'equals'
+                  const value = valueInput?.value || ''
+                  if (!value) {
+                    toast.error('Please enter a value for the rule')
+                    return
+                  }
+                  toast.success('Rule added', { description: `${property} ${operator} "${value}"` })
+                  if (valueInput) valueInput.value = ''
+                }}>
                   <Plus className="h-4 w-4 mr-1" />Add Rule
                 </Button>
               </div>
@@ -3260,7 +3331,27 @@ export default function NotificationsClient() {
             <div className="py-4">
               <div className="flex items-center gap-2 mb-4">
                 <Input placeholder="Search users..." className="flex-1" />
-                <Button variant="outline" onClick={() => toast.success('Users exported to CSV')}>
+                <Button variant="outline" onClick={() => {
+                  const users = [
+                    { name: 'John Smith', email: 'john@example.com', joinedAt: '2024-01-15' },
+                    { name: 'Sarah Johnson', email: 'sarah@example.com', joinedAt: '2024-02-20' },
+                    { name: 'Mike Wilson', email: 'mike@example.com', joinedAt: '2024-03-10' },
+                    { name: 'Emily Brown', email: 'emily@example.com', joinedAt: '2024-01-28' },
+                    { name: 'Chris Davis', email: 'chris@example.com', joinedAt: '2024-02-05' },
+                  ]
+                  const csvData = [
+                    ['Name', 'Email', 'Joined Date'],
+                    ...users.map(u => [u.name, u.email, u.joinedAt])
+                  ].map(row => row.join(',')).join('\n')
+                  const blob = new Blob([csvData], { type: 'text/csv' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `segment-${selectedSegment?.name?.toLowerCase().replace(/\s+/g, '-') || 'users'}-export.csv`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Users exported to CSV', { description: `${users.length} users exported` })
+                }}>
                   <Download className="h-4 w-4 mr-2" />Export
                 </Button>
               </div>

@@ -277,6 +277,31 @@ export default function CvPortfolioClient() {
   const [projectsToDelete, setProjectsToDelete] = useState<number[]>([])
   const [isDeleting, setIsDeleting] = useState(false)
 
+  // Upload progress states
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadingProjectId, setUploadingProjectId] = useState<number | null>(null)
+
+  // Drag and drop reorder states
+  const [draggedProjectId, setDraggedProjectId] = useState<number | null>(null)
+  const [dragOverProjectId, setDragOverProjectId] = useState<number | null>(null)
+
+  // Featured project states
+  const [togglingFeaturedId, setTogglingFeaturedId] = useState<number | null>(null)
+
+  // View project dialog
+  const [showViewProjectDialog, setShowViewProjectDialog] = useState(false)
+  const [viewingProject, setViewingProject] = useState<Project | null>(null)
+
+  // Edit profile dialog
+  const [showEditProfileDialog, setShowEditProfileDialog] = useState(false)
+  const [editProfileName, setEditProfileName] = useState('')
+  const [editProfileTitle, setEditProfileTitle] = useState('')
+  const [editProfileLocation, setEditProfileLocation] = useState('')
+  const [editProfileEmail, setEditProfileEmail] = useState('')
+  const [editProfilePhone, setEditProfilePhone] = useState('')
+  const [editProfileWebsite, setEditProfileWebsite] = useState('')
+
   // Dialog states for prompt() replacements
   // Add Project Dialog
   const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
@@ -837,9 +862,8 @@ export default function CvPortfolioClient() {
       status: project.status
     })
 
-    toast.info('Viewing Project', {
-      description: `${project.title} - ${project.status}`
-    })
+    setViewingProject(project)
+    setShowViewProjectDialog(true)
   }
 
   // ==================== SKILL HANDLERS ====================
@@ -1571,64 +1595,203 @@ export default function CvPortfolioClient() {
   const handleExportCV = async (format: 'PDF' | 'DOCX' | 'JSON') => {
     setIsExporting(true)
 
-    try {
-      const cvData = {
-        profile: profileData,
-        experience,
-        projects,
-        skills,
-        education,
-        achievements,
-        sections: cvSections.filter(s => s.visible).sort((a, b) => a.order - b.order),
-        template: selectedTemplate,
-        metadata: {
-          completeness: completenessScore,
-          yearsOfExperience,
-          exportDate: new Date().toISOString(),
-          format
-        }
-      }
-
-      logger.info('Exporting CV', {
-        format,
-        completenessScore,
+    const cvData = {
+      profile: profileData,
+      experience,
+      projects,
+      skills,
+      education,
+      achievements,
+      sections: cvSections.filter(s => s.visible).sort((a, b) => a.order - b.order),
+      template: selectedTemplate,
+      metadata: {
+        completeness: completenessScore,
         yearsOfExperience,
-        projectCount: projects.length,
-        skillCount: skills.length,
-        experienceCount: experience.length,
-        template: selectedTemplate
-      })
+        exportDate: new Date().toISOString(),
+        format
+      }
+    }
 
-      // Note: Data is already persisted in database - no localStorage needed
+    try {
+      await toast.promise(
+        (async () => {
+          logger.info('Exporting CV', {
+            format,
+            completenessScore,
+            yearsOfExperience,
+            projectCount: projects.length,
+            skillCount: skills.length,
+            experienceCount: experience.length,
+            template: selectedTemplate
+          })
 
-      // Create download
-      const blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `cv-${profileData.name.replace(/\s/g, '-')}-${Date.now()}.${format.toLowerCase()}`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+          let blob: Blob
+          let fileName: string
+          let mimeType: string
 
-      logger.info('CV exported successfully', {
-        format,
-        fileName: a.download,
-        fileSize: blob.size
-      })
+          if (format === 'PDF') {
+            // Call PDF export API
+            if (userId) {
+              const response = await fetch('/api/portfolio/export/pdf', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cvData)
+              })
 
-      toast.success(`CV Exported as ${format}!`, {
-        description: `${a.download} (${completenessScore}% complete)`
-      })
+              if (!response.ok) {
+                // Fallback to client-side HTML-to-print for PDF
+                const printWindow = window.open('', '_blank')
+                if (printWindow) {
+                  printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                      <title>CV - ${profileData.name}</title>
+                      <style>
+                        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+                        h1 { color: #1a1a2e; border-bottom: 2px solid #4a4a6a; padding-bottom: 10px; }
+                        h2 { color: #4a4a6a; margin-top: 30px; }
+                        .section { margin-bottom: 25px; }
+                        .job, .edu, .project { margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+                        .job-title, .edu-degree { font-weight: bold; color: #1a1a2e; }
+                        .company, .institution { color: #666; }
+                        .skills { display: flex; flex-wrap: wrap; gap: 8px; }
+                        .skill { background: #e3e3e8; padding: 4px 12px; border-radius: 15px; font-size: 0.9em; }
+                        .tech-badge { background: #dde; padding: 2px 8px; border-radius: 3px; font-size: 0.85em; margin-right: 5px; }
+                        @media print { body { padding: 20px; } }
+                      </style>
+                    </head>
+                    <body>
+                      <h1>${profileData.name}</h1>
+                      <p><strong>${profileData.title}</strong></p>
+                      <p>${profileData.location} | ${profileData.email} | ${profileData.phone}</p>
+
+                      <div class="section">
+                        <h2>Professional Summary</h2>
+                        <p>${profileData.bio}</p>
+                      </div>
+
+                      <div class="section">
+                        <h2>Experience</h2>
+                        ${experience.map(exp => `
+                          <div class="job">
+                            <div class="job-title">${exp.position}</div>
+                            <div class="company">${exp.company} | ${exp.period}</div>
+                            <p>${exp.description}</p>
+                            <div>${exp.technologies.map(t => `<span class="tech-badge">${t}</span>`).join('')}</div>
+                          </div>
+                        `).join('')}
+                      </div>
+
+                      <div class="section">
+                        <h2>Education</h2>
+                        ${education.map(edu => `
+                          <div class="edu">
+                            <div class="edu-degree">${edu.degree}</div>
+                            <div class="institution">${edu.institution} | ${edu.period}</div>
+                            ${edu.gpa ? `<p>GPA: ${edu.gpa}</p>` : ''}
+                          </div>
+                        `).join('')}
+                      </div>
+
+                      <div class="section">
+                        <h2>Skills</h2>
+                        <div class="skills">
+                          ${skills.map(s => `<span class="skill">${s.name}</span>`).join('')}
+                        </div>
+                      </div>
+
+                      <div class="section">
+                        <h2>Projects</h2>
+                        ${projects.map(p => `
+                          <div class="project">
+                            <div class="job-title">${p.title}</div>
+                            <p>${p.description}</p>
+                            <div>${p.technologies.map(t => `<span class="tech-badge">${t}</span>`).join('')}</div>
+                          </div>
+                        `).join('')}
+                      </div>
+
+                      ${achievements.length > 0 ? `
+                      <div class="section">
+                        <h2>Awards & Achievements</h2>
+                        ${achievements.map(a => `
+                          <div class="project">
+                            <div class="job-title">${a.title}</div>
+                            <div class="company">${a.issuer} | ${a.date}</div>
+                          </div>
+                        `).join('')}
+                      </div>
+                      ` : ''}
+                    </body>
+                    </html>
+                  `)
+                  printWindow.document.close()
+                  printWindow.print()
+                }
+                return
+              }
+
+              blob = await response.blob()
+            } else {
+              // Generate PDF client-side for unauthenticated users
+              blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
+            }
+            mimeType = 'application/pdf'
+            fileName = `cv-${profileData.name.replace(/\s/g, '-')}-${Date.now()}.pdf`
+          } else if (format === 'DOCX') {
+            // Call DOCX export API
+            if (userId) {
+              const response = await fetch('/api/portfolio/export/docx', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cvData)
+              })
+
+              if (response.ok) {
+                blob = await response.blob()
+              } else {
+                // Fallback to JSON
+                blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
+              }
+            } else {
+              blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
+            }
+            mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            fileName = `cv-${profileData.name.replace(/\s/g, '-')}-${Date.now()}.docx`
+          } else {
+            // JSON export
+            blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
+            mimeType = 'application/json'
+            fileName = `cv-${profileData.name.replace(/\s/g, '-')}-${Date.now()}.json`
+          }
+
+          // Create download
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = fileName
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+
+          logger.info('CV exported successfully', {
+            format,
+            fileName,
+            fileSize: blob.size
+          })
+        })(),
+        {
+          loading: `Generating ${format} export...`,
+          success: `CV exported as ${format}`,
+          error: `Failed to export ${format}`
+        }
+      )
     } catch (error: any) {
       logger.error('Failed to export CV', {
         error: error.message,
         format
-      })
-
-      toast.error('Export Failed', {
-        description: error.message || 'Please try again later'
       })
     } finally {
       setIsExporting(false)
@@ -1782,25 +1945,26 @@ export default function CvPortfolioClient() {
 
   // ==================== ADDITIONAL FEATURE HANDLERS ====================
 
-  // Project Reordering
+  // Project Reordering with arrow buttons
   const handleReorderProject = (projectId: number, direction: 'up' | 'down') => {
     const project = projects.find(p => p.id === projectId)
     if (!project) return
 
-    const sortedProjects = [...projects].sort((a, b) => (a.dateAdded || '').localeCompare(b.dateAdded || ''))
-    const currentIndex = sortedProjects.findIndex(p => p.id === projectId)
+    const currentIndex = projects.findIndex(p => p.id === projectId)
 
     if (direction === 'up' && currentIndex > 0) {
-      const temp = sortedProjects[currentIndex - 1]
-      sortedProjects[currentIndex - 1] = sortedProjects[currentIndex]
-      sortedProjects[currentIndex] = temp
-    } else if (direction === 'down' && currentIndex < sortedProjects.length - 1) {
-      const temp = sortedProjects[currentIndex + 1]
-      sortedProjects[currentIndex + 1] = sortedProjects[currentIndex]
-      sortedProjects[currentIndex] = temp
+      const newProjects = [...projects]
+      const temp = newProjects[currentIndex - 1]
+      newProjects[currentIndex - 1] = newProjects[currentIndex]
+      newProjects[currentIndex] = temp
+      setProjects(newProjects)
+    } else if (direction === 'down' && currentIndex < projects.length - 1) {
+      const newProjects = [...projects]
+      const temp = newProjects[currentIndex + 1]
+      newProjects[currentIndex + 1] = newProjects[currentIndex]
+      newProjects[currentIndex] = temp
+      setProjects(newProjects)
     }
-
-    setProjects(sortedProjects)
 
     logger.info('Project reordered', {
       projectId,
@@ -1814,43 +1978,218 @@ export default function CvPortfolioClient() {
     })
   }
 
+  // Drag and Drop handlers for projects
+  const handleDragStart = (projectId: number) => {
+    setDraggedProjectId(projectId)
+  }
+
+  const handleDragOver = (e: React.DragEvent, projectId: number) => {
+    e.preventDefault()
+    if (draggedProjectId !== projectId) {
+      setDragOverProjectId(projectId)
+    }
+  }
+
+  const handleDragLeave = () => {
+    setDragOverProjectId(null)
+  }
+
+  const handleDrop = async (targetProjectId: number) => {
+    if (!draggedProjectId || draggedProjectId === targetProjectId) {
+      setDraggedProjectId(null)
+      setDragOverProjectId(null)
+      return
+    }
+
+    const draggedProject = projects.find(p => p.id === draggedProjectId)
+    if (!draggedProject) return
+
+    const draggedIndex = projects.findIndex(p => p.id === draggedProjectId)
+    const targetIndex = projects.findIndex(p => p.id === targetProjectId)
+
+    const newProjects = [...projects]
+    newProjects.splice(draggedIndex, 1)
+    newProjects.splice(targetIndex, 0, draggedProject)
+
+    setProjects(newProjects)
+
+    try {
+      if (userId) {
+        const response = await fetch(`/api/portfolio/projects/${draggedProjectId}/reorder`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newIndex: targetIndex })
+        })
+
+        if (!response.ok) {
+          logger.warn('Failed to persist reorder to server, but local state updated')
+        }
+      }
+
+      logger.info('Project drag-drop reorder completed', {
+        projectId: draggedProjectId,
+        projectTitle: draggedProject.title,
+        fromIndex: draggedIndex,
+        toIndex: targetIndex
+      })
+
+      toast.success('Projects Reordered', {
+        description: `${draggedProject.title} moved to position ${targetIndex + 1}`
+      })
+    } catch (error: any) {
+      logger.error('Failed to persist reorder', { error: error.message })
+    } finally {
+      setDraggedProjectId(null)
+      setDragOverProjectId(null)
+    }
+  }
+
+  const handleDragEnd = () => {
+    setDraggedProjectId(null)
+    setDragOverProjectId(null)
+  }
+
   // Toggle Featured Project
-  const handleToggleFeatured = (projectId: number) => {
+  const handleToggleFeatured = async (projectId: number) => {
     const project = projects.find(p => p.id === projectId)
     if (!project) return
 
-    // For mock data, we'll just show a toast
-    logger.info('Toggling featured status', {
-      projectId,
-      projectTitle: project.title,
-      currentStatus: project.status
-    })
+    setTogglingFeaturedId(projectId)
+    const isFeatured = project.status === 'Live' || project.status === 'Featured'
+    const newStatus = isFeatured ? 'Completed' : 'Featured'
 
-    toast.success(project.status === 'Live' ? 'Featured!' : 'Unfeatured', {
-      description: `${project.title} ${project.status === 'Live' ? 'marked as featured' : 'removed from featured'}`
-    })
+    try {
+      await toast.promise(
+        (async () => {
+          if (userId) {
+            const { updateProject } = await import('@/lib/cv-portfolio-queries')
+            const { error } = await updateProject(String(projectId), { is_featured: !isFeatured })
+            if (error) throw new Error(error.message || 'Failed to update featured status')
+          }
+
+          // Update local state
+          setProjects(prev => prev.map(p =>
+            p.id === projectId ? { ...p, status: newStatus } : p
+          ))
+
+          logger.info('Project featured status toggled', {
+            projectId,
+            projectTitle: project.title,
+            oldStatus: project.status,
+            newStatus
+          })
+        })(),
+        {
+          loading: `${isFeatured ? 'Removing from featured...' : 'Adding to featured...'}`,
+          success: `${project.title} ${isFeatured ? 'removed from featured' : 'is now featured'}`,
+          error: 'Failed to update featured status'
+        }
+      )
+    } catch (error: any) {
+      logger.error('Failed to toggle featured', { error: error.message, projectId })
+    } finally {
+      setTogglingFeaturedId(null)
+    }
   }
 
-  // Upload Project Image
+  // Upload Project Image with Progress
   const handleUploadProjectImage = (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    if (!project) return
+
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
 
-    input.onchange = (e: Event) => {
+    input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
 
-      logger.info('Project image uploaded', {
-        projectId,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      })
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File too large', {
+          description: 'Maximum file size is 5MB'
+        })
+        return
+      }
 
-      toast.success('Image Uploaded!', {
-        description: `${file.name} added to project`
-      })
+      setIsUploading(true)
+      setUploadingProjectId(projectId)
+      setUploadProgress(0)
+
+      try {
+        await toast.promise(
+          (async () => {
+            // Simulate upload progress
+            const progressInterval = setInterval(() => {
+              setUploadProgress(prev => {
+                if (prev >= 90) {
+                  clearInterval(progressInterval)
+                  return prev
+                }
+                return prev + 10
+              })
+            }, 200)
+
+            // Create FormData for actual upload
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('projectId', String(projectId))
+
+            if (userId) {
+              // Actual API upload
+              const response = await fetch('/api/portfolio/upload/image', {
+                method: 'POST',
+                body: formData
+              })
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.message || 'Upload failed')
+              }
+
+              const data = await response.json()
+
+              // Update project with new image URL
+              setProjects(prev => prev.map(p =>
+                p.id === projectId ? { ...p, image: data.url || URL.createObjectURL(file) } : p
+              ))
+            } else {
+              // Local preview for unauthenticated users
+              const imageUrl = URL.createObjectURL(file)
+              setProjects(prev => prev.map(p =>
+                p.id === projectId ? { ...p, image: imageUrl } : p
+              ))
+            }
+
+            clearInterval(progressInterval)
+            setUploadProgress(100)
+
+            logger.info('Project image uploaded successfully', {
+              projectId,
+              projectTitle: project.title,
+              fileName: file.name,
+              fileSize: file.size,
+              fileType: file.type
+            })
+          })(),
+          {
+            loading: `Uploading ${file.name}...`,
+            success: `Image uploaded to ${project.title}`,
+            error: 'Failed to upload image'
+          }
+        )
+      } catch (error: any) {
+        logger.error('Failed to upload project image', {
+          error: error.message,
+          projectId,
+          fileName: file.name
+        })
+      } finally {
+        setIsUploading(false)
+        setUploadingProjectId(null)
+        setUploadProgress(0)
+      }
     }
 
     input.click()
@@ -2032,15 +2371,39 @@ export default function CvPortfolioClient() {
     }
   }
 
-  // Toggle Visibility
+  // Toggle Visibility - Maps to CV sections
   const handleToggleVisibility = (type: 'projects' | 'skills' | 'experience' | 'education') => {
-    logger.info('Toggling section visibility', {
-      section: type
+    const sectionMapping: Record<string, string> = {
+      'projects': 'projects',
+      'skills': 'skills',
+      'experience': 'experience',
+      'education': 'education'
+    }
+
+    const sectionId = sectionMapping[type]
+    if (!sectionId) return
+
+    const section = cvSections.find(s => s.id === sectionId)
+    if (!section) return
+
+    setCvSections(prev => prev.map(s =>
+      s.id === sectionId ? { ...s, visible: !s.visible } : s
+    ))
+
+    const newVisibility = !section.visible
+
+    logger.info('Section visibility toggled', {
+      section: type,
+      sectionId,
+      oldVisibility: section.visible,
+      newVisibility
     })
 
-    toast.info('Visibility Updated', {
-      description: `${type} section visibility toggled`
+    toast.success('Section Updated', {
+      description: `${section.name} is now ${newVisibility ? 'visible' : 'hidden'} on your CV`
     })
+
+    announce(`${section.name} ${newVisibility ? 'shown' : 'hidden'}`, 'polite')
   }
 
   // Send Test Email
@@ -2057,13 +2420,73 @@ export default function CvPortfolioClient() {
   // ==================== OTHER HANDLERS ====================
 
   const handleEditProfile = () => {
+    setEditProfileName(profileData.name)
+    setEditProfileTitle(profileData.title)
+    setEditProfileLocation(profileData.location)
+    setEditProfileEmail(profileData.email)
+    setEditProfilePhone(profileData.phone)
+    setEditProfileWebsite(profileData.website)
+    setShowEditProfileDialog(true)
+
     logger.info('Opening profile editor', {
       profileName: profileData.name
     })
+  }
 
-    toast.info('Edit Profile', {
-      description: 'Update personal information and contact details'
-    })
+  const confirmEditProfile = async () => {
+    if (!editProfileName.trim()) {
+      toast.error('Please enter your name')
+      return
+    }
+    if (!editProfileEmail.trim()) {
+      toast.error('Please enter your email')
+      return
+    }
+
+    try {
+      await toast.promise(
+        (async () => {
+          const updatedProfile = {
+            name: editProfileName.trim(),
+            title: editProfileTitle.trim(),
+            location: editProfileLocation.trim(),
+            email: editProfileEmail.trim(),
+            phone: editProfilePhone.trim(),
+            website: editProfileWebsite.trim()
+          }
+
+          if (userId) {
+            const response = await fetch('/api/portfolio/settings', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(updatedProfile)
+            })
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}))
+              throw new Error(errorData.message || 'Failed to update profile')
+            }
+          }
+
+          setProfileData(prev => ({ ...prev, ...updatedProfile }))
+
+          logger.info('Profile updated', {
+            oldName: profileData.name,
+            newName: updatedProfile.name,
+            email: updatedProfile.email
+          })
+
+          setShowEditProfileDialog(false)
+        })(),
+        {
+          loading: 'Updating profile...',
+          success: 'Profile updated successfully',
+          error: 'Failed to update profile'
+        }
+      )
+    } catch (error: any) {
+      logger.error('Failed to update profile', { error: error.message })
+    }
   }
 
   const handleUploadAvatar = () => {
@@ -2071,19 +2494,79 @@ export default function CvPortfolioClient() {
     input.type = 'file'
     input.accept = 'image/*'
 
-    input.onchange = (e: Event) => {
+    input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
 
-      logger.info('Avatar uploaded', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      })
+      // Validate file size (max 2MB for avatar)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('File too large', {
+          description: 'Maximum avatar size is 2MB'
+        })
+        return
+      }
 
-      toast.success('Avatar Uploaded!', {
-        description: file.name
-      })
+      setIsUploading(true)
+      setUploadProgress(0)
+
+      try {
+        await toast.promise(
+          (async () => {
+            // Simulate upload progress
+            const progressInterval = setInterval(() => {
+              setUploadProgress(prev => {
+                if (prev >= 90) {
+                  clearInterval(progressInterval)
+                  return prev
+                }
+                return prev + 15
+              })
+            }, 150)
+
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('type', 'avatar')
+
+            if (userId) {
+              const response = await fetch('/api/portfolio/upload/image', {
+                method: 'POST',
+                body: formData
+              })
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.message || 'Upload failed')
+              }
+
+              const data = await response.json()
+              setProfileData(prev => ({ ...prev, avatar: data.url || URL.createObjectURL(file) }))
+            } else {
+              // Local preview
+              const avatarUrl = URL.createObjectURL(file)
+              setProfileData(prev => ({ ...prev, avatar: avatarUrl }))
+            }
+
+            clearInterval(progressInterval)
+            setUploadProgress(100)
+
+            logger.info('Avatar uploaded successfully', {
+              fileName: file.name,
+              fileSize: file.size,
+              fileType: file.type
+            })
+          })(),
+          {
+            loading: 'Uploading avatar...',
+            success: 'Avatar updated successfully',
+            error: 'Failed to upload avatar'
+          }
+        )
+      } catch (error: any) {
+        logger.error('Failed to upload avatar', { error: error.message })
+      } finally {
+        setIsUploading(false)
+        setUploadProgress(0)
+      }
     }
 
     input.click()
@@ -2334,6 +2817,15 @@ export default function CvPortfolioClient() {
                     <span>{profileData.website}</span>
                   </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-4"
+                  onClick={handleEditProfile}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
               </CardContent>
             </Card>
 
@@ -2627,25 +3119,73 @@ export default function CvPortfolioClient() {
               </TabsContent>
 
               <TabsContent value="projects" className="space-y-6">
-                <div className="flex justify-end mb-4">
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-sm text-gray-500">
+                    Drag and drop to reorder projects
+                  </p>
                   <Button onClick={handleAddProject}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Project
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {projects.map((project) => (
-                    <Card key={project.id} className="kazi-card kazi-hover-scale">
+                  {projects.map((project, index) => (
+                    <Card
+                      key={project.id}
+                      className={`kazi-card kazi-hover-scale cursor-move transition-all duration-200 ${
+                        draggedProjectId === project.id ? 'opacity-50 scale-95' : ''
+                      } ${
+                        dragOverProjectId === project.id ? 'ring-2 ring-blue-500 ring-offset-2' : ''
+                      }`}
+                      draggable
+                      onDragStart={() => handleDragStart(project.id)}
+                      onDragOver={(e) => handleDragOver(e, project.id)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={() => handleDrop(project.id)}
+                      onDragEnd={handleDragEnd}
+                    >
                       <CardContent className="p-0">
-                        <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 rounded-t-lg flex items-center justify-center relative">
-                          <div className="text-white text-6xl opacity-20">
-                            <Briefcase />
-                          </div>
+                        <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 rounded-t-lg flex items-center justify-center relative overflow-hidden">
+                          {project.image && project.image !== '/portfolio-default.jpg' ? (
+                            <img
+                              src={project.image}
+                              alt={project.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-white text-6xl opacity-20">
+                              <Briefcase />
+                            </div>
+                          )}
+                          {/* Upload Progress Overlay */}
+                          {isUploading && uploadingProjectId === project.id && (
+                            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                              <div className="w-3/4 bg-gray-200 rounded-full h-2 mb-2">
+                                <div
+                                  className="bg-blue-500 h-2 rounded-full transition-all duration-200"
+                                  style={{ width: `${uploadProgress}%` }}
+                                />
+                              </div>
+                              <p className="text-white text-sm">{uploadProgress}% uploaded</p>
+                            </div>
+                          )}
                           <div className="absolute top-2 right-2 flex gap-1">
-                            <Button size="sm" variant="secondary" onClick={() => handleToggleFeatured(project.id)} title="Toggle Featured">
-                              <Star className={`w-3 h-3 ${project.status === 'Live' ? 'fill-yellow-400 text-yellow-400' : ''}`} />
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleToggleFeatured(project.id)}
+                              title="Toggle Featured"
+                              disabled={togglingFeaturedId === project.id}
+                            >
+                              <Star className={`w-3 h-3 ${project.status === 'Live' || project.status === 'Featured' ? 'fill-yellow-400 text-yellow-400' : ''}`} />
                             </Button>
-                            <Button size="sm" variant="secondary" onClick={() => handleUploadProjectImage(project.id)} title="Upload Image">
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleUploadProjectImage(project.id)}
+                              title="Upload Image"
+                              disabled={isUploading && uploadingProjectId === project.id}
+                            >
                               <Upload className="w-3 h-3" />
                             </Button>
                             <Button size="sm" variant="secondary" onClick={() => handleEditProject(project)} title="Edit">
@@ -2658,6 +3198,12 @@ export default function CvPortfolioClient() {
                               <Trash2 className="w-3 h-3" />
                             </Button>
                           </div>
+                          {/* Position indicator */}
+                          <div className="absolute top-2 left-2">
+                            <Badge variant="secondary" className="bg-black/50 text-white">
+                              #{index + 1}
+                            </Badge>
+                          </div>
                         </div>
                         <div className="p-6">
                           <div className="flex justify-between items-start mb-2">
@@ -2665,8 +3211,8 @@ export default function CvPortfolioClient() {
                               {project.title}
                             </h3>
                             <Badge
-                              variant={project.status === 'Live' ? 'default' : 'secondary'}
-                              className={project.status === 'Live' ? 'bg-green-100 text-green-800' : ''}
+                              variant={project.status === 'Live' || project.status === 'Featured' ? 'default' : 'secondary'}
+                              className={project.status === 'Live' || project.status === 'Featured' ? 'bg-green-100 text-green-800' : ''}
                             >
                               {project.status}
                             </Badge>
@@ -3473,6 +4019,176 @@ export default function CvPortfolioClient() {
             </Button>
             <Button onClick={confirmUpdateBio}>
               Update Bio
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Project Dialog */}
+      <Dialog open={showViewProjectDialog} onOpenChange={setShowViewProjectDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{viewingProject?.title}</DialogTitle>
+            <DialogDescription>
+              Project Details
+            </DialogDescription>
+          </DialogHeader>
+          {viewingProject && (
+            <div className="space-y-4 py-4">
+              <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                {viewingProject.image && viewingProject.image !== '/portfolio-default.jpg' ? (
+                  <img
+                    src={viewingProject.image}
+                    alt={viewingProject.title}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                ) : (
+                  <Briefcase className="w-16 h-16 text-white opacity-50" />
+                )}
+              </div>
+              <div>
+                <Label className="text-sm text-gray-500">Status</Label>
+                <Badge
+                  variant={viewingProject.status === 'Live' || viewingProject.status === 'Featured' ? 'default' : 'secondary'}
+                  className={viewingProject.status === 'Live' || viewingProject.status === 'Featured' ? 'bg-green-100 text-green-800' : ''}
+                >
+                  {viewingProject.status}
+                </Badge>
+              </div>
+              <div>
+                <Label className="text-sm text-gray-500">Description</Label>
+                <p className="text-gray-700 dark:text-gray-300">{viewingProject.description}</p>
+              </div>
+              <div>
+                <Label className="text-sm text-gray-500">Technologies</Label>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {viewingProject.technologies.map((tech) => (
+                    <Badge key={tech} variant="outline" className="text-xs">
+                      {tech}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              {viewingProject.link && (
+                <div>
+                  <Label className="text-sm text-gray-500">Project URL</Label>
+                  <a
+                    href={viewingProject.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline flex items-center gap-1"
+                  >
+                    {viewingProject.link}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+              {viewingProject.dateAdded && (
+                <div>
+                  <Label className="text-sm text-gray-500">Added</Label>
+                  <p className="text-gray-700 dark:text-gray-300">
+                    {new Date(viewingProject.dateAdded).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowViewProjectDialog(false)}>
+              Close
+            </Button>
+            {viewingProject?.link && (
+              <Button onClick={() => window.open(viewingProject.link, '_blank')}>
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Open Project
+              </Button>
+            )}
+            <Button onClick={() => {
+              if (viewingProject) {
+                handleEditProject(viewingProject)
+                setShowViewProjectDialog(false)
+              }
+            }}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={showEditProfileDialog} onOpenChange={setShowEditProfileDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your personal information and contact details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="profile-name">Full Name *</Label>
+              <Input
+                id="profile-name"
+                placeholder="Enter your full name"
+                value={editProfileName}
+                onChange={(e) => setEditProfileName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-title">Professional Title</Label>
+              <Input
+                id="profile-title"
+                placeholder="e.g., Senior Full-Stack Developer"
+                value={editProfileTitle}
+                onChange={(e) => setEditProfileTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-location">Location</Label>
+              <Input
+                id="profile-location"
+                placeholder="City, Country"
+                value={editProfileLocation}
+                onChange={(e) => setEditProfileLocation(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-email">Email *</Label>
+              <Input
+                id="profile-email"
+                type="email"
+                placeholder="your@email.com"
+                value={editProfileEmail}
+                onChange={(e) => setEditProfileEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-phone">Phone</Label>
+              <Input
+                id="profile-phone"
+                type="tel"
+                placeholder="+1 234 567 8900"
+                value={editProfilePhone}
+                onChange={(e) => setEditProfilePhone(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-website">Website</Label>
+              <Input
+                id="profile-website"
+                placeholder="yourwebsite.com"
+                value={editProfileWebsite}
+                onChange={(e) => setEditProfileWebsite(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditProfileDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditProfile}>
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

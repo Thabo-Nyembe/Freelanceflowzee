@@ -126,14 +126,25 @@ const mockInvoicesActivities = [
 // Quick actions will be defined inside the component to access handlers
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
+  const [statusFilter, _setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [dateRange, setDateRange] = useState<'all' | '7days' | '30days' | '90days'>('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showFilterModal, setShowFilterModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
+  const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null)
   const [activeTab, setActiveTab] = useState('all')
   const [settingsTab, setSettingsTab] = useState('general')
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
+  // Advanced filter state
+  const [filterAmountMin, setFilterAmountMin] = useState<string>('')
+  const [filterAmountMax, setFilterAmountMax] = useState<string>('')
+  const [filterClient, setFilterClient] = useState<string>('')
+  const [filterDueDateFrom, setFilterDueDateFrom] = useState<string>('')
+  const [filterDueDateTo, setFilterDueDateTo] = useState<string>('')
 
   // Invoice creation state
   const [newInvoice, setNewInvoice] = useState({
@@ -207,8 +218,56 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
       filtered = filtered.filter(i => i.status === activeTab)
     }
 
+    // Date range filter
+    if (dateRange !== 'all') {
+      const now = new Date()
+      let cutoffDate: Date
+      switch (dateRange) {
+        case '7days':
+          cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          break
+        case '30days':
+          cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          break
+        case '90days':
+          cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+          break
+        default:
+          cutoffDate = new Date(0)
+      }
+      filtered = filtered.filter(i => new Date(i.issue_date || i.created_at) >= cutoffDate)
+    }
+
+    // Advanced filters
+    if (filterAmountMin) {
+      const minAmount = parseFloat(filterAmountMin)
+      if (!isNaN(minAmount)) {
+        filtered = filtered.filter(i => i.total_amount >= minAmount)
+      }
+    }
+
+    if (filterAmountMax) {
+      const maxAmount = parseFloat(filterAmountMax)
+      if (!isNaN(maxAmount)) {
+        filtered = filtered.filter(i => i.total_amount <= maxAmount)
+      }
+    }
+
+    if (filterClient) {
+      const clientQuery = filterClient.toLowerCase()
+      filtered = filtered.filter(i => i.client_name?.toLowerCase().includes(clientQuery))
+    }
+
+    if (filterDueDateFrom) {
+      filtered = filtered.filter(i => new Date(i.due_date) >= new Date(filterDueDateFrom))
+    }
+
+    if (filterDueDateTo) {
+      filtered = filtered.filter(i => new Date(i.due_date) <= new Date(filterDueDateTo))
+    }
+
     return filtered
-  }, [displayInvoices, searchQuery, activeTab])
+  }, [displayInvoices, searchQuery, activeTab, dateRange, filterAmountMin, filterAmountMax, filterClient, filterDueDateFrom, filterDueDateTo])
 
   const addLineItem = () => {
     const newItem: LineItem = {
@@ -831,9 +890,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                   <option value="30days">Last 30 Days</option>
                   <option value="90days">Last 90 Days</option>
                 </select>
-                <Button variant="outline" size="icon" onClick={() => {
-                  toast.info('Filter options: Status, Amount Range, Due Date, Client')
-                }}>
+                <Button variant="outline" size="icon" onClick={() => setShowFilterModal(true)}>
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
@@ -953,7 +1010,10 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => window.open(`/dashboard/invoices/${invoice.id}/edit`, '_blank')}>
+                            <DropdownMenuItem onClick={() => {
+                              setEditingInvoice(invoice)
+                              setShowEditModal(true)
+                            }}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -991,7 +1051,10 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                               Void Invoice
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteInvoice(invoice)}>
+                            <DropdownMenuItem className="text-red-600" onClick={() => {
+                              setDeletingInvoice(invoice)
+                              setShowDeleteConfirm(true)
+                            }}>
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete
                             </DropdownMenuItem>
@@ -1853,7 +1916,21 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
             <AIInsightsPanel
               insights={mockInvoicesAIInsights}
               title="Invoice Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                // Handle insight actions based on type
+                if (insight.type === 'warning' && insight.category === 'Collections') {
+                  // Navigate to overdue invoices
+                  setActiveTab('overdue')
+                  toast.info('Showing overdue invoices', { description: 'Review and send reminders to clients' })
+                } else if (insight.type === 'success') {
+                  toast.success(insight.title, { description: insight.description })
+                } else if (insight.type === 'info' && insight.category === 'Forecast') {
+                  // Show forecast details
+                  toast.info('Revenue Forecast', { description: insight.description })
+                } else {
+                  toast.info(insight.title, { description: insight.description })
+                }
+              }}
             />
           </div>
 
@@ -2386,10 +2463,53 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                   toast.error('Please fill in client name and invoice title to preview')
                   return
                 }
-                toast.loading('Generating preview...', { id: 'invoice-preview' })
-                setTimeout(() => {
-                  toast.success('Invoice preview ready!', { id: 'invoice-preview' })
-                }, 1000)
+                // Generate preview content
+                const previewContent = `
+Invoice Preview
+===============
+Invoice #: INV-${Date.now().toString().slice(-6)}
+Date: ${new Date().toLocaleDateString()}
+Due: ${newInvoice.dueDate || 'Not set'}
+
+Bill To:
+${newInvoice.client}
+${newInvoice.clientEmail || ''}
+
+${newInvoice.title}
+${'-'.repeat(40)}
+Items: ${newInvoice.items.length}
+Subtotal: ${getCurrencySymbol(newInvoice.currency)}${calculateSubtotal().toFixed(2)}
+Tax: ${getCurrencySymbol(newInvoice.currency)}${calculateTax().toFixed(2)}
+${newInvoice.discount.enabled ? `Discount: -${getCurrencySymbol(newInvoice.currency)}${calculateDiscount().toFixed(2)}` : ''}
+${'-'.repeat(40)}
+Total: ${getCurrencySymbol(newInvoice.currency)}${calculateTotal().toFixed(2)}
+
+Notes: ${newInvoice.notes || 'None'}
+Terms: ${newInvoice.terms || 'Standard terms apply'}
+                `.trim()
+
+                // Open preview in new window
+                const previewWindow = window.open('', '_blank', 'width=600,height=800')
+                if (previewWindow) {
+                  previewWindow.document.write(`
+                    <html>
+                      <head>
+                        <title>Invoice Preview - ${newInvoice.title}</title>
+                        <style>
+                          body { font-family: system-ui, sans-serif; padding: 40px; line-height: 1.6; background: #f5f5f5; }
+                          pre { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); white-space: pre-wrap; }
+                        </style>
+                      </head>
+                      <body>
+                        <pre>${previewContent}</pre>
+                      </body>
+                    </html>
+                  `)
+                  previewWindow.document.close()
+                  toast.success('Invoice preview opened in new window')
+                } else {
+                  toast.error('Please allow popups to preview invoice')
+                }
               }}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
@@ -2493,6 +2613,305 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
               </div>
             </TabsContent>
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Advanced Filters
+            </DialogTitle>
+            <DialogDescription>
+              Filter invoices by multiple criteria
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Client Name</Label>
+              <Input
+                placeholder="Search by client name..."
+                value={filterClient}
+                onChange={(e) => setFilterClient(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Min Amount</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  value={filterAmountMin}
+                  onChange={(e) => setFilterAmountMin(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Max Amount</Label>
+                <Input
+                  type="number"
+                  placeholder="No limit"
+                  value={filterAmountMax}
+                  onChange={(e) => setFilterAmountMax(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Due Date From</Label>
+                <Input
+                  type="date"
+                  value={filterDueDateFrom}
+                  onChange={(e) => setFilterDueDateFrom(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Due Date To</Label>
+                <Input
+                  type="date"
+                  value={filterDueDateTo}
+                  onChange={(e) => setFilterDueDateTo(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFilterClient('')
+                setFilterAmountMin('')
+                setFilterAmountMax('')
+                setFilterDueDateFrom('')
+                setFilterDueDateTo('')
+                toast.success('Filters cleared')
+              }}
+            >
+              Clear All
+            </Button>
+            <Button onClick={() => {
+              setShowFilterModal(false)
+              const activeFilters = [
+                filterClient && 'Client',
+                (filterAmountMin || filterAmountMax) && 'Amount',
+                (filterDueDateFrom || filterDueDateTo) && 'Due Date'
+              ].filter(Boolean)
+              if (activeFilters.length > 0) {
+                toast.success(`Filters applied: ${activeFilters.join(', ')}`)
+              }
+            }}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Invoice Dialog */}
+      <Dialog open={showEditModal} onOpenChange={(open) => {
+        setShowEditModal(open)
+        if (!open) setEditingInvoice(null)
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-600" />
+              Edit Invoice
+            </DialogTitle>
+            <DialogDescription>
+              {editingInvoice && `Editing invoice #${editingInvoice.invoice_number}`}
+            </DialogDescription>
+          </DialogHeader>
+          {editingInvoice && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Invoice Title</Label>
+                  <Input
+                    value={editingInvoice.title || ''}
+                    onChange={(e) => setEditingInvoice({...editingInvoice, title: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <select
+                    className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                    value={editingInvoice.status}
+                    onChange={(e) => setEditingInvoice({...editingInvoice, status: e.target.value as InvoiceStatus})}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Client Name</Label>
+                  <Input
+                    value={editingInvoice.client_name || ''}
+                    onChange={(e) => setEditingInvoice({...editingInvoice, client_name: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Client Email</Label>
+                  <Input
+                    type="email"
+                    value={editingInvoice.client_email || ''}
+                    onChange={(e) => setEditingInvoice({...editingInvoice, client_email: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Total Amount</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingInvoice.total_amount}
+                    onChange={(e) => setEditingInvoice({
+                      ...editingInvoice,
+                      total_amount: parseFloat(e.target.value) || 0,
+                      amount_due: parseFloat(e.target.value) - (editingInvoice.amount_paid || 0)
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Amount Paid</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={editingInvoice.amount_paid || 0}
+                    onChange={(e) => setEditingInvoice({
+                      ...editingInvoice,
+                      amount_paid: parseFloat(e.target.value) || 0,
+                      amount_due: editingInvoice.total_amount - (parseFloat(e.target.value) || 0)
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Due Date</Label>
+                  <Input
+                    type="date"
+                    value={editingInvoice.due_date?.split('T')[0] || ''}
+                    onChange={(e) => setEditingInvoice({...editingInvoice, due_date: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea
+                  value={editingInvoice.notes || ''}
+                  onChange={(e) => setEditingInvoice({...editingInvoice, notes: e.target.value})}
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowEditModal(false)
+              setEditingInvoice(null)
+            }}>
+              Cancel
+            </Button>
+            <Button
+              disabled={mutating}
+              onClick={async () => {
+                if (!editingInvoice) return
+                try {
+                  await toast.promise(
+                    updateInvoice(editingInvoice.id, {
+                      title: editingInvoice.title,
+                      client_name: editingInvoice.client_name,
+                      client_email: editingInvoice.client_email,
+                      status: editingInvoice.status,
+                      total_amount: editingInvoice.total_amount,
+                      amount_paid: editingInvoice.amount_paid,
+                      amount_due: editingInvoice.amount_due,
+                      due_date: editingInvoice.due_date,
+                      notes: editingInvoice.notes
+                    }),
+                    {
+                      loading: 'Saving changes...',
+                      success: `Invoice #${editingInvoice.invoice_number} updated successfully`,
+                      error: 'Failed to update invoice'
+                    }
+                  )
+                  setShowEditModal(false)
+                  setEditingInvoice(null)
+                } catch (error) {
+                  // Error already handled by toast.promise
+                }
+              }}
+            >
+              {mutating ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={(open) => {
+        setShowDeleteConfirm(open)
+        if (!open) setDeletingInvoice(null)
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete Invoice
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. The invoice will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+          {deletingInvoice && (
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="font-medium">Invoice #{deletingInvoice.invoice_number}</p>
+                <p className="text-sm text-muted-foreground">{deletingInvoice.title}</p>
+                <p className="text-sm text-muted-foreground">Client: {deletingInvoice.client_name}</p>
+                <p className="text-sm font-medium mt-2">
+                  Amount: {getCurrencySymbol(deletingInvoice.currency)}{deletingInvoice.total_amount.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowDeleteConfirm(false)
+              setDeletingInvoice(null)
+            }}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={mutating}
+              onClick={async () => {
+                if (!deletingInvoice) return
+                try {
+                  await toast.promise(
+                    deleteInvoice(deletingInvoice.id),
+                    {
+                      loading: 'Deleting invoice...',
+                      success: `Invoice #${deletingInvoice.invoice_number} deleted successfully`,
+                      error: 'Failed to delete invoice'
+                    }
+                  )
+                  setShowDeleteConfirm(false)
+                  setDeletingInvoice(null)
+                } catch (error) {
+                  // Error already handled by toast.promise
+                }
+              }}
+            >
+              {mutating ? 'Deleting...' : 'Delete Invoice'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

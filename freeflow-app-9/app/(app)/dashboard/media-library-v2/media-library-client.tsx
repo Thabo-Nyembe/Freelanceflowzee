@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -87,7 +87,11 @@ import {
   Boxes,
   Database,
   Activity,
-  PieChart
+  PieChart,
+  X,
+  CheckSquare,
+  Square,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -647,6 +651,22 @@ export default function MediaLibraryClient({
   const [showDownloadsDialog, setShowDownloadsDialog] = useState(false)
   const [showStorageDialog, setShowStorageDialog] = useState(false)
 
+  // File upload state
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadingFiles, setUploadingFiles] = useState<File[]>([])
+  const [dragActive, setDragActive] = useState(false)
+
+  // Bulk selection state
+  const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set())
+  const [bulkSelectMode, setBulkSelectMode] = useState(false)
+
+  // URL import state
+  const [importUrl, setImportUrl] = useState('')
+  const [importFileName, setImportFileName] = useState('')
+  const [isImporting, setIsImporting] = useState(false)
+
   const stats = useMemo(() => {
     const totalViews = initialAssets.reduce((sum, a) => sum + a.viewCount, 0)
     const totalDownloads = initialAssets.reduce((sum, a) => sum + a.downloadCount, 0)
@@ -692,6 +712,112 @@ export default function MediaLibraryClient({
 
   // CRUD Handlers
   const handleUploadMedia = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileSelect = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+
+    const fileArray = Array.from(files)
+    setUploadingFiles(fileArray)
+    setIsUploading(true)
+    setUploadProgress(0)
+    setShowUploadDialog(true)
+
+    const totalFiles = fileArray.length
+    let completedFiles = 0
+
+    for (const file of fileArray) {
+      try {
+        // Determine file type from mime type
+        let fileType: MediaFileType = 'other'
+        if (file.type.startsWith('image/')) fileType = 'image'
+        else if (file.type.startsWith('video/')) fileType = 'video'
+        else if (file.type.startsWith('audio/')) fileType = 'audio'
+        else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text')) fileType = 'document'
+        else if (file.type.includes('zip') || file.type.includes('rar') || file.type.includes('tar')) fileType = 'archive'
+
+        // Upload to Supabase Storage
+        const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(`uploads/${fileName}`, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError)
+          toast.error(`Failed to upload ${file.name}`)
+          continue
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(`uploads/${fileName}`)
+
+        // Create file record in database
+        await fileMutation.create({
+          file_name: file.name,
+          original_name: file.name,
+          file_type: fileType,
+          file_size: file.size,
+          mime_type: file.type,
+          storage_path: uploadData?.path || `uploads/${fileName}`,
+          public_url: urlData?.publicUrl || null,
+          access_level: 'private',
+          is_public: false,
+          status: 'active',
+          view_count: 0,
+          download_count: 0,
+          share_count: 0,
+          is_starred: false,
+          is_featured: false,
+          password_protected: false,
+        })
+
+        completedFiles++
+        setUploadProgress(Math.round((completedFiles / totalFiles) * 100))
+      } catch (error) {
+        console.error('Error uploading file:', error)
+        toast.error(`Failed to upload ${file.name}`)
+      }
+    }
+
+    setIsUploading(false)
+    setUploadingFiles([])
+    setShowUploadDialog(false)
+    refetchFiles()
+
+    if (completedFiles === totalFiles) {
+      toast.success(`Successfully uploaded ${completedFiles} file${completedFiles > 1 ? 's' : ''}`)
+    } else {
+      toast.warning(`Uploaded ${completedFiles} of ${totalFiles} files`)
+    }
+  }, [supabase, fileMutation, refetchFiles])
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true)
+    } else if (e.type === 'dragleave') {
+      setDragActive(false)
+    }
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileSelect(e.dataTransfer.files)
+    }
+  }, [handleFileSelect])
+
+  const handleOpenUploadDialog = () => {
     setFileForm(defaultFileForm)
     setShowUploadDialog(true)
   }
@@ -769,19 +895,55 @@ export default function MediaLibraryClient({
     }
   }
 
-  const handleDownloadAsset = (asset: MediaAsset) => {
-    if (asset.originalUrl) {
-      window.open(asset.originalUrl, '_blank')
-      toast.success('Download started', {
-        description: `Downloading "${asset.fileName}"...`
-      })
-      // Increment download count
-      fileMutation.update(asset.id, { download_count: (asset.downloadCount || 0) + 1 })
-    } else {
+  const handleDownloadAsset = async (asset: MediaAsset) => {
+    const downloadUrl = asset.originalUrl
+
+    if (!downloadUrl) {
       toast.error('Download unavailable', {
         description: 'No download URL available for this asset'
       })
+      return
     }
+
+    const downloadPromise = async () => {
+      try {
+        const response = await fetch(downloadUrl)
+        if (!response.ok) throw new Error('Download failed')
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = asset.fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        // Increment download count
+        await fileMutation.update(asset.id, { download_count: (asset.downloadCount || 0) + 1 })
+
+        return asset.fileName
+      } catch (error) {
+        // Fallback to direct download if fetch fails (e.g., CORS issues)
+        const link = document.createElement('a')
+        link.href = downloadUrl
+        link.download = asset.fileName
+        link.target = '_blank'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
+        await fileMutation.update(asset.id, { download_count: (asset.downloadCount || 0) + 1 })
+        return asset.fileName
+      }
+    }
+
+    toast.promise(downloadPromise(), {
+      loading: `Downloading "${asset.fileName}"...`,
+      success: (name) => `Downloaded "${name}" successfully`,
+      error: 'Download failed'
+    })
   }
 
   const handleDeleteAsset = (asset: MediaAsset) => {
@@ -1396,6 +1558,221 @@ export default function MediaLibraryClient({
     }
   }
 
+  // Bulk selection handlers
+  const toggleAssetSelection = (assetId: string) => {
+    setSelectedAssets(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(assetId)) {
+        newSet.delete(assetId)
+      } else {
+        newSet.add(assetId)
+      }
+      return newSet
+    })
+  }
+
+  const selectAllAssets = () => {
+    if (selectedAssets.size === filteredAssets.length) {
+      setSelectedAssets(new Set())
+    } else {
+      setSelectedAssets(new Set(filteredAssets.map(a => a.id)))
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedAssets(new Set())
+    setBulkSelectMode(false)
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedAssets.size === 0) {
+      toast.error('No assets selected')
+      return
+    }
+
+    if (!confirm(`Delete ${selectedAssets.size} selected asset(s)? This action cannot be undone.`)) {
+      return
+    }
+
+    const deletePromise = async () => {
+      let deleted = 0
+      const assetIds = Array.from(selectedAssets)
+      for (const assetId of assetIds) {
+        try {
+          await fileMutation.remove(assetId)
+          deleted++
+        } catch (error) {
+          console.error('Error deleting asset:', error)
+        }
+      }
+      clearSelection()
+      refetchFiles()
+      return deleted
+    }
+
+    toast.promise(deletePromise(), {
+      loading: `Deleting ${selectedAssets.size} assets...`,
+      success: (count) => `Deleted ${count} asset(s) successfully`,
+      error: 'Failed to delete some assets'
+    })
+  }
+
+  const handleBulkDownload = async () => {
+    if (selectedAssets.size === 0) {
+      toast.error('No assets selected')
+      return
+    }
+
+    const assetsToDownload = filteredAssets.filter(a => selectedAssets.has(a.id))
+
+    toast.loading(`Preparing ${assetsToDownload.length} files for download...`)
+
+    for (const asset of assetsToDownload) {
+      if (asset.originalUrl) {
+        try {
+          const response = await fetch(asset.originalUrl)
+          const blob = await response.blob()
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = asset.fileName
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+        } catch {
+          // Fallback
+          window.open(asset.originalUrl, '_blank')
+        }
+      }
+    }
+
+    toast.dismiss()
+    toast.success(`Downloaded ${assetsToDownload.length} files`)
+    clearSelection()
+  }
+
+  const handleBulkMove = () => {
+    if (selectedAssets.size === 0) {
+      toast.error('No assets selected')
+      return
+    }
+    // Use the first selected asset as reference for the move dialog
+    const firstAsset = filteredAssets.find(a => selectedAssets.has(a.id))
+    if (firstAsset) {
+      setItemToMove(firstAsset)
+      setShowMoveDialog(true)
+    }
+  }
+
+  const handleBulkStar = async () => {
+    if (selectedAssets.size === 0) {
+      toast.error('No assets selected')
+      return
+    }
+
+    const starPromise = async () => {
+      let updated = 0
+      for (const assetId of selectedAssets) {
+        try {
+          await fileMutation.update(assetId, { is_starred: true })
+          updated++
+        } catch (error) {
+          console.error('Error starring asset:', error)
+        }
+      }
+      clearSelection()
+      refetchFiles()
+      return updated
+    }
+
+    toast.promise(starPromise(), {
+      loading: 'Starring selected assets...',
+      success: (count) => `Starred ${count} asset(s)`,
+      error: 'Failed to star some assets'
+    })
+  }
+
+  // URL Import handler
+  const handleUrlImport = async () => {
+    if (!importUrl.trim()) {
+      toast.error('Please enter a URL')
+      return
+    }
+
+    setIsImporting(true)
+
+    const importPromise = async () => {
+      try {
+        const response = await fetch(importUrl)
+        if (!response.ok) throw new Error('Failed to fetch URL')
+
+        const blob = await response.blob()
+        const fileName = importFileName.trim() || importUrl.split('/').pop() || 'imported-file'
+        const file = new File([blob], fileName, { type: blob.type })
+
+        // Determine file type
+        let fileType: MediaFileType = 'other'
+        if (blob.type.startsWith('image/')) fileType = 'image'
+        else if (blob.type.startsWith('video/')) fileType = 'video'
+        else if (blob.type.startsWith('audio/')) fileType = 'audio'
+        else if (blob.type.includes('pdf') || blob.type.includes('document')) fileType = 'document'
+
+        // Upload to Supabase Storage
+        const storageName = `${Date.now()}-${fileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('media')
+          .upload(`uploads/${storageName}`, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) throw uploadError
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(`uploads/${storageName}`)
+
+        // Create file record
+        await fileMutation.create({
+          file_name: fileName,
+          original_name: fileName,
+          file_type: fileType,
+          file_size: blob.size,
+          mime_type: blob.type,
+          storage_path: uploadData?.path || `uploads/${storageName}`,
+          public_url: urlData?.publicUrl || null,
+          access_level: 'private',
+          is_public: false,
+          status: 'active',
+          view_count: 0,
+          download_count: 0,
+          share_count: 0,
+          is_starred: false,
+          is_featured: false,
+          password_protected: false,
+        })
+
+        setImportUrl('')
+        setImportFileName('')
+        setShowUrlImportDialog(false)
+        refetchFiles()
+        return fileName
+      } catch (error) {
+        throw error
+      } finally {
+        setIsImporting(false)
+      }
+    }
+
+    toast.promise(importPromise(), {
+      loading: 'Importing from URL...',
+      success: (name) => `Imported "${name}" successfully`,
+      error: 'Failed to import from URL'
+    })
+  }
+
   // Quick actions defined with real functionality
   const mediaQuickActions = useMemo(() => [
     { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: handleUploadMedia },
@@ -1406,6 +1783,16 @@ export default function MediaLibraryClient({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
+      {/* Hidden file input for uploads */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
+        className="hidden"
+        onChange={(e) => handleFileSelect(e.target.files)}
+      />
+
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1419,6 +1806,18 @@ export default function MediaLibraryClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Bulk selection mode toggle */}
+            <Button
+              variant={bulkSelectMode ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                setBulkSelectMode(!bulkSelectMode)
+                if (bulkSelectMode) clearSelection()
+              }}
+            >
+              {bulkSelectMode ? <CheckSquare className="w-4 h-4 mr-2" /> : <Square className="w-4 h-4 mr-2" />}
+              {bulkSelectMode ? 'Exit Select' : 'Select'}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
@@ -1429,6 +1828,41 @@ export default function MediaLibraryClient({
             </Button>
           </div>
         </div>
+
+        {/* Bulk Actions Toolbar - shows when assets are selected */}
+        {selectedAssets.size > 0 && (
+          <div className="flex items-center justify-between p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+            <div className="flex items-center gap-4">
+              <span className="font-medium text-indigo-700 dark:text-indigo-300">
+                {selectedAssets.size} asset{selectedAssets.size > 1 ? 's' : ''} selected
+              </span>
+              <Button variant="ghost" size="sm" onClick={selectAllAssets}>
+                {selectedAssets.size === filteredAssets.length ? 'Deselect All' : 'Select All'}
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleBulkDownload}>
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleBulkMove}>
+                <Move className="w-4 h-4 mr-2" />
+                Move
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleBulkStar}>
+                <Star className="w-4 h-4 mr-2" />
+                Star
+              </Button>
+              <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+              <Button variant="ghost" size="sm" onClick={clearSelection}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -1576,8 +2010,40 @@ export default function MediaLibraryClient({
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {filteredAssets.map((asset) => (
-                  <Card key={asset.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group" onClick={() => setSelectedAsset(asset)}>
+                  <Card
+                    key={asset.id}
+                    className={`border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group relative ${
+                      selectedAssets.has(asset.id) ? 'ring-2 ring-indigo-500' : ''
+                    }`}
+                    onClick={() => {
+                      if (bulkSelectMode) {
+                        toggleAssetSelection(asset.id)
+                      } else {
+                        setSelectedAsset(asset)
+                      }
+                    }}
+                  >
                     <CardContent className="p-0">
+                      {/* Selection checkbox */}
+                      {(bulkSelectMode || selectedAssets.size > 0) && (
+                        <div
+                          className="absolute top-2 left-2 z-10"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleAssetSelection(asset.id)
+                          }}
+                        >
+                          <div className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                            selectedAssets.has(asset.id)
+                              ? 'bg-indigo-500 border-indigo-500'
+                              : 'bg-white/80 border-gray-300 hover:border-indigo-500'
+                          }`}>
+                            {selectedAssets.has(asset.id) && (
+                              <CheckSquare className="w-4 h-4 text-white" />
+                            )}
+                          </div>
+                        </div>
+                      )}
                       <div className={`aspect-video rounded-t-lg bg-gradient-to-br ${getFileTypeColor(asset.fileType)} flex items-center justify-center relative overflow-hidden`}>
                         {getFileTypeIcon(asset.fileType)}
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -1617,9 +2083,37 @@ export default function MediaLibraryClient({
                     {filteredAssets.map((asset) => (
                       <div
                         key={asset.id}
-                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer flex items-center gap-4"
-                        onClick={() => setSelectedAsset(asset)}
+                        className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer flex items-center gap-4 ${
+                          selectedAssets.has(asset.id) ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
+                        }`}
+                        onClick={() => {
+                          if (bulkSelectMode) {
+                            toggleAssetSelection(asset.id)
+                          } else {
+                            setSelectedAsset(asset)
+                          }
+                        }}
                       >
+                        {/* Selection checkbox for list view */}
+                        {(bulkSelectMode || selectedAssets.size > 0) && (
+                          <div
+                            className="flex-shrink-0"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleAssetSelection(asset.id)
+                            }}
+                          >
+                            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
+                              selectedAssets.has(asset.id)
+                                ? 'bg-indigo-500 border-indigo-500'
+                                : 'border-gray-300 hover:border-indigo-500'
+                            }`}>
+                              {selectedAssets.has(asset.id) && (
+                                <CheckSquare className="w-4 h-4 text-white" />
+                              )}
+                            </div>
+                          </div>
+                        )}
                         <div className={`w-16 h-16 rounded-lg bg-gradient-to-br ${getFileTypeColor(asset.fileType)} flex items-center justify-center flex-shrink-0`}>
                           {getFileTypeIcon(asset.fileType)}
                         </div>
@@ -2508,7 +3002,20 @@ export default function MediaLibraryClient({
             <AIInsightsPanel
               insights={mockMediaAIInsights}
               title="Media Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                if (insight.category === 'Storage') {
+                  setActiveTab('settings')
+                  setSettingsTab('storage')
+                  toast.info('Navigate to Storage settings')
+                } else if (insight.category === 'Automation') {
+                  handleAITagAll()
+                } else if (insight.category === 'Compliance') {
+                  setShowFilterDialog(true)
+                  toast.info('Review assets with expiring licenses')
+                } else {
+                  toast.info(`Action for: ${insight.title}`)
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2726,88 +3233,168 @@ export default function MediaLibraryClient({
         </Dialog>
 
         {/* Upload/Create File Dialog */}
-        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+        <Dialog open={showUploadDialog} onOpenChange={(open) => {
+          if (!isUploading) setShowUploadDialog(open)
+        }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Upload New Asset</DialogTitle>
-              <DialogDescription>Add a new file to your media library</DialogDescription>
+              <DialogTitle>{isUploading ? 'Uploading Files' : 'Upload New Asset'}</DialogTitle>
+              <DialogDescription>
+                {isUploading
+                  ? `Uploading ${uploadingFiles.length} file${uploadingFiles.length > 1 ? 's' : ''}...`
+                  : 'Add a new file to your media library'}
+              </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="file_name">File Name *</Label>
-                <Input
-                  id="file_name"
-                  value={fileForm.file_name}
-                  onChange={(e) => setFileForm({ ...fileForm, file_name: e.target.value })}
-                  placeholder="Enter file name"
-                />
+
+            {isUploading ? (
+              <div className="space-y-6 py-4">
+                {/* Upload Progress */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium">Upload Progress</span>
+                    <span className="text-gray-500">{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-3" />
+                </div>
+
+                {/* Files being uploaded */}
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {uploadingFiles.map((file, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                        {file.type.startsWith('image/') && <FileImage className="w-5 h-5 text-indigo-600" />}
+                        {file.type.startsWith('video/') && <FileVideo className="w-5 h-5 text-indigo-600" />}
+                        {file.type.startsWith('audio/') && <FileAudio className="w-5 h-5 text-indigo-600" />}
+                        {!file.type.startsWith('image/') && !file.type.startsWith('video/') && !file.type.startsWith('audio/') && (
+                          <FileText className="w-5 h-5 text-indigo-600" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{file.name}</p>
+                        <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
+                      </div>
+                      <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-sm text-gray-500 text-center">
+                  Please wait while your files are being uploaded...
+                </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="file_type">File Type</Label>
-                <Select value={fileForm.file_type} onValueChange={(value: MediaFileType) => setFileForm({ ...fileForm, file_type: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select file type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="image">Image</SelectItem>
-                    <SelectItem value="video">Video</SelectItem>
-                    <SelectItem value="audio">Audio</SelectItem>
-                    <SelectItem value="document">Document</SelectItem>
-                    <SelectItem value="archive">Archive</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+            ) : (
+              <div className="space-y-4">
+                {/* Drag and drop area */}
+                <div
+                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
+                    dragActive
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                      : 'border-gray-300 dark:border-gray-700 hover:border-indigo-500'
+                  }`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <CloudUpload className={`w-12 h-12 mx-auto mb-3 ${dragActive ? 'text-indigo-500' : 'text-gray-400'}`} />
+                  <p className="font-medium text-gray-700 dark:text-gray-300">
+                    {dragActive ? 'Drop files here' : 'Drag and drop files here'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">or click to browse</p>
+                  <p className="text-xs text-gray-400 mt-2">
+                    Supports images, videos, audio, documents, and archives (max 5GB)
+                  </p>
+                </div>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white dark:bg-gray-950 px-2 text-gray-500">Or create manually</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="file_name">File Name *</Label>
+                  <Input
+                    id="file_name"
+                    value={fileForm.file_name}
+                    onChange={(e) => setFileForm({ ...fileForm, file_name: e.target.value })}
+                    placeholder="Enter file name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="file_type">File Type</Label>
+                  <Select value={fileForm.file_type} onValueChange={(value: MediaFileType) => setFileForm({ ...fileForm, file_type: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select file type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="image">Image</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="audio">Audio</SelectItem>
+                      <SelectItem value="document">Document</SelectItem>
+                      <SelectItem value="archive">Archive</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={fileForm.description}
+                    onChange={(e) => setFileForm({ ...fileForm, description: e.target.value })}
+                    placeholder="Enter file description"
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="alt_text">Alt Text</Label>
+                  <Input
+                    id="alt_text"
+                    value={fileForm.alt_text}
+                    onChange={(e) => setFileForm({ ...fileForm, alt_text: e.target.value })}
+                    placeholder="Enter alt text for accessibility"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+                  <Input
+                    id="tags"
+                    value={fileForm.tags}
+                    onChange={(e) => setFileForm({ ...fileForm, tags: e.target.value })}
+                    placeholder="tag1, tag2, tag3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="access_level">Access Level</Label>
+                  <Select value={fileForm.access_level} onValueChange={(value: MediaAccessLevel) => setFileForm({ ...fileForm, access_level: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select access level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="private">Private</SelectItem>
+                      <SelectItem value="team">Team</SelectItem>
+                      <SelectItem value="organization">Organization</SelectItem>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="link_only">Link Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={fileForm.description}
-                  onChange={(e) => setFileForm({ ...fileForm, description: e.target.value })}
-                  placeholder="Enter file description"
-                  rows={3}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="alt_text">Alt Text</Label>
-                <Input
-                  id="alt_text"
-                  value={fileForm.alt_text}
-                  onChange={(e) => setFileForm({ ...fileForm, alt_text: e.target.value })}
-                  placeholder="Enter alt text for accessibility"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={fileForm.tags}
-                  onChange={(e) => setFileForm({ ...fileForm, tags: e.target.value })}
-                  placeholder="tag1, tag2, tag3"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="access_level">Access Level</Label>
-                <Select value={fileForm.access_level} onValueChange={(value: MediaAccessLevel) => setFileForm({ ...fileForm, access_level: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select access level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="private">Private</SelectItem>
-                    <SelectItem value="team">Team</SelectItem>
-                    <SelectItem value="organization">Organization</SelectItem>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="link_only">Link Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
-              <Button onClick={handleCreateFile} disabled={isSubmitting}>
-                {isSubmitting ? 'Creating...' : 'Create File'}
-              </Button>
-            </DialogFooter>
+            )}
+
+            {!isUploading && (
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
+                <Button onClick={handleCreateFile} disabled={isSubmitting}>
+                  {isSubmitting ? 'Creating...' : 'Create File'}
+                </Button>
+              </DialogFooter>
+            )}
           </DialogContent>
         </Dialog>
 
@@ -3290,7 +3877,15 @@ export default function MediaLibraryClient({
         </Dialog>
 
         {/* URL Import Dialog */}
-        <Dialog open={showUrlImportDialog} onOpenChange={setShowUrlImportDialog}>
+        <Dialog open={showUrlImportDialog} onOpenChange={(open) => {
+          if (!isImporting) {
+            setShowUrlImportDialog(open)
+            if (!open) {
+              setImportUrl('')
+              setImportFileName('')
+            }
+          }
+        }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Import from URL</DialogTitle>
@@ -3298,17 +3893,49 @@ export default function MediaLibraryClient({
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>File URL</Label>
-                <Input placeholder="https://example.com/image.jpg" />
+                <Label htmlFor="import_url">File URL *</Label>
+                <Input
+                  id="import_url"
+                  placeholder="https://example.com/image.jpg"
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  disabled={isImporting}
+                />
               </div>
               <div className="space-y-2">
-                <Label>File Name (optional)</Label>
-                <Input placeholder="Enter file name" />
+                <Label htmlFor="import_filename">File Name (optional)</Label>
+                <Input
+                  id="import_filename"
+                  placeholder="Enter file name"
+                  value={importFileName}
+                  onChange={(e) => setImportFileName(e.target.value)}
+                  disabled={isImporting}
+                />
+                <p className="text-xs text-gray-500">Leave empty to auto-detect from URL</p>
               </div>
+              {isImporting && (
+                <div className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                  <Loader2 className="w-5 h-5 text-indigo-600 animate-spin" />
+                  <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                    Importing file...
+                  </span>
+                </div>
+              )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowUrlImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowUrlImportDialog(false); toast.success('URL import started') }}>Import</Button>
+              <Button variant="outline" onClick={() => setShowUrlImportDialog(false)} disabled={isImporting}>
+                Cancel
+              </Button>
+              <Button onClick={handleUrlImport} disabled={isImporting || !importUrl.trim()}>
+                {isImporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  'Import'
+                )}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

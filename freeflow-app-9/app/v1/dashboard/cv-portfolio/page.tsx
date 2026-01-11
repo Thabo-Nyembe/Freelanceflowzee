@@ -54,6 +54,8 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -108,7 +110,16 @@ import {
   getSkills,
   getExperience,
   getEducation,
-  createShareLink
+  createShareLink,
+  addProject as addProjectApi,
+  updateProject as updateProjectApi,
+  addExperience as addExperienceApi,
+  updateExperience as updateExperienceApi,
+  addEducation as addEducationApi,
+  updateEducation as updateEducationApi,
+  addCertification as addCertificationApi,
+  updateCertification as updateCertificationApi,
+  uploadPortfolioImage
 } from '@/lib/cv-portfolio-queries'
 
 // TYPES
@@ -272,6 +283,20 @@ export default function CVPortfolioPage() {
   // Update Bio Dialog
   const [showUpdateBioDialog, setShowUpdateBioDialog] = useState(false)
   const [editBio, setEditBio] = useState('')
+
+  // Edit Profile Dialog
+  const [showEditProfileDialog, setShowEditProfileDialog] = useState(false)
+  const [editProfileName, setEditProfileName] = useState('')
+  const [editProfileTitle, setEditProfileTitle] = useState('')
+  const [editProfileLocation, setEditProfileLocation] = useState('')
+  const [editProfileEmail, setEditProfileEmail] = useState('')
+  const [editProfilePhone, setEditProfilePhone] = useState('')
+  const [editProfileWebsite, setEditProfileWebsite] = useState('')
+
+  // Upload Progress States
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   // REAL STATE - Projects
   const [projects, setProjects] = useState<Project[]>([
@@ -615,7 +640,7 @@ export default function CVPortfolioPage() {
     setShowAddProjectDialog(true)
   }
 
-  const confirmAddProject = () => {
+  const confirmAddProject = async () => {
     if (!newProjectTitle.trim()) {
       toast.error('Please enter a project title')
       return
@@ -630,29 +655,62 @@ export default function CVPortfolioPage() {
     const technologies = newProjectTechnologies ? newProjectTechnologies.split(',').map(t => t.trim()).filter(t => t) : []
     const link = newProjectLink.trim()
 
-    const newProject: Project = {
-      id: Date.now(),
-      title,
-      description,
-      image: '/portfolio-default.jpg',
-      technologies,
-      link,
-      status: 'In Development',
-      dateAdded: new Date().toISOString()
+    setIsSaving(true)
+
+    const addProjectPromise = async () => {
+      let newProjectId = Date.now()
+
+      // Persist to database if user is authenticated
+      if (userId) {
+        const { data: createdProject, error: addError } = await addProjectApi(userId, {
+          title,
+          description,
+          technologies,
+          project_url: link || undefined,
+          is_featured: false,
+          category: 'web'
+        })
+        if (addError) throw new Error((addError as any)?.message || 'Failed to add project')
+        if (createdProject?.id) newProjectId = parseInt(createdProject.id)
+      }
+
+      const newProject: Project = {
+        id: newProjectId,
+        title,
+        description,
+        image: '/portfolio-default.jpg',
+        technologies,
+        link,
+        status: 'In Development',
+        dateAdded: new Date().toISOString()
+      }
+
+      setProjects(prev => [...prev, newProject])
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Project added', {
+        projectId: newProject.id,
+        projectTitle: title,
+        technologiesCount: technologies.length,
+        completenessScore: newCompleteness
+      })
+
+      return { title, completeness: newCompleteness }
     }
 
-    setProjects(prev => [...prev, newProject])
-
-    const newCompleteness = calculateCompleteness()
-    logger.info('Project added', {
-      projectId: newProject.id,
-      projectTitle: title,
-      technologiesCount: technologies.length,
-      completenessScore: newCompleteness
-    })
-
-    setShowAddProjectDialog(false)
-    toast.success(`Project Added! "${title}" added to portfolio (CV ${newCompleteness}% complete)`)
+    try {
+      const result = await toast.promise(addProjectPromise(), {
+        loading: 'Adding project...',
+        success: (data) => `Project Added! "${data.title}" added to portfolio (CV ${data.completeness}% complete)`,
+        error: (err) => err.message || 'Failed to add project'
+      })
+      setShowAddProjectDialog(false)
+      announce(`Project ${result.title} added`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to add project', { error: error.message })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleEditProject = (project: Project) => {
@@ -664,7 +722,7 @@ export default function CVPortfolioPage() {
     setShowEditProjectDialog(true)
   }
 
-  const confirmEditProject = () => {
+  const confirmEditProject = async () => {
     if (!editingProject) return
 
     if (!editProjectTitle.trim()) {
@@ -681,28 +739,56 @@ export default function CVPortfolioPage() {
     const technologies = editProjectTechnologies ? editProjectTechnologies.split(',').map(t => t.trim()).filter(t => t) : editingProject.technologies
     const link = editProjectLink.trim()
 
-    setProjects(prev => prev.map(p =>
-      p.id === editingProject.id
-        ? {
-            ...p,
-            title,
-            description,
-            technologies,
-            link: link || p.link
-          }
-        : p
-    ))
+    setIsSaving(true)
 
-    logger.info('Project updated', {
-      projectId: editingProject.id,
-      oldTitle: editingProject.title,
-      newTitle: title,
-      technologiesCount: technologies.length
-    })
+    const updateProjectPromise = async () => {
+      // Persist to database if user is authenticated
+      if (userId) {
+        const { error: updateError } = await updateProjectApi(String(editingProject.id), {
+          title,
+          description,
+          technologies,
+          project_url: link || undefined
+        })
+        if (updateError) throw new Error((updateError as any)?.message || 'Failed to update project')
+      }
 
-    setShowEditProjectDialog(false)
-    setEditingProject(null)
-    toast.success(`Project Updated! "${title}" has been updated`)
+      setProjects(prev => prev.map(p =>
+        p.id === editingProject.id
+          ? {
+              ...p,
+              title,
+              description,
+              technologies,
+              link: link || p.link
+            }
+          : p
+      ))
+
+      logger.info('Project updated', {
+        projectId: editingProject.id,
+        oldTitle: editingProject.title,
+        newTitle: title,
+        technologiesCount: technologies.length
+      })
+
+      return { title }
+    }
+
+    try {
+      const result = await toast.promise(updateProjectPromise(), {
+        loading: 'Updating project...',
+        success: (data) => `Project Updated! "${data.title}" has been updated`,
+        error: (err) => err.message || 'Failed to update project'
+      })
+      setShowEditProjectDialog(false)
+      setEditingProject(null)
+      announce(`Project ${result.title} updated`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update project', { error: error.message, projectId: editingProject.id })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleDeleteProject = (projectId: number) => {
@@ -925,7 +1011,7 @@ export default function CVPortfolioPage() {
     setShowAddExperienceDialog(true)
   }
 
-  const confirmAddExperience = () => {
+  const confirmAddExperience = async () => {
     if (!newExpCompany.trim()) {
       toast.error('Please enter a company name')
       return
@@ -954,31 +1040,66 @@ export default function CVPortfolioPage() {
     const period = newExpPeriod.trim()
     const technologies = newExpTechnologies ? newExpTechnologies.split(',').map(t => t.trim()).filter(t => t) : []
 
-    const newExperience: Experience = {
-      id: Date.now(),
-      company,
-      position,
-      location,
-      description,
-      period,
-      technologies,
-      startDate: new Date().toISOString()
+    setIsSaving(true)
+
+    const addExperiencePromise = async () => {
+      let newExperienceId = Date.now()
+
+      // Persist to database if user is authenticated
+      if (userId) {
+        const { data: createdExp, error: addError } = await addExperienceApi(userId, {
+          company,
+          position,
+          description,
+          location,
+          start_date: new Date().toISOString(),
+          is_current: period.toLowerCase().includes('present'),
+          achievements: [],
+          technologies
+        })
+        if (addError) throw new Error((addError as any)?.message || 'Failed to add experience')
+        if (createdExp?.id) newExperienceId = parseInt(createdExp.id)
+      }
+
+      const newExperience: Experience = {
+        id: newExperienceId,
+        company,
+        position,
+        location,
+        description,
+        period,
+        technologies,
+        startDate: new Date().toISOString()
+      }
+
+      setExperience(prev => [...prev, newExperience])
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Experience added', {
+        experienceId: newExperience.id,
+        company,
+        position,
+        descriptionLength: description.length,
+        technologiesCount: technologies.length,
+        completenessScore: newCompleteness
+      })
+
+      return { position, company, completeness: newCompleteness }
     }
 
-    setExperience(prev => [...prev, newExperience])
-
-    const newCompleteness = calculateCompleteness()
-    logger.info('Experience added', {
-      experienceId: newExperience.id,
-      company,
-      position,
-      descriptionLength: description.length,
-      technologiesCount: technologies.length,
-      completenessScore: newCompleteness
-    })
-
-    setShowAddExperienceDialog(false)
-    toast.success(`Experience Added! ${position} at ${company} (CV ${newCompleteness}% complete)`)
+    try {
+      const result = await toast.promise(addExperiencePromise(), {
+        loading: 'Adding experience...',
+        success: (data) => `Experience Added! ${data.position} at ${data.company} (CV ${data.completeness}% complete)`,
+        error: (err) => err.message || 'Failed to add experience'
+      })
+      setShowAddExperienceDialog(false)
+      announce(`Experience at ${result.company} added`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to add experience', { error: error.message })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleEditExperience = (exp: Experience) => {
@@ -989,7 +1110,7 @@ export default function CVPortfolioPage() {
     setShowEditExperienceDialog(true)
   }
 
-  const confirmEditExperience = () => {
+  const confirmEditExperience = async () => {
     if (!editingExperience) return
 
     if (!editExpCompany.trim()) {
@@ -1009,29 +1130,56 @@ export default function CVPortfolioPage() {
     const position = editExpPosition.trim()
     const description = editExpDescription.trim()
 
-    setExperience(prev => prev.map(e =>
-      e.id === editingExperience.id
-        ? {
-            ...e,
-            company,
-            position,
-            description
-          }
-        : e
-    ))
+    setIsSaving(true)
 
-    logger.info('Experience updated', {
-      experienceId: editingExperience.id,
-      oldCompany: editingExperience.company,
-      newCompany: company,
-      oldPosition: editingExperience.position,
-      newPosition: position,
-      descriptionLength: description.length
-    })
+    const updateExperiencePromise = async () => {
+      // Persist to database if user is authenticated
+      if (userId) {
+        const { error: updateError } = await updateExperienceApi(String(editingExperience.id), {
+          company,
+          position,
+          description
+        })
+        if (updateError) throw new Error((updateError as any)?.message || 'Failed to update experience')
+      }
 
-    setShowEditExperienceDialog(false)
-    setEditingExperience(null)
-    toast.success(`Experience Updated! ${position} at ${company}`)
+      setExperience(prev => prev.map(e =>
+        e.id === editingExperience.id
+          ? {
+              ...e,
+              company,
+              position,
+              description
+            }
+          : e
+      ))
+
+      logger.info('Experience updated', {
+        experienceId: editingExperience.id,
+        oldCompany: editingExperience.company,
+        newCompany: company,
+        oldPosition: editingExperience.position,
+        newPosition: position,
+        descriptionLength: description.length
+      })
+
+      return { position, company }
+    }
+
+    try {
+      const result = await toast.promise(updateExperiencePromise(), {
+        loading: 'Updating experience...',
+        success: (data) => `Experience Updated! ${data.position} at ${data.company}`,
+        error: (err) => err.message || 'Failed to update experience'
+      })
+      setShowEditExperienceDialog(false)
+      setEditingExperience(null)
+      announce(`Experience at ${result.company} updated`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update experience', { error: error.message, experienceId: editingExperience.id })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleDeleteExperience = (experienceId: number) => {
@@ -1095,7 +1243,7 @@ export default function CVPortfolioPage() {
     setShowAddEducationDialog(true)
   }
 
-  const confirmAddEducation = () => {
+  const confirmAddEducation = async () => {
     if (!newEduInstitution.trim()) {
       toast.error('Please enter an institution name')
       return
@@ -1119,30 +1267,65 @@ export default function CVPortfolioPage() {
     const location = newEduLocation.trim()
     const gpa = newEduGpa.trim()
 
-    const newEducation: Education = {
-      id: Date.now(),
-      institution,
-      degree,
-      period,
-      location,
-      achievements: [],
-      gpa: gpa || undefined,
-      startDate: new Date().toISOString()
+    setIsSaving(true)
+
+    const addEducationPromise = async () => {
+      let newEducationId = Date.now()
+
+      // Persist to database if user is authenticated
+      if (userId) {
+        const { data: createdEdu, error: addError } = await addEducationApi(userId, {
+          institution,
+          degree,
+          field_of_study: degree,
+          location,
+          start_date: new Date().toISOString(),
+          is_current: period.toLowerCase().includes('present'),
+          grade: gpa || undefined,
+          achievements: []
+        })
+        if (addError) throw new Error((addError as any)?.message || 'Failed to add education')
+        if (createdEdu?.id) newEducationId = parseInt(createdEdu.id)
+      }
+
+      const newEducation: Education = {
+        id: newEducationId,
+        institution,
+        degree,
+        period,
+        location,
+        achievements: [],
+        gpa: gpa || undefined,
+        startDate: new Date().toISOString()
+      }
+
+      setEducation(prev => [...prev, newEducation])
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Education added', {
+        educationId: newEducation.id,
+        institution,
+        degree,
+        gpa: gpa || 'N/A',
+        completenessScore: newCompleteness
+      })
+
+      return { degree, institution }
     }
 
-    setEducation(prev => [...prev, newEducation])
-
-    const newCompleteness = calculateCompleteness()
-    logger.info('Education added', {
-      educationId: newEducation.id,
-      institution,
-      degree,
-      gpa: gpa || 'N/A',
-      completenessScore: newCompleteness
-    })
-
-    setShowAddEducationDialog(false)
-    toast.success(`Education Added! ${degree} from ${institution}`)
+    try {
+      const result = await toast.promise(addEducationPromise(), {
+        loading: 'Adding education...',
+        success: (data) => `Education Added! ${data.degree} from ${data.institution}`,
+        error: (err) => err.message || 'Failed to add education'
+      })
+      setShowAddEducationDialog(false)
+      announce(`Education ${result.degree} added`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to add education', { error: error.message })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleEditEducation = (edu: Education) => {
@@ -1152,7 +1335,7 @@ export default function CVPortfolioPage() {
     setShowEditEducationDialog(true)
   }
 
-  const confirmEditEducation = () => {
+  const confirmEditEducation = async () => {
     if (!editingEducation) return
 
     if (!editEduInstitution.trim()) {
@@ -1167,23 +1350,49 @@ export default function CVPortfolioPage() {
     const institution = editEduInstitution.trim()
     const degree = editEduDegree.trim()
 
-    setEducation(prev => prev.map(e =>
-      e.id === editingEducation.id
-        ? { ...e, institution, degree }
-        : e
-    ))
+    setIsSaving(true)
 
-    logger.info('Education updated', {
-      educationId: editingEducation.id,
-      oldInstitution: editingEducation.institution,
-      newInstitution: institution,
-      oldDegree: editingEducation.degree,
-      newDegree: degree
-    })
+    const updateEducationPromise = async () => {
+      // Persist to database if user is authenticated
+      if (userId) {
+        const { error: updateError } = await updateEducationApi(String(editingEducation.id), {
+          institution,
+          degree
+        })
+        if (updateError) throw new Error((updateError as any)?.message || 'Failed to update education')
+      }
 
-    setShowEditEducationDialog(false)
-    setEditingEducation(null)
-    toast.success(`Education Updated! ${degree} from ${institution}`)
+      setEducation(prev => prev.map(e =>
+        e.id === editingEducation.id
+          ? { ...e, institution, degree }
+          : e
+      ))
+
+      logger.info('Education updated', {
+        educationId: editingEducation.id,
+        oldInstitution: editingEducation.institution,
+        newInstitution: institution,
+        oldDegree: editingEducation.degree,
+        newDegree: degree
+      })
+
+      return { degree, institution }
+    }
+
+    try {
+      const result = await toast.promise(updateEducationPromise(), {
+        loading: 'Updating education...',
+        success: (data) => `Education Updated! ${data.degree} from ${data.institution}`,
+        error: (err) => err.message || 'Failed to update education'
+      })
+      setShowEditEducationDialog(false)
+      setEditingEducation(null)
+      announce(`Education ${result.degree} updated`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update education', { error: error.message, educationId: editingEducation.id })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleDeleteEducation = (educationId: number) => {
@@ -1464,7 +1673,7 @@ export default function CVPortfolioPage() {
   const handleExportCV = async (format: 'PDF' | 'DOCX' | 'JSON') => {
     setIsExporting(true)
 
-    try {
+    const exportPromise = async () => {
       const cvData = {
         profile: profileData,
         experience,
@@ -1492,14 +1701,87 @@ export default function CVPortfolioPage() {
         template: selectedTemplate
       })
 
-      // Note: Data is already persisted in database - no localStorage needed
+      // Determine content type and extension
+      let contentType = 'application/json'
+      let content: string = JSON.stringify(cvData, null, 2)
+      let extension = format.toLowerCase()
+
+      if (format === 'PDF') {
+        // For PDF, we create a printable HTML that can be converted to PDF
+        contentType = 'text/html'
+        extension = 'html'
+        content = `<!DOCTYPE html>
+<html>
+<head>
+  <title>CV - ${profileData.name}</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+    h1 { color: #333; border-bottom: 2px solid #333; padding-bottom: 10px; }
+    h2 { color: #555; margin-top: 30px; }
+    .section { margin-bottom: 20px; }
+    .experience-item, .education-item { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 5px; }
+    .skills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .skill-badge { background: #e0e0e0; padding: 4px 12px; border-radius: 15px; font-size: 14px; }
+    .project { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+    @media print { body { padding: 20px; } }
+  </style>
+</head>
+<body>
+  <h1>${profileData.name}</h1>
+  <p>${profileData.title}</p>
+  <p>${profileData.email} | ${profileData.phone} | ${profileData.location}</p>
+
+  <h2>Professional Summary</h2>
+  <p>${profileData.bio}</p>
+
+  <h2>Experience</h2>
+  ${experience.map(exp => `<div class="experience-item"><strong>${exp.position}</strong> at ${exp.company}<br/><small>${exp.period} | ${exp.location}</small><p>${exp.description}</p></div>`).join('')}
+
+  <h2>Skills</h2>
+  <div class="skills">${skills.map(skill => `<span class="skill-badge">${skill.name}</span>`).join('')}</div>
+
+  <h2>Education</h2>
+  ${education.map(edu => `<div class="education-item"><strong>${edu.degree}</strong><br/>${edu.institution} | ${edu.period}</div>`).join('')}
+
+  <h2>Projects</h2>
+  ${projects.map(proj => `<div class="project"><strong>${proj.title}</strong> - ${proj.status}<p>${proj.description}</p><small>Technologies: ${proj.technologies.join(', ')}</small></div>`).join('')}
+
+  <p style="margin-top: 30px; font-size: 12px; color: #999;">Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenessScore}%</p>
+</body>
+</html>`
+      } else if (format === 'DOCX') {
+        // For DOCX, create a simple text format
+        contentType = 'text/plain'
+        extension = 'txt'
+        content = `${profileData.name}
+${profileData.title}
+${profileData.email} | ${profileData.phone} | ${profileData.location}
+
+PROFESSIONAL SUMMARY
+${profileData.bio}
+
+EXPERIENCE
+${experience.map(exp => `${exp.position} at ${exp.company}\n${exp.period} | ${exp.location}\n${exp.description}`).join('\n\n')}
+
+SKILLS
+${skills.map(skill => skill.name).join(', ')}
+
+EDUCATION
+${education.map(edu => `${edu.degree}\n${edu.institution} | ${edu.period}`).join('\n\n')}
+
+PROJECTS
+${projects.map(proj => `${proj.title} - ${proj.status}\n${proj.description}\nTechnologies: ${proj.technologies.join(', ')}`).join('\n\n')}
+
+Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenessScore}%`
+      }
 
       // Create download
-      const blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
+      const blob = new Blob([content], { type: contentType })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `cv-${profileData.name.replace(/\s/g, '-')}-${Date.now()}.${format.toLowerCase()}`
+      const fileName = `cv-${profileData.name.replace(/\s/g, '-')}-${Date.now()}.${extension}`
+      a.download = fileName
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -1507,19 +1789,23 @@ export default function CVPortfolioPage() {
 
       logger.info('CV exported successfully', {
         format,
-        fileName: a.download,
+        fileName,
         fileSize: blob.size
       })
 
-      toast.success(`CV Exported as ${format}! ${a.download} (${completenessScore}% complete)`)
+      return { format, fileName, completeness: completenessScore }
+    }
+
+    try {
+      await toast.promise(exportPromise(), {
+        loading: `Exporting CV as ${format}...`,
+        success: (data) => `CV Exported as ${data.format}! ${data.fileName} (${data.completeness}% complete)`,
+        error: 'Export failed. Please try again.'
+      })
     } catch (error: any) {
       logger.error('Failed to export CV', {
         error: error.message,
         format
-      })
-
-      toast.error('Export Failed', {
-        description: error.message || 'Please try again later'
       })
     } finally {
       setIsExporting(false)
@@ -1717,32 +2003,75 @@ export default function CVPortfolioPage() {
       : `Unfeatured! ${project.title} removed from featured`)
   }
 
-  // Upload Project Image
+  // Upload Project Image with Progress
   const handleUploadProjectImage = (projectId: number) => {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
 
-    input.onchange = (e: Event) => {
+    input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (!file) return
 
-      // Create a local URL for the uploaded image
-      const imageUrl = URL.createObjectURL(file)
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File too large', { description: 'Please select an image under 5MB' })
+        return
+      }
 
-      // Update the project with the new image
-      setProjects(prev => prev.map(p =>
-        p.id === projectId ? { ...p, image: imageUrl } : p
-      ))
+      setIsUploading(true)
+      setUploadProgress(0)
 
-      logger.info('Project image uploaded', {
-        projectId,
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      })
+      const uploadPromise = async () => {
+        // Simulate progress for visual feedback
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => Math.min(prev + 10, 90))
+        }, 100)
 
-      toast.success(`Image Uploaded! ${file.name} added to project`)
+        let imageUrl = URL.createObjectURL(file)
+
+        // Upload to server if user is authenticated
+        if (userId) {
+          try {
+            const { data: uploadResult, error: uploadError } = await uploadPortfolioImage(userId, file, 'project')
+            if (uploadError) throw new Error((uploadError as any)?.message || 'Failed to upload image')
+            if (uploadResult?.url) imageUrl = uploadResult.url
+          } catch (err) {
+            // Continue with local URL if upload fails
+            logger.warn('Server upload failed, using local URL', { error: err })
+          }
+        }
+
+        clearInterval(progressInterval)
+        setUploadProgress(100)
+
+        // Update the project with the new image
+        setProjects(prev => prev.map(p =>
+          p.id === projectId ? { ...p, image: imageUrl } : p
+        ))
+
+        logger.info('Project image uploaded', {
+          projectId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        })
+
+        return { fileName: file.name }
+      }
+
+      try {
+        await toast.promise(uploadPromise(), {
+          loading: 'Uploading image...',
+          success: (data) => `Image Uploaded! ${data.fileName} added to project`,
+          error: 'Failed to upload image'
+        })
+      } catch (error: any) {
+        logger.error('Failed to upload project image', { error: error.message, projectId })
+      } finally {
+        setIsUploading(false)
+        setUploadProgress(0)
+      }
     }
 
     input.click()
@@ -1954,10 +2283,70 @@ export default function CVPortfolioPage() {
       profileName: profileData.name
     })
 
-    // For now, just show the bio editor
-    setEditBio(profileData.bio)
-    setShowUpdateBioDialog(true)
-    toast.info('Edit Profile - Update personal information and contact details')
+    // Initialize edit fields with current profile data
+    setEditProfileName(profileData.name)
+    setEditProfileTitle(profileData.title)
+    setEditProfileLocation(profileData.location)
+    setEditProfileEmail(profileData.email)
+    setEditProfilePhone(profileData.phone)
+    setEditProfileWebsite(profileData.website)
+    setShowEditProfileDialog(true)
+  }
+
+  const confirmEditProfile = async () => {
+    if (!editProfileName.trim()) {
+      toast.error('Please enter your name')
+      return
+    }
+    if (!editProfileEmail.trim()) {
+      toast.error('Please enter your email')
+      return
+    }
+
+    const name = editProfileName.trim()
+    const title = editProfileTitle.trim()
+    const location = editProfileLocation.trim()
+    const email = editProfileEmail.trim()
+    const phone = editProfilePhone.trim()
+    const website = editProfileWebsite.trim()
+
+    setIsSaving(true)
+
+    const updateProfilePromise = async () => {
+      // Update local state
+      setProfileData(prev => ({
+        ...prev,
+        name,
+        title,
+        location,
+        email,
+        phone,
+        website
+      }))
+
+      logger.info('Profile updated', {
+        oldName: profileData.name,
+        newName: name,
+        email,
+        phone
+      })
+
+      return { name }
+    }
+
+    try {
+      const result = await toast.promise(updateProfilePromise(), {
+        loading: 'Updating profile...',
+        success: (data) => `Profile Updated! Welcome, ${data.name}`,
+        error: 'Failed to update profile'
+      })
+      setShowEditProfileDialog(false)
+      announce(`Profile updated for ${result.name}`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update profile', { error: error.message })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleUploadAvatar = () => {
@@ -2217,6 +2606,15 @@ export default function CVPortfolioPage() {
                     <span>{profileData.website}</span>
                   </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-4"
+                  onClick={handleEditProfile}
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
               </CardContent>
             </Card>
 
@@ -3360,6 +3758,96 @@ export default function CVPortfolioPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={showEditProfileDialog} onOpenChange={setShowEditProfileDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your personal information and contact details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="profile-name">Full Name *</Label>
+              <Input
+                id="profile-name"
+                placeholder="Enter your full name"
+                value={editProfileName}
+                onChange={(e) => setEditProfileName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-title">Professional Title</Label>
+              <Input
+                id="profile-title"
+                placeholder="e.g., Senior Full-Stack Developer"
+                value={editProfileTitle}
+                onChange={(e) => setEditProfileTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-email">Email *</Label>
+              <Input
+                id="profile-email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={editProfileEmail}
+                onChange={(e) => setEditProfileEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-phone">Phone Number</Label>
+              <Input
+                id="profile-phone"
+                type="tel"
+                placeholder="+27 81 234 5678"
+                value={editProfilePhone}
+                onChange={(e) => setEditProfilePhone(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-location">Location</Label>
+              <Input
+                id="profile-location"
+                placeholder="City, Country"
+                value={editProfileLocation}
+                onChange={(e) => setEditProfileLocation(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="profile-website">Website</Label>
+              <Input
+                id="profile-website"
+                placeholder="yourwebsite.com"
+                value={editProfileWebsite}
+                onChange={(e) => setEditProfileWebsite(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditProfileDialog(false)} disabled={isSaving}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditProfile} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Profile'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Progress Indicator */}
+      {isUploading && (
+        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border z-50 min-w-[250px]">
+          <div className="flex items-center gap-3 mb-2">
+            <Upload className="w-5 h-5 text-blue-600 animate-pulse" />
+            <span className="font-medium">Uploading...</span>
+          </div>
+          <Progress value={uploadProgress} className="h-2" />
+          <p className="text-xs text-gray-500 mt-1">{uploadProgress}% complete</p>
+        </div>
+      )}
     </div>
   );
 }

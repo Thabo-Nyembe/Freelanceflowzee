@@ -24,7 +24,7 @@ import {
 
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -222,6 +222,86 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
   const [showAuditLogModal, setShowAuditLogModal] = useState(false)
   const [showSecretKey, setShowSecretKey] = useState(false)
 
+  // Settings state - payment methods
+  const [paymentSettings, setPaymentSettings] = useState({
+    creditCards: true,
+    achBankTransfers: true,
+    sepaDirectDebit: false,
+    appleGooglePay: true,
+    wireTransfers: false,
+    autoRetry: true,
+    updateCardPrompt: true,
+    radarFraudDetection: true,
+    threeDSecure: true,
+    cvcVerification: true,
+    addressVerification: true,
+    customerPortal: true,
+    allowPlanChanges: true,
+    allowCancellations: true,
+    invoiceHistoryAccess: true
+  })
+
+  // Settings state - invoicing
+  const [invoicingSettings, setInvoicingSettings] = useState({
+    autoFinalizeDrafts: true,
+    autoAdvanceCollection: true,
+    resetYearly: true,
+    emailInvoices: true,
+    attachPdf: true
+  })
+
+  // Settings state - notifications
+  const [notificationSettings, setNotificationSettings] = useState({
+    paymentSuccessful: true,
+    paymentFailed: true,
+    invoiceSent: true,
+    subscriptionConfirmed: true,
+    subscriptionCanceled: true,
+    refundProcessed: true,
+    newSubscription: true,
+    paymentFailedInternal: true,
+    subscriptionCanceledInternal: true,
+    largePayment: true,
+    enableDunning: true,
+    trialEndingReminder: true,
+    invoiceDueReminder: true,
+    pastDueReminders: true,
+    slackPaymentEvents: true,
+    slackSubscriptionEvents: true,
+    slackWeeklySummary: true
+  })
+
+  // Settings state - tax automation
+  const [taxSettings, setTaxSettings] = useState({
+    automaticTaxCalculation: true,
+    taxIdValidation: true,
+    reverseCharge: true
+  })
+
+  // Settings state - advanced
+  const [advancedSettings, setAdvancedSettings] = useState({
+    testMode: false,
+    pauseCollection: true
+  })
+
+  // Tax rate states map
+  const [taxRateStates, setTaxRateStates] = useState<Record<string, boolean>>({})
+
+  // Confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    description: string
+    variant: 'default' | 'destructive'
+    onConfirm: () => void
+  }>({
+    open: false,
+    title: '',
+    description: '',
+    variant: 'default',
+    onConfirm: () => {}
+  })
+
   const { transactions, loading, error, refetch: refetchTransactions } = useBilling({ status: statusFilter })
   const display = transactions.length > 0 ? transactions : initialBilling
 
@@ -276,6 +356,190 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     table: 'refunds',
     onSuccess: refetchTransactions
   })
+
+  // Settings mutation hook
+  const { update: updateTaxRate, loading: updatingTaxRate } = useSupabaseMutation({
+    table: 'tax_rates',
+    onSuccess: refreshTaxRates
+  })
+
+  // Helper function to save billing settings to database
+  const saveBillingSettings = useCallback(async (
+    settingKey: string,
+    settingValue: boolean | string | number,
+    settingCategory: string
+  ) => {
+    try {
+      const supabase = createClient()
+      await supabase.from('billing_settings').upsert({
+        key: settingKey,
+        value: settingValue,
+        category: settingCategory,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'key' })
+      return true
+    } catch (error) {
+      console.error('Failed to save setting:', error)
+      return false
+    }
+  }, [])
+
+  // Helper function for updating payment settings with persistence
+  const updatePaymentSetting = useCallback(async (
+    key: keyof typeof paymentSettings,
+    value: boolean
+  ) => {
+    setPaymentSettings(prev => ({ ...prev, [key]: value }))
+    const success = await saveBillingSettings(key, value, 'payment')
+    if (success) {
+      toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} ${value ? 'enabled' : 'disabled'}`)
+    } else {
+      toast.error('Failed to save setting')
+      setPaymentSettings(prev => ({ ...prev, [key]: !value })) // Revert on failure
+    }
+  }, [saveBillingSettings])
+
+  // Helper function for updating invoicing settings with persistence
+  const updateInvoicingSetting = useCallback(async (
+    key: keyof typeof invoicingSettings,
+    value: boolean
+  ) => {
+    setInvoicingSettings(prev => ({ ...prev, [key]: value }))
+    const success = await saveBillingSettings(key, value, 'invoicing')
+    if (success) {
+      toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} ${value ? 'enabled' : 'disabled'}`)
+    } else {
+      toast.error('Failed to save setting')
+      setInvoicingSettings(prev => ({ ...prev, [key]: !value }))
+    }
+  }, [saveBillingSettings])
+
+  // Helper function for updating notification settings with persistence
+  const updateNotificationSetting = useCallback(async (
+    key: keyof typeof notificationSettings,
+    value: boolean
+  ) => {
+    setNotificationSettings(prev => ({ ...prev, [key]: value }))
+    const success = await saveBillingSettings(key, value, 'notifications')
+    if (success) {
+      toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} notifications ${value ? 'enabled' : 'disabled'}`)
+    } else {
+      toast.error('Failed to save setting')
+      setNotificationSettings(prev => ({ ...prev, [key]: !value }))
+    }
+  }, [saveBillingSettings])
+
+  // Helper function for updating tax settings with persistence
+  const updateTaxSetting = useCallback(async (
+    key: keyof typeof taxSettings,
+    value: boolean
+  ) => {
+    setTaxSettings(prev => ({ ...prev, [key]: value }))
+    const success = await saveBillingSettings(key, value, 'tax')
+    if (success) {
+      toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} ${value ? 'enabled' : 'disabled'}`)
+    } else {
+      toast.error('Failed to save setting')
+      setTaxSettings(prev => ({ ...prev, [key]: !value }))
+    }
+  }, [saveBillingSettings])
+
+  // Helper function for updating advanced settings with persistence
+  const updateAdvancedSetting = useCallback(async (
+    key: keyof typeof advancedSettings,
+    value: boolean
+  ) => {
+    setAdvancedSettings(prev => ({ ...prev, [key]: value }))
+    const success = await saveBillingSettings(key, value, 'advanced')
+    if (success) {
+      toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} ${value ? 'enabled' : 'disabled'}`)
+    } else {
+      toast.error('Failed to save setting')
+      setAdvancedSettings(prev => ({ ...prev, [key]: !value }))
+    }
+  }, [saveBillingSettings])
+
+  // Helper function to toggle tax rate status
+  const handleToggleTaxRate = useCallback(async (taxRate: TaxRate, newActiveState: boolean) => {
+    // Optimistic update
+    setTaxRateStates(prev => ({ ...prev, [taxRate.id]: newActiveState }))
+
+    try {
+      await updateTaxRate(taxRate.id, { is_active: newActiveState })
+      toast.success(`${taxRate.name} ${newActiveState ? 'enabled' : 'disabled'}`)
+    } catch (error) {
+      // Revert on failure
+      setTaxRateStates(prev => ({ ...prev, [taxRate.id]: !newActiveState }))
+      toast.error(`Failed to update ${taxRate.name}`)
+    }
+  }, [updateTaxRate])
+
+  // Helper function to download invoice as PDF
+  const handleDownloadInvoicePdf = useCallback(async (invoice: Invoice) => {
+    toast.loading(`Generating PDF for ${invoice.number}...`, { id: 'download-invoice' })
+
+    try {
+      // Generate PDF content
+      const pdfContent = `
+INVOICE
+=======
+Invoice Number: ${invoice.number}
+Date: ${new Date(invoice.created_at).toLocaleDateString()}
+Due Date: ${new Date(invoice.due_date).toLocaleDateString()}
+
+BILL TO:
+${invoice.customer_name}
+${invoice.customer_email}
+
+ITEMS:
+${invoice.line_items?.map(item =>
+  `${item.description} - Qty: ${item.quantity} - ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.amount)}`
+).join('\n') || 'No line items'}
+
+SUBTOTAL: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.subtotal)}
+TAX: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.tax)}
+TOTAL: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(invoice.total)}
+
+STATUS: ${invoice.status.toUpperCase()}
+${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}` : ''}
+      `.trim()
+
+      const blob = new Blob([pdfContent], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${invoice.number}.txt`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success(`Downloaded ${invoice.number}`, { id: 'download-invoice' })
+    } catch (error) {
+      toast.error('Failed to generate invoice PDF', { id: 'download-invoice' })
+    }
+  }, [])
+
+  // Handle AI insight action
+  const handleInsightAction = useCallback((insight: typeof mockBillingAIInsights[0]) => {
+    switch (insight.category) {
+      case 'Revenue':
+        setActiveTab('dashboard')
+        toast.success('Viewing revenue details')
+        break
+      case 'Retention':
+        setActiveTab('subscriptions')
+        setStatusFilter('past_due')
+        toast.info('Showing at-risk accounts with payment failures')
+        break
+      case 'AI Insights':
+        setActiveTab('coupons')
+        toast.info('Consider creating an annual discount coupon')
+        break
+      default:
+        toast.info(`Insight action: ${insight.title}`)
+    }
+  }, [])
 
   // Invoice dialog state
   const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false)
@@ -1168,7 +1432,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
                               <Button size="sm" variant="ghost" onClick={() => setSelectedInvoice(inv)}><Eye className="w-4 h-4" /></Button>
-                              <Button size="sm" variant="ghost" onClick={handleExportBilling}><Download className="w-4 h-4" /></Button>
+                              <Button size="sm" variant="ghost" onClick={() => handleDownloadInvoicePdf(inv)}><Download className="w-4 h-4" /></Button>
                               {inv.status === 'open' && (
                                 <Button size="sm" variant="outline" onClick={() => handleSendInvoiceReminder(inv)} disabled={mutatingInvoice}>
                                   Send Reminder
@@ -1271,9 +1535,11 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Badge className={tax.inclusive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>
                           {tax.inclusive ? 'Inclusive' : 'Exclusive'}
                         </Badge>
-                        <Switch checked={tax.active} onCheckedChange={(checked) => {
-                          toast.success(`${tax.name} ${checked ? 'enabled' : 'disabled'}`)
-                        }} />
+                        <Switch
+                          checked={taxRateStates[tax.id] ?? tax.active}
+                          onCheckedChange={(checked) => handleToggleTaxRate(tax, checked)}
+                          disabled={updatingTaxRate}
+                        />
                       </div>
                     </div>
                   ))}
@@ -1382,35 +1648,35 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Credit Cards</p>
                           <p className="text-sm text-gray-500">Accept Visa, Mastercard, Amex, Discover</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Credit Cards ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.creditCards} onCheckedChange={(checked) => updatePaymentSetting('creditCards', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">ACH Bank Transfers</p>
                           <p className="text-sm text-gray-500">US bank account debits</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`ACH Bank Transfers ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.achBankTransfers} onCheckedChange={(checked) => updatePaymentSetting('achBankTransfers', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">SEPA Direct Debit</p>
                           <p className="text-sm text-gray-500">European bank transfers</p>
                         </div>
-                        <Switch onCheckedChange={(checked) => toast.success(`SEPA Direct Debit ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.sepaDirectDebit} onCheckedChange={(checked) => updatePaymentSetting('sepaDirectDebit', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Apple Pay / Google Pay</p>
                           <p className="text-sm text-gray-500">Mobile wallet payments</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Apple Pay / Google Pay ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.appleGooglePay} onCheckedChange={(checked) => updatePaymentSetting('appleGooglePay', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Wire Transfers</p>
                           <p className="text-sm text-gray-500">For enterprise invoices</p>
                         </div>
-                        <Switch onCheckedChange={(checked) => toast.success(`Wire Transfers ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.wireTransfers} onCheckedChange={(checked) => updatePaymentSetting('wireTransfers', checked)} />
                       </div>
                     </CardContent>
                   </Card>
@@ -1428,7 +1694,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Auto-retry Failed Payments</p>
                           <p className="text-sm text-gray-500">Automatically retry failed charges</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Auto-retry ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.autoRetry} onCheckedChange={(checked) => updatePaymentSetting('autoRetry', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Retry Schedule</Label>
@@ -1462,7 +1728,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Update Card Prompt</p>
                           <p className="text-sm text-gray-500">Prompt customers to update failed cards</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Update Card Prompt ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.updateCardPrompt} onCheckedChange={(checked) => updatePaymentSetting('updateCardPrompt', checked)} />
                       </div>
                     </CardContent>
                   </Card>
@@ -1480,14 +1746,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Radar Fraud Detection</p>
                           <p className="text-sm text-gray-500">AI-powered fraud prevention</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Radar Fraud Detection ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.radarFraudDetection} onCheckedChange={(checked) => updatePaymentSetting('radarFraudDetection', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">3D Secure Authentication</p>
                           <p className="text-sm text-gray-500">Require 3DS for high-risk transactions</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`3D Secure Authentication ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.threeDSecure} onCheckedChange={(checked) => updatePaymentSetting('threeDSecure', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Risk Threshold</Label>
@@ -1507,14 +1773,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">CVC Verification</p>
                           <p className="text-sm text-gray-500">Require CVC for all transactions</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`CVC Verification ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.cvcVerification} onCheckedChange={(checked) => updatePaymentSetting('cvcVerification', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Address Verification (AVS)</p>
                           <p className="text-sm text-gray-500">Verify billing address matches</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Address Verification ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.addressVerification} onCheckedChange={(checked) => updatePaymentSetting('addressVerification', checked)} />
                       </div>
                     </CardContent>
                   </Card>
@@ -1532,28 +1798,28 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Enable Customer Portal</p>
                           <p className="text-sm text-gray-500">Let customers manage subscriptions</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Customer Portal ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.customerPortal} onCheckedChange={(checked) => updatePaymentSetting('customerPortal', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Allow Plan Changes</p>
                           <p className="text-sm text-gray-500">Customers can upgrade/downgrade</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Plan Changes ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.allowPlanChanges} onCheckedChange={(checked) => updatePaymentSetting('allowPlanChanges', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Allow Cancellations</p>
                           <p className="text-sm text-gray-500">Customers can cancel subscriptions</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Allow Cancellations ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.allowCancellations} onCheckedChange={(checked) => updatePaymentSetting('allowCancellations', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Invoice History Access</p>
                           <p className="text-sm text-gray-500">View and download past invoices</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Invoice History Access ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={paymentSettings.invoiceHistoryAccess} onCheckedChange={(checked) => updatePaymentSetting('invoiceHistoryAccess', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Portal URL</Label>
@@ -1589,14 +1855,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Auto-finalize Drafts</p>
                           <p className="text-sm text-gray-500">Automatically finalize after 1 hour</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Auto-finalize Drafts ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={invoicingSettings.autoFinalizeDrafts} onCheckedChange={(checked) => updateInvoicingSetting('autoFinalizeDrafts', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Auto-advance Collection</p>
                           <p className="text-sm text-gray-500">Automatically charge open invoices</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Auto-advance Collection ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={invoicingSettings.autoAdvanceCollection} onCheckedChange={(checked) => updateInvoicingSetting('autoAdvanceCollection', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Payment Due</Label>
@@ -1664,7 +1930,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Reset Yearly</p>
                           <p className="text-sm text-gray-500">Reset sequence number each year</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Reset Yearly ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={invoicingSettings.resetYearly} onCheckedChange={(checked) => updateInvoicingSetting('resetYearly', checked)} />
                       </div>
                     </CardContent>
                   </Card>
@@ -1728,14 +1994,14 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Email Invoices</p>
                           <p className="text-sm text-gray-500">Send invoices via email automatically</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Email Invoices ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={invoicingSettings.emailInvoices} onCheckedChange={(checked) => updateInvoicingSetting('emailInvoices', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Attach PDF</p>
                           <p className="text-sm text-gray-500">Include PDF attachment in emails</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Attach PDF ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={invoicingSettings.attachPdf} onCheckedChange={(checked) => updateInvoicingSetting('attachPdf', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Reply-To Email</Label>
@@ -1766,42 +2032,42 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Payment Successful</p>
                           <p className="text-sm text-gray-500">Confirm successful payments</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Payment Successful notifications ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.paymentSuccessful} onCheckedChange={(checked) => updateNotificationSetting('paymentSuccessful', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Payment Failed</p>
                           <p className="text-sm text-gray-500">Alert when payment fails</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Payment Failed notifications ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.paymentFailed} onCheckedChange={(checked) => updateNotificationSetting('paymentFailed', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Invoice Sent</p>
                           <p className="text-sm text-gray-500">Notify when invoice is created</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Invoice Sent notifications ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.invoiceSent} onCheckedChange={(checked) => updateNotificationSetting('invoiceSent', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Subscription Confirmed</p>
                           <p className="text-sm text-gray-500">Welcome email for new subscriptions</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Subscription Confirmed notifications ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.subscriptionConfirmed} onCheckedChange={(checked) => updateNotificationSetting('subscriptionConfirmed', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Subscription Canceled</p>
                           <p className="text-sm text-gray-500">Confirmation of cancellation</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Subscription Canceled notifications ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.subscriptionCanceled} onCheckedChange={(checked) => updateNotificationSetting('subscriptionCanceled', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Refund Processed</p>
                           <p className="text-sm text-gray-500">Notify when refund is issued</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Refund Processed notifications ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.refundProcessed} onCheckedChange={(checked) => updateNotificationSetting('refundProcessed', checked)} />
                       </div>
                     </CardContent>
                   </Card>
@@ -1819,28 +2085,28 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">New Subscription</p>
                           <p className="text-sm text-gray-500">Alert when customer subscribes</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`New Subscription alerts ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.newSubscription} onCheckedChange={(checked) => updateNotificationSetting('newSubscription', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Payment Failed (Internal)</p>
                           <p className="text-sm text-gray-500">Alert team on failed payments</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Payment Failed (Internal) alerts ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.paymentFailedInternal} onCheckedChange={(checked) => updateNotificationSetting('paymentFailedInternal', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Subscription Canceled (Internal)</p>
                           <p className="text-sm text-gray-500">Alert team on cancellations</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Subscription Canceled (Internal) alerts ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.subscriptionCanceledInternal} onCheckedChange={(checked) => updateNotificationSetting('subscriptionCanceledInternal', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Large Payment Received</p>
                           <p className="text-sm text-gray-500">Alert on payments over threshold</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Large Payment alerts ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.largePayment} onCheckedChange={(checked) => updateNotificationSetting('largePayment', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Large Payment Threshold</Label>
@@ -1866,28 +2132,28 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Enable Dunning</p>
                           <p className="text-sm text-gray-500">Automated collection reminders</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Dunning ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.enableDunning} onCheckedChange={(checked) => updateNotificationSetting('enableDunning', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Trial Ending Reminder</p>
                           <p className="text-sm text-gray-500">Remind 3 days before trial ends</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Trial Ending Reminder ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.trialEndingReminder} onCheckedChange={(checked) => updateNotificationSetting('trialEndingReminder', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Invoice Due Reminder</p>
                           <p className="text-sm text-gray-500">Remind before invoice is due</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Invoice Due Reminder ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.invoiceDueReminder} onCheckedChange={(checked) => updateNotificationSetting('invoiceDueReminder', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Past Due Reminders</p>
                           <p className="text-sm text-gray-500">Send escalating past due notices</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Past Due Reminders ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.pastDueReminders} onCheckedChange={(checked) => updateNotificationSetting('pastDueReminders', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Dunning Schedule</Label>
@@ -1928,21 +2194,21 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Payment Events</p>
                           <p className="text-sm text-gray-500">Post payment notifications</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Slack Payment Events ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.slackPaymentEvents} onCheckedChange={(checked) => updateNotificationSetting('slackPaymentEvents', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Subscription Events</p>
                           <p className="text-sm text-gray-500">Post subscription changes</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Slack Subscription Events ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.slackSubscriptionEvents} onCheckedChange={(checked) => updateNotificationSetting('slackSubscriptionEvents', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Weekly Summary</p>
                           <p className="text-sm text-gray-500">Post weekly billing summary</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Slack Weekly Summary ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={notificationSettings.slackWeeklySummary} onCheckedChange={(checked) => updateNotificationSetting('slackWeeklySummary', checked)} />
                       </div>
                     </CardContent>
                   </Card>
@@ -2135,9 +2401,11 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                               <Badge className={tax.inclusive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>
                                 {tax.inclusive ? 'Inclusive' : 'Exclusive'}
                               </Badge>
-                              <Switch checked={tax.active} onCheckedChange={(checked) => {
-                                toast.success(`${tax.name} ${checked ? 'enabled' : 'disabled'}`)
-                              }} />
+                              <Switch
+                                checked={taxRateStates[tax.id] ?? tax.active}
+                                onCheckedChange={(checked) => handleToggleTaxRate(tax, checked)}
+                                disabled={updatingTaxRate}
+                              />
                               <Button variant="ghost" size="sm" onClick={() => {
                                 setSelectedTaxRate(tax)
                                 setShowTaxRateModal(true)
@@ -2162,21 +2430,21 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Automatic Tax Calculation</p>
                           <p className="text-sm text-gray-500">Calculate taxes based on customer location</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Automatic Tax Calculation ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={taxSettings.automaticTaxCalculation} onCheckedChange={(checked) => updateTaxSetting('automaticTaxCalculation', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Tax ID Validation</p>
                           <p className="text-sm text-gray-500">Validate VAT/GST numbers automatically</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Tax ID Validation ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={taxSettings.taxIdValidation} onCheckedChange={(checked) => updateTaxSetting('taxIdValidation', checked)} />
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">Reverse Charge</p>
                           <p className="text-sm text-gray-500">Apply reverse charge for B2B EU transactions</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Reverse Charge ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={taxSettings.reverseCharge} onCheckedChange={(checked) => updateTaxSetting('reverseCharge', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Tax Provider</Label>
@@ -2259,7 +2527,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Enable Test Mode</p>
                           <p className="text-sm text-gray-500">Use test API keys and data</p>
                         </div>
-                        <Switch onCheckedChange={(checked) => toast.success(`Test Mode ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={advancedSettings.testMode} onCheckedChange={(checked) => updateAdvancedSetting('testMode', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Test Card Number</Label>
@@ -2315,7 +2583,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <p className="font-medium text-gray-900 dark:text-white">Pause Collection</p>
                           <p className="text-sm text-gray-500">Allow pausing subscriptions</p>
                         </div>
-                        <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Pause Collection ${checked ? 'enabled' : 'disabled'}`)} />
+                        <Switch checked={advancedSettings.pauseCollection} onCheckedChange={(checked) => updateAdvancedSetting('pauseCollection', checked)} />
                       </div>
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Grace Period (Days)</Label>
@@ -2481,7 +2749,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <AIInsightsPanel
               insights={mockBillingAIInsights}
               title="Billing Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
@@ -2802,6 +3070,34 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         </Dialog>
       )}
 
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className={confirmDialog.variant === 'destructive' ? 'text-red-600' : ''}>
+              {confirmDialog.title}
+            </DialogTitle>
+            <DialogDescription>
+              {confirmDialog.description}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}>
+              Cancel
+            </Button>
+            <Button
+              variant={confirmDialog.variant === 'destructive' ? 'destructive' : 'default'}
+              onClick={() => {
+                confirmDialog.onConfirm()
+                setConfirmDialog(prev => ({ ...prev, open: false }))
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Invoice Detail Modal */}
       {selectedInvoice && (
         <Dialog open={!!selectedInvoice} onOpenChange={() => setSelectedInvoice(null)}>
@@ -2897,10 +3193,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
               )}
               <Button
                 variant="outline"
-                onClick={() => {
-                  handleExportBilling()
-                  toast.success(`Downloading invoice ${selectedInvoice.number}`)
-                }}
+                onClick={() => handleDownloadInvoicePdf(selectedInvoice)}
               >
                 <Download className="h-4 w-4 mr-2" />
                 Download PDF

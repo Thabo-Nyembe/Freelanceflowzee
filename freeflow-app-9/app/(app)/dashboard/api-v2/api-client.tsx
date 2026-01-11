@@ -94,6 +94,7 @@ import {
 // Hooks
 import { useApiEndpoints } from '@/lib/hooks/use-api-endpoints'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
+import { useWebhooks } from '@/lib/hooks/use-webhooks'
 
 // Types
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
@@ -420,15 +421,29 @@ export default function ApiClient() {
     isLoading: keysLoading,
     fetchKeys,
     createKey,
+    updateKey,
     revokeKey,
     deleteKey
   } = useApiKeys()
+
+  const {
+    webhooks: dbWebhooks,
+    stats: webhookStats,
+    loading: webhooksLoading,
+    fetchWebhooks,
+    createWebhook,
+    updateWebhook,
+    deleteWebhook,
+    toggleStatus: toggleWebhookStatus,
+    testWebhook
+  } = useWebhooks()
 
   // Fetch data on mount
   useEffect(() => {
     fetchEndpoints()
     fetchKeys()
-  }, [fetchEndpoints, fetchKeys])
+    fetchWebhooks()
+  }, [fetchEndpoints, fetchKeys, fetchWebhooks])
 
   // Mock data fallback for collections, history, etc.
   const [collections] = useState<Collection[]>(mockCollections)
@@ -436,8 +451,24 @@ export default function ApiClient() {
   const [monitors] = useState<Monitor[]>(mockMonitors)
   const [testSuites] = useState<TestSuite[]>(mockTestSuites)
   const [testCases] = useState<TestCase[]>(mockTestCases)
-  const [webhooks] = useState<WebhookConfig[]>(mockWebhooks)
   const [mockServersState] = useState<MockServer[]>(mockMockServers)
+
+  // Combined webhooks: DB data + mock data fallback
+  const webhooks: WebhookConfig[] = useMemo(() => {
+    if (dbWebhooks.length > 0) {
+      return dbWebhooks.map(w => ({
+        id: w.id,
+        name: w.name,
+        url: w.url,
+        events: w.events,
+        isActive: w.status === 'active',
+        lastTriggered: w.last_delivery_at || w.updated_at,
+        successRate: w.success_rate,
+        totalDeliveries: w.total_deliveries
+      }))
+    }
+    return mockWebhooks
+  }, [dbWebhooks])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpoint | null>(null)
   const [selectedTestSuite, setSelectedTestSuite] = useState<TestSuite | null>(null)
@@ -451,6 +482,11 @@ export default function ApiClient() {
   const [showCreateMonitorDialog, setShowCreateMonitorDialog] = useState(false)
   const [showCreateWebhookDialog, setShowCreateWebhookDialog] = useState(false)
   const [showCreateTestSuiteDialog, setShowCreateTestSuiteDialog] = useState(false)
+  const [showEditKeyDialog, setShowEditKeyDialog] = useState(false)
+  const [showDeleteKeyDialog, setShowDeleteKeyDialog] = useState(false)
+  const [showRateLimitDialog, setShowRateLimitDialog] = useState(false)
+  const [selectedKeyForEdit, setSelectedKeyForEdit] = useState<ApiKey | null>(null)
+  const [editKeyForm, setEditKeyForm] = useState({ name: '', description: '', rateLimit: 1000, scopes: [] as string[] })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Form states for new dialogs
@@ -775,6 +811,191 @@ export default function ApiClient() {
       toast.promise(Promise.resolve(), { loading: 'Deleting API key...', success: `"${keyName}" has been removed`, error: 'Failed to delete key' })
     } catch (err) {
       toast.error('Failed to delete key', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }
+
+  const handleUpdateApiKey = async () => {
+    if (!selectedKeyForEdit) return
+
+    setIsSubmitting(true)
+    try {
+      await updateKey(selectedKeyForEdit.id, {
+        name: editKeyForm.name,
+        description: editKeyForm.description,
+        rate_limit_per_hour: editKeyForm.rateLimit,
+        scopes: editKeyForm.scopes
+      })
+      toast.success(`"${editKeyForm.name}" updated successfully`, { description: 'API key settings have been saved' })
+      setShowEditKeyDialog(false)
+      setSelectedKeyForEdit(null)
+    } catch (err) {
+      toast.error('Failed to update API key', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const openEditKeyDialog = (key: ApiKey) => {
+    setSelectedKeyForEdit(key)
+    setEditKeyForm({
+      name: key.name,
+      description: '',
+      rateLimit: key.rateLimit,
+      scopes: key.scopes
+    })
+    setShowEditKeyDialog(true)
+  }
+
+  const openDeleteKeyDialog = (key: ApiKey) => {
+    setSelectedKeyForEdit(key)
+    setShowDeleteKeyDialog(true)
+  }
+
+  const openRateLimitDialog = (key: ApiKey) => {
+    setSelectedKeyForEdit(key)
+    setEditKeyForm(prev => ({ ...prev, rateLimit: key.rateLimit }))
+    setShowRateLimitDialog(true)
+  }
+
+  const handleUpdateRateLimit = async () => {
+    if (!selectedKeyForEdit) return
+
+    setIsSubmitting(true)
+    try {
+      await updateKey(selectedKeyForEdit.id, {
+        rate_limit_per_hour: editKeyForm.rateLimit
+      })
+      toast.success(`Rate limit updated to ${editKeyForm.rateLimit}/hr`, { description: `For API key "${selectedKeyForEdit.name}"` })
+      setShowRateLimitDialog(false)
+      setSelectedKeyForEdit(null)
+    } catch (err) {
+      toast.error('Failed to update rate limit', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const confirmDeleteKey = async () => {
+    if (!selectedKeyForEdit) return
+
+    setIsSubmitting(true)
+    try {
+      await deleteKey(selectedKeyForEdit.id)
+      toast.success(`"${selectedKeyForEdit.name}" has been deleted`, { description: 'This API key can no longer be used' })
+      setShowDeleteKeyDialog(false)
+      setSelectedKeyForEdit(null)
+    } catch (err) {
+      toast.error('Failed to delete API key', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Real webhook handlers
+  const handleCreateWebhook = async () => {
+    if (!webhookForm.name || !webhookForm.url) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await createWebhook({
+        name: webhookForm.name,
+        url: webhookForm.url,
+        events: webhookForm.events,
+        secret: webhookForm.secret || undefined,
+        status: 'active'
+      })
+      if (result.success) {
+        toast.success('Webhook created', { description: `"${webhookForm.name}" is now active` })
+        setWebhookForm({ name: '', url: '', events: ['request.created'], secret: '' })
+        setShowCreateWebhookDialog(false)
+      } else {
+        toast.error('Failed to create webhook', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to create webhook', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleTestWebhook = async (webhookId: string, webhookName: string) => {
+    toast.promise(
+      testWebhook(webhookId),
+      {
+        loading: `Sending test webhook to "${webhookName}"...`,
+        success: (result) => result.success
+          ? `Test webhook delivered successfully to "${webhookName}"`
+          : `Test failed: ${result.error}`,
+        error: 'Failed to send test webhook'
+      }
+    )
+  }
+
+  const handleToggleWebhook = async (webhookId: string, webhookName: string, currentlyActive: boolean) => {
+    const newStatus = currentlyActive ? 'paused' : 'active'
+    toast.promise(
+      toggleWebhookStatus(webhookId, newStatus as 'active' | 'paused'),
+      {
+        loading: `${currentlyActive ? 'Pausing' : 'Activating'} "${webhookName}"...`,
+        success: `"${webhookName}" is now ${newStatus}`,
+        error: `Failed to ${currentlyActive ? 'pause' : 'activate'} webhook`
+      }
+    )
+  }
+
+  const handleDeleteWebhook = async (webhookId: string, webhookName: string) => {
+    toast.promise(
+      deleteWebhook(webhookId),
+      {
+        loading: `Deleting "${webhookName}"...`,
+        success: `"${webhookName}" has been deleted`,
+        error: 'Failed to delete webhook'
+      }
+    )
+  }
+
+  // Real collection creation handler
+  const handleCreateCollection = async () => {
+    if (!collectionForm.name.trim()) {
+      toast.error('Please enter a collection name')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const supabase = (await import('@/lib/supabase/client')).createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('collections')
+        .insert({
+          user_id: user.id,
+          name: collectionForm.name,
+          description: collectionForm.description,
+          type: 'api',
+          visibility: 'private',
+          item_count: 0
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      toast.success('Collection created', {
+        description: `"${collectionForm.name}" is now ready to use`
+      })
+      setCollectionForm({ name: '', description: '' })
+      setShowCreateCollectionDialog(false)
+    } catch (err) {
+      toast.error('Failed to create collection', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -1464,21 +1685,9 @@ export default function ApiClient() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => {
-                          toast.info(`Edit "${key.name}"`, {
-                            description: `Environment: ${key.environment} | Scopes: ${key.scopes.join(', ')} | Rate Limit: ${key.rateLimit}/hr`,
-                            action: {
-                              label: 'Update',
-                              onClick: () => {
-                                toast.loading(`Updating ${key.name}...`, { id: 'key-update' })
-                                setTimeout(() => {
-                                  toast.success(`${key.name} updated successfully`, { id: 'key-update', description: 'API key settings have been saved' })
-                                }, 1500)
-                              }
-                            }
-                          })
-                        }}>Edit</Button>
-                        <Button variant="outline" size="sm" className="text-red-600" onClick={() => handleRevokeApiKey(key.id, key.name)}>Revoke</Button>
+                        <Button variant="outline" size="sm" onClick={() => openEditKeyDialog(key)}>Edit</Button>
+                        <Button variant="outline" size="sm" onClick={() => openRateLimitDialog(key)}>Rate Limit</Button>
+                        <Button variant="outline" size="sm" className="text-red-600" onClick={() => openDeleteKeyDialog(key)}>Delete</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -2011,7 +2220,7 @@ export default function ApiClient() {
                       ))}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
                       <div>
                         <p className="text-xs text-gray-500">Deliveries</p>
                         <p className="font-semibold">{formatNumber(webhook.totalDeliveries)}</p>
@@ -2024,6 +2233,33 @@ export default function ApiClient() {
                         <p className="text-xs text-gray-500">Last Triggered</p>
                         <p className="font-semibold">{formatTimeAgo(webhook.lastTriggered)}</p>
                       </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleTestWebhook(webhook.id, webhook.name)}
+                      >
+                        <Send className="w-4 h-4 mr-1" />
+                        Test
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggleWebhook(webhook.id, webhook.name, webhook.isActive)}
+                      >
+                        {webhook.isActive ? <StopCircle className="w-4 h-4 mr-1" /> : <PlayCircle className="w-4 h-4 mr-1" />}
+                        {webhook.isActive ? 'Pause' : 'Activate'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600"
+                        onClick={() => handleDeleteWebhook(webhook.id, webhook.name)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -3119,16 +3355,8 @@ export default function ApiClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateCollectionDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
-                if (!collectionForm.name.trim()) {
-                  toast.error('Please enter a collection name')
-                  return
-                }
-                toast.success('Collection created', { description: `"${collectionForm.name}" is now ready to use` })
-                setCollectionForm({ name: '', description: '' })
-                setShowCreateCollectionDialog(false)
-              }}>
-                <FolderPlus className="w-4 h-4 mr-2" />
+              <Button onClick={handleCreateCollection} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FolderPlus className="w-4 h-4 mr-2" />}
                 Create Collection
               </Button>
             </DialogFooter>
@@ -3310,16 +3538,8 @@ export default function ApiClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateWebhookDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
-                if (!webhookForm.name.trim() || !webhookForm.url.trim()) {
-                  toast.error('Please fill in all required fields')
-                  return
-                }
-                toast.success('Webhook created', { description: `"${webhookForm.name}" is now active` })
-                setWebhookForm({ name: '', url: '', events: ['request.created'], secret: '' })
-                setShowCreateWebhookDialog(false)
-              }}>
-                <Webhook className="w-4 h-4 mr-2" />
+              <Button onClick={handleCreateWebhook} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Webhook className="w-4 h-4 mr-2" />}
                 Create Webhook
               </Button>
             </DialogFooter>
@@ -3374,6 +3594,153 @@ export default function ApiClient() {
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Suite
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit API Key Dialog */}
+        <Dialog open={showEditKeyDialog} onOpenChange={setShowEditKeyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit API Key</DialogTitle>
+              <DialogDescription>Update settings for "{selectedKeyForEdit?.name}"</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-key-name">Key Name</Label>
+                <Input
+                  id="edit-key-name"
+                  value={editKeyForm.name}
+                  onChange={(e) => setEditKeyForm({ ...editKeyForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="What is this key used for?"
+                  value={editKeyForm.description}
+                  onChange={(e) => setEditKeyForm({ ...editKeyForm, description: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Rate Limit (req/hr)</Label>
+                <Input
+                  type="number"
+                  value={editKeyForm.rateLimit}
+                  onChange={(e) => setEditKeyForm({ ...editKeyForm, rateLimit: parseInt(e.target.value) || 1000 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Scopes</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {['read', 'write', 'delete', 'admin'].map(scope => (
+                    <Button
+                      key={scope}
+                      variant={editKeyForm.scopes.includes(scope) ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        const newScopes = editKeyForm.scopes.includes(scope)
+                          ? editKeyForm.scopes.filter(s => s !== scope)
+                          : [...editKeyForm.scopes, scope]
+                        setEditKeyForm({ ...editKeyForm, scopes: newScopes })
+                      }}
+                    >
+                      {scope}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditKeyDialog(false)}>Cancel</Button>
+              <Button onClick={handleUpdateApiKey} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete API Key Confirmation Dialog */}
+        <Dialog open={showDeleteKeyDialog} onOpenChange={setShowDeleteKeyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Delete API Key
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete the API key "{selectedKeyForEdit?.name}" and revoke all access.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  <strong>Warning:</strong> Any applications using this key will immediately lose access.
+                </p>
+                <div className="mt-3 text-sm text-red-600 dark:text-red-300">
+                  <p>Key: <code className="bg-red-100 dark:bg-red-900/40 px-1 rounded">{selectedKeyForEdit?.keyPrefix}</code></p>
+                  <p>Environment: <Badge className="ml-1" variant="secondary">{selectedKeyForEdit?.environment}</Badge></p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteKeyDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={confirmDeleteKey} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                Delete Permanently
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rate Limit Edit Dialog */}
+        <Dialog open={showRateLimitDialog} onOpenChange={setShowRateLimitDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Gauge className="w-5 h-5" />
+                Edit Rate Limit
+              </DialogTitle>
+              <DialogDescription>
+                Adjust the rate limit for "{selectedKeyForEdit?.name}"
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Current Rate Limit</Label>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedKeyForEdit?.rateLimit}/hr</p>
+              </div>
+              <div className="space-y-2">
+                <Label>New Rate Limit (requests per hour)</Label>
+                <Input
+                  type="number"
+                  value={editKeyForm.rateLimit}
+                  onChange={(e) => setEditKeyForm({ ...editKeyForm, rateLimit: parseInt(e.target.value) || 1000 })}
+                  min={0}
+                  step={100}
+                />
+                <p className="text-xs text-gray-500">Set to 0 for unlimited requests</p>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {[100, 500, 1000, 5000, 10000].map(limit => (
+                  <Button
+                    key={limit}
+                    variant={editKeyForm.rateLimit === limit ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setEditKeyForm({ ...editKeyForm, rateLimit: limit })}
+                  >
+                    {limit >= 1000 ? `${limit / 1000}K` : limit}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRateLimitDialog(false)}>Cancel</Button>
+              <Button onClick={handleUpdateRateLimit} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                Update Rate Limit
               </Button>
             </DialogFooter>
           </DialogContent>

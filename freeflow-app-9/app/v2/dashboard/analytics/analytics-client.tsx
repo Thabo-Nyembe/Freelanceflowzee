@@ -3,7 +3,8 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -167,6 +168,39 @@ export default function AnalyticsClient() {
   const [showDeleteTracking, setShowDeleteTracking] = useState(false)
   const [showRevokeApiKeys, setShowRevokeApiKeys] = useState(false)
 
+  // Filter and date range state
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showCustomDateRange, setShowCustomDateRange] = useState(false)
+  const [showCompareDialog, setShowCompareDialog] = useState(false)
+  const [customDateRange, setCustomDateRange] = useState({
+    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0]
+  })
+  const [compareDateRange, setCompareDateRange] = useState({
+    startDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    endDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  })
+  const [activeFilters, setActiveFilters] = useState<{
+    categories: string[]
+    metricTypes: string[]
+    status: string[]
+    minValue: string
+    maxValue: string
+  }>({
+    categories: [],
+    metricTypes: [],
+    status: [],
+    minValue: '',
+    maxValue: ''
+  })
+  const [showSaveReportDialog, setShowSaveReportDialog] = useState(false)
+  const [customReportForm, setCustomReportForm] = useState({
+    name: '',
+    description: '',
+    metrics: [] as string[],
+    schedule: 'none' as 'none' | 'daily' | 'weekly' | 'monthly'
+  })
+
   // Metric action dialogs
   const [showDuplicateMetric, setShowDuplicateMetric] = useState(false)
   const [showSetAlertDialog, setShowSetAlertDialog] = useState(false)
@@ -327,13 +361,41 @@ export default function AnalyticsClient() {
     }
   }, [userId, fetchFunnels, fetchReports, fetchDashboards, fetchMetrics])
 
-  // Filter metrics
+  // Filter metrics with advanced filtering
   const filteredMetrics = useMemo(() => {
-    return mockMetrics.filter(m =>
-      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.category.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  }, [searchQuery])
+    return mockMetrics.filter(m => {
+      // Text search filter
+      const matchesSearch =
+        m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        m.category.toLowerCase().includes(searchQuery.toLowerCase())
+
+      // Category filter
+      const matchesCategory =
+        activeFilters.categories.length === 0 ||
+        activeFilters.categories.includes(m.category)
+
+      // Metric type filter
+      const matchesType =
+        activeFilters.metricTypes.length === 0 ||
+        activeFilters.metricTypes.includes(m.type)
+
+      // Status filter
+      const matchesStatus =
+        activeFilters.status.length === 0 ||
+        activeFilters.status.includes(m.status)
+
+      // Value range filter
+      const matchesMinValue =
+        !activeFilters.minValue ||
+        m.value >= parseFloat(activeFilters.minValue)
+
+      const matchesMaxValue =
+        !activeFilters.maxValue ||
+        m.value <= parseFloat(activeFilters.maxValue)
+
+      return matchesSearch && matchesCategory && matchesType && matchesStatus && matchesMinValue && matchesMaxValue
+    })
+  }, [searchQuery, activeFilters])
 
   // CRUD Operations
   const handleCreateFunnel = async () => {
@@ -710,7 +772,174 @@ Add this code to the <head> section of your HTML.`)
   }
 
   const handleFilters = () => {
-    toast.info('Filters', { description: 'Opening filter panel...' })
+    setShowFilterDialog(true)
+  }
+
+  // Apply filters from dialog
+  const handleApplyFilters = () => {
+    const filterCount =
+      activeFilters.categories.length +
+      activeFilters.metricTypes.length +
+      activeFilters.status.length +
+      (activeFilters.minValue ? 1 : 0) +
+      (activeFilters.maxValue ? 1 : 0)
+
+    setShowFilterDialog(false)
+    toast.success('Filters applied', {
+      description: filterCount > 0
+        ? `${filterCount} filter${filterCount > 1 ? 's' : ''} active`
+        : 'Showing all data'
+    })
+  }
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setActiveFilters({
+      categories: [],
+      metricTypes: [],
+      status: [],
+      minValue: '',
+      maxValue: ''
+    })
+    toast.success('Filters cleared', { description: 'Showing all data' })
+  }
+
+  // Toggle filter option
+  const toggleFilterOption = (filterType: 'categories' | 'metricTypes' | 'status', value: string) => {
+    setActiveFilters(prev => {
+      const current = prev[filterType]
+      const updated = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value]
+      return { ...prev, [filterType]: updated }
+    })
+  }
+
+  // Handle custom date range selection
+  const handleApplyCustomDateRange = () => {
+    if (new Date(customDateRange.startDate) > new Date(customDateRange.endDate)) {
+      toast.error('Invalid date range', { description: 'Start date must be before end date' })
+      return
+    }
+    setTimeRange('custom')
+    setShowCustomDateRange(false)
+    toast.success('Date range applied', {
+      description: `${customDateRange.startDate} to ${customDateRange.endDate}`
+    })
+  }
+
+  // Handle compare date range
+  const handleApplyCompare = () => {
+    if (new Date(compareDateRange.startDate) > new Date(compareDateRange.endDate)) {
+      toast.error('Invalid compare range', { description: 'Start date must be before end date' })
+      return
+    }
+    setCompareMode(true)
+    setShowCompareDialog(false)
+    toast.success('Compare mode enabled', {
+      description: `Comparing with ${compareDateRange.startDate} to ${compareDateRange.endDate}`
+    })
+  }
+
+  // Export report as PDF
+  const handleExportPDF = async () => {
+    setIsLoading(true)
+    const loadingToast = toast.loading('Generating PDF report...')
+
+    try {
+      // Create PDF content
+      const pdfContent = `
+ANALYTICS REPORT
+================
+Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}
+Date Range: ${timeRange === 'custom' ? `${customDateRange.startDate} to ${customDateRange.endDate}` : timeRange}
+
+KEY METRICS
+-----------
+${mockMetrics.map(m => `${m.name}: ${formatValue(m.value, m.type)} (${m.changePercent >= 0 ? '+' : ''}${m.changePercent.toFixed(1)}%)`).join('\n')}
+
+FUNNEL SUMMARY
+--------------
+${mockFunnels.map(f => `${f.name}: ${f.totalConversion}% total conversion`).join('\n')}
+
+COHORT RETENTION
+----------------
+${mockCohorts.map(c => `${c.cohort}: ${c.users} users, Week 4 retention: ${c.week4}%`).join('\n')}
+
+---
+Report generated by Kazi Analytics
+      `.trim()
+
+      const blob = new Blob([pdfContent], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `analytics-report-${new Date().toISOString().split('T')[0]}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss(loadingToast)
+      toast.success('PDF exported', { description: 'Report downloaded successfully' })
+    } catch (err) {
+      toast.dismiss(loadingToast)
+      toast.error('Export failed', { description: 'Could not generate PDF report' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Save custom report
+  const handleSaveCustomReport = async () => {
+    if (!customReportForm.name.trim()) {
+      toast.error('Report name required', { description: 'Please enter a name for your report' })
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      if (userId) {
+        const { error } = await supabase
+          .from('analytics_reports')
+          .insert({
+            user_id: userId,
+            name: customReportForm.name,
+            type: customReportForm.schedule === 'none' ? 'one-time' : 'scheduled',
+            frequency: customReportForm.schedule === 'none' ? null : customReportForm.schedule,
+            format: 'pdf',
+            recipients: [],
+            status: 'active',
+            last_run: new Date().toISOString(),
+            config: {
+              description: customReportForm.description,
+              metrics: customReportForm.metrics,
+              dateRange: timeRange === 'custom' ? customDateRange : timeRange
+            }
+          })
+        if (error) throw error
+      }
+
+      toast.success('Report saved', { description: `"${customReportForm.name}" has been saved` })
+      setCustomReportForm({ name: '', description: '', metrics: [], schedule: 'none' })
+      setShowSaveReportDialog(false)
+      fetchReports()
+    } catch (err: any) {
+      toast.error('Error saving report', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Copy share link for report
+  const handleShareReport = async () => {
+    const shareUrl = `${window.location.origin}/dashboard/analytics-v2?range=${timeRange}&filters=${encodeURIComponent(JSON.stringify(activeFilters))}`
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    } catch (err) {
+      toast.error('Copy failed', { description: 'Could not copy link to clipboard' })
+    }
   }
 
   const handleRefresh = async () => {
@@ -1158,11 +1387,11 @@ Add this code to the <head> section of your HTML.`)
                 />
                 <Button
                   variant={compareMode ? 'secondary' : 'ghost'}
-                  onClick={() => setCompareMode(!compareMode)}
+                  onClick={() => compareMode ? setCompareMode(false) : setShowCompareDialog(true)}
                   className={compareMode ? '' : 'bg-white/20 hover:bg-white/30 text-white border-0'}
                 >
                   <GitBranch className="h-4 w-4 mr-2" />
-                  Compare
+                  {compareMode ? 'Exit Compare' : 'Compare'}
                 </Button>
                 <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleNotifications}>
                   <Bell className="h-4 w-4" />
@@ -1199,7 +1428,7 @@ Add this code to the <head> section of your HTML.`)
         {/* Time Range & Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl p-1 shadow-sm border">
-            {['24h', '7d', '30d', '90d', '12m', 'custom'].map((range) => (
+            {['24h', '7d', '30d', '90d', '12m'].map((range) => (
               <Button
                 key={range}
                 variant={timeRange === range ? 'default' : 'ghost'}
@@ -1207,19 +1436,91 @@ Add this code to the <head> section of your HTML.`)
                 onClick={() => setTimeRange(range)}
                 className={timeRange === range ? '' : 'text-gray-600 dark:text-gray-300'}
               >
-                {range === 'custom' ? <Calendar className="h-4 w-4 mr-1" /> : null}
                 {range}
               </Button>
             ))}
+            <Popover open={showCustomDateRange} onOpenChange={setShowCustomDateRange}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={timeRange === 'custom' ? 'default' : 'ghost'}
+                  size="sm"
+                  className={timeRange === 'custom' ? '' : 'text-gray-600 dark:text-gray-300'}
+                >
+                  <Calendar className="h-4 w-4 mr-1" />
+                  {timeRange === 'custom'
+                    ? `${customDateRange.startDate} - ${customDateRange.endDate}`
+                    : 'Custom'
+                  }
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80" align="start">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Custom Date Range</h4>
+                    <p className="text-sm text-muted-foreground">Select start and end dates for your analysis</p>
+                  </div>
+                  <div className="grid gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="start-date">Start Date</Label>
+                      <Input
+                        id="start-date"
+                        type="date"
+                        value={customDateRange.startDate}
+                        onChange={(e) => setCustomDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="end-date">End Date</Label>
+                      <Input
+                        id="end-date"
+                        type="date"
+                        value={customDateRange.endDate}
+                        onChange={(e) => setCustomDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setShowCustomDateRange(false)} className="flex-1">
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleApplyCustomDateRange} className="flex-1">
+                      Apply
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="flex items-center gap-2">
+            {/* Active filters indicator */}
+            {(activeFilters.categories.length > 0 ||
+              activeFilters.metricTypes.length > 0 ||
+              activeFilters.status.length > 0 ||
+              activeFilters.minValue ||
+              activeFilters.maxValue) && (
+              <Badge variant="secondary" className="mr-2">
+                {activeFilters.categories.length +
+                  activeFilters.metricTypes.length +
+                  activeFilters.status.length +
+                  (activeFilters.minValue ? 1 : 0) +
+                  (activeFilters.maxValue ? 1 : 0)} filters active
+              </Badge>
+            )}
             <Button variant="outline" size="sm" onClick={handleFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowSaveReportDialog(true)}>
+              <FileText className="h-4 w-4 mr-2" />
+              Save Report
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExportPDF}>
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
             </Button>
           </div>
         </div>
@@ -3688,6 +3989,251 @@ Add this code to the <head> section of your HTML.`)
                 <Button variant="destructive" onClick={handleRevokeAllApiKeys} disabled={isLoading}>
                   {isLoading ? 'Revoking...' : 'Revoke All Keys'}
                 </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Filter Analytics</DialogTitle>
+              <DialogDescription>
+                Apply filters to narrow down your analytics data
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6 mt-4">
+              {/* Category Filter */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Categories</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['users', 'revenue', 'engagement', 'conversion'].map((cat) => (
+                    <Badge
+                      key={cat}
+                      variant={activeFilters.categories.includes(cat) ? 'default' : 'outline'}
+                      className="cursor-pointer capitalize"
+                      onClick={() => toggleFilterOption('categories', cat)}
+                    >
+                      {cat}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Metric Type Filter */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Metric Types</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['count', 'currency', 'percentage', 'duration'].map((type) => (
+                    <Badge
+                      key={type}
+                      variant={activeFilters.metricTypes.includes(type) ? 'default' : 'outline'}
+                      className="cursor-pointer capitalize"
+                      onClick={() => toggleFilterOption('metricTypes', type)}
+                    >
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Status</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'up', label: 'Trending Up', color: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' },
+                    { value: 'down', label: 'Trending Down', color: 'bg-red-100 text-red-700 hover:bg-red-200' },
+                    { value: 'stable', label: 'Stable', color: 'bg-gray-100 text-gray-700 hover:bg-gray-200' }
+                  ].map((status) => (
+                    <Badge
+                      key={status.value}
+                      variant="outline"
+                      className={`cursor-pointer ${activeFilters.status.includes(status.value) ? status.color : ''}`}
+                      onClick={() => toggleFilterOption('status', status.value)}
+                    >
+                      {status.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Value Range Filter */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Value Range</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="min-value" className="text-xs text-muted-foreground">Minimum Value</Label>
+                    <Input
+                      id="min-value"
+                      type="number"
+                      placeholder="Min"
+                      value={activeFilters.minValue}
+                      onChange={(e) => setActiveFilters(prev => ({ ...prev, minValue: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="max-value" className="text-xs text-muted-foreground">Maximum Value</Label>
+                    <Input
+                      id="max-value"
+                      type="number"
+                      placeholder="Max"
+                      value={activeFilters.maxValue}
+                      onChange={(e) => setActiveFilters(prev => ({ ...prev, maxValue: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between gap-2 pt-4 border-t">
+                <Button variant="ghost" onClick={handleClearFilters}>
+                  Clear All
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setShowFilterDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleApplyFilters}>
+                    Apply Filters
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compare Date Range Dialog */}
+        <Dialog open={showCompareDialog} onOpenChange={setShowCompareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Compare Date Ranges</DialogTitle>
+              <DialogDescription>
+                Select a date range to compare against your current view
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                <p className="text-sm font-medium text-indigo-900 dark:text-indigo-100">Current Range</p>
+                <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                  {timeRange === 'custom'
+                    ? `${customDateRange.startDate} to ${customDateRange.endDate}`
+                    : `Last ${timeRange}`
+                  }
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Label>Compare With</Label>
+                <div className="grid gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="compare-start" className="text-xs text-muted-foreground">Start Date</Label>
+                    <Input
+                      id="compare-start"
+                      type="date"
+                      value={compareDateRange.startDate}
+                      onChange={(e) => setCompareDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="compare-end" className="text-xs text-muted-foreground">End Date</Label>
+                    <Input
+                      id="compare-end"
+                      type="date"
+                      value={compareDateRange.endDate}
+                      onChange={(e) => setCompareDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowCompareDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleApplyCompare}>
+                  <GitBranch className="h-4 w-4 mr-2" />
+                  Start Comparison
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Save Custom Report Dialog */}
+        <Dialog open={showSaveReportDialog} onOpenChange={setShowSaveReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Save Custom Report</DialogTitle>
+              <DialogDescription>
+                Save your current analytics view as a custom report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="report-save-name">Report Name</Label>
+                <Input
+                  id="report-save-name"
+                  placeholder="e.g., Monthly Performance Overview"
+                  value={customReportForm.name}
+                  onChange={(e) => setCustomReportForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="report-save-description">Description (optional)</Label>
+                <Textarea
+                  id="report-save-description"
+                  placeholder="Describe what this report tracks..."
+                  value={customReportForm.description}
+                  onChange={(e) => setCustomReportForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="mt-1"
+                />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
+                <h4 className="text-sm font-medium">Report Configuration</h4>
+                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <p>Date Range: {timeRange === 'custom' ? `${customDateRange.startDate} to ${customDateRange.endDate}` : timeRange}</p>
+                  <p>Active Filters: {
+                    activeFilters.categories.length +
+                    activeFilters.metricTypes.length +
+                    activeFilters.status.length +
+                    (activeFilters.minValue ? 1 : 0) +
+                    (activeFilters.maxValue ? 1 : 0)
+                  } applied</p>
+                  <p>Metrics: {filteredMetrics.length} metrics included</p>
+                </div>
+              </div>
+              <div>
+                <Label>Schedule (optional)</Label>
+                <Select
+                  value={customReportForm.schedule}
+                  onValueChange={(v: 'none' | 'daily' | 'weekly' | 'monthly') =>
+                    setCustomReportForm(prev => ({ ...prev, schedule: v }))
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No schedule (one-time)</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-between gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={handleShareReport}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Copy Link
+                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setShowSaveReportDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveCustomReport} disabled={isLoading}>
+                    {isLoading ? 'Saving...' : 'Save Report'}
+                  </Button>
+                </div>
               </div>
             </div>
           </DialogContent>

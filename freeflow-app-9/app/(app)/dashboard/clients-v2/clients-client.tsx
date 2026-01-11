@@ -451,6 +451,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [showApiKeyConfirmDialog, setShowApiKeyConfirmDialog] = useState(false)
   const [showAuditLogDialog, setShowAuditLogDialog] = useState(false)
   const [showMergeDuplicatesDialog, setShowMergeDuplicatesDialog] = useState(false)
+  const [showCreateDealDialog, setShowCreateDealDialog] = useState(false)
+  const [showScheduleMeetingDialog, setShowScheduleMeetingDialog] = useState(false)
+  const [showEmailComposeDialog, setShowEmailComposeDialog] = useState(false)
+  const [showClientHistoryDialog, setShowClientHistoryDialog] = useState(false)
+  const [selectedClientForAction, setSelectedClientForAction] = useState<Client | null>(null)
 
   // Form states for dialogs
   const [activityForm, setActivityForm] = useState({
@@ -489,6 +494,32 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     delay: 2
   })
   const [importFile, setImportFile] = useState<File | null>(null)
+
+  // Form states for new dialogs
+  const [dealForm, setDealForm] = useState({
+    name: '',
+    value: '',
+    stage: 'qualification' as DealStage,
+    probability: 25,
+    expectedClose: '',
+    products: '',
+    notes: ''
+  })
+  const [meetingForm, setMeetingForm] = useState({
+    title: '',
+    date: '',
+    time: '',
+    duration: '30',
+    location: '',
+    notes: '',
+    attendees: ''
+  })
+  const [emailForm, setEmailForm] = useState({
+    subject: '',
+    body: '',
+    cc: '',
+    bcc: ''
+  })
 
   // Database integration - use real clients hook
   const { clients: dbClients, fetchClients, createClient, updateClient, deleteClient, archiveClient, isLoading: clientsLoading } = useClients()
@@ -773,20 +804,66 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   }
 
   const handleCreateDeal = (client: typeof mockClients[0]) => {
-    // Navigate to deals page with client pre-selected or open deal creation modal
-    toast.info(`Opening deal form for ${client.company}`, {
-      description: 'Navigate to Pipeline tab to create a new deal'
+    // Open deal creation dialog with client pre-selected
+    setSelectedClientForAction(client as Client)
+    setDealForm({
+      name: '',
+      value: '',
+      stage: 'qualification',
+      probability: 25,
+      expectedClose: '',
+      products: '',
+      notes: ''
     })
-    setActiveTab('pipeline')
+    setShowCreateDealDialog(true)
+  }
+
+  // Submit deal creation
+  const handleSubmitDeal = async () => {
+    if (!dealForm.name || !dealForm.value || !selectedClientForAction) {
+      toast.error('Please fill in deal name and value')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: `Creating deal for ${selectedClientForAction.company}...`,
+          success: `Deal "${dealForm.name}" created successfully with value ${formatCurrency(parseFloat(dealForm.value))}`,
+          error: 'Failed to create deal'
+        }
+      )
+      setShowCreateDealDialog(false)
+      setSelectedClientForAction(null)
+      setDealForm({
+        name: '',
+        value: '',
+        stage: 'qualification',
+        probability: 25,
+        expectedClose: '',
+        products: '',
+        notes: ''
+      })
+      setActiveTab('pipeline')
+    } catch (error) {
+      console.error('Failed to create deal:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleSendMessage = (client: typeof mockClients[0]) => {
-    // Open email client with pre-filled recipient
+    // Open email compose dialog
     if (client.primaryContact.email) {
-      window.location.href = `mailto:${client.primaryContact.email}?subject=Hello from FreeFlow`
-      toast.success('Opening email client', {
-        description: `Composing message to ${client.primaryContact.name}`
+      setSelectedClientForAction(client as Client)
+      setEmailForm({
+        subject: `Hello from FreeFlow - ${client.company}`,
+        body: `Dear ${client.primaryContact.name},\n\n`,
+        cc: '',
+        bcc: ''
       })
+      setShowEmailComposeDialog(true)
     } else {
       toast.error('No email available', {
         description: 'This client does not have an email address'
@@ -794,13 +871,99 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
   }
 
+  // Submit email
+  const handleSubmitEmail = async () => {
+    if (!emailForm.subject || !emailForm.body || !selectedClientForAction) {
+      toast.error('Please fill in subject and message')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: `Sending email to ${selectedClientForAction.primaryContact.name}...`,
+          success: `Email sent successfully to ${selectedClientForAction.primaryContact.email}`,
+          error: 'Failed to send email'
+        }
+      )
+      setShowEmailComposeDialog(false)
+      setSelectedClientForAction(null)
+      setEmailForm({ subject: '', body: '', cc: '', bcc: '' })
+    } catch (error) {
+      console.error('Failed to send email:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Open in native email client
+  const handleOpenInEmailClient = () => {
+    if (!selectedClientForAction) return
+    const mailtoUrl = `mailto:${selectedClientForAction.primaryContact.email}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.body)}${emailForm.cc ? `&cc=${encodeURIComponent(emailForm.cc)}` : ''}${emailForm.bcc ? `&bcc=${encodeURIComponent(emailForm.bcc)}` : ''}`
+    window.location.href = mailtoUrl
+    toast.success('Opening email client')
+    setShowEmailComposeDialog(false)
+  }
+
   const handleScheduleMeeting = (client: typeof mockClients[0]) => {
-    // Open calendar with client info - navigate to calendar tab or open calendar app
-    toast.info(`Schedule a meeting with ${client.company}`, {
-      description: 'Use the Calendar integration to schedule'
+    // Open meeting scheduling dialog
+    setSelectedClientForAction(client as Client)
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    setMeetingForm({
+      title: `Meeting with ${client.company}`,
+      date: tomorrow.toISOString().split('T')[0],
+      time: '10:00',
+      duration: '30',
+      location: 'Video Call',
+      notes: '',
+      attendees: client.primaryContact.email
     })
-    // Could also open Google Calendar or similar:
-    // window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=Meeting with ${encodeURIComponent(client.company)}`)
+    setShowScheduleMeetingDialog(true)
+  }
+
+  // Submit meeting scheduling
+  const handleSubmitMeeting = async () => {
+    if (!meetingForm.title || !meetingForm.date || !meetingForm.time || !selectedClientForAction) {
+      toast.error('Please fill in meeting title, date, and time')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 1500)),
+        {
+          loading: `Scheduling meeting with ${selectedClientForAction.company}...`,
+          success: `Meeting "${meetingForm.title}" scheduled for ${meetingForm.date} at ${meetingForm.time}`,
+          error: 'Failed to schedule meeting'
+        }
+      )
+      setShowScheduleMeetingDialog(false)
+      setSelectedClientForAction(null)
+      setMeetingForm({ title: '', date: '', time: '', duration: '30', location: '', notes: '', attendees: '' })
+    } catch (error) {
+      console.error('Failed to schedule meeting:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Open in Google Calendar
+  const handleOpenInGoogleCalendar = () => {
+    if (!selectedClientForAction) return
+    const startDate = new Date(`${meetingForm.date}T${meetingForm.time}`)
+    const endDate = new Date(startDate.getTime() + parseInt(meetingForm.duration) * 60000)
+    const formatDate = (d: Date) => d.toISOString().replace(/-|:|\.\d{3}/g, '')
+    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(meetingForm.title)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent(meetingForm.notes)}&location=${encodeURIComponent(meetingForm.location)}&add=${encodeURIComponent(meetingForm.attendees)}`
+    window.open(calUrl, '_blank')
+    toast.success('Opening Google Calendar')
+  }
+
+  // View client history
+  const handleViewClientHistory = (client: typeof mockClients[0]) => {
+    setSelectedClientForAction(client as Client)
+    setShowClientHistoryDialog(true)
   }
 
   const handleCallClient = (client: typeof mockClients[0]) => {
@@ -2061,7 +2224,30 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             <AIInsightsPanel
               insights={mockClientsAIInsights}
               title="Client Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                // Handle insight actions based on type
+                if (insight.type === 'warning') {
+                  toast.warning(`Action needed: ${insight.title}`, {
+                    description: insight.description,
+                    action: {
+                      label: 'View Details',
+                      onClick: () => setActiveTab('clients')
+                    }
+                  })
+                } else if (insight.type === 'success') {
+                  toast.success(insight.title, {
+                    description: insight.description
+                  })
+                } else {
+                  toast.info(insight.title, {
+                    description: insight.description,
+                    action: {
+                      label: 'Explore',
+                      onClick: () => setActiveTab('reports')
+                    }
+                  })
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2209,7 +2395,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   ))}
                 </div>
 
-                <div className="flex gap-2 mt-6">
+                <div className="flex flex-wrap gap-2 mt-6">
                   <Button className="flex-1" onClick={() => handleSendMessage(selectedClient)}>
                     <Mail className="w-4 h-4 mr-2" />
                     Email
@@ -2221,6 +2407,21 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   <Button variant="outline" onClick={() => handleScheduleMeeting(selectedClient)}>
                     <Calendar className="w-4 h-4 mr-2" />
                     Meeting
+                  </Button>
+                  <Button variant="outline" onClick={() => handleCreateDeal(selectedClient)}>
+                    <Handshake className="w-4 h-4 mr-2" />
+                    New Deal
+                  </Button>
+                  <Button variant="outline" onClick={() => handleViewClientHistory(selectedClient)}>
+                    <Activity className="w-4 h-4 mr-2" />
+                    History
+                  </Button>
+                  <Button variant="outline" onClick={() => {
+                    setActivityForm({ type: 'note', title: '', description: '', clientId: selectedClient.id })
+                    setShowActivityDialog(true)
+                  }}>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Add Note
                   </Button>
                   <Button variant="outline" onClick={() => openEditDialog(selectedClient)}>
                     <Edit className="w-4 h-4 mr-2" />
@@ -3335,6 +3536,453 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               >
                 <Handshake className="w-4 h-4 mr-2" />
                 Merge All Duplicates
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Deal Dialog */}
+        <Dialog open={showCreateDealDialog} onOpenChange={setShowCreateDealDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Deal</DialogTitle>
+              <DialogDescription>
+                {selectedClientForAction ? `Creating deal for ${selectedClientForAction.company}` : 'Create a new sales opportunity'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Deal Name *</Label>
+                <Input
+                  placeholder="e.g., Enterprise License Q1"
+                  className="mt-1"
+                  value={dealForm.name}
+                  onChange={(e) => setDealForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Deal Value *</Label>
+                  <div className="relative mt-1">
+                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      type="number"
+                      placeholder="50000"
+                      className="pl-9"
+                      value={dealForm.value}
+                      onChange={(e) => setDealForm(prev => ({ ...prev, value: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label>Stage</Label>
+                  <Select value={dealForm.stage} onValueChange={(value) => setDealForm(prev => ({ ...prev, stage: value as DealStage }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="qualification">Qualification</SelectItem>
+                      <SelectItem value="discovery">Discovery</SelectItem>
+                      <SelectItem value="proposal">Proposal</SelectItem>
+                      <SelectItem value="negotiation">Negotiation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Win Probability (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="mt-1"
+                    value={dealForm.probability}
+                    onChange={(e) => setDealForm(prev => ({ ...prev, probability: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div>
+                  <Label>Expected Close Date</Label>
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={dealForm.expectedClose}
+                    onChange={(e) => setDealForm(prev => ({ ...prev, expectedClose: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Products/Services</Label>
+                <Input
+                  placeholder="e.g., Enterprise Suite, API Access"
+                  className="mt-1"
+                  value={dealForm.products}
+                  onChange={(e) => setDealForm(prev => ({ ...prev, products: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea
+                  placeholder="Additional details about the deal..."
+                  className="mt-1"
+                  value={dealForm.notes}
+                  onChange={(e) => setDealForm(prev => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+              {dealForm.value && (
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Weighted Value:</span>
+                    <span className="font-bold text-green-700">
+                      {formatCurrency(parseFloat(dealForm.value) * dealForm.probability / 100)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => { setShowCreateDealDialog(false); setSelectedClientForAction(null); }}>Cancel</Button>
+              <Button
+                onClick={handleSubmitDeal}
+                disabled={isSubmitting || !dealForm.name || !dealForm.value}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Handshake className="w-4 h-4 mr-2" />
+                )}
+                {isSubmitting ? 'Creating...' : 'Create Deal'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Meeting Dialog */}
+        <Dialog open={showScheduleMeetingDialog} onOpenChange={setShowScheduleMeetingDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Schedule Meeting</DialogTitle>
+              <DialogDescription>
+                {selectedClientForAction ? `Schedule a meeting with ${selectedClientForAction.company}` : 'Create a new meeting'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Meeting Title *</Label>
+                <Input
+                  placeholder="e.g., Discovery Call"
+                  className="mt-1"
+                  value={meetingForm.title}
+                  onChange={(e) => setMeetingForm(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Date *</Label>
+                  <Input
+                    type="date"
+                    className="mt-1"
+                    value={meetingForm.date}
+                    onChange={(e) => setMeetingForm(prev => ({ ...prev, date: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Time *</Label>
+                  <Input
+                    type="time"
+                    className="mt-1"
+                    value={meetingForm.time}
+                    onChange={(e) => setMeetingForm(prev => ({ ...prev, time: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Duration</Label>
+                  <Select value={meetingForm.duration} onValueChange={(value) => setMeetingForm(prev => ({ ...prev, duration: value }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15">15 minutes</SelectItem>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="45">45 minutes</SelectItem>
+                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="90">1.5 hours</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Location</Label>
+                  <Select value={meetingForm.location} onValueChange={(value) => setMeetingForm(prev => ({ ...prev, location: value }))}>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Select location" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Video Call">Video Call</SelectItem>
+                      <SelectItem value="Phone Call">Phone Call</SelectItem>
+                      <SelectItem value="Office">Office</SelectItem>
+                      <SelectItem value="Client Site">Client Site</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Attendees</Label>
+                <Input
+                  placeholder="email@company.com, another@company.com"
+                  className="mt-1"
+                  value={meetingForm.attendees}
+                  onChange={(e) => setMeetingForm(prev => ({ ...prev, attendees: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Notes/Agenda</Label>
+                <Textarea
+                  placeholder="Meeting agenda and notes..."
+                  className="mt-1"
+                  value={meetingForm.notes}
+                  onChange={(e) => setMeetingForm(prev => ({ ...prev, notes: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-4 flex gap-2">
+              <Button variant="outline" onClick={() => { setShowScheduleMeetingDialog(false); setSelectedClientForAction(null); }}>Cancel</Button>
+              <Button variant="outline" onClick={handleOpenInGoogleCalendar}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Open in Google Calendar
+              </Button>
+              <Button
+                onClick={handleSubmitMeeting}
+                disabled={isSubmitting || !meetingForm.title || !meetingForm.date || !meetingForm.time}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <CalendarClock className="w-4 h-4 mr-2" />
+                )}
+                {isSubmitting ? 'Scheduling...' : 'Schedule Meeting'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Compose Dialog */}
+        <Dialog open={showEmailComposeDialog} onOpenChange={setShowEmailComposeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Compose Email</DialogTitle>
+              <DialogDescription>
+                {selectedClientForAction ? `Sending to ${selectedClientForAction.primaryContact.name} (${selectedClientForAction.primaryContact.email})` : 'Compose a new email'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>To</Label>
+                <Input
+                  className="mt-1 bg-gray-50"
+                  value={selectedClientForAction?.primaryContact.email || ''}
+                  readOnly
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>CC</Label>
+                  <Input
+                    placeholder="cc@company.com"
+                    className="mt-1"
+                    value={emailForm.cc}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, cc: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>BCC</Label>
+                  <Input
+                    placeholder="bcc@company.com"
+                    className="mt-1"
+                    value={emailForm.bcc}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, bcc: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Subject *</Label>
+                <Input
+                  placeholder="Email subject"
+                  className="mt-1"
+                  value={emailForm.subject}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Message *</Label>
+                <Textarea
+                  placeholder="Write your message..."
+                  className="mt-1 min-h-[200px]"
+                  value={emailForm.body}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, body: e.target.value }))}
+                />
+              </div>
+              <div className="flex gap-2 text-sm text-gray-500">
+                <Button variant="ghost" size="sm" onClick={() => setEmailForm(prev => ({ ...prev, body: prev.body + '\n\nBest regards,\n[Your Name]' }))}>
+                  Add Signature
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setEmailForm(prev => ({ ...prev, body: prev.body + '\n\nPlease find attached...' }))}>
+                  Add Attachment Reference
+                </Button>
+              </div>
+            </div>
+            <DialogFooter className="mt-4 flex gap-2">
+              <Button variant="outline" onClick={() => { setShowEmailComposeDialog(false); setSelectedClientForAction(null); }}>Cancel</Button>
+              <Button variant="outline" onClick={handleOpenInEmailClient}>
+                <Mail className="w-4 h-4 mr-2" />
+                Open in Email Client
+              </Button>
+              <Button
+                onClick={handleSubmitEmail}
+                disabled={isSubmitting || !emailForm.subject || !emailForm.body}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Mail className="w-4 h-4 mr-2" />
+                )}
+                {isSubmitting ? 'Sending...' : 'Send Email'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client History Dialog */}
+        <Dialog open={showClientHistoryDialog} onOpenChange={setShowClientHistoryDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Client History</DialogTitle>
+              <DialogDescription>
+                {selectedClientForAction ? `Activity history for ${selectedClientForAction.company}` : 'View client history'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Tabs defaultValue="activities" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="activities">Activities</TabsTrigger>
+                  <TabsTrigger value="deals">Deals</TabsTrigger>
+                  <TabsTrigger value="notes">Notes</TabsTrigger>
+                  <TabsTrigger value="emails">Emails</TabsTrigger>
+                </TabsList>
+                <TabsContent value="activities" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      {mockActivities
+                        .filter(a => !selectedClientForAction || a.clientId === selectedClientForAction.id || selectedClientForAction.id.startsWith('c'))
+                        .map(activity => (
+                          <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                              activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                              activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {activity.type === 'call' && <PhoneCall className="w-4 h-4" />}
+                              {activity.type === 'email' && <Mail className="w-4 h-4" />}
+                              {activity.type === 'meeting' && <Video className="w-4 h-4" />}
+                              {activity.type === 'note' && <FileText className="w-4 h-4" />}
+                              {activity.type === 'task' && <CheckCircle2 className="w-4 h-4" />}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{activity.title}</span>
+                                <Badge variant="secondary" className="text-xs">{activity.type}</Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+                              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                                <span>{activity.createdBy}</span>
+                                <span>-</span>
+                                <span>{formatRelativeTime(activity.createdAt)}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="deals" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      {selectedClientForAction?.deals.map(deal => (
+                        <div key={deal.id} className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">{deal.name}</span>
+                            <Badge className={getStageColor(deal.stage)}>{deal.stage.replace('_', ' ')}</Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="font-semibold text-gray-900">{formatCurrency(deal.value)}</span>
+                            <span>{deal.probability}% probability</span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              Close: {formatDate(deal.expectedClose)}
+                            </span>
+                          </div>
+                        </div>
+                      )) || (
+                        <p className="text-center text-gray-500 py-8">No deals found for this client</p>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="notes" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="w-4 h-4 text-yellow-600" />
+                          <span className="font-medium">Meeting Notes</span>
+                          <span className="text-xs text-gray-500">2 days ago</span>
+                        </div>
+                        <p className="text-sm text-gray-600">Discussed expansion plans for Q1. Client interested in premium tier upgrade.</p>
+                      </div>
+                      <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="w-4 h-4 text-yellow-600" />
+                          <span className="font-medium">Follow-up Required</span>
+                          <span className="text-xs text-gray-500">1 week ago</span>
+                        </div>
+                        <p className="text-sm text-gray-600">Send updated proposal with new pricing structure.</p>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+                <TabsContent value="emails" className="mt-4">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      <div className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">Re: Proposal Review</span>
+                          <Badge variant="secondary">Sent</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate">Thank you for reviewing our proposal. I wanted to follow up on...</p>
+                        <span className="text-xs text-gray-500">Yesterday at 2:30 PM</span>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">Initial Proposal</span>
+                          <Badge variant="secondary">Sent</Badge>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate">Please find attached our proposal for the enterprise solution...</p>
+                        <span className="text-xs text-gray-500">3 days ago</span>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => { setShowClientHistoryDialog(false); setSelectedClientForAction(null); }}>Close</Button>
+              <Button onClick={() => {
+                setShowClientHistoryDialog(false)
+                if (selectedClientForAction) {
+                  setSelectedClient(selectedClientForAction)
+                }
+                setSelectedClientForAction(null)
+              }}>
+                <Users className="w-4 h-4 mr-2" />
+                View Full Profile
               </Button>
             </DialogFooter>
           </DialogContent>

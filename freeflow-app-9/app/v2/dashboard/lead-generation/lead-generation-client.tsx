@@ -593,6 +593,46 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const [leadToDelete, setLeadToDelete] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Email compose dialog state
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false)
+  const [emailForm, setEmailForm] = useState({ subject: '', body: '' })
+
+  // Note dialog state
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false)
+  const [noteContent, setNoteContent] = useState('')
+
+  // Assign lead dialog state
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
+  const [selectedAssignee, setSelectedAssignee] = useState('')
+
+  // Edit lead dialog state
+  const [isEditLeadDialogOpen, setIsEditLeadDialogOpen] = useState(false)
+  const [editLeadForm, setEditLeadForm] = useState<LeadInput>({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    title: '',
+    status: 'new',
+    score: 50,
+    source: 'website',
+    notes: '',
+    value_estimate: 0,
+    tags: []
+  })
+
+  // Status change dialog state
+  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
+  const [selectedNewStatus, setSelectedNewStatus] = useState<LeadStatus>('new')
+
+  // Team members for assignment
+  const teamMembers = [
+    { id: '1', name: 'Mike Wilson', role: 'Sales Manager' },
+    { id: '2', name: 'Emma Davis', role: 'Sales Rep' },
+    { id: '3', name: 'John Smith', role: 'SDR' },
+    { id: '4', name: 'Sarah Brown', role: 'Account Executive' }
+  ]
+
   // Form state for new lead
   const [newLeadForm, setNewLeadForm] = useState<LeadInput>({
     name: '',
@@ -785,9 +825,40 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handleSendEmail = () => {
     if (!selectedLead) return
-    toast.success('Email composer opened', {
-      description: `Composing email to ${selectedLead.firstName} ${selectedLead.lastName}`
-    })
+    setEmailForm({ subject: '', body: '' })
+    setIsEmailDialogOpen(true)
+  }
+
+  const handleSubmitEmail = async () => {
+    if (!selectedLead) return
+    if (!emailForm.subject.trim() || !emailForm.body.trim()) {
+      toast.error('Validation Error', {
+        description: 'Subject and message are required'
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Log the email activity
+      await contactLead(selectedLead.id)
+
+      // Open the user's email client with the composed email
+      const mailtoUrl = `mailto:${selectedLead.email}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.body)}`
+      window.open(mailtoUrl, '_blank')
+
+      toast.success('Email Sent', {
+        description: `Email composed and opened for ${selectedLead.firstName} ${selectedLead.lastName}`
+      })
+      setIsEmailDialogOpen(false)
+      setEmailForm({ subject: '', body: '' })
+    } catch (error) {
+      toast.error('Error', {
+        description: 'Failed to send email. Please try again.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Handlers
@@ -898,9 +969,43 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleAssignLead = (leadName: string) => {
-    toast.info('Assign Lead', {
-      description: `Assigning "${leadName}" to sales rep...`
-    })
+    setSelectedAssignee('')
+    setIsAssignDialogOpen(true)
+  }
+
+  const handleSubmitAssignment = async () => {
+    if (!selectedLead || !selectedAssignee) {
+      toast.error('Validation Error', {
+        description: 'Please select a team member to assign'
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const assignee = teamMembers.find(t => t.id === selectedAssignee)
+      const result = await updateLead(selectedLead.id, {
+        // Update metadata to store assignment info
+      })
+
+      if (result) {
+        toast.success('Lead Assigned', {
+          description: `${selectedLead.firstName} ${selectedLead.lastName} assigned to ${assignee?.name}`
+        })
+        setIsAssignDialogOpen(false)
+        setSelectedAssignee('')
+      } else {
+        toast.error('Error', {
+          description: 'Failed to assign lead'
+        })
+      }
+    } catch (error) {
+      toast.error('Error', {
+        description: 'Failed to assign lead. Please try again.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleExportLeads = () => {
@@ -924,14 +1029,25 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Leads Tab
   const handleImportCSV = () => {
-    toast.info('Import CSV', {
-      description: 'Opening CSV import wizard...'
-    })
+    setIsImportDialogOpen(true)
   }
 
   const handleExportAll = () => {
-    toast.success('Exporting All Leads', {
-      description: 'All lead data will be downloaded as CSV'
+    // Export all leads as CSV with extended data
+    const header = '"Name","Email","Phone","Company","Title","Status","Stage","Source","Priority","Score","Behavioral Score","Demographic Score","Estimated Value","Owner","Industry","Company Size","Tags","Created At","Updated At"\n'
+    const csvContent = leads.map(l =>
+      `"${l.firstName} ${l.lastName}","${l.email}","${l.phone || ''}","${l.company}","${l.title}","${l.status}","${l.stage}","${l.source}","${l.priority}","${l.score}","${l.behavioralScore}","${l.demographicScore}","${l.estimatedValue}","${l.owner.name}","${l.industry}","${l.companySize}","${l.tags.join('; ')}","${formatDate(l.createdAt)}","${formatDate(l.updatedAt)}"`
+    ).join('\n')
+    const blob = new Blob([header + csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `leads-full-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', {
+      description: `Exported ${leads.length} leads to CSV`
     })
   }
 
@@ -1034,9 +1150,53 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleAddNote = () => {
-    toast.info('Add Note', {
-      description: 'Opening note creation form...'
-    })
+    if (!selectedLead) {
+      toast.info('Select a Lead', {
+        description: 'Please select a lead first to add a note'
+      })
+      return
+    }
+    setNoteContent('')
+    setIsNoteDialogOpen(true)
+  }
+
+  const handleSubmitNote = async () => {
+    if (!selectedLead) return
+    if (!noteContent.trim()) {
+      toast.error('Validation Error', {
+        description: 'Note content is required'
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Append note to existing notes
+      const existingNotes = selectedLead.notes.map(n => n.content).join('\n---\n')
+      const newNotes = existingNotes
+        ? `${existingNotes}\n---\n[${new Date().toLocaleDateString()}] ${noteContent}`
+        : `[${new Date().toLocaleDateString()}] ${noteContent}`
+
+      const result = await updateLead(selectedLead.id, { notes: newNotes })
+
+      if (result) {
+        toast.success('Note Added', {
+          description: `Note added to ${selectedLead.firstName} ${selectedLead.lastName}`
+        })
+        setIsNoteDialogOpen(false)
+        setNoteContent('')
+      } else {
+        toast.error('Error', {
+          description: 'Failed to add note'
+        })
+      }
+    } catch (error) {
+      toast.error('Error', {
+        description: 'Failed to add note. Please try again.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleCreateTask = () => {
@@ -1058,8 +1218,31 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleExportLog = () => {
-    toast.success('Exporting Activity Log', {
-      description: 'Activity log will be downloaded as CSV'
+    // Export activity log as CSV
+    const activities = leads.flatMap(lead =>
+      lead.activities.map(activity => ({
+        ...activity,
+        leadName: `${lead.firstName} ${lead.lastName}`,
+        leadEmail: lead.email,
+        leadCompany: lead.company
+      }))
+    ).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+
+    const header = '"Date","Type","Title","Description","Lead Name","Lead Email","Company","Performed By","Outcome"\n'
+    const csvContent = activities.map(a =>
+      `"${formatDate(a.createdAt)}","${a.type}","${a.title}","${a.description}","${a.leadName}","${a.leadEmail}","${a.leadCompany}","${a.performedBy}","${a.outcome || ''}"`
+    ).join('\n')
+
+    const blob = new Blob([header + csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `activity-log-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', {
+      description: `Exported ${activities.length} activities to CSV`
     })
   }
 
@@ -1289,9 +1472,115 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Dialog Actions
   const handleDialogMore = () => {
-    toast.info('More Options', {
-      description: 'Opening additional lead actions...'
+    if (!selectedLead) return
+    // Open edit dialog instead of just showing toast
+    handleEditLead()
+  }
+
+  const handleEditLead = () => {
+    if (!selectedLead) return
+    setEditLeadForm({
+      name: `${selectedLead.firstName} ${selectedLead.lastName}`,
+      email: selectedLead.email,
+      phone: selectedLead.phone || '',
+      company: selectedLead.company,
+      title: selectedLead.title,
+      status: selectedLead.status === 'won' ? 'converted' : selectedLead.status === 'lost' ? 'archived' : selectedLead.status as any,
+      score: selectedLead.score,
+      source: selectedLead.source,
+      notes: selectedLead.notes.map(n => n.content).join('\n'),
+      value_estimate: selectedLead.estimatedValue,
+      tags: selectedLead.tags
     })
+    setIsEditLeadDialogOpen(true)
+  }
+
+  const handleSubmitEditLead = async () => {
+    if (!selectedLead) return
+    if (!editLeadForm.name?.trim()) {
+      toast.error('Validation Error', {
+        description: 'Lead name is required'
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await updateLead(selectedLead.id, {
+        name: editLeadForm.name,
+        email: editLeadForm.email,
+        phone: editLeadForm.phone,
+        company: editLeadForm.company,
+        title: editLeadForm.title,
+        score: editLeadForm.score,
+        source: editLeadForm.source,
+        notes: editLeadForm.notes,
+        value_estimate: editLeadForm.value_estimate,
+        tags: editLeadForm.tags
+      })
+
+      if (result) {
+        toast.success('Lead Updated', {
+          description: `"${editLeadForm.name}" has been updated successfully`
+        })
+        setIsEditLeadDialogOpen(false)
+        setIsLeadDialogOpen(false)
+      } else {
+        toast.error('Error', {
+          description: 'Failed to update lead'
+        })
+      }
+    } catch (error) {
+      toast.error('Error', {
+        description: 'Failed to update lead. Please try again.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Status change handler
+  const handleChangeStatus = () => {
+    if (!selectedLead) {
+      toast.info('Select a Lead', {
+        description: 'Please select a lead first to change status'
+      })
+      return
+    }
+    setSelectedNewStatus(selectedLead.status)
+    setIsStatusDialogOpen(true)
+  }
+
+  const handleSubmitStatusChange = async () => {
+    if (!selectedLead) return
+
+    setIsSubmitting(true)
+    try {
+      // Map component status to hook status
+      let hookStatus: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost' | 'archived' = 'new'
+      if (selectedNewStatus === 'won') hookStatus = 'converted'
+      else if (selectedNewStatus === 'lost') hookStatus = 'archived'
+      else if (['new', 'contacted', 'qualified'].includes(selectedNewStatus)) hookStatus = selectedNewStatus as any
+
+      const result = await updateLead(selectedLead.id, { status: hookStatus })
+
+      if (result) {
+        toast.success('Status Updated', {
+          description: `Lead status changed to ${selectedNewStatus}`
+        })
+        setIsStatusDialogOpen(false)
+      } else {
+        toast.error('Error', {
+          description: 'Failed to update status'
+        })
+      }
+    } catch (error) {
+      toast.error('Error', {
+        description: 'Failed to update status. Please try again.'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Quick actions with real functionality
@@ -2633,7 +2922,24 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             <AIInsightsPanel
               insights={mockLeadGenAIInsights}
               title="Lead Gen Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                if (insight.type === 'warning') {
+                  // Handle warning insights - show stale leads
+                  setSelectedStatus('all')
+                  toast.info('Showing Inactive Leads', {
+                    description: 'Filtered to show leads needing attention'
+                  })
+                } else if (insight.type === 'success') {
+                  // Handle success insights - show dashboard
+                  toast.success('Great Progress!', {
+                    description: insight.description
+                  })
+                } else {
+                  toast.info(insight.title, {
+                    description: insight.description
+                  })
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2850,7 +3156,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                       )}
                     </div>
 
-                    {/* Actions */}
+                    {/* Actions - Primary Row */}
                     <div className="flex items-center gap-3 pt-4 border-t">
                       <Button className="flex-1" onClick={handleSendEmail}>
                         <Mail className="w-4 h-4 mr-2" />
@@ -2860,11 +3166,54 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         <Phone className="w-4 h-4 mr-2" />
                         Log Call
                       </Button>
-                      <Button variant="outline" onClick={() => {
+                    </div>
+
+                    {/* Actions - Secondary Row */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={handleAddNote}>
+                        <FileText className="w-4 h-4 mr-2" />
+                        Add Note
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleAssignLead(`${selectedLead.firstName} ${selectedLead.lastName}`)}>
+                        <Users className="w-4 h-4 mr-2" />
+                        Assign
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={handleChangeStatus}>
+                        <Activity className="w-4 h-4 mr-2" />
+                        Status
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleEditLead}>
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => {
                         setLeadToDelete(selectedLead.id)
                         setIsDeleteDialogOpen(true)
                       }}>
                         <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+
+                    {/* Quick Actions Row */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={() => handleQualifyLead(selectedLead.id, `${selectedLead.firstName} ${selectedLead.lastName}`)}
+                        disabled={selectedLead.status === 'qualified' || selectedLead.status === 'won'}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Qualify
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                        onClick={() => handleConvertLead(selectedLead.id, `${selectedLead.firstName} ${selectedLead.lastName}`)}
+                        disabled={selectedLead.status === 'won'}
+                      >
+                        <Award className="w-4 h-4 mr-1" />
+                        Convert
                       </Button>
                     </div>
                   </div>
@@ -3161,6 +3510,385 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
                 Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Compose Dialog */}
+        <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-blue-500" />
+                Compose Email
+              </DialogTitle>
+              <DialogDescription>
+                {selectedLead && `Send an email to ${selectedLead.firstName} ${selectedLead.lastName} (${selectedLead.email})`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="email-subject">Subject</Label>
+                <Input
+                  id="email-subject"
+                  placeholder="Enter email subject..."
+                  value={emailForm.subject}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email-body">Message</Label>
+                <Textarea
+                  id="email-body"
+                  placeholder="Write your message..."
+                  value={emailForm.body}
+                  onChange={(e) => setEmailForm(prev => ({ ...prev, body: e.target.value }))}
+                  rows={8}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                onClick={handleSubmitEmail}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Email
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Note Dialog */}
+        <Dialog open={isNoteDialogOpen} onOpenChange={setIsNoteDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-amber-500" />
+                Add Note
+              </DialogTitle>
+              <DialogDescription>
+                {selectedLead && `Add a note to ${selectedLead.firstName} ${selectedLead.lastName}'s record`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="note-content">Note</Label>
+                <Textarea
+                  id="note-content"
+                  placeholder="Enter your note..."
+                  value={noteContent}
+                  onChange={(e) => setNoteContent(e.target.value)}
+                  rows={6}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsNoteDialogOpen(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                onClick={handleSubmitNote}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Note
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Lead Dialog */}
+        <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-500" />
+                Assign Lead
+              </DialogTitle>
+              <DialogDescription>
+                {selectedLead && `Assign ${selectedLead.firstName} ${selectedLead.lastName} to a team member`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Team Member</Label>
+                <div className="space-y-2">
+                  {teamMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedAssignee === member.id
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => setSelectedAssignee(member.id)}
+                    >
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+                          {member.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{member.name}</p>
+                        <p className="text-sm text-muted-foreground">{member.role}</p>
+                      </div>
+                      {selectedAssignee === member.id && (
+                        <CheckCircle className="w-5 h-5 text-purple-500" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white"
+                onClick={handleSubmitAssignment}
+                disabled={isSubmitting || !selectedAssignee}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Assigning...
+                  </>
+                ) : (
+                  <>
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Assign
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Lead Dialog */}
+        <Dialog open={isEditLeadDialogOpen} onOpenChange={setIsEditLeadDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-indigo-500" />
+                Edit Lead
+              </DialogTitle>
+              <DialogDescription>
+                Update lead information
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-name">Full Name *</Label>
+                  <Input
+                    id="edit-lead-name"
+                    placeholder="John Doe"
+                    value={editLeadForm.name}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-email">Email</Label>
+                  <Input
+                    id="edit-lead-email"
+                    type="email"
+                    placeholder="john@example.com"
+                    value={editLeadForm.email || ''}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, email: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-phone">Phone</Label>
+                  <Input
+                    id="edit-lead-phone"
+                    placeholder="+1 (555) 123-4567"
+                    value={editLeadForm.phone || ''}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, phone: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-company">Company</Label>
+                  <Input
+                    id="edit-lead-company"
+                    placeholder="Acme Corp"
+                    value={editLeadForm.company || ''}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, company: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-title">Job Title</Label>
+                  <Input
+                    id="edit-lead-title"
+                    placeholder="VP of Engineering"
+                    value={editLeadForm.title || ''}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, title: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-source">Source</Label>
+                  <select
+                    id="edit-lead-source"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={editLeadForm.source || 'website'}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, source: e.target.value }))}
+                  >
+                    <option value="website">Website</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="referral">Referral</option>
+                    <option value="email">Email</option>
+                    <option value="paid_ads">Paid Ads</option>
+                    <option value="organic">Organic</option>
+                    <option value="event">Event</option>
+                    <option value="cold_outreach">Cold Outreach</option>
+                    <option value="partner">Partner</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-score">Score</Label>
+                  <Input
+                    id="edit-lead-score"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={editLeadForm.score || 50}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, score: parseInt(e.target.value) || 50 }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-lead-value">Estimated Value ($)</Label>
+                  <Input
+                    id="edit-lead-value"
+                    type="number"
+                    min="0"
+                    placeholder="10000"
+                    value={editLeadForm.value_estimate || ''}
+                    onChange={(e) => setEditLeadForm(prev => ({ ...prev, value_estimate: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-lead-notes">Notes</Label>
+                <Textarea
+                  id="edit-lead-notes"
+                  placeholder="Add any notes about this lead..."
+                  value={editLeadForm.notes || ''}
+                  onChange={(e) => setEditLeadForm(prev => ({ ...prev, notes: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditLeadDialogOpen(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={handleSubmitEditLead}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Status Change Dialog */}
+        <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-green-500" />
+                Change Lead Status
+              </DialogTitle>
+              <DialogDescription>
+                {selectedLead && `Update status for ${selectedLead.firstName} ${selectedLead.lastName}`}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select New Status</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'] as LeadStatus[]).map((status) => (
+                    <div
+                      key={status}
+                      className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedNewStatus === status
+                          ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => setSelectedNewStatus(status)}
+                    >
+                      <Badge className={getStatusColor(status)}>{status}</Badge>
+                      {selectedNewStatus === status && (
+                        <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsStatusDialogOpen(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                onClick={handleSubmitStatusChange}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Update Status
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

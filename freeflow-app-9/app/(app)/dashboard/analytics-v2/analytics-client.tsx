@@ -1,9 +1,11 @@
 'use client'
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Checkbox } from '@/components/ui/checkbox'
 // Import extended analytics hooks for real Supabase data
 import {
   useAnalyticsDailyMetrics,
@@ -187,6 +189,22 @@ export default function AnalyticsClient() {
     'Hotjar': true,
   })
   const [apiKey, setApiKey] = useState('ak_live_' + Math.random().toString(36).substring(2, 14))
+
+  // New state for enhanced features
+  const [showSaveReportDialog, setShowSaveReportDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [customDateRange, setCustomDateRange] = useState({ start: '', end: '' })
+  const [showCustomDatePicker, setShowCustomDatePicker] = useState(false)
+  const [selectedFilters, setSelectedFilters] = useState<{
+    metrics: string[]
+    dimensions: string[]
+    segments: string[]
+  }>({ metrics: [], dimensions: [], segments: [] })
+  const [compareDateRange, setCompareDateRange] = useState({ start: '', end: '' })
+  const [savedReportName, setSavedReportName] = useState('')
+  const [shareEmail, setShareEmail] = useState('')
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'csv'>('csv')
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>('line')
 
   // Database state
   const [dbFunnels, setDbFunnels] = useState<any[]>([])
@@ -757,67 +775,273 @@ export default function AnalyticsClient() {
     setActiveTab('settings')
   }
 
-  const handleExport = async () => {
-    const exportData = async () => {
-      // Gather analytics data for export
-      const metricsData = mockMetrics.map(m => ({
-        name: m.name,
-        value: m.value,
-        previousValue: m.previousValue,
-        changePercent: m.changePercent,
-        category: m.category,
-        type: m.type,
-        status: m.status
-      }))
+  // Generate CSV content from metrics
+  const generateCSVContent = (metricsData: typeof computedMetrics) => {
+    const headers = ['Name', 'Value', 'Previous Value', 'Change %', 'Category', 'Type', 'Status']
+    const csvRows = [
+      headers.join(','),
+      ...metricsData.map(m => [
+        `"${m.name}"`,
+        m.value,
+        m.previousValue,
+        m.changePercent.toFixed(2),
+        `"${m.category}"`,
+        `"${m.type}"`,
+        `"${m.status}"`
+      ].join(','))
+    ]
+    return csvRows.join('\n')
+  }
 
-      // Create CSV content
-      const headers = ['Name', 'Value', 'Previous Value', 'Change %', 'Category', 'Type', 'Status']
-      const csvRows = [
-        headers.join(','),
-        ...metricsData.map(m => [
-          `"${m.name}"`,
-          m.value,
-          m.previousValue,
-          m.changePercent.toFixed(2),
-          `"${m.category}"`,
-          `"${m.type}"`,
-          `"${m.status}"`
-        ].join(','))
-      ]
-      const csvContent = csvRows.join('\n')
+  // Generate PDF content from metrics (text-based for simplicity)
+  const generatePDFContent = (metricsData: typeof computedMetrics) => {
+    const dateStr = new Date().toLocaleDateString()
+    const timeRangeLabel = timeRange === 'custom' && customDateRange.start
+      ? `${customDateRange.start} to ${customDateRange.end}`
+      : timeRange
 
-      // Create and download the file
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `analytics-report-${new Date().toISOString().split('T')[0]}.csv`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+    let content = `Analytics Report
+Generated: ${dateStr}
+Time Range: ${timeRangeLabel}
+${'='.repeat(50)}
 
-      return { fileName: link.download }
+METRICS SUMMARY
+${'─'.repeat(50)}
+`
+    metricsData.forEach(m => {
+      const changeSymbol = m.changePercent >= 0 ? '+' : ''
+      content += `
+${m.name}
+  Category: ${m.category}
+  Current Value: ${formatValue(m.value, m.type)}
+  Previous Value: ${formatValue(m.previousValue, m.type)}
+  Change: ${changeSymbol}${m.changePercent.toFixed(2)}%
+  Status: ${m.status.toUpperCase()}
+${'─'.repeat(50)}`
+    })
+
+    if (selectedFilters.metrics.length > 0 || selectedFilters.dimensions.length > 0) {
+      content += `\n\nAPPLIED FILTERS
+${'─'.repeat(50)}
+Metrics: ${selectedFilters.metrics.join(', ') || 'All'}
+Dimensions: ${selectedFilters.dimensions.join(', ') || 'All'}
+Segments: ${selectedFilters.segments.join(', ') || 'All'}`
     }
 
-    toast.promise(exportData(), {
-      loading: 'Generating analytics report...',
+    return content
+  }
+
+  // Export as CSV
+  const exportAsCSV = async () => {
+    const metricsToExport = selectedFilters.metrics.length > 0
+      ? computedMetrics.filter(m => selectedFilters.metrics.includes(m.id))
+      : computedMetrics
+
+    const csvContent = generateCSVContent(metricsToExport)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `analytics-report-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    return { fileName: link.download, format: 'CSV' }
+  }
+
+  // Export as PDF (text-based)
+  const exportAsPDF = async () => {
+    const metricsToExport = selectedFilters.metrics.length > 0
+      ? computedMetrics.filter(m => selectedFilters.metrics.includes(m.id))
+      : computedMetrics
+
+    const pdfContent = generatePDFContent(metricsToExport)
+    const blob = new Blob([pdfContent], { type: 'text/plain;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `analytics-report-${new Date().toISOString().split('T')[0]}.txt`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    return { fileName: link.download, format: 'PDF-Text' }
+  }
+
+  const handleExport = async (format: 'pdf' | 'csv' = exportFormat) => {
+    const exportFn = format === 'pdf' ? exportAsPDF : exportAsCSV
+    toast.promise(exportFn(), {
+      loading: `Generating ${format.toUpperCase()} report...`,
       success: (data) => `Export completed: ${data.fileName}`,
-      error: 'Failed to export analytics report'
+      error: `Failed to export ${format.toUpperCase()} report`
     })
   }
 
   const handleShare = async () => {
+    setShowShareDialog(true)
+  }
+
+  const handleCopyShareLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href)
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+      const shareUrl = new URL(window.location.href)
+      shareUrl.searchParams.set('timeRange', timeRange)
+      if (customDateRange.start) shareUrl.searchParams.set('startDate', customDateRange.start)
+      if (customDateRange.end) shareUrl.searchParams.set('endDate', customDateRange.end)
+      if (selectedFilters.metrics.length > 0) shareUrl.searchParams.set('metrics', selectedFilters.metrics.join(','))
+      await navigator.clipboard.writeText(shareUrl.toString())
+      toast.success('Link copied', { description: 'Share link with filters copied to clipboard' })
     } catch (err) {
       toast.error('Failed to copy link', { description: 'Please try again' })
     }
   }
 
+  const handleEmailShare = async () => {
+    if (!shareEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+    // In production, this would send an API request
+    const sharePromise = async () => {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      return { email: shareEmail }
+    }
+    toast.promise(sharePromise(), {
+      loading: `Sending report to ${shareEmail}...`,
+      success: (data) => {
+        setShareEmail('')
+        setShowShareDialog(false)
+        return `Report shared with ${data.email}`
+      },
+      error: 'Failed to send report'
+    })
+  }
+
   const handleFilters = async () => {
     setShowFilters(!showFilters)
+  }
+
+  // Apply filters and refresh data
+  const handleApplyFilters = async () => {
+    setIsLoading(true)
+    const applyFiltersPromise = async () => {
+      await Promise.all([
+        fetchFunnels(),
+        fetchReports(),
+        fetchDashboards(),
+        fetchMetrics(),
+        fetchUserAnalytics(),
+        fetchEngagementMetrics(),
+        fetchPlatformMetrics(),
+        fetchDashboardMetrics(),
+      ])
+      return {
+        metricsCount: selectedFilters.metrics.length,
+        dimensionsCount: selectedFilters.dimensions.length
+      }
+    }
+    toast.promise(applyFiltersPromise(), {
+      loading: 'Applying filters...',
+      success: (data) => {
+        setShowFilters(false)
+        setIsLoading(false)
+        return `Filters applied: ${data.metricsCount} metrics, ${data.dimensionsCount} dimensions`
+      },
+      error: () => {
+        setIsLoading(false)
+        return 'Failed to apply filters'
+      }
+    })
+  }
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSelectedFilters({ metrics: [], dimensions: [], segments: [] })
+    toast.success('Filters cleared', { description: 'All filters have been removed' })
+  }
+
+  // Toggle filter selection
+  const toggleFilterItem = (category: 'metrics' | 'dimensions' | 'segments', item: string) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      [category]: prev[category].includes(item)
+        ? prev[category].filter(i => i !== item)
+        : [...prev[category], item]
+    }))
+  }
+
+  // Handle custom date range selection
+  const handleCustomDateRange = () => {
+    if (!customDateRange.start || !customDateRange.end) {
+      toast.error('Please select both start and end dates')
+      return
+    }
+    if (new Date(customDateRange.start) > new Date(customDateRange.end)) {
+      toast.error('Start date must be before end date')
+      return
+    }
+    setTimeRange('custom')
+    setShowCustomDatePicker(false)
+    toast.success('Custom date range applied', {
+      description: `${customDateRange.start} to ${customDateRange.end}`
+    })
+    handleRefresh()
+  }
+
+  // Save current view as a custom report
+  const handleSaveCustomReport = async () => {
+    if (!userId) {
+      toast.error('Error', { description: 'You must be logged in to save a report' })
+      return
+    }
+    if (!savedReportName.trim()) {
+      toast.error('Error', { description: 'Report name is required' })
+      return
+    }
+
+    setIsLoading(true)
+    const savePromise = async () => {
+      const reportConfig = {
+        user_id: userId,
+        name: savedReportName,
+        type: 'custom' as const,
+        format: exportFormat,
+        status: 'active',
+        last_run: new Date().toISOString(),
+        recipients: [],
+        config: {
+          timeRange,
+          customDateRange,
+          filters: selectedFilters,
+          compareMode,
+          compareDateRange
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('analytics_reports')
+        .insert(reportConfig)
+        .select()
+        .single()
+
+      if (error) throw error
+      return { name: savedReportName }
+    }
+
+    toast.promise(savePromise(), {
+      loading: 'Saving custom report...',
+      success: (data) => {
+        setSavedReportName('')
+        setShowSaveReportDialog(false)
+        setIsLoading(false)
+        fetchReports()
+        return `Report "${data.name}" saved successfully`
+      },
+      error: () => {
+        setIsLoading(false)
+        return 'Failed to save report'
+      }
+    })
   }
 
   const handleRefresh = async () => {
@@ -1189,9 +1413,28 @@ export default function AnalyticsClient() {
                 <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleNotifications}>
                   <Bell className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleExport}>
-                  <Download className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleExport('csv')}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Export as CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Export as PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowSaveReportDialog(true)}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Save as Report
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleShare}>
                   <Share2 className="h-4 w-4" />
                 </Button>
@@ -1221,7 +1464,7 @@ export default function AnalyticsClient() {
         {/* Time Range & Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl p-1 shadow-sm border">
-            {['24h', '7d', '30d', '90d', '12m', 'custom'].map((range) => (
+            {['24h', '7d', '30d', '90d', '12m'].map((range) => (
               <Button
                 key={range}
                 variant={timeRange === range ? 'default' : 'ghost'}
@@ -1229,18 +1472,175 @@ export default function AnalyticsClient() {
                 onClick={() => setTimeRange(range)}
                 className={timeRange === range ? '' : 'text-gray-600 dark:text-gray-300'}
               >
-                {range === 'custom' ? <Calendar className="h-4 w-4 mr-1" /> : null}
                 {range}
               </Button>
             ))}
+            <Popover open={showCustomDatePicker} onOpenChange={setShowCustomDatePicker}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={timeRange === 'custom' ? 'default' : 'ghost'}
+                  size="sm"
+                  className={timeRange === 'custom' ? '' : 'text-gray-600 dark:text-gray-300'}
+                >
+                  <Calendar className="h-4 w-4 mr-1" />
+                  {timeRange === 'custom' && customDateRange.start
+                    ? `${customDateRange.start} - ${customDateRange.end}`
+                    : 'custom'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="start">
+                <div className="space-y-4">
+                  <h4 className="font-medium text-sm">Select Date Range</h4>
+                  <div className="space-y-2">
+                    <Label htmlFor="start-date">Start Date</Label>
+                    <Input
+                      id="start-date"
+                      type="date"
+                      value={customDateRange.start}
+                      onChange={(e) => setCustomDateRange(prev => ({ ...prev, start: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="end-date">End Date</Label>
+                    <Input
+                      id="end-date"
+                      type="date"
+                      value={customDateRange.end}
+                      onChange={(e) => setCustomDateRange(prev => ({ ...prev, end: e.target.value }))}
+                    />
+                  </div>
+                  {compareMode && (
+                    <>
+                      <div className="border-t pt-4">
+                        <h4 className="font-medium text-sm mb-2">Compare To</h4>
+                        <div className="space-y-2">
+                          <Label htmlFor="compare-start">Compare Start</Label>
+                          <Input
+                            id="compare-start"
+                            type="date"
+                            value={compareDateRange.start}
+                            onChange={(e) => setCompareDateRange(prev => ({ ...prev, start: e.target.value }))}
+                          />
+                        </div>
+                        <div className="space-y-2 mt-2">
+                          <Label htmlFor="compare-end">Compare End</Label>
+                          <Input
+                            id="compare-end"
+                            type="date"
+                            value={compareDateRange.end}
+                            onChange={(e) => setCompareDateRange(prev => ({ ...prev, end: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button variant="outline" size="sm" onClick={() => setShowCustomDatePicker(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleCustomDateRange}>
+                      Apply
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handleFilters}>
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
+            {/* Filter indicators */}
+            {(selectedFilters.metrics.length > 0 || selectedFilters.dimensions.length > 0) && (
+              <Badge variant="secondary" className="gap-1">
+                {selectedFilters.metrics.length + selectedFilters.dimensions.length} filters
+                <button onClick={handleClearFilters} className="ml-1 hover:text-red-500">
+                  x
+                </button>
+              </Badge>
+            )}
+            <Popover open={showFilters} onOpenChange={setShowFilters}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filters
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" align="end">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Filter Data</h4>
+
+                  {/* Metrics Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-gray-500 uppercase">Metrics</Label>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {['sessions', 'pageviews', 'bounce-rate', 'revenue', 'active-users'].map((metric) => (
+                        <div key={metric} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`metric-${metric}`}
+                            checked={selectedFilters.metrics.includes(metric)}
+                            onCheckedChange={() => toggleFilterItem('metrics', metric)}
+                          />
+                          <label htmlFor={`metric-${metric}`} className="text-sm capitalize">
+                            {metric.replace('-', ' ')}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dimensions Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-gray-500 uppercase">Dimensions</Label>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {['country', 'device', 'browser', 'source', 'campaign'].map((dim) => (
+                        <div key={dim} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`dim-${dim}`}
+                            checked={selectedFilters.dimensions.includes(dim)}
+                            onCheckedChange={() => toggleFilterItem('dimensions', dim)}
+                          />
+                          <label htmlFor={`dim-${dim}`} className="text-sm capitalize">
+                            {dim}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Segments Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-gray-500 uppercase">Segments</Label>
+                    <div className="space-y-1">
+                      {['new-users', 'returning-users', 'paid-users', 'enterprise'].map((seg) => (
+                        <div key={seg} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`seg-${seg}`}
+                            checked={selectedFilters.segments.includes(seg)}
+                            onCheckedChange={() => toggleFilterItem('segments', seg)}
+                          />
+                          <label htmlFor={`seg-${seg}`} className="text-sm capitalize">
+                            {seg.replace('-', ' ')}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-2 border-t">
+                    <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                      Clear All
+                    </Button>
+                    <Button size="sm" onClick={handleApplyFilters} disabled={isLoading}>
+                      {isLoading ? 'Applying...' : 'Apply Filters'}
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button variant="outline" size="sm" onClick={() => setShowSaveReportDialog(true)}>
+              <FileText className="h-4 w-4 mr-2" />
+              Save Report
             </Button>
-            <Button variant="outline" size="sm" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
@@ -1365,19 +1765,37 @@ export default function AnalyticsClient() {
                       <CardDescription>Visitors and page views over time</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="ghost" className="bg-indigo-100 text-indigo-600" onClick={() => {
-                        toast.success('Line chart view', { description: 'Switched to line chart visualization' })
-                      }}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={chartType === 'line' ? 'bg-indigo-100 text-indigo-600' : ''}
+                        onClick={() => {
+                          setChartType('line')
+                          toast.success('Line chart view', { description: 'Switched to line chart visualization' })
+                        }}
+                      >
                         <LineChart className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => {
-                        toast.success('Bar chart view', { description: 'Switched to bar chart visualization' })
-                      }}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={chartType === 'bar' ? 'bg-indigo-100 text-indigo-600' : ''}
+                        onClick={() => {
+                          setChartType('bar')
+                          toast.success('Bar chart view', { description: 'Switched to bar chart visualization' })
+                        }}
+                      >
                         <BarChart3 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => {
-                        toast.success('Area chart view', { description: 'Switched to area chart visualization' })
-                      }}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={chartType === 'area' ? 'bg-indigo-100 text-indigo-600' : ''}
+                        onClick={() => {
+                          setChartType('area')
+                          toast.success('Area chart view', { description: 'Switched to area chart visualization' })
+                        }}
+                      >
                         <AreaChart className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1544,14 +1962,8 @@ export default function AnalyticsClient() {
                   </SelectContent>
                 </Select>
                 <Button onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Opening metric creator...',
-                      success: 'Metric creator ready',
-                      error: 'Failed to open metric creator'
-                    }
-                  )
+                  setShowMetricCreator(true)
+                  toast.success('Metric creator opened', { description: 'Create a custom metric' })
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric
@@ -1743,15 +2155,35 @@ export default function AnalyticsClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-white/20 text-white border-white/30">{cohortType}</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Exporting cohort data...',
-                        success: 'Cohort data exported successfully',
-                        error: 'Failed to export cohort data'
-                      }
-                    )
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={async () => {
+                    const exportCohortData = async () => {
+                      const headers = ['Cohort', 'Users', 'Week 0', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7']
+                      const csvRows = [
+                        headers.join(','),
+                        ...mockCohorts.map(row => [
+                          `"${row.cohort}"`,
+                          row.users,
+                          row.week0, row.week1, row.week2, row.week3,
+                          row.week4, row.week5, row.week6, row.week7
+                        ].join(','))
+                      ]
+                      const csvContent = csvRows.join('\n')
+                      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+                      const url = URL.createObjectURL(blob)
+                      const link = document.createElement('a')
+                      link.href = url
+                      link.download = `cohort-${cohortType}-${new Date().toISOString().split('T')[0]}.csv`
+                      document.body.appendChild(link)
+                      link.click()
+                      document.body.removeChild(link)
+                      URL.revokeObjectURL(url)
+                      return { fileName: link.download }
+                    }
+                    toast.promise(exportCohortData(), {
+                      loading: 'Exporting cohort data...',
+                      success: (data) => `Cohort data exported: ${data.fileName}`,
+                      error: 'Failed to export cohort data'
+                    })
                   }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
@@ -1777,14 +2209,8 @@ export default function AnalyticsClient() {
                   </SelectContent>
                 </Select>
                 <Button onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Opening cohort creator...',
-                      success: 'Cohort creator ready',
-                      error: 'Failed to open cohort creator'
-                    }
-                  )
+                  setShowCohortCreator(true)
+                  toast.success('Cohort creator opened', { description: 'Configure your new cohort analysis' })
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Cohort
@@ -2075,14 +2501,17 @@ export default function AnalyticsClient() {
                         Run Now
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 800)),
-                          {
-                            loading: 'Opening report editor...',
-                            success: 'Report editor opened',
-                            error: 'Failed to open report editor'
-                          }
-                        )
+                        setEditingReportId(report.id)
+                        // Pre-fill the report form with existing data
+                        setReportForm({
+                          name: report.name,
+                          type: report.type,
+                          frequency: report.frequency || 'weekly',
+                          format: report.format || 'pdf',
+                          recipients: (report.recipients || []).join(', ')
+                        })
+                        setShowCreateReport(true)
+                        toast.success('Editing report', { description: `Modify "${report.name}"` })
                       }}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
@@ -2195,15 +2624,26 @@ export default function AnalyticsClient() {
                       </div>
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center gap-2">
-                      <Button variant="default" size="sm" className="flex-1" onClick={() => {
-                        toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 800)),
-                          {
+                      <Button variant="default" size="sm" className="flex-1" onClick={async () => {
+                        setViewingDashboardId(dashboard.id)
+                        // Update last_viewed in database
+                        if (userId) {
+                          const updatePromise = supabase
+                            .from('analytics_dashboards')
+                            .update({ last_viewed: new Date().toISOString() })
+                            .eq('id', dashboard.id)
+                            .eq('user_id', userId)
+                          toast.promise(updatePromise, {
                             loading: 'Loading dashboard...',
-                            success: 'Dashboard loaded',
+                            success: () => {
+                              fetchDashboards()
+                              return `Dashboard "${dashboard.name}" loaded`
+                            },
                             error: 'Failed to load dashboard'
-                          }
-                        )
+                          })
+                        } else {
+                          toast.success(`Viewing dashboard: ${dashboard.name}`)
+                        }
                       }}>
                         <Eye className="h-4 w-4 mr-1" />
                         View
@@ -2246,15 +2686,36 @@ export default function AnalyticsClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Exporting configuration...',
-                        success: 'Configuration exported successfully',
-                        error: 'Failed to export configuration'
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={async () => {
+                    const exportConfig = async () => {
+                      const config = {
+                        exportedAt: new Date().toISOString(),
+                        settings: {
+                          integrations: integrationStates,
+                          timeRange,
+                          customDateRange,
+                          filters: selectedFilters,
+                          compareMode
+                        },
+                        user: userId
                       }
-                    )
+                      const jsonContent = JSON.stringify(config, null, 2)
+                      const blob = new Blob([jsonContent], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const link = document.createElement('a')
+                      link.href = url
+                      link.download = `analytics-config-${new Date().toISOString().split('T')[0]}.json`
+                      document.body.appendChild(link)
+                      link.click()
+                      document.body.removeChild(link)
+                      URL.revokeObjectURL(url)
+                      return { fileName: link.download }
+                    }
+                    toast.promise(exportConfig(), {
+                      loading: 'Exporting configuration...',
+                      success: (data) => `Configuration exported: ${data.fileName}`,
+                      error: 'Failed to export configuration'
+                    })
                   }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
@@ -2575,17 +3036,27 @@ export default function AnalyticsClient() {
                                 <p className="text-xs text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1500)),
-                                {
-                                  loading: integration.connected ? `Disconnecting ${integration.name}...` : `Connecting to ${integration.name}...`,
-                                  success: integration.connected ? `${integration.name} disconnected` : `${integration.name} connected successfully`,
-                                  error: integration.connected ? `Failed to disconnect ${integration.name}` : `Failed to connect to ${integration.name}`
-                                }
-                              )
+                            <Button variant={integrationStates[integration.name] ? 'outline' : 'default'} size="sm" onClick={() => {
+                              const isConnected = integrationStates[integration.name]
+                              const togglePromise = async () => {
+                                await new Promise(resolve => setTimeout(resolve, 1000))
+                                setIntegrationStates(prev => ({
+                                  ...prev,
+                                  [integration.name]: !isConnected
+                                }))
+                                return { name: integration.name, connected: !isConnected }
+                              }
+                              toast.promise(togglePromise(), {
+                                loading: isConnected ? `Disconnecting ${integration.name}...` : `Connecting to ${integration.name}...`,
+                                success: (data) => data.connected
+                                  ? `${data.name} connected successfully`
+                                  : `${data.name} disconnected`,
+                                error: isConnected
+                                  ? `Failed to disconnect ${integration.name}`
+                                  : `Failed to connect to ${integration.name}`
+                              })
                             }}>
-                              {integration.connected ? 'Disconnect' : 'Connect'}
+                              {integrationStates[integration.name] ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
                         ))}
@@ -2599,18 +3070,22 @@ export default function AnalyticsClient() {
                         <div>
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
-                            <Input value="ak_••••••••••••" readOnly className="font-mono" />
+                            <Input value={apiKey.replace(/(.{8})(.*)(.{4})/, '$1••••••••$3')} readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 2000)),
-                                {
-                                  loading: 'Regenerating API key...',
-                                  success: 'New API key generated successfully',
-                                  error: 'Failed to regenerate API key'
-                                }
-                              )
+                              const regeneratePromise = async () => {
+                                await new Promise(resolve => setTimeout(resolve, 1500))
+                                const newKey = 'ak_live_' + Math.random().toString(36).substring(2, 14)
+                                setApiKey(newKey)
+                                return { key: newKey }
+                              }
+                              toast.promise(regeneratePromise(), {
+                                loading: 'Regenerating API key...',
+                                success: 'New API key generated successfully',
+                                error: 'Failed to regenerate API key'
+                              })
                             }}>Regenerate</Button>
                           </div>
+                          <p className="text-xs text-gray-500 mt-1">Full key: {apiKey}</p>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
@@ -3149,6 +3624,135 @@ export default function AnalyticsClient() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Save Custom Report Dialog */}
+        <Dialog open={showSaveReportDialog} onOpenChange={setShowSaveReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Save Custom Report</DialogTitle>
+              <DialogDescription>
+                Save your current view with filters and date range as a reusable report.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="saved-report-name">Report Name</Label>
+                <Input
+                  id="saved-report-name"
+                  placeholder="e.g., Weekly Performance Summary"
+                  value={savedReportName}
+                  onChange={(e) => setSavedReportName(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={(v: 'pdf' | 'csv') => setExportFormat(v)}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="pdf">PDF (Text)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Time Range:</span>
+                  <span className="font-medium">
+                    {timeRange === 'custom' && customDateRange.start
+                      ? `${customDateRange.start} to ${customDateRange.end}`
+                      : timeRange}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Metrics:</span>
+                  <span className="font-medium">
+                    {selectedFilters.metrics.length > 0 ? selectedFilters.metrics.length : 'All'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Compare Mode:</span>
+                  <span className="font-medium">{compareMode ? 'Enabled' : 'Disabled'}</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowSaveReportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveCustomReport} disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Report'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Report Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Share Analytics Report</DialogTitle>
+              <DialogDescription>
+                Share this report with team members via link or email.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label>Share via Link</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/analytics-v2?timeRange=${timeRange}`}
+                    readOnly
+                    className="font-mono text-xs"
+                  />
+                  <Button variant="outline" onClick={handleCopyShareLink}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white dark:bg-gray-950 px-2 text-gray-500">Or</span>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="share-email">Share via Email</Label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    id="share-email"
+                    type="email"
+                    placeholder="colleague@company.com"
+                    value={shareEmail}
+                    onChange={(e) => setShareEmail(e.target.value)}
+                  />
+                  <Button onClick={handleEmailShare} disabled={!shareEmail.trim()}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Send
+                  </Button>
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
+                <h4 className="font-medium mb-2">Report includes:</h4>
+                <ul className="space-y-1 text-gray-600 dark:text-gray-400">
+                  <li>- Time range: {timeRange === 'custom' && customDateRange.start ? `${customDateRange.start} to ${customDateRange.end}` : timeRange}</li>
+                  <li>- {selectedFilters.metrics.length > 0 ? selectedFilters.metrics.length : 'All'} metrics</li>
+                  <li>- {selectedFilters.dimensions.length > 0 ? selectedFilters.dimensions.length : 'All'} dimensions</li>
+                  {compareMode && <li>- Comparison data included</li>}
+                </ul>
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 

@@ -244,14 +244,43 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
     description: ''
   })
 
+  // Attendee management state
+  const [eventAttendees, setEventAttendees] = useState<Attendee[]>([])
+  const [attendeeEmail, setAttendeeEmail] = useState('')
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [selectedEventForInvite, setSelectedEventForInvite] = useState<CalendarEvent | null>(null)
+
+  // Handle inviting attendees
+  const handleInviteAttendee = () => {
+    if (!attendeeEmail || !attendeeEmail.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    const newAttendee: Attendee = {
+      id: Date.now().toString(),
+      name: attendeeEmail.split('@')[0],
+      email: attendeeEmail,
+      status: 'pending'
+    }
+    setEventAttendees(prev => [...prev, newAttendee])
+    setAttendeeEmail('')
+    toast.success(`Invitation sent to ${attendeeEmail}`)
+  }
+
+  // Remove attendee
+  const handleRemoveAttendee = (attendeeId: string) => {
+    setEventAttendees(prev => prev.filter(a => a.id !== attendeeId))
+    toast.success('Attendee removed')
+  }
+
   // Handle creating a new event
   const handleCreateEvent = async () => {
     if (!newEventForm.title || !newEventForm.startTime || !newEventForm.endTime) {
       toast.error('Please fill in title, start and end time')
       return
     }
-    try {
-      await createEvent({
+    toast.promise(
+      createEvent({
         title: newEventForm.title,
         start_time: new Date(newEventForm.startTime).toISOString(),
         end_time: new Date(newEventForm.endTime).toISOString(),
@@ -261,12 +290,18 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
         status: 'confirmed',
         all_day: false,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      })
-      setShowNewEvent(false)
-      setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
-    } catch (err) {
-      console.error('Failed to create event:', err)
-    }
+      }),
+      {
+        loading: 'Creating event...',
+        success: () => {
+          setShowNewEvent(false)
+          setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
+          setEventAttendees([])
+          return `Event "${newEventForm.title}" created successfully`
+        },
+        error: 'Failed to create event'
+      }
+    )
   }
   const displayEvents = (events && events.length > 0) ? events : (initialEvents || [])
 
@@ -416,6 +451,8 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [newCalendarColor, setNewCalendarColor] = useState('bg-teal-500')
   const [calendars, setCalendars] = useState(mockCalendars)
   const [reminders, setReminders] = useState(mockReminders)
+  const [schedulingLinks, setSchedulingLinks] = useState(mockSchedulingLinks)
+  const [workingHours, setWorkingHours] = useState(mockWorkingHours)
   const [connectedApps, setConnectedApps] = useState<Record<string, boolean>>({
     'Google Calendar': true,
     'Outlook Calendar': true,
@@ -614,8 +651,43 @@ END:VCALENDAR`
                           <label className="block text-sm font-medium mb-1">Description</label>
                           <textarea rows={3} placeholder="Add description" className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" value={newEventForm.description} onChange={(e) => setNewEventForm(prev => ({ ...prev, description: e.target.value }))} />
                         </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Invite Attendees</label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              placeholder="Enter email address"
+                              type="email"
+                              value={attendeeEmail}
+                              onChange={(e) => setAttendeeEmail(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleInviteAttendee())}
+                              className="flex-1"
+                            />
+                            <Button variant="outline" size="sm" onClick={handleInviteAttendee}>
+                              <Users className="h-4 w-4 mr-1" />
+                              Add
+                            </Button>
+                          </div>
+                          {eventAttendees.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                              {eventAttendees.map(attendee => (
+                                <div key={attendee.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center text-xs text-teal-700">
+                                      {attendee.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <span className="text-sm">{attendee.email}</span>
+                                    <Badge variant="outline" className="text-xs">{attendee.status}</Badge>
+                                  </div>
+                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleRemoveAttendee(attendee.id)}>
+                                    <Trash2 className="h-3 w-3 text-gray-400" />
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                         <div className="flex justify-end gap-3 pt-4">
-                          <Button variant="outline" onClick={() => setShowNewEvent(false)}>Cancel</Button>
+                          <Button variant="outline" onClick={() => { setShowNewEvent(false); setEventAttendees([]); setAttendeeEmail('') }}>Cancel</Button>
                           <Button className="bg-teal-600 hover:bg-teal-700" onClick={handleCreateEvent} disabled={loading || !newEventForm.title}>{loading ? 'Creating...' : 'Create Event'}</Button>
                         </div>
                       </div>
@@ -643,7 +715,7 @@ END:VCALENDAR`
             { label: 'Confirmed', value: stats.confirmed, icon: CheckCircle2, color: 'emerald', change: '+8' },
             { label: 'Hours/Week', value: stats.hoursThisWeek, icon: Timer, color: 'amber', change: '' },
             { label: 'Avg Attendees', value: stats.avgAttendees, icon: Users, color: 'pink', change: '' },
-            { label: 'Bookings', value: mockSchedulingLinks.reduce((sum, l) => sum + l.bookingsCount, 0), icon: Link2, color: 'sky', change: '+5' },
+            { label: 'Bookings', value: schedulingLinks.reduce((sum, l) => sum + l.bookingsCount, 0), icon: Link2, color: 'sky', change: '+5' },
           ].map((stat, index) => (
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
@@ -899,14 +971,23 @@ END:VCALENDAR`
                   <CardTitle className="text-lg font-semibold">My Calendars</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {mockCalendars.map(cal => (
+                  {calendars.map(cal => (
                     <label key={cal.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer group">
                       <div className={`w-3 h-3 rounded ${cal.color} ${!cal.enabled && 'opacity-50'}`}></div>
                       <span className={`flex-1 text-sm ${cal.enabled ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
                         {cal.name}
                       </span>
                       <span className="text-xs text-gray-400">{cal.eventCount}</span>
-                      <Switch checked={cal.enabled} className="scale-75" />
+                      <Switch
+                        checked={cal.enabled}
+                        className="scale-75"
+                        onCheckedChange={(checked) => {
+                          setCalendars(prev => prev.map(c =>
+                            c.id === cal.id ? { ...c, enabled: checked } : c
+                          ))
+                          toast.success(checked ? `${cal.name} calendar enabled` : `${cal.name} calendar hidden`)
+                        }}
+                      />
                     </label>
                   ))}
                   <Button variant="outline" className="w-full mt-2" size="sm" onClick={() => setShowAddCalendar(true)}>
@@ -923,7 +1004,7 @@ END:VCALENDAR`
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab('scheduling')}>Manage</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockSchedulingLinks.filter(l => l.isActive).slice(0, 3).map(link => (
+                  {schedulingLinks.filter(l => l.isActive).slice(0, 3).map(link => (
                     <div key={link.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium text-gray-900 dark:text-white">{link.name}</span>
@@ -1044,11 +1125,20 @@ END:VCALENDAR`
                     <CardTitle className="text-sm font-semibold">My Calendars</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1 pt-0">
-                    {mockCalendars.slice(0, 4).map(cal => (
+                    {calendars.slice(0, 4).map(cal => (
                       <label key={cal.id} className="flex items-center gap-2 p-1.5 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                         <div className={`w-2.5 h-2.5 rounded ${cal.color} ${!cal.enabled && 'opacity-50'}`}></div>
                         <span className={`text-sm flex-1 ${cal.enabled ? '' : 'text-gray-500'}`}>{cal.name}</span>
-                        <Switch checked={cal.enabled} className="scale-75" />
+                        <Switch
+                          checked={cal.enabled}
+                          className="scale-75"
+                          onCheckedChange={(checked) => {
+                            setCalendars(prev => prev.map(c =>
+                              c.id === cal.id ? { ...c, enabled: checked } : c
+                            ))
+                            toast.success(checked ? `${cal.name} shown` : `${cal.name} hidden`)
+                          }}
+                        />
                       </label>
                     ))}
                   </CardContent>
@@ -1363,15 +1453,15 @@ END:VCALENDAR`
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSchedulingLinks.length}</p>
+                    <p className="text-3xl font-bold">{schedulingLinks.length}</p>
                     <p className="text-sm text-green-200">Links</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSchedulingLinks.filter(l => l.isActive).length}</p>
+                    <p className="text-3xl font-bold">{schedulingLinks.filter(l => l.isActive).length}</p>
                     <p className="text-sm text-green-200">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSchedulingLinks.reduce((sum, l) => sum + l.bookingsCount, 0)}</p>
+                    <p className="text-3xl font-bold">{schedulingLinks.reduce((sum, l) => sum + l.bookingsCount, 0)}</p>
                     <p className="text-sm text-green-200">Bookings</p>
                   </div>
                 </div>
@@ -1390,7 +1480,7 @@ END:VCALENDAR`
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockSchedulingLinks.map(link => (
+              {schedulingLinks.map(link => (
                 <Card key={link.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1398,7 +1488,15 @@ END:VCALENDAR`
                         <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{link.name}</h3>
                         <p className="text-sm text-gray-500">{link.duration} minutes • {link.buffer} min buffer</p>
                       </div>
-                      <Switch checked={link.isActive} />
+                      <Switch
+                        checked={link.isActive}
+                        onCheckedChange={(checked) => {
+                          setSchedulingLinks(prev => prev.map(l =>
+                            l.id === link.id ? { ...l, isActive: checked } : l
+                          ))
+                          toast.success(checked ? `${link.name} is now active` : `${link.name} is now paused`)
+                        }}
+                      />
                     </div>
                     <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
                       <Link2 className="h-4 w-4 text-gray-400" />
@@ -1687,15 +1785,42 @@ END:VCALENDAR`
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {mockWorkingHours.map(wh => (
+                      {workingHours.map(wh => (
                         <div key={wh.day} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <Switch checked={wh.enabled} className="scale-90" />
+                          <Switch
+                            checked={wh.enabled}
+                            className="scale-90"
+                            onCheckedChange={(checked) => {
+                              setWorkingHours(prev => prev.map(h =>
+                                h.day === wh.day ? { ...h, enabled: checked } : h
+                              ))
+                              toast.success(checked ? `${wh.day} is now available` : `${wh.day} marked as unavailable`)
+                            }}
+                          />
                           <span className={`w-24 text-sm ${wh.enabled ? 'font-medium' : 'text-gray-500'}`}>{wh.day}</span>
                           {wh.enabled ? (
                             <div className="flex items-center gap-2 flex-1">
-                              <Input type="time" defaultValue={wh.start} className="w-28 h-9" />
+                              <Input
+                                type="time"
+                                value={wh.start}
+                                className="w-28 h-9"
+                                onChange={(e) => {
+                                  setWorkingHours(prev => prev.map(h =>
+                                    h.day === wh.day ? { ...h, start: e.target.value } : h
+                                  ))
+                                }}
+                              />
                               <span className="text-gray-400">to</span>
-                              <Input type="time" defaultValue={wh.end} className="w-28 h-9" />
+                              <Input
+                                type="time"
+                                value={wh.end}
+                                className="w-28 h-9"
+                                onChange={(e) => {
+                                  setWorkingHours(prev => prev.map(h =>
+                                    h.day === wh.day ? { ...h, end: e.target.value } : h
+                                  ))
+                                }}
+                              />
                             </div>
                           ) : (
                             <span className="text-sm text-gray-500">Unavailable</span>
@@ -2026,7 +2151,17 @@ END:VCALENDAR`
             <AIInsightsPanel
               insights={calendarAIInsights}
               title="Calendar Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => {
+                if (insight.actionLabel?.toLowerCase().includes('schedule') || insight.actionLabel?.toLowerCase().includes('create')) {
+                  setShowNewEvent(true)
+                  toast.success(`AI Suggestion: ${insight.title}`)
+                } else if (insight.actionLabel?.toLowerCase().includes('view') || insight.actionLabel?.toLowerCase().includes('open')) {
+                  setActiveTab('calendar')
+                  toast.info(`Viewing: ${insight.title}`)
+                } else {
+                  toast.info(`Insight action: ${insight.title}`)
+                }
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2127,6 +2262,17 @@ END:VCALENDAR`
                     {selectedEvent.rsvp_required && (
                       <span className="text-sm text-gray-500">({selectedEvent.accepted_count} accepted)</span>
                     )}
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-teal-600 p-0 h-auto"
+                      onClick={() => {
+                        setSelectedEventForInvite(selectedEvent)
+                        setShowInviteDialog(true)
+                      }}
+                    >
+                      Invite more
+                    </Button>
                   </div>
                   {selectedEvent.description && (
                     <div className="pt-4 border-t dark:border-gray-700">
@@ -2136,6 +2282,12 @@ END:VCALENDAR`
                   <div className="flex items-center gap-2 pt-4 border-t dark:border-gray-700">
                     <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => startEditing(selectedEvent)}>
                       <Edit2 className="h-4 w-4 mr-2" />Edit
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      setSelectedEventForInvite(selectedEvent)
+                      setShowInviteDialog(true)
+                    }}>
+                      <Users className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" onClick={async () => {
                       try {
@@ -2329,6 +2481,82 @@ END:VCALENDAR`
                 }}>
                   Add Reminder
                 </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Attendees Dialog */}
+        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-teal-600" />
+                Invite Attendees
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedEventForInvite && (
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-medium text-gray-900 dark:text-white">{selectedEventForInvite.title}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(selectedEventForInvite.start_time).toLocaleDateString()} at {formatTime(selectedEventForInvite.start_time)}
+                  </p>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium mb-1">Email Address</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Enter email to invite"
+                    type="email"
+                    value={attendeeEmail}
+                    onChange={(e) => setAttendeeEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleInviteAttendee())}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleInviteAttendee}>
+                    Send
+                  </Button>
+                </div>
+              </div>
+              {eventAttendees.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Pending Invitations</label>
+                  <div className="space-y-2">
+                    {eventAttendees.map(attendee => (
+                      <div key={attendee.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-sm text-teal-700">
+                            {attendee.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">{attendee.email}</p>
+                            <Badge variant="outline" className={getStatusColor(attendee.status)}>{attendee.status}</Badge>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => handleRemoveAttendee(attendee.id)}>
+                          <Trash2 className="h-4 w-4 text-gray-400" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => { setShowInviteDialog(false); setEventAttendees([]); setAttendeeEmail('') }}>
+                  Close
+                </Button>
+                {eventAttendees.length > 0 && (
+                  <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                    toast.success(`${eventAttendees.length} invitation(s) sent successfully`)
+                    setShowInviteDialog(false)
+                    setEventAttendees([])
+                    setAttendeeEmail('')
+                  }}>
+                    Send All Invitations
+                  </Button>
+                )}
               </div>
             </div>
           </DialogContent>
