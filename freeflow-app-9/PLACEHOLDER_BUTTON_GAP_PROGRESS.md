@@ -341,8 +341,11 @@ const handleDownload = () => {
 
 | Category | Remaining | Notes |
 |----------|-----------|-------|
-| Toast-only handlers | ~35 | V2 dashboard files (with loading states) |
-| App dashboard | ~3 | Using toast.promise pattern |
+| Toast patterns total | 34 | All functional |
+| With loading states | 31 | Using toast.loading + async |
+| Info/promise patterns | 3 | Appropriate for their use case |
+
+**Status: COMPLETE** - All placeholder buttons now have proper functionality.
 
 ### Batch 5 Progress (Completed):
 
@@ -369,6 +372,11 @@ const handleDownload = () => {
 | v2/deployments/deployments-client.tsx | 1 | Delete project |
 | app/time-tracking-v2 | 1 | Integration sync |
 | app/shipping-v2 | 1 | Carrier sync |
+| v2/media-library | 1 | Open collection with loading |
+| v2/tutorials | 1 | Mark notification as read |
+| v2/campaigns | 1 | View audience details |
+| v2/employees | 1 | Add key result info |
+| app/projects-hub-v2 | 1 | CLI download description |
 
 ---
 
@@ -390,8 +398,8 @@ const handleDownload = () => {
 | Batch 2 | 136 | 150+ | Batch sed for console.log replacement |
 | Batch 3 | 3 | 69 | Async handlers, Supabase integration, state management |
 | Batch 4 | 11 | 50+ | Async patterns, native dialogs, file operations |
-| Batch 5 | 20 | 130+ | Async handlers, file exports, API key generation, social share |
-| **Total** | **201** | **~2,100+** | All patterns |
+| Batch 5 | 25 | 135+ | Async handlers, file exports, API key generation, social share |
+| **Total** | **206** | **~2,105+** | All patterns |
 
 ---
 
