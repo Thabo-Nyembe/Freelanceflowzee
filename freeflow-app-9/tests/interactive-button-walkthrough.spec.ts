@@ -1,4 +1,5 @@
 import { test, Page } from '@playwright/test';
+import * as fs from 'fs';
 
 /**
  * Interactive Button Walkthrough
@@ -431,7 +432,6 @@ test.describe('Interactive App Walkthrough', () => {
     }
 
     // Write results to file
-    const fs = require('fs');
     fs.writeFileSync(
       'test-results/button-audit-results.json',
       JSON.stringify(results, null, 2)

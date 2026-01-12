@@ -35,9 +35,9 @@ const pipelineAsync = promisify(pipeline);
 
 // Lazy-loaded AI System (to avoid build-time initialization)
 let _aiSystem: any = null;
-function getAISystem() {
+async function getAISystem() {
   if (!_aiSystem) {
-    const { IntegratedAISystem } = require('@/lib/ai/integrated-ai-system');
+    const { IntegratedAISystem } = await import('@/lib/ai/integrated-ai-system');
     _aiSystem = IntegratedAISystem.getInstance();
   }
   return _aiSystem;

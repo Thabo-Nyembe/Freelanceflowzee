@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import * as fs from 'fs';
 
 /**
  * Quick Verification Test
@@ -164,7 +165,6 @@ test.describe('Quick Visual Verification', () => {
     const fullHTML = await page.content();
 
     // Save to file for inspection
-    const fs = require('fs');
     fs.writeFileSync('test-results/my-day-page-html.html', fullHTML);
 
     console.log('✓ Full HTML saved to: test-results/my-day-page-html.html');

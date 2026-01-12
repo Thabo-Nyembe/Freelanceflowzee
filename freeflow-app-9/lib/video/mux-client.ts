@@ -4,6 +4,7 @@
  */
 
 import Mux from '@mux/mux-node';
+import crypto from 'crypto';
 import { muxConfig, validateMuxConfig } from './config';
 
 // Initialize Mux client
@@ -265,7 +266,6 @@ export const verifyWebhookSignature = (
   signature: string,
   secret: string = muxConfig.webhookSecret || ''
 ): boolean => {
-  const crypto = require('crypto');
   const expectedSignature = crypto
     .createHmac('sha256', secret)
     .update(payload)

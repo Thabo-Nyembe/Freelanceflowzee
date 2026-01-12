@@ -1,4 +1,6 @@
 import { Page, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Comprehensive Test Helpers for KAZI Application
@@ -111,8 +113,6 @@ export class TestHelpers {
   }
 
   async createTestFile(filename: string, content: string = 'Test file content'): Promise<string> {
-    const fs = require('fs');
-    const path = require('path');
     const testDataDir = path.join(process.cwd(), 'test-data');
     
     // Ensure test-data directory exists

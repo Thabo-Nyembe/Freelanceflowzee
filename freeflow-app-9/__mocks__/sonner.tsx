@@ -1,8 +1,6 @@
-const React = require('react')
+export const Toaster = () => null
 
-const Toaster = () => null
-
-const toast = {
+export const toast = {
   success: jest.fn(),
   error: jest.fn(),
   info: jest.fn(),
@@ -10,9 +8,4 @@ const toast = {
   loading: jest.fn(),
   dismiss: jest.fn(),
   promise: jest.fn()
-}
-
-module.exports = {
-  Toaster,
-  toast
 } 

@@ -10,6 +10,8 @@
  */
 
 import { test, expect } from '@playwright/test'
+import * as fs from 'fs'
+import * as path from 'path'
 
 test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
 
@@ -643,8 +645,6 @@ KAZI is not just competitive—it's category-defining. The platform delivers:
 **Ready For**: Investor Presentations
 `
 
-  const fs = require('fs')
-  const path = require('path')
   const reportPath = path.join(__dirname, '../investor-screenshots/COMPETITIVE_ADVANTAGE_REPORT.md')
   fs.writeFileSync(reportPath, report)
   console.log(`\n📊 Competitive advantage report: ${reportPath}\n`)

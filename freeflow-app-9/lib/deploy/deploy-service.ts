@@ -441,7 +441,7 @@ export class DeployService {
    */
   private async createZipFromFiles(files: ProjectFiles): Promise<Buffer> {
     // Simple implementation - in production, use a proper zip library
-    const JSZip = require('jszip');
+    const JSZip = (await import('jszip')).default;
     const zip = new JSZip();
 
     for (const file of files.files) {

@@ -8,6 +8,7 @@
 import { EventEmitter } from 'events';
 import { spawn, ChildProcess } from 'child_process';
 import crypto from 'crypto';
+import * as fs from 'fs';
 
 export interface VNCConfig {
   displayNumber?: number;
@@ -257,7 +258,6 @@ export class VNCStreamer extends EventEmitter {
       proc.on('close', (code) => {
         if (code === 0) {
           // Read the file and convert to base64
-          const fs = require('fs');
           try {
             const data = fs.readFileSync(tempFile);
             fs.unlinkSync(tempFile);

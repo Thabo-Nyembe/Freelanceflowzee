@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import * as fs from 'fs';
 
 /**
  * Real User Interaction Test
@@ -350,7 +351,6 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     }
 
     // Save audit results
-    const fs = require('fs');
     fs.writeFileSync(
       'test-results/button-wiring-audit.json',
       JSON.stringify(auditResults, null, 2)

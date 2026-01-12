@@ -4,11 +4,13 @@
  * This script wires up all database features for Kazi
  */
 
-const fs = require('fs')
-const path = require('path')
+import * as fs from 'fs'
+import * as path from 'path'
+import { execSync } from 'child_process'
+import dotenv from 'dotenv'
 
 // Load environment variables
-require('dotenv').config({ path: '.env.local' })
+dotenv.config({ path: '.env.local' })
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gcinvwprtlnwuwuvmrux.supabase.co'
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -72,8 +74,6 @@ if (process.platform === 'darwin') {
   const masterSQL = fs.readFileSync(path.join(migrationsDir, 'MASTER_COMPLETE_SETUP.sql'), 'utf-8')
 
   // Use pbcopy to copy to clipboard
-  const { execSync } = require('child_process')
-
   try {
     execSync('pbcopy', { input: masterSQL })
     console.log('✅ MASTER_COMPLETE_SETUP.sql copied to clipboard!')
