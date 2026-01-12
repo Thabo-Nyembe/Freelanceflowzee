@@ -8,7 +8,7 @@
 import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
 import { generateReminderEmailHTML } from '@/lib/invoice-email-template'
-import type { Invoice, InvoiceStatus, Currency } from '@/lib/invoice-types'
+import type { InvoiceStatus, Currency } from '@/lib/invoice-types'
 
 const logger = createFeatureLogger('PaymentReminderService')
 

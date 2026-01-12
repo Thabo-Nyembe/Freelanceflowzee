@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { CommunicationEvent, CommunicationMessage, CommunicationUser, CommunicationCall } from './unified-communication-service'
+import { CommunicationEvent, CommunicationMessage, CommunicationUser } from './unified-communication-service'
 
 // WebSocket Message Types
 export interface WebSocketMessage {

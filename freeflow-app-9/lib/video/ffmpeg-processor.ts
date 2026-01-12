@@ -8,7 +8,6 @@
 import { createFeatureLogger } from '@/lib/logger'
 import path from 'path'
 import fs from 'fs/promises'
-import { existsSync } from 'fs'
 
 const logger = createFeatureLogger('FFmpegProcessor')
 
@@ -661,7 +660,7 @@ export async function concatenateVideos(
 
   const ffmpeg = await getFFmpeg()
   return new Promise((resolve, reject) => {
-    let command = ffmpeg()
+    const command = ffmpeg()
       .input(listPath)
       .inputOptions(['-f concat', '-safe 0'])
       .output(outputPath)

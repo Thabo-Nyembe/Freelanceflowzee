@@ -6,35 +6,29 @@ import {
   Send,
   Sparkles,
   FolderTree,
-  Play,
   Copy,
   Download,
   Plus,
   Trash2,
   History,
   Settings,
-  ChevronRight,
   Loader2,
   Check,
   X,
   FileCode,
   Layout,
-  Database,
   Server,
   Palette,
   TestTube,
-  BookOpen,
   Zap,
   Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -50,7 +44,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { useCodeBuilder, GeneratedFile, AgentStep, AgentMessage } from '@/hooks/use-code-builder';
+import { useCodeBuilder, GeneratedFile, AgentStep } from '@/hooks/use-code-builder';
 
 // Code syntax highlighting (simple version)
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {

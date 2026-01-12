@@ -11,10 +11,7 @@ import {
 } from '@/lib/hooks/use-gallery'
 import {
   downloadFile,
-  shareContent,
-  deleteWithConfirmation,
-  apiPost,
-  apiDelete
+  shareContent
 } from '@/lib/button-handlers'
 import {
   Image,

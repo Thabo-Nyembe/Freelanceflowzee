@@ -5,7 +5,7 @@
  * Each task runs in its own container with resource limits and security isolation.
  */
 
-import { spawn, ChildProcess } from 'child_process';
+import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
 

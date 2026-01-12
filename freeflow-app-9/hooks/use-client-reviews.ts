@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { ClientReview, ReviewStage, ReviewApproval } from '@/components/video/client-review-panel';
+import { ClientReview, ReviewStage } from '@/components/video/client-review-panel';
 
 export interface CreateReviewData {
   video_id: string;

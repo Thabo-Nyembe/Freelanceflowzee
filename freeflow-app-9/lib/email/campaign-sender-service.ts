@@ -7,7 +7,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { EmailService, EmailMessage, emailService } from './email-service'
+import { EmailMessage, emailService } from './email-service'
 import { eventTrackingService } from './event-tracking-service'
 
 // ============================================================================
@@ -807,7 +807,7 @@ export class CampaignSenderService {
 
     // Render template with personal data
     let htmlBody = emailService.renderTemplate(content.htmlBody, queueItem.personalData)
-    let textBody = content.textBody
+    const textBody = content.textBody
       ? emailService.renderTemplate(content.textBody, queueItem.personalData)
       : undefined
 

@@ -10,7 +10,6 @@
  */
 
 import { createClient } from './client'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 // ============================================================================
 // TYPE DEFINITIONS

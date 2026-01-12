@@ -14,7 +14,6 @@ import {
   CRDTOperation,
   VectorClock,
   mergeClock,
-  compareClock,
   isConcurrent
 } from './crdt-service'
 

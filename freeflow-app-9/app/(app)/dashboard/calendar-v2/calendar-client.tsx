@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus, type CreateCalendarEventInput, type UpdateCalendarEventInput } from '@/lib/hooks/use-calendar-events'
+import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus } from '@/lib/hooks/use-calendar-events'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

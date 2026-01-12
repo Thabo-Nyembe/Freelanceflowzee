@@ -13,21 +13,16 @@
 
 import { createClient } from '@/lib/supabase/server';
 import * as muxClient from './mux-client';
-import * as captionService from './caption-service';
-import { queueExportJob, queueThumbnailJob, queueCompressJob, getJobStatus, getUserJobs } from './video-queue';
-import { getVideoMetadata, type ExportOptions, type ThumbnailOptions } from './ffmpeg-processor';
+import { type ExportOptions } from './ffmpeg-processor';
 import type {
   Video,
   VideoStatus,
   VideoComment,
   VideoShare,
-  VideoAnalyticsEvent,
   CreateVideoInput,
   UpdateVideoInput,
   VideoSearchFilters,
-  VideoSearchResult,
   VideoAnalyticsSummary,
-  SharingSettings,
   ShareType,
   AccessLevel,
   EmbedSettings,

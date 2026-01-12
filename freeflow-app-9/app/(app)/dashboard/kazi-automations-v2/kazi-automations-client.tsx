@@ -55,10 +55,6 @@ import {
   FileText,
   AlertTriangle,
   Eye,
-  Pause,
-  RefreshCw,
-  Filter,
-  ExternalLink,
   Terminal
 } from 'lucide-react'
 import {

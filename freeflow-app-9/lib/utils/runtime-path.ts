@@ -9,7 +9,7 @@
  * prevents those warnings while maintaining the same functionality.
  */
 
-import { sep, join as pathJoin, resolve as pathResolve, basename, extname, dirname } from 'path';
+import { sep, resolve as pathResolve, basename, extname, dirname } from 'path';
 
 /**
  * Joins path segments at runtime, avoiding static analysis

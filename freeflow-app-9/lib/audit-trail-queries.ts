@@ -6,9 +6,7 @@ import type {
   ActivityType,
   EntityType,
   SeverityLevel,
-  AuditLog,
   ActivitySummary,
-  ComplianceReport,
   ComplianceFinding,
   AuditFilter
 } from '@/lib/audit-types'

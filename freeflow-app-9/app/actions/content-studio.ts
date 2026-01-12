@@ -1,6 +1,5 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import type { ContentStudio } from '@/lib/hooks/use-content-studio'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'

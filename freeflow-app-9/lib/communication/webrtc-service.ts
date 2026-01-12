@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events'
-import { CommunicationCall, CallParticipant } from './unified-communication-service'
 
 // WebRTC Configuration
 export interface WebRTCConfig {

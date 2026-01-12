@@ -133,7 +133,7 @@ export function usePriorityStats(organizationId?: string) {
   const supabase = createClient()
     setIsLoading(true)
     try {
-      let query = supabase.from('priority_assignments').select('*, priorities(*)')
+      const query = supabase.from('priority_assignments').select('*, priorities(*)')
       const { data } = await query
       const byLevel: { [level: number]: number } = {}
       data?.forEach(a => {

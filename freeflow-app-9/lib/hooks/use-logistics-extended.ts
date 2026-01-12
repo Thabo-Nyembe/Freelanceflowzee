@@ -121,7 +121,7 @@ export function useWarehouseInventory(warehouseId?: string, options?: { low_stoc
     if (!warehouseId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
-      let query = supabase.from('logistics_inventory').select('*').eq('warehouse_id', warehouseId)
+      const query = supabase.from('logistics_inventory').select('*').eq('warehouse_id', warehouseId)
       const { data } = await query.order('product_id', { ascending: true })
       let filtered = data || []
       if (options?.low_stock) {

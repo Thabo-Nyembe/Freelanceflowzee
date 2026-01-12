@@ -64,8 +64,6 @@ import {
   Edit,
   Link,
   Lock,
-  Calendar,
-  X,
   ExternalLink,
   AlertTriangle
 } from 'lucide-react'

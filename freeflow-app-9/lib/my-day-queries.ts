@@ -2,7 +2,7 @@
 // Provides CRUD operations for the My Day feature
 
 import { createClient } from '@/lib/supabase/client'
-import { Task, TimeBlock, AIInsight } from './my-day-utils'
+import { Task, TimeBlock } from './my-day-utils'
 
 // ============================================================================
 // TYPES

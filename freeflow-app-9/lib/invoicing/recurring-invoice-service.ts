@@ -11,8 +11,7 @@ import type {
   Invoice,
   InvoiceItem,
   BillingCycle,
-  Currency,
-  RecurringConfig
+  Currency
 } from '@/lib/invoice-types'
 
 const logger = createFeatureLogger('RecurringInvoiceService')

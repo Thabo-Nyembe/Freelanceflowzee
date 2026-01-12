@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/permissions'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'

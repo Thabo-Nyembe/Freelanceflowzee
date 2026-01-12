@@ -1,7 +1,7 @@
 'use client'
 
 import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
-import { createTestRun, updateTestRun, cancelTestRun, addTestResult, getTestRunStats } from '@/app/actions/testing'
+import { createTestRun, updateTestRun, cancelTestRun, addTestResult } from '@/app/actions/testing'
 
 export interface TestRun {
   id: string

@@ -493,7 +493,7 @@ function calculateLineSimilarity(line1: string, line2: string): number {
 // AUTO-SAVE MANAGEMENT
 // ============================================================================
 
-let autoSaveTimers: Map<string, NodeJS.Timeout> = new Map()
+const autoSaveTimers: Map<string, NodeJS.Timeout> = new Map()
 
 /**
  * Enables auto-save for a generation

@@ -1,5 +1,5 @@
-import { useReducer, useCallback, useEffect, useState } from 'react'
-import { EditorState, EditorAction, ContentBlock, BlockTemplate, DatabaseSource } from '@/lib/types/editor'
+import { useReducer, useCallback, useEffect } from 'react'
+import { EditorState, EditorAction, ContentBlock } from '@/lib/types/editor'
 import { defaultTemplates, defaultDatabases, calculateWordCount } from '@/lib/utils/editor'
 
 const initialState: EditorState = {

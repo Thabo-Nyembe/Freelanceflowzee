@@ -12,7 +12,6 @@ import {
   TranslationMemory,
   TranslationGlossary,
   TranslationStats,
-  TranslationMode,
   TranslationQuality,
   TranslationEngine
 } from './real-time-translation-types'

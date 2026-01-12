@@ -40,7 +40,7 @@ import {
   User, Clock, DollarSign, Star,
   Search, Grid, List, BarChart, FileAudio,
   Wand2, BookOpen, Code, Check, Plus, Upload,
-  Copy, Pause, RotateCcw, Volume2, X, FolderPlus
+  Copy, Pause, RotateCcw, FolderPlus
 } from 'lucide-react'
 
 import {

@@ -157,8 +157,8 @@ export function useMetricSummary(metricId?: string, options?: { period?: 'day' |
     try {
       const now = new Date()
       const period = options?.period || 'day'
-      let startDate = new Date()
-      let prevStartDate = new Date()
+      const startDate = new Date()
+      const prevStartDate = new Date()
       if (period === 'day') { startDate.setDate(now.getDate() - 1); prevStartDate.setDate(now.getDate() - 2) }
       else if (period === 'week') { startDate.setDate(now.getDate() - 7); prevStartDate.setDate(now.getDate() - 14) }
       else { startDate.setMonth(now.getMonth() - 1); prevStartDate.setMonth(now.getMonth() - 2) }

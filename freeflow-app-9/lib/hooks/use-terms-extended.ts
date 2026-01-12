@@ -180,7 +180,7 @@ export function useUserTermAcceptances(userId?: string, options?: { term_type?: 
     if (!userId) { setIsLoading(false); return }
     setIsLoading(true)
     try {
-      let query = supabase.from('term_acceptances').select('*, terms(*)').eq('user_id', userId)
+      const query = supabase.from('term_acceptances').select('*, terms(*)').eq('user_id', userId)
       const { data } = await query.order('accepted_at', { ascending: false })
       let result = data || []
       if (options?.term_type) {

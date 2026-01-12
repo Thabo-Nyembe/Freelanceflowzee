@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -20,8 +20,6 @@ import {
   DollarSign,
   TrendingUp,
   Users,
-  CreditCard,
-  Truck,
   BarChart3,
   Settings,
   Plus,
@@ -33,17 +31,12 @@ import {
   Eye,
   Edit,
   Trash2,
-  MoreHorizontal,
   Star,
-  Heart,
   Share2,
   Tag,
   Percent,
   Box,
-  Store,
   ArrowLeft,
-  CheckCircle,
-  Clock,
   XCircle,
   AlertTriangle,
   Layers,

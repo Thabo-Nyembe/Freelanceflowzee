@@ -12,12 +12,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Download, Edit, CheckCircle, MessageSquare, FolderOpen, ArrowLeft, AlertCircle, Loader2,
-  Plus, Search, Filter, BarChart3, TrendingUp, Users, Calendar, Clock, Target, Zap,
-  Settings, RefreshCw, Eye, Copy, Trash2, MoreHorizontal, Star, Share2, FileText, Activity,
+  Download, Edit, CheckCircle, MessageSquare, FolderOpen, AlertCircle, Loader2,
+  Plus, Search, Filter, BarChart3, TrendingUp, Target, RefreshCw, Eye, Copy, Trash2, MoreHorizontal, Share2, Activity,
   Archive
 } from 'lucide-react'
 import {
@@ -51,7 +49,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Project,
   getStatusColor,
-  getStatusIcon,
   formatCurrency
 } from '@/lib/client-zone-utils'
 

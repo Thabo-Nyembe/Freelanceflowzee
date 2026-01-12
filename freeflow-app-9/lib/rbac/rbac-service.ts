@@ -894,7 +894,7 @@ export class RBACService {
    */
   getEffectivePermissions(role: Role): Permission[] {
     const roleDef = ROLE_DEFINITIONS[role]
-    let permissions = [...roleDef.permissions]
+    const permissions = [...roleDef.permissions]
 
     // Add inherited permissions
     if (roleDef.inherits) {

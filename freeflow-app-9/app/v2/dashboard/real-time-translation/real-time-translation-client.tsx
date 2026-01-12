@@ -27,7 +27,7 @@ import {
   Upload, Pause, Volume2, RefreshCw,
   CheckCircle, ArrowRight,
   Filter, Star, Plus, Eye, Save,
-  ChevronDown, Copy, X
+  ChevronDown, Copy
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

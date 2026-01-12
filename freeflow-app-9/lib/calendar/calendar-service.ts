@@ -403,7 +403,7 @@ class CalendarService {
     const duration = end.getTime() - start.getTime();
 
     const instances: any[] = [];
-    let current = new Date(start);
+    const current = new Date(start);
     current.setDate(current.getDate() + 7); // Start from next occurrence
 
     let count = 0;

@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
@@ -99,7 +99,7 @@ export function useSupabaseMutation({
       setLoading(true)
 
       // Get user ID and add to data if not already present
-      let dataWithUser = { ...data }
+      const dataWithUser = { ...data }
       if (!dataWithUser.user_id) {
         const userId = await getUserId()
         if (!userId) {

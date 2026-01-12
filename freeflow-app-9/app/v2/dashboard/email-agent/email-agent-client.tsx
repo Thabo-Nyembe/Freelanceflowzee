@@ -37,7 +37,6 @@ import {
   ArrowRight, Check, X, PlayCircle,
   Link as LinkIcon, Brain
 } from 'lucide-react';
-import { toast } from 'sonner';
 import logger from '@/lib/logger';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';

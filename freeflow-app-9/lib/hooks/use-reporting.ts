@@ -685,7 +685,7 @@ export function useScheduledReports() {
 // Helper function to calculate next run date
 function calculateNextRun(schedule: ScheduleType): string {
   const now = new Date()
-  let nextRun = new Date()
+  const nextRun = new Date()
 
   switch (schedule) {
     case 'daily':

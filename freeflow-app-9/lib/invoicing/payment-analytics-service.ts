@@ -7,7 +7,7 @@
 
 import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
-import type { Invoice, Payment, Currency, PaymentMethod, InvoiceStatus } from '@/lib/invoice-types'
+import type { Payment, Currency, PaymentMethod } from '@/lib/invoice-types'
 
 const logger = createFeatureLogger('PaymentAnalyticsService')
 

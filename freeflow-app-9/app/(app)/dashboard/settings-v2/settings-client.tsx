@@ -73,7 +73,6 @@ import {
   Contrast,
   MousePointer,
   MessageSquare,
-  Calendar,
   Activity,
   ExternalLink,
   AlertOctagon,

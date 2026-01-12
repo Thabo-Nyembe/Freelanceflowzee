@@ -41,7 +41,6 @@ import {
   ChevronDown,
   ChevronRight,
   Printer,
-  FileText,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

@@ -8,7 +8,6 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { createServerClient } from '@/lib/supabase/server'
 
 // ============================================
 // SECURITY EVENT TYPES

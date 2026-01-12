@@ -12,7 +12,6 @@ import { createFeatureLogger } from '@/lib/logger'
 import {
   exportVideo,
   generateThumbnails,
-  generateAnimatedThumbnail,
   compressVideo,
   getVideoMetadata,
   type ExportOptions,
@@ -21,7 +20,6 @@ import {
 } from './ffmpeg-processor'
 import { createClient } from '@/lib/supabase/server'
 import path from 'path'
-import fs from 'fs/promises'
 
 const logger = createFeatureLogger('VideoQueue')
 

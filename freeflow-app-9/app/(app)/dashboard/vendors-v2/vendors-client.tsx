@@ -4,14 +4,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   Building2,
-  Users,
   DollarSign,
-  TrendingUp,
   Plus,
   Search,
-  Filter,
   Download,
-  Upload,
   MoreHorizontal,
   Edit,
   Trash2,
@@ -19,14 +15,10 @@ import {
   Phone,
   MapPin,
   Star,
-  Package,
-  Clock,
   CheckCircle2,
-  XCircle,
   AlertTriangle,
   RefreshCw,
   Eye,
-  FileText,
   ExternalLink,
   Globe,
   Copy,
@@ -39,7 +31,6 @@ import { Badge } from '@/components/ui/badge'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'

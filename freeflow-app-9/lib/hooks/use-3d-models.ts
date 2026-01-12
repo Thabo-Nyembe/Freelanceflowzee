@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
 
 export interface ThreeDModel {

@@ -1092,7 +1092,7 @@ export class EmailAnalyticsService {
     userId: string,
     dateRange?: DateRange
   ): Promise<AutomationPerformance[]> {
-    let query = this.supabase
+    const query = this.supabase
       .from('email_automations')
       .select('id, name, status, stats')
       .eq('user_id', userId)

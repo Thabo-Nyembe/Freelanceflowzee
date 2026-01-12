@@ -25,7 +25,7 @@ import { motion } from 'framer-motion'
 import {
   Palette, Type, Image, Globe, Code, Eye, Download,
   Settings, Sparkles, CheckCircle, AlertCircle, Copy, Upload, RefreshCw, Save, Star, Crown, Shield, Zap, Info, Award,
-  Plus, X, FileText
+  Plus, FileText
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

@@ -25,7 +25,7 @@ import {
   FileText, BarChart3, PieChart, TrendingUp, Users, Clock,
   DollarSign, Download, Calendar, Play,
   Star, CheckCircle, Info, Sparkles, ArrowRight,
-  LineChart, Table, Hash, Zap, X, Plus, Settings
+  LineChart, Table, Hash, Zap, Plus, Settings
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

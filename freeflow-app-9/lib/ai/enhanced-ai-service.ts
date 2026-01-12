@@ -1,7 +1,6 @@
 'use client'
 
 import { openai, googleAI, anthropic, aiConfig } from './config'
-import { createParser } from 'eventsource-parser'
 
 interface AIContext {
   userId: string

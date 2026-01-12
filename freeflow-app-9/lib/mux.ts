@@ -1,5 +1,4 @@
 import Mux from '@mux/mux-node';
-import { VideoExportFormat, VideoExportQuality } from './types/video-export';
 
 const { Video } = new Mux.default({
   tokenId: process.env.MUX_TOKEN_ID!,

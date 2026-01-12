@@ -4,7 +4,7 @@
  * Optimized for maximum revenue, client acquisition, and scaling
  */
 
-import { kaziAI, AITaskType } from './kazi-ai-router'
+import { kaziAI } from './kazi-ai-router'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('BusinessGrowthEngine')

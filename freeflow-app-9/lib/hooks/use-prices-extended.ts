@@ -174,7 +174,7 @@ export function useCalculatedPrice(priceId?: string, quantity?: number, discount
         const applicableTier = price.price_tiers.find((t: any) => quantity >= t.min_quantity && (!t.max_quantity || quantity <= t.max_quantity))
         if (applicableTier) { unitPrice = applicableTier.unit_amount }
       }
-      let subtotal = unitPrice * quantity
+      const subtotal = unitPrice * quantity
       let discount = 0
       if (discountCode) {
         const { data: discountData } = await supabase.from('price_discounts').select('*').eq('price_id', priceId).eq('code', discountCode).eq('is_active', true).single()

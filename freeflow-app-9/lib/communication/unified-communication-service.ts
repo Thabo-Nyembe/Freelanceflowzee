@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { EventEmitter } from 'events'
 
 // Core Communication Types
 export interface CommunicationUser {

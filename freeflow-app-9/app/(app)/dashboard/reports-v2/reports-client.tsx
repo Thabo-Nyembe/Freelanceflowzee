@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
@@ -26,7 +25,6 @@ import {
   Share2,
   Plus,
   Search,
-  Filter,
   Calendar,
   RefreshCw,
   Settings,
@@ -39,25 +37,17 @@ import {
   Palette,
   Grid3X3,
   List,
-  MoreHorizontal,
   Trash2,
-  Edit,
   Star,
   FolderOpen,
-  Upload,
   ExternalLink,
   ChevronDown,
   Sparkles,
   Target,
   Globe,
-  Mail,
   Bell,
-  Key,
   Webhook,
-  Shield,
-  HardDrive,
   AlertOctagon,
-  CreditCard,
   Sliders,
   AlertCircle,
   Loader2
@@ -78,12 +68,9 @@ import {
 // Supabase hooks for real data
 import {
   useDashboards,
-  useWorksheets,
   useReportDataSources,
   useScheduledReports,
   type Dashboard,
-  type ReportDataSource,
-  type ScheduledReport as ScheduledReportType,
   type ExportFormat,
   type ScheduleType
 } from '@/lib/hooks/use-reporting'

@@ -5,7 +5,7 @@
  * Each template is a complete, functional workflow configuration.
  */
 
-import type { KaziWorkflow, KaziAction, KaziTriggerConfig } from './kazi-workflow-service'
+import type { KaziAction, KaziTriggerConfig } from './kazi-workflow-service'
 
 export interface WorkflowTemplate {
   id: string

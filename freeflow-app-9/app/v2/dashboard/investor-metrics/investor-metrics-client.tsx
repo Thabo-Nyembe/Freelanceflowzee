@@ -797,7 +797,7 @@ export default function InvestorMetricsClient() {
     setLoading(true)
     try {
       // Build export data based on selections
-      let exportData: any = {
+      const exportData: any = {
         exportedAt: new Date().toISOString(),
         format: exportDataForm.format,
         dateRange: exportDataForm.dateRange

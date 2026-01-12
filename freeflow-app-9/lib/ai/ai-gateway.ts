@@ -8,7 +8,7 @@
  * @version 1.0.0
  */
 
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import { CircuitBreaker } from 'opossum';
 import { Redis } from '@upstash/redis';

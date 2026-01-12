@@ -7,7 +7,6 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
 import { createFeatureLogger } from '@/lib/logger'
 

@@ -6,7 +6,6 @@
 import {
   Lead,
   LeadStatus,
-  LeadSource,
   LeadScore,
   LeadForm,
   LandingPage,

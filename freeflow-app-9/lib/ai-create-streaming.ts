@@ -82,7 +82,7 @@ interface StreamChunk {
 export async function startStreamingGeneration(
   config: StreamingConfig
 ): Promise<StreamingController> {
-  let abortController = new AbortController()
+  const abortController = new AbortController()
   let isPaused = false
   let pauseBuffer: string[] = []
 

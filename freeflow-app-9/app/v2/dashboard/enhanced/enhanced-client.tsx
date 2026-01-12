@@ -39,10 +39,8 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Slider } from '@/components/ui/slider'
 import {
   Brain,
@@ -52,30 +50,16 @@ import {
   Settings,
   RefreshCw,
   Download,
-  Upload,
   MessageSquare,
   Video,
   Phone,
   Share2,
   Bell,
-  Zap,
   Target,
   BarChart3,
   Sparkles,
-  Calendar,
-  Clock,
   Plus,
-  Filter,
-  Eye,
-  Trash2,
-  Archive,
-  Star,
   Send,
-  Mic,
-  Shield,
-  Lock,
-  Globe,
-  Layers,
 } from 'lucide-react'
 
 // A+++ UTILITIES

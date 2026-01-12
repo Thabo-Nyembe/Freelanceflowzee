@@ -6,7 +6,6 @@ import { nanoid } from 'nanoid'
 import {
   CollaborationUser,
   CollaborationComment,
-  CollaborationEvent,
   CollaborationState,
   CollaborationOptions,
   CollaborationMessage,

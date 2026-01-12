@@ -179,7 +179,7 @@ export function useOverdueInvoices(options?: { organization_id?: string; limit?:
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
-      let query = supabase.from('purchase_invoices').select('*, purchases(*, purchase_vendors(*))').eq('status', 'unpaid').lt('due_date', now)
+      const query = supabase.from('purchase_invoices').select('*, purchases(*, purchase_vendors(*))').eq('status', 'unpaid').lt('due_date', now)
       const { data } = await query.order('due_date', { ascending: true }).limit(options?.limit || 50)
       setInvoices(data || [])
     } finally { setIsLoading(false) }

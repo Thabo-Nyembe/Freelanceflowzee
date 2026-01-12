@@ -5,8 +5,6 @@
 
 import {
   ReportTemplate,
-  ReportType,
-  ChartType,
   DateRange,
   ExportFormat,
   MetricCard,

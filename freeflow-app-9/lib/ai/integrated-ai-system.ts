@@ -8,10 +8,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
-import { AIGateway, AIProvider, AIRequestOptions, AIResponse } from './ai-gateway';
+import { AIGateway, AIProvider, AIRequestOptions } from './ai-gateway';
 import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
-import { debounce, throttle } from 'lodash';
 
 // Environment configuration
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;

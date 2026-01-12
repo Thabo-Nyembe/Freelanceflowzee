@@ -22,13 +22,12 @@ import {
   DollarSign, RefreshCw, BookOpen, Layers, Hash,
   Coffee, Plane, MessageSquare, Bell,
   Shield, Sliders, Webhook, Trash2,
-  Download, Upload, Terminal, Loader2, Copy, Share2, FileText
+  Download, Upload, Terminal, Loader2, Share2
 } from 'lucide-react'
 
 // Real button handlers
 import {
   copyToClipboard,
-  downloadAsJson,
   downloadAsCsv,
   shareContent
 } from '@/lib/button-handlers'

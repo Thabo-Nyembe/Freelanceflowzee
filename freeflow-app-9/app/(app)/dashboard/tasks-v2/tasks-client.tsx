@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import React, { useState, useMemo, useCallback } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,13 +14,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
-import { format, formatDistanceToNow, isAfter, isBefore, isToday, addDays } from 'date-fns'
+import { format, formatDistanceToNow, isBefore, isToday, addDays } from 'date-fns'
 import { useTasks, type Task, type TaskStatus, type TaskPriority, type TaskCategory } from '@/lib/hooks/use-tasks'
 import {
   CheckCircle2,
@@ -28,7 +27,6 @@ import {
   Clock,
   Plus,
   Search,
-  Filter,
   MoreVertical,
   Calendar as CalendarIcon,
   Flag,
@@ -43,13 +41,10 @@ import {
   CheckCheck,
   Loader2,
   RefreshCw,
-  LayoutGrid,
   List,
   Kanban,
   Timer,
-  Sparkles,
   Tag,
-  FolderOpen,
   ArrowUpCircle,
   ArrowDownCircle,
   AlertTriangle,

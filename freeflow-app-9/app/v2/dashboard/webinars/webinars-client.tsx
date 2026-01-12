@@ -36,7 +36,6 @@ import {
   Trash2,
   Edit,
   Copy,
-  MoreHorizontal,
   Share2,
   Link,
   CheckCircle2,

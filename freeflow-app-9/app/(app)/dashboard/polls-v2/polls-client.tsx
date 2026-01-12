@@ -7,7 +7,6 @@ import {
   ClipboardList,
   Plus,
   Search,
-  MoreVertical,
   BarChart3,
   PieChart,
   TrendingUp,

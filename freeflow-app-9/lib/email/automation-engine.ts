@@ -960,7 +960,7 @@ export class AutomationEngine {
   }
 
   private processWait(config: WaitConfig, settings: AutomationSettings): ProcessingResult {
-    let waitMs = this.durationToMs(config.duration, config.unit)
+    const waitMs = this.durationToMs(config.duration, config.unit)
 
     // Adjust for business hours if needed
     if (config.businessHoursOnly && settings.businessHours?.enabled) {

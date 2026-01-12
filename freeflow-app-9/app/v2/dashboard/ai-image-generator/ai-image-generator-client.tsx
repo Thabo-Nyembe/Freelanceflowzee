@@ -1,15 +1,10 @@
 'use client'
 // Enhanced & Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
 
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
+
+
+
+
 
 
 export const dynamic = 'force-dynamic';

@@ -1194,7 +1194,7 @@ export default function EscrowClient() {
     try {
       const timestamp = new Date().toISOString().split('T')[0]
       let content = ''
-      let filename = `escrow-${reportForm.reportType}-report-${timestamp}`
+      const filename = `escrow-${reportForm.reportType}-report-${timestamp}`
 
       // Generate report content based on type
       switch (reportForm.reportType) {

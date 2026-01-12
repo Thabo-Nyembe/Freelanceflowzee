@@ -46,12 +46,9 @@ import {
   Target,
   Sparkles,
   ArrowRight,
-  Bell,
-  GitBranch,
   Loader2,
   FolderOpen,
   Star,
-  Globe,
   FileText,
   Users,
   Save,
@@ -59,17 +56,13 @@ import {
   RotateCcw,
   AlertTriangle,
   Share2,
-  Filter,
   RefreshCw,
-  PauseCircle,
-  StopCircle,
-  ExternalLink
+  StopCircle
 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'

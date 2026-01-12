@@ -21,7 +21,6 @@ import type {
   ActionType,
   WorkflowStatus,
   ExecutionStatus,
-  ConditionOperator,
   WorkflowCategory
 } from './automation-types'
 

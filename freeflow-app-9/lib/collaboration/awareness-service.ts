@@ -11,7 +11,6 @@
  */
 
 import { createFeatureLogger } from '@/lib/logger'
-import { createClient } from '@/lib/supabase/server'
 
 const logger = createFeatureLogger('AwarenessService')
 

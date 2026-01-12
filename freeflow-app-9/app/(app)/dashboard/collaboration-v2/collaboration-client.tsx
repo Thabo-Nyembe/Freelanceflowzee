@@ -28,7 +28,6 @@ import {
   FileText,
   Video,
   Calendar,
-  CheckCircle,
   TrendingUp,
   Share2,
   Trash2,
@@ -58,7 +57,6 @@ import {
   Send,
   Smile,
   Paperclip,
-  ScreenShare,
   Hash,
   Bell,
   BellOff,
@@ -66,15 +64,12 @@ import {
   Reply,
   MoreVertical,
   UserPlus,
-  Settings2,
   Zap,
   Globe,
-  AlertCircle,
   Edit,
   Archive,
   Copy,
   Eye,
-  EyeOff,
   Flag
 } from 'lucide-react'
 

@@ -48,7 +48,7 @@ export function useTranslationsForLocale(localeCode?: string, options?: { projec
     if (!localeCode) { setIsLoading(false); return }
     setIsLoading(true)
     try {
-      let query = supabase.from('localization_translations').select('*, localization_strings(*)').eq('locale_code', localeCode)
+      const query = supabase.from('localization_translations').select('*, localization_strings(*)').eq('locale_code', localeCode)
       const { data } = await query
       setTranslations(data || [])
     } finally { setIsLoading(false) }

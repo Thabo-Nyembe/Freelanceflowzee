@@ -1,4 +1,3 @@
-import { openai, anthropic, googleAI } from './config'
 
 interface VoiceSynthesisRequest {
   text: string

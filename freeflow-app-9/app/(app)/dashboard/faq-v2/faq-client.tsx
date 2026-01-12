@@ -51,9 +51,7 @@ import {
   Link,
   Image,
   ChevronUp,
-  ChevronDown,
-  X,
-  GripVertical
+  ChevronDown
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

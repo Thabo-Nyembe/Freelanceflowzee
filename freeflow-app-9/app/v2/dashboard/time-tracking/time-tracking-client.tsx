@@ -36,7 +36,7 @@ import {
 import { CardDescription } from '@/components/ui/card'
 import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
 import { toast } from 'sonner'
-import { copyToClipboard, downloadAsCsv, downloadAsJson, printContent, deleteWithConfirmation, apiPost, apiDelete } from '@/lib/button-handlers'
+import { downloadAsCsv, downloadAsJson, printContent, apiPost } from '@/lib/button-handlers'
 
 // Types
 type TimeEntryStatus = 'running' | 'stopped' | 'approved' | 'rejected'

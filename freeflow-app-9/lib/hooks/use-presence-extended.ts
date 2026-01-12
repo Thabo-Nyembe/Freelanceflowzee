@@ -54,7 +54,7 @@ export function useOnlineUsers(options?: { channel_id?: string; limit?: number }
     setIsLoading(true)
     try {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
-      let query = supabase.from('presence').select('*, users(*)').in('status', ['online', 'away', 'busy']).gte('last_seen', fiveMinutesAgo)
+      const query = supabase.from('presence').select('*, users(*)').in('status', ['online', 'away', 'busy']).gte('last_seen', fiveMinutesAgo)
       const { data } = await query.order('last_seen', { ascending: false }).limit(options?.limit || 100)
       setUsers(data || [])
     } finally { setIsLoading(false) }

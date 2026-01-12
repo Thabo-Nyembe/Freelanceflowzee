@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { EnhancedAIService } from '@/lib/ai/enhanced-ai-service'
-import { toast } from '@/components/ui/use-toast'
 
 const aiService = new EnhancedAIService()
 

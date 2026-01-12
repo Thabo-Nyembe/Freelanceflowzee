@@ -14,19 +14,14 @@
 
 import { createClient } from '@/lib/supabase/client'
 import {
-  getFeatureTests,
-  getFeatureTest,
   createFeatureTest,
   updateFeatureTest,
   createTestRun,
   createTestStepResult,
-  getTestRuns,
   getTestStepResults,
   createTestIssue,
-  getTestIssues,
   type FeatureTest,
   type TestRun,
-  type TestStepResult,
   type TestCategory,
   type TestStatus,
   type TestResult

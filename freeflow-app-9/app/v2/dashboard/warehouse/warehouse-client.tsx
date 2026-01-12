@@ -45,7 +45,6 @@ import {
   Mail,
   Upload,
   Terminal,
-  Calendar,
   User,
   FileText
 } from 'lucide-react'

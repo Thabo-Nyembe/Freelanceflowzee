@@ -50,7 +50,7 @@ export function useActiveAnnouncements(options?: { target_audience?: string; lim
     setIsLoading(true)
     try {
       const now = new Date().toISOString()
-      let query = supabase.from('announcements').select('*').eq('status', 'published')
+      const query = supabase.from('announcements').select('*').eq('status', 'published')
       const { data } = await query.order('is_pinned', { ascending: false }).order('priority', { ascending: false }).limit(options?.limit || 20)
       const filtered = (data || []).filter(a => {
         if (a.starts_at && new Date(a.starts_at) > new Date(now)) return false

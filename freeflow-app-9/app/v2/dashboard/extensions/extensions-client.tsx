@@ -80,8 +80,7 @@ import {
   Filter,
   Zap,
   RotateCcw,
-  Check,
-  X
+  Check
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

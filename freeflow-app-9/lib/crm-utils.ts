@@ -5,14 +5,12 @@
 
 import {
   Contact,
-  Lead,
   Deal,
   Pipeline,
   Activity,
   CRMStats,
   ContactType,
   LeadStatus,
-  LeadSource,
   DealStage,
   Priority
 } from './crm-types'

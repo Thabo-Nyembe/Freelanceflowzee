@@ -8,20 +8,11 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
-import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
-import { debounce, throttle } from 'lodash';
 import {
   IntegratedAISystem,
-  AIOperationType,
   AIOperationStatus,
-  AIProvider,
-  AIEventType,
-  AIOperationRequest,
-  AIOperationResult,
-  AIOperationProgress,
-  AIContentType,
-  AIFeatureConfig
+  AIOperationRequest
 } from './integrated-ai-system';
 
 // Environment configuration
