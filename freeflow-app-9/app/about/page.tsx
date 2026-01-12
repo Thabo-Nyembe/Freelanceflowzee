@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Users, Target, Zap, Globe, Award, TrendingUp, Heart, Shield } from 'lucide-react'
+import { Users, Target, Zap, Globe, Award, Heart, Shield } from 'lucide-react'
 import { EnhancedNavigation } from '@/components/marketing/enhanced-navigation'
 import { Button } from '@/components/ui/button'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'

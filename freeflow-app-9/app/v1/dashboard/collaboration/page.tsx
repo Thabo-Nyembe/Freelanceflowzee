@@ -35,11 +35,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
-  copyToClipboard,
   downloadAsJson,
-  downloadAsCsv,
   shareContent,
-  toggleFullscreen,
   apiCall,
   apiPost
 } from '@/lib/button-handlers';
@@ -89,9 +86,7 @@ import {
   Timer,
   ArrowRight,
   Plus,
-  X,
   Trash2,
-  Hash,
   Lock,
   Globe,
   UsersRound

@@ -23,7 +23,6 @@ import {
   CheckCircle,
   Bell,
   Edit,
-  X,
   Trash2,
   GripVertical,
   CalendarDays,

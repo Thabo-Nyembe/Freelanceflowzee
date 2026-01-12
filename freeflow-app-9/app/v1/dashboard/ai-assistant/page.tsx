@@ -60,7 +60,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useKaziAI } from '@/lib/hooks/use-kazi-ai'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { copyToClipboard, downloadAsJson } from '@/lib/button-handlers'
+import { copyToClipboard } from '@/lib/button-handlers'
 
 // A+++ SUPABASE INTEGRATION
 import {

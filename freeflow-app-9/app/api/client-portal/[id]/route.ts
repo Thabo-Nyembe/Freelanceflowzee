@@ -22,12 +22,10 @@ import {
   toggleProjectStar,
   getClientProjects,
   getProjectMilestones,
-  createMilestone,
   updateMilestone,
   completeMilestone,
   deleteMilestone,
   getProjectRisks,
-  createRisk,
   updateRisk,
   closeRisk,
   deleteRisk,
@@ -45,7 +43,6 @@ import {
   markInvoiceAsPaid,
   getClientActivities,
   getClientMetrics,
-  recordClientMetrics,
   exportClientDataToCSV
 } from '@/lib/client-portal-queries'
 

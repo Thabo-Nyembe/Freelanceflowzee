@@ -14,7 +14,6 @@ import {
   getDesignOutputs,
   createDesignOutput,
   getDesignTemplates,
-  getDesignTemplate,
   getPopularTemplates,
   getAIReadyTemplates,
   getAITools,

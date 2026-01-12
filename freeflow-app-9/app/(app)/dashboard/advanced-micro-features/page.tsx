@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { useMemo, useCallback } from 'react'
+import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
