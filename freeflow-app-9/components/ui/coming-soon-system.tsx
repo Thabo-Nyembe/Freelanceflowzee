@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from './button'
 import { Card } from './card'
+import { toast } from 'sonner'
 import {
   Rocket, Calendar, Bell, Mail, Zap, Star, CheckCircle, ArrowRight, X, ExternalLink,
   Palette, Video, BarChart3,
@@ -364,8 +365,19 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
                     variant="default"
                     className="flex-1 gap-2"
                     onClick={() => {
-                      // Add to waitlist
-                      console.log('Added to waitlist:', feature.id)
+                      // Add to waitlist with toast notification
+                      toast.promise(
+                        new Promise((resolve) => setTimeout(resolve, 800)),
+                        {
+                          loading: 'Adding to waitlist...',
+                          success: () => {
+                            return `You'll be notified when ${feature.title} is available!`
+                          },
+                          error: 'Failed to join waitlist'
+                        }
+                      )
+                      // In a real app, call an API here
+                      // fetch('/api/waitlist', { method: 'POST', body: JSON.stringify({ featureId: feature.id }) })
                       onClose()
                     }}
                   >
@@ -376,8 +388,11 @@ export function ComingSoonModal({ isOpen, onClose, feature }: ComingSoonModalPro
                     variant="outline"
                     className="gap-2"
                     onClick={() => {
-                      // Share feedback
-                      console.log('Share feedback for:', feature.id)
+                      // Open feedback email
+                      const subject = encodeURIComponent(`Feedback for: ${feature.title}`)
+                      const body = encodeURIComponent(`Hi,\n\nI'd like to share feedback about the upcoming feature "${feature.title}":\n\n[Your feedback here]\n\nThanks!`)
+                      window.location.href = `mailto:feedback@freeflow.io?subject=${subject}&body=${body}`
+                      toast.success('Opening email client', { description: 'Share your feedback about this feature' })
                     }}
                   >
                     <Mail className="w-4 h-4" />

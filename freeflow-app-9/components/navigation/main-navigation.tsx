@@ -1,10 +1,12 @@
 "use client"
 
-
+import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,6 +16,16 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   Video,
   FileText,
@@ -26,6 +38,7 @@ import {
   Settings,
   LogOut,
   Briefcase,
+  Loader2,
 } from 'lucide-react'
 
 const features = [
@@ -87,8 +100,34 @@ const features = [
 
 export function MainNavigation() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [showSignOutDialog, setShowSignOutDialog] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.signOut()
+
+      if (error) {
+        toast.error('Failed to sign out', { description: error.message })
+        return
+      }
+
+      toast.success('Signed out successfully')
+      router.push('/login')
+      router.refresh()
+    } catch (err) {
+      toast.error('An error occurred while signing out')
+    } finally {
+      setIsSigningOut(false)
+      setShowSignOutDialog(false)
+    }
+  }
 
   return (
+    <>
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
@@ -140,12 +179,50 @@ export function MainNavigation() {
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <Button variant="ghost" size="sm">
-            <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSignOutDialog(true)}
+            disabled={isSigningOut}
+          >
+            {isSigningOut ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4 mr-2" />
+            )}
+            {isSigningOut ? 'Signing out...' : 'Sign Out'}
           </Button>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
+
+    <AlertDialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Sign out of your account?</AlertDialogTitle>
+          <AlertDialogDescription>
+            You will need to sign in again to access your dashboard and data.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isSigningOut}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {isSigningOut ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Signing out...
+              </>
+            ) : (
+              'Sign Out'
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   )
 }

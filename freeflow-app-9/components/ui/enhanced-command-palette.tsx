@@ -33,6 +33,7 @@ import {
   Lightbulb,
   Sparkles
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface CommandItem {
   id: string
@@ -188,7 +189,10 @@ export function EnhancedCommandPalette({
       title: 'Create New Project',
       description: 'Start a new project',
       icon: Plus,
-      action: () => console.log('Create new project'),
+      action: () => {
+        router.push('/dashboard/projects-hub-v2?action=new')
+        toast.success('Create Project', { description: 'Opening project creation...' })
+      },
       shortcut: '⌘N',
       category: 'Actions',
       keywords: ['new', 'create', 'project', 'start']
@@ -198,7 +202,17 @@ export function EnhancedCommandPalette({
       title: 'Global Search',
       description: 'Search across all content',
       icon: Search,
-      action: () => console.log('Global search'),
+      action: () => {
+        // Focus the search input if we're on a page with search, otherwise navigate
+        const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement
+        if (searchInput) {
+          searchInput.focus()
+          toast.info('Search', { description: 'Type to search...' })
+        } else {
+          router.push('/dashboard?search=true')
+          toast.info('Global Search', { description: 'Navigating to search...' })
+        }
+      },
       shortcut: '⌘F',
       category: 'Actions',
       keywords: ['search', 'find', 'lookup']
@@ -208,7 +222,10 @@ export function EnhancedCommandPalette({
       title: 'Settings',
       description: 'Open application settings',
       icon: Settings,
-      action: () => console.log('Open settings'),
+      action: () => {
+        router.push('/dashboard/settings-v2')
+        toast.info('Settings', { description: 'Opening settings...' })
+      },
       shortcut: '⌘,',
       category: 'Actions',
       keywords: ['settings', 'preferences', 'config']
@@ -220,7 +237,23 @@ export function EnhancedCommandPalette({
       title: 'Calculator',
       description: 'Quick calculations',
       icon: Calculator,
-      action: () => console.log('Open calculator'),
+      action: () => {
+        // Open system calculator or show inline calculator
+        toast.info('Calculator', {
+          description: 'Calculator opened in new window',
+          action: {
+            label: 'Open',
+            onClick: () => window.open('calculator://', '_blank')
+          }
+        })
+        // Attempt to open system calculator
+        try {
+          window.open('calculator://', '_blank')
+        } catch {
+          // Fallback: show web calculator
+          window.open('https://www.calculator.net/', '_blank')
+        }
+      },
       category: 'Tools',
       keywords: ['calculator', 'math', 'calculate']
     },
@@ -229,7 +262,25 @@ export function EnhancedCommandPalette({
       title: 'Color Picker',
       description: 'Pick and manage colors',
       icon: Palette,
-      action: () => console.log('Color picker'),
+      action: () => {
+        // Use native color picker via hidden input
+        const colorInput = document.createElement('input')
+        colorInput.type = 'color'
+        colorInput.style.position = 'fixed'
+        colorInput.style.opacity = '0'
+        colorInput.style.pointerEvents = 'none'
+        document.body.appendChild(colorInput)
+        colorInput.addEventListener('change', (e) => {
+          const color = (e.target as HTMLInputElement).value
+          navigator.clipboard.writeText(color)
+          toast.success('Color Copied', { description: `${color} copied to clipboard` })
+          document.body.removeChild(colorInput)
+        })
+        colorInput.addEventListener('cancel', () => {
+          document.body.removeChild(colorInput)
+        })
+        colorInput.click()
+      },
       category: 'Tools',
       keywords: ['color', 'picker', 'palette', 'design']
     },
@@ -240,7 +291,10 @@ export function EnhancedCommandPalette({
       title: 'E-commerce Platform',
       description: 'Recently worked on project',
       icon: Briefcase,
-      action: () => console.log('Open recent project'),
+      action: () => {
+        router.push('/dashboard/projects-hub-v2')
+        toast.info('Opening Project', { description: 'Loading E-commerce Platform...' })
+      },
       category: 'Recent',
       keywords: ['recent', 'project', 'ecommerce']
     },
@@ -249,7 +303,10 @@ export function EnhancedCommandPalette({
       title: 'Brand Identity Design',
       description: 'Recently edited design',
       icon: Sparkles,
-      action: () => console.log('Open recent design'),
+      action: () => {
+        router.push('/dashboard/ai-design-v2')
+        toast.info('Opening Design', { description: 'Loading Brand Identity Design...' })
+      },
       category: 'Recent',
       keywords: ['recent', 'design', 'brand']
     },

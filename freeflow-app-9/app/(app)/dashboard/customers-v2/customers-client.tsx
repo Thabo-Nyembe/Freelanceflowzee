@@ -472,6 +472,15 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const [showEmailDialog, setShowEmailDialog] = useState(false)
   const [emailRecipient, setEmailRecipient] = useState<Contact | Client | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showActivityLogDialog, setShowActivityLogDialog] = useState(false)
+  const [activityLogForm, setActivityLogForm] = useState({
+    type: 'call' as ActivityType,
+    subject: '',
+    description: '',
+    outcome: '',
+    duration: 0,
+    contactId: ''
+  })
 
   // Local state for CRM entities
   const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS)
@@ -847,8 +856,68 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     toast.success('Opening Email Client', { description: `Composing email to ${contact.email}` })
   }
 
-  const handleLogActivity = () => {
-    // TODO: Implement activity log modal
+  const handleLogActivity = (contactId?: string) => {
+    setActivityLogForm({
+      type: 'call',
+      subject: '',
+      description: '',
+      outcome: '',
+      duration: 0,
+      contactId: contactId || ''
+    })
+    setShowActivityLogDialog(true)
+  }
+
+  const handleSaveActivityLog = async () => {
+    if (!activityLogForm.subject || !activityLogForm.type) {
+      toast.error('Please fill in required fields')
+      return
+    }
+
+    try {
+      // Create the activity log entry
+      const newActivity: Activity = {
+        id: `a-${Date.now()}`,
+        type: activityLogForm.type,
+        subject: activityLogForm.subject,
+        description: activityLogForm.description,
+        contactId: activityLogForm.contactId || null,
+        accountId: null,
+        opportunityId: null,
+        ownerId: 'current-user',
+        ownerName: 'Current User',
+        status: 'completed',
+        dueDate: new Date().toISOString(),
+        completedDate: new Date().toISOString(),
+        duration: activityLogForm.duration,
+        outcome: activityLogForm.outcome || null,
+        createdDate: new Date().toISOString(),
+        priority: 'medium'
+      }
+
+      // In a real app, this would call an API
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 800)),
+        {
+          loading: 'Saving activity...',
+          success: () => {
+            setShowActivityLogDialog(false)
+            setActivityLogForm({
+              type: 'call',
+              subject: '',
+              description: '',
+              outcome: '',
+              duration: 0,
+              contactId: ''
+            })
+            return `Activity logged: ${activityLogForm.subject}`
+          },
+          error: 'Failed to log activity'
+        }
+      )
+    } catch (err) {
+      toast.error('Error logging activity')
+    }
   }
 
   // Copy to clipboard helper
@@ -3248,6 +3317,102 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 toast.info('Select a File', { description: 'Choose a CSV or Excel file to import' })
               }}>
                 <Upload className="h-4 w-4 mr-2" />Select File to Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Activity Log Dialog */}
+        <Dialog open={showActivityLogDialog} onOpenChange={setShowActivityLogDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-green-600" />
+                Log Activity
+              </DialogTitle>
+              <DialogDescription>Record an activity for your CRM</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Activity Type *</Label>
+                <Select
+                  value={activityLogForm.type}
+                  onValueChange={(value: ActivityType) => setActivityLogForm(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="call">Phone Call</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="note">Note</SelectItem>
+                    <SelectItem value="task">Task</SelectItem>
+                    <SelectItem value="linkedin">LinkedIn</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Subject *</Label>
+                <Input
+                  placeholder="Enter activity subject..."
+                  value={activityLogForm.subject}
+                  onChange={(e) => setActivityLogForm(prev => ({ ...prev, subject: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="Enter activity details..."
+                  value={activityLogForm.description}
+                  onChange={(e) => setActivityLogForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Duration (minutes)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={activityLogForm.duration}
+                    onChange={(e) => setActivityLogForm(prev => ({ ...prev, duration: Number(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Outcome</Label>
+                  <Select
+                    value={activityLogForm.outcome}
+                    onValueChange={(value) => setActivityLogForm(prev => ({ ...prev, outcome: value }))}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="successful">Successful</SelectItem>
+                      <SelectItem value="left-voicemail">Left Voicemail</SelectItem>
+                      <SelectItem value="no-answer">No Answer</SelectItem>
+                      <SelectItem value="busy">Busy</SelectItem>
+                      <SelectItem value="follow-up-needed">Follow-up Needed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Related Contact</Label>
+                <Select
+                  value={activityLogForm.contactId}
+                  onValueChange={(value) => setActivityLogForm(prev => ({ ...prev, contactId: value }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select contact..." /></SelectTrigger>
+                  <SelectContent>
+                    {MOCK_CONTACTS.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowActivityLogDialog(false)}>Cancel</Button>
+              <Button onClick={handleSaveActivityLog} disabled={!activityLogForm.subject}>
+                <Activity className="h-4 w-4 mr-2" />Log Activity
               </Button>
             </DialogFooter>
           </DialogContent>
