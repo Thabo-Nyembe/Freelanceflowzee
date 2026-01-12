@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test('PRODUCTION READY - Dialog positioning test', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })

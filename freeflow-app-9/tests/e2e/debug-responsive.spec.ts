@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test.describe('Debug Responsive Behavior', () => {
   test('should check responsive behavior at different breakpoints', async ({ page }) => {

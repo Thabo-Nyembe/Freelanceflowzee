@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test.describe('Debug Header Issue', () => {
   test('should investigate duplicate elements', async ({ page }) => {

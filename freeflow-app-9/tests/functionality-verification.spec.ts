@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 // Test functionality that's actually available
 test.describe('Functionality Verification', () => {

@@ -323,9 +323,9 @@ test.describe('Cross-Browser Compatibility Tests', () => {
       // Simulate missing features
       await page.addInitScript(() => {
         // Remove some modern features
-        // @ts-ignore
+        // @ts-expect-error - testing graceful degradation without IntersectionObserver
         delete window.IntersectionObserver;
-        // @ts-ignore
+        // @ts-expect-error - testing graceful degradation without ResizeObserver
         delete window.ResizeObserver;
       });
       

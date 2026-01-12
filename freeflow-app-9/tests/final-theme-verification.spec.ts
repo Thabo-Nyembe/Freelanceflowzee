@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test('Final Theme Verification - Pure Black & White', async ({ page }) => {
   console.log('\n========================================')

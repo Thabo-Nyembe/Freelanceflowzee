@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { navigateToProtectedRoute, TEST_USER } from '../utils/auth-helper';
+import { navigateToProtectedRoute } from '../utils/auth-helper';
 
 /**
  * Dashboard Rendering Tests

@@ -8,7 +8,7 @@
  * Created: December 16, 2024
  */
 
-import { test, expect, Page, BrowserContext } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
 
 // ============================================
 // TEST CONFIGURATION
@@ -846,7 +846,7 @@ test.describe('Real-time Features Tests', () => {
 
     // Check for WebSocket connection
     const wsConnected = await page.evaluate(() => {
-      // @ts-ignore
+      // @ts-expect-error - checking WebSocket availability on window
       return typeof window.WebSocket !== 'undefined'
     })
     expect(wsConnected).toBeTruthy()

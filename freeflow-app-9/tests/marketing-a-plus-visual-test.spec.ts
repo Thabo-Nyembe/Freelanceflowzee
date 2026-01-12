@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test.describe('A+++ Marketing Pages - Visual Verification', () => {
   test.setTimeout(120000) // 2 minutes for visual inspection

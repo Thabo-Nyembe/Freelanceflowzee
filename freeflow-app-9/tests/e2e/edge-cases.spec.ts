@@ -65,9 +65,9 @@ test.describe('Edge Cases and Error Handling Tests', () => {
     test('should handle old browser features', async ({ page }) => {
       // Simulate missing modern browser features
       await page.addInitScript(() => {
-        // @ts-ignore
+        // @ts-expect-error - testing graceful degradation without fetch API
         delete window.fetch;
-        // @ts-ignore  
+        // @ts-expect-error - testing graceful degradation without IntersectionObserver
         delete window.IntersectionObserver;
       });
       
@@ -271,7 +271,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
       
       // Inject a JS error
       await page.evaluate(() => {
-        // @ts-ignore
+        // @ts-expect-error - intentionally calling undefined function to test error handling
         nonExistentFunction();
       });
       
@@ -285,7 +285,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
       // Create memory pressure
       await page.evaluate(() => {
         const largeArray = new Array(1000000).fill('memory test');
-        // @ts-ignore
+        // @ts-expect-error - adding test property to window for memory pressure testing
         window.memoryTest = largeArray;
       });
       

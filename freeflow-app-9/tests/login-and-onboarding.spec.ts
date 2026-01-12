@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 // Configure test timeout for slow dev server
 test.setTimeout(180000) // 3 minutes per test

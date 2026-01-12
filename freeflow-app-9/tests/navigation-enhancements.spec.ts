@@ -1,4 +1,4 @@
-import { test, expect, Page, TestInfo, Locator } from '@playwright/test';
+import { test, expect, Page, TestInfo } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { performance } from 'perf_hooks';
 

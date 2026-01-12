@@ -8,7 +8,7 @@
  * 4. Mobile responsiveness
  */
 
-import { test, expect, devices } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
 // Key pages to test
