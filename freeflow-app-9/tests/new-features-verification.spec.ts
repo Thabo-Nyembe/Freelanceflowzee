@@ -72,7 +72,8 @@ test.describe('New Features Verification', () => {
 
     // Check for tab navigation
     const tabs = page.locator('[role="tablist"] button')
-    await expect(tabs).toHaveCountGreaterThan(0)
+    const tabCount = await tabs.count()
+    expect(tabCount).toBeGreaterThan(0)
 
     // Test tab switching
     const formTab = page.locator('button[value="forms"]')

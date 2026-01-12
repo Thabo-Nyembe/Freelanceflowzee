@@ -63,7 +63,12 @@ test.describe('Missing Features Audit', () => {
 
     console.log(`🔍 Auditing ${allDashboardRoutes.length} dashboard routes...`)
 
-    const results = {
+    const results: {
+      accessible: Array<{ path: string; name: string; tested: boolean; title: string; analysis: unknown }>
+      missing: Array<{ path: string; name: string; tested: boolean; status: number; reason: string }>
+      errors: Array<{ path: string; name: string; tested: boolean; error: string }>
+      missingFeatures: Array<{ route: string; issue: string }>
+    } = {
       accessible: [],
       missing: [],
       errors: [],
@@ -166,7 +171,7 @@ test.describe('Missing Features Audit', () => {
       } catch (error) {
         results.errors.push({
           ...route,
-          error: error.toString()
+          error: String(error)
         })
         console.log(`💥 ${route.name}: ${error}`)
       }

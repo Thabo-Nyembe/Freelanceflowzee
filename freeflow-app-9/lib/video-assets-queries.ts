@@ -609,3 +609,99 @@ export async function getAssetTags(
     return { data: [], error }
   }
 }
+
+// Asset archive/restore functions
+
+export async function archiveVideoAsset(
+  assetId: string
+): Promise<{ data: VideoAsset | null; error: any }> {
+  try {
+    const { data, error } = await supabase
+      .from('video_assets')
+      .update({ status: 'archived', updated_at: new Date().toISOString() })
+      .eq('id', assetId)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to archive video asset', { error, assetId })
+      return { data: null, error }
+    }
+
+    logger.info('Video asset archived', { assetId })
+    return { data, error: null }
+  } catch (error) {
+    logger.error('Exception archiving video asset', { error, assetId })
+    return { data: null, error }
+  }
+}
+
+export async function restoreVideoAsset(
+  assetId: string
+): Promise<{ data: VideoAsset | null; error: any }> {
+  try {
+    const { data, error } = await supabase
+      .from('video_assets')
+      .update({ status: 'active', updated_at: new Date().toISOString() })
+      .eq('id', assetId)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to restore video asset', { error, assetId })
+      return { data: null, error }
+    }
+
+    logger.info('Video asset restored', { assetId })
+    return { data, error: null }
+  } catch (error) {
+    logger.error('Exception restoring video asset', { error, assetId })
+    return { data: null, error }
+  }
+}
+
+export async function getAssetsByProject(
+  projectId: string
+): Promise<{ data: VideoAsset[]; error: any }> {
+  try {
+    const { data, error } = await supabase
+      .from('video_assets')
+      .select('*')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      logger.error('Failed to fetch assets by project', { error, projectId })
+      return { data: [], error }
+    }
+
+    return { data: data || [], error: null }
+  } catch (error) {
+    logger.error('Exception fetching assets by project', { error, projectId })
+    return { data: [], error }
+  }
+}
+
+export async function getAssetsByStatus(
+  userId: string,
+  status: string
+): Promise<{ data: VideoAsset[]; error: any }> {
+  try {
+    const { data, error } = await supabase
+      .from('video_assets')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('status', status)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      logger.error('Failed to fetch assets by status', { error, status })
+      return { data: [], error }
+    }
+
+    return { data: data || [], error: null }
+  } catch (error) {
+    logger.error('Exception fetching assets by status', { error, status })
+    return { data: [], error }
+  }
+}

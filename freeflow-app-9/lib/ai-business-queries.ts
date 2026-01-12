@@ -896,3 +896,176 @@ export async function getUserBusinessStats(
 
   return { data: stats, error: null }
 }
+
+// Single record getters (singular versions)
+
+export async function getBusinessInsight(
+  insightId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('business_insights')
+    .select('*')
+    .eq('id', insightId)
+    .single()
+  return { data, error }
+}
+
+export async function getPricingRecommendation(
+  recommendationId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('pricing_recommendations')
+    .select('*')
+    .eq('id', recommendationId)
+    .single()
+  return { data, error }
+}
+
+export async function getGrowthForecast(
+  forecastId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('growth_forecasts')
+    .select('*')
+    .eq('id', forecastId)
+    .single()
+  return { data, error }
+}
+
+// Recommendation actions
+
+export async function acceptRecommendation(
+  recommendationId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('pricing_recommendations')
+    .update({ status: 'accepted', updated_at: new Date().toISOString() })
+    .eq('id', recommendationId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function rejectRecommendation(
+  recommendationId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('pricing_recommendations')
+    .update({ status: 'rejected', updated_at: new Date().toISOString() })
+    .eq('id', recommendationId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+// Session actions
+
+export async function endAdvisorySession(
+  sessionId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('advisory_sessions')
+    .update({
+      status: 'completed',
+      ended_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', sessionId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+// Additional query functions needed by API routes
+
+export async function getAnalysesByProject(
+  projectId: string
+): Promise<{ data: any[]; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('project_analyses')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+  return { data: data || [], error }
+}
+
+export async function getInsightsByType(
+  userId: string,
+  type: string
+): Promise<{ data: any[]; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('business_insights')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('type', type)
+    .order('created_at', { ascending: false })
+  return { data: data || [], error }
+}
+
+export async function getRecommendationsByProject(
+  projectId: string
+): Promise<{ data: any[]; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('pricing_recommendations')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+  return { data: data || [], error }
+}
+
+export async function getActiveSession(
+  userId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('advisory_sessions')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .single()
+  return { data, error }
+}
+
+export async function getForecastsByType(
+  userId: string,
+  type: string
+): Promise<{ data: any[]; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('growth_forecasts')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('type', type)
+    .order('created_at', { ascending: false })
+  return { data: data || [], error }
+}
+
+export async function getAIBusinessStats(
+  userId: string
+): Promise<{ data: any; error: any }> {
+  // Alias for getUserBusinessStats
+  return getUserBusinessStats(userId)
+}
+
+export async function getRecentActivity(
+  userId: string,
+  limit: number = 10
+): Promise<{ data: any[]; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('user_activity')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return { data: data || [], error }
+}

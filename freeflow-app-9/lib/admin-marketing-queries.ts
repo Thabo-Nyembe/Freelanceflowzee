@@ -1007,3 +1007,143 @@ export async function getCampaignPerformanceComparison(userId: string) {
 
   return performance.sort((a, b) => b.overall_roi - a.overall_roi)
 }
+
+// Missing function stubs - to be fully implemented
+
+export async function convertLead(
+  leadId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('leads')
+    .update({ status: 'converted', converted_at: new Date().toISOString() })
+    .eq('id', leadId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function pauseCampaign(
+  campaignId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('campaigns')
+    .update({ status: 'paused', updated_at: new Date().toISOString() })
+    .eq('id', campaignId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function resumeCampaign(
+  campaignId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('campaigns')
+    .update({ status: 'active', updated_at: new Date().toISOString() })
+    .eq('id', campaignId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function sendEmailCampaign(
+  campaignId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('email_campaigns')
+    .update({ status: 'sent', sent_at: new Date().toISOString() })
+    .eq('id', campaignId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function createCampaignMetric(
+  userId: string,
+  metric: {
+    campaign_id: string
+    metric_name: string
+    metric_value: number
+    date?: string
+  }
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('campaign_metrics')
+    .insert({ user_id: userId, ...metric })
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function updateCampaignMetric(
+  metricId: string,
+  updates: Partial<{ metric_value: number; metric_name: string }>
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('campaign_metrics')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', metricId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function deleteCampaignMetric(
+  metricId: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('campaign_metrics')
+    .delete()
+    .eq('id', metricId)
+  return { data, error }
+}
+
+export async function getEmailCampaignsByStatus(
+  userId: string,
+  status: string
+): Promise<any[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('email_campaigns')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', status)
+  if (error) return []
+  return data || []
+}
+
+export async function getLeadConversionRate(
+  userId: string
+): Promise<number> {
+  const supabase = createClient()
+  const [total, converted] = await Promise.all([
+    supabase.from('leads').select('id', { count: 'exact' }).eq('user_id', userId),
+    supabase.from('leads').select('id', { count: 'exact' }).eq('user_id', userId).eq('status', 'converted')
+  ])
+  const totalCount = total.count || 0
+  const convertedCount = converted.count || 0
+  return totalCount > 0 ? (convertedCount / totalCount) * 100 : 0
+}
+
+export async function getCampaignROI(
+  campaignId: string
+): Promise<number> {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('campaigns')
+    .select('budget, revenue')
+    .eq('id', campaignId)
+    .single()
+  if (!data) return 0
+  const budget = data.budget || 0
+  const revenue = data.revenue || 0
+  return budget > 0 ? ((revenue - budget) / budget) * 100 : 0
+}
+

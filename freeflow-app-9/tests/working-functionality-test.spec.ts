@@ -227,9 +227,9 @@ test.describe('Working Functionality Testing', () => {
 
     // Create test file for upload simulation
     await page.evaluate(() => {
-      // Create a test blob/file
+      // Create a test blob/file (stored for future upload testing)
       const testContent = 'Test file content for upload testing'
-      const _blob = new Blob([testContent], { type: 'text/plain' })
+      new Blob([testContent], { type: 'text/plain' })
 
       // Simulate file upload areas
       const fileInputs = document.querySelectorAll('input[type="file"]')

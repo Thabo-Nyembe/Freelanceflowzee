@@ -886,12 +886,7 @@ export default function EmployeesClient() {
     setExpandedNodes(prev => prev.includes(id) ? prev.filter(n => n !== id) : [...prev, id])
   }
 
-  // Handlers
-  const handleExportEmployees = () => {
-    toast.success('Export started', {
-      description: 'Employee data is being exported'
-    })
-  }
+  // Handlers (handleExportEmployees is defined above at line 541)
 
   const handleScheduleReview = (employee: Employee) => {
     toast.success('Review scheduled', {

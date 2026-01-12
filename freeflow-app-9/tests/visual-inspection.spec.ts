@@ -27,21 +27,21 @@ test.describe('Visual Feature Inspection', () => {
       const navLinks = Array.from(document.querySelectorAll('nav a, .nav-link, [role="navigation"] a')).map(link => ({
         text: link.textContent?.trim(),
         href: link.getAttribute('href'),
-        visible: link.offsetParent !== null
+        visible: (link as HTMLElement).offsetParent !== null
       }))
 
       // Find sidebar navigation if exists
       const sidebarLinks = Array.from(document.querySelectorAll('.sidebar a, [data-sidebar] a, .side-nav a')).map(link => ({
         text: link.textContent?.trim(),
         href: link.getAttribute('href'),
-        visible: link.offsetParent !== null
+        visible: (link as HTMLElement).offsetParent !== null
       }))
 
       // Find tab elements
       const tabs = Array.from(document.querySelectorAll('[role="tab"], .tab, [data-tab], .tabs-trigger')).map(tab => ({
         text: tab.textContent?.trim(),
         active: tab.classList.contains('active') || tab.getAttribute('aria-selected') === 'true',
-        visible: tab.offsetParent !== null
+        visible: (tab as HTMLElement).offsetParent !== null
       }))
 
       // Find action buttons

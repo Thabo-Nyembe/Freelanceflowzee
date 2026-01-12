@@ -200,7 +200,7 @@ test.describe('KAZI Platform - Interactive Features Testing', () => {
           await button.click();
           await page.waitForTimeout(500);
         } catch (error) {
-          console.log(`Button click failed: ${buttonText} - ${error.message}`);
+          console.log(`Button click failed: ${buttonText} - ${(error as Error).message}`);
         }
       }
     }

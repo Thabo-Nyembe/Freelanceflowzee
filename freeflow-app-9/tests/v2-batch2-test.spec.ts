@@ -64,12 +64,15 @@ test.describe('V2 Batch 2 Testing (50 more pages)', () => {
 
         const status = response?.status() || 0
 
-        results.push({
+        const result: { page: string; status: number; hasError: boolean; errorText?: string } = {
           page: pageName,
           status,
-          hasError: status >= 400 || !!hasBuildError,
-          errorText: hasBuildError ? 'Build/Runtime error detected' : undefined
-        })
+          hasError: status >= 400 || !!hasBuildError
+        }
+        if (hasBuildError) {
+          result.errorText = 'Build/Runtime error detected'
+        }
+        results.push(result)
 
         const statusIcon = status === 200 && !hasBuildError ? '✓' : '✗'
         console.log(`${statusIcon} ${pageName}: ${status}${hasBuildError ? ' (BUILD ERROR)' : ''}`)

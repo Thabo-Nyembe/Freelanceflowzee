@@ -677,3 +677,148 @@ export async function getEngagementMetrics(userId: string, days: number = 30) {
     averageConnectionsPerDay: newConnections.length / days
   }
 }
+
+// Missing function stubs - to be fully implemented
+
+const supabase = createClient()
+
+export async function updateActivityLog(
+  logId: string,
+  updates: Partial<{ action: string; metadata: any }>
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('profile_activity_logs')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', logId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function deleteActivityLog(
+  logId: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('profile_activity_logs')
+    .delete()
+    .eq('id', logId)
+  return { data, error }
+}
+
+export async function getActivityByType(
+  userId: string,
+  type: string
+): Promise<any[]> {
+  const { data } = await supabase
+    .from('profile_activity_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('activity_type', type)
+    .order('created_at', { ascending: false })
+  return data || []
+}
+
+export async function getProfileGrowth(
+  userId: string,
+  days: number = 30
+): Promise<any> {
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+
+  const { data } = await supabase
+    .from('profile_views')
+    .select('*')
+    .eq('profile_user_id', userId)
+    .gte('created_at', startDate.toISOString())
+
+  return {
+    views: data?.length || 0,
+    period: `${days}d`,
+    averagePerDay: (data?.length || 0) / days
+  }
+}
+
+export async function getViewsByPeriod(
+  userId: string,
+  period: '7d' | '30d' | '90d' | '365d'
+): Promise<any[]> {
+  const days = parseInt(period) || 30
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+
+  const { data } = await supabase
+    .from('profile_views')
+    .select('*')
+    .eq('profile_user_id', userId)
+    .gte('created_at', startDate.toISOString())
+  return data || []
+}
+
+export async function deleteProfileView(
+  viewId: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('profile_views')
+    .delete()
+    .eq('id', viewId)
+  return { data, error }
+}
+
+export async function createConnection(
+  userId: string,
+  connection: { connected_user_id: string; platform?: string }
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('social_connections')
+    .insert({ user_id: userId, ...connection, status: 'pending' })
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function updateConnection(
+  connectionId: string,
+  updates: Partial<{ status: string; notes: string }>
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('social_connections')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', connectionId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function deleteConnection(
+  connectionId: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('social_connections')
+    .delete()
+    .eq('id', connectionId)
+  return { data, error }
+}
+
+export async function getConnectionsByPlatform(
+  userId: string,
+  platform: string
+): Promise<any[]> {
+  const { data } = await supabase
+    .from('social_connections')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('platform', platform)
+  return data || []
+}
+
+export async function disconnectPlatform(
+  userId: string,
+  platform: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('social_connections')
+    .delete()
+    .eq('user_id', userId)
+    .eq('platform', platform)
+  return { data, error }
+}

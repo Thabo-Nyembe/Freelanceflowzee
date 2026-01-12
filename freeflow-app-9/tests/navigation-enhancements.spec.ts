@@ -185,8 +185,8 @@ test.describe('Navigation Components Rendering', () => {
     
     // Verify breadcrumb structure (Dashboard > Projects Hub)
     expect(breadcrumbLinks.length).toBeGreaterThanOrEqual(2);
-    expect(breadcrumbLinks[0].href).toContain('/dashboard');
-    expect(breadcrumbLinks[breadcrumbLinks.length - 1].href).toContain('/projects-hub');
+    expect(breadcrumbLinks[0]?.href).toContain('/dashboard');
+    expect(breadcrumbLinks[breadcrumbLinks.length - 1]?.href).toContain('/projects-hub');
   });
 });
 
@@ -309,23 +309,23 @@ test.describe('Touch Events and Drag-and-Drop', () => {
     const favoriteItems = await page.$$(TEST_CONFIG.selectors.favoriteItems);
     
     // Skip test if no favorites found
+    test.skip(favoriteItems.length < 2, 'Not enough favorite items to test drag-and-drop');
     if (favoriteItems.length < 2) {
-      test.skip('Not enough favorite items to test drag-and-drop');
       return;
     }
-    
+
     // Get initial order of favorites
-    const initialOrder = await page.$$eval(TEST_CONFIG.selectors.favoriteItems, 
+    const initialOrder = await page.$$eval(TEST_CONFIG.selectors.favoriteItems,
       items => items.map(item => item.textContent?.trim())
     );
-    
+
     // Take screenshot before drag
     await takeScreenshot(page, testInfo, 'favorites-before-drag');
-    
+
     // Perform drag and drop
-    const firstItem = favoriteItems[0];
-    const secondItem = favoriteItems[1];
-    
+    const firstItem = favoriteItems[0]!;
+    const secondItem = favoriteItems[1]!;
+
     const firstItemBoundingBox = await firstItem.boundingBox();
     const secondItemBoundingBox = await secondItem.boundingBox();
     
@@ -375,23 +375,23 @@ test.describe('Touch Events and Drag-and-Drop', () => {
     const favoriteItems = await page.$$(TEST_CONFIG.selectors.favoriteItems);
     
     // Skip test if no favorites found
+    test.skip(favoriteItems.length < 2, 'Not enough favorite items to test drag-and-drop');
     if (favoriteItems.length < 2) {
-      test.skip('Not enough favorite items to test drag-and-drop');
       return;
     }
-    
+
     // Get initial order of favorites
-    const initialOrder = await page.$$eval(TEST_CONFIG.selectors.favoriteItems, 
+    const initialOrder = await page.$$eval(TEST_CONFIG.selectors.favoriteItems,
       items => items.map(item => item.textContent?.trim())
     );
-    
+
     // Take screenshot before touch drag
     await takeScreenshot(page, testInfo, 'mobile-favorites-before-drag');
-    
+
     // Perform touch drag and drop
-    const firstItem = favoriteItems[0];
-    const secondItem = favoriteItems[1];
-    
+    const firstItem = favoriteItems[0]!;
+    const secondItem = favoriteItems[1]!;
+
     const firstItemBoundingBox = await firstItem.boundingBox();
     const secondItemBoundingBox = await secondItem.boundingBox();
     
@@ -584,10 +584,10 @@ test.describe('Search Functionality', () => {
     await takeScreenshot(page, testInfo, 'search-no-results');
     
     // Check if no results message is shown (implementation specific)
-    const noResultsVisible = await page.$$eval(
-      `${TEST_CONFIG.selectors.searchResults}`, 
-      elements => elements.some(el => 
-        el.textContent?.includes('No results') || 
+    const _noResultsVisible = await page.$$eval(
+      `${TEST_CONFIG.selectors.searchResults}`,
+      elements => elements.some(el =>
+        el.textContent?.includes('No results') ||
         el.textContent?.includes('not found') ||
         el.textContent?.includes('Try another')
       )

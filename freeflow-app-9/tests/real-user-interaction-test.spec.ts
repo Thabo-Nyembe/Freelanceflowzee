@@ -109,8 +109,10 @@ test.describe('Real User Journey - New User Walkthrough', () => {
       console.log(`  📊 Found ${allButtons.length} buttons on page`);
 
       for (let i = 0; i < Math.min(allButtons.length, 10); i++) {
-        const text = await allButtons[i].textContent();
-        const testId = await allButtons[i].getAttribute('data-testid');
+        const button = allButtons[i];
+        if (!button) continue;
+        const text = await button.textContent();
+        const testId = await button.getAttribute('data-testid');
         console.log(`    Button ${i}: "${text?.trim()}" ${testId ? `[testid="${testId}"]` : ''}`);
       }
     }
@@ -155,7 +157,9 @@ test.describe('Real User Journey - New User Walkthrough', () => {
       const buttons = await page.locator('button').all();
       console.log(`  📊 Found ${buttons.length} buttons on Projects Hub`);
       for (let i = 0; i < Math.min(buttons.length, 5); i++) {
-        const text = await buttons[i].textContent();
+        const button = buttons[i];
+        if (!button) continue;
+        const text = await button.textContent();
         console.log(`    Button ${i}: "${text?.trim()}"`);
       }
     }
@@ -324,6 +328,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
       console.log('  Testing buttons:');
       for (let i = 0; i < Math.min(buttons.length, 5); i++) {
         const btn = buttons[i];
+        if (!btn) continue;
         const text = await btn.textContent();
         const testId = await btn.getAttribute('data-testid');
         const isEnabled = await btn.isEnabled();
@@ -373,6 +378,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
 
     for (let i = 0; i < Math.min(buttons.length, 10); i++) {
       const btn = buttons[i];
+      if (!btn) continue;
       const text = await btn.textContent();
 
       try {
@@ -390,7 +396,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
           console.log(`  ⚠️  Button ${i + 1}: "${text?.trim()}" - Not clickable (${!isEnabled ? 'disabled' : 'not visible'})`);
         }
       } catch (error) {
-        console.log(`  ✗ Button ${i + 1}: "${text?.trim()}" - Click failed: ${error.message}`);
+        console.log(`  ✗ Button ${i + 1}: "${text?.trim()}" - Click failed: ${(error as Error).message}`);
       }
     }
 

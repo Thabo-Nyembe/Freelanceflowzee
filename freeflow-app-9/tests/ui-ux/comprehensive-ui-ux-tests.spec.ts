@@ -425,7 +425,7 @@ test.describe('Responsive Design Tests', () => {
 
       // Should have hamburger menu on mobile
       const hamburger = page.locator('[data-testid="mobile-menu"], .hamburger, button[aria-label*="menu" i], [class*="hamburger"]')
-      const mobileNav = await hamburger.count() > 0
+      const _mobileNav = await hamburger.count() > 0
 
       // Navigation should adapt to mobile
       expect(true).toBeTruthy()
@@ -788,7 +788,7 @@ test.describe('Dark Mode Tests', () => {
     // Look for theme toggle
     const themeToggle = page.locator('[data-testid="theme-toggle"], button[aria-label*="theme" i], button[aria-label*="dark" i], button[aria-label*="mode" i]')
     if (await themeToggle.count() > 0 && await themeToggle.first().isVisible()) {
-      const initialBg = await page.evaluate(() => {
+      const _initialBg = await page.evaluate(() => {
         return window.getComputedStyle(document.body).backgroundColor
       })
 

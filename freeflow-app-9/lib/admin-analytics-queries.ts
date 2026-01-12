@@ -693,3 +693,206 @@ function getStartDateFromRange(dateRange: DateRange): string {
 
   return now.toISOString().split('T')[0]
 }
+
+// Missing function stubs - to be fully implemented
+
+const supabase = createClient()
+
+export async function getAnalyticsMetrics(
+  userId: string
+): Promise<{ data: any[]; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_metrics')
+    .select('*')
+    .eq('user_id', userId)
+  return { data: data || [], error }
+}
+
+export async function createMetric(
+  userId: string,
+  metric: { name: string; value: number; type?: string }
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_metrics')
+    .insert({ user_id: userId, ...metric })
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function updateMetric(
+  metricId: string,
+  updates: Partial<{ value: number; name: string }>
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_metrics')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', metricId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function deleteMetric(
+  metricId: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_metrics')
+    .delete()
+    .eq('id', metricId)
+  return { data, error }
+}
+
+export async function getAnalyticsInsights(
+  userId: string
+): Promise<{ data: any[]; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_insights')
+    .select('*')
+    .eq('user_id', userId)
+  return { data: data || [], error }
+}
+
+export async function updateInsight(
+  insightId: string,
+  updates: Partial<{ content: string; status: string }>
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_insights')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', insightId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function deleteInsight(
+  insightId: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_insights')
+    .delete()
+    .eq('id', insightId)
+  return { data, error }
+}
+
+export async function getInsightsByCategory(
+  userId: string,
+  category: string
+): Promise<any[]> {
+  const { data } = await supabase
+    .from('analytics_insights')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('category', category)
+  return data || []
+}
+
+export async function getAnalyticsReports(
+  userId: string
+): Promise<{ data: any[]; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_reports')
+    .select('*')
+    .eq('user_id', userId)
+  return { data: data || [], error }
+}
+
+export async function createReport(
+  userId: string,
+  report: { name: string; type?: string; config?: any }
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_reports')
+    .insert({ user_id: userId, ...report })
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function updateReport(
+  reportId: string,
+  updates: Partial<{ name: string; config: any }>
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_reports')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', reportId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function getReportsByStatus(
+  userId: string,
+  status: string
+): Promise<any[]> {
+  const { data } = await supabase
+    .from('analytics_reports')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', status)
+  return data || []
+}
+
+export async function markReportComplete(
+  reportId: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('analytics_reports')
+    .update({ status: 'complete', completed_at: new Date().toISOString() })
+    .eq('id', reportId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function updateRevenueData(
+  revenueId: string,
+  updates: Partial<{ amount: number; source: string }>
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('revenue_data')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', revenueId)
+    .select()
+    .single()
+  return { data, error }
+}
+
+export async function deleteRevenueData(
+  revenueId: string
+): Promise<{ data: any; error: any }> {
+  const { data, error } = await supabase
+    .from('revenue_data')
+    .delete()
+    .eq('id', revenueId)
+  return { data, error }
+}
+
+export async function getRevenueByPeriod(
+  userId: string,
+  period: '7d' | '30d' | '90d' | '365d'
+): Promise<any[]> {
+  const days = parseInt(period) || 30
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+
+  const { data } = await supabase
+    .from('revenue_data')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('date', startDate.toISOString().split('T')[0])
+  return data || []
+}
+
+export async function getFunnelStageData(
+  userId: string
+): Promise<any[]> {
+  const { data } = await supabase
+    .from('funnel_stages')
+    .select('*')
+    .eq('user_id', userId)
+    .order('stage_order', { ascending: true })
+  return data || []
+}

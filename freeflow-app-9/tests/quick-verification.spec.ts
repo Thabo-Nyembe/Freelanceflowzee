@@ -66,9 +66,11 @@ test.describe('Quick Visual Verification', () => {
     console.log('\nFirst 10 Visible Buttons:');
     const visibleButtons = await page.locator('button:visible').all();
     for (let i = 0; i < Math.min(visibleButtons.length, 10); i++) {
-      const text = await visibleButtons[i].textContent();
-      const testId = await visibleButtons[i].getAttribute('data-testid');
-      const classes = await visibleButtons[i].getAttribute('class');
+      const button = visibleButtons[i];
+      if (!button) continue;
+      const text = await button.textContent();
+      const testId = await button.getAttribute('data-testid');
+      await button.getAttribute('class'); // classes for potential debugging
       console.log(`  ${i + 1}. "${text?.trim() || '(empty)'}" ${testId ? `[${testId}]` : ''}`);
     }
   });
@@ -100,7 +102,7 @@ test.describe('Quick Visual Verification', () => {
     console.log(`  Page heading: "${heading}"`);
 
     const bodyText = await page.locator('body').textContent();
-    const hasAIContent = bodyText.includes('AI') || bodyText.includes('Generate') || bodyText.includes('Create');
+    const hasAIContent = bodyText?.includes('AI') || bodyText?.includes('Generate') || bodyText?.includes('Create');
     console.log(`  AI-related content: ${hasAIContent ? '✓ YES' : '✗ NO'}`);
   });
 
@@ -120,9 +122,9 @@ test.describe('Quick Visual Verification', () => {
 
     await page.waitForTimeout(3000);
 
-    // Check for JavaScript errors
-    const _jsErrors = await page.evaluate(() => {
-      return (window as any).__errors || [];
+    // Check for JavaScript errors (assigned for debugging purposes)
+    await page.evaluate(() => {
+      return (window as unknown as { __errors?: string[] }).__errors || [];
     });
 
     console.log('Error Detection:');

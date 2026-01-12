@@ -67,12 +67,15 @@ test.describe('V2 Comprehensive Page Testing', () => {
 
         const status = response?.status() || 0
 
-        results.push({
+        const result: { page: string; status: number; hasError: boolean; errorText?: string } = {
           page: pageName,
           status,
-          hasError: status >= 400 || !!hasError,
-          errorText: hasError ? 'Error detected on page' : undefined
-        })
+          hasError: status >= 400 || !!hasError
+        }
+        if (hasError) {
+          result.errorText = 'Error detected on page'
+        }
+        results.push(result)
 
         const statusIcon = status === 200 && !hasError ? '✓' : '✗'
         console.log(`${statusIcon} ${pageName}: ${status}${hasError ? ' (error on page)' : ''}`)

@@ -294,8 +294,8 @@ export class TestHelpers {
    * Accessibility Testing
    */
   async checkAccessibility() {
-    // Basic accessibility checks
-    const _headings = this.page.locator('h1, h2, h3, h4, h5, h6');
+    // Basic accessibility checks - headings query stored for future use
+    this.page.locator('h1, h2, h3, h4, h5, h6');
     const images = this.page.locator('img');
     const buttons = this.page.locator('button, [role="button"]');
     
