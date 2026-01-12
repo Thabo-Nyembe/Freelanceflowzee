@@ -1,0 +1,191 @@
+/**
+ * Workflow Builder API Routes
+ *
+ * REST endpoints for Workflow Builder:
+ * GET - List workflows, templates, stats, trigger types, action types, history
+ * POST - Create workflow, action, save draft, save as template, test, activate, pause
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import {
+  getWorkflows,
+  createWorkflow,
+  getWorkflowTemplates,
+  createWorkflowFromTemplate,
+  getBuilderStats,
+  getWorkflowsForBuilder,
+  getTemplatesForBuilder,
+  saveWorkflowDraft,
+  addWorkflowAction,
+  validateWorkflow,
+  activateWorkflow,
+  pauseWorkflow,
+  testWorkflow,
+  saveAsTemplate,
+  getWorkflowHistory,
+  getTriggerTypes,
+  getActionTypes
+} from '@/lib/workflow-builder-queries'
+
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type') || 'workflows'
+    const workflowId = searchParams.get('workflow_id')
+    const status = searchParams.get('status') as any
+    const category = searchParams.get('category') || undefined
+    const search = searchParams.get('search') || undefined
+    const complexity = searchParams.get('complexity') as any
+    const limit = parseInt(searchParams.get('limit') || '20')
+
+    switch (type) {
+      case 'workflows': {
+        const data = await getWorkflowsForBuilder({
+          search,
+          status,
+          category
+        })
+        return NextResponse.json({ data })
+      }
+
+      case 'templates': {
+        const data = await getTemplatesForBuilder({
+          search,
+          category,
+          complexity
+        })
+        return NextResponse.json({ data })
+      }
+
+      case 'stats': {
+        const data = await getBuilderStats()
+        return NextResponse.json({ data })
+      }
+
+      case 'trigger-types': {
+        const data = getTriggerTypes()
+        return NextResponse.json({ data })
+      }
+
+      case 'action-types': {
+        const data = getActionTypes()
+        return NextResponse.json({ data })
+      }
+
+      case 'history': {
+        if (!workflowId) {
+          return NextResponse.json({ error: 'workflow_id required' }, { status: 400 })
+        }
+        const data = await getWorkflowHistory(workflowId, limit)
+        return NextResponse.json({ data })
+      }
+
+      case 'validate': {
+        if (!workflowId) {
+          return NextResponse.json({ error: 'workflow_id required' }, { status: 400 })
+        }
+        const data = await validateWorkflow(workflowId)
+        return NextResponse.json({ data })
+      }
+
+      default:
+        return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
+    }
+  } catch (error) {
+    console.error('Workflow Builder API error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch Workflow Builder data' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { action, ...payload } = body
+
+    switch (action) {
+      case 'create-workflow': {
+        const data = await createWorkflow(payload)
+        return NextResponse.json({ data }, { status: 201 })
+      }
+
+      case 'create-from-template': {
+        const data = await createWorkflowFromTemplate(payload.template_id)
+        return NextResponse.json({ data }, { status: 201 })
+      }
+
+      case 'save-draft': {
+        const workflowId = await saveWorkflowDraft(payload.workflow_id || null, {
+          name: payload.name,
+          description: payload.description,
+          trigger_type: payload.trigger_type,
+          trigger_config: payload.trigger_config,
+          category: payload.category
+        })
+        return NextResponse.json({ workflow_id: workflowId }, { status: 201 })
+      }
+
+      case 'add-action': {
+        const data = await addWorkflowAction(payload.workflow_id, {
+          action_type: payload.action_type,
+          position: payload.position,
+          config: payload.config,
+          conditions: payload.conditions
+        })
+        return NextResponse.json({ data }, { status: 201 })
+      }
+
+      case 'activate': {
+        await activateWorkflow(payload.workflow_id)
+        return NextResponse.json({ success: true })
+      }
+
+      case 'pause': {
+        await pauseWorkflow(payload.workflow_id)
+        return NextResponse.json({ success: true })
+      }
+
+      case 'test': {
+        const data = await testWorkflow(payload.workflow_id, payload.test_input)
+        return NextResponse.json({ data })
+      }
+
+      case 'save-as-template': {
+        const templateId = await saveAsTemplate(payload.workflow_id, {
+          name: payload.name,
+          description: payload.description,
+          category: payload.category,
+          icon: payload.icon,
+          tags: payload.tags
+        })
+        return NextResponse.json({ template_id: templateId }, { status: 201 })
+      }
+
+      default:
+        return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+    }
+  } catch (error) {
+    console.error('Workflow Builder API error:', error)
+    return NextResponse.json(
+      { error: 'Failed to process Workflow Builder request' },
+      { status: 500 }
+    )
+  }
+}
