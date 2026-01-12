@@ -55,6 +55,7 @@ import {
   EyeOff,
   Lock,
   Unlock,
+  Plus,
 } from "lucide-react"
 
 // Drawing tool types

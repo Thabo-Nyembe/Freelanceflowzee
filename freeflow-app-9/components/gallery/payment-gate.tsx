@@ -26,7 +26,8 @@ import {
   Crown,
   DollarSign,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  RefreshCw
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'

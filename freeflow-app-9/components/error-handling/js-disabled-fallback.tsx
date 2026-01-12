@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AlertCircle } from 'lucide-react'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 
 export function JavaScriptDisabledFallback() {
   const [hasJavaScript, setHasJavaScript] = useState<any>(true)

@@ -15,6 +15,15 @@ import { getProjects, getDashboardData, preloadUser } from '@/lib/data-fetching'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { HeroImage, ContentImage } from '@/components/ui/optimized-image-v2'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
 
 // This is a Server Component (no 'use client')
 
