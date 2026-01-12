@@ -440,10 +440,10 @@ const mockAIAssistantActivities = [
 // Note: This mock data is kept for backwards compatibility but the component uses
 // the quickActions array defined inside the component with proper dialog handlers
 const mockAIAssistantQuickActions = [
-  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => console.log('Open New Chat Dialog') },
-  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => console.log('Open Templates Dialog') },
-  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => console.log('Open Knowledge Dialog') },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Open AI Settings Dialog') },
+  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => { /* Handled by quickActions in component */ } },
+  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => { /* Handled by quickActions in component */ } },
+  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => { /* Handled by quickActions in component */ } },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => { /* Handled by quickActions in component */ } },
 ]
 
 export default function AIAssistantClient() {

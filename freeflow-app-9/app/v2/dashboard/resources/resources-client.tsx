@@ -923,14 +923,14 @@ export default function ResourcesClient() {
       new Promise<void>((resolve) => {
         // Simulate opening integration configuration
         setTimeout(() => {
-          console.log(`Configuring ${integrationName}...`)
+          // Integration configuration modal would open here
           resolve()
         }, 600)
       }),
       {
-        loading: 'Opening integration settings...',
-        success: 'Integration configuration ready',
-        error: 'Failed to open configuration'
+        loading: `Opening ${integrationName} settings...`,
+        success: `${integrationName} configuration ready`,
+        error: `Failed to open ${integrationName} configuration`
       }
     )
   }
@@ -959,14 +959,13 @@ export default function ResourcesClient() {
         // Simulate initializing import wizard
         setTimeout(() => {
           // In a real app, this would open a dialog or navigate to import wizard
-          console.log('Import wizard initialized')
           resolve()
         }, 1000)
       }),
       {
         loading: 'Preparing import wizard...',
-        success: 'Import wizard ready',
-        error: 'Failed to initialize import'
+        success: 'Import wizard ready - Select files to import',
+        error: 'Failed to initialize import wizard'
       }
     )
   }

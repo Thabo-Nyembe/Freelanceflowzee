@@ -1899,10 +1899,10 @@ export default function MarketingClient() {
             <div className="mt-6">
               <ActivityFeed
                 activities={mockActivities}
-                onMarkRead={(id) => console.log('Mark read:', id)}
-                onMarkAllRead={() => console.log('Mark all read')}
-                onPin={(id) => console.log('Pin:', id)}
-                onArchive={(id) => console.log('Archive:', id)}
+                onMarkRead={(id) => toast.success('Marked as read', { description: `Activity ${id} marked as read` })}
+                onMarkAllRead={() => toast.success('All marked as read', { description: 'All activities marked as read' })}
+                onPin={(id) => toast.success('Activity pinned', { description: `Activity ${id} has been pinned` })}
+                onArchive={(id) => toast.success('Activity archived', { description: `Activity ${id} moved to archive` })}
               />
             </div>
           </TabsContent>

@@ -2035,7 +2035,7 @@ export default function ProjectsHubClient() {
           <div className="lg:col-span-2">
             <AIInsightsPanel
               insights={mockProjectsAIInsights as any}
-              onInsightAction={(insight: any) => console.log('Insight action:', insight)}
+              onInsightAction={(insight: any) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
 

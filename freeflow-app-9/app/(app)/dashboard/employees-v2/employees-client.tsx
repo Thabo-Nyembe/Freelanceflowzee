@@ -2399,8 +2399,33 @@ export default function EmployeesClient() {
                     toast.success('Opening email client')
                   }
                 }}><Mail className="h-4 w-4 mr-2" />Contact</Button><Button onClick={() => {
-                  setShowProfileDialog(false)
-                  // TODO: Implement profile editor
+                  if (selectedEmployee) {
+                    // Find matching DB employee by email to edit
+                    const matchingDbEmployee = dbEmployees?.find(e => e.email === selectedEmployee.email)
+                    if (matchingDbEmployee) {
+                      setShowProfileDialog(false)
+                      handleOpenEditDialog(matchingDbEmployee)
+                    } else {
+                      // No DB match - suggest adding employee
+                      toast.info('Employee not in database', {
+                        description: 'This employee is from sample data. Add them to edit.',
+                        action: {
+                          label: 'Add Employee',
+                          onClick: () => {
+                            setNewEmployeeForm({
+                              name: selectedEmployee.name,
+                              email: selectedEmployee.email,
+                              department: selectedEmployee.department,
+                              position: selectedEmployee.position,
+                              startDate: selectedEmployee.hireDate
+                            })
+                            setShowProfileDialog(false)
+                            setShowAddDialog(true)
+                          }
+                        }
+                      })
+                    }
+                  }
                 }}><Edit3 className="h-4 w-4 mr-2" />Edit Profile</Button></DialogFooter>
               </>
             )}

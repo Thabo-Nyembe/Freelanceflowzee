@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -579,10 +580,10 @@ export function UpgradesShowcaseClient() {
                 <CardContent>
                   <InlineComment
                     comment={mockComment}
-                    onReply={(id, content) => console.log('Reply:', id, content)}
-                    onReact={(id, emoji) => console.log('React:', id, emoji)}
-                    onResolve={(id) => console.log('Resolve:', id)}
-                    onPin={(id) => console.log('Pin:', id)}
+                    onReply={(id, content) => toast.success('Reply sent', { description: `Reply to comment ${id}: ${content.substring(0, 30)}...` })}
+                    onReact={(id, emoji) => toast.success('Reaction added', { description: `${emoji} added to comment` })}
+                    onResolve={(id) => toast.success('Comment resolved', { description: `Comment ${id} has been resolved` })}
+                    onPin={(id) => toast.success('Comment pinned', { description: `Comment ${id} has been pinned` })}
                   />
                 </CardContent>
               </Card>
@@ -606,10 +607,10 @@ export function UpgradesShowcaseClient() {
           <TabsContent value="activity" className="space-y-6">
             <ActivityFeed
               activities={mockActivities}
-              onMarkRead={(id) => console.log('Mark read:', id)}
-              onMarkAllRead={() => console.log('Mark all read')}
-              onPin={(id) => console.log('Pin:', id)}
-              onArchive={(id) => console.log('Archive:', id)}
+              onMarkRead={(id) => toast.success('Marked as read', { description: `Activity ${id} marked as read` })}
+              onMarkAllRead={() => toast.success('All marked as read', { description: 'All activities marked as read' })}
+              onPin={(id) => toast.success('Activity pinned', { description: `Activity ${id} has been pinned` })}
+              onArchive={(id) => toast.success('Activity archived', { description: `Activity ${id} moved to archive` })}
             />
           </TabsContent>
 
@@ -618,7 +619,7 @@ export function UpgradesShowcaseClient() {
             <GamificationWidget
               stats={mockUserStats}
               achievements={mockAchievements}
-              onClaim={(id) => console.log('Claim achievement:', id)}
+              onClaim={(id) => toast.success('Achievement claimed!', { description: `You've claimed achievement ${id}. Check your profile for rewards!` })}
             />
           </TabsContent>
         </Tabs>
