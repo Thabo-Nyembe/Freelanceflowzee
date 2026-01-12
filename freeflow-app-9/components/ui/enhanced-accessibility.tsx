@@ -238,7 +238,8 @@ export const AccessibleInput = React.forwardRef<
     required?: boolean
   }
 >(({ className, type, label, description, error, required, id, ...props }, ref) => {
-  const inputId = id || React.useId()
+  const generatedId = React.useId()
+  const inputId = id || generatedId
   const descriptionId = description ? `${inputId}-description` : undefined
   const errorId = error ? `${inputId}-error` : undefined
 

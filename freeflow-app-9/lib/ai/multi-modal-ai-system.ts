@@ -1436,7 +1436,7 @@ export class MultiModalAISystem {
               return false;
             }
           } else if (key in asset) {
-            // @ts-expect-error
+            // @ts-expect-error - dynamic key access on asset object
             if (asset[key] !== value) {
               return false;
             }
@@ -1453,9 +1453,9 @@ export class MultiModalAISystem {
         const direction = options.sortDirection === 'desc' ? -1 : 1;
         
         if (key in a && key in b) {
-          // @ts-expect-error
+          // @ts-expect-error - dynamic key access for sorting
           const aValue = a[key];
-          // @ts-expect-error
+          // @ts-expect-error - dynamic key access for sorting
           const bValue = b[key];
           
           if (typeof aValue === 'string' && typeof bValue === 'string') {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse, NextFetchEvent } from 'next/server';
 import { geolocation } from '@vercel/edge';
-import { withAxiom } from 'next-axiom';
+// TODO: Re-enable Axiom logging when needed
+// import { withAxiom } from 'next-axiom';
 import { nanoid } from 'nanoid';
 import { createFeatureLogger } from '@/lib/logger';
 
@@ -267,7 +268,7 @@ const rateLimitStore = new RateLimitStore();
  * In-memory cold start detection
  */
 let isFirstRequest = true;
-let serverStartTime = Date.now();
+const serverStartTime = Date.now();
 
 // Schedule periodic cleanup of rate limit store
 if (typeof setInterval !== 'undefined') {

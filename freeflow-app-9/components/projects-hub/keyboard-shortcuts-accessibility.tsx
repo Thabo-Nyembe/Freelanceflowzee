@@ -130,6 +130,21 @@ const defaultAccessibilitySettings: AccessibilitySettings = {
   audioDescriptions: false
 }
 
+// Helper component to register a single hotkey (hooks must be at top level)
+function HotkeyRegistration({
+  keyBinding,
+  action
+}: {
+  keyBinding: string
+  action: () => void
+}) {
+  useHotkeys(keyBinding, action, {
+    enableOnFormTags: ["INPUT", "TEXTAREA", "SELECT"],
+    preventDefault: true
+  })
+  return null
+}
+
 export function KeyboardShortcutsAccessibility({
   onShortcutTriggered,
   onAccessibilityChange,
@@ -424,17 +439,7 @@ export function KeyboardShortcutsAccessibility({
     setShortcuts(defaultShortcuts)
   }, [onShortcutTriggered])
 
-  // Register all shortcuts
-  shortcuts.forEach(shortcut => {
-    if (shortcut.isEnabled) {
-      shortcut.keys.forEach(key => {
-        useHotkeys(key, shortcut.action, {
-          enableOnFormTags: ["INPUT", "TEXTAREA", "SELECT"],
-          preventDefault: true
-        })
-      })
-    }
-  })
+  // Shortcut registrations will be rendered as components in JSX to properly use hooks
 
   // Announce function for screen readers
   const announce = useCallback((message: string) => {
@@ -583,6 +588,19 @@ export function KeyboardShortcutsAccessibility({
 
   return (
     <div className={className}>
+      {/* Register all shortcuts as components (hooks must be at top level) */}
+      {shortcuts
+        .filter((shortcut) => shortcut.isEnabled)
+        .flatMap((shortcut) =>
+          shortcut.keys.map((key) => (
+            <HotkeyRegistration
+              key={`${shortcut.id}-${key}`}
+              keyBinding={key}
+              action={shortcut.action}
+            />
+          ))
+        )}
+
       {/* Screen reader announcements */}
       <div
         ref={announceRef}

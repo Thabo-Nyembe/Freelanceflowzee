@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 
 interface ComprehensiveErrorProps {
@@ -48,13 +49,13 @@ export function ComprehensiveError({
             </button>
           )}
           
-          <a
+          <Link
             href="/"
             className="w-full flex items-center justify-center px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
           >
             <Home className="w-4 h-4 mr-2" />
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

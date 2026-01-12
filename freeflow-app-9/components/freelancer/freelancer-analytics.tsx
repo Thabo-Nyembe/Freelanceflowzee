@@ -45,7 +45,7 @@ interface AnalyticsData {
   };
 }
 
-export const _FreelancerAnalytics = () => {
+export const FreelancerAnalyticsComponent = () => {
   const supabase = useSupabaseClient();
   const [data, setData] = React.useState<AnalyticsData | null>(null);
   const [timeframe, setTimeframe] = React.useState<'daily' | 'monthly' | 'yearly'>('monthly');

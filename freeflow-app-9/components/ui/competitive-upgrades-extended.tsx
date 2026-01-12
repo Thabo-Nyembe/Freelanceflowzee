@@ -103,11 +103,10 @@ export function ActivityFeed({
   const [searchQuery, setSearchQuery] = React.useState('')
   const [showUnreadOnly, setShowUnreadOnly] = React.useState(false)
 
-  if (!activities || activities.length === 0) return null
-
-  const unreadCount = activities.filter(a => !a.isRead).length
+  const unreadCount = activities?.filter(a => !a.isRead).length ?? 0
 
   const filteredActivities = React.useMemo(() => {
+    if (!activities || activities.length === 0) return []
     return activities.filter(activity => {
       // Filter by type
       if (activeFilter !== 'all') {
@@ -132,6 +131,9 @@ export function ActivityFeed({
       return true
     })
   }, [activities, activeFilter, showUnreadOnly, searchQuery])
+
+  // Early return after hooks
+  if (!activities || activities.length === 0) return null
 
   const getActivityIcon = (type: ActivityItem['type']) => {
     switch (type) {
@@ -925,9 +927,8 @@ export function QuickActionsToolbar({
 }: QuickActionsToolbarProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
 
-  if (!actions || actions.length === 0) return null
-
   const groupedActions = React.useMemo(() => {
+    if (!actions || actions.length === 0) return {}
     const groups: Record<string, QuickAction[]> = {}
     actions.forEach(action => {
       const category = action.category || 'General'
@@ -936,6 +937,9 @@ export function QuickActionsToolbar({
     })
     return groups
   }, [actions])
+
+  // Early return after hooks
+  if (!actions || actions.length === 0) return null
 
   const positionClasses = {
     bottom: 'fixed bottom-4 left-1/2 -translate-x-1/2',

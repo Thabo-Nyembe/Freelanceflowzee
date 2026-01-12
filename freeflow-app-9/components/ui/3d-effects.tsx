@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { motion, useMotionValue, useSpring, useTransform, MotionValue } from "framer-motion"
 import { ReactNode, useRef } from "react"
 
 /**
@@ -76,6 +76,36 @@ interface ParallaxLayersProps {
   className?: string
 }
 
+// Separate component for each parallax layer to properly use hooks
+interface ParallaxLayerItemProps {
+  child: ReactNode
+  index: number
+  x: MotionValue<number>
+  y: MotionValue<number>
+}
+
+function ParallaxLayerItem({ child, index, x, y }: ParallaxLayerItemProps) {
+  const depth = (index + 1) * 20
+  const springX = useSpring(x, { stiffness: 150, damping: 15 })
+  const springY = useSpring(y, { stiffness: 150, damping: 15 })
+  const translateX = useTransform(springX, (value) => value * (index + 1))
+  const translateY = useTransform(springY, (value) => value * (index + 1))
+
+  return (
+    <motion.div
+      style={{
+        x: translateX,
+        y: translateY,
+        transform: `translateZ(${depth}px)`,
+        transformStyle: "preserve-3d",
+      }}
+      className="absolute inset-0"
+    >
+      {child}
+    </motion.div>
+  )
+}
+
 export function ParallaxLayers({ children, className }: ParallaxLayersProps) {
   const ref = useRef<HTMLDivElement>(null)
   const x = useMotionValue(0)
@@ -104,29 +134,9 @@ export function ParallaxLayers({ children, className }: ParallaxLayersProps) {
       onMouseLeave={handleMouseLeave}
       className={cn("relative perspective-1000", className)}
     >
-      {children.map((child, index) => {
-        const depth = (index + 1) * 20
-        const springX = useSpring(x, { stiffness: 150, damping: 15 })
-        const springY = useSpring(y, { stiffness: 150, damping: 15 })
-
-        const translateX = useTransform(springX, (value) => value * (index + 1))
-        const translateY = useTransform(springY, (value) => value * (index + 1))
-
-        return (
-          <motion.div
-            key={index}
-            style={{
-              x: translateX,
-              y: translateY,
-              transform: `translateZ(${depth}px)`,
-              transformStyle: "preserve-3d",
-            }}
-            className="absolute inset-0"
-          >
-            {child}
-          </motion.div>
-        )
-      })}
+      {children.map((child, index) => (
+        <ParallaxLayerItem key={index} child={child} index={index} x={x} y={y} />
+      ))}
     </div>
   )
 }

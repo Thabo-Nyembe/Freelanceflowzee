@@ -136,7 +136,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
       await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
-      let toastShown = false;
+      const _toastShown = false; // eslint-disable-line @typescript-eslint/no-unused-vars
       page.on('dialog', async dialog => await dialog.accept());
 
       // Look for AI Generate button

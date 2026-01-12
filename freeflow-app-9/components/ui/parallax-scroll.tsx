@@ -216,9 +216,8 @@ export function ParallaxText({
 
   const y = useTransform(scrollYProgress, [0, 1], [0, -speed * 100])
   const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
-  const blurValue = blur
-    ? useTransform(scrollYProgress, [0, 0.5, 1], [10, 0, 10])
-    : undefined
+  const blurTransform = useTransform(scrollYProgress, [0, 0.5, 1], [10, 0, 10])
+  const blurValue = blur ? blurTransform : undefined
 
   return (
     <motion.div

@@ -1,6 +1,7 @@
 import { Application, Router } from 'https://deno.land/x/oak@v12.6.1/mod.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+// CORS headers imported from shared module (may be used in extended functionality)
+// import { corsHeaders } from '../_shared/cors.ts'
 
 interface Database {
   public: {
