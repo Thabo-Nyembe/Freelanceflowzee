@@ -14,8 +14,8 @@
  */
 
 import {
-  Play, Pause, Video, FileVideo, Music, Image as ImageIcon,
-  Type, Sparkles, Award, TrendingUp, Clock, Eye
+  Play, Video, FileVideo, Music, Image as ImageIcon,
+  Type, Sparkles, Award, TrendingUp, Clock
 } from 'lucide-react'
 import { createFeatureLogger } from './logger'
 

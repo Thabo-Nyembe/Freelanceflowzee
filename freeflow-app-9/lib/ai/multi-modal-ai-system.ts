@@ -1436,7 +1436,7 @@ export class MultiModalAISystem {
               return false;
             }
           } else if (key in asset) {
-            // @ts-ignore
+            // @ts-expect-error
             if (asset[key] !== value) {
               return false;
             }
@@ -1453,9 +1453,9 @@ export class MultiModalAISystem {
         const direction = options.sortDirection === 'desc' ? -1 : 1;
         
         if (key in a && key in b) {
-          // @ts-ignore
+          // @ts-expect-error
           const aValue = a[key];
-          // @ts-ignore
+          // @ts-expect-error
           const bValue = b[key];
           
           if (typeof aValue === 'string' && typeof bValue === 'string') {

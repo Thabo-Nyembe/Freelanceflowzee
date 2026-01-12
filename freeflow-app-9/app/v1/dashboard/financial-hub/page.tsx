@@ -50,7 +50,7 @@ import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
 import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
 
 // Real button handlers
-import { apiPost, apiDelete, downloadAsCsv, downloadAsJson } from '@/lib/button-handlers'
+import { downloadAsCsv, downloadAsJson } from '@/lib/button-handlers'
 
 const logger = createFeatureLogger('FinancialHub')
 

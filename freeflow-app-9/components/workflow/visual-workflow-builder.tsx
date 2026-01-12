@@ -8,23 +8,19 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react'
-import { Canvas, Node, Edge, Port, MarkerArrow, Label, CanvasRef, NodeData, EdgeData, PortData, addNodeAndEdge, removeNode, upsertNode, hasLink } from 'reaflow'
+import { Canvas, Node, Edge, Port, MarkerArrow, Label, CanvasRef, NodeData, EdgeData, PortData, removeNode, hasLink } from 'reaflow'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label as FormLabel } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Play,
   Save,
-  Plus,
   Trash2,
-  Settings,
   Zap,
   Clock,
   Webhook,
@@ -35,7 +31,6 @@ import {
   Database,
   Globe,
   FileText,
-  Users,
   CheckCircle2,
   XCircle,
   Loader2,
@@ -45,7 +40,6 @@ import {
   ZoomOut,
   Maximize2
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 // Node Types
 export type WorkflowNodeType =

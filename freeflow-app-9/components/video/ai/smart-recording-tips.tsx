@@ -89,7 +89,7 @@ const tips: Tip[] = [
     description: 'Speak slowly and enunciate clearly for better understanding.',
     priority: 'medium',
     icon: <Info className="h-4 w-4" />,
-    condition: (props) => props.isRecording && props.contentQuality?.clarity! < 0.7
+    condition: (props) => props.isRecording && (props.contentQuality?.clarity ?? 1) < 0.7
   },
   {
     id: 'engagement',
@@ -98,7 +98,7 @@ const tips: Tip[] = [
     description: 'Use vocal variety and gestures to maintain viewer interest.',
     priority: 'medium',
     icon: <Users className="h-4 w-4" />,
-    condition: (props) => props.isRecording && props.contentQuality?.engagement! < 0.7
+    condition: (props) => props.isRecording && (props.contentQuality?.engagement ?? 1) < 0.7
   },
 
   // Duration Tips

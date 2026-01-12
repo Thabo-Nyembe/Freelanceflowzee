@@ -6,7 +6,7 @@
  * Components that adapt to user behavior and preferences
  */
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {

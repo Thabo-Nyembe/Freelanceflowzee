@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { copyToClipboard, downloadAsJson, apiCall, shareContent } from '@/lib/button-handlers'
+import { copyToClipboard, apiCall, shareContent } from '@/lib/button-handlers'
 import { useScreenRecorder } from '@/hooks/use-screen-recorder'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import VideoTemplates from '@/components/video/video-templates'

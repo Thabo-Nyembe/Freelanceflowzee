@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user's badges
-    let userBadgesQuery = supabase
+    const userBadgesQuery = supabase
       .from('user_badges')
       .select(`
         *,

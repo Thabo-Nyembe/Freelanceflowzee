@@ -16,8 +16,112 @@ interface VideoTranscriptionProps {
 
 export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps) {
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('en')
+  const [_selectedLanguage, _setSelectedLanguage] = useState<string>('en')
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copying' | 'success' | 'error'>('idle')
+
+  // Extract segments safely for hooks (before any early returns)
+  const segments = data?.segments
+
+  const formatSRTTime = (seconds: number) => {
+    const date = new Date(seconds * 1000)
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0')
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+    const secs = date.getUTCSeconds().toString().padStart(2, '0')
+    const ms = date.getUTCMilliseconds().toString().padStart(3, '0')
+    return `${hours}:${minutes}:${secs},${ms}`
+  }
+
+  const formatVTTTime = (seconds: number) => {
+    const date = new Date(seconds * 1000)
+    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0')
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0')
+    const secs = date.getUTCSeconds().toString().padStart(2, '0')
+    const ms = date.getUTCMilliseconds().toString().padStart(3, '0')
+    return `${hours}:${minutes}:${secs}.${ms}`
+  }
+
+  const downloadFile = (content: string, filename: string, mimeType: string) => {
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleCopyText = useCallback(async () => {
+    if (!segments || segments.length === 0) return
+
+    setCopyStatus('copying')
+    try {
+      const text = segments.map(segment =>
+        segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
+      ).join('\n\n')
+
+      await navigator.clipboard.writeText(text)
+      setCopyStatus('success')
+      setTimeout(() => setCopyStatus('idle'), 2000)
+    } catch (error) {
+      console.error('Failed to copy text:', error)
+      setCopyStatus('error')
+      setTimeout(() => setCopyStatus('idle'), 2000)
+    }
+  }, [segments])
+
+  const generateSRT = useCallback(() => {
+    if (!segments || segments.length === 0) return ''
+
+    let srt = ''
+    segments.forEach((segment, index) => {
+      const startTime = formatSRTTime(segment.start)
+      const endTime = formatSRTTime(segment.end)
+      const text = segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
+      srt += `${index + 1}\n${startTime} --> ${endTime}\n${text}\n\n`
+    })
+    return srt
+  }, [segments])
+
+  const generateVTT = useCallback(() => {
+    if (!segments || segments.length === 0) return ''
+
+    let vtt = 'WEBVTT\n\n'
+    segments.forEach((segment) => {
+      const startTime = formatVTTTime(segment.start)
+      const endTime = formatVTTTime(segment.end)
+      const text = segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
+      vtt += `${startTime} --> ${endTime}\n${text}\n\n`
+    })
+    return vtt
+  }, [segments])
+
+  const handleDownloadSRT = useCallback(() => {
+    try {
+      const srt = generateSRT()
+      if (!srt) {
+        console.error('No transcription data available for SRT export')
+        return
+      }
+      downloadFile(srt, 'transcription.srt', 'text/plain')
+    } catch (error) {
+      console.error('Failed to download SRT:', error)
+    }
+  }, [generateSRT])
+
+  const handleDownloadVTT = useCallback(() => {
+    try {
+      const vtt = generateVTT()
+      if (!vtt) {
+        console.error('No transcription data available for VTT export')
+        return
+      }
+      downloadFile(vtt, 'transcription.vtt', 'text/vtt')
+    } catch (error) {
+      console.error('Failed to download VTT:', error)
+    }
+  }, [generateVTT])
 
   if (isLoading) {
     return (
@@ -41,7 +145,7 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
 
   if (!data) return null
 
-  const { segments, languages, confidence } = data
+  const { languages, confidence } = data
 
   if (!segments || segments.length === 0) {
     return (
@@ -77,107 +181,6 @@ export function VideoTranscription({ data, isLoading }: VideoTranscriptionProps)
       video.play()
     }
   }
-
-  const handleCopyText = useCallback(async () => {
-    if (!segments || segments.length === 0) return
-    
-    setCopyStatus('copying')
-    try {
-      const text = segments.map(segment => 
-        segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
-      ).join('\n\n')
-      
-      await navigator.clipboard.writeText(text)
-      setCopyStatus('success')
-      setTimeout(() => setCopyStatus('idle'), 2000)
-    } catch (error) {
-      console.error('Failed to copy text:', error)
-      setCopyStatus('error')
-      setTimeout(() => setCopyStatus('idle'), 2000)
-    }
-  }, [segments])
-
-  const generateSRT = useCallback(() => {
-    if (!segments || segments.length === 0) return ''
-    
-    let srt = ''
-    segments.forEach((segment, index) => {
-      const startTime = formatSRTTime(segment.start)
-      const endTime = formatSRTTime(segment.end)
-      const text = segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
-      srt += `${index + 1}\n${startTime} --> ${endTime}\n${text}\n\n`
-    })
-    return srt
-  }, [segments])
-
-  const generateVTT = useCallback(() => {
-    if (!segments || segments.length === 0) return ''
-    
-    let vtt = 'WEBVTT\n\n'
-    segments.forEach((segment) => {
-      const startTime = formatVTTTime(segment.start)
-      const endTime = formatVTTTime(segment.end)
-      const text = segment.speaker ? `${segment.speaker}: ${segment.text}` : segment.text
-      vtt += `${startTime} --> ${endTime}\n${text}\n\n`
-    })
-    return vtt
-  }, [segments])
-
-  const formatSRTTime = (seconds: number) => {
-    const date = new Date(seconds * 1000)
-    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0')
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0')
-    const secs = date.getUTCSeconds().toString().padStart(2, '0')
-    const ms = date.getUTCMilliseconds().toString().padStart(3, '0')
-    return `${hours}:${minutes}:${secs},${ms}`
-  }
-
-  const formatVTTTime = (seconds: number) => {
-    const date = new Date(seconds * 1000)
-    const hours = Math.floor(seconds / 3600).toString().padStart(2, '0')
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0')
-    const secs = date.getUTCSeconds().toString().padStart(2, '0')
-    const ms = date.getUTCMilliseconds().toString().padStart(3, '0')
-    return `${hours}:${minutes}:${secs}.${ms}`
-  }
-
-  const downloadFile = (content: string, filename: string, mimeType: string) => {
-    const blob = new Blob([content], { type: mimeType })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
-
-  const handleDownloadSRT = useCallback(() => {
-    try {
-      const srt = generateSRT()
-      if (!srt) {
-        console.error('No transcription data available for SRT export')
-        return
-      }
-      downloadFile(srt, 'transcription.srt', 'text/plain')
-    } catch (error) {
-      console.error('Failed to download SRT:', error)
-    }
-  }, [generateSRT])
-
-  const handleDownloadVTT = useCallback(() => {
-    try {
-      const vtt = generateVTT()
-      if (!vtt) {
-        console.error('No transcription data available for VTT export')
-        return
-      }
-      downloadFile(vtt, 'transcription.vtt', 'text/vtt')
-    } catch (error) {
-      console.error('Failed to download VTT:', error)
-    }
-  }, [generateVTT])
 
   return (
     <Card>

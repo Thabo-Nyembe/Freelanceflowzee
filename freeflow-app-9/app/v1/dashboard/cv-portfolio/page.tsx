@@ -55,7 +55,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { Switch } from '@/components/ui/switch'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -117,8 +116,6 @@ import {
   updateExperience as updateExperienceApi,
   addEducation as addEducationApi,
   updateEducation as updateEducationApi,
-  addCertification as addCertificationApi,
-  updateCertification as updateCertificationApi,
   uploadPortfolioImage
 } from '@/lib/cv-portfolio-queries'
 

@@ -74,7 +74,7 @@ const applyMiddleware = async (req: NextRequest) => {
 };
 
 // Error handling wrapper
-const errorHandler = async (fn: Function, req: NextRequest) => {
+const errorHandler = async (fn: (req: NextRequest) => Promise<Response>, req: NextRequest) => {
   try {
     return await fn(req);
   } catch (error: any) {

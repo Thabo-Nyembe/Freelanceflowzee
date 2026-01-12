@@ -239,7 +239,7 @@ export function useTemplateMutations() {
     createTemplate: createMutation.mutate,
     updateTemplate: updateMutation.mutate,
     deleteTemplate: deleteMutation.mutate,
-    useTemplate: useTemplateMutation.mutate,
+    applyTemplate: useTemplateMutation.mutate,
     downloadTemplate: downloadTemplateMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,

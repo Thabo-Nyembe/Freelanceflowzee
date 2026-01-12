@@ -334,7 +334,7 @@ export function parseTime(timeString: string): { hours: number; minutes: number 
   const match = timeString.match(/(\d+):(\d+)\s*(AM|PM)?/)
   if (!match) return { hours: 0, minutes: 0 }
 
-  let [, hours, minutes, period] = match
+  const [, hours, minutes, period] = match
   let h = parseInt(hours)
   const m = parseInt(minutes)
 

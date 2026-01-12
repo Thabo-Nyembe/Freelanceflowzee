@@ -41,10 +41,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // DATABASE QUERIES
 import {
   disputeInvoice,
-  createInvoice as createInvoiceAPI,
-  updateInvoice as updateInvoiceAPI,
-  markInvoiceAsPaid as markInvoiceAsPaidAPI,
-  getClientInvoices
+  markInvoiceAsPaid as markInvoiceAsPaidAPI
 } from '@/lib/client-zone-queries'
 
 const logger = createFeatureLogger('ClientZoneInvoices')

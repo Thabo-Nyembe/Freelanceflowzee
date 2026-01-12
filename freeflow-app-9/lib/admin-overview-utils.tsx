@@ -16,19 +16,15 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  DollarSign,
   Users,
   Target,
-  Mail,
   CheckCircle,
   Clock,
   AlertCircle,
   XCircle,
   Zap,
   FileText,
-  Send,
-  Eye,
-  Download
+  Send
 } from 'lucide-react'
 
 // ============================================================================

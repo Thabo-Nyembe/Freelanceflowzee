@@ -13,7 +13,7 @@
  * - Public portfolio URLs
  */
 
-import { format, differenceInMonths, differenceInYears } from 'date-fns'
+import { format, differenceInMonths } from 'date-fns'
 
 // ==================== TYPESCRIPT INTERFACES ====================
 

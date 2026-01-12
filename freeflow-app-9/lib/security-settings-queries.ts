@@ -126,7 +126,7 @@ export async function createTwoFactorBackupCodes(userId: string, codes: Array<{ 
   return await supabase.from('two_factor_backup_codes').insert(records).select()
 }
 
-export async function useTwoFactorBackupCode(codeHash: string, ipAddress?: string) {
+export async function consumeTwoFactorBackupCode(codeHash: string, ipAddress?: string) {
   const supabase = createClient()
   return await supabase.from('two_factor_backup_codes').update({
     is_used: true,

@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import {
-  useTwoFactorBackupCode,
+  consumeTwoFactorBackupCode,
   verifyTwoFactorBackupCode,
   deleteUsedBackupCodes,
   getTrustedDevice,
@@ -87,7 +87,7 @@ export async function PUT(
     switch (type) {
       case 'backup-code': {
         if (action === 'use') {
-          const result = await useTwoFactorBackupCode(id, updates.ip_address)
+          const result = await consumeTwoFactorBackupCode(id, updates.ip_address)
           return NextResponse.json({ data: result.data })
         }
         return NextResponse.json({ error: 'Invalid action for backup-code' }, { status: 400 })

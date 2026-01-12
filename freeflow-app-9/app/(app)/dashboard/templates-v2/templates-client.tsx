@@ -468,7 +468,7 @@ export default function TemplatesClient() {
   const {
     createTemplate,
     deleteTemplate,
-    useTemplate,
+    applyTemplate,
     downloadTemplate,
     isCreating,
     isDeleting
@@ -610,7 +610,7 @@ export default function TemplatesClient() {
 
   const handleUseTemplate = useCallback(async (template: Template) => {
     try {
-      await useTemplate({
+      await applyTemplate({
         templateId: template.id,
         userName: undefined,
         department: undefined
@@ -624,7 +624,7 @@ export default function TemplatesClient() {
         description: error instanceof Error ? error.message : 'Please try again'
       })
     }
-  }, [useTemplate, refetch])
+  }, [applyTemplate, refetch])
 
   const handleDuplicateTemplate = useCallback(async (template: Template) => {
     try {

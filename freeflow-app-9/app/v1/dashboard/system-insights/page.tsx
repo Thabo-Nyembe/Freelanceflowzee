@@ -15,7 +15,6 @@ import {
   Bell,
   Code,
   Copy,
-  Database,
   Download,
   Loader2,
   TrendingUp,
@@ -23,8 +22,7 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Eye,
-  Trash2
+  Eye
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

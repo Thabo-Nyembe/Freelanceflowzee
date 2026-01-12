@@ -654,7 +654,6 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const handleExportReport = async () => {
     setIsSubmitting(true)
     try {
-      let data: string
       const headers = ['ID', 'Type', 'Category', 'Description', 'Amount', 'Date']
       if (exportOptions.includeCustomerDetails) {
         headers.push('Customer')
@@ -674,7 +673,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
         return row.join(',')
       })
 
-      data = [headers.join(','), ...rows].join('\n')
+      const data = [headers.join(','), ...rows].join('\n')
 
       const blob = new Blob([data], { type: exportOptions.format === 'csv' ? 'text/csv' : 'application/octet-stream' })
       const url = URL.createObjectURL(blob)

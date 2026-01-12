@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import {
   Music, Play, Pause, Download, RefreshCw, Sparkles, Mic, FileText, Zap, Settings2, Volume2, SkipBack, SkipForward, Loader2,
   Trash2, Heart, Share2, Sliders, ListMusic, Layers, ChevronDown, Plus, Crown,
-  Music2, Radio, Repeat, Shuffle, Waves, BookmarkPlus, User, X, Copy, Check
+  Music2, Radio, Repeat, Shuffle, Waves, BookmarkPlus, User, Copy, Check
 } from 'lucide-react'
 import { useSunoMusic, type SunoModel, promptTemplates } from '@/lib/hooks/use-suno-music'
 import { toast } from 'sonner'

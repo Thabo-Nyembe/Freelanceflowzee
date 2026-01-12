@@ -688,7 +688,7 @@ export function findBestMatch(
   requiredSkills: string[],
   availableOnly: boolean = true
 ): TeamMember | null {
-  let candidates = availableOnly ? getAvailableMembers(members) : members
+  const candidates = availableOnly ? getAvailableMembers(members) : members
 
   let bestMatch: TeamMember | null = null
   let maxMatchCount = 0

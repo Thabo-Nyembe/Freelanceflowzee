@@ -24,7 +24,7 @@ import {
   createTemplateDeliverable,
   getTemplatePricing,
   createPricingTier,
-  useTemplate,
+  applyTemplateToProject,
   getTemplateUsage,
   getUserTemplateUsage,
   favoriteTemplate,
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'use-template': {
-        const result = await useTemplate(
+        const result = await applyTemplateToProject(
           payload.template_id,
           payload.project_id,
           payload.customizations

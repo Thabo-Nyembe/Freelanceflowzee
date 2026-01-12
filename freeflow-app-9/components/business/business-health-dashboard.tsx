@@ -16,7 +16,6 @@ import {
   Target,
   Activity,
   ArrowUpRight,
-  ArrowDownRight,
   Briefcase,
   Clock,
   PiggyBank,

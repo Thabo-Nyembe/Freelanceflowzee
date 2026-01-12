@@ -718,9 +718,9 @@ export async function deletePricingTier(tierId: string) {
 // ============================================================================
 
 /**
- * Use template
+ * Apply template to create project
  */
-export async function useTemplate(
+export async function applyTemplateToProject(
   templateId: string,
   projectId?: string,
   customizations?: any
