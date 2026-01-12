@@ -1065,11 +1065,11 @@ export default function AllocationClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Allocation', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => { setFormData(initialFormState); setShowCreateDialog(true) } },
-                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('Select a resource to assign') },
+                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowAssignDialog(true) },
                 { icon: Calendar, label: 'Schedule', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('schedule') },
-                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Time tracking feature ready') },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Select pending allocations to approve') },
-                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Transfer allocation between projects') },
+                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowTimeEntryDialog(true) },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowApproveDialog(true) },
+                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setShowTransferDialog(true) },
                 { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('reports') },
                 { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
@@ -1206,13 +1206,13 @@ export default function AllocationClient() {
             {/* Resources Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Resource', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Add new team member or contractor', { description: 'Configure skills, availability, and hourly rate' }) },
-                { icon: Users, label: 'Team View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Switching to team view') },
-                { icon: Star, label: 'Skills', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Skills matrix view loading') },
-                { icon: BarChart3, label: 'Utilization', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => { setActiveTab('reports'); toast.success('Viewing utilization reports') } },
-                { icon: Plane, label: 'Time Off', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('Time off calendar opening') },
-                { icon: DollarSign, label: 'Rates', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => { setActiveTab('settings'); toast.success('View billing rates') } },
-                { icon: Eye, label: 'Availability', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.success('Availability calendar loading') },
+                { icon: Plus, label: 'Add Resource', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { setFormData(initialFormState); setShowCreateDialog(true) } },
+                { icon: Users, label: 'Team View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setViewMode('grid') },
+                { icon: Star, label: 'Skills', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('capacity') },
+                { icon: BarChart3, label: 'Utilization', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('reports') },
+                { icon: Plane, label: 'Time Off', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('schedule') },
+                { icon: DollarSign, label: 'Rates', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setActiveTab('settings') },
+                { icon: Eye, label: 'Availability', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setActiveTab('schedule') },
                 { icon: Settings, label: 'Settings', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1328,13 +1328,13 @@ export default function AllocationClient() {
             {/* Capacity Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Forecast', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.success('Loading capacity forecast') },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.success('Analyzing capacity trends') },
-                { icon: AlertTriangle, label: 'Alerts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.success('Capacity alerts configured') },
-                { icon: Users, label: 'Hiring', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.success('Hiring recommendations loading') },
-                { icon: Layers, label: 'Balance', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('Workload balancing tool ready') },
+                { icon: BarChart3, label: 'Forecast', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setActiveTab('reports') },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('reports') },
+                { icon: AlertTriangle, label: 'Alerts', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => setAlertSettings(prev => ({ ...prev, capacityWarnings: !prev.capacityWarnings })) },
+                { icon: Users, label: 'Hiring', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setActiveTab('resources') },
+                { icon: Layers, label: 'Balance', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowAssignDialog(true) },
                 { icon: Calendar, label: 'Schedule', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('schedule') },
-                { icon: RefreshCw, label: 'Optimize', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Running capacity optimization') },
+                { icon: RefreshCw, label: 'Optimize', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => handleRefresh() },
                 { icon: Settings, label: 'Settings', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1486,12 +1486,12 @@ export default function AllocationClient() {
             {/* Schedule Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Project', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('New project wizard launching') },
-                { icon: Calendar, label: 'Timeline', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.success('Loading Gantt timeline view') },
-                { icon: Target, label: 'Milestones', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Project milestones view loading') },
+                { icon: Plus, label: 'New Project', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { setFormData(initialFormState); setShowCreateDialog(true) } },
+                { icon: Calendar, label: 'Timeline', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setViewMode(viewMode === 'list' ? 'grid' : 'list') },
+                { icon: Target, label: 'Milestones', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('allocations') },
                 { icon: Briefcase, label: 'Resources', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('resources') },
-                { icon: GitBranch, label: 'Dependencies', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => toast.success('Dependency graph loading') },
-                { icon: Clock, label: 'Deadlines', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Upcoming deadlines view') },
+                { icon: GitBranch, label: 'Dependencies', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => setShowTransferDialog(true) },
+                { icon: Clock, label: 'Deadlines', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setActiveTab('schedule') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('reports') },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
@@ -1612,12 +1612,12 @@ export default function AllocationClient() {
             {/* Reports Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: PieChart, label: 'Utilization', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Loading utilization report') },
-                { icon: BarChart3, label: 'Revenue', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Loading revenue report') },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Analyzing trends data') },
-                { icon: Users, label: 'Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Loading team performance report') },
-                { icon: Briefcase, label: 'Projects', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.success('Loading projects report') },
-                { icon: DollarSign, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('Loading billing summary') },
+                { icon: PieChart, label: 'Utilization', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('capacity') },
+                { icon: BarChart3, label: 'Revenue', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setActiveTab('settings') },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('capacity') },
+                { icon: Users, label: 'Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('resources') },
+                { icon: Briefcase, label: 'Projects', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('schedule') },
+                { icon: DollarSign, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('settings') },
                 { icon: Calendar, label: 'Schedule', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setActiveTab('schedule') },
                 { icon: ArrowUpRight, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => { toast.success('Exporting report data...'); const blob = new Blob(['Report Data Export'], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'allocation-report.txt'; a.click() } },
               ].map((action, idx) => (
@@ -1790,14 +1790,14 @@ export default function AllocationClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Clock, label: 'Work Hours', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => toast.success('Configuring work hours') },
-                { icon: Target, label: 'Targets', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => toast.success('Editing utilization targets') },
-                { icon: DollarSign, label: 'Billing', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400', onClick: () => toast.success('Configuring billing defaults') },
-                { icon: AlertTriangle, label: 'Alerts', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400', onClick: () => toast.success('Managing notification preferences') },
-                { icon: Users, label: 'Roles', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400', onClick: () => toast.success('Configuring team roles') },
-                { icon: Calendar, label: 'Holidays', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.success('Managing company holidays') },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { handleRefresh(); toast.success('Syncing allocation data') } },
-                { icon: Zap, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('Managing integrations') },
+                { icon: Clock, label: 'Work Hours', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => setShowTimeEntryDialog(true) },
+                { icon: Target, label: 'Targets', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => setActiveTab('capacity') },
+                { icon: DollarSign, label: 'Billing', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400', onClick: () => setActiveTab('reports') },
+                { icon: AlertTriangle, label: 'Alerts', color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-900/30 dark:text-neutral-400', onClick: () => setAlertSettings(prev => ({ ...prev, overAllocation: !prev.overAllocation, pendingApprovals: !prev.pendingApprovals, capacityWarnings: !prev.capacityWarnings })) },
+                { icon: Users, label: 'Roles', color: 'bg-stone-100 text-stone-600 dark:bg-stone-900/30 dark:text-stone-400', onClick: () => setActiveTab('resources') },
+                { icon: Calendar, label: 'Holidays', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setActiveTab('schedule') },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => handleRefresh() },
+                { icon: Zap, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('reports') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2367,6 +2367,296 @@ export default function AllocationClient() {
           </DialogContent>
         </Dialog>
 
+        {/* Assign Resource Dialog */}
+        <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <UserCheck className="w-5 h-5" />
+                Assign Resource
+              </DialogTitle>
+              <DialogDescription>Select a resource to assign to a project</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="assign_resource">Select Resource</Label>
+                <Select
+                  value={formData.resource_name}
+                  onValueChange={(v) => setFormData(prev => ({ ...prev, resource_name: v }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Choose a resource" /></SelectTrigger>
+                  <SelectContent>
+                    {mockResources.filter(r => r.status === 'available').map(resource => (
+                      <SelectItem key={resource.id} value={resource.name}>{resource.name} - {resource.role}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="assign_project">Select Project</Label>
+                <Select
+                  value={formData.project_name}
+                  onValueChange={(v) => setFormData(prev => ({ ...prev, project_name: v }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Choose a project" /></SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.filter(p => p.status === 'active').map(project => (
+                      <SelectItem key={project.id} value={project.name}>{project.name} ({project.code})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="assign_hours">Hours/Week</Label>
+                  <Input
+                    id="assign_hours"
+                    type="number"
+                    value={formData.hours_per_week}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hours_per_week: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="assign_rate">Bill Rate ($/hr)</Label>
+                  <Input
+                    id="assign_rate"
+                    type="number"
+                    value={formData.billable_rate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, billable_rate: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (formData.resource_name && formData.project_name) {
+                    handleCreateAllocation()
+                    setShowAssignDialog(false)
+                  } else {
+                    toast.error('Please select both resource and project')
+                  }
+                }}
+                disabled={isCreating}
+              >
+                {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UserCheck className="w-4 h-4 mr-2" />}
+                Assign Resource
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Entry Dialog */}
+        <Dialog open={showTimeEntryDialog} onOpenChange={setShowTimeEntryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Clock className="w-5 h-5" />
+                Time Entry
+              </DialogTitle>
+              <DialogDescription>Log time for an allocation</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="time_resource">Resource</Label>
+                <Select
+                  value={formData.resource_name}
+                  onValueChange={(v) => setFormData(prev => ({ ...prev, resource_name: v }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select resource" /></SelectTrigger>
+                  <SelectContent>
+                    {mockResources.map(resource => (
+                      <SelectItem key={resource.id} value={resource.name}>{resource.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="time_hours">Hours</Label>
+                  <Input
+                    id="time_hours"
+                    type="number"
+                    value={timeEntryData.hours}
+                    onChange={(e) => setTimeEntryData(prev => ({ ...prev, hours: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time_date">Date</Label>
+                  <Input
+                    id="time_date"
+                    type="date"
+                    value={timeEntryData.date}
+                    onChange={(e) => setTimeEntryData(prev => ({ ...prev, date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="time_description">Description</Label>
+                <Textarea
+                  id="time_description"
+                  value={timeEntryData.description}
+                  onChange={(e) => setTimeEntryData(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                  placeholder="What did you work on?"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTimeEntryDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  if (timeEntryData.hours > 0 && timeEntryData.date) {
+                    toast.success('Time Entry Logged', { description: `${timeEntryData.hours} hours recorded for ${timeEntryData.date}` })
+                    setTimeEntryData({ hours: 0, description: '', date: '' })
+                    setShowTimeEntryDialog(false)
+                  } else {
+                    toast.error('Please enter hours and date')
+                  }
+                }}
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Log Time
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Approve Allocations Dialog */}
+        <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <CheckCircle className="w-5 h-5" />
+                Pending Approvals
+              </DialogTitle>
+              <DialogDescription>Review and approve pending resource allocations</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {mockAllocations.filter(a => a.status === 'pending').length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">No pending allocations to approve</p>
+                  ) : (
+                    mockAllocations.filter(a => a.status === 'pending').map(allocation => (
+                      <div key={allocation.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                          <p className="font-medium">{allocation.resource_name}</p>
+                          <p className="text-sm text-gray-500">{allocation.project_name} - {allocation.hours_per_week}h/week</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCancelAllocation(allocation.id, allocation.resource_name)}
+                          >
+                            Reject
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleApproveAllocation(allocation.id, allocation.resource_name)}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Approve
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowApproveDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Transfer Allocation Dialog */}
+        <Dialog open={showTransferDialog} onOpenChange={setShowTransferDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <GitBranch className="w-5 h-5" />
+                Transfer Allocation
+              </DialogTitle>
+              <DialogDescription>Move a resource allocation to a different project</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Allocation to Transfer</Label>
+                <Select
+                  value={formData.resource_name}
+                  onValueChange={(v) => {
+                    const allocation = mockAllocations.find(a => a.resource_name === v)
+                    if (allocation) {
+                      setFormData(prev => ({
+                        ...prev,
+                        resource_name: allocation.resource_name,
+                        project_name: allocation.project_name
+                      }))
+                    }
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select allocation" /></SelectTrigger>
+                  <SelectContent>
+                    {mockAllocations.filter(a => a.status === 'active').map(allocation => (
+                      <SelectItem key={allocation.id} value={allocation.resource_name}>
+                        {allocation.resource_name} → {allocation.project_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Target Project</Label>
+                <Select
+                  value={transferData.targetProject}
+                  onValueChange={(v) => setTransferData(prev => ({ ...prev, targetProject: v }))}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select target project" /></SelectTrigger>
+                  <SelectContent>
+                    {mockProjects.filter(p => p.status === 'active' && p.name !== formData.project_name).map(project => (
+                      <SelectItem key={project.id} value={project.name}>{project.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="transfer_notes">Transfer Notes</Label>
+                <Textarea
+                  id="transfer_notes"
+                  value={transferData.notes}
+                  onChange={(e) => setTransferData(prev => ({ ...prev, notes: e.target.value }))}
+                  rows={2}
+                  placeholder="Reason for transfer..."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTransferDialog(false)}>Cancel</Button>
+              <Button
+                onClick={async () => {
+                  if (formData.resource_name && transferData.targetProject) {
+                    toast.success('Allocation Transferred', {
+                      description: `${formData.resource_name} moved to ${transferData.targetProject}`
+                    })
+                    setTransferData({ targetProject: '', notes: '' })
+                    setFormData(initialFormState)
+                    setShowTransferDialog(false)
+                  } else {
+                    toast.error('Please select allocation and target project')
+                  }
+                }}
+              >
+                <GitBranch className="w-4 h-4 mr-2" />
+                Transfer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Resource Detail Dialog */}
         <Dialog open={!!selectedResource} onOpenChange={() => setSelectedResource(null)}>
           <DialogContent className="max-w-2xl">
@@ -2439,7 +2729,7 @@ export default function AllocationClient() {
                   </div>
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1" onClick={() => { setSelectedResource(null); setActiveTab('allocations'); toast.success(`Viewing allocations for ${selectedResource?.name}`) }}>
+                    <Button variant="outline" className="flex-1" onClick={() => { setSearchQuery(selectedResource?.name || ''); setSelectedResource(null); setActiveTab('allocations') }}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Allocations
                     </Button>

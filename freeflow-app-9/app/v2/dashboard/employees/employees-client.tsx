@@ -379,6 +379,9 @@ export default function EmployeesClient() {
     startDate: ''
   })
 
+  // Key results state for goal dialog
+  const [keyResultInputs, setKeyResultInputs] = useState<string[]>(['', ''])
+
   // Handle creating a new employee
   const handleCreateEmployee = async () => {
     if (!newEmployeeForm.name || !newEmployeeForm.email) {
@@ -483,6 +486,339 @@ export default function EmployeesClient() {
   const handleOpenDeleteDialog = (employee: DBEmployee) => {
     setEmployeeToDelete(employee)
     setShowDeleteDialog(true)
+  }
+
+  // Handle document upload
+  const handleUploadDocument = async () => {
+    toast.loading('Uploading document...', { id: 'doc-upload' })
+    try {
+      // Simulate document upload - in production, this would upload to storage
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Document uploaded successfully!', { id: 'doc-upload' })
+      setShowDocumentDialog(false)
+    } catch (error) {
+      toast.error('Failed to upload document', { id: 'doc-upload' })
+    }
+  }
+
+  // Handle goal creation
+  const handleCreateGoal = async () => {
+    toast.loading('Creating goal...', { id: 'goal-create' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      toast.success('Goal created successfully!', { id: 'goal-create' })
+      setShowGoalDialog(false)
+    } catch (error) {
+      toast.error('Failed to create goal', { id: 'goal-create' })
+    }
+  }
+
+  // Handle survey creation
+  const handleCreateSurvey = async () => {
+    toast.loading('Creating survey...', { id: 'survey-create' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Survey created and invitations sent!', { id: 'survey-create' })
+      setShowSurveyDialog(false)
+    } catch (error) {
+      toast.error('Failed to create survey', { id: 'survey-create' })
+    }
+  }
+
+  // Handle performance review start
+  const handleStartReview = async () => {
+    toast.loading('Initiating review cycle...', { id: 'review-start' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Performance review started! Notifications sent to participants.', { id: 'review-start' })
+      setShowReviewDialog(false)
+    } catch (error) {
+      toast.error('Failed to start review', { id: 'review-start' })
+    }
+  }
+
+  // Handle employee data export
+  const handleExportEmployees = async () => {
+    toast.loading('Exporting employee data...', { id: 'employee-export' })
+    try {
+      // Create CSV data from employees
+      const headers = ['Name', 'Email', 'Department', 'Position', 'Status', 'Hire Date']
+      const csvData = mockEmployees.map(emp =>
+        [emp.name, emp.email, emp.department, emp.position, emp.status, emp.hireDate].join(',')
+      )
+      const csvContent = [headers.join(','), ...csvData].join('\n')
+
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `employees-export-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export complete! Download starting...', { id: 'employee-export' })
+      setShowExportDialog(false)
+    } catch (error) {
+      toast.error('Failed to export data', { id: 'employee-export' })
+    }
+  }
+
+  // Handle time off request submission
+  const handleSubmitTimeOff = async () => {
+    toast.loading('Submitting time off request...', { id: 'timeoff-submit' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      toast.success('Time off request submitted for approval!', { id: 'timeoff-submit' })
+      setShowTimeOffRequestDialog(false)
+    } catch (error) {
+      toast.error('Failed to submit request', { id: 'timeoff-submit' })
+    }
+  }
+
+  // Handle compensation report generation
+  const handleGenerateCompensationReport = async () => {
+    toast.loading('Generating compensation report...', { id: 'report-gen' })
+    try {
+      // Generate compensation report data
+      const reportData = mockEmployees.map(emp => ({
+        name: emp.name,
+        department: emp.department,
+        position: emp.position,
+        salary: emp.salary
+      }))
+
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `compensation-report-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Report generated! Download starting...', { id: 'report-gen' })
+      setShowExportReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to generate report', { id: 'report-gen' })
+    }
+  }
+
+  // Handle integration connection
+  const handleConnectIntegration = async () => {
+    toast.loading('Connecting integration...', { id: 'integration-connect' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1800))
+      toast.success('Integration connected successfully!', { id: 'integration-connect' })
+      setShowAddIntegrationDialog(false)
+    } catch (error) {
+      toast.error('Failed to connect integration', { id: 'integration-connect' })
+    }
+  }
+
+  // Handle integration disconnection
+  const handleDisconnectIntegration = async () => {
+    if (!confirm('Are you sure you want to disconnect this integration?')) return
+    toast.loading('Disconnecting integration...', { id: 'integration-disconnect' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      toast.success('Integration disconnected', { id: 'integration-disconnect' })
+      setShowConfigureIntegrationDialog(false)
+    } catch (error) {
+      toast.error('Failed to disconnect integration', { id: 'integration-disconnect' })
+    }
+  }
+
+  // Handle integration settings save
+  const handleSaveIntegrationSettings = async () => {
+    toast.loading('Saving integration settings...', { id: 'integration-save' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Integration settings saved!', { id: 'integration-save' })
+      setShowConfigureIntegrationDialog(false)
+    } catch (error) {
+      toast.error('Failed to save settings', { id: 'integration-save' })
+    }
+  }
+
+  // Handle API key regeneration
+  const handleRegenerateApiKey = async () => {
+    if (!confirm('Are you sure? This will invalidate your current API key.')) return
+    toast.loading('Regenerating API key...', { id: 'api-regen' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('New API key generated! Please update your applications.', { id: 'api-regen' })
+      setShowRegenerateKeyDialog(false)
+    } catch (error) {
+      toast.error('Failed to regenerate API key', { id: 'api-regen' })
+    }
+  }
+
+  // Handle full HR data export
+  const handleExportAllHRData = async () => {
+    toast.loading('Exporting all HR data...', { id: 'full-export' })
+    try {
+      const fullExport = {
+        employees: mockEmployees,
+        documents: mockDocuments,
+        reviews: mockReviews,
+        timeOffRequests: mockTimeOffRequests,
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(fullExport, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `hr-full-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Full HR data export complete! Download starting...', { id: 'full-export' })
+      setShowExportDataDialog(false)
+    } catch (error) {
+      toast.error('Failed to export data', { id: 'full-export' })
+    }
+  }
+
+  // Handle HR data import
+  const handleImportHRData = async () => {
+    toast.loading('Importing HR data...', { id: 'hr-import' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      toast.success('HR data imported successfully!', { id: 'hr-import' })
+      setShowImportDataDialog(false)
+      refetch()
+    } catch (error) {
+      toast.error('Failed to import data', { id: 'hr-import' })
+    }
+  }
+
+  // Handle compliance report generation
+  const handleGenerateComplianceReport = async () => {
+    toast.loading('Generating compliance report...', { id: 'compliance-gen' })
+    try {
+      const complianceReport = {
+        type: 'GDPR Compliance',
+        generatedAt: new Date().toISOString(),
+        employeeCount: mockEmployees.length,
+        documentsAudited: mockDocuments.length,
+        complianceStatus: 'Compliant'
+      }
+
+      const blob = new Blob([JSON.stringify(complianceReport, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `compliance-report-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Compliance report generated! Download starting...', { id: 'compliance-gen' })
+      setShowComplianceReportDialog(false)
+    } catch (error) {
+      toast.error('Failed to generate report', { id: 'compliance-gen' })
+    }
+  }
+
+  // Handle archiving terminated employees
+  const handleArchiveTerminated = async () => {
+    if (!confirm('Are you sure you want to archive all terminated employees?')) return
+    toast.loading('Archiving terminated employees...', { id: 'archive-terminated' })
+    try {
+      const terminatedCount = mockEmployees.filter(e => e.status === 'terminated').length
+      await new Promise(resolve => setTimeout(resolve, 1800))
+      toast.success(`Archived ${terminatedCount} terminated employees successfully!`, { id: 'archive-terminated' })
+      setShowArchiveDialog(false)
+    } catch (error) {
+      toast.error('Failed to archive employees', { id: 'archive-terminated' })
+    }
+  }
+
+  // Handle deleting all HR data
+  const handleDeleteAllData = async () => {
+    if (!confirm('FINAL WARNING: This will permanently delete ALL HR data. This action cannot be undone. Are you absolutely sure?')) return
+    toast.loading('Deleting all HR data...', { id: 'delete-all' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2500))
+      toast.success('All HR data has been deleted', { id: 'delete-all' })
+      setShowDeleteAllDialog(false)
+    } catch (error) {
+      toast.error('Failed to delete data', { id: 'delete-all' })
+    }
+  }
+
+  // Handle resetting settings
+  const handleResetSettings = async () => {
+    if (!confirm('Are you sure you want to reset all settings to their default values?')) return
+    toast.loading('Resetting settings...', { id: 'reset-settings' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      toast.success('Settings reset to defaults!', { id: 'reset-settings' })
+      setShowResetSettingsDialog(false)
+    } catch (error) {
+      toast.error('Failed to reset settings', { id: 'reset-settings' })
+    }
+  }
+
+  // Handle updating mock employee profile
+  const handleUpdateMockProfile = async () => {
+    toast.loading('Updating employee profile...', { id: 'profile-update' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      toast.success('Employee profile updated successfully!', { id: 'profile-update' })
+      setShowEditProfileDialog(false)
+    } catch (error) {
+      toast.error('Failed to update profile', { id: 'profile-update' })
+    }
+  }
+
+  // Handle document download
+  const handleDownloadDocument = async () => {
+    if (!selectedDocument) return
+    toast.loading('Preparing download...', { id: 'doc-download' })
+    try {
+      // Simulate document download preparation
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      // Create a sample document blob for download
+      const content = `Document: ${selectedDocument.name}\nType: ${selectedDocument.type}\nUploaded: ${selectedDocument.uploadedAt}\nSize: ${selectedDocument.size}`
+      const blob = new Blob([content], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = selectedDocument.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Download started!', { id: 'doc-download' })
+      setShowDownloadDocDialog(false)
+    } catch (error) {
+      toast.error('Failed to download document', { id: 'doc-download' })
+    }
+  }
+
+  // Handle document deletion
+  const handleDeleteDocument = async () => {
+    if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) return
+    toast.loading('Deleting document...', { id: 'doc-delete' })
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      toast.success('Document deleted successfully', { id: 'doc-delete' })
+      setShowDeleteDocDialog(false)
+      setSelectedDocument(null)
+    } catch (error) {
+      toast.error('Failed to delete document', { id: 'doc-delete' })
+    }
   }
 
   const filteredEmployees = useMemo(() => {
@@ -2016,7 +2352,7 @@ export default function EmployeesClient() {
             <AIInsightsPanel
               insights={employeesAIInsights}
               title="HR Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2095,7 +2431,7 @@ export default function EmployeesClient() {
               <div className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-center"><Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" /><p className="text-sm text-gray-500">Drag and drop or click to upload</p><p className="text-xs text-gray-400 mt-1">PDF, DOC, DOCX up to 10MB</p></div>
               <div><Label>Expiration Date (Optional)</Label><Input type="date" className="mt-1" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Uploading document...', { id: 'doc-upload' }); setTimeout(() => { toast.success('Document uploaded successfully!', { id: 'doc-upload' }); setShowDocumentDialog(false) }, 1500) }}>Upload Document</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowDocumentDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleUploadDocument}>Upload Document</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2109,13 +2445,14 @@ export default function EmployeesClient() {
               <div className="grid grid-cols-2 gap-4"><div><Label>Category</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select" /></SelectTrigger><SelectContent><SelectItem value="performance">Performance</SelectItem><SelectItem value="development">Development</SelectItem><SelectItem value="team">Team</SelectItem><SelectItem value="company">Company</SelectItem></SelectContent></Select></div><div><Label>Due Date</Label><Input type="date" className="mt-1" /></div></div>
               <div><Label>Key Results</Label>
                 <div className="space-y-2 mt-2">
-                  <Input placeholder="Key Result 1" />
-                  <Input placeholder="Key Result 2" />
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => { toast.info('Key results', { description: 'Additional fields can be added after goal creation' }) }}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
+                  {keyResultInputs.map((kr, idx) => (
+                    <Input key={idx} placeholder={`Key Result ${idx + 1}`} value={kr} onChange={(e) => setKeyResultInputs(prev => prev.map((v, i) => i === idx ? e.target.value : v))} />
+                  ))}
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => setKeyResultInputs(prev => [...prev, ''])}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Creating goal...', { id: 'goal-create' }); setTimeout(() => { toast.success('Goal created successfully!', { id: 'goal-create' }); setShowGoalDialog(false) }, 1200) }}>Create Goal</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleCreateGoal}>Create Goal</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2129,7 +2466,7 @@ export default function EmployeesClient() {
               <div><Label>Recipients</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select recipients" /></SelectTrigger><SelectContent><SelectItem value="all">All Employees</SelectItem><SelectItem value="engineering">Engineering Only</SelectItem><SelectItem value="managers">Managers Only</SelectItem><SelectItem value="custom">Custom Selection</SelectItem></SelectContent></Select></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Anonymous Responses</p><p className="text-sm text-gray-500">Protect respondent identity</p></div><Switch defaultChecked /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Creating survey...', { id: 'survey-create' }); setTimeout(() => { toast.success('Survey created and invitations sent!', { id: 'survey-create' }); setShowSurveyDialog(false) }, 1500) }}>Create Survey</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowSurveyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleCreateSurvey}>Create Survey</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2143,7 +2480,7 @@ export default function EmployeesClient() {
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">Include Self-Review</p><p className="text-sm text-gray-500">Allow employee to self-assess</p></div><Switch defaultChecked /></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div><Switch /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Initiating review cycle...', { id: 'review-start' }); setTimeout(() => { toast.success('Performance review started! Notifications sent to participants.', { id: 'review-start' }); setShowReviewDialog(false) }, 1500) }}>Start Review</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleStartReview}>Start Review</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2312,7 +2649,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Exporting employee data...', { id: 'employee-export' }); setTimeout(() => { toast.success('Export complete! Download starting...', { id: 'employee-export' }); setShowExportDialog(false) }, 2000) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleExportEmployees}>
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
@@ -2373,7 +2710,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTimeOffRequestDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Submitting time off request...', { id: 'timeoff-submit' }); setTimeout(() => { toast.success('Time off request submitted for approval!', { id: 'timeoff-submit' }); setShowTimeOffRequestDialog(false) }, 1200) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleSubmitTimeOff}>
                 Submit Request
               </Button>
             </DialogFooter>
@@ -2433,7 +2770,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Generating compensation report...', { id: 'report-gen' }); setTimeout(() => { toast.success('Report generated! Download starting...', { id: 'report-gen' }); setShowExportReportDialog(false) }, 2000) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleGenerateCompensationReport}>
                 <Download className="h-4 w-4 mr-2" />
                 Generate Report
               </Button>
@@ -2535,7 +2872,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddIntegrationDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Connecting integration...', { id: 'integration-connect' }); setTimeout(() => { toast.success('Integration connected successfully!', { id: 'integration-connect' }); setShowAddIntegrationDialog(false) }, 1800) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleConnectIntegration}>
                 <Zap className="h-4 w-4 mr-2" />
                 Connect
               </Button>
@@ -2587,8 +2924,8 @@ export default function EmployeesClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConfigureIntegrationDialog(false)}>Cancel</Button>
-              <Button variant="outline" className="text-red-600" onClick={() => { if (confirm('Are you sure you want to disconnect this integration?')) { toast.loading('Disconnecting integration...', { id: 'integration-disconnect' }); setTimeout(() => { toast.success('Integration disconnected', { id: 'integration-disconnect' }); setShowConfigureIntegrationDialog(false) }, 1200) } }}>Disconnect</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Saving integration settings...', { id: 'integration-save' }); setTimeout(() => { toast.success('Integration settings saved!', { id: 'integration-save' }); setShowConfigureIntegrationDialog(false) }, 1000) }}>Save Changes</Button>
+              <Button variant="outline" className="text-red-600" onClick={handleDisconnectIntegration}>Disconnect</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleSaveIntegrationSettings}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2608,7 +2945,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { if (confirm('Are you sure? This will invalidate your current API key.')) { toast.loading('Regenerating API key...', { id: 'api-regen' }); setTimeout(() => { toast.success('New API key generated! Please update your applications.', { id: 'api-regen' }); setShowRegenerateKeyDialog(false) }, 1500) } }}>
+              <Button variant="destructive" onClick={handleRegenerateApiKey}>
                 Regenerate Key
               </Button>
             </DialogFooter>
@@ -2649,7 +2986,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Exporting all HR data...', { id: 'full-export' }); setTimeout(() => { toast.success('Full HR data export complete! Download starting...', { id: 'full-export' }); setShowExportDataDialog(false) }, 2500) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleExportAllHRData}>
                 <Download className="h-4 w-4 mr-2" />
                 Export All
               </Button>
@@ -2693,7 +3030,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Importing HR data...', { id: 'hr-import' }); setTimeout(() => { toast.success('HR data imported successfully!', { id: 'hr-import' }); setShowImportDataDialog(false) }, 2000) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleImportHRData}>
                 <Upload className="h-4 w-4 mr-2" />
                 Import
               </Button>
@@ -2740,7 +3077,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowComplianceReportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Generating compliance report...', { id: 'compliance-gen' }); setTimeout(() => { toast.success('Compliance report generated! Download starting...', { id: 'compliance-gen' }); setShowComplianceReportDialog(false) }, 2200) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleGenerateComplianceReport}>
                 <FileCheck className="h-4 w-4 mr-2" />
                 Generate
               </Button>

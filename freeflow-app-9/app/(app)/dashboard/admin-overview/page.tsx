@@ -155,7 +155,7 @@ export default function AdminOverviewPage() {
         })
 
         toast.success('Dashboard Loaded', {
-          description: `Tracking ${stats.totalDeals} deals, ${stats.totalInvoices} invoices, ${stats.totalLeads} leads`
+          description: `Tracking ${stats.activeDeals || 0} deals, ${stats.totalInvoices || 0} invoices, ${stats.totalLeads || 0} leads`
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard'
@@ -437,7 +437,7 @@ export default function AdminOverviewPage() {
                   <div className="text-lg font-bold text-blue-700">
                     <NumberFlow
                       value={284500}
-                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                      format="currency"
                     />
                   </div>
                   <div className="text-xs text-green-600 flex items-center gap-1">
@@ -500,7 +500,7 @@ export default function AdminOverviewPage() {
                   <div className="text-lg font-bold text-green-700">
                     <NumberFlow
                       value={totalPipelineValue}
-                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                      format="currency"
                     />
                   </div>
                   <div className="text-xs text-gray-600">{dashboardStats?.activeDeals || 0} deals</div>
@@ -564,7 +564,7 @@ export default function AdminOverviewPage() {
                   <div className="text-lg font-bold text-green-700">
                     <NumberFlow
                       value={dashboardStats?.totalRevenue || 0}
-                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                      format="currency"
                     />
                   </div>
                   <div className="text-xs text-gray-600">On time</div>
@@ -575,7 +575,7 @@ export default function AdminOverviewPage() {
                   <div className="text-lg font-bold text-red-700">
                     <NumberFlow
                       value={totalOutstanding}
-                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                      format="currency"
                     />
                   </div>
                   <div className="text-xs text-red-600">{overdueInvoices.length} overdue</div>
@@ -793,7 +793,7 @@ export default function AdminOverviewPage() {
               <div className="text-2xl font-bold text-gray-800 mb-1">
                 <NumberFlow
                   value={totalPipelineValue}
-                  format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                  format="currency"
                 />
               </div>
               <div className="text-xs text-gray-500">{dashboardStats?.activeDeals || 0} active deals</div>

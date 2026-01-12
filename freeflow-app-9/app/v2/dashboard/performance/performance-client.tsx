@@ -2576,7 +2576,7 @@ export default function PerformanceClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockPerfAIInsights}
-          onAskQuestion={(q) => console.log('Performance Question:', q)}
+          onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your performance question...') } })}
         />
         <PredictiveAnalytics predictions={mockPerfPredictions} />
       </div>

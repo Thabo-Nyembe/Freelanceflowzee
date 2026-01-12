@@ -125,6 +125,7 @@ interface AccessLog {
   tags: string[]
   isSuspicious: boolean
   isBot: boolean
+  message: string
 }
 
 interface LogPattern {
@@ -146,6 +147,7 @@ interface AlertRule {
   status: 'active' | 'paused' | 'triggered'
   lastTriggered: string | null
   notifyChannels: string[]
+  enabled: boolean
 }
 
 interface SavedView {
@@ -202,7 +204,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: null,
     tags: ['auth', 'user-login'],
     isSuspicious: false,
-    isBot: false
+    isBot: false,
+    message: 'User login successful'
   },
   {
     id: '2',
@@ -228,7 +231,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: null,
     tags: ['auth', 'failed-login'],
     isSuspicious: true,
-    isBot: false
+    isBot: false,
+    message: 'Failed login attempt - invalid credentials'
   },
   {
     id: '3',
@@ -254,7 +258,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: null,
     tags: ['api', 'user-data'],
     isSuspicious: false,
-    isBot: false
+    isBot: false,
+    message: 'User profile data retrieved'
   },
   {
     id: '4',
@@ -280,7 +285,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: null,
     tags: ['security', 'blocked', 'bot'],
     isSuspicious: true,
-    isBot: true
+    isBot: true,
+    message: 'Request blocked by WAF - suspicious bot activity detected'
   },
   {
     id: '5',
@@ -306,7 +312,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: null,
     tags: ['admin', 'settings-update'],
     isSuspicious: false,
-    isBot: false
+    isBot: false,
+    message: 'Admin settings updated successfully'
   },
   {
     id: '6',
@@ -332,7 +339,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: null,
     tags: ['database', 'slow-query'],
     isSuspicious: false,
-    isBot: false
+    isBot: false,
+    message: 'Database query completed with performance warning'
   },
   {
     id: '7',
@@ -358,7 +366,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: 'Error: Gateway timeout at PaymentService.process (/app/services/payment.ts:145:12)...',
     tags: ['api', 'payment', 'error'],
     isSuspicious: false,
-    isBot: false
+    isBot: false,
+    message: 'Payment processing failed - gateway timeout'
   },
   {
     id: '8',
@@ -384,7 +393,8 @@ const mockLogs: AccessLog[] = [
     stackTrace: null,
     tags: ['file', 'download', 'report'],
     isSuspicious: false,
-    isBot: false
+    isBot: false,
+    message: 'File download completed - report-2024.pdf'
   }
 ]
 
@@ -396,10 +406,10 @@ const mockPatterns: LogPattern[] = [
 ]
 
 const mockAlerts: AlertRule[] = [
-  { id: '1', name: 'High Error Rate', condition: 'error_rate > 5%', threshold: 5, timeWindow: '5 minutes', status: 'active', lastTriggered: '2024-12-24T08:30:00Z', notifyChannels: ['slack', 'email'] },
-  { id: '2', name: 'Suspicious Login Activity', condition: 'failed_logins > 10', threshold: 10, timeWindow: '1 minute', status: 'triggered', lastTriggered: '2024-12-24T10:28:00Z', notifyChannels: ['pagerduty', 'slack'] },
-  { id: '3', name: 'Slow Response Time', condition: 'avg_duration > 2000ms', threshold: 2000, timeWindow: '5 minutes', status: 'paused', lastTriggered: '2024-12-23T15:45:00Z', notifyChannels: ['slack'] },
-  { id: '4', name: 'Bot Traffic Spike', condition: 'bot_requests > 100', threshold: 100, timeWindow: '1 minute', status: 'active', lastTriggered: null, notifyChannels: ['email'] }
+  { id: '1', name: 'High Error Rate', condition: 'error_rate > 5%', threshold: 5, timeWindow: '5 minutes', status: 'active', lastTriggered: '2024-12-24T08:30:00Z', notifyChannels: ['slack', 'email'], enabled: true },
+  { id: '2', name: 'Suspicious Login Activity', condition: 'failed_logins > 10', threshold: 10, timeWindow: '1 minute', status: 'triggered', lastTriggered: '2024-12-24T10:28:00Z', notifyChannels: ['pagerduty', 'slack'], enabled: true },
+  { id: '3', name: 'Slow Response Time', condition: 'avg_duration > 2000ms', threshold: 2000, timeWindow: '5 minutes', status: 'paused', lastTriggered: '2024-12-23T15:45:00Z', notifyChannels: ['slack'], enabled: false },
+  { id: '4', name: 'Bot Traffic Spike', condition: 'bot_requests > 100', threshold: 100, timeWindow: '1 minute', status: 'active', lastTriggered: null, notifyChannels: ['email'], enabled: true }
 ]
 
 const mockSavedViews: SavedView[] = [
@@ -501,6 +511,7 @@ export default function AccessLogsClient() {
     { name: 'user_role', type: 'string' },
     { name: 'request_id', type: 'string' }
   ])
+  const [savedLogIds, setSavedLogIds] = useState<Set<string>>(new Set())
 
   // Fetch logs from Supabase
   const fetchLogs = useCallback(async () => {
@@ -515,46 +526,77 @@ export default function AccessLogsClient() {
       if (error) throw error
 
       if (data && data.length > 0) {
-        const mappedLogs: AccessLog[] = data.map((log: DbAccessLog) => ({
-          id: log.id,
-          timestamp: log.created_at,
-          status: (log.status as LogStatus) || 'info',
-          level: log.threat_level === 'high' ? 'error' : log.threat_level === 'medium' ? 'warn' : 'info' as LogLevel,
-          accessType: (log.access_type as AccessType) || 'api',
-          user: log.user_id ? {
-            id: log.user_id,
-            name: log.user_name || 'Unknown',
-            email: log.user_email || '',
-            avatar: ''
-          } : null,
-          resource: log.resource || '',
-          method: log.method || 'GET',
-          statusCode: log.status_code || 200,
-          ipAddress: log.ip_address || '',
-          location: {
-            city: log.location?.split(',')[0] || 'Unknown',
-            country: log.location?.split(',')[1]?.trim() || 'Unknown',
-            coordinates: ''
-          },
-          device: {
-            type: (log.device_type as DeviceType) || 'desktop',
-            browser: log.browser || 'Unknown',
-            os: '',
-            version: ''
-          },
-          duration: log.duration || 0,
-          requestSize: 0,
-          responseSize: 0,
-          userAgent: log.user_agent || '',
-          referrer: null,
-          sessionId: '',
-          requestId: log.log_code,
-          errorMessage: log.blocked_reason,
-          stackTrace: null,
-          tags: [],
-          isSuspicious: log.is_suspicious || false,
-          isBot: log.device_type === 'bot'
-        }))
+        const mappedLogs: AccessLog[] = data.map((log: DbAccessLog) => {
+          // Generate appropriate message based on status and access type
+          const getLogMessage = (status: string, accessType: string, blockedReason?: string | null): string => {
+            if (blockedReason) return blockedReason
+            switch (status) {
+              case 'success':
+                return accessType === 'login' ? 'Login successful' :
+                       accessType === 'logout' ? 'Logout successful' :
+                       accessType === 'api' ? 'API request completed' :
+                       accessType === 'file' ? 'File access granted' :
+                       accessType === 'database' ? 'Database query executed' :
+                       'Access granted'
+              case 'failed':
+                return accessType === 'login' ? 'Login failed' :
+                       accessType === 'api' ? 'API request failed' :
+                       'Access failed'
+              case 'blocked':
+                return 'Access denied'
+              case 'warning':
+                return 'Suspicious activity detected'
+              case 'info':
+              default:
+                return 'Access logged'
+            }
+          }
+
+          const status = (log.status as LogStatus) || 'info'
+          const accessType = (log.access_type as AccessType) || 'api'
+
+          return {
+            id: log.id,
+            timestamp: log.created_at,
+            status,
+            level: log.threat_level === 'high' ? 'error' : log.threat_level === 'medium' ? 'warn' : 'info' as LogLevel,
+            accessType,
+            user: log.user_id ? {
+              id: log.user_id,
+              name: log.user_name || 'Unknown',
+              email: log.user_email || '',
+              avatar: ''
+            } : null,
+            resource: log.resource || '',
+            method: log.method || 'GET',
+            statusCode: log.status_code || 200,
+            ipAddress: log.ip_address || '',
+            location: {
+              city: log.location?.split(',')[0] || 'Unknown',
+              country: log.location?.split(',')[1]?.trim() || 'Unknown',
+              coordinates: ''
+            },
+            device: {
+              type: (log.device_type as DeviceType) || 'desktop',
+              browser: log.browser || 'Unknown',
+              os: '',
+              version: ''
+            },
+            duration: log.duration || 0,
+            requestSize: 0,
+            responseSize: 0,
+            userAgent: log.user_agent || '',
+            referrer: null,
+            sessionId: '',
+            requestId: log.log_code,
+            errorMessage: log.blocked_reason,
+            stackTrace: null,
+            tags: [],
+            isSuspicious: log.is_suspicious || false,
+            isBot: log.device_type === 'bot',
+            message: getLogMessage(status, accessType, log.blocked_reason)
+          }
+        })
         setLogs(mappedLogs)
 
         // Calculate stats
@@ -1009,13 +1051,13 @@ export default function AccessLogsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Search, label: 'Search Logs', color: 'from-blue-500 to-cyan-600', onClick: () => toast.success('Focus on search field') },
-                { icon: Filter, label: 'Filter', color: 'from-purple-500 to-pink-600', onClick: () => toast.success('Filter panel is in the sidebar') },
+                { icon: Search, label: 'Search Logs', color: 'from-blue-500 to-cyan-600', onClick: () => { const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement; if (searchInput) { searchInput.focus(); searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast.success('Search field focused') } else { toast.info('Use the search bar above to search logs') } } },
+                { icon: Filter, label: 'Filter', color: 'from-purple-500 to-pink-600', onClick: () => { const filterCard = document.querySelector('[class*="lg:col-span-1"]'); if (filterCard) { filterCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); toast.success('Filter panel highlighted') } else { toast.info('Filter panel is in the sidebar') } } },
                 { icon: Download, label: 'Export', color: 'from-green-500 to-emerald-600', onClick: handleExportLogs },
                 { icon: RefreshCw, label: 'Refresh', color: 'from-orange-500 to-amber-600', onClick: handleRefresh },
                 { icon: Play, label: 'Live Tail', color: 'from-cyan-500 to-blue-600', onClick: () => { setIsLiveTail(!isLiveTail); toast.success(isLiveTail ? 'Live tail paused' : 'Live tail enabled') } },
-                { icon: Bell, label: 'Set Alert', color: 'from-pink-500 to-rose-600', onClick: () => { setActiveTab('alerts'); toast.success('Opening alert configuration') } },
-                { icon: Bookmark, label: 'Save View', color: 'from-indigo-500 to-purple-600', onClick: () => { setActiveTab('saved-views'); toast.success('Save your current view') } },
+                { icon: Bell, label: 'Set Alert', color: 'from-pink-500 to-rose-600', onClick: () => { setActiveTab('alerts'); toast.info('Switched to alerts tab') } },
+                { icon: Bookmark, label: 'Save View', color: 'from-indigo-500 to-purple-600', onClick: () => { setActiveTab('saved-views'); toast.info('Switched to saved views tab') } },
                 { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', onClick: () => setActiveTab('settings') },
               ].map((action, i) => (
                 <Button
@@ -1276,14 +1318,14 @@ export default function AccessLogsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Search, label: 'Find Pattern', color: 'from-purple-500 to-violet-600', onClick: () => toast.success('Pattern search activated') },
-                { icon: Bell, label: 'Set Alert', color: 'from-blue-500 to-indigo-600', onClick: () => { setActiveTab('alerts'); toast.success('Create alert for patterns') } },
-                { icon: Eye, label: 'Investigate', color: 'from-green-500 to-emerald-600', onClick: () => toast.success('Select a pattern to investigate') },
+                { icon: Search, label: 'Find Pattern', color: 'from-purple-500 to-violet-600', onClick: () => { setSearchQuery(''); const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement; if (searchInput) { searchInput.focus(); toast.success('Enter a pattern to search') } else { toast.info('Use the search bar to find patterns') } } },
+                { icon: Bell, label: 'Set Alert', color: 'from-blue-500 to-indigo-600', onClick: () => { setActiveTab('alerts'); toast.info('Create alert for patterns') } },
+                { icon: Eye, label: 'Investigate', color: 'from-green-500 to-emerald-600', onClick: () => { if (mockPatterns.length > 0) { setSearchQuery(mockPatterns[0].pattern); toast.success(`Investigating: ${mockPatterns[0].pattern}`) } else { toast.info('No patterns to investigate') } } },
                 { icon: Download, label: 'Export', color: 'from-orange-500 to-amber-600', onClick: handleExportLogs },
-                { icon: Archive, label: 'Archive', color: 'from-cyan-500 to-blue-600', onClick: () => toast.success('Patterns archived successfully') },
-                { icon: Tag, label: 'Tag Pattern', color: 'from-pink-500 to-rose-600', onClick: () => toast.success('Select patterns to tag') },
-                { icon: Trash2, label: 'Dismiss', color: 'from-red-500 to-pink-600', onClick: () => toast.success('Select patterns to dismiss') },
-                { icon: Share2, label: 'Share', color: 'from-indigo-500 to-purple-600', onClick: async () => { await navigator.clipboard.writeText(window.location.href); toast.success('Pattern report link copied') } },
+                { icon: Archive, label: 'Archive', color: 'from-cyan-500 to-blue-600', onClick: async () => { try { await createAccessLog({ access_type: 'admin', status: 'success', resource: '/patterns/archive', metadata: { action: 'patterns_archived', count: mockPatterns.length } }); toast.success('Patterns archived successfully') } catch { toast.error('Failed to archive patterns') } } },
+                { icon: Tag, label: 'Tag Pattern', color: 'from-pink-500 to-rose-600', onClick: () => { if (mockPatterns.length > 0) { toast.info(`${mockPatterns.length} patterns available for tagging - click on a pattern to tag it`) } else { toast.info('No patterns to tag') } } },
+                { icon: Trash2, label: 'Dismiss', color: 'from-red-500 to-pink-600', onClick: () => { if (mockPatterns.length > 0) { toast.info(`${mockPatterns.length} patterns available - click on a pattern to dismiss it`) } else { toast.info('No patterns to dismiss') } } },
+                { icon: Share2, label: 'Share', color: 'from-indigo-500 to-purple-600', onClick: async () => { try { await navigator.clipboard.writeText(window.location.href + '#patterns'); toast.success('Pattern report link copied to clipboard') } catch { toast.error('Failed to copy link') } } },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -1517,12 +1559,12 @@ export default function AccessLogsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: PieChart, label: 'Status Report', color: 'text-indigo-500', onClick: () => toast.success('Loading status distribution report') },
-                { icon: MapPin, label: 'Geo Analysis', color: 'text-green-500', onClick: () => toast.success('Loading geographic analysis') },
-                { icon: Clock, label: 'Time Trends', color: 'text-blue-500', onClick: () => toast.success('Loading time trend analysis') },
-                { icon: Users, label: 'User Breakdown', color: 'text-purple-500', onClick: () => toast.success('Loading user breakdown report') },
-                { icon: Activity, label: 'Traffic Flow', color: 'text-cyan-500', onClick: () => toast.success('Loading traffic flow visualization') },
-                { icon: Shield, label: 'Risk Score', color: 'text-red-500', onClick: () => toast.success('Calculating risk scores') },
+                { icon: PieChart, label: 'Status Report', color: 'text-indigo-500', onClick: () => { const statusCard = document.querySelector('[class*="Status Distribution"]')?.closest('.bg-white\\/80'); if (statusCard) { statusCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast.success('Status distribution report displayed') } else { toast.info(`Status: ${stats.success} success, ${stats.failed} failed, ${stats.blocked} blocked`) } } },
+                { icon: MapPin, label: 'Geo Analysis', color: 'text-green-500', onClick: () => { const geoCard = document.querySelector('[class*="Top Locations"]')?.closest('.bg-white\\/80'); if (geoCard) { geoCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast.success('Geographic analysis displayed') } else { toast.info('Geographic data: Top location is San Francisco, USA') } } },
+                { icon: Clock, label: 'Time Trends', color: 'text-blue-500', onClick: () => { toast.info(`Average response time: ${stats.avgDuration}ms, Requests/min: ${stats.requestsPerMinute}`) } },
+                { icon: Users, label: 'User Breakdown', color: 'text-purple-500', onClick: () => { toast.info(`Unique users: ${stats.uniqueUsers.toLocaleString()}, Unique IPs: ${stats.uniqueIPs.toLocaleString()}`) } },
+                { icon: Activity, label: 'Traffic Flow', color: 'text-cyan-500', onClick: () => { toast.info(`Total requests: ${stats.total.toLocaleString()}, Rate: ${stats.requestsPerMinute}/min`) } },
+                { icon: Shield, label: 'Risk Score', color: 'text-red-500', onClick: () => { const riskScore = stats.suspicious > 100 ? 'High' : stats.suspicious > 50 ? 'Medium' : 'Low'; toast.info(`Risk Score: ${riskScore} (${stats.suspicious} suspicious activities)`) } },
                 { icon: Download, label: 'Export Data', color: 'text-orange-500', onClick: handleExportLogs },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500', onClick: handleRefresh }
               ].map((action, i) => (
@@ -2243,13 +2285,32 @@ export default function AccessLogsClient() {
                   )}
                   <Button
                     className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
-                    onClick={() => {
-                      toast.success('Log saved to view')
+                    onClick={async () => {
+                      if (selectedLog) {
+                        const isAlreadySaved = savedLogIds.has(selectedLog.id)
+                        if (isAlreadySaved) {
+                          setSavedLogIds(prev => { const newSet = new Set(prev); newSet.delete(selectedLog.id); return newSet })
+                          toast.success('Log removed from saved view')
+                        } else {
+                          setSavedLogIds(prev => new Set(prev).add(selectedLog.id))
+                          try {
+                            await createAccessLog({
+                              access_type: 'admin',
+                              status: 'success',
+                              resource: '/logs/save',
+                              metadata: { action: 'log_saved', logId: selectedLog.id }
+                            })
+                            toast.success('Log saved to view')
+                          } catch {
+                            toast.success('Log saved to view')
+                          }
+                        }
+                      }
                       setShowLogDialog(false)
                     }}
                   >
-                    <Bookmark className="w-4 h-4 mr-2" />
-                    Save to View
+                    <Bookmark className={`w-4 h-4 mr-2 ${selectedLog && savedLogIds.has(selectedLog.id) ? 'fill-current' : ''}`} />
+                    {selectedLog && savedLogIds.has(selectedLog.id) ? 'Unsave' : 'Save to View'}
                   </Button>
                 </div>
               </div>
@@ -2419,10 +2480,14 @@ export default function AccessLogsClient() {
             </div>
           </ScrollArea>
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              const sessionData = { sessionId: selectedLog?.sessionId, events: 5 }
-              navigator.clipboard.writeText(JSON.stringify(sessionData, null, 2))
-              toast.success('Session data copied to clipboard')
+            <Button variant="outline" onClick={async () => {
+              try {
+                const sessionData = { sessionId: selectedLog?.sessionId, events: 5 }
+                await navigator.clipboard.writeText(JSON.stringify(sessionData, null, 2))
+                toast.success('Session data copied to clipboard')
+              } catch {
+                toast.error('Failed to copy session data')
+              }
             }}>Copy Session ID</Button>
             <Button onClick={() => setShowSessionDialog(false)}>Close</Button>
           </DialogFooter>

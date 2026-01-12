@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { SidebarEnhanced } from '@/components/navigation/sidebar-enhanced'
 import { MobileAdminNav } from '@/components/admin/mobile-admin-nav'
 import { ErrorBoundary } from '@/components/error-boundary'

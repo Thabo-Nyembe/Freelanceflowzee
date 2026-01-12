@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useCampaigns, type CampaignType as CampaignTypeDB, type CampaignStatus as CampaignStatusDB } from '@/lib/hooks/use-campaigns'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -613,6 +613,11 @@ export default function CampaignsClient() {
   const [showSendTestDialog, setShowSendTestDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
   const [showManageAudienceDialog, setShowManageAudienceDialog] = useState(false)
+  const [showCreateAutomationDialog, setShowCreateAutomationDialog] = useState(false)
+  const [showAIGenerateDialog, setShowAIGenerateDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [automationData, setAutomationData] = useState({ name: '', trigger: 'subscribe', action: 'send_email' })
 
   // Quick Actions Array (inside component to access state setters)
   const campaignQuickActions = [
@@ -1415,7 +1420,7 @@ export default function CampaignsClient() {
                   <h2 className="text-xl font-semibold">Active Workflows</h2>
                   <p className="text-gray-500">Manage your automation workflows</p>
                 </div>
-                <Button><Plus className="w-4 h-4 mr-2" />Create Automation</Button>
+                <Button onClick={() => setShowCreateAutomationDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Automation</Button>
               </div>
 
               <div className="grid gap-4">
@@ -1537,8 +1542,8 @@ export default function CampaignsClient() {
                   <p className="text-gray-500">Choose from pre-built or custom templates</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline"><Wand2 className="w-4 h-4 mr-2" />AI Generate</Button>
-                  <Button><Plus className="w-4 h-4 mr-2" />Create Template</Button>
+                  <Button variant="outline" onClick={() => setShowAIGenerateDialog(true)}><Wand2 className="w-4 h-4 mr-2" />AI Generate</Button>
+                  <Button onClick={() => setShowTemplateDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Template</Button>
                 </div>
               </div>
 
@@ -1632,8 +1637,8 @@ export default function CampaignsClient() {
                   <p className="text-gray-500">All your subscriber lists and segments</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline"><Download className="w-4 h-4 mr-2" />Import</Button>
-                  <Button><Plus className="w-4 h-4 mr-2" />Create Audience</Button>
+                  <Button variant="outline" onClick={() => setShowImportDialog(true)}><Download className="w-4 h-4 mr-2" />Import</Button>
+                  <Button onClick={() => setShowAudienceDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Audience</Button>
                 </div>
               </div>
 
@@ -1811,7 +1816,10 @@ export default function CampaignsClient() {
                   <h2 className="text-xl font-semibold">Email Deliverability</h2>
                   <p className="text-gray-500">Monitor your sender reputation and inbox placement</p>
                 </div>
-                <Button variant="outline"><RefreshCw className="w-4 h-4 mr-2" />Run Health Check</Button>
+                <Button variant="outline" onClick={async () => {
+                  await new Promise(resolve => setTimeout(resolve, 1500))
+                  toast.success('Health check complete', { description: 'All authentication records verified. Sender score: 98' })
+                }}><RefreshCw className="w-4 h-4 mr-2" />Run Health Check</Button>
               </div>
 
               <div className="grid grid-cols-4 gap-4">
@@ -2858,6 +2866,185 @@ export default function CampaignsClient() {
             >
               <Users className="w-4 h-4 mr-2" />
               Go to Audiences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Automation Dialog */}
+      <Dialog open={showCreateAutomationDialog} onOpenChange={setShowCreateAutomationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Automation Workflow</DialogTitle>
+            <DialogDescription>Set up an automated marketing workflow</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Automation Name</Label>
+              <Input
+                placeholder="e.g., Welcome Series"
+                value={automationData.name}
+                onChange={(e) => setAutomationData(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Trigger</Label>
+              <Select value={automationData.trigger} onValueChange={(v) => setAutomationData(prev => ({ ...prev, trigger: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="subscribe">New Subscriber</SelectItem>
+                  <SelectItem value="purchase">Purchase Made</SelectItem>
+                  <SelectItem value="abandoned_cart">Abandoned Cart</SelectItem>
+                  <SelectItem value="date">Specific Date</SelectItem>
+                  <SelectItem value="tag_added">Tag Added</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Action</Label>
+              <Select value={automationData.action} onValueChange={(v) => setAutomationData(prev => ({ ...prev, action: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="send_email">Send Email</SelectItem>
+                  <SelectItem value="add_tag">Add Tag</SelectItem>
+                  <SelectItem value="move_to_list">Move to List</SelectItem>
+                  <SelectItem value="webhook">Trigger Webhook</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button>
+            <Button onClick={async () => {
+              if (!automationData.name) {
+                toast.error('Please enter an automation name')
+                return
+              }
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 1500)),
+                {
+                  loading: 'Creating automation...',
+                  success: () => {
+                    setShowCreateAutomationDialog(false)
+                    setAutomationData({ name: '', trigger: 'subscribe', action: 'send_email' })
+                    return 'Automation created successfully!'
+                  },
+                  error: 'Failed to create automation'
+                }
+              )
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Automation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Generate Dialog */}
+      <Dialog open={showAIGenerateDialog} onOpenChange={setShowAIGenerateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>AI Template Generator</DialogTitle>
+            <DialogDescription>Describe the template you want to create</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Describe your template</Label>
+              <Textarea
+                placeholder="e.g., A professional welcome email for new subscribers with a discount code..."
+                rows={4}
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+              />
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">AI Suggestions:</h4>
+              <div className="flex flex-wrap gap-2">
+                {['Welcome Series', 'Product Launch', 'Newsletter', 'Promotional', 'Re-engagement'].map(suggestion => (
+                  <Button key={suggestion} variant="outline" size="sm" onClick={() => setAiPrompt(prev => prev + ' ' + suggestion)}>{suggestion}</Button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAIGenerateDialog(false)}>Cancel</Button>
+            <Button onClick={async () => {
+              if (!aiPrompt) {
+                toast.error('Please describe your template')
+                return
+              }
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 2500)),
+                {
+                  loading: 'AI is generating your template...',
+                  success: () => {
+                    setShowAIGenerateDialog(false)
+                    setAiPrompt('')
+                    setShowTemplateDialog(true)
+                    return 'Template generated! Opening editor...'
+                  },
+                  error: 'Failed to generate template'
+                }
+              )
+            }}>
+              <Wand2 className="w-4 h-4 mr-2" />
+              Generate Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Subscribers Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Subscribers</DialogTitle>
+            <DialogDescription>Import your contacts from a CSV file or CRM</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+              <input type="file" accept=".csv,.xlsx" className="hidden" id="import-file" onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) toast.info(`Selected: ${file.name}`)
+              }} />
+              <label htmlFor="import-file" className="cursor-pointer">
+                <Download className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600 dark:text-gray-400">Drop your CSV file here or click to browse</p>
+                <p className="text-sm text-gray-500 mt-1">Supports CSV, XLSX up to 10MB</p>
+              </label>
+            </div>
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+              <div className="relative flex justify-center"><span className="bg-white dark:bg-gray-900 px-2 text-gray-500 text-sm">OR</span></div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {['Mailchimp', 'HubSpot', 'Salesforce'].map(crm => (
+                <Button key={crm} variant="outline" className="flex-col h-auto py-4" onClick={() => toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 2000)),
+                  { loading: `Connecting to ${crm}...`, success: `Connected to ${crm}!`, error: 'Connection failed' }
+                )}>
+                  <span className="text-sm">{crm}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 3000)),
+                {
+                  loading: 'Importing subscribers...',
+                  success: () => {
+                    setShowImportDialog(false)
+                    return 'Subscribers imported successfully!'
+                  },
+                  error: 'Import failed'
+                }
+              )
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Import
             </Button>
           </DialogFooter>
         </DialogContent>

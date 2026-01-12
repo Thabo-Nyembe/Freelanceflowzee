@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -449,13 +449,13 @@ export default function TeamHubClient() {
   // UI State
   const [members] = useState<TeamMember[]>(mockMembers)
   const [channels, setChannels] = useState<Channel[]>(mockChannels)
-  const [messages] = useState<Message[]>(mockMessages)
+  const [messages, setMessages] = useState<Message[]>(mockMessages)
   const [activities] = useState<Activity[]>(mockActivities)
-  const [huddles] = useState<Huddle[]>(mockHuddles)
+  const [huddles, setHuddles] = useState<Huddle[]>(mockHuddles)
   const [apps, setApps] = useState<SlackApp[]>(mockApps)
-  const [workflows] = useState<SlackWorkflow[]>(mockWorkflows)
+  const [workflows, setWorkflows] = useState<SlackWorkflow[]>(mockWorkflows)
   const [reminders] = useState<Reminder[]>(mockReminders)
-  const [savedItems] = useState<SavedItem[]>(mockSavedItems)
+  const [savedItems, setSavedItems] = useState<SavedItem[]>(mockSavedItems)
   const [userGroups] = useState<UserGroup[]>(mockUserGroups)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
@@ -497,6 +497,36 @@ export default function TeamHubClient() {
     bio: '',
     skills: ''
   })
+
+  // Channel Form State
+  const [channelForm, setChannelForm] = useState({
+    name: '',
+    description: '',
+    isPrivate: false
+  })
+
+  // Workflow Form State
+  const [workflowForm, setWorkflowForm] = useState({
+    name: '',
+    description: '',
+    trigger: 'channel_message' as WorkflowTrigger
+  })
+
+  // Huddle Form State
+  const [huddleForm, setHuddleForm] = useState({
+    channelId: '',
+    enableVideo: false,
+    recordHuddle: false
+  })
+
+  // Reply Form State
+  const [replyContent, setReplyContent] = useState('')
+
+  // API Token State
+  const [apiToken, setApiToken] = useState('xoxb-****************************')
+
+  // Selected message for reactions
+  const [selectedMessageForReaction, setSelectedMessageForReaction] = useState<Message | null>(null)
 
   // Fetch team members
   const fetchMembers = useCallback(async () => {
@@ -810,7 +840,10 @@ export default function TeamHubClient() {
     setShowThreadDialog(true)
   }
 
-  const handleOpenReactions = () => {
+  const handleOpenReactions = (message?: Message) => {
+    if (message) {
+      setSelectedMessageForReaction(message)
+    }
     setShowReactionsDialog(true)
   }
 
@@ -1262,7 +1295,7 @@ export default function TeamHubClient() {
                               </div>
 
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleOpenReactions}><Smile className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleOpenReactions(message)}><Smile className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStartThread(message)}><MessageCircle className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
                                   setSavedItems(prev => [...prev, { id: `saved-${Date.now()}`, type: 'message', title: message.content.substring(0, 30), time: new Date().toLocaleTimeString() }])
@@ -1486,7 +1519,13 @@ export default function TeamHubClient() {
                           <span>{app.installCount.toLocaleString()} installs</span>
                         </div>
                       </div>
-                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setShowAddAppDialog(true); toast.success(`${app.name} added`, { description: 'App installed successfully' }) }}>Add</Button>
+                      <Button size="sm" onClick={(e) => {
+                        e.stopPropagation()
+                        setApps(prev => prev.map(a =>
+                          a.id === app.id ? { ...a, isInstalled: true, isEnabled: true } : a
+                        ))
+                        toast.success(`${app.name} added`, { description: 'App installed successfully' })
+                      }}>Add</Button>
                     </div>
                   ))}
                 </div>
@@ -1812,8 +1851,11 @@ export default function TeamHubClient() {
                         <div>
                           <Label>API Token</Label>
                           <div className="flex gap-2 mt-1">
-                            <Input type="password" value="xoxb-****************************" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('xoxb-****************************'); toast.success('Copied!', { description: 'API token copied to clipboard' }) }}>
+                            <Input type="password" value={apiToken} readOnly className="font-mono" />
+                            <Button variant="outline" onClick={() => {
+                              navigator.clipboard.writeText(apiToken)
+                              toast.success('Copied!', { description: 'API token copied to clipboard' })
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1822,7 +1864,13 @@ export default function TeamHubClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://hooks.slack.com/services/..." className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate the API token? Existing integrations will stop working.')) { toast.success('Token regenerated', { description: 'New API token generated successfully' }) } }}>
+                        <Button variant="outline" onClick={() => {
+                          if (confirm('Are you sure you want to regenerate the API token? Existing integrations will stop working.')) {
+                            const newToken = `xoxb-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
+                            setApiToken(newToken)
+                            toast.success('Token regenerated', { description: 'New API token generated successfully' })
+                          }
+                        }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -1965,7 +2013,13 @@ export default function TeamHubClient() {
                             <Download className="w-4 h-4 mr-2" />
                             Export Workspace Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => { if (confirm('Clear all cached data? This action cannot be undone.')) { toast.success('Cache cleared', { description: 'All cached data has been removed' }) } }}>
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => {
+                            if (confirm('Clear all cached data? This action cannot be undone.')) {
+                              localStorage.clear()
+                              sessionStorage.clear()
+                              toast.success('Cache cleared', { description: 'All cached data has been removed' })
+                            }
+                          }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -1986,7 +2040,19 @@ export default function TeamHubClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset Workspace</p>
                             <p className="text-sm text-red-600/70">Reset all workspace settings</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => { if (confirm('Are you sure you want to reset all workspace settings? This cannot be undone.')) { toast.success('Workspace reset', { description: 'All settings restored to defaults' }) } }}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            if (confirm('Are you sure you want to reset all workspace settings? This cannot be undone.')) {
+                              // Reset form states to defaults
+                              setChannelForm({ name: '', description: '', isPrivate: false })
+                              setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
+                              setHuddleForm({ channelId: '', enableVideo: false, recordHuddle: false })
+                              setApiToken('xoxb-****************************')
+                              setSettingsTab('general')
+                              // Clear any cached settings
+                              localStorage.removeItem('team-hub-settings')
+                              toast.success('Workspace reset', { description: 'All settings restored to defaults' })
+                            }
+                          }}>
                             Reset
                           </Button>
                         </div>
@@ -2372,23 +2438,70 @@ export default function TeamHubClient() {
             <div className="space-y-4 py-4">
               <div>
                 <Label>Channel Name</Label>
-                <Input placeholder="project-updates" className="mt-1" />
+                <Input
+                  placeholder="project-updates"
+                  className="mt-1"
+                  value={channelForm.name}
+                  onChange={(e) => setChannelForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Description</Label>
-                <Input placeholder="Updates and discussions for the project" className="mt-1" />
+                <Input
+                  placeholder="Updates and discussions for the project"
+                  className="mt-1"
+                  value={channelForm.description}
+                  onChange={(e) => setChannelForm(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
               <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Private Channel</p>
                   <p className="text-sm text-gray-500">Only invited members can see this channel</p>
                 </div>
-                <Switch />
+                <Switch
+                  checked={channelForm.isPrivate}
+                  onCheckedChange={(checked) => setChannelForm(prev => ({ ...prev, isPrivate: checked }))}
+                />
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCreateChannelDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowCreateChannelDialog(false); toast.success('Channel created') }}>Create Channel</Button>
+              <Button variant="outline" onClick={() => {
+                setShowCreateChannelDialog(false)
+                setChannelForm({ name: '', description: '', isPrivate: false })
+              }}>Cancel</Button>
+              <Button
+                disabled={!channelForm.name.trim()}
+                onClick={() => {
+                  const newChannel: Channel = {
+                    id: `channel-${Date.now()}`,
+                    name: channelForm.name.toLowerCase().replace(/\s+/g, '-'),
+                    type: channelForm.isPrivate ? 'private' : 'public',
+                    description: channelForm.description,
+                    topic: '',
+                    memberCount: 1,
+                    unreadCount: 0,
+                    mentionCount: 0,
+                    isPinned: false,
+                    isMuted: false,
+                    isArchived: false,
+                    isStarred: false,
+                    lastMessage: '',
+                    lastMessageAt: new Date().toISOString(),
+                    createdBy: 'You',
+                    createdAt: new Date().toISOString().split('T')[0],
+                    retentionDays: null,
+                    canvasCount: 0,
+                    bookmarkCount: 0,
+                    notificationLevel: 'all',
+                    externalConnections: []
+                  }
+                  setChannels(prev => [...prev, newChannel])
+                  setShowCreateChannelDialog(false)
+                  setChannelForm({ name: '', description: '', isPrivate: false })
+                  toast.success('Channel created', { description: `#${newChannel.name} is ready to use` })
+                }}
+              >Create Channel</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -2406,7 +2519,11 @@ export default function TeamHubClient() {
             <div className="space-y-4 py-4">
               <div>
                 <Label>Select Channel</Label>
-                <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <select
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={huddleForm.channelId || channels[0]?.id || ''}
+                  onChange={(e) => setHuddleForm(prev => ({ ...prev, channelId: e.target.value }))}
+                >
                   {channels.map(channel => (
                     <option key={channel.id} value={channel.id}>#{channel.name}</option>
                   ))}
@@ -2417,19 +2534,53 @@ export default function TeamHubClient() {
                   <p className="font-medium text-gray-900 dark:text-white">Enable Video</p>
                   <p className="text-sm text-gray-500">Start with video on</p>
                 </div>
-                <Switch />
+                <Switch
+                  checked={huddleForm.enableVideo}
+                  onCheckedChange={(checked) => setHuddleForm(prev => ({ ...prev, enableVideo: checked }))}
+                />
               </div>
               <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">Record Huddle</p>
                   <p className="text-sm text-gray-500">Record this conversation</p>
                 </div>
-                <Switch />
+                <Switch
+                  checked={huddleForm.recordHuddle}
+                  onCheckedChange={(checked) => setHuddleForm(prev => ({ ...prev, recordHuddle: checked }))}
+                />
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowHuddleDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => { setShowHuddleDialog(false); toast.success('Huddle started', { description: 'Connecting to audio channel...' }) }}>
+              <Button variant="outline" onClick={() => {
+                setShowHuddleDialog(false)
+                setHuddleForm({ channelId: '', enableVideo: false, recordHuddle: false })
+              }}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => {
+                const selectedChannelId = huddleForm.channelId || channels[0]?.id
+                const selectedChannel = channels.find(c => c.id === selectedChannelId)
+                const newHuddle: Huddle = {
+                  id: `huddle-${Date.now()}`,
+                  channelId: selectedChannelId,
+                  channelName: selectedChannel?.name || 'general',
+                  status: 'active',
+                  startedAt: new Date().toISOString(),
+                  duration: 0,
+                  participants: [{
+                    userId: 'current-user',
+                    name: 'You',
+                    avatar: '/avatars/default.jpg',
+                    isSpeaking: false,
+                    isMuted: false,
+                    hasVideo: huddleForm.enableVideo
+                  }],
+                  isRecording: huddleForm.recordHuddle,
+                  hasScreenShare: false
+                }
+                setHuddles(prev => [...prev, newHuddle])
+                setShowHuddleDialog(false)
+                setHuddleForm({ channelId: '', enableVideo: false, recordHuddle: false })
+                toast.success('Huddle started', { description: `Connected to #${selectedChannel?.name || 'general'}` })
+              }}>
                 <Headphones className="w-4 h-4 mr-2" />
                 Start Huddle
               </Button>
@@ -2549,15 +2700,29 @@ export default function TeamHubClient() {
             <div className="space-y-4 py-4">
               <div>
                 <Label>Workflow Name</Label>
-                <Input placeholder="My Workflow" className="mt-1" />
+                <Input
+                  placeholder="My Workflow"
+                  className="mt-1"
+                  value={workflowForm.name}
+                  onChange={(e) => setWorkflowForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Description</Label>
-                <Input placeholder="What does this workflow do?" className="mt-1" />
+                <Input
+                  placeholder="What does this workflow do?"
+                  className="mt-1"
+                  value={workflowForm.description}
+                  onChange={(e) => setWorkflowForm(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Trigger</Label>
-                <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <select
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={workflowForm.trigger}
+                  onChange={(e) => setWorkflowForm(prev => ({ ...prev, trigger: e.target.value as WorkflowTrigger }))}
+                >
                   <option value="channel_message">When a message is posted</option>
                   <option value="emoji_reaction">When an emoji is added</option>
                   <option value="new_member">When a new member joins</option>
@@ -2572,8 +2737,33 @@ export default function TeamHubClient() {
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowWorkflowBuilderDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowWorkflowBuilderDialog(false); toast.success('Workflow created', { description: 'Add steps to complete your workflow' }) }}>
+              <Button variant="outline" onClick={() => {
+                setShowWorkflowBuilderDialog(false)
+                setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
+              }}>Cancel</Button>
+              <Button
+                disabled={!workflowForm.name.trim()}
+                onClick={() => {
+                  const newWorkflow: SlackWorkflow = {
+                    id: `workflow-${Date.now()}`,
+                    name: workflowForm.name,
+                    description: workflowForm.description,
+                    trigger: workflowForm.trigger,
+                    triggerChannel: null,
+                    steps: [],
+                    isEnabled: true,
+                    createdBy: 'You',
+                    createdAt: new Date().toISOString().split('T')[0],
+                    runCount: 0,
+                    lastRun: null,
+                    errorCount: 0
+                  }
+                  setWorkflows(prev => [...prev, newWorkflow])
+                  setShowWorkflowBuilderDialog(false)
+                  setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
+                  toast.success('Workflow created', { description: 'Add steps to complete your workflow' })
+                }}
+              >
                 Create Workflow
               </Button>
             </div>
@@ -2595,7 +2785,29 @@ export default function TeamHubClient() {
                   <button
                     key={emoji}
                     className="w-10 h-10 flex items-center justify-center text-2xl hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                    onClick={() => { setShowReactionsDialog(false); toast.success('Reaction added', { description: `You reacted with ${emoji}` }) }}
+                    onClick={() => {
+                      if (selectedMessageForReaction) {
+                        setMessages(prev => prev.map(msg =>
+                          msg.id === selectedMessageForReaction.id
+                            ? {
+                                ...msg,
+                                reactions: [
+                                  ...msg.reactions.filter(r => r.emoji !== emoji),
+                                  {
+                                    emoji,
+                                    count: (msg.reactions.find(r => r.emoji === emoji)?.count || 0) + 1,
+                                    users: [...(msg.reactions.find(r => r.emoji === emoji)?.users || []), 'current-user'],
+                                    isCustom: false
+                                  }
+                                ]
+                              }
+                            : msg
+                        ))
+                      }
+                      setShowReactionsDialog(false)
+                      setSelectedMessageForReaction(null)
+                      toast.success('Reaction added', { description: `You reacted with ${emoji}` })
+                    }}
                   >
                     {emoji}
                   </button>
@@ -2630,15 +2842,70 @@ export default function TeamHubClient() {
                   </div>
                   <p className="text-sm">{selectedMessageForThread.content}</p>
                 </div>
+                {/* Show existing replies */}
+                {selectedMessageForThread.replies.length > 0 && (
+                  <div className="space-y-2">
+                    {selectedMessageForThread.replies.map(reply => (
+                      <div key={reply.id} className="p-2 bg-gray-50 dark:bg-gray-800 rounded-lg ml-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Avatar className="w-5 h-5">
+                            <AvatarImage src={reply.senderAvatar} />
+                            <AvatarFallback>{reply.senderName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium text-xs">{reply.senderName}</span>
+                          <span className="text-xs text-gray-500">{formatTime(reply.timestamp)}</span>
+                        </div>
+                        <p className="text-xs">{reply.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div>
                   <Label>Your Reply</Label>
-                  <Input placeholder="Write a reply..." className="mt-1" />
+                  <Input
+                    placeholder="Write a reply..."
+                    className="mt-1"
+                    value={replyContent}
+                    onChange={(e) => setReplyContent(e.target.value)}
+                  />
                 </div>
               </div>
             )}
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => { setShowThreadDialog(false); setSelectedMessageForThread(null) }}>Cancel</Button>
-              <Button onClick={() => { setShowThreadDialog(false); setSelectedMessageForThread(null); toast.success('Reply sent', { description: 'Your message has been posted to the thread' }) }}>
+              <Button variant="outline" onClick={() => {
+                setShowThreadDialog(false)
+                setSelectedMessageForThread(null)
+                setReplyContent('')
+              }}>Cancel</Button>
+              <Button
+                disabled={!replyContent.trim()}
+                onClick={() => {
+                  if (selectedMessageForThread && replyContent.trim()) {
+                    const newReply: Reply = {
+                      id: `reply-${Date.now()}`,
+                      content: replyContent,
+                      senderId: 'current-user',
+                      senderName: 'You',
+                      senderAvatar: '/avatars/default.jpg',
+                      timestamp: new Date().toISOString(),
+                      reactions: []
+                    }
+                    setMessages(prev => prev.map(msg =>
+                      msg.id === selectedMessageForThread.id
+                        ? {
+                            ...msg,
+                            replies: [...msg.replies, newReply],
+                            replyCount: msg.replyCount + 1
+                          }
+                        : msg
+                    ))
+                    setShowThreadDialog(false)
+                    setSelectedMessageForThread(null)
+                    setReplyContent('')
+                    toast.success('Reply sent', { description: 'Your message has been posted to the thread' })
+                  }
+                }}
+              >
                 Send Reply
               </Button>
             </div>

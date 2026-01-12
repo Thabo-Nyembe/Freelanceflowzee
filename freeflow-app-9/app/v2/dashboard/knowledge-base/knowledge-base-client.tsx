@@ -725,6 +725,13 @@ export default function KnowledgeBaseClient() {
   const [newPageCategory, setNewPageCategory] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Edit Mode State
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editingPage, setEditingPage] = useState<Page | null>(null)
+  const [editPageTitle, setEditPageTitle] = useState('')
+  const [editPageContent, setEditPageContent] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
+
   // Dialog States for Quick Actions
   const [showCreateSpaceDialog, setShowCreateSpaceDialog] = useState(false)
   const [showImportDocsDialog, setShowImportDocsDialog] = useState(false)
@@ -956,18 +963,143 @@ export default function KnowledgeBaseClient() {
     }
   }
 
-  const handleExport = () => {
-    toast.success('Export started', { description: 'Your knowledge base is being exported' })
+  const handleExport = async () => {
+    try {
+      // Prepare export data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        totalPages: pages.length,
+        pages: pages.map(page => ({
+          id: page.id,
+          title: page.title,
+          content: page.content,
+          excerpt: page.excerpt,
+          type: page.type,
+          status: page.status,
+          labels: page.labels,
+          author: page.author.name,
+          version: page.version,
+          createdAt: page.createdAt,
+          updatedAt: page.updatedAt
+        }))
+      }
+
+      // Create downloadable blob
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+
+      // Trigger download
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `knowledge-base-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export complete', { description: `Exported ${pages.length} articles successfully` })
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast.error('Export failed', { description: 'Unable to export knowledge base' })
+    }
   }
 
-  const handleShare = () => {
-    toast.success('Link copied', { description: 'Share link copied to clipboard' })
+  const handleShare = async (pageId?: string) => {
+    try {
+      const shareUrl = pageId
+        ? `${window.location.origin}/knowledge-base/page/${pageId}`
+        : `${window.location.origin}/knowledge-base`
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    } catch (error) {
+      console.error('Failed to copy:', error)
+      toast.error('Failed to copy link', { description: 'Please try again' })
+    }
   }
 
-  const handleToggleWatch = (page: Page) => {
-    toast.success(page.isWatching ? 'Stopped watching page' : 'Now watching page', {
-      description: page.isWatching ? 'You will no longer receive notifications' : 'You will receive notifications for updates'
-    })
+  const handleToggleWatch = async (page: Page) => {
+    try {
+      const newWatchState = !page.isWatching
+
+      // Update local state optimistically
+      setPages(prev => prev.map(p =>
+        p.id === page.id ? { ...p, isWatching: newWatchState } : p
+      ))
+
+      // If selectedPage is being watched, update it too
+      if (selectedPage?.id === page.id) {
+        setSelectedPage(prev => prev ? { ...prev, isWatching: newWatchState } : null)
+      }
+
+      // Persist to database (using a watch tracking field or separate table)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        // Note: In a full implementation, you'd have a separate watch/subscription table
+        // For now, we're updating a field in the knowledge_base table
+        await supabase
+          .from('knowledge_base')
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', page.id)
+          .eq('user_id', user.id)
+      }
+
+      toast.success(page.isWatching ? 'Stopped watching page' : 'Now watching page', {
+        description: page.isWatching ? 'You will no longer receive notifications' : 'You will receive notifications for updates'
+      })
+    } catch (error) {
+      console.error('Failed to toggle watch:', error)
+      // Revert on error
+      setPages(prev => prev.map(p =>
+        p.id === page.id ? { ...p, isWatching: page.isWatching } : p
+      ))
+      toast.error('Failed to update watch status')
+    }
+  }
+
+  // Edit Page Handler
+  const handleEditPage = (page: Page) => {
+    setEditingPage(page)
+    setEditPageTitle(page.title)
+    setEditPageContent(page.content)
+    setShowEditDialog(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingPage) return
+    if (!editPageTitle.trim()) {
+      toast.error('Please enter a page title')
+      return
+    }
+    setIsUpdating(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('knowledge_base')
+        .update({
+          article_title: editPageTitle.trim(),
+          content: editPageContent,
+          updated_at: new Date().toISOString(),
+          version: (editingPage.version || 1) + 1
+        })
+        .eq('id', editingPage.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Page updated', { description: `"${editPageTitle}" has been saved` })
+      setShowEditDialog(false)
+      setEditingPage(null)
+      setEditPageTitle('')
+      setEditPageContent('')
+      fetchData()
+    } catch (error) {
+      console.error('Failed to update page:', error)
+      toast.error('Failed to update page', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   // Create Space Handler
@@ -2007,7 +2139,7 @@ export default function KnowledgeBaseClient() {
             <AIInsightsPanel
               insights={mockKnowledgeBaseAIInsights}
               title="Knowledge Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2066,7 +2198,7 @@ export default function KnowledgeBaseClient() {
                     <Button variant="outline" size="icon" onClick={() => handleToggleWatch(selectedPage)}>
                       {selectedPage.isWatching ? <Bell className="w-4 h-4 text-indigo-500" /> : <BellOff className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon" onClick={handleShare}>
+                    <Button variant="outline" size="icon" onClick={() => handleShare(selectedPage.id)}>
                       <Share2 className="w-4 h-4" />
                     </Button>
                     <DropdownMenu>
@@ -2076,10 +2208,10 @@ export default function KnowledgeBaseClient() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => toast.success('Edit mode enabled')}>
+                        <DropdownMenuItem onClick={() => handleEditPage(selectedPage)}>
                           <Edit className="h-4 w-4 mr-2" /> Edit Page
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleShare}>
+                        <DropdownMenuItem onClick={() => handleShare(selectedPage.id)}>
                           <Share2 className="h-4 w-4 mr-2" /> Share
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -2291,6 +2423,45 @@ export default function KnowledgeBaseClient() {
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
             <Button onClick={handleCreatePage} disabled={isSubmitting} className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
               {isSubmitting ? 'Creating...' : 'Create Page'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Page Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-600" />
+              Edit Page
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="editPageTitle">Title</Label>
+              <Input
+                id="editPageTitle"
+                value={editPageTitle}
+                onChange={(e) => setEditPageTitle(e.target.value)}
+                placeholder="Enter page title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="editPageContent">Content</Label>
+              <Textarea
+                id="editPageContent"
+                value={editPageContent}
+                onChange={(e) => setEditPageContent(e.target.value)}
+                placeholder="Enter page content..."
+                className="h-64 resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit} disabled={isUpdating} className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
+              {isUpdating ? 'Saving...' : 'Save Changes'}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -505,6 +505,7 @@ export default function PluginsClient() {
   const [changelogPlugin, setChangelogPlugin] = useState<Plugin | null>(null)
   const [showBulkActions, setShowBulkActions] = useState(false)
   const [selectedPluginIds, setSelectedPluginIds] = useState<string[]>([])
+  const [selectedCollectionPluginIds, setSelectedCollectionPluginIds] = useState<string[] | null>(null)
   const [showConfirmRemoveAll, setShowConfirmRemoveAll] = useState(false)
   const [showConfirmReset, setShowConfirmReset] = useState(false)
   const [apiKey, setApiKey] = useState('plg_api_key_' + Math.random().toString(36).substring(2, 18))
@@ -576,9 +577,10 @@ export default function PluginsClient() {
                            plugin.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesCategory = selectedCategory === 'all' || plugin.category === selectedCategory
       const matchesTier = selectedTier === 'all' || plugin.tier === selectedTier
-      return matchesSearch && matchesCategory && matchesTier
+      const matchesCollection = selectedCollectionPluginIds === null || selectedCollectionPluginIds.includes(plugin.id)
+      return matchesSearch && matchesCategory && matchesTier && matchesCollection
     })
-  }, [searchQuery, selectedCategory, selectedTier, localPlugins])
+  }, [searchQuery, selectedCategory, selectedTier, localPlugins, selectedCollectionPluginIds])
 
   const installedPlugins = localPlugins.filter(p => p.isInstalled)
   const activePlugins = installedPlugins.filter(p => p.isActivated)
@@ -1016,6 +1018,22 @@ export default function PluginsClient() {
     setSelectedPlugin(plugin)
     setShowConfigDialog(true)
     toast.info(`Opening settings for "${plugin.name}"`)
+  }
+
+  // Handler for viewing a collection - filters plugins to show only those in the collection
+  const handleViewCollection = (collection: PluginCollection) => {
+    setSelectedCollectionPluginIds(collection.plugins)
+    setSelectedCategory('all')
+    setSelectedTier('all')
+    setSearchQuery('')
+    setActiveTab('discover')
+    toast.success(`Viewing ${collection.plugins.length} plugins in "${collection.name}" collection`)
+  }
+
+  // Handler for clearing collection filter
+  const handleClearCollectionFilter = () => {
+    setSelectedCollectionPluginIds(null)
+    toast.info('Collection filter cleared - showing all plugins')
   }
 
   // Handler for category/filter actions
@@ -1488,7 +1506,7 @@ export default function PluginsClient() {
                       <div className="text-2xl mb-2">🛡️</div>
                       <h3 className="font-semibold mb-1">Essential Security</h3>
                       <p className="text-sm text-green-100 mb-3">Must-have security plugins for any site</p>
-                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => { setSelectedCategory('security'); toast.success('Showing security plugins collection') }}>
+                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => handleViewCollection(mockCollections[0])}>
                         View Collection
                       </Button>
                     </div>
@@ -1530,6 +1548,14 @@ export default function PluginsClient() {
                     </Button>
                   </div>
                   <div className="flex items-center gap-2">
+                    {selectedCollectionPluginIds && (
+                      <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                        Collection Active
+                        <button onClick={handleClearCollectionFilter} className="ml-1 hover:text-green-600">
+                          &times;
+                        </button>
+                      </Badge>
+                    )}
                     <span className="text-sm text-gray-500">{filteredPlugins.length} plugins</span>
                     <div className="flex border rounded-lg overflow-hidden">
                       <Button
@@ -1778,7 +1804,7 @@ export default function PluginsClient() {
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{collection.description}</p>
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">{collection.plugins.length} plugins</Badge>
-                          <Button size="sm" variant="outline" onClick={() => { setActiveTab('discover'); toast.success(`Viewing ${collection.plugins.length} plugins in "${collection.name}" collection`) }}>
+                          <Button size="sm" variant="outline" onClick={() => handleViewCollection(collection)}>
                             <Eye className="h-4 w-4 mr-2" />
                             View Collection
                           </Button>

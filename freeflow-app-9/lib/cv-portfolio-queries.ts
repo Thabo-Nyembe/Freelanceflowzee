@@ -875,3 +875,65 @@ export async function incrementShareViewCount(
 
   return { error }
 }
+
+// ==================== FILE UPLOAD ====================
+
+export async function uploadPortfolioImage(
+  userId: string,
+  file: File,
+  type: 'project' | 'avatar' | 'cover' = 'project'
+): Promise<{ data: { url: string } | null; error: any }> {
+  try {
+    const supabase = createClient()
+
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${userId}/${type}/${Date.now()}.${fileExt}`
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('portfolio-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      })
+
+    if (error) throw error
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('portfolio-images')
+      .getPublicUrl(fileName)
+
+    return { data: { url: urlData.publicUrl }, error: null }
+  } catch (error) {
+    console.error('Error uploading portfolio image:', error)
+    return { data: null, error }
+  }
+}
+
+export async function deletePortfolioImage(
+  imageUrl: string
+): Promise<{ error: any }> {
+  try {
+    const supabase = createClient()
+
+    // Extract path from URL
+    const urlParts = imageUrl.split('/portfolio-images/')
+    if (urlParts.length < 2) {
+      return { error: new Error('Invalid image URL') }
+    }
+
+    const filePath = urlParts[1]
+
+    const { error } = await supabase.storage
+      .from('portfolio-images')
+      .remove([filePath])
+
+    if (error) throw error
+    return { error: null }
+  } catch (error) {
+    console.error('Error deleting portfolio image:', error)
+    return { error }
+  }
+}

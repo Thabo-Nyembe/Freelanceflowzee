@@ -471,7 +471,8 @@ const mockIntegrationsActivities = [
 // Quick actions are defined inside the component to access state setters
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
-  const { integrations, stats } = useMarketplaceIntegrations(initialIntegrations, initialStats)
+  const { integrations, stats, createIntegration, updateIntegration, deleteIntegration, connectIntegration, disconnectIntegration } = useMarketplaceIntegrations(initialIntegrations, initialStats)
+  const [apps, setApps] = useState<AppListing[]>(mockApps)
   const [activeTab, setActiveTab] = useState('discover')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<AppCategory | 'all'>('all')
@@ -515,6 +516,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [newWebhookUrl, setNewWebhookUrl] = useState('')
   const [newWebhookEvents, setNewWebhookEvents] = useState<string[]>([])
   const [appToBlock, setAppToBlock] = useState('')
+  const [actionedInsights, setActionedInsights] = useState<Set<string>>(new Set())
 
   // Mock logs data
   const integrationLogs = [
@@ -540,11 +542,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   ]
 
   const filteredApps = useMemo(() => {
-    let apps = [...mockApps]
+    let appsList = [...apps]
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
-      apps = apps.filter(app =>
+      appsList = appsList.filter(app =>
         app.name.toLowerCase().includes(query) ||
         app.shortDescription.toLowerCase().includes(query) ||
         app.tags.some(tag => tag.toLowerCase().includes(query))
@@ -552,26 +554,26 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
     }
 
     if (selectedCategory !== 'all') {
-      apps = apps.filter(app => app.category === selectedCategory)
+      appsList = appsList.filter(app => app.category === selectedCategory)
     }
 
     switch (sortBy) {
       case 'popular':
-        apps.sort((a, b) => b.installCount - a.installCount)
+        appsList.sort((a, b) => b.installCount - a.installCount)
         break
       case 'rating':
-        apps.sort((a, b) => b.rating - a.rating)
+        appsList.sort((a, b) => b.rating - a.rating)
         break
       case 'newest':
-        apps.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
+        appsList.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
         break
     }
 
-    return apps
-  }, [searchQuery, selectedCategory, sortBy])
+    return appsList
+  }, [apps, searchQuery, selectedCategory, sortBy])
 
-  const installedApps = mockApps.filter(app => app.status === 'installed')
-  const featuredApps = mockApps.filter(app => app.featured)
+  const installedApps = apps.filter(app => app.status === 'installed')
+  const featuredApps = apps.filter(app => app.featured)
 
   const formatInstalls = (count: number) => {
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
@@ -581,9 +583,62 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
   // Handlers
   const handleInstall = (app: AppListing, plan: PricingPlan) => {
-    toast.success(`${app.name} installed successfully`)
+    // Update app status to installed
+    setApps(prev => prev.map(a =>
+      a.id === app.id
+        ? { ...a, status: 'installed' as const, currentPlan: plan.name, installCount: a.installCount + 1 }
+        : a
+    ))
+    toast.success(`${app.name} installed successfully with ${plan.name} plan`)
     setShowInstallDialog(false)
     setSelectedApp(null)
+  }
+
+  // Uninstall app handler
+  const handleUninstallApp = (app: AppListing) => {
+    setApps(prev => prev.map(a =>
+      a.id === app.id
+        ? { ...a, status: 'available' as const, currentPlan: undefined }
+        : a
+    ))
+    toast.success(`${app.name} uninstalled successfully`)
+    setShowUninstallDialog(false)
+    setSelectedAppForAction(null)
+  }
+
+  // Reconnect app handler
+  const handleReconnectApp = (app: AppListing) => {
+    setApps(prev => prev.map(a =>
+      a.id === app.id
+        ? { ...a, status: 'installed' as const }
+        : a
+    ))
+    toast.success(`${app.name} reconnected successfully`)
+    setShowReconnectDialog(false)
+    setSelectedAppForAction(null)
+  }
+
+  // Disconnect app handler
+  const handleDisconnectApp = (app: AppListing) => {
+    setApps(prev => prev.map(a =>
+      a.id === app.id
+        ? { ...a, status: 'pending' as const }
+        : a
+    ))
+    toast.success(`${app.name} disconnected successfully`)
+    setShowDisconnectDialog(false)
+    setSelectedAppForAction(null)
+  }
+
+  // Disconnect all apps handler
+  const handleDisconnectAllApps = () => {
+    setApps(prev => prev.map(a =>
+      a.status === 'installed'
+        ? { ...a, status: 'available' as const, currentPlan: undefined }
+        : a
+    ))
+    toast.success('All apps disconnected successfully')
+    setShowDisconnectAllDialog(false)
   }
 
   const renderStars = (rating: number) => {
@@ -703,7 +758,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           {/* Quick Stats */}
           <div className="grid grid-cols-4 gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{mockApps.length * 62}</div>
+              <div className="text-3xl font-bold">{apps.length * 62}</div>
               <div className="text-teal-100 text-sm">Total Apps</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
@@ -943,7 +998,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                     </div>
                     <div className="flex -space-x-2">
                       {collection.apps.slice(0, 4).map((appId, idx) => {
-                        const app = mockApps.find(a => a.id === appId)
+                        const app = apps.find(a => a.id === appId)
                         return app ? (
                           <div key={appId} className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm border-2 border-white">
                             {app.icon}
@@ -1899,7 +1954,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </div>
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-2 gap-3">
-                {mockApps
+                {apps
                   .filter(app =>
                     browseSearchQuery === '' ||
                     app.name.toLowerCase().includes(browseSearchQuery.toLowerCase()) ||
@@ -1941,7 +1996,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             </ScrollArea>
             <div className="flex justify-between items-center pt-2 border-t">
               <span className="text-sm text-gray-500">
-                {mockApps.filter(app =>
+                {apps.filter(app =>
                   browseSearchQuery === '' ||
                   app.name.toLowerCase().includes(browseSearchQuery.toLowerCase()) ||
                   app.category.toLowerCase().includes(browseSearchQuery.toLowerCase())
@@ -1979,7 +2034,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                 <p className="text-sm text-gray-500">Choose an app from our marketplace to install</p>
                 <ScrollArea className="h-[350px]">
                   <div className="space-y-2">
-                    {mockApps
+                    {apps
                       .filter(app => app.status !== 'installed')
                       .map(app => (
                         <Card
@@ -2132,6 +2187,12 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                   <Button
                     className="bg-teal-600 hover:bg-teal-700"
                     onClick={() => {
+                      // Update app status to installed
+                      setApps(prev => prev.map(a =>
+                        a.id === selectedAppToInstall.id
+                          ? { ...a, status: 'installed' as const, currentPlan: selectedInstallPlan.name, installCount: a.installCount + 1 }
+                          : a
+                      ))
                       toast.success(`${selectedAppToInstall.name} installed successfully with ${selectedInstallPlan.name} plan`)
                       setShowInstallAppDialog(false)
                       setSelectedAppToInstall(null)
@@ -2677,9 +2738,16 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                 <Button variant="destructive" onClick={() => {
                   if (confirm(`Are you sure you want to uninstall ${selectedAppForAction.name}?`)) {
                     toast.loading('Uninstalling app...', { id: 'uninstall-app' })
+                    // Update app status to available
+                    setApps(prev => prev.map(a =>
+                      a.id === selectedAppForAction.id
+                        ? { ...a, status: 'available' as const, currentPlan: undefined }
+                        : a
+                    ))
                     setTimeout(() => {
                       toast.success(`${selectedAppForAction.name} uninstalled successfully`, { id: 'uninstall-app' })
                       setShowUninstallDialog(false)
+                      setSelectedAppForAction(null)
                     }, 1500)
                   }
                 }}>Uninstall</Button>
@@ -2938,7 +3006,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                   <SelectValue placeholder="Select an app" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockApps.filter(app => app.status !== 'installed').map(app => (
+                  {apps.filter(app => app.status !== 'installed').map(app => (
                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                   ))}
                 </SelectContent>

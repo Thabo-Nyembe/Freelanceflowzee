@@ -91,6 +91,16 @@ type SurveyStatus = 'draft' | 'active' | 'paused' | 'closed'
 type QuestionType = 'short_text' | 'long_text' | 'multiple_choice' | 'checkbox' | 'rating' | 'nps' | 'date' | 'file_upload' | 'dropdown' | 'linear_scale' | 'matrix'
 type DistributionChannel = 'link' | 'email' | 'embed' | 'qr'
 
+interface LogicNode {
+  id: string
+  type: 'condition' | 'question' | 'calculation' | 'endpoint'
+  position: { x: number; y: number }
+  data: {
+    label: string
+    color: string
+  }
+}
+
 interface Question {
   id: string
   type: QuestionType
@@ -513,6 +523,7 @@ export default function SurveysClient() {
   const [showLogicBuilderDialog, setShowLogicBuilderDialog] = useState(false)
   const [isDownloadingQR, setIsDownloadingQR] = useState(false)
   const [isCopyingQR, setIsCopyingQR] = useState(false)
+  const [logicNodes, setLogicNodes] = useState<LogicNode[]>([])
 
   // Automations Dialog State
   const [showAutomationsDialog, setShowAutomationsDialog] = useState(false)
@@ -3638,7 +3649,16 @@ export default function SurveysClient() {
                 <Button
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-20"
-                  onClick={() => toast.info('Add Condition', { description: 'Drag to canvas to add a new condition node' })}
+                  onClick={() => {
+                    const newNode: LogicNode = {
+                      id: crypto.randomUUID(),
+                      type: 'condition',
+                      position: { x: 100 + (logicNodes.length * 50), y: 100 },
+                      data: { label: 'New Condition', color: 'yellow' }
+                    }
+                    setLogicNodes(prev => [...prev, newNode])
+                    toast.success('Condition Added', { description: 'Drag to position on canvas' })
+                  }}
                 >
                   <GitBranch className="w-5 h-5 text-yellow-600" />
                   <span className="text-xs">Add Condition</span>
@@ -3646,7 +3666,16 @@ export default function SurveysClient() {
                 <Button
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-20"
-                  onClick={() => toast.info('Add Question', { description: 'Drag to canvas to add a new question node' })}
+                  onClick={() => {
+                    const newNode: LogicNode = {
+                      id: crypto.randomUUID(),
+                      type: 'question',
+                      position: { x: 100 + (logicNodes.length * 50), y: 100 },
+                      data: { label: 'New Question', color: 'blue' }
+                    }
+                    setLogicNodes(prev => [...prev, newNode])
+                    toast.success('Question Added', { description: 'Drag to position on canvas' })
+                  }}
                 >
                   <Type className="w-5 h-5 text-blue-600" />
                   <span className="text-xs">Add Question</span>
@@ -3654,7 +3683,16 @@ export default function SurveysClient() {
                 <Button
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-20"
-                  onClick={() => toast.info('Add Calculation', { description: 'Add calculated fields based on responses' })}
+                  onClick={() => {
+                    const newNode: LogicNode = {
+                      id: crypto.randomUUID(),
+                      type: 'calculation',
+                      position: { x: 100 + (logicNodes.length * 50), y: 100 },
+                      data: { label: 'New Calculation', color: 'green' }
+                    }
+                    setLogicNodes(prev => [...prev, newNode])
+                    toast.success('Calculation Added', { description: 'Drag to position on canvas' })
+                  }}
                 >
                   <Hash className="w-5 h-5 text-green-600" />
                   <span className="text-xs">Calculate</span>
@@ -3662,7 +3700,16 @@ export default function SurveysClient() {
                 <Button
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-20"
-                  onClick={() => toast.info('Add End Point', { description: 'Add an endpoint to the flow' })}
+                  onClick={() => {
+                    const newNode: LogicNode = {
+                      id: crypto.randomUUID(),
+                      type: 'endpoint',
+                      position: { x: 100 + (logicNodes.length * 50), y: 100 },
+                      data: { label: 'End Point', color: 'red' }
+                    }
+                    setLogicNodes(prev => [...prev, newNode])
+                    toast.success('End Point Added', { description: 'Drag to position on canvas' })
+                  }}
                 >
                   <Target className="w-5 h-5 text-red-600" />
                   <span className="text-xs">End Point</span>

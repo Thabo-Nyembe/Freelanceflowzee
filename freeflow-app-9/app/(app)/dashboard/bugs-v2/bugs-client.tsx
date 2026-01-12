@@ -2209,14 +2209,64 @@ export default function BugsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Test Data</p>
                             <p className="text-sm text-gray-500">Remove all test and demo bugs</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Delete all test/demo bugs? This cannot be undone.')) { toast.loading('Deleting test data...', { id: 'delete-test-data' }); setTimeout(() => toast.success('Test data deleted successfully', { id: 'delete-test-data' }), 1500) } }}>Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => {
+                            if (confirm('Delete all test/demo bugs? This cannot be undone.')) {
+                              toast.loading('Deleting test data...', { id: 'delete-test-data' });
+                              try {
+                                const { data: { user } } = await supabase.auth.getUser()
+                                if (!user) {
+                                  toast.error('Please sign in', { id: 'delete-test-data' })
+                                  return
+                                }
+                                // Delete bugs that have "test" or "demo" in title (case insensitive)
+                                const testBugs = bugs.filter(b =>
+                                  b.title.toLowerCase().includes('test') ||
+                                  b.title.toLowerCase().includes('demo')
+                                )
+                                for (const bug of testBugs) {
+                                  await supabase
+                                    .from('bugs')
+                                    .update({ deleted_at: new Date().toISOString() })
+                                    .eq('id', bug.id)
+                                }
+                                await fetchBugs()
+                                toast.success(`Deleted ${testBugs.length} test/demo bugs`, { id: 'delete-test-data' })
+                              } catch (error) {
+                                console.error('Error deleting test data:', error)
+                                toast.error('Failed to delete test data', { id: 'delete-test-data' })
+                              }
+                            }
+                          }}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/20">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Project</p>
                             <p className="text-sm text-gray-500">Delete all bugs and reset to default</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Reset project and delete all bugs? This cannot be undone.')) { toast.loading('Resetting project...', { id: 'project-reset' }); setTimeout(() => toast.success('Project reset successfully', { id: 'project-reset' }), 2000) } }}>Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => {
+                            if (confirm('Reset project and delete all bugs? This cannot be undone.')) {
+                              toast.loading('Resetting project...', { id: 'project-reset' });
+                              try {
+                                const { data: { user } } = await supabase.auth.getUser()
+                                if (!user) {
+                                  toast.error('Please sign in', { id: 'project-reset' })
+                                  return
+                                }
+                                // Soft delete all bugs for this user
+                                const { error } = await supabase
+                                  .from('bugs')
+                                  .update({ deleted_at: new Date().toISOString() })
+                                  .eq('user_id', user.id)
+                                  .is('deleted_at', null)
+                                if (error) throw error
+                                await fetchBugs()
+                                toast.success('Project reset successfully - all bugs deleted', { id: 'project-reset' })
+                              } catch (error) {
+                                console.error('Error resetting project:', error)
+                                toast.error('Failed to reset project', { id: 'project-reset' })
+                              }
+                            }
+                          }}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -3568,7 +3618,32 @@ export default function BugsClient() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  toast.success('Activity Log Exported', { description: 'Full activity log exported to CSV' })
+                  // Generate CSV content from activity data
+                  const activityData = [
+                    { user: 'Sarah Chen', action: 'Resolved bug', bug: 'BUG-1234', time: '2 hours ago' },
+                    { user: 'Alex Rivera', action: 'Updated status', bug: 'BUG-1235', time: '4 hours ago' },
+                    { user: 'System', action: 'Auto-closed bug after 30 days of inactivity', bug: 'BUG-089', time: '3 days ago' },
+                    { user: 'Sarah Chen', action: 'Added label "critical"', bug: 'BUG-123', time: '4 days ago' },
+                    { user: 'Mike Johnson', action: 'Removed label "wontfix"', bug: 'BUG-098', time: '5 days ago' },
+                    { user: 'Alex Rivera', action: 'Changed priority from minor to major', bug: 'BUG-145', time: '1 week ago' },
+                    { user: 'Lisa Park', action: 'Linked pull request #234', bug: 'BUG-167', time: '1 week ago' },
+                  ]
+                  const csvHeaders = 'User,Action,Bug,Time\n'
+                  const csvRows = activityData.map(a => `"${a.user}","${a.action}","${a.bug}","${a.time}"`).join('\n')
+                  const csvContent = csvHeaders + csvRows
+
+                  // Create and trigger download
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.setAttribute('href', url)
+                  link.setAttribute('download', `bug-activity-log-${new Date().toISOString().split('T')[0]}.csv`)
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  URL.revokeObjectURL(url)
+
+                  toast.success('Activity Log Exported', { description: 'Full activity log downloaded as CSV' })
                 }}
               >
                 <Download className="w-4 h-4 mr-2" />

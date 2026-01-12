@@ -410,6 +410,10 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [selectedCloneWorkflow, setSelectedCloneWorkflow] = useState<AutomationWorkflow | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [templateFilterType, setTemplateFilterType] = useState<'ai' | 'top_rated' | 'popular' | 'all'>('all')
+  const [showConnectionSettingsDialog, setShowConnectionSettingsDialog] = useState(false)
+  const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
+  const [isRefreshingExecutions, setIsRefreshingExecutions] = useState(false)
+  const [connectionEditForm, setConnectionEditForm] = useState({ name: '', apiKey: '', autoRefresh: true })
 
   // Additional dialog states for confirmations and editing
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
@@ -1068,6 +1072,99 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     } catch (err) {
       console.error('Error copying to clipboard:', err)
       toast.error('Failed to copy to clipboard')
+    }
+  }
+
+  // Refresh executions with proper loading state
+  const handleRefreshExecutions = async () => {
+    setIsRefreshingExecutions(true)
+    try {
+      await fetchWorkflows()
+      toast.success('Executions refreshed', {
+        description: 'Latest execution data loaded'
+      })
+    } catch (err) {
+      console.error('Error refreshing executions:', err)
+      toast.error('Failed to refresh executions')
+    } finally {
+      setIsRefreshingExecutions(false)
+    }
+  }
+
+  // Open connection settings dialog
+  const handleOpenConnectionSettings = (connection: Connection) => {
+    setSelectedConnection(connection)
+    setConnectionEditForm({
+      name: connection.name,
+      apiKey: '••••••••••••••••',
+      autoRefresh: true
+    })
+    setShowConnectionSettingsDialog(true)
+  }
+
+  // Update connection settings
+  const handleUpdateConnectionSettings = async () => {
+    if (!selectedConnection) return
+
+    if (!connectionEditForm.name.trim()) {
+      toast.error('Connection name is required')
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      // Simulate API call to update connection
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Connection settings updated', {
+        description: `${connectionEditForm.name} has been updated`
+      })
+      setShowConnectionSettingsDialog(false)
+      setSelectedConnection(null)
+    } catch (err) {
+      console.error('Error updating connection:', err)
+      toast.error('Failed to update connection settings')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Disconnect/remove connection
+  const handleDisconnectConnection = async () => {
+    if (!selectedConnection) return
+
+    setIsProcessing(true)
+    try {
+      // Simulate API call to disconnect
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('Connection removed', {
+        description: `${selectedConnection.name} has been disconnected`
+      })
+      setShowConnectionSettingsDialog(false)
+      setSelectedConnection(null)
+    } catch (err) {
+      console.error('Error disconnecting:', err)
+      toast.error('Failed to disconnect')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // Reconnect/refresh connection
+  const handleReconnectConnection = async () => {
+    if (!selectedConnection) return
+
+    setIsProcessing(true)
+    try {
+      // Simulate OAuth re-authorization flow
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      toast.success('Connection refreshed', {
+        description: `${selectedConnection.name} credentials have been renewed`
+      })
+    } catch (err) {
+      console.error('Error reconnecting:', err)
+      toast.error('Failed to refresh connection')
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -3221,7 +3318,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <div className="text-center">
                           <Workflow className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                           <p className="text-sm text-gray-500">Drag and drop modules to build</p>
-                          <Button className="mt-3" onClick={() => { setSelectedWorkflow(null); setShowEditorDialog(true); toast.success('Opening workflow editor') }}>Open Editor</Button>
+                          <Button className="mt-3" onClick={() => { setSelectedWorkflow(null); setShowEditorDialog(true) }}>Open Editor</Button>
                         </div>
                       </div>
                     </div>

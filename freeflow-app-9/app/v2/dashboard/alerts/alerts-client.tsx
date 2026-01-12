@@ -2168,7 +2168,7 @@ export default function AlertsClient() {
             <AIInsightsPanel
               insights={mockAlertsAIInsights}
               title="Alert Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

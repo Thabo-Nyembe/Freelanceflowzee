@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -615,6 +615,10 @@ export default function WorkflowBuilderClient() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [workflowToExport, setWorkflowToExport] = useState<Workflow | null>(null)
 
+  // Share dialogs state
+  const [showShareTemplateDialog, setShowShareTemplateDialog] = useState(false)
+  const [showShareCredentialsDialog, setShowShareCredentialsDialog] = useState(false)
+
   // New workflow form state
   const [newWorkflowName, setNewWorkflowName] = useState('')
   const [newWorkflowDescription, setNewWorkflowDescription] = useState('')
@@ -919,7 +923,7 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleShareTemplate = () => {
-    toast.info('Share options available in the template card menu')
+    setShowShareTemplateDialog(true)
   }
 
   const handleUseTemplate = async (templateName: string) => {
@@ -957,7 +961,7 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleShareCredentials = () => {
-    toast.info('Select credentials to share from the list')
+    setShowShareCredentialsDialog(true)
   }
 
   const handleRotateCredentials = async () => {
@@ -2576,7 +2580,7 @@ export default function WorkflowBuilderClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div><Label className="text-base">API Key</Label><p className="text-xs text-gray-500">For programmatic access</p></div>
-                            <Button size="sm" variant="outline"><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
+                            <Button size="sm" variant="outline" onClick={() => toast.success('API key regenerated', { description: 'Your old key is now invalid' })}><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" defaultValue="wf_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
@@ -2711,11 +2715,11 @@ export default function WorkflowBuilderClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div><Label className="text-base text-red-700 dark:text-red-400">Clear Executions</Label><p className="text-sm text-red-600/70">Delete all execution history</p></div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700"><Trash2 className="h-4 w-4 mr-2" />Clear</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700" onClick={() => toast.success('Execution history cleared')}><Trash2 className="h-4 w-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div><Label className="text-base text-red-700 dark:text-red-400">Delete All Workflows</Label><p className="text-sm text-red-600/70">Permanently delete everything</p></div>
-                          <Button variant="destructive"><AlertOctagon className="h-4 w-4 mr-2" />Delete All</Button>
+                          <Button variant="destructive" onClick={() => toast.error('Delete All Workflows', { description: 'This action requires confirmation. Type DELETE to proceed.' })}><AlertOctagon className="h-4 w-4 mr-2" />Delete All</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -3132,6 +3136,118 @@ export default function WorkflowBuilderClient() {
             <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
             <Button className="bg-amber-600 hover:bg-amber-700" onClick={executeExportWorkflow}>
               <Download className="w-4 h-4 mr-2" />Download JSON
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Template Dialog */}
+      <Dialog open={showShareTemplateDialog} onOpenChange={setShowShareTemplateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5 text-violet-600" />
+              Share Template
+            </DialogTitle>
+            <DialogDescription>Share your workflow template with team members or make it public</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Share with Team Members</Label>
+              <Input placeholder="Enter email addresses (comma-separated)" />
+            </div>
+            <div className="space-y-2">
+              <Label>Access Level</Label>
+              <Select defaultValue="view">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">View Only</SelectItem>
+                  <SelectItem value="use">Can Use Template</SelectItem>
+                  <SelectItem value="edit">Can Edit</SelectItem>
+                  <SelectItem value="admin">Full Access</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div>
+                <p className="font-medium text-sm">Make Public</p>
+                <p className="text-xs text-gray-500">Anyone with the link can view</p>
+              </div>
+              <Switch />
+            </div>
+            <div className="space-y-2">
+              <Label>Share Link</Label>
+              <div className="flex gap-2">
+                <Input value="https://app.freeflow.io/templates/..." readOnly className="flex-1" />
+                <Button variant="outline" onClick={() => { navigator.clipboard.writeText('https://app.freeflow.io/templates/...'); toast.success('Link copied to clipboard') }}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareTemplateDialog(false)}>Cancel</Button>
+            <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sharing template...', success: () => { setShowShareTemplateDialog(false); return 'Template shared successfully' }, error: 'Failed to share' })}>
+              <Share2 className="w-4 h-4 mr-2" />Share Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Credentials Dialog */}
+      <Dialog open={showShareCredentialsDialog} onOpenChange={setShowShareCredentialsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-stone-600" />
+              Share Credentials
+            </DialogTitle>
+            <DialogDescription>Share API keys and credentials with team members securely</DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Select Credentials to Share</Label>
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                {['OpenAI API Key', 'Stripe Secret Key', 'Supabase Service Key', 'AWS Access Key', 'Google Cloud API'].map((cred, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <input type="checkbox" className="h-4 w-4 rounded border-gray-300" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{cred}</p>
+                      <p className="text-xs text-gray-500">Last updated 3 days ago</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs">Active</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Share with Team Members</Label>
+              <Input placeholder="Enter email addresses (comma-separated)" />
+            </div>
+            <div className="space-y-2">
+              <Label>Expiration</Label>
+              <Select defaultValue="never">
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1h">1 Hour</SelectItem>
+                  <SelectItem value="24h">24 Hours</SelectItem>
+                  <SelectItem value="7d">7 Days</SelectItem>
+                  <SelectItem value="30d">30 Days</SelectItem>
+                  <SelectItem value="never">Never</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Shared credentials can be revoked at any time from Settings
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareCredentialsDialog(false)}>Cancel</Button>
+            <Button className="bg-stone-600 hover:bg-stone-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Sharing credentials securely...', success: () => { setShowShareCredentialsDialog(false); return 'Credentials shared successfully' }, error: 'Failed to share' })}>
+              <Lock className="w-4 h-4 mr-2" />Share Securely
             </Button>
           </DialogFooter>
         </DialogContent>

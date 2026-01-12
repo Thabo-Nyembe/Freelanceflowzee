@@ -558,6 +558,14 @@ export default function DeploymentsClient() {
   const [selectedEnvVar, setSelectedEnvVar] = useState<EnvVar | null>(null)
   const [realTimeLogs, setRealTimeLogs] = useState<BuildLog[]>(mockBuildLogs)
   const [logStreamInterval, setLogStreamInterval] = useState<NodeJS.Timeout | null>(null)
+  const [selectedFunction, setSelectedFunction] = useState<ServerlessFunction | null>(null)
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null)
+  const [logFilters, setLogFilters] = useState<{ levels: string[]; timeRange: string; functionFilter: string; messageFilter: string }>({
+    levels: ['error', 'warn', 'info', 'debug'],
+    timeRange: '1h',
+    functionFilter: '',
+    messageFilter: ''
+  })
 
   // AI Insight action handler
   const handleInsightAction = useCallback(async (insight: { id: string; type: string; title: string; description: string }) => {
@@ -1468,9 +1476,9 @@ export default function DeploymentsClient() {
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => { setActiveTab('logs'); toast.success('Terminal Opened', { description: `Viewing logs for ${fn.name}` }); }}><Terminal className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => { setActiveTab('analytics'); toast.success('Metrics Loaded', { description: `${fn.invocations.toLocaleString()} invocations, ${fn.avgDuration}ms avg` }); }}><BarChart3 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => { setActiveTab('settings'); toast.success('Settings Opened', { description: `Configure ${fn.name} function` }); }}><Settings className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('logs'); setLogFilters(prev => ({ ...prev, functionFilter: fn.name })); toast.success('Terminal Opened', { description: `Viewing logs for ${fn.name}` }); }}><Terminal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('analytics'); toast.success('Metrics Loaded', { description: `${fn.invocations.toLocaleString()} invocations, ${fn.avgDuration}ms avg` }); }}><BarChart3 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('settings'); setSettingsTab('general'); toast.success('Settings Opened', { description: `Configure ${fn.name} function` }); }}><Settings className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -2320,7 +2328,7 @@ export default function DeploymentsClient() {
                             </div>
                             <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
                           </div>
-                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => { setShowIntegrationDialog(true); toast.info(`Configure ${integration.name}`, { description: `Manage ${integration.type} integration settings` }); }}><Settings className="h-4 w-4" /></Button></div>
+                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => { setSelectedIntegration(integration); setShowIntegrationDialog(true); }}><Settings className="h-4 w-4" /></Button></div>
                         </div>
                       ))}
                     </CardContent>
@@ -3133,7 +3141,30 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEdgeConfigEditDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-cyan-500 to-teal-500" onClick={() => { setShowEdgeConfigEditDialog(false); toast.success('Config Saved', { description: `${selectedEdgeConfig?.name} has been updated` }); }}>Save Changes</Button>
+              <Button className="bg-gradient-to-r from-cyan-500 to-teal-500" onClick={async () => {
+                if (!selectedEdgeConfig) return;
+                setIsProcessing(true);
+                try {
+                  const { data: userData } = await supabase.auth.getUser();
+                  if (!userData.user) throw new Error('Not authenticated');
+                  const { error } = await supabase.from('edge_configs').upsert({
+                    id: selectedEdgeConfig.id,
+                    user_id: userData.user.id,
+                    name: selectedEdgeConfig.name,
+                    item_count: selectedEdgeConfig.itemCount,
+                    updated_at: new Date().toISOString()
+                  });
+                  if (error) throw error;
+                  toast.success('Config Saved', { description: `${selectedEdgeConfig.name} has been updated` });
+                  setShowEdgeConfigEditDialog(false);
+                } catch (error: any) {
+                  toast.error('Save Failed', { description: error.message });
+                } finally {
+                  setIsProcessing(false);
+                }
+              }} disabled={isProcessing}>
+                {isProcessing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</> : 'Save Changes'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3165,7 +3196,34 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewFolderDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-indigo-600 to-violet-600" onClick={() => { const input = document.getElementById('new-folder-name') as HTMLInputElement; const name = input?.value?.trim(); if (!name) { toast.error('Validation Error', { description: 'Folder name is required' }); return; } toast.success('Folder Created', { description: `/${name} has been created` }); setShowNewFolderDialog(false); }}><Folder className="h-4 w-4 mr-2" />Create Folder</Button>
+              <Button className="bg-gradient-to-r from-indigo-600 to-violet-600" onClick={async () => {
+                const input = document.getElementById('new-folder-name') as HTMLInputElement;
+                const name = input?.value?.trim();
+                if (!name) {
+                  toast.error('Validation Error', { description: 'Folder name is required' });
+                  return;
+                }
+                setIsProcessing(true);
+                try {
+                  const { data: userData } = await supabase.auth.getUser();
+                  if (!userData.user) throw new Error('Not authenticated');
+                  const { error } = await supabase.from('storage_folders').insert({
+                    user_id: userData.user.id,
+                    name: name,
+                    path: `/${name}`,
+                    created_at: new Date().toISOString()
+                  });
+                  if (error) throw error;
+                  toast.success('Folder Created', { description: `/${name} has been created` });
+                  setShowNewFolderDialog(false);
+                } catch (error: any) {
+                  toast.error('Create Failed', { description: error.message });
+                } finally {
+                  setIsProcessing(false);
+                }
+              }} disabled={isProcessing}>
+                {isProcessing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : <><Folder className="h-4 w-4 mr-2" />Create Folder</>}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3275,7 +3333,29 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLogFiltersDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowLogFiltersDialog(false); toast.success('Filters Applied', { description: 'Log filters updated' }); }}>Apply Filters</Button>
+              <Button onClick={() => {
+                const levels: string[] = [];
+                ['error', 'warn', 'info', 'debug'].forEach(level => {
+                  const checkbox = document.getElementById(`level-${level}`) as HTMLInputElement;
+                  if (checkbox?.checked) levels.push(level);
+                });
+                const functionInput = document.querySelector('input[placeholder="e.g., /api/auth/*"]') as HTMLInputElement;
+                const messageInput = document.querySelector('input[placeholder="Search in log messages"]') as HTMLInputElement;
+                setLogFilters({
+                  levels,
+                  timeRange: logFilters.timeRange,
+                  functionFilter: functionInput?.value || '',
+                  messageFilter: messageInput?.value || ''
+                });
+                const filteredLogs = mockBuildLogs.filter(log =>
+                  levels.includes(log.level) &&
+                  (!functionInput?.value || log.step.includes(functionInput.value)) &&
+                  (!messageInput?.value || log.message.toLowerCase().includes(messageInput.value.toLowerCase()))
+                );
+                setRealTimeLogs(filteredLogs);
+                setShowLogFiltersDialog(false);
+                toast.success('Filters Applied', { description: `Showing ${filteredLogs.length} log entries` });
+              }}>Apply Filters</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3476,7 +3556,27 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportLogsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowExportLogsDialog(false); toast.success('Export Started', { description: 'Logs export has been queued' }); }}><Download className="h-4 w-4 mr-2" />Export</Button>
+              <Button onClick={async () => {
+                setIsProcessing(true);
+                try {
+                  const logsText = realTimeLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n');
+                  const blob = new Blob([logsText], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `deployment-logs-${new Date().toISOString().split('T')[0]}.txt`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                  toast.success('Export Complete', { description: `${realTimeLogs.length} log entries exported` });
+                  setShowExportLogsDialog(false);
+                } catch (error: any) {
+                  toast.error('Export Failed', { description: error.message });
+                } finally {
+                  setIsProcessing(false);
+                }
+              }} disabled={isProcessing}>
+                {isProcessing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Exporting...</> : <><Download className="h-4 w-4 mr-2" />Export</>}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3525,7 +3625,38 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-cyan-600" onClick={() => { setShowExportAnalyticsDialog(false); toast.success('Export Started', { description: 'Analytics report is being generated' }); }}><Download className="h-4 w-4 mr-2" />Export Report</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-cyan-600" onClick={async () => {
+                setIsProcessing(true);
+                try {
+                  const analyticsData = {
+                    totalDeployments: dbDeployments.length,
+                    successRate: stats.successRate,
+                    avgBuildTime: stats.avgBuildTime,
+                    deploymentsThisWeek: stats.deploymentsThisWeek,
+                    deploymentsByEnvironment: {
+                      production: dbDeployments.filter(d => d.environment === 'production').length,
+                      staging: dbDeployments.filter(d => d.environment === 'staging').length,
+                      development: dbDeployments.filter(d => d.environment === 'development').length
+                    },
+                    generatedAt: new Date().toISOString()
+                  };
+                  const blob = new Blob([JSON.stringify(analyticsData, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `deployment-analytics-${new Date().toISOString().split('T')[0]}.json`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                  toast.success('Export Complete', { description: 'Analytics report downloaded' });
+                  setShowExportAnalyticsDialog(false);
+                } catch (error: any) {
+                  toast.error('Export Failed', { description: error.message });
+                } finally {
+                  setIsProcessing(false);
+                }
+              }} disabled={isProcessing}>
+                {isProcessing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Exporting...</> : <><Download className="h-4 w-4 mr-2" />Export Report</>}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3642,7 +3773,36 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddRuleDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowAddRuleDialog(false); toast.success('Rule Created', { description: 'Protection rule has been added' }); }}>Create Rule</Button>
+              <Button onClick={async () => {
+                const ruleNameInput = document.querySelector('input[placeholder="e.g., Staging Password"]') as HTMLInputElement;
+                const ruleName = ruleNameInput?.value?.trim();
+                if (!ruleName) {
+                  toast.error('Validation Error', { description: 'Rule name is required' });
+                  return;
+                }
+                setIsProcessing(true);
+                try {
+                  const { data: userData } = await supabase.auth.getUser();
+                  if (!userData.user) throw new Error('Not authenticated');
+                  const { error } = await supabase.from('protection_rules').insert({
+                    user_id: userData.user.id,
+                    name: ruleName,
+                    type: 'password',
+                    environment: 'all',
+                    enabled: true,
+                    created_at: new Date().toISOString()
+                  });
+                  if (error) throw error;
+                  toast.success('Rule Created', { description: `${ruleName} has been added` });
+                  setShowAddRuleDialog(false);
+                } catch (error: any) {
+                  toast.error('Create Failed', { description: error.message });
+                } finally {
+                  setIsProcessing(false);
+                }
+              }} disabled={isProcessing}>
+                {isProcessing ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : 'Create Rule'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

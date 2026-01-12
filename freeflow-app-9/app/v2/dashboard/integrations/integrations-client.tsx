@@ -311,6 +311,7 @@ export default function IntegrationsClient() {
   const [newIpAddress, setNewIpAddress] = useState('')
   const [smsBackupPhone, setSmsBackupPhone] = useState('')
   const [showSmsBackupInput, setShowSmsBackupInput] = useState(false)
+  const [is2FAEnabled, setIs2FAEnabled] = useState(true)
   const [webhookForm, setWebhookForm] = useState<WebhookFormData>({
     name: '',
     description: '',
@@ -2760,7 +2761,14 @@ export default function IntegrationsClient() {
                       <Eye className="w-3 h-3 mr-1" />
                       Reveal
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(webhook.secret || 'whsec_default'); toast.success('Secret copied') }}>
+                    <Button size="sm" variant="ghost" onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(webhook.secret || 'whsec_default')
+                        toast.success('Secret copied')
+                      } catch {
+                        toast.error('Failed to copy secret')
+                      }
+                    }}>
                       <Copy className="w-3 h-3" />
                     </Button>
                   </div>
@@ -2850,7 +2858,17 @@ export default function IntegrationsClient() {
               <div className="space-y-2">
                 <Label>Recovery Codes</Label>
                 <p className="text-xs text-muted-foreground">Keep these codes safe. They can be used to access your account if you lose your authenticator device.</p>
-                <Button variant="outline" className="w-full" onClick={() => toast.success('Recovery codes downloaded', { description: '8 recovery codes saved to file' })}>
+                <Button variant="outline" className="w-full" onClick={() => {
+                  const codes = ['ABC123', 'DEF456', 'GHI789', 'JKL012', 'MNO345', 'PQR678', 'STU901', 'VWX234']
+                  const blob = new Blob([codes.join('\n')], { type: 'text/plain' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'recovery-codes.txt'
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Recovery codes downloaded', { description: '8 recovery codes saved to file' })
+                }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download Recovery Codes
                 </Button>
@@ -2884,7 +2902,18 @@ export default function IntegrationsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTwoFactorDialog(false)}>Close</Button>
-              <Button variant="destructive" onClick={() => toast('Disable 2FA?', { description: 'This will reduce your account security.', action: { label: 'Disable', onClick: () => toast.success('2FA has been disabled') }, cancel: { label: 'Cancel', onClick: () => {} } })}>
+              <Button variant="destructive" onClick={() => toast('Disable 2FA?', {
+                description: 'This will reduce your account security.',
+                action: {
+                  label: 'Disable',
+                  onClick: () => {
+                    setIs2FAEnabled(false)
+                    setShowTwoFactorDialog(false)
+                    toast.success('2FA has been disabled')
+                  }
+                },
+                cancel: { label: 'Cancel', onClick: () => {} }
+              })}>
                 Disable 2FA
               </Button>
             </DialogFooter>
@@ -3016,7 +3045,13 @@ export default function IntegrationsClient() {
                       <p className="font-medium text-sm">{bill.amount}</p>
                       <Badge variant="outline" className="text-green-600">{bill.status}</Badge>
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => toast.success(`Downloading ${bill.invoice}...`)}>
+                    <Button size="sm" variant="ghost" onClick={() => {
+                      const link = document.createElement('a')
+                      link.href = `/invoices/${bill.invoice}.pdf`
+                      link.download = `${bill.invoice}.pdf`
+                      link.click()
+                      toast.success(`Downloading ${bill.invoice}...`)
+                    }}>
                       <Download className="w-4 h-4" />
                     </Button>
                   </div>

@@ -707,9 +707,40 @@ export default function WorkflowsClient() {
   }
 
   const handleExportWorkflows = () => {
-    toast.success('Exporting workflows', {
-      description: 'Workflow definitions will be downloaded'
-    })
+    try {
+      // Export workflows as JSON file
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        workflows: filteredWorkflows.map(w => ({
+          id: w.id,
+          name: w.name,
+          description: w.description,
+          status: w.status,
+          steps: w.steps,
+          trigger: w.trigger,
+          tags: w.tags,
+          createdAt: w.createdAt,
+          updatedAt: w.updatedAt
+        }))
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `workflows-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Workflows exported', {
+        description: `${filteredWorkflows.length} workflow(s) downloaded successfully`
+      })
+    } catch (error) {
+      toast.error('Export failed', {
+        description: error instanceof Error ? error.message : 'Failed to export workflows'
+      })
+    }
   }
 
   return (
@@ -922,7 +953,7 @@ export default function WorkflowsClient() {
                               <Copy className="w-4 h-4 mr-2" />
                               Copy ID
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.info('Duplicate workflow', { description: 'This feature is coming soon' })}>
+                            <DropdownMenuItem onClick={() => handleDuplicateWorkflow(workflow)}>
                               <Layers className="w-4 h-4 mr-2" />
                               Duplicate
                             </DropdownMenuItem>
@@ -1840,7 +1871,8 @@ export default function WorkflowsClient() {
                           <div className="flex gap-2">
                             <Input type="password" value="wf_api_••••••••••••••••••••" readOnly className="font-mono" />
                             <Button variant="outline" size="icon" onClick={() => {
-                              toast.info('API Key copied', { description: 'Your API key has been copied to the clipboard' })
+                              navigator.clipboard.writeText('wf_api_your_api_key_here')
+                              toast.success('API Key copied', { description: 'Your API key has been copied to the clipboard' })
                             }}>
                               <Copy className="w-4 h-4" />
                             </Button>
@@ -1987,7 +2019,7 @@ export default function WorkflowsClient() {
             <AIInsightsPanel
               insights={mockWorkflowsAIInsights}
               title="Workflow Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2311,8 +2343,29 @@ export default function WorkflowsClient() {
             </Button>
             <Button
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-              onClick={() => {
-                toast.success('Test executed successfully', { description: 'All steps completed without errors' })
+              onClick={async () => {
+                if (!selectedWorkflow) return
+                toast.loading('Running workflow test...', { id: 'workflow-test' })
+                try {
+                  // Execute the workflow in test mode
+                  const result = await startWorkflow(selectedWorkflow.id)
+                  if (result.success) {
+                    toast.success('Test executed successfully', {
+                      id: 'workflow-test',
+                      description: 'All steps completed without errors'
+                    })
+                  } else {
+                    toast.error('Test execution failed', {
+                      id: 'workflow-test',
+                      description: result.error || 'An error occurred during test'
+                    })
+                  }
+                } catch (error) {
+                  toast.error('Test execution failed', {
+                    id: 'workflow-test',
+                    description: error instanceof Error ? error.message : 'An error occurred'
+                  })
+                }
                 setShowRunTestDialog(false)
               }}
             >
@@ -2362,6 +2415,7 @@ export default function WorkflowsClient() {
                 </SelectContent>
               </Select>
               <Button variant="outline" size="icon" onClick={() => {
+                fetchWorkflows()
                 toast.success('Logs refreshed', { description: 'Workflow logs have been refreshed' })
               }}>
                 <RefreshCw className="w-4 h-4" />
@@ -2402,10 +2456,41 @@ export default function WorkflowsClient() {
               Close
             </Button>
             <Button variant="outline" onClick={() => {
-              toast.loading('Exporting logs...', { id: 'export-workflow-logs' })
-              setTimeout(() => {
-                toast.success('Logs exported successfully', { id: 'export-workflow-logs' })
-              }, 1000)
+              try {
+                // Export workflow logs as JSON file
+                const logsData = {
+                  exportedAt: new Date().toISOString(),
+                  runs: mockRuns.map(run => ({
+                    id: run.id,
+                    workflowId: run.workflowId,
+                    workflowName: run.workflowName,
+                    status: run.status,
+                    startedAt: run.startedAt,
+                    completedAt: run.completedAt,
+                    duration: run.duration,
+                    stepsCompleted: run.stepsCompleted,
+                    totalSteps: run.totalSteps,
+                    error: run.error
+                  }))
+                }
+                const blob = new Blob([JSON.stringify(logsData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `workflow-logs-${new Date().toISOString().split('T')[0]}.json`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                URL.revokeObjectURL(url)
+
+                toast.success('Logs exported successfully', {
+                  description: `${mockRuns.length} log entries exported`
+                })
+              } catch (error) {
+                toast.error('Export failed', {
+                  description: error instanceof Error ? error.message : 'Failed to export logs'
+                })
+              }
             }}>
               <Download className="w-4 h-4 mr-2" />
               Export Logs

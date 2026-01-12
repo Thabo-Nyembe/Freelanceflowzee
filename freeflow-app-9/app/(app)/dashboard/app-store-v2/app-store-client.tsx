@@ -71,6 +71,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
+import { updateFilesViewMode } from '@/lib/storage/preferences-queries'
 
 // ============================================================================
 // TYPE DEFINITIONS - App Store Connect Level
@@ -1053,6 +1054,53 @@ export default function AppStoreClient() {
     }
   }
 
+  // Handle view mode change with persistence
+  const handleViewModeChange = async (mode: 'grid' | 'list') => {
+    setViewMode(mode)
+    if (userId) {
+      const success = await updateFilesViewMode(userId, mode)
+      if (success) {
+        toast.success(`${mode === 'grid' ? 'Grid' : 'List'} view set as default`, {
+          description: 'Your preference has been saved'
+        })
+      } else {
+        toast.success(`${mode === 'grid' ? 'Grid' : 'List'} view selected`)
+      }
+    } else {
+      toast.success(`${mode === 'grid' ? 'Grid' : 'List'} view selected`)
+    }
+  }
+
+  // Handle AI insight action
+  const handleInsightAction = (insight: { id?: string; title?: string; description?: string; type?: string }) => {
+    // Navigate based on insight type or show details
+    if (insight.type === 'recommendation') {
+      setActiveTab('discover')
+      toast.info(insight.title || 'Recommendation', {
+        description: insight.description || 'Exploring recommended apps'
+      })
+    } else if (insight.type === 'alert') {
+      setActiveTab('installed')
+      toast.warning(insight.title || 'Alert', {
+        description: insight.description || 'Review your installed apps'
+      })
+    } else if (insight.type === 'update') {
+      setActiveTab('updates')
+      toast.info(insight.title || 'Updates Available', {
+        description: insight.description || 'Check available updates'
+      })
+    } else {
+      // Default: show insight details in a toast with action
+      toast.info(insight.title || 'AI Insight', {
+        description: insight.description || 'View insight details',
+        action: {
+          label: 'View Apps',
+          onClick: () => setActiveTab('discover')
+        }
+      })
+    }
+  }
+
   // Generate quick actions with current state
   const mockAppStoreQuickActions = getAppStoreQuickActions(setActiveTab, setSearchQuery)
 
@@ -1872,8 +1920,8 @@ export default function AppStoreClient() {
                         <div className="flex items-center justify-between">
                           <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">Grid or list view</p></div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => { setViewMode('grid'); toast.success('Grid view set as default') }}><Grid3X3 className="h-4 w-4" /></Button>
-                            <Button variant="outline" size="sm" onClick={() => { setViewMode('list'); toast.success('List view set as default') }}><List className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => handleViewModeChange('grid')}><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => handleViewModeChange('list')}><List className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2095,7 +2143,7 @@ export default function AppStoreClient() {
             <AIInsightsPanel
               insights={mockAppStoreAIInsights}
               title="App Store Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">

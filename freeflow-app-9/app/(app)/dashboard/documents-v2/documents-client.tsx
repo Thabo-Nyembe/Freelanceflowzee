@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import { useDocuments, useDocumentMutations, type Document, type DocumentType } from '@/lib/hooks/use-documents'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -1199,7 +1199,10 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => {
-                    toast.info('Viewing complete activity history')
+                    // Navigate to full activity view and store preference
+                    localStorage.setItem('documents_activity_view', 'expanded')
+                    setActiveTab('documents')
+                    toast.success('Viewing complete activity history', { description: 'Switched to documents view with expanded activity' })
                   }}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -1481,8 +1484,37 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 { icon: Share2, label: 'Share', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { if (selectedFolder) { handleWebShare() } else { toast.info('Select a folder first', { description: 'Choose a folder to share' }) } } },
                 { icon: Move, label: 'Move', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { if (selectedFolder) { setShowMoveDialog(true) } else { toast.info('Select a folder first', { description: 'Choose a folder to move' }) } } },
                 { icon: Copy, label: 'Duplicate', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { if (selectedFolder) { handleCopyLink() } else { toast.info('Select a folder first', { description: 'Choose a folder to duplicate' }) } } },
-                { icon: Archive, label: 'Archive', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (selectedFolder) { toast.success('Folder archived') } else { toast.info('Select a folder first', { description: 'Choose a folder to archive' }) } } },
-                { icon: Palette, label: 'Color', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { if (selectedFolder) { toast.info('Color Picker', { description: 'Choose a color for your folder' }) } else { toast.info('Select a folder first', { description: 'Choose a folder to color' }) } } },
+                { icon: Archive, label: 'Archive', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => {
+                  if (selectedFolder) {
+                    // Archive folder by saving to localStorage and updating state
+                    const archivedFolders = JSON.parse(localStorage.getItem('archived_folders') || '[]')
+                    archivedFolders.push({ ...selectedFolder, archivedAt: new Date().toISOString() })
+                    localStorage.setItem('archived_folders', JSON.stringify(archivedFolders))
+                    setFolderOrder(prev => prev.filter(f => f.id !== selectedFolder.id))
+                    setSelectedFolder(null)
+                    toast.success('Folder archived', { description: `"${selectedFolder.name}" has been moved to archive` })
+                  } else {
+                    toast.info('Select a folder first', { description: 'Choose a folder to archive' })
+                  }
+                } },
+                { icon: Palette, label: 'Color', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => {
+                  if (selectedFolder) {
+                    // Cycle through available colors
+                    const colors = ['bg-blue-500', 'bg-pink-500', 'bg-emerald-500', 'bg-purple-500', 'bg-amber-500', 'bg-red-500', 'bg-cyan-500', 'bg-orange-500']
+                    const currentIndex = colors.indexOf(selectedFolder.color)
+                    const nextColor = colors[(currentIndex + 1) % colors.length]
+                    // Update folder color in state
+                    setFolderOrder(prev => prev.map(f => f.id === selectedFolder.id ? { ...f, color: nextColor } : f))
+                    setSelectedFolder(prev => prev ? { ...prev, color: nextColor } : null)
+                    // Save to localStorage
+                    const folderColors = JSON.parse(localStorage.getItem('folder_colors') || '{}')
+                    folderColors[selectedFolder.id] = nextColor
+                    localStorage.setItem('folder_colors', JSON.stringify(folderColors))
+                    toast.success('Folder color updated', { description: `Changed "${selectedFolder.name}" color` })
+                  } else {
+                    toast.info('Select a folder first', { description: 'Choose a folder to color' })
+                  }
+                } },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1505,7 +1537,23 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       <div className={`p-3 rounded-xl ${folder.color}`}>
                         <Folder className="h-6 w-6 text-white" />
                       </div>
-                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedFolder(folder); toast.info(folder.name, { description: `${folder.documentCount} items - ${formatBytes(folder.size)}` }) }}>
+                      <Button variant="ghost" size="sm" onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedFolder(folder)
+                        // Copy folder share link to clipboard
+                        const shareLink = `${window.location.origin}/documents/folder/${folder.id}`
+                        navigator.clipboard.writeText(shareLink).then(() => {
+                          toast.success(`Folder "${folder.name}" selected`, {
+                            description: `${folder.documentCount} items - ${formatBytes(folder.size)}. Share link copied!`,
+                            action: {
+                              label: 'Open',
+                              onClick: () => setActiveTab('folders')
+                            }
+                          })
+                        }).catch(() => {
+                          toast.info(folder.name, { description: `${folder.documentCount} items - ${formatBytes(folder.size)}` })
+                        })
+                      }}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -2397,7 +2445,25 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <AIInsightsPanel
               insights={mockDocumentsAIInsights}
               title="Document Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={(insight) => {
+                // Store insight action in localStorage and navigate based on insight type
+                const insightActions = JSON.parse(localStorage.getItem('document_insights_actions') || '[]')
+                insightActions.push({ insightId: insight.id || Date.now(), action: 'viewed', timestamp: new Date().toISOString() })
+                localStorage.setItem('document_insights_actions', JSON.stringify(insightActions))
+
+                // Navigate based on insight category
+                if (insight.category === 'storage' || insight.title?.toLowerCase().includes('storage')) {
+                  setActiveTab('settings')
+                  setSettingsTab('storage')
+                } else if (insight.category === 'sharing' || insight.title?.toLowerCase().includes('share')) {
+                  setActiveTab('shared')
+                } else if (insight.category === 'organization' || insight.title?.toLowerCase().includes('folder')) {
+                  setActiveTab('folders')
+                } else {
+                  setActiveTab('documents')
+                }
+                toast.success(insight.title || 'AI Insight Applied', { description: insight.description || 'Navigating to relevant section' })
+              }}
             />
           </div>
           <div className="space-y-6">
@@ -2740,7 +2806,20 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                       </div>
                       <Select defaultValue="root" onValueChange={(parentId) => {
                         if (parentId !== 'root' && parentId !== folder.id) {
-                          toast.success(`Moved "${folder.name}" into another folder`)
+                          // Save folder parent relationship to localStorage
+                          const folderParents = JSON.parse(localStorage.getItem('folder_parents') || '{}')
+                          folderParents[folder.id] = parentId
+                          localStorage.setItem('folder_parents', JSON.stringify(folderParents))
+                          // Update folder in state with parent
+                          setFolderOrder(prev => prev.map(f => f.id === folder.id ? { ...f, parentId } : f))
+                          const parentFolder = folderOrder.find(f => f.id === parentId)
+                          toast.success(`Moved "${folder.name}" into "${parentFolder?.name || 'folder'}"`, { description: 'Folder hierarchy updated' })
+                        } else if (parentId === 'root') {
+                          // Remove parent relationship
+                          const folderParents = JSON.parse(localStorage.getItem('folder_parents') || '{}')
+                          delete folderParents[folder.id]
+                          localStorage.setItem('folder_parents', JSON.stringify(folderParents))
+                          setFolderOrder(prev => prev.map(f => f.id === folder.id ? { ...f, parentId: undefined } : f))
                         }
                       }}>
                         <SelectTrigger className="w-[140px]">
@@ -2770,7 +2849,13 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Folder organization saved', { description: 'Your folder order has been updated' })
+                  // Save folder order to localStorage
+                  const orderData = folderOrder.map((f, idx) => ({ id: f.id, order: idx, parentId: f.parentId }))
+                  localStorage.setItem('folder_order', JSON.stringify(orderData))
+                  // Save colors as well
+                  const colorData = folderOrder.reduce((acc, f) => ({ ...acc, [f.id]: f.color }), {})
+                  localStorage.setItem('folder_colors', JSON.stringify(colorData))
+                  toast.success('Folder organization saved', { description: 'Your folder order and hierarchy has been saved' })
                   setShowOrganizeDialog(false)
                 }}
               >

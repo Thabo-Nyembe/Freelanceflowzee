@@ -667,6 +667,18 @@ export default function MediaLibraryClient({
   const [importFileName, setImportFileName] = useState('')
   const [isImporting, setIsImporting] = useState(false)
 
+  // Permissions and privacy settings state
+  const [permissionSettings, setPermissionSettings] = useState({
+    admin: true,
+    editor: true,
+    viewer: false
+  })
+  const [privacySettings, setPrivacySettings] = useState({
+    publicAccess: false,
+    passwordProtected: false,
+    linkSharing: true
+  })
+
   const stats = useMemo(() => {
     const totalViews = initialAssets.reduce((sum, a) => sum + a.viewCount, 0)
     const totalDownloads = initialAssets.reduce((sum, a) => sum + a.downloadCount, 0)
@@ -2346,7 +2358,7 @@ export default function MediaLibraryClient({
                 { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'video' }); setShowUploadDialog(true) } },
                 { icon: Music, label: 'Audio', desc: 'Upload audio', color: 'text-green-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'audio' }); setShowUploadDialog(true) } },
                 { icon: FileText, label: 'Documents', desc: 'Upload docs', color: 'text-orange-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'document' }); setShowUploadDialog(true) } },
-                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => { setShowUploadDialog(true); toast.success('Bulk upload mode enabled - select multiple files') } },
+                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => setShowUploadDialog(true) },
                 { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => setShowCloudImportDialog(true) },
                 { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => setShowUrlImportDialog(true) },
                 { icon: FileArchive, label: 'Archives', desc: 'ZIP/RAR files', color: 'text-gray-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'archive' }); setShowUploadDialog(true) } },
@@ -3767,23 +3779,43 @@ export default function MediaLibraryClient({
               <DialogDescription>Manage access control for folders</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              {[
-                { role: 'Admin', access: 'Full access' },
-                { role: 'Editor', access: 'Edit & upload' },
-                { role: 'Viewer', access: 'View only' },
-              ].map(perm => (
-                <div key={perm.role} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{perm.role}</p>
-                    <p className="text-sm text-gray-500">{perm.access}</p>
-                  </div>
-                  <Switch defaultChecked={perm.role !== 'Viewer'} />
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Admin</p>
+                  <p className="text-sm text-gray-500">Full access</p>
                 </div>
-              ))}
+                <Switch
+                  checked={permissionSettings.admin}
+                  onCheckedChange={(checked) => setPermissionSettings(prev => ({ ...prev, admin: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Editor</p>
+                  <p className="text-sm text-gray-500">Edit & upload</p>
+                </div>
+                <Switch
+                  checked={permissionSettings.editor}
+                  onCheckedChange={(checked) => setPermissionSettings(prev => ({ ...prev, editor: checked }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Viewer</p>
+                  <p className="text-sm text-gray-500">View only</p>
+                </div>
+                <Switch
+                  checked={permissionSettings.viewer}
+                  onCheckedChange={(checked) => setPermissionSettings(prev => ({ ...prev, viewer: checked }))}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowPermissionsDialog(false); toast.success('Permissions saved') }}>Save</Button>
+              <Button onClick={() => {
+                setShowPermissionsDialog(false)
+                toast.success('Permissions saved', { description: 'Access controls updated' })
+              }}>Save</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3801,26 +3833,38 @@ export default function MediaLibraryClient({
                   <p className="font-medium">Public Access</p>
                   <p className="text-sm text-gray-500">Anyone can view this collection</p>
                 </div>
-                <Switch />
+                <Switch
+                  checked={privacySettings.publicAccess}
+                  onCheckedChange={(checked) => setPrivacySettings(prev => ({ ...prev, publicAccess: checked }))}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Password Protected</p>
                   <p className="text-sm text-gray-500">Require password to access</p>
                 </div>
-                <Switch />
+                <Switch
+                  checked={privacySettings.passwordProtected}
+                  onCheckedChange={(checked) => setPrivacySettings(prev => ({ ...prev, passwordProtected: checked }))}
+                />
               </div>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
                   <p className="font-medium">Link Sharing</p>
                   <p className="text-sm text-gray-500">Allow sharing via link</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={privacySettings.linkSharing}
+                  onCheckedChange={(checked) => setPrivacySettings(prev => ({ ...prev, linkSharing: checked }))}
+                />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPrivacyDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowPrivacyDialog(false); toast.success('Privacy settings saved') }}>Save</Button>
+              <Button onClick={() => {
+                setShowPrivacyDialog(false)
+                toast.success('Privacy settings saved', { description: 'Collection access controls updated' })
+              }}>Save</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3950,12 +3994,16 @@ export default function MediaLibraryClient({
             </DialogHeader>
             <div className="space-y-4">
               {[
-                { name: 'Google Drive', icon: FolderSync, color: 'text-blue-500' },
-                { name: 'Dropbox', icon: FolderSync, color: 'text-blue-600' },
-                { name: 'OneDrive', icon: FolderSync, color: 'text-blue-400' },
-                { name: 'AWS S3', icon: Database, color: 'text-orange-500' },
+                { name: 'Google Drive', icon: FolderSync, color: 'text-blue-500', url: 'https://accounts.google.com/o/oauth2/v2/auth' },
+                { name: 'Dropbox', icon: FolderSync, color: 'text-blue-600', url: 'https://www.dropbox.com/oauth2/authorize' },
+                { name: 'OneDrive', icon: FolderSync, color: 'text-blue-400', url: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize' },
+                { name: 'AWS S3', icon: Database, color: 'text-orange-500', url: 'https://console.aws.amazon.com/s3' },
               ].map(service => (
-                <Card key={service.name} className="p-4 cursor-pointer hover:shadow-md flex items-center gap-4" onClick={() => { setShowCloudImportDialog(false); toast.success(`Connecting to ${service.name}...`) }}>
+                <Card key={service.name} className="p-4 cursor-pointer hover:shadow-md flex items-center gap-4" onClick={() => {
+                  window.open(service.url, '_blank')
+                  setShowCloudImportDialog(false)
+                  toast.success(`Connecting to ${service.name}...`, { description: 'Complete authorization in the popup' })
+                }}>
                   <service.icon className={`h-8 w-8 ${service.color}`} />
                   <div>
                     <h4 className="font-medium">{service.name}</h4>

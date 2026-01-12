@@ -2571,8 +2571,8 @@ Generated on: ${new Date().toLocaleString()}
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700"><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
-                  <Button variant="outline" className="flex-1"><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                  <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.success('Stage Advanced', { description: 'Deal moved to next stage' })}><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
+                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit Deal', { description: 'Opening deal editor...' })}><Edit className="w-4 h-4 mr-2" />Edit</Button>
                   <Button variant="outline" onClick={handleViewContract}><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
@@ -3593,10 +3593,19 @@ Generated on: ${new Date().toLocaleString()}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Opening document...', { description: 'MSA document will open in a new tab' })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        window.open('/documents/msa.pdf', '_blank')
+                        toast.success('Opening document...', { description: 'MSA opened in new tab' })
+                      }}>
                         <ExternalLink className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Downloaded', { description: 'Master Service Agreement.pdf' })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        const link = document.createElement('a')
+                        link.href = '/documents/msa.pdf'
+                        link.download = 'Master Service Agreement.pdf'
+                        link.click()
+                        toast.success('Downloaded', { description: 'Master Service Agreement.pdf' })
+                      }}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
@@ -3610,10 +3619,19 @@ Generated on: ${new Date().toLocaleString()}
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Opening document...', { description: 'SOW document will open in a new tab' })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        window.open('/documents/sow.pdf', '_blank')
+                        toast.success('Opening document...', { description: 'SOW opened in new tab' })
+                      }}>
                         <ExternalLink className="w-4 h-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Downloaded', { description: 'Statement of Work.pdf' })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        const link = document.createElement('a')
+                        link.href = '/documents/sow.pdf'
+                        link.download = 'Statement of Work.pdf'
+                        link.click()
+                        toast.success('Downloaded', { description: 'Statement of Work.pdf' })
+                      }}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
@@ -3626,7 +3644,18 @@ Generated on: ${new Date().toLocaleString()}
                         <p className="text-sm text-gray-500">PDF, DOC, DOCX up to 10MB</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Upload', { description: 'Document upload feature - click to select a file' })}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const input = document.createElement('input')
+                      input.type = 'file'
+                      input.accept = '.pdf,.doc,.docx'
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0]
+                        if (file) {
+                          toast.success('File selected', { description: file.name })
+                        }
+                      }
+                      input.click()
+                    }}>
                       <Upload className="w-4 h-4 mr-2" />
                       Upload
                     </Button>

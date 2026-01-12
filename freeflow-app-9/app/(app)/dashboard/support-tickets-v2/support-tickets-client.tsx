@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useSupportTickets, useTicketReplies, SupportTicket, SupportStats, TicketReply } from '@/lib/hooks/use-support-tickets'
 import { createSupportTicket, deleteSupportTicket, updateSupportTicket, resolveTicket, escalateTicket, assignTicket, closeTicket, reopenTicket } from '@/app/actions/support-tickets'

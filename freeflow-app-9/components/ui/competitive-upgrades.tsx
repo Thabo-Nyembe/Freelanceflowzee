@@ -54,12 +54,15 @@ interface AIInsight {
   type: 'recommendation' | 'alert' | 'opportunity' | 'prediction'
   title: string
   description: string
-  impact: 'high' | 'medium' | 'low'
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
   metric?: string
   change?: number
   confidence?: number
   action?: string
-  createdAt: Date
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
 }
 
 interface AIInsightsPanelProps {
@@ -153,11 +156,12 @@ export function AIInsightsPanel({
     }
   }
 
-  const getImpactColor = (impact: AIInsight['impact']) => {
+  const getImpactColor = (impact: AIInsight['impact'] | AIInsight['priority']) => {
     switch (impact) {
       case 'high': return 'bg-red-500/10 text-red-500 border-red-500/20'
       case 'medium': return 'bg-amber-500/10 text-amber-500 border-amber-500/20'
       case 'low': return 'bg-green-500/10 text-green-500 border-green-500/20'
+      default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20'
     }
   }
 
@@ -297,9 +301,11 @@ export function AIInsightsPanel({
                   <p className="text-sm font-medium truncate">{insight.title}</p>
                   <p className="text-xs text-muted-foreground truncate">{insight.description}</p>
                 </div>
-                <Badge variant="outline" className={cn("text-xs", getImpactColor(insight.impact))}>
-                  {insight.impact}
-                </Badge>
+                {(insight.impact || insight.priority) && (
+                  <Badge variant="outline" className={cn("text-xs", getImpactColor(insight.impact || insight.priority))}>
+                    {insight.impact || insight.priority}
+                  </Badge>
+                )}
               </motion.div>
             ))}
           </div>
@@ -615,10 +621,12 @@ interface Collaborator {
   id: string
   name: string
   avatar?: string
-  color: string
+  color?: string
   status: 'online' | 'away' | 'offline'
+  role?: string
   isTyping?: boolean
   lastSeen?: Date
+  lastActive?: string | Date
   cursor?: { x: number; y: number }
 }
 
@@ -649,11 +657,11 @@ export function CollaborationIndicator({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="relative">
-                  <Avatar className="h-8 w-8 border-2 border-background ring-2" style={{ '--tw-ring-color': collaborator.color } as React.CSSProperties}>
+                  <Avatar className="h-8 w-8 border-2 border-background ring-2" style={{ '--tw-ring-color': collaborator.color || '#6366f1' } as React.CSSProperties}>
                     {collaborator.avatar ? (
                       <AvatarImage src={collaborator.avatar} alt={collaborator.name} />
                     ) : null}
-                    <AvatarFallback style={{ backgroundColor: collaborator.color }} className="text-white text-xs">
+                    <AvatarFallback style={{ backgroundColor: collaborator.color || '#6366f1' }} className="text-white text-xs">
                       {collaborator.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
@@ -1146,13 +1154,20 @@ export function DashboardWidget({
 // ============================================================================
 
 interface Prediction {
-  label: string
-  currentValue: number
-  predictedValue: number
+  id?: string
+  label?: string
+  title?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
   confidence: number
   trend: 'up' | 'down' | 'stable'
-  timeframe: string
-  factors: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }>
+  timeframe?: string
+  impact?: string
+  factors?: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }> | string[]
 }
 
 interface PredictiveAnalyticsProps {
@@ -1216,24 +1231,24 @@ export function PredictiveAnalytics({
               transition={{ delay: index * 0.1 }}
               className="p-4 rounded-lg border hover:bg-muted/50 cursor-pointer transition-colors"
               onClick={() => setSelectedPrediction(
-                selectedPrediction?.label === prediction.label ? null : prediction
+                selectedPrediction?.label === (prediction.label || prediction.title) ? null : prediction
               )}
             >
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{prediction.label}</span>
+                    <span className="font-medium">{prediction.label || prediction.title}</span>
                     {getTrendIcon(prediction.trend)}
                   </div>
                   <div className="flex items-center gap-4 mt-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Current</p>
-                      <p className="text-lg font-semibold">{(prediction.currentValue ?? 0).toLocaleString()}</p>
+                      <p className="text-lg font-semibold">{(prediction.currentValue ?? prediction.current ?? 0).toLocaleString()}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <p className="text-xs text-muted-foreground">Predicted ({prediction.timeframe || 'N/A'})</p>
-                      <p className="text-lg font-semibold text-purple-600">{(prediction.predictedValue ?? 0).toLocaleString()}</p>
+                      <p className="text-lg font-semibold text-purple-600">{(prediction.predictedValue ?? prediction.predicted ?? prediction.target ?? 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -1251,7 +1266,7 @@ export function PredictiveAnalytics({
 
               {/* Expanded Details */}
               <AnimatePresence>
-                {selectedPrediction?.label === prediction.label && (
+                {selectedPrediction?.label === (prediction.label || prediction.title) && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -1260,17 +1275,27 @@ export function PredictiveAnalytics({
                   >
                     <p className="text-sm font-medium mb-2">Contributing Factors</p>
                     <div className="space-y-2">
-                      {(prediction.factors || []).map((factor, i) => (
-                        <div key={i} className="flex items-center justify-between text-sm">
-                          <span className={getImpactColor(factor.impact)}>{factor.name}</span>
-                          <div className="flex items-center gap-2">
-                            <Progress value={factor.weight * 100} className="w-24 h-2" />
-                            <span className="text-xs text-muted-foreground w-10">
-                              {(factor.weight * 100).toFixed(0)}%
-                            </span>
+                      {(prediction.factors || []).map((factor, i) => {
+                        // Handle both string[] and object[] formats
+                        if (typeof factor === 'string') {
+                          return (
+                            <div key={i} className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">{factor}</span>
+                            </div>
+                          )
+                        }
+                        return (
+                          <div key={i} className="flex items-center justify-between text-sm">
+                            <span className={getImpactColor(factor.impact)}>{factor.name}</span>
+                            <div className="flex items-center gap-2">
+                              <Progress value={factor.weight * 100} className="w-24 h-2" />
+                              <span className="text-xs text-muted-foreground w-10">
+                                {(factor.weight * 100).toFixed(0)}%
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </motion.div>
                 )}

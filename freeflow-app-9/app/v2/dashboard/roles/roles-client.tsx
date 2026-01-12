@@ -1319,7 +1319,9 @@ export default function RolesClient() {
                     <p className="text-amber-100 text-sm">Fine-grained access control configuration</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={async () => {
+                      await apiPost('/api/roles/permissions/sync', {}, { loading: 'Syncing permissions...', success: 'Permissions synced', error: 'Sync failed' })
+                    }}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-amber-700 hover:bg-amber-50"><Plus className="h-4 w-4 mr-2" />Add Permission</Button>
                   </div>
                 </div>
@@ -1426,7 +1428,15 @@ export default function RolesClient() {
                     <p className="text-blue-100 text-sm">Manage user-to-role mappings</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => {
+                      const exportData = { assignments: mockUserAssignments, exportDate: new Date().toISOString() }
+                      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url; a.download = `role-assignments-${new Date().toISOString().split('T')[0]}.json`
+                      a.click(); URL.revokeObjectURL(url)
+                      toast.success('Assignments exported')
+                    }}><Download className="h-4 w-4 mr-2" />Export</Button>
                     <Button onClick={() => handleAssignRole('selected user')} className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
                   </div>
                 </div>
@@ -1484,7 +1494,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search users..." className="w-64" />
-                      <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter panel', { description: 'Filter by role, status, or date' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1540,7 +1550,9 @@ export default function RolesClient() {
                     <p className="text-green-100 text-sm">Conditional access and security rules</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Evaluate</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={async () => {
+                      await apiPost('/api/roles/policies/evaluate', {}, { loading: 'Evaluating policies...', success: 'All policies validated', error: 'Evaluation failed' })
+                    }}><RefreshCw className="h-4 w-4 mr-2" />Evaluate</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-green-700 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />Add Policy</Button>
                   </div>
                 </div>
@@ -1599,7 +1611,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search policies..." className="w-64" />
-                      <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter panel', { description: 'Filter by type, status, or conditions' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1663,8 +1675,16 @@ export default function RolesClient() {
                     <p className="text-slate-200 text-sm">Complete activity log and compliance tracking</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button className="bg-white text-slate-700 hover:bg-slate-50"><Filter className="h-4 w-4 mr-2" />Filter</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => {
+                      const exportData = { auditLogs: mockAuditLogs, exportDate: new Date().toISOString() }
+                      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url; a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
+                      a.click(); URL.revokeObjectURL(url)
+                      toast.success('Audit logs exported')
+                    }}><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => toast.info('Filter audit logs', { description: 'Filter by date, action, or user' })}><Filter className="h-4 w-4 mr-2" />Filter</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -1770,7 +1790,9 @@ export default function RolesClient() {
                     <p className="text-rose-100 text-sm">Organize users for bulk role management</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={async () => {
+                      await apiPost('/api/roles/groups/sync', {}, { loading: 'Syncing groups...', success: 'Groups synced', error: 'Sync failed' })
+                    }}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-rose-700 hover:bg-rose-50"><Plus className="h-4 w-4 mr-2" />Create Group</Button>
                   </div>
                 </div>
@@ -1828,7 +1850,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search groups..." className="w-64" />
-                      <Button variant="outline"><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => toast.info('Filter groups', { description: 'Filter by status, role, or member count' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -2154,7 +2176,7 @@ export default function RolesClient() {
               <AIInsightsPanel
                 insights={mockRolesAIInsights}
                 title="Role Intelligence"
-                onInsightAction={(_insight) => console.log('Insight action:', insight)}
+                onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
               />
             </div>
             <div className="space-y-6">

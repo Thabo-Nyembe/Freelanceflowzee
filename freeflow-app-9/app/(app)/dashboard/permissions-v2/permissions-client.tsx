@@ -312,6 +312,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)
   const [editingRole, setEditingRole] = useState<OktaRole | null>(null)
 
+  // State for actioned AI insights
+  const [actionedInsights, setActionedInsights] = useState<Set<string>>(new Set())
+
   // Form state for creating new role
   const [newRole, setNewRole] = useState({
     role_name: '',
@@ -356,15 +359,41 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const totalApps = mockApplications.length
   const pendingUsers = mockUsers.filter(u => u.status === 'pending').length
 
+  // State for applied advanced filters (separate from the form state)
+  const [appliedAdvancedFilters, setAppliedAdvancedFilters] = useState({
+    department: 'all',
+    mfaStatus: 'all',
+    createdAfter: '',
+    createdBefore: '',
+    hasRole: 'all'
+  })
+
+  // State for saved attribute mappings
+  const [savedAttributeMappings, setSavedAttributeMappings] = useState<Array<{ source: string; target: string; required: boolean }>>([])
+
   const filteredUsers = useMemo(() => {
     return mockUsers.filter(user => {
       const matchesStatus = userStatusFilter === 'all' || user.status === userStatusFilter
       const matchesSearch = !searchQuery ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.displayName.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesStatus && matchesSearch
+
+      // Apply advanced filters
+      const matchesDepartment = appliedAdvancedFilters.department === 'all' ||
+        user.department === appliedAdvancedFilters.department
+      const matchesMfa = appliedAdvancedFilters.mfaStatus === 'all' ||
+        (appliedAdvancedFilters.mfaStatus === 'enabled' && user.mfaEnabled) ||
+        (appliedAdvancedFilters.mfaStatus === 'disabled' && !user.mfaEnabled)
+      const matchesCreatedAfter = !appliedAdvancedFilters.createdAfter ||
+        new Date(user.createdAt) >= new Date(appliedAdvancedFilters.createdAfter)
+      const matchesCreatedBefore = !appliedAdvancedFilters.createdBefore ||
+        new Date(user.createdAt) <= new Date(appliedAdvancedFilters.createdBefore)
+      const matchesRole = appliedAdvancedFilters.hasRole === 'all' ||
+        user.roles.includes(appliedAdvancedFilters.hasRole)
+
+      return matchesStatus && matchesSearch && matchesDepartment && matchesMfa && matchesCreatedAfter && matchesCreatedBefore && matchesRole
     })
-  }, [userStatusFilter, searchQuery])
+  }, [userStatusFilter, searchQuery, appliedAdvancedFilters])
 
   const getUserStatusColor = (status: UserStatus) => {
     switch (status) {
@@ -763,7 +792,19 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
   // Handler for applying advanced filters
   const handleApplyAdvancedFilters = () => {
-    toast.success('Filters applied', { description: 'User list has been filtered with advanced criteria' })
+    // Apply the form state to the actual filter state
+    setAppliedAdvancedFilters({ ...advancedFilters })
+
+    // Count how many filters are active
+    const activeFilterCount = Object.entries(advancedFilters).filter(
+      ([key, value]) => value !== 'all' && value !== ''
+    ).length
+
+    toast.success('Filters applied', {
+      description: activeFilterCount > 0
+        ? `${activeFilterCount} filter(s) applied to user list`
+        : 'All filters cleared'
+    })
     setShowAdvancedFilters(false)
   }
 
@@ -806,7 +847,22 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       toast.error('Validation Error', { description: 'Both source and target attributes are required' })
       return
     }
-    toast.success('Mapping added', { description: `${newMapping.source} -> ${newMapping.target} mapping created` })
+
+    // Check for duplicate mappings
+    const isDuplicate = savedAttributeMappings.some(
+      m => m.source === newMapping.source && m.target === newMapping.target
+    )
+    if (isDuplicate) {
+      toast.error('Duplicate Mapping', { description: 'This attribute mapping already exists' })
+      return
+    }
+
+    // Add the new mapping to saved mappings
+    setSavedAttributeMappings(prev => [...prev, { ...newMapping }])
+
+    toast.success('Mapping added', {
+      description: `${newMapping.source} -> ${newMapping.target} mapping created (${savedAttributeMappings.length + 1} total)`
+    })
     setShowAttributeMapping(false)
     setNewMapping({ source: '', target: '', required: false })
   }
@@ -945,6 +1001,52 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Handler for AI insight actions
+  const handleAIInsightAction = (insight: { id: string; type: 'success' | 'warning' | 'info'; title?: string; description?: string; category?: string }) => {
+    // Don't process already actioned insights
+    if (actionedInsights.has(insight.id)) {
+      toast.info('Already Processed', { description: 'This insight has already been addressed' })
+      return
+    }
+
+    // Take action based on insight type and category
+    switch (insight.type) {
+      case 'warning':
+        // For security warnings, navigate to relevant tab or trigger review
+        if (insight.category === 'Security') {
+          setActiveTab('audit')
+          toast.warning('Security Review Required', {
+            description: `${insight.title}: ${insight.description}. Opening audit logs for investigation.`
+          })
+        } else {
+          toast.warning('Action Required', { description: insight.description || 'Please review this warning' })
+        }
+        break
+
+      case 'info':
+        // For optimization recommendations, guide user to relevant settings
+        if (insight.category === 'Optimization') {
+          setActiveTab('roles')
+          toast.info('Review Recommended', {
+            description: `${insight.title}: Opening roles tab for permission review.`
+          })
+        } else {
+          toast.info('Insight Noted', { description: insight.description || 'This information has been noted' })
+        }
+        break
+
+      case 'success':
+        // For success items, mark as acknowledged
+        toast.success('Compliance Verified', {
+          description: `${insight.title} has been acknowledged and logged.`
+        })
+        break
+    }
+
+    // Mark insight as actioned
+    setActionedInsights(prev => new Set([...prev, insight.id]))
   }
 
   // Quick actions with real functionality
@@ -2300,7 +2402,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <AIInsightsPanel
               insights={mockPermissionsAIInsights}
               title="Security Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
+              onInsightAction={handleAIInsightAction}
             />
           </div>
           <div className="space-y-6">

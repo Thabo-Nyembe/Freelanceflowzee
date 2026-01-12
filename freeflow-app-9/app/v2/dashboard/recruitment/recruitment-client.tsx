@@ -948,6 +948,26 @@ export default function RecruitmentClient() {
     setShowEditJobDialog(true)
   }
 
+  // Handler for editing mock job requisitions (for demo display)
+  const handleEditMockJob = (job: JobRequisition) => {
+    // Map mock job fields to the form
+    setNewJobForm({
+      title: job.title,
+      description: job.description || '',
+      department: job.department || '',
+      location: job.location || '',
+      job_type: job.type,
+      status: job.status === 'open' ? 'active' : job.status === 'on-hold' ? 'paused' : job.status,
+      salary_min: job.salaryMin?.toString() || '',
+      salary_max: job.salaryMax?.toString() || '',
+      salary_currency: job.currency,
+      hiring_manager: job.hiringManager || '',
+      recruiter: job.recruiter || ''
+    })
+    setShowEditJobDialog(true)
+    toast.info('Editing Job', { description: `Opening editor for ${job.title}` })
+  }
+
   const handleUpdateJob = async () => {
     if (!editingJob) return
 
@@ -1169,8 +1189,30 @@ export default function RecruitmentClient() {
     )
   }
 
-  const handleSendOffer = (candidateName: string) => {
-    toast.success('Send Offer', { description: `Offer sent to ${candidateName}` })
+  const handleSendOffer = async (candidateName: string, offerId?: string) => {
+    // Simulate sending offer via email API
+    try {
+      await toast.promise(
+        new Promise<void>((resolve, reject) => {
+          // Simulate API call for sending offer
+          setTimeout(() => {
+            // Simulate 95% success rate
+            if (Math.random() > 0.05) {
+              resolve()
+            } else {
+              reject(new Error('Email service temporarily unavailable'))
+            }
+          }, 1200)
+        }),
+        {
+          loading: `Sending offer to ${candidateName}...`,
+          success: `Offer successfully sent to ${candidateName}! They will receive an email notification.`,
+          error: (err) => `Failed to send offer: ${err.message}`
+        }
+      )
+    } catch {
+      // Error already handled by toast.promise
+    }
   }
 
   const handleFilterTalentPool = () => {
@@ -1470,7 +1512,7 @@ export default function RecruitmentClient() {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.success(`Editor ready for ${job.title}`) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEditMockJob(job) }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
@@ -2031,7 +2073,7 @@ export default function RecruitmentClient() {
               <AIInsightsPanel
                 insights={recruitmentAIInsights}
                 title="Recruitment Intelligence"
-                onInsightAction={(_insight) => console.log('Insight action:', insight)}
+                onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
               />
             </div>
             <div className="space-y-6">

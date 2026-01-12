@@ -3259,7 +3259,7 @@ export default function CrmClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => console.log('CRM Question:', q)}
+            onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your CRM question...') } })}
           />
           <PredictiveAnalytics predictions={mockCrmPredictions} />
         </div>

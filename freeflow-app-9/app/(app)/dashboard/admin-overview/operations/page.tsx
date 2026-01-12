@@ -50,8 +50,54 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import type { AdminTeamMember } from '@/lib/admin-overview-queries'
 
 const logger = createFeatureLogger('admin-operations')
+
+// Mapper function to convert AdminTeamMember to TeamMember
+function mapAdminTeamMemberToTeamMember(admin: AdminTeamMember): TeamMember {
+  const result: TeamMember = {
+    id: admin.id,
+    name: admin.full_name,
+    email: admin.email,
+    role: admin.role as UserRole,
+    status: admin.status as UserStatus,
+    department: admin.department || 'General',
+    joinDate: admin.created_at,
+    lastActive: admin.last_login_at || admin.updated_at,
+    permissions: admin.permissions || [],
+    assignedProjects: 0,
+    completedTasks: 0,
+    productivityScore: 0
+  }
+  if (admin.avatar_url) {
+    result.avatar = admin.avatar_url
+  }
+  return result
+}
+
+// Mapper function to convert user profile data to TeamMember
+function mapUserProfileToTeamMember(user: any): TeamMember {
+  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Unknown'
+  const result: TeamMember = {
+    id: user.id || user.user_id,
+    name: fullName,
+    email: user.email || user.user?.email || '',
+    role: (user.role || 'member') as UserRole,
+    status: (user.status || 'active') as UserStatus,
+    department: user.department || 'General',
+    joinDate: user.joined_at || user.created_at,
+    lastActive: user.last_active || user.user?.last_sign_in_at || user.updated_at,
+    permissions: user.permissions || [],
+    assignedProjects: user.projects_count || 0,
+    completedTasks: 0,
+    productivityScore: 0
+  }
+  if (user.avatar_url) {
+    result.avatar = user.avatar_url
+  }
+  return result
+}
 
 export default function OperationsPage() {
   const router = useRouter()
@@ -97,7 +143,7 @@ export default function OperationsPage() {
     const totalMembers = teamMembers.length
     const pendingInvites = 0 // Placeholder - would need invite tracking
     const totalPermissions = roles.reduce((sum, role) => sum + (role.permissions?.length || 0), 0)
-    const activeRoles = roles.filter(r => r.isActive !== false).length
+    const activeRoles = roles.length // All roles are considered active
 
     return { totalMembers, pendingInvites, totalPermissions, activeRoles }
   }, [teamMembers, roles])
@@ -119,17 +165,17 @@ export default function OperationsPage() {
         const { getTeamMembers } = await import('@/lib/admin-overview-queries')
 
         const teamResult = await getTeamMembers(userId)
-        setTeamMembers(teamResult.data || [])
+        setTeamMembers((teamResult || []).map(mapAdminTeamMemberToTeamMember))
         setRoles([])
 
         setIsLoading(false)
         announce('Operations data loaded successfully', 'polite')
         toast.success('Operations loaded', {
-          description: `${teamResult.data?.length || 0} team members loaded`
+          description: `${teamResult?.length || 0} team members loaded`
         })
         logger.info('Operations loaded', {
           success: true,
-          memberCount: teamResult.data?.length || 0,
+          memberCount: teamResult?.length || 0,
           roleCount: 0
         })
       } catch (err) {
@@ -179,7 +225,7 @@ export default function OperationsPage() {
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
-      setTeamMembers(users || [])
+      setTeamMembers((users || []).map(mapUserProfileToTeamMember))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Invite failed'
       toast.error('Invite Failed', { description: message })
@@ -226,7 +272,7 @@ export default function OperationsPage() {
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
-      setTeamMembers(users || [])
+      setTeamMembers((users || []).map(mapUserProfileToTeamMember))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
@@ -265,7 +311,7 @@ export default function OperationsPage() {
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
-      setTeamMembers(users || [])
+      setTeamMembers((users || []).map(mapUserProfileToTeamMember))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
@@ -299,7 +345,7 @@ export default function OperationsPage() {
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
-      setTeamMembers(users || [])
+      setTeamMembers((users || []).map(mapUserProfileToTeamMember))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Deactivate failed'
       toast.error('Deactivate Failed', { description: message })
@@ -331,7 +377,7 @@ export default function OperationsPage() {
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
-      setTeamMembers(users || [])
+      setTeamMembers((users || []).map(mapUserProfileToTeamMember))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Role change failed'
       toast.error('Role Change Failed', { description: message })
@@ -429,7 +475,7 @@ export default function OperationsPage() {
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
 
-      setTeamMembers(users || [])
+      setTeamMembers((users || []).map(mapUserProfileToTeamMember))
 
       toast.success('Operations Refreshed', {
         description: `Reloaded ${users?.length || 0} team members successfully`

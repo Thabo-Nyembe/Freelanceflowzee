@@ -789,9 +789,9 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
   // Quick actions for the toolbar (now with real functionality)
   const knowledgeArticlesQuickActions = [
-    { id: '1', label: 'New Article', icon: 'plus', action: () => { setShowCreateArticleDialog(true); toast.success('Create Article', { description: 'Opening editor...' }) }, variant: 'default' as const },
-    { id: '2', label: 'Templates', icon: 'layout', action: () => { setShowTemplatesDialog(true); toast.success('Templates', { description: 'Choose from pre-built templates' }) }, variant: 'default' as const },
-    { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => { setShowAnalyticsDialog(true); toast.success('Analytics', { description: 'View content performance' }) }, variant: 'outline' as const },
+    { id: '1', label: 'New Article', icon: 'plus', action: () => setShowCreateArticleDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Templates', icon: 'layout', action: () => setShowTemplatesDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
   ]
 
   return (
@@ -819,7 +819,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 className="pl-9 w-64"
               />
             </div>
-            <Button variant="outline" className="gap-2" onClick={() => { setShowTemplatesDialog(true); toast.success('Templates', { description: 'Choose from pre-built article templates' }) }}>
+            <Button variant="outline" className="gap-2" onClick={() => setShowTemplatesDialog(true)}>
               <LayoutTemplate className="w-4 h-4" />
               Templates
             </Button>
@@ -919,14 +919,14 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: FilePlus, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => { setShowCreateArticleDialog(true); toast.success('New Article', { description: 'Opening article editor...' }) } },
-                { icon: LayoutTemplate, label: 'Templates', color: 'from-purple-500 to-pink-600', action: () => { setShowTemplatesDialog(true); toast.success('Templates', { description: 'Browse article templates' }) } },
-                { icon: FolderTree, label: 'New Space', color: 'from-green-500 to-emerald-600', action: () => { setShowCreateSpaceDialog(true); toast.success('New Space', { description: 'Create a new content space' }) } },
-                { icon: Search, label: 'Search', color: 'from-orange-500 to-amber-600', action: () => { setActiveTab('search'); toast.success('Advanced Search', { description: 'Search your knowledge base' }) } },
-                { icon: GitBranch, label: 'Versions', color: 'from-cyan-500 to-blue-600', action: () => { setShowVersionsDialog(true); toast.success('Version History', { description: 'View article version history' }) } },
-                { icon: Users, label: 'Contributors', color: 'from-pink-500 to-rose-600', action: () => { setShowContributorsDialog(true); toast.success('Contributors', { description: 'View knowledge base contributors' }) } },
-                { icon: BarChart3, label: 'Analytics', color: 'from-indigo-500 to-purple-600', action: () => { setShowAnalyticsDialog(true); toast.success('Analytics', { description: 'View content analytics' }) } },
-                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', action: () => { setActiveTab('settings'); toast.success('Settings', { description: 'Manage knowledge base settings' }) } },
+                { icon: FilePlus, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => setShowCreateArticleDialog(true) },
+                { icon: LayoutTemplate, label: 'Templates', color: 'from-purple-500 to-pink-600', action: () => setShowTemplatesDialog(true) },
+                { icon: FolderTree, label: 'New Space', color: 'from-green-500 to-emerald-600', action: () => setShowCreateSpaceDialog(true) },
+                { icon: Search, label: 'Search', color: 'from-orange-500 to-amber-600', action: () => setActiveTab('search') },
+                { icon: GitBranch, label: 'Versions', color: 'from-cyan-500 to-blue-600', action: () => setShowVersionsDialog(true) },
+                { icon: Users, label: 'Contributors', color: 'from-pink-500 to-rose-600', action: () => setShowContributorsDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'from-indigo-500 to-purple-600', action: () => setShowAnalyticsDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', action: () => setActiveTab('settings') },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -1208,14 +1208,14 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Create Space', color: 'from-purple-500 to-violet-600', action: () => { setShowCreateSpaceDialog(true); toast.success('Create Space', { description: 'Configure your new content space' }) } },
-                { icon: Folder, label: 'Browse All', color: 'from-blue-500 to-indigo-600', action: () => { setSelectedSpace(null); toast.success('All Spaces', { description: 'Browsing all available spaces' }) } },
-                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => { setShowFavoritesDialog(true); toast.success('Favorites', { description: 'View your favorite spaces' }) } },
-                { icon: Users, label: 'Members', color: 'from-green-500 to-emerald-600', action: () => { setShowMembersDialog(true); toast.success('Members', { description: 'View space members' }) } },
-                { icon: Lock, label: 'Permissions', color: 'from-red-500 to-pink-600', action: () => { setShowPermissionsDialog(true); toast.success('Permissions', { description: 'Manage space permissions' }) } },
-                { icon: Archive, label: 'Archived', color: 'from-gray-500 to-gray-600', action: () => { setShowArchivedDialog(true); toast.success('Archived', { description: 'View archived spaces' }) } },
-                { icon: Settings, label: 'Settings', color: 'from-cyan-500 to-blue-600', action: () => { setActiveTab('settings'); toast.success('Settings', { description: 'Manage space settings' }) } },
-                { icon: Trash2, label: 'Deleted', color: 'from-rose-500 to-red-600', action: () => { setShowDeletedDialog(true); toast.success('Deleted', { description: 'View deleted spaces' }) } },
+                { icon: Plus, label: 'Create Space', color: 'from-purple-500 to-violet-600', action: () => setShowCreateSpaceDialog(true) },
+                { icon: Folder, label: 'Browse All', color: 'from-blue-500 to-indigo-600', action: () => setSelectedSpace(null) },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => setShowFavoritesDialog(true) },
+                { icon: Users, label: 'Members', color: 'from-green-500 to-emerald-600', action: () => setShowMembersDialog(true) },
+                { icon: Lock, label: 'Permissions', color: 'from-red-500 to-pink-600', action: () => setShowPermissionsDialog(true) },
+                { icon: Archive, label: 'Archived', color: 'from-gray-500 to-gray-600', action: () => setShowArchivedDialog(true) },
+                { icon: Settings, label: 'Settings', color: 'from-cyan-500 to-blue-600', action: () => setActiveTab('settings') },
+                { icon: Trash2, label: 'Deleted', color: 'from-rose-500 to-red-600', action: () => setShowDeletedDialog(true) },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -1233,7 +1233,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">All Spaces ({spaces.length})</h3>
-              <Button className="gap-2" onClick={() => { setShowCreateSpaceDialog(true); toast.success('Create Space', { description: 'Configure your new content space' }) }}>
+              <Button className="gap-2" onClick={() => setShowCreateSpaceDialog(true)}>
                 <Plus className="w-4 h-4" /> Create Space
               </Button>
             </div>
@@ -1321,14 +1321,14 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600', action: () => { setShowCreateTemplateDialog(true); toast.success('Create Template', { description: 'Design your new template' }) } },
+                { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600', action: () => setShowCreateTemplateDialog(true) },
                 { icon: FileCode, label: 'Import', color: 'from-blue-500 to-indigo-600', action: () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = () => toast.success('Template imported', { description: 'Template ready to use' }); input.click() } },
                 { icon: Share2, label: 'Share', color: 'from-purple-500 to-pink-600', action: () => { navigator.clipboard.writeText(`${window.location.origin}/templates`); toast.success('Share link copied', { description: 'Templates share link copied to clipboard' }) } },
-                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600', action: () => { if (templates.length > 0) { handleDuplicateTemplate(templates[0]); toast.success('Duplicate template', { description: 'Select which template to duplicate' }) } else { toast.error('No templates', { description: 'Create a template first' }) } } },
-                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600', action: () => { if (templates.length > 0) { handleCustomizeTemplate(templates[0]); toast.success('Customize template', { description: 'Select which template to customize' }) } else { toast.error('No templates', { description: 'Create a template first' }) } } },
-                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => { setShowFavoritesDialog(true); toast.success('Favorites', { description: 'View your favorite templates' }) } },
-                { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600', action: () => { setShowCategoriesDialog(true); toast.success('Categories', { description: 'Browse template categories' }) } },
-                { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600', action: () => { setShowUsageStatsDialog(true); toast.success('Usage Stats', { description: 'View template usage statistics' }) } },
+                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600', action: () => { if (templates.length > 0) { handleDuplicateTemplate(templates[0]) } else { toast.error('No templates', { description: 'Create a template first' }) } } },
+                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600', action: () => { if (templates.length > 0) { handleCustomizeTemplate(templates[0]) } else { toast.error('No templates', { description: 'Create a template first' }) } } },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => setShowFavoritesDialog(true) },
+                { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600', action: () => setShowCategoriesDialog(true) },
+                { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600', action: () => setShowUsageStatsDialog(true) },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -1346,7 +1346,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Article Templates ({templates.length})</h3>
-              <Button className="gap-2" onClick={() => { setShowCreateTemplateDialog(true); toast.success('Create Template', { description: 'Design your new template' }) }}>
+              <Button className="gap-2" onClick={() => setShowCreateTemplateDialog(true)}>
                 <Plus className="w-4 h-4" /> Create Template
               </Button>
             </div>
@@ -2205,6 +2205,164 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 setShowCustomizeTemplateDialog(false)
               }}>
                 <Palette className="w-4 h-4 mr-2" /> Save Changes
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Selection Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LayoutTemplate className="w-5 h-5" />
+                Article Templates
+              </DialogTitle>
+              <DialogDescription>Choose from pre-built article templates to get started quickly</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[50vh] pr-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                {templates.map(template => (
+                  <Card key={template.id} className="p-4 cursor-pointer hover:shadow-md transition-all hover:border-blue-500" onClick={() => {
+                    handleUseTemplate(template)
+                    setShowTemplatesDialog(false)
+                  }}>
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <LayoutTemplate className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{template.name}</h4>
+                        <span className="text-xs text-muted-foreground">{template.category}</span>
+                      </div>
+                      {template.isGlobal && <Badge variant="secondary">Global</Badge>}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">{template.description}</p>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Used {template.usageCount} times</span>
+                      <Badge variant="outline">{template.type}</Badge>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                setShowTemplatesDialog(false)
+                setShowCreateTemplateDialog(true)
+              }}>
+                <Plus className="w-4 h-4 mr-2" /> Create Custom Template
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Space Dialog */}
+        <Dialog open={showCreateSpaceDialog} onOpenChange={setShowCreateSpaceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderTree className="w-5 h-5" />
+                Create New Space
+              </DialogTitle>
+              <DialogDescription>Configure your new content space for organizing articles</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="space-name">Space Name</Label>
+                <Input id="space-name" placeholder="e.g., Engineering Docs" className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="space-key">Space Key</Label>
+                <Input id="space-key" placeholder="e.g., ENG" maxLength={6} className="mt-1 uppercase" />
+                <p className="text-xs text-muted-foreground mt-1">Short identifier for URLs (max 6 characters)</p>
+              </div>
+              <div>
+                <Label htmlFor="space-desc">Description</Label>
+                <Textarea id="space-desc" placeholder="What will this space contain?" className="mt-1" />
+              </div>
+              <div>
+                <Label>Space Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['#6366F1', '#F59E0B', '#EC4899', '#10B981', '#3B82F6', '#EF4444', '#8B5CF6', '#06B6D4'].map(color => (
+                    <button
+                      key={color}
+                      className="w-8 h-8 rounded-full border-2 border-transparent hover:border-gray-400 transition-all"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Public Space</p>
+                  <p className="text-xs text-muted-foreground">Visible to all team members</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateSpaceDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Space created', { description: 'Your new content space is ready' })
+                setShowCreateSpaceDialog(false)
+              }}>
+                <FolderTree className="w-4 h-4 mr-2" /> Create Space
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FilePlus className="w-5 h-5" />
+                Create New Template
+              </DialogTitle>
+              <DialogDescription>Design a reusable template for your articles</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="template-name">Template Name</Label>
+                <Input id="template-name" placeholder="e.g., Technical Guide" className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="template-desc">Description</Label>
+                <Textarea id="template-desc" placeholder="Describe when to use this template" className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="template-category">Category</Label>
+                <Input id="template-category" placeholder="e.g., Documentation, Technical, General" className="mt-1" />
+              </div>
+              <div>
+                <Label>Article Type</Label>
+                <select className="w-full border rounded-md p-2 mt-1">
+                  <option value="page">Page</option>
+                  <option value="how-to">How-To Guide</option>
+                  <option value="tutorial">Tutorial</option>
+                  <option value="reference">Reference</option>
+                  <option value="faq">FAQ</option>
+                  <option value="blog">Blog Post</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Global Template</p>
+                  <p className="text-xs text-muted-foreground">Available to all team members</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Template created', { description: 'Your new template is ready to use' })
+                setShowCreateTemplateDialog(false)
+              }}>
+                <FilePlus className="w-4 h-4 mr-2" /> Create Template
               </Button>
             </div>
           </DialogContent>

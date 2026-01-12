@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import {
   FolderOpen, Plus, Search, Filter, DollarSign, Users, CheckCircle2, Calendar, TrendingUp,
   Briefcase, Edit, Target, BarChart3, Settings, Trash2, LayoutGrid,
@@ -802,7 +803,7 @@ export default function ProjectsHubClient() {
                   <div key={column.id} className="min-w-[280px]">
                     <div className="flex items-center justify-between mb-3 px-2">
                       <div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${column.color}`} /><h3 className="font-semibold">{column.label}</h3><Badge variant="secondary" className="text-xs">{projectsByStatus[column.id]?.length || 0}</Badge></div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); toast.success('New Project', { description: 'Project form opened' }) }}><Plus className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setShowNewProjectDialog(true) }}><Plus className="h-4 w-4" /></Button>
                     </div>
                     <div className="space-y-3">
                       {projectsByStatus[column.id]?.map(project => (
@@ -837,7 +838,35 @@ export default function ProjectsHubClient() {
                           <td className="px-4 py-4"><div className="w-24"><div className="flex justify-between text-xs mb-1"><span>{project.progress}%</span></div><Progress value={project.progress} className="h-1.5" /></div></td>
                           <td className="px-4 py-4">{project.budget ? <div><span className="font-medium">${(project.spent / 1000).toFixed(0)}K</span><span className="text-gray-500"> / ${(project.budget / 1000).toFixed(0)}K</span></div> : '-'}</td>
                           <td className="px-4 py-4">{project.endDate ? new Date(project.endDate).toLocaleDateString() : '-'}</td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.success('Project Options', { description: 'Menu opened' }) }}><MoreHorizontal className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowProjectDialog(true) }}>
+                                  <FolderOpen className="h-4 w-4 mr-2" />View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setSelectedProject(project); setShowEditProjectDialog(true) }}>
+                                  <Edit className="h-4 w-4 mr-2" />Edit Project
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleUpdateProjectStatus(project.id, 'active')}>
+                                  <Play className="h-4 w-4 mr-2" />Mark Active
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleUpdateProjectStatus(project.id, 'completed')}>
+                                  <CheckCircle2 className="h-4 w-4 mr-2" />Mark Completed
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleUpdateProjectStatus(project.id, 'on_hold')}>
+                                  <Archive className="h-4 w-4 mr-2" />Put On Hold
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteProject(project.id)}>
+                                  <Trash2 className="h-4 w-4 mr-2" />Delete Project
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

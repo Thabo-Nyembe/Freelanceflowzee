@@ -110,7 +110,7 @@ export default function MarketingPage() {
     const convertedLeads = leads.filter(l => l.status === 'converted').length
     const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0
     const activeCampaigns = campaigns.filter(c => c.status === 'active').length
-    const totalReach = campaigns.reduce((sum, c) => sum + (c.reach || 0), 0)
+    const totalReach = campaigns.reduce((sum, c) => sum + (c.reached || 0), 0)
     const marketingROI = 150 // Placeholder - would need revenue tracking
 
     return { totalLeads, convertedLeads, conversionRate, activeCampaigns, totalReach, marketingROI }
@@ -194,7 +194,7 @@ export default function MarketingPage() {
 
       // Reload leads
       const leadsResult = await getLeads(userId)
-      setLeads(leadsResult.data || [])
+      setLeads(leadsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -266,7 +266,7 @@ export default function MarketingPage() {
 
       // Reload leads
       const leadsResult = await getLeads(userId)
-      setLeads(leadsResult.data || [])
+      setLeads(leadsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
@@ -401,7 +401,7 @@ export default function MarketingPage() {
 
       // Reload campaigns
       const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult.data || [])
+      setCampaigns(campaignsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Create failed'
       toast.error('Create Failed', { description: message })
@@ -472,7 +472,7 @@ export default function MarketingPage() {
 
       // Reload campaigns
       const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult.data || [])
+      setCampaigns(campaignsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
@@ -616,8 +616,7 @@ export default function MarketingPage() {
         spent: 0,
         start_date: new Date().toISOString(),
         target_audience: originalCampaign.targetAudience ? [String(originalCampaign.targetAudience)] : undefined,
-        channels: originalCampaign.channels,
-        tags: originalCampaign.tags
+        channels: originalCampaign.channels
       })
 
       toast.success('Campaign Duplicated', {

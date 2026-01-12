@@ -360,6 +360,7 @@ export default function ProjectsHubClient() {
   ])
   const [localCustomFields, setLocalCustomFields] = useState<CustomField[]>(mockCustomFields)
   const [localAutomations, setLocalAutomations] = useState(mockAutomations)
+  const [localIssues, setLocalIssues] = useState<Issue[]>(mockIssues)
 
   // Database integration - use real projects hook
   const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()
@@ -614,7 +615,7 @@ export default function ProjectsHubClient() {
                   <div key={column.id} className="min-w-[280px]">
                     <div className="flex items-center justify-between mb-3 px-2">
                       <div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${column.color}`} /><h3 className="font-semibold">{column.label}</h3><Badge variant="secondary" className="text-xs">{projectsByStatus[column.id]?.length || 0}</Badge></div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setShowNewProjectDialog(true); toast.success(`Create a new project for ${column.label}`) }}><Plus className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setShowNewProjectDialog(true) }}><Plus className="h-4 w-4" /></Button>
                     </div>
                     <div className="space-y-3">
                       {projectsByStatus[column.id]?.map(project => (
@@ -2020,7 +2021,27 @@ export default function ProjectsHubClient() {
                           )}
                           <div className="pt-4 border-t">
                             <Textarea placeholder="Add a comment..." className="mb-2" value={commentText} onChange={(e) => setCommentText(e.target.value)} />
-                            <Button size="sm" onClick={() => { if (commentText.trim()) { toast.success('Comment added successfully'); setCommentText('') } else { toast.error('Please enter a comment') } }}>Add Comment</Button>
+                            <Button size="sm" onClick={() => {
+                              if (commentText.trim() && selectedIssue) {
+                                const newComment: Comment = {
+                                  id: `comment-${Date.now()}`,
+                                  author: 'Current User',
+                                  content: commentText.trim(),
+                                  createdAt: new Date().toISOString()
+                                };
+                                // Update the selectedIssue with the new comment
+                                const updatedIssue = { ...selectedIssue, comments: [...selectedIssue.comments, newComment] };
+                                setSelectedIssue(updatedIssue);
+                                // Update local issues state
+                                setLocalIssues(prev => prev.map(issue =>
+                                  issue.id === selectedIssue.id ? updatedIssue : issue
+                                ));
+                                setCommentText('');
+                                toast.success('Comment added successfully');
+                              } else {
+                                toast.error('Please enter a comment');
+                              }
+                            }}>Add Comment</Button>
                           </div>
                         </div>
                       </CardContent>

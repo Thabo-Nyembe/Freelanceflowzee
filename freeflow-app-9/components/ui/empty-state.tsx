@@ -59,12 +59,30 @@ export function EmptyState({
 }
 
 // Predefined Empty States
-export function NoDataEmptyState({ entityName = 'items' }: { entityName?: string }) {
+interface NoDataEmptyStateProps {
+  entityName?: string
+  title?: string
+  description?: string
+  actionLabel?: string
+  onAction?: () => void | Promise<void>
+}
+
+export function NoDataEmptyState({
+  entityName = 'items',
+  title,
+  description,
+  actionLabel,
+  onAction
+}: NoDataEmptyStateProps) {
   return (
     <EmptyState
       icon="📭"
-      title={`No ${entityName} yet`}
-      description={`You haven't created any ${entityName} yet. Get started by creating your first one!`}
+      title={title || `No ${entityName} yet`}
+      description={description || `You haven't created any ${entityName} yet. Get started by creating your first one!`}
+      action={actionLabel && onAction ? {
+        label: actionLabel,
+        onClick: onAction
+      } : undefined}
     />
   )
 }
@@ -111,7 +129,7 @@ export function OfflineEmptyState() {
   )
 }
 
-export function ErrorEmptyState({ error }: { error?: string }) {
+export function ErrorEmptyState({ error, onRetry }: { error?: string; onRetry?: () => void }) {
   return (
     <EmptyState
       icon="⚠️"
@@ -119,7 +137,7 @@ export function ErrorEmptyState({ error }: { error?: string }) {
       description={error || "We encountered an error loading this content. Please try again."}
       action={{
         label: 'Retry',
-        onClick: () => window.location.reload()
+        onClick: onRetry || (() => window.location.reload())
       }}
     />
   )

@@ -2,7 +2,7 @@
 // Features: Badge creation, awarding, sharing, downloading, gamification
 'use client'
 
-import { useState, useMemo, useCallback, useRef } from 'react'
+import React, { useState, useMemo, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge as BadgeUI } from '@/components/ui/badge'

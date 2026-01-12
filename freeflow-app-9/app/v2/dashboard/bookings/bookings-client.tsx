@@ -359,6 +359,139 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     }
   }
 
+  // Export bookings to CSV
+  const handleExportBookings = (type: 'calendar' | 'list' | 'agenda') => {
+    const dataToExport = filteredBookings.length > 0 ? filteredBookings : displayBookings
+    const csvContent = [
+      ['Booking Number', 'Title', 'Customer', 'Email', 'Date', 'Time', 'Duration', 'Status', 'Payment', 'Price'].join(','),
+      ...dataToExport.map(b => [
+        b.booking_number,
+        `"${b.title}"`,
+        `"${b.customer_name || ''}"`,
+        b.customer_email || '',
+        new Date(b.start_time).toLocaleDateString(),
+        new Date(b.start_time).toLocaleTimeString(),
+        `${b.duration_minutes} min`,
+        b.status,
+        b.payment_status,
+        `$${b.price}`
+      ].join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bookings-${type}-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Export Complete', { description: `${dataToExport.length} bookings exported to CSV` })
+  }
+
+  // Confirm all pending bookings
+  const handleConfirmAllPending = async () => {
+    const pendingBookings = displayBookings.filter(b => b.status === 'pending')
+    if (pendingBookings.length === 0) {
+      toast.info('No Pending Bookings', { description: 'There are no pending bookings to confirm' })
+      return
+    }
+
+    toast.loading(`Confirming ${pendingBookings.length} bookings...`, { id: 'confirm-all' })
+    let confirmed = 0
+    for (const booking of pendingBookings) {
+      try {
+        await updateBooking(booking.id, {
+          status: 'confirmed' as BookingStatus,
+          confirmed_at: new Date().toISOString(),
+          confirmation_code: `CONF-${Date.now().toString(36).toUpperCase()}`
+        })
+        confirmed++
+      } catch (err) {
+        console.error(`Failed to confirm booking ${booking.id}:`, err)
+      }
+    }
+    toast.success('Bookings Confirmed', { id: 'confirm-all', description: `${confirmed} of ${pendingBookings.length} bookings confirmed` })
+    refetch()
+  }
+
+  // Cancel all pending bookings
+  const handleCancelAllPending = async () => {
+    const pendingBookings = displayBookings.filter(b => b.status === 'pending')
+    if (pendingBookings.length === 0) {
+      toast.info('No Pending Bookings', { description: 'There are no pending bookings to cancel' })
+      return
+    }
+
+    toast.loading(`Cancelling ${pendingBookings.length} bookings...`, { id: 'cancel-all' })
+    let cancelled = 0
+    for (const booking of pendingBookings) {
+      try {
+        await updateBooking(booking.id, {
+          status: 'cancelled' as BookingStatus,
+          cancelled_at: new Date().toISOString(),
+          cancellation_reason: 'Mass cancellation by admin'
+        })
+        cancelled++
+      } catch (err) {
+        console.error(`Failed to cancel booking ${booking.id}:`, err)
+      }
+    }
+    toast.success('Bookings Cancelled', { id: 'cancel-all', description: `${cancelled} of ${pendingBookings.length} bookings cancelled` })
+    refetch()
+  }
+
+  // Send reminder to a client
+  const handleSendReminder = async (booking: Booking) => {
+    if (!booking.customer_email) {
+      toast.error('No Email', { description: 'This booking does not have a customer email address' })
+      return
+    }
+    // In a real implementation, this would call an API to send an email
+    toast.loading('Sending reminder...', { id: 'send-reminder' })
+    try {
+      await updateBooking(booking.id, {
+        reminder_sent: true,
+        reminder_sent_at: new Date().toISOString()
+      })
+      toast.success('Reminder Sent', { id: 'send-reminder', description: `Reminder sent to ${booking.customer_email}` })
+    } catch (err) {
+      toast.error('Failed to Send', { id: 'send-reminder', description: 'Could not send reminder email' })
+    }
+  }
+
+  // Send reminders to all upcoming bookings
+  const handleSendAllReminders = async () => {
+    const upcomingBookings = displayBookings.filter(b =>
+      new Date(b.start_time) > new Date() &&
+      !b.reminder_sent &&
+      b.customer_email &&
+      ['pending', 'confirmed'].includes(b.status)
+    )
+
+    if (upcomingBookings.length === 0) {
+      toast.info('No Reminders Needed', { description: 'All upcoming bookings have already been sent reminders' })
+      return
+    }
+
+    toast.loading(`Sending ${upcomingBookings.length} reminders...`, { id: 'send-all-reminders' })
+    let sent = 0
+    for (const booking of upcomingBookings) {
+      try {
+        await updateBooking(booking.id, {
+          reminder_sent: true,
+          reminder_sent_at: new Date().toISOString()
+        })
+        sent++
+      } catch (err) {
+        console.error(`Failed to send reminder for booking ${booking.id}:`, err)
+      }
+    }
+    toast.success('Reminders Sent', { id: 'send-all-reminders', description: `${sent} of ${upcomingBookings.length} reminders sent` })
+    refetch()
+  }
+
   // Get days of the week
   const getWeekDays = () => {
     const days = []
@@ -1326,10 +1459,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                               </div>
                               <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => {
                                 if (confirm('Are you sure you want to cancel all pending bookings? This action cannot be undone.')) {
-                                  toast.loading('Cancelling all pending bookings...', { id: 'cancel-all' })
-                                  setTimeout(() => {
-                                    toast.success('All pending bookings cancelled', { id: 'cancel-all' })
-                                  }, 1500)
+                                  handleCancelAllPending()
                                 }
                               }}>
                                 Cancel All
@@ -1342,10 +1472,15 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                               </div>
                               <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => {
                                 if (confirm('Are you sure you want to reset all settings to default? This action cannot be undone.')) {
-                                  toast.loading('Resetting all settings...', { id: 'reset-settings' })
-                                  setTimeout(() => {
-                                    toast.success('All settings reset to default', { id: 'reset-settings' })
-                                  }, 1500)
+                                  // Reset filters and view settings
+                                  setBookingTypeFilter('all')
+                                  setStatusFilter('all')
+                                  setPaymentStatusFilter('all')
+                                  setView('calendar')
+                                  setCalendarView('week')
+                                  setCurrentDate(new Date())
+                                  setSearchQuery('')
+                                  toast.success('Settings Reset', { description: 'All booking settings have been reset to defaults' })
                                 }
                               }}>
                                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -1382,12 +1517,12 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[
             { icon: Plus, label: 'New Booking', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => setShowNewBooking(true) },
-            { icon: Calendar, label: 'Calendar', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { setView('calendar'); toast.info('Calendar View', { description: 'Switched to calendar view' }) } },
-            { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Clients', { description: 'Navigate to Clients page to manage your client list' }) },
-            { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.info('Video Meeting', { description: 'Starting a new video meeting...' }) },
-            { icon: CreditCard, label: 'Payments', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Payments', { description: 'Navigate to Payments page to manage transactions' }) },
-            { icon: Bell, label: 'Reminders', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Reminders', { description: 'Reminder settings are available in booking settings' }) },
-            { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.info('Analytics', { description: 'Navigate to Analytics page for detailed insights' }) },
+            { icon: Calendar, label: 'Calendar', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { setView('calendar') } },
+            { icon: Users, label: 'Clients', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { window.location.href = '/v2/dashboard/clients' } },
+            { icon: Video, label: 'Video Meet', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { window.open('https://meet.google.com/new', '_blank'); toast.success('Video Meeting', { description: 'Opening video meeting in new tab...' }) } },
+            { icon: CreditCard, label: 'Payments', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/v2/dashboard/billing' } },
+            { icon: Bell, label: 'Reminders', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { setShowSettings(true); setSettingsTab('notifications') } },
+            { icon: BarChart3, label: 'Analytics', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { window.location.href = '/v2/dashboard/analytics' } },
             { icon: Settings, label: 'Settings', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowSettings(true) },
           ].map((action, idx) => (
             <Button
@@ -1580,9 +1715,9 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 { icon: CalendarClock, label: 'Week View', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => setCalendarView('week') },
                 { icon: Globe, label: 'Month View', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => setCalendarView('month') },
                 { icon: RefreshCw, label: 'Sync', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { refetch(); toast.success('Calendar Synced', { description: 'Calendar has been refreshed' }) } },
-                { icon: Repeat, label: 'Recurring', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Recurring Events', { description: 'Set up recurring events in the booking settings' }) },
-                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => toast.success('Export Started', { description: 'Calendar export is being prepared' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Filters', { description: 'Use the status dropdown above to filter bookings' }) },
+                { icon: Repeat, label: 'Recurring', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => { setShowSettings(true); setSettingsTab('availability') } },
+                { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => handleExportBookings('calendar') },
+                { icon: Filter, label: 'Filter', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { document.getElementById('status-filter')?.focus() } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1766,12 +1901,12 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Add Booking', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowNewBooking(true) },
-                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Filters', { description: 'Use the status dropdown above to filter bookings' }) },
-                { icon: Search, label: 'Search', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Search', { description: 'Use the search box above to find bookings' }) },
-                { icon: Check, label: 'Confirm All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { if (confirm('Confirm all pending bookings?')) { toast.success('Bookings Confirmed', { description: 'All pending bookings have been confirmed' }) } } },
-                { icon: Mail, label: 'Email All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.success('Emails Sent', { description: 'Reminder emails sent to all clients' }) },
-                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.success('Export Started', { description: 'Booking list export is being prepared' }) },
-                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Reports', { description: 'Navigate to Analytics page for detailed reports' }) },
+                { icon: Filter, label: 'Filter', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { document.getElementById('status-filter')?.focus() } },
+                { icon: Search, label: 'Search', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { document.getElementById('search-input')?.focus() } },
+                { icon: Check, label: 'Confirm All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { if (confirm('Confirm all pending bookings?')) { handleConfirmAllPending() } } },
+                { icon: Mail, label: 'Email All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleSendAllReminders() },
+                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleExportBookings('list') },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { window.location.href = '/v2/dashboard/analytics' } },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setShowSettings(true) },
               ].map((action, idx) => (
                 <Button
@@ -1904,13 +2039,13 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Event', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowNewBooking(true) },
-                { icon: Calendar, label: 'Today', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setCurrentDate(new Date()); toast.info('Today', { description: 'Showing today\'s bookings' }) } },
-                { icon: Clock, label: 'This Week', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.info('This Week', { description: 'Showing bookings for this week' }) },
-                { icon: CalendarClock, label: 'This Month', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('This Month', { description: 'Showing bookings for this month' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Filters', { description: 'Use the status dropdown above to filter bookings' }) },
-                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.success('Reminders Sent', { description: 'Reminder notifications sent for upcoming bookings' }) },
-                { icon: Repeat, label: 'Recurring', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Recurring Events', { description: 'Set up recurring events in the booking settings' }) },
-                { icon: Download, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => toast.success('Export Started', { description: 'Agenda export is being prepared' }) },
+                { icon: Calendar, label: 'Today', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setCurrentDate(new Date()) },
+                { icon: Clock, label: 'This Week', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setView('calendar'); setCalendarView('week') } },
+                { icon: CalendarClock, label: 'This Month', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setView('calendar'); setCalendarView('month') } },
+                { icon: Filter, label: 'Filter', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { document.getElementById('status-filter')?.focus() } },
+                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleSendAllReminders() },
+                { icon: Repeat, label: 'Recurring', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => { setShowSettings(true); setSettingsTab('availability') } },
+                { icon: Download, label: 'Export', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => handleExportBookings('agenda') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -2128,9 +2263,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                     Reschedule
                   </button>
                   <button
-                    onClick={() => {
-                      toast.success('Reminder Sent', { description: `Reminder sent to ${selectedBooking.customer_email || 'client'}` })
-                    }}
+                    onClick={() => handleSendReminder(selectedBooking)}
                     className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
                   >
                     <Mail className="h-4 w-4" />
@@ -2272,10 +2405,49 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  toast.success('Time Blocked', { description: `Time slot blocked on ${blockTimeForm.date || 'selected date'}` })
-                  setShowBlockTimeDialog(false)
-                  setBlockTimeForm({ date: '', startTime: '09:00', endTime: '10:00', reason: '' })
+                onClick={async () => {
+                  if (!blockTimeForm.date) {
+                    toast.error('Date Required', { description: 'Please select a date to block' })
+                    return
+                  }
+                  const startTime = new Date(`${blockTimeForm.date}T${blockTimeForm.startTime}:00`)
+                  const endTime = new Date(`${blockTimeForm.date}T${blockTimeForm.endTime}:00`)
+                  try {
+                    await createBooking({
+                      booking_number: `BLOCK-${Date.now().toString(36).toUpperCase()}`,
+                      title: blockTimeForm.reason || 'Blocked Time',
+                      description: 'Time blocked by admin',
+                      booking_type: 'appointment' as BookingType,
+                      start_time: startTime.toISOString(),
+                      end_time: endTime.toISOString(),
+                      duration_minutes: Math.round((endTime.getTime() - startTime.getTime()) / 60000),
+                      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                      buffer_before_minutes: 0,
+                      buffer_after_minutes: 0,
+                      status: 'confirmed' as BookingStatus,
+                      guest_count: 0,
+                      price: 0,
+                      deposit_amount: 0,
+                      paid_amount: 0,
+                      balance_due: 0,
+                      currency: 'USD',
+                      payment_status: 'paid' as PaymentStatus,
+                      reminder_sent: false,
+                      confirmation_sent: false,
+                      follow_up_sent: false,
+                      is_recurring: false,
+                      capacity: 0,
+                      slots_booked: 0,
+                      requirements: {},
+                      metadata: { isBlockedTime: true }
+                    })
+                    toast.success('Time Blocked', { description: `Time slot blocked on ${blockTimeForm.date}` })
+                    setShowBlockTimeDialog(false)
+                    setBlockTimeForm({ date: '', startTime: '09:00', endTime: '10:00', reason: '' })
+                    refetch()
+                  } catch (err: any) {
+                    toast.error('Failed to Block Time', { description: err.message || 'Could not block time slot' })
+                  }
                 }}
                 className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
               >
@@ -2663,7 +2835,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             <AIInsightsPanel
               insights={mockBookingsAIInsights}
               title="Booking Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

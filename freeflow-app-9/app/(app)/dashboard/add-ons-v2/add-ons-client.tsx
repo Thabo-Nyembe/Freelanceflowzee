@@ -458,6 +458,13 @@ export default function AddOnsClient() {
   const [statusFilter, setStatusFilter] = useState<AddOnStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [addOnSettings, setAddOnSettings] = useState<Record<string, { notifications: boolean; autoSync: boolean; developerMode: boolean }>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('add-ons-settings')
+      return saved ? JSON.parse(saved) : {}
+    }
+    return {}
+  })
   const [addOns, setAddOns] = useState<AddOn[]>(mockAddOns)
   const [showFilterDialog, setShowFilterDialog] = useState(false)
   const [showAdvancedSearchDialog, setShowAdvancedSearchDialog] = useState(false)
@@ -2135,25 +2142,53 @@ export default function AddOnsClient() {
                       <div className="font-medium text-sm">Enable Notifications</div>
                       <div className="text-xs text-muted-foreground">Receive notifications from this add-on</div>
                     </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
+                    <input
+                      type="checkbox"
+                      checked={addOnSettings[selectedAddOn.id]?.notifications ?? true}
+                      onChange={(e) => setAddOnSettings(prev => ({
+                        ...prev,
+                        [selectedAddOn.id]: { ...prev[selectedAddOn.id], notifications: e.target.checked, autoSync: prev[selectedAddOn.id]?.autoSync ?? true, developerMode: prev[selectedAddOn.id]?.developerMode ?? false }
+                      }))}
+                      className="toggle"
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <div className="font-medium text-sm">Auto-sync Data</div>
                       <div className="text-xs text-muted-foreground">Automatically sync data in background</div>
                     </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
+                    <input
+                      type="checkbox"
+                      checked={addOnSettings[selectedAddOn.id]?.autoSync ?? true}
+                      onChange={(e) => setAddOnSettings(prev => ({
+                        ...prev,
+                        [selectedAddOn.id]: { ...prev[selectedAddOn.id], autoSync: e.target.checked, notifications: prev[selectedAddOn.id]?.notifications ?? true, developerMode: prev[selectedAddOn.id]?.developerMode ?? false }
+                      }))}
+                      className="toggle"
+                    />
                   </div>
                   <div className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <div className="font-medium text-sm">Developer Mode</div>
                       <div className="text-xs text-muted-foreground">Enable debug features</div>
                     </div>
-                    <input type="checkbox" className="toggle" />
+                    <input
+                      type="checkbox"
+                      checked={addOnSettings[selectedAddOn.id]?.developerMode ?? false}
+                      onChange={(e) => setAddOnSettings(prev => ({
+                        ...prev,
+                        [selectedAddOn.id]: { ...prev[selectedAddOn.id], developerMode: e.target.checked, notifications: prev[selectedAddOn.id]?.notifications ?? true, autoSync: prev[selectedAddOn.id]?.autoSync ?? true }
+                      }))}
+                      className="toggle"
+                    />
                   </div>
                 </div>
                 <div className="flex gap-3 pt-4">
-                  <Button className="flex-1" onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved!') }}>
+                  <Button className="flex-1" onClick={() => {
+                    localStorage.setItem('add-ons-settings', JSON.stringify(addOnSettings))
+                    setShowSettingsDialog(false)
+                    toast.success('Settings saved!')
+                  }}>
                     Save Changes
                   </Button>
                   <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>

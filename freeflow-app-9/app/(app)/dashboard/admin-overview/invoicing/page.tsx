@@ -19,6 +19,7 @@ import {
   getOverdueInvoices,
   calculateDaysOverdue,
   type Invoice,
+  type InvoiceItem,
   type InvoiceStatus
 } from '@/lib/admin-overview-utils'
 import type { AdminInvoice } from '@/lib/admin-overview-queries'
@@ -51,7 +52,17 @@ const logger = createFeatureLogger('admin-invoicing')
 
 // Mapper function to convert AdminInvoice (snake_case) to Invoice (camelCase)
 function mapAdminInvoiceToInvoice(adminInvoice: AdminInvoice): Invoice {
-  return {
+  // Map items to ensure they have all required InvoiceItem properties
+  const mappedItems: InvoiceItem[] = (adminInvoice.items || []).map((item: Record<string, any>, index: number) => ({
+    id: item.id || `item-${index}`,
+    description: item.description || '',
+    quantity: item.quantity || 1,
+    rate: item.rate || 0,
+    amount: item.amount || (item.quantity || 1) * (item.rate || 0),
+    taxable: item.taxable ?? true
+  }))
+
+  const result: Invoice = {
     id: adminInvoice.id,
     number: adminInvoice.invoice_number,
     clientId: adminInvoice.client_id || '',
@@ -60,7 +71,6 @@ function mapAdminInvoiceToInvoice(adminInvoice: AdminInvoice): Invoice {
     status: adminInvoice.status as InvoiceStatus,
     issueDate: adminInvoice.issue_date,
     dueDate: adminInvoice.due_date,
-    paidDate: adminInvoice.paid_date,
     total: adminInvoice.amount_total,
     subtotal: adminInvoice.amount_total - (adminInvoice.amount_paid || 0),
     taxRate: 10,
@@ -68,11 +78,20 @@ function mapAdminInvoiceToInvoice(adminInvoice: AdminInvoice): Invoice {
     amountPaid: adminInvoice.amount_paid,
     amountDue: adminInvoice.amount_due,
     currency: 'USD',
-    items: adminInvoice.items || [],
-    notes: adminInvoice.notes,
+    items: mappedItems,
     createdAt: adminInvoice.created_at,
     remindersSent: 0
   }
+
+  // Only add optional properties if they have values
+  if (adminInvoice.paid_date) {
+    result.paidDate = adminInvoice.paid_date
+  }
+  if (adminInvoice.notes) {
+    result.notes = adminInvoice.notes
+  }
+
+  return result
 }
 
 const TABS: { id: InvoiceStatus | 'all'; label: string }[] = [
@@ -124,10 +143,10 @@ export default function InvoicingPage() {
 
   // Calculate billing stats from invoices
   const billingStats = useMemo(() => {
-    const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0)
-    const totalPaid = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.amount || 0), 0)
-    const totalOutstanding = invoices.filter(inv => inv.status === 'sent').reduce((sum, inv) => sum + (inv.amount || 0), 0)
-    const overdueAmount = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.amount || 0), 0)
+    const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0)
+    const totalPaid = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total || 0), 0)
+    const totalOutstanding = invoices.filter(inv => inv.status === 'sent').reduce((sum, inv) => sum + (inv.total || 0), 0)
+    const overdueAmount = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.total || 0), 0)
 
     return { totalInvoiced, totalPaid, totalOutstanding, overdueAmount }
   }, [invoices])
@@ -577,7 +596,7 @@ export default function InvoicingPage() {
                 <div className="text-2xl font-bold text-blue-700">
                   <NumberFlow
                     value={billingStats.totalInvoiced}
-                    format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    format="currency"
                   />
                 </div>
                 <div className="text-xs text-gray-600">{invoices.length} invoices</div>
@@ -588,7 +607,7 @@ export default function InvoicingPage() {
                 <div className="text-2xl font-bold text-green-700">
                   <NumberFlow
                     value={billingStats.totalPaid}
-                    format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    format="currency"
                   />
                 </div>
                 <div className="text-xs text-gray-600">{billingStats.totalInvoiced > 0 ? (billingStats.totalPaid / billingStats.totalInvoiced * 100).toFixed(1) : 0}% collected</div>
@@ -599,7 +618,7 @@ export default function InvoicingPage() {
                 <div className="text-2xl font-bold text-yellow-700">
                   <NumberFlow
                     value={billingStats.totalOutstanding}
-                    format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    format="currency"
                   />
                 </div>
                 <div className="text-xs text-gray-600">Pending payment</div>
@@ -610,7 +629,7 @@ export default function InvoicingPage() {
                 <div className="text-2xl font-bold text-red-700">
                   <NumberFlow
                     value={billingStats.overdueAmount}
-                    format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    format="currency"
                   />
                 </div>
                 <div className="text-xs text-gray-600">{getOverdueInvoices(invoices).length} invoices</div>

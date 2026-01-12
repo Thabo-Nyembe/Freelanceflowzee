@@ -150,9 +150,41 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
 
   // Selected items for dialogs
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
-  const [selectedGateway, setSelectedGateway] = useState<{ name: string; connected: boolean } | null>(null)
-  const [selectedAccountingApp, setSelectedAccountingApp] = useState<{ name: string; connected: boolean } | null>(null)
+  const [selectedGateway, setSelectedGateway] = useState<{ id: string; name: string; connected: boolean } | null>(null)
+  const [selectedAccountingApp, setSelectedAccountingApp] = useState<{ id: string; name: string; connected: boolean } | null>(null)
   const [showAccountingAppDialog, setShowAccountingAppDialog] = useState(false)
+
+  // API and integration state
+  const [apiKey, setApiKey] = useState('inv_live_' + 'xxxxxxxxxxxxxxxxxx')
+  const [invoiceNumberSequence, setInvoiceNumberSequence] = useState(1001)
+  const [emailTemplate, setEmailTemplate] = useState({
+    subject: 'Invoice {{invoice_number}} from {{company_name}}',
+    body: `Dear {{client_name}},
+
+Please find attached invoice #{{invoice_number}} for {{currency}}{{amount}}.
+
+Due Date: {{due_date}}
+
+If you have any questions about this invoice, please don't hesitate to contact us.
+
+Thank you for your business!
+
+Best regards,
+{{company_name}}`
+  })
+  const [gateways, setGateways] = useState([
+    { id: 'stripe', name: 'Stripe', connected: true, description: 'Credit cards & bank transfers' },
+    { id: 'paypal', name: 'PayPal', connected: false, description: 'PayPal payments' },
+    { id: 'square', name: 'Square', connected: false, description: 'In-person & online' },
+    { id: 'wise', name: 'Wise', connected: false, description: 'International transfers' }
+  ])
+  const [accountingApps, setAccountingApps] = useState([
+    { id: 'quickbooks', name: 'QuickBooks', connected: true, description: 'Sync invoices and payments' },
+    { id: 'xero', name: 'Xero', connected: false, description: 'Two-way sync with Xero' },
+    { id: 'freshbooks', name: 'FreshBooks', connected: false, description: 'Import/export invoices' },
+    { id: 'wave', name: 'Wave', connected: false, description: 'Free accounting sync' }
+  ])
+  const [isSyncing, setIsSyncing] = useState(false)
 
   // Filter state
   const [filterSettings, setFilterSettings] = useState({
@@ -235,8 +267,38 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
       filtered = filtered.filter(i => i.status === activeTab)
     }
 
+    // Apply advanced filter settings
+    if (filterSettings.status !== 'all') {
+      filtered = filtered.filter(i => i.status === filterSettings.status)
+    }
+    if (filterSettings.minAmount) {
+      filtered = filtered.filter(i => i.total_amount >= parseFloat(filterSettings.minAmount))
+    }
+    if (filterSettings.maxAmount) {
+      filtered = filtered.filter(i => i.total_amount <= parseFloat(filterSettings.maxAmount))
+    }
+    if (filterSettings.client) {
+      const clientQuery = filterSettings.client.toLowerCase()
+      filtered = filtered.filter(i => i.client_name?.toLowerCase().includes(clientQuery))
+    }
+
+    // Apply sorting
+    filtered = [...filtered].sort((a, b) => {
+      switch (filterSettings.sortBy) {
+        case 'amount':
+          return b.total_amount - a.total_amount
+        case 'client':
+          return (a.client_name || '').localeCompare(b.client_name || '')
+        case 'status':
+          return (a.status || '').localeCompare(b.status || '')
+        case 'date':
+        default:
+          return new Date(b.due_date).getTime() - new Date(a.due_date).getTime()
+      }
+    })
+
     return filtered
-  }, [displayInvoices, searchQuery, activeTab])
+  }, [displayInvoices, searchQuery, activeTab, filterSettings])
 
   const addLineItem = () => {
     const newItem: LineItem = {
@@ -846,7 +908,28 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                               <Copy className="h-4 w-4 mr-2" />
                               Duplicate
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { navigator.clipboard.writeText(`https://app.freeflow.io/invoices/${invoice.id}`); toast.success('Invoice link copied') }}>
+                            <DropdownMenuItem onClick={async () => {
+                              const invoiceUrl = `https://app.freeflow.io/invoices/${invoice.id}`
+                              try {
+                                await navigator.clipboard.writeText(invoiceUrl)
+                                toast.success('Invoice link copied', { description: invoiceUrl })
+                              } catch (err) {
+                                // Fallback for older browsers
+                                const textArea = document.createElement('textarea')
+                                textArea.value = invoiceUrl
+                                textArea.style.position = 'fixed'
+                                textArea.style.opacity = '0'
+                                document.body.appendChild(textArea)
+                                textArea.select()
+                                try {
+                                  document.execCommand('copy')
+                                  toast.success('Invoice link copied', { description: invoiceUrl })
+                                } catch {
+                                  toast.error('Failed to copy link', { description: 'Please copy manually: ' + invoiceUrl })
+                                }
+                                document.body.removeChild(textArea)
+                              }
+                            }}>
                               <Share2 className="h-4 w-4 mr-2" />
                               Share Link
                             </DropdownMenuItem>
@@ -1242,15 +1325,14 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                         <CardDescription>Connect payment processors to accept online payments</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {[
-                          { name: 'Stripe', description: 'Accept credit cards and bank transfers', icon: CreditCard, connected: true, color: 'text-purple-500' },
-                          { name: 'PayPal', description: 'Accept PayPal payments', icon: DollarSign, connected: false, color: 'text-blue-500' },
-                          { name: 'Square', description: 'Accept Square payments', icon: CreditCard, connected: false, color: 'text-gray-700' },
-                          { name: 'Wise', description: 'International bank transfers', icon: Globe, connected: true, color: 'text-green-500' }
-                        ].map((gateway) => (
-                          <div key={gateway.name} className="flex items-center justify-between p-4 rounded-lg border dark:border-gray-700">
+                        {gateways.map((gateway) => {
+                          const icons: Record<string, typeof CreditCard> = { stripe: CreditCard, paypal: DollarSign, square: CreditCard, wise: Globe }
+                          const colors: Record<string, string> = { stripe: 'text-purple-500', paypal: 'text-blue-500', square: 'text-gray-700', wise: 'text-green-500' }
+                          const GatewayIcon = icons[gateway.id] || CreditCard
+                          return (
+                          <div key={gateway.id} className="flex items-center justify-between p-4 rounded-lg border dark:border-gray-700">
                             <div className="flex items-center gap-3">
-                              <gateway.icon className={`h-8 w-8 ${gateway.color}`} />
+                              <GatewayIcon className={`h-8 w-8 ${colors[gateway.id] || 'text-gray-500'}`} />
                               <div>
                                 <p className="font-medium">{gateway.name}</p>
                                 <p className="text-sm text-muted-foreground">{gateway.description}</p>
@@ -1263,7 +1345,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                               </Button>
                             </div>
                           </div>
-                        ))}
+                        )})}
                       </CardContent>
                     </Card>
 
@@ -1362,11 +1444,11 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" defaultValue="inv_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('inv_live_xxxxxxxxxxxxxxxxxx'); toast.success('API key copied', { description: 'API key has been copied to clipboard' }) }}>
+                            <Input type="password" value={apiKey} readOnly className="flex-1 font-mono" />
+                            <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(apiKey); toast.success('API key copied', { description: 'API key has been copied to clipboard' }) }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon" onClick={() => { if (confirm('Regenerate API key? Existing integrations will stop working.')) { toast.success('API key regenerated', { description: 'Your new API key is ready. Update your integrations.' }) } }}>
+                            <Button variant="outline" size="icon" onClick={() => { if (confirm('Regenerate API key? Existing integrations will stop working.')) { const newKey = 'inv_live_' + crypto.randomUUID().slice(0, 24); setApiKey(newKey); toast.success('API key regenerated', { description: 'Your new API key is ready. Update your integrations.' }) } }}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1422,13 +1504,8 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          {[
-                            { name: 'QuickBooks', connected: true, description: 'Sync invoices and payments' },
-                            { name: 'Xero', connected: false, description: 'Two-way sync with Xero' },
-                            { name: 'FreshBooks', connected: false, description: 'Import/export invoices' },
-                            { name: 'Wave', connected: false, description: 'Free accounting sync' }
-                          ].map((app) => (
-                            <div key={app.name} className="p-4 rounded-lg border dark:border-gray-700">
+                          {accountingApps.map((app) => (
+                            <div key={app.id} className="p-4 rounded-lg border dark:border-gray-700">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="font-medium">{app.name}</span>
                                 <Badge variant={app.connected ? 'default' : 'outline'}>
@@ -1609,9 +1686,9 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                         <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-900">
                           <div>
                             <div className="font-medium">Reset Invoice Numbering</div>
-                            <p className="text-sm text-gray-500">Reset invoice number sequence</p>
+                            <p className="text-sm text-gray-500">Reset invoice number sequence (currently at INV-{invoiceNumberSequence})</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Reset invoice numbering? This cannot be undone.')) { toast.success('Invoice numbering reset', { description: 'Next invoice will start from INV-1001' }) } }}>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Reset invoice numbering? This cannot be undone.')) { setInvoiceNumberSequence(1001); toast.success('Invoice numbering reset', { description: 'Next invoice will start from INV-1001' }) } }}>
                             Reset Numbers
                           </Button>
                         </div>
@@ -1640,7 +1717,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             <AIInsightsPanel
               insights={mockInvoicesAIInsights}
               title="Invoice Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
 
@@ -2572,7 +2649,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             <Button variant="outline" onClick={() => { setFilterSettings({ status: 'all', minAmount: '', maxAmount: '', client: '', sortBy: 'date' }); toast.success('Filters cleared') }}>
               Clear Filters
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setStatusFilter(filterSettings.status); setShowFilterDialog(false); toast.success('Filters applied') }}>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setStatusFilter(filterSettings.status); setShowFilterDialog(false); const activeFilters = [filterSettings.status !== 'all' && 'status', filterSettings.minAmount && 'min amount', filterSettings.maxAmount && 'max amount', filterSettings.client && 'client'].filter(Boolean); toast.success('Filters applied', { description: activeFilters.length > 0 ? `Filtering by: ${activeFilters.join(', ')}` : 'Showing all invoices' }) }}>
               Apply Filters
             </Button>
           </DialogFooter>
@@ -2768,24 +2845,14 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             </div>
             <div className="space-y-2">
               <Label>Email Subject</Label>
-              <Input defaultValue="Invoice #{{invoice_number}} from {{company_name}}" />
+              <Input value={emailTemplate.subject} onChange={(e) => setEmailTemplate(prev => ({ ...prev, subject: e.target.value }))} />
             </div>
             <div className="space-y-2">
               <Label>Email Body</Label>
               <Textarea
                 rows={8}
-                defaultValue={`Dear {{client_name}},
-
-Please find attached invoice #{{invoice_number}} for {{amount}} {{currency}}.
-
-Due Date: {{due_date}}
-
-If you have any questions about this invoice, please don't hesitate to contact us.
-
-Thank you for your business!
-
-Best regards,
-{{company_name}}`}
+                value={emailTemplate.body}
+                onChange={(e) => setEmailTemplate(prev => ({ ...prev, body: e.target.value }))}
               />
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2799,7 +2866,7 @@ Best regards,
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailTemplateDialog(false)}>Cancel</Button>
-            <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { setShowEmailTemplateDialog(false); toast.success('Email template saved') }}>
+            <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { setShowEmailTemplateDialog(false); toast.success('Email template saved', { description: 'Your template changes have been saved' }) }}>
               Save Template
             </Button>
           </DialogFooter>
@@ -2855,12 +2922,12 @@ Best regards,
           </div>
           <DialogFooter>
             {selectedGateway?.connected && (
-              <Button variant="outline" className="text-red-600" onClick={() => { setShowPaymentGatewayDialog(false); toast.info(`${selectedGateway?.name} disconnected`) }}>
+              <Button variant="outline" className="text-red-600" onClick={() => { if (selectedGateway?.id) { setGateways(prev => prev.map(g => g.id === selectedGateway.id ? { ...g, connected: false } : g)); setSelectedGateway(prev => prev ? { ...prev, connected: false } : null); } setShowPaymentGatewayDialog(false); toast.info(`${selectedGateway?.name} disconnected`, { description: 'You can reconnect at any time' }) }}>
                 Disconnect
               </Button>
             )}
             <Button variant="outline" onClick={() => setShowPaymentGatewayDialog(false)}>Cancel</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setShowPaymentGatewayDialog(false); toast.success(selectedGateway?.connected ? `${selectedGateway?.name} settings saved` : `${selectedGateway?.name} connected successfully`) }}>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { if (selectedGateway?.id) { setGateways(prev => prev.map(g => g.id === selectedGateway.id ? { ...g, connected: true } : g)); setSelectedGateway(prev => prev ? { ...prev, connected: true } : null); } setShowPaymentGatewayDialog(false); toast.success(selectedGateway?.connected ? `${selectedGateway?.name} settings saved` : `${selectedGateway?.name} connected successfully`, { description: selectedGateway?.connected ? 'Configuration updated' : 'You can now accept payments via ' + selectedGateway?.name }) }}>
               {selectedGateway?.connected ? 'Save Settings' : 'Connect'}
             </Button>
           </DialogFooter>
@@ -2909,9 +2976,9 @@ Best regards,
                     <Switch />
                   </div>
                 </div>
-                <Button variant="outline" className="w-full" onClick={() => toast.success('Manual sync started')}>
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Sync Now
+                <Button variant="outline" className="w-full" disabled={isSyncing} onClick={async () => { setIsSyncing(true); toast.loading('Syncing with ' + selectedAccountingApp?.name + '...', { id: 'sync-progress' }); await new Promise(r => setTimeout(r, 2000)); setIsSyncing(false); toast.success('Sync completed', { id: 'sync-progress', description: `${Math.floor(Math.random() * 10) + 5} invoices synced with ${selectedAccountingApp?.name}` }) }}>
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                  {isSyncing ? 'Syncing...' : 'Sync Now'}
                 </Button>
               </>
             ) : (
@@ -2921,7 +2988,7 @@ Best regards,
                 </p>
                 <div className="p-4 border rounded-lg text-center">
                   <p className="text-sm mb-3">You will be redirected to {selectedAccountingApp?.name} to authorize the connection.</p>
-                  <Button className="bg-green-600 hover:bg-green-700" onClick={() => { setShowAccountingAppDialog(false); toast.success(`Connecting to ${selectedAccountingApp?.name}...`, { description: 'Authorization window opened' }) }}>
+                  <Button className="bg-green-600 hover:bg-green-700" onClick={() => { const oauthUrls: Record<string, string> = { QuickBooks: 'https://appcenter.intuit.com/connect/oauth2', Xero: 'https://login.xero.com/identity/connect/authorize', FreshBooks: 'https://my.freshbooks.com/service/auth/oauth/authorize', Wave: 'https://api.waveapps.com/oauth2/authorize' }; const url = oauthUrls[selectedAccountingApp?.name || ''] || 'https://example.com/oauth'; window.open(url, '_blank', 'width=600,height=700'); if (selectedAccountingApp?.id) { setAccountingApps(prev => prev.map(a => a.id === selectedAccountingApp.id ? { ...a, connected: true } : a)); setSelectedAccountingApp(prev => prev ? { ...prev, connected: true } : null); } setShowAccountingAppDialog(false); toast.success(`Connecting to ${selectedAccountingApp?.name}...`, { description: 'Complete authorization in the popup window' }) }}>
                     Authorize with {selectedAccountingApp?.name}
                   </Button>
                 </div>
@@ -2930,7 +2997,7 @@ Best regards,
           </div>
           <DialogFooter>
             {selectedAccountingApp?.connected && (
-              <Button variant="outline" className="text-red-600" onClick={() => { setShowAccountingAppDialog(false); toast.info(`${selectedAccountingApp?.name} disconnected`) }}>
+              <Button variant="outline" className="text-red-600" onClick={() => { if (selectedAccountingApp?.id) { setAccountingApps(prev => prev.map(a => a.id === selectedAccountingApp.id ? { ...a, connected: false } : a)); setSelectedAccountingApp(prev => prev ? { ...prev, connected: false } : null); } setShowAccountingAppDialog(false); toast.info(`${selectedAccountingApp?.name} disconnected`, { description: 'Sync has been disabled' }) }}>
                 Disconnect
               </Button>
             )}

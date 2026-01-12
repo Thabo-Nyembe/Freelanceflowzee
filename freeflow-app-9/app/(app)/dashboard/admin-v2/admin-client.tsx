@@ -279,9 +279,9 @@ const statusColors = {
 
 // Enhanced Competitive Upgrade Mock Data
 const mockAdminAIInsights = [
-  { id: '1', type: 'success' as const, title: 'System Health Excellent', description: 'All 12 resources running optimally with 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'warning' as const, title: 'Permission Audit Due', description: 'Quarterly access review recommended for 15 admin users.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'Feature Flag Opportunity', description: '3 feature flags have 100% rollout. Consider cleanup.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
+  { id: '1', type: 'recommendation' as const, title: 'System Health Excellent', description: 'All 12 resources running optimally with 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
+  { id: '2', type: 'alert' as const, title: 'Permission Audit Due', description: 'Quarterly access review recommended for 15 admin users.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
+  { id: '3', type: 'opportunity' as const, title: 'Feature Flag Opportunity', description: '3 feature flags have 100% rollout. Consider cleanup.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
 ]
 
 const mockAdminCollaborators = [
@@ -296,9 +296,9 @@ const mockAdminPredictions = [
 ]
 
 const mockAdminActivities = [
-  { id: '1', user: 'System Admin', action: 'Deployed', target: 'v2.4.1 to production', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'DevOps Lead', action: 'Enabled', target: 'new-checkout-flow feature flag', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Completed', target: 'daily backup job', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+  { id: '1', user: { id: 'admin-1', name: 'System Admin', avatar: '/avatars/admin.jpg' }, action: 'Deployed', target: 'v2.4.1 to production', timestamp: new Date().toISOString(), type: 'create' as const },
+  { id: '2', user: { id: 'devops-1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg' }, action: 'Enabled', target: 'new-checkout-flow feature flag', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'update' as const },
+  { id: '3', user: { id: 'system-1', name: 'System' }, action: 'Completed', target: 'daily backup job', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'status_change' as const },
 ]
 
 // Quick actions with real functionality - handlers passed from component

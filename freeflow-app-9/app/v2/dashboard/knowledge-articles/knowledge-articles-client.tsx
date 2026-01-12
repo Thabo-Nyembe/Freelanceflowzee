@@ -515,8 +515,8 @@ const mockKnowledgeArticlesActivities = [
 export default function KnowledgeArticlesClient({ initialArticles, initialStats }: KnowledgeArticlesClientProps) {
   const [activeTab, setActiveTab] = useState('articles')
   const [articles, setArticles] = useState<Article[]>(mockArticles)
-  const [spaces] = useState<Space[]>(mockSpaces)
-  const [templates] = useState<Template[]>(mockTemplates)
+  const [spaces, setSpaces] = useState<Space[]>(mockSpaces)
+  const [templates, setTemplates] = useState<Template[]>(mockTemplates)
   const [stats] = useState<ContentStats>(mockStats)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
@@ -588,6 +588,14 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
   // Selected template for preview
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+
+  // Template customization state
+  const [selectedTemplateColor, setSelectedTemplateColor] = useState('#3B82F6')
+  const [selectedTemplateFont, setSelectedTemplateFont] = useState('Inter')
+  const [templateDarkModeEnabled, setTemplateDarkModeEnabled] = useState(true)
+
+  // Sort state for articles
+  const [articleSortBy, setArticleSortBy] = useState<'updated' | 'created' | 'views' | 'likes' | 'alpha'>('updated')
 
   // Quick actions with real dialog functionality
   const knowledgeArticlesQuickActions = [
@@ -731,20 +739,34 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
   // Handlers
   const handleCreateArticle = () => {
-    toast.info('Create Article', {
-      description: 'Opening article editor...'
-    })
+    setShowNewArticleDialog(true)
   }
 
   const handlePublishArticle = (articleId: string) => {
+    setArticles(prev => prev.map(a =>
+      a.id === articleId
+        ? { ...a, status: 'published' as ArticleStatus, publishedAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+        : a
+    ))
     toast.success('Article published', {
       description: 'Article is now live'
     })
   }
 
   const handleExportArticles = () => {
+    // Create a JSON blob of all articles and trigger download
+    const dataStr = JSON.stringify(articles, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `knowledge-articles-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
     toast.success('Exporting articles', {
-      description: 'Articles will be downloaded'
+      description: 'Articles have been downloaded'
     })
   }
 
@@ -830,36 +852,100 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
   // Handler for sharing article
   const handleShareArticle = () => {
-    toast.success('Article shared', { description: 'Share link has been generated' })
+    if (selectedArticle) {
+      // Increment share count
+      setArticles(prev => prev.map(a =>
+        a.id === selectedArticle.id
+          ? { ...a, shares: a.shares + 1 }
+          : a
+      ))
+      // Copy share link to clipboard
+      const shareUrl = `https://docs.company.com/${selectedArticle.slug}`
+      navigator.clipboard.writeText(shareUrl)
+      toast.success('Article shared', { description: 'Share link has been copied to clipboard' })
+    }
     setShowShareArticleDialog(false)
   }
 
   // Handler for exporting data
   const handleExportData = () => {
-    toast.success('Export started', { description: 'Your data export is being prepared' })
+    // Export all knowledge base data
+    const exportData = {
+      articles,
+      spaces,
+      templates,
+      stats,
+      exportedAt: new Date().toISOString()
+    }
+    const dataStr = JSON.stringify(exportData, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `knowledge-base-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success('Export completed', { description: 'Your data has been downloaded' })
     setShowExportDataDialog(false)
   }
 
   // Handler for clearing cache
   const handleClearCache = () => {
+    // Simulate cache clear by forcing a re-render with updated timestamps
+    setArticles(prev => prev.map(a => ({ ...a })))
     toast.success('Cache cleared', { description: 'All cached content has been refreshed' })
     setShowClearCacheDialog(false)
   }
 
   // Handler for deleting knowledge base
   const handleDeleteKnowledgeBase = () => {
+    // Clear all articles (simulated delete)
+    setArticles([])
     toast.error('Knowledge base deleted', { description: 'All content has been permanently deleted' })
     setShowDeleteKnowledgeBaseDialog(false)
   }
 
-  // Handler for connecting integration
+  // Handler for connecting integration - store integration state
+  const [integrationConnected, setIntegrationConnected] = useState(false)
+
   const handleConnectIntegration = () => {
+    setIntegrationConnected(true)
     toast.success('Integration connected', { description: 'Google Analytics has been connected' })
     setShowConnectIntegrationDialog(false)
   }
 
   // Handler for export report
   const handleExportReport = () => {
+    // Generate and download analytics report
+    const report = {
+      title: 'Knowledge Base Analytics Report',
+      generatedAt: new Date().toISOString(),
+      stats: {
+        totalArticles: articles.length,
+        publishedArticles: articles.filter(a => a.status === 'published').length,
+        draftArticles: articles.filter(a => a.status === 'draft').length,
+        totalViews: articles.reduce((sum, a) => sum + a.views, 0),
+        totalLikes: articles.reduce((sum, a) => sum + a.likes, 0),
+        avgReadTime: Math.round(articles.reduce((sum, a) => sum + a.readTime, 0) / articles.length) || 0
+      },
+      topArticles: [...articles].sort((a, b) => b.views - a.views).slice(0, 5).map(a => ({
+        title: a.title,
+        views: a.views,
+        likes: a.likes
+      }))
+    }
+    const dataStr = JSON.stringify(report, null, 2)
+    const dataBlob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(dataBlob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `analytics-report-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
     toast.success('Report exported', { description: 'Analytics report has been downloaded' })
     setShowExportReportDialog(false)
   }
@@ -2035,7 +2121,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             <AIInsightsPanel
               insights={mockKnowledgeArticlesAIInsights}
               title="Knowledge Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -3266,11 +3352,17 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     key={template.id}
                     className="p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border"
                     onClick={() => {
-                      toast.loading('Duplicating template...', { id: 'duplicate-template' })
-                      setTimeout(() => {
-                        toast.success('Template duplicated successfully!', { id: 'duplicate-template' })
-                        setShowDuplicateDialog(false)
-                      }, 1000)
+                      // Actually duplicate the template
+                      const duplicatedTemplate: Template = {
+                        ...template,
+                        id: `t${Date.now()}`,
+                        name: `${template.name} (Copy)`,
+                        usageCount: 0,
+                        createdBy: mockAuthors[0]
+                      }
+                      setTemplates(prev => [...prev, duplicatedTemplate])
+                      toast.success('Template duplicated', { description: `"${duplicatedTemplate.name}" has been created` })
+                      setShowDuplicateDialog(false)
                     }}
                   >
                     <p className="font-medium">{template.name}</p>
@@ -3304,10 +3396,11 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
                     <div
                       key={color}
-                      className="w-8 h-8 rounded-full cursor-pointer border-2 border-transparent hover:border-gray-400"
+                      className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-all ${selectedTemplateColor === color ? 'border-gray-800 dark:border-white scale-110' : 'border-transparent hover:border-gray-400'}`}
                       style={{ backgroundColor: color }}
                       onClick={() => {
-                        toast.success(`Color ${color} selected!`)
+                        setSelectedTemplateColor(color)
+                        toast.success(`Primary color updated to ${color}`)
                       }}
                     />
                   ))}
@@ -3315,11 +3408,15 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               </div>
               <div>
                 <Label>Font Family</Label>
-                <select className="w-full mt-1 border rounded-md p-2 bg-background">
-                  <option>Inter</option>
-                  <option>Roboto</option>
-                  <option>Open Sans</option>
-                  <option>Lato</option>
+                <select
+                  className="w-full mt-1 border rounded-md p-2 bg-background"
+                  value={selectedTemplateFont}
+                  onChange={(e) => setSelectedTemplateFont(e.target.value)}
+                >
+                  <option value="Inter">Inter</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Open Sans">Open Sans</option>
+                  <option value="Lato">Lato</option>
                 </select>
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -3327,17 +3424,20 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   <p className="text-sm font-medium">Dark mode support</p>
                   <p className="text-xs text-muted-foreground">Enable dark mode for templates</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={templateDarkModeEnabled}
+                  onCheckedChange={setTemplateDarkModeEnabled}
+                />
               </div>
             </div>
             <div className="flex items-center justify-between pt-4 border-t">
               <Button variant="outline" onClick={() => setShowCustomizeDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                  toast.loading('Saving customizations...', { id: 'save-customizations' })
-                  setTimeout(() => {
-                    toast.success('Customizations saved successfully!', { id: 'save-customizations' })
-                    setShowCustomizeDialog(false)
-                  }, 1000)
+                  // Save customization settings (in a real app, this would persist to backend)
+                  toast.success('Customizations saved', {
+                    description: `Theme: ${selectedTemplateColor}, Font: ${selectedTemplateFont}, Dark mode: ${templateDarkModeEnabled ? 'enabled' : 'disabled'}`
+                  })
+                  setShowCustomizeDialog(false)
                 }}>
                 Save Changes
               </Button>
@@ -3582,22 +3682,46 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             </DialogHeader>
             <div className="space-y-2">
               {[
-                { label: 'Recently Updated', value: 'updated' },
-                { label: 'Recently Created', value: 'created' },
-                { label: 'Most Views', value: 'views' },
-                { label: 'Most Likes', value: 'likes' },
-                { label: 'Alphabetical', value: 'alpha' },
+                { label: 'Recently Updated', value: 'updated' as const },
+                { label: 'Recently Created', value: 'created' as const },
+                { label: 'Most Views', value: 'views' as const },
+                { label: 'Most Likes', value: 'likes' as const },
+                { label: 'Alphabetical', value: 'alpha' as const },
               ].map(option => (
                 <Button
                   key={option.value}
-                  variant="outline"
+                  variant={articleSortBy === option.value ? 'default' : 'outline'}
                   className="w-full justify-start"
                   onClick={() => {
-                    toast.success('Sort applied', { description: `Sorting by ${option.label}` })
+                    setArticleSortBy(option.value)
+                    // Actually sort the articles
+                    setArticles(prev => {
+                      const sorted = [...prev]
+                      switch (option.value) {
+                        case 'updated':
+                          sorted.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                          break
+                        case 'created':
+                          sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                          break
+                        case 'views':
+                          sorted.sort((a, b) => b.views - a.views)
+                          break
+                        case 'likes':
+                          sorted.sort((a, b) => b.likes - a.likes)
+                          break
+                        case 'alpha':
+                          sorted.sort((a, b) => a.title.localeCompare(b.title))
+                          break
+                      }
+                      return sorted
+                    })
+                    toast.success('Sort applied', { description: `Articles sorted by ${option.label}` })
                     setShowSortDialog(false)
                   }}
                 >
                   {option.label}
+                  {articleSortBy === option.value && ' (current)'}
                 </Button>
               ))}
             </div>

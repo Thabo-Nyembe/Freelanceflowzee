@@ -1317,6 +1317,62 @@ export default function HelpCenterClient() {
     )
   }
 
+  const handleSaveSettings = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Saving settings...',
+        success: () => {
+          setShowSettingsDialog(false)
+          return 'Help center settings saved successfully'
+        },
+        error: 'Failed to save settings'
+      }
+    )
+  }
+
+  const handleSubmitSubcategory = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Creating subcategory...',
+        success: () => {
+          setShowSubcategoryDialog(false)
+          return 'Subcategory created successfully'
+        },
+        error: 'Failed to create subcategory'
+      }
+    )
+  }
+
+  const handleSaveOrganize = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Organizing content...',
+        success: () => {
+          setShowOrganizeDialog(false)
+          return 'Content organization saved'
+        },
+        error: 'Failed to organize content'
+      }
+    )
+  }
+
+  const handleCreateCrossLink = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Linking articles...',
+        success: () => {
+          setShowCrossLinkDialog(false)
+          return 'Articles linked successfully'
+        },
+        error: 'Failed to link articles'
+      }
+    )
+  }
+
   // Quick actions with real handlers
   const helpCenterQuickActions = [
     { id: '1', label: 'New Article', icon: 'plus', action: handleCreateArticle, variant: 'default' as const },
@@ -2197,7 +2253,7 @@ export default function HelpCenterClient() {
             <AIInsightsPanel
               insights={mockHelpCenterAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2746,7 +2802,7 @@ export default function HelpCenterClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
-            <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved') }}>Save Settings</Button>
+            <Button onClick={handleSaveSettings}>Save Settings</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2779,7 +2835,7 @@ export default function HelpCenterClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSubcategoryDialog(false)}>Cancel</Button>
-            <Button onClick={() => { setShowSubcategoryDialog(false); toast.success('Subcategory created') }}>Create</Button>
+            <Button onClick={handleSubmitSubcategory}>Create</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2808,7 +2864,7 @@ export default function HelpCenterClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowOrganizeDialog(false)}>Cancel</Button>
-            <Button onClick={() => { setShowOrganizeDialog(false); toast.success('Content organized') }}>Save Changes</Button>
+            <Button onClick={handleSaveOrganize}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2894,7 +2950,7 @@ export default function HelpCenterClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCrossLinkDialog(false)}>Cancel</Button>
-            <Button onClick={() => { setShowCrossLinkDialog(false); toast.success('Articles linked') }}>Create Link</Button>
+            <Button onClick={handleCreateCrossLink}>Create Link</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

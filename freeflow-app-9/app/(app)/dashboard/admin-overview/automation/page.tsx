@@ -33,7 +33,8 @@ import {
   calculateTotalTimeSaved,
   type Workflow,
   type Integration,
-  type AutomationStatus
+  type AutomationStatus,
+  type IntegrationStatus
 } from '@/lib/admin-overview-utils'
 import {
   Plus,
@@ -90,7 +91,8 @@ export default function AutomationPage() {
     return filtered
   }, [workflows, statusFilter, searchQuery])
 
-  const activeWorkflows = useMemo(() => getActiveWorkflows(workflows), [workflows])
+  const activeWorkflowsList = useMemo(() => getActiveWorkflows(workflows), [workflows])
+  const activeWorkflowsCount = useMemo(() => activeWorkflowsList.length, [activeWorkflowsList])
   const connectedIntegrations = useMemo(() => getConnectedIntegrations(integrations), [integrations])
   const totalTimeSaved = useMemo(() => calculateTotalTimeSaved(workflows), [workflows])
 
@@ -510,12 +512,19 @@ export default function AutomationPage() {
       announce('Integration disconnected successfully', 'polite')
 
       // Optimistic update - ideally reload from database
-      setIntegrations(prev => prev.map(i => i.id === disconnectIntegration.id ? {
-        ...i,
-        status: 'disconnected',
-        connectedDate: undefined,
-        lastSync: undefined
-      } : i))
+      setIntegrations(prev => prev.map((i): Integration => {
+        if (i.id === disconnectIntegration.id) {
+          const updated: Integration = {
+            ...i,
+            status: 'disconnected' as IntegrationStatus
+          }
+          // Remove optional properties by not including them
+          delete updated.connectedDate
+          delete updated.lastSync
+          return updated
+        }
+        return i
+      }))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Disconnect failed'
       toast.error('Disconnect Failed', { description: message })
@@ -693,7 +702,7 @@ export default function AutomationPage() {
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
                 <div className="text-sm text-blue-600 mb-1">Active Workflows</div>
                 <div className="text-2xl font-bold text-blue-700">
-                  <NumberFlow value={activeWorkflows} />
+                  <NumberFlow value={activeWorkflowsCount} />
                 </div>
                 <div className="text-xs text-gray-600">{workflows.length} total</div>
               </div>

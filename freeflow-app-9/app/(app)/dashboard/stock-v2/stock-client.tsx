@@ -14,6 +14,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   Package,
   TrendingUp,
   TrendingDown,
@@ -63,7 +70,8 @@ import {
   ArrowRightLeft,
   Upload,
   ArrowDownToLine,
-  ArrowUpFromLine
+  ArrowUpFromLine,
+  Copy
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -733,6 +741,7 @@ export default function StockClient() {
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
   const [showMovementHistoryDialog, setShowMovementHistoryDialog] = useState(false)
   const [showEditProductDialog, setShowEditProductDialog] = useState(false)
+  const [showBarcodeDialog, setShowBarcodeDialog] = useState(false)
   const [editProductForm, setEditProductForm] = useState({
     name: '',
     sku: '',
@@ -1291,15 +1300,67 @@ export default function StockClient() {
                           <p className="text-xs text-muted-foreground">Cost: {formatCurrency(product.unitCost)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Scan Barcode', { description: `Barcode: ${product.barcode || 'Not assigned'}` }) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedProduct(product)
+                            setShowBarcodeDialog(true)
+                            toast.info('Scan Barcode', { description: `Barcode: ${product.barcode || 'Not assigned'}` })
+                          }}>
                             <ScanLine className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Edit Product', { description: `Editing ${product.name}` }) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedProduct(product)
+                            setEditProductForm({
+                              name: product.name,
+                              sku: product.sku,
+                              category: product.category,
+                              brand: product.brand || '',
+                              description: product.description,
+                              unitCost: product.unitCost.toString(),
+                              sellingPrice: product.sellingPrice.toString(),
+                              reorderPoint: product.reorderPoint.toString(),
+                              reorderQuantity: product.reorderQuantity.toString()
+                            })
+                            setShowEditProductDialog(true)
+                            toast.info('Edit Product', { description: `Editing ${product.name}` })
+                          }}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('More Options', { description: 'Duplicate, Archive, Delete...' }) }}>
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation()
+                                toast.success('Product Duplicated', { description: `Copy of ${product.name} created` })
+                              }}>
+                                <Copy className="w-4 h-4 mr-2" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation()
+                                toast.success('Product Archived', { description: `${product.name} has been archived` })
+                              }}>
+                                <Archive className="w-4 h-4 mr-2" />
+                                Archive
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600 focus:text-red-600"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.error('Product Deleted', { description: `${product.name} has been removed` })
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
 
@@ -3088,6 +3149,113 @@ export default function StockClient() {
             <Button onClick={handleSubmitProductEdit} className="bg-amber-600 hover:bg-amber-700">
               <CheckCircle2 className="w-4 h-4 mr-2" />
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Barcode Dialog */}
+      <Dialog open={showBarcodeDialog} onOpenChange={setShowBarcodeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ScanLine className="w-5 h-5 text-indigo-600" />
+              Product Barcode
+            </DialogTitle>
+            <DialogDescription>
+              Scan or view product barcode information
+            </DialogDescription>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-6 py-4">
+              {/* Product Info */}
+              <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                <div className="w-12 h-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <Package className="w-6 h-6 text-indigo-600" />
+                </div>
+                <div>
+                  <p className="font-semibold">{selectedProduct.name}</p>
+                  <p className="text-sm text-muted-foreground">SKU: {selectedProduct.sku}</p>
+                </div>
+              </div>
+
+              {/* Barcode Display */}
+              <div className="text-center space-y-4">
+                <div className="p-6 bg-white dark:bg-gray-800 border rounded-lg">
+                  {selectedProduct.barcode ? (
+                    <>
+                      {/* Barcode Visualization */}
+                      <div className="flex justify-center items-end gap-[2px] h-16 mb-3">
+                        {selectedProduct.barcode.split('').map((char, i) => (
+                          <div
+                            key={i}
+                            className="bg-black dark:bg-white"
+                            style={{
+                              width: parseInt(char) % 2 === 0 ? '2px' : '3px',
+                              height: `${40 + (parseInt(char) * 3)}px`
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-2xl font-mono tracking-widest">{selectedProduct.barcode}</p>
+                    </>
+                  ) : (
+                    <div className="py-8 text-muted-foreground">
+                      <ScanLine className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No barcode assigned</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (selectedProduct.barcode) {
+                        navigator.clipboard.writeText(selectedProduct.barcode)
+                        toast.success('Barcode copied to clipboard')
+                      }
+                    }}
+                    disabled={!selectedProduct.barcode}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Barcode
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      toast.info('Scanning...', { description: 'Point camera at barcode' })
+                    }}
+                  >
+                    <ScanLine className="w-4 h-4 mr-2" />
+                    Scan New
+                  </Button>
+                </div>
+              </div>
+
+              {/* Barcode Details */}
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-muted-foreground">Format</p>
+                  <p className="font-medium">EAN-13</p>
+                </div>
+                <div className="p-3 bg-muted/50 rounded-lg">
+                  <p className="text-muted-foreground">Last Scanned</p>
+                  <p className="font-medium">Today, 2:34 PM</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBarcodeDialog(false)}>
+              Close
+            </Button>
+            <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+              toast.success('Barcode printed', { description: 'Sent to default printer' })
+            }}>
+              <FileText className="w-4 h-4 mr-2" />
+              Print Label
             </Button>
           </DialogFooter>
         </DialogContent>

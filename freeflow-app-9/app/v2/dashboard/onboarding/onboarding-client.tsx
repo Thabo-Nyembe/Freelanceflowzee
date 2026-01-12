@@ -450,6 +450,18 @@ export default function OnboardingClient() {
   const [editingFlow, setEditingFlow] = useState<Flow | null>(null)
   const [editingChecklist, setEditingChecklist] = useState<Checklist | null>(null)
   const [completionGoal, setCompletionGoal] = useState(80)
+  const [savedCompletionGoal, setSavedCompletionGoal] = useState(80)
+  const [analyticsData, setAnalyticsData] = useState<FlowAnalytics[]>(mockAnalytics)
+  const [assignedSegmentId, setAssignedSegmentId] = useState<string>('')
+  const [selectedUser, setSelectedUser] = useState<UserJourney | null>(null)
+  const [showUserDetailDialog, setShowUserDetailDialog] = useState(false)
+  const [showSessionManagementDialog, setShowSessionManagementDialog] = useState(false)
+  const [apiKey, setApiKey] = useState('ob_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15))
+  const [editingChecklistItem, setEditingChecklistItem] = useState<ChecklistItem | null>(null)
+  const [showEditItemDialog, setShowEditItemDialog] = useState(false)
+  const [editItemForm, setEditItemForm] = useState({ title: '', description: '', isRequired: false, actionUrl: '' })
+  const [analyticsFlowFilter, setAnalyticsFlowFilter] = useState<string | null>(null)
+  const [filtersApplied, setFiltersApplied] = useState(false)
 
   // Form state for creating/editing
   const [flowForm, setFlowForm] = useState({
@@ -587,7 +599,7 @@ export default function OnboardingClient() {
     })
   }, [checklists, searchQuery, checklistStatusFilter])
 
-  const maxViews = Math.max(...mockAnalytics.map(a => a.views))
+  const maxViews = Math.max(...analyticsData.map(a => a.views), 1)
 
   // CRUD Handlers
   const handleCreateFlow = async () => {
@@ -1305,7 +1317,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockAnalytics.map((day) => (
+                    {analyticsData.length > 0 ? analyticsData.map((day) => (
                       <div key={day.date} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">{new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
@@ -1319,10 +1331,15 @@ export default function OnboardingClient() {
                         </div>
                         <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>{day.views} views</span>
-                          <span>{((day.completions / day.views) * 100).toFixed(1)}% rate</span>
+                          <span>{day.views > 0 ? ((day.completions / day.views) * 100).toFixed(1) : 0}% rate</span>
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>No analytics data available</p>
+                        <p className="text-sm">Analytics will appear once flows are active</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1525,7 +1542,9 @@ export default function OnboardingClient() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                  toast.info('User Details', { description: `Viewing details for ${user.userName}` })
+                                  setSelectedUser(user)
+                                  setShowUserDetailDialog(true)
+                                  toast.success('User details loaded', { description: `Viewing details for ${user.userName}` })
                                 }}>
                                 <Eye className="w-4 h-4" />
                               </Button>
@@ -1986,7 +2005,7 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Clear Analytics</p>
                             <p className="text-sm text-gray-500">Remove all analytics data</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Are you sure you want to clear all analytics? This action cannot be undone.')) { toast.success('Analytics cleared', { description: 'All analytics data has been removed' }) } }}>Clear</Button>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('Are you sure you want to clear all analytics? This action cannot be undone.')) { setAnalyticsData([]); setFlows(prev => prev.map(f => ({ ...f, views: 0, completions: 0, completionRate: 0, dropoffRate: 0, avgTimeToComplete: 0 }))); toast.success('Analytics cleared', { description: 'All analytics data has been removed' }) } }}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2003,7 +2022,7 @@ export default function OnboardingClient() {
             <AIInsightsPanel
               insights={onboardingAIInsights}
               title="Onboarding Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2260,16 +2279,19 @@ export default function OnboardingClient() {
                   Current average: <span className="font-bold text-green-600">{stats.avgCompletionRate.toFixed(1)}%</span>
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {stats.avgCompletionRate >= completionGoal
+                  Saved target: <span className="font-bold">{savedCompletionGoal}%</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {stats.avgCompletionRate >= savedCompletionGoal
                     ? 'You are meeting your goal!'
-                    : `${(completionGoal - stats.avgCompletionRate).toFixed(1)}% below target`}
+                    : `${(savedCompletionGoal - stats.avgCompletionRate).toFixed(1)}% below target`}
                 </p>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setShowGoalsDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1" onClick={() => { setShowGoalsDialog(false); toast.success('Goal saved', { description: `Completion target set to ${completionGoal}%` }) }}>
+                <Button className="flex-1" onClick={() => { setSavedCompletionGoal(completionGoal); setShowGoalsDialog(false); toast.success('Goal saved', { description: `Completion target set to ${completionGoal}%` }) }}>
                   Save Goal
                 </Button>
               </div>
@@ -2399,7 +2421,11 @@ export default function OnboardingClient() {
               </p>
               <div>
                 <Label>Select Segment</Label>
-                <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800">
+                <select
+                  value={assignedSegmentId}
+                  onChange={(e) => setAssignedSegmentId(e.target.value)}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800"
+                >
                   <option value="">All Users</option>
                   {segments.map(seg => (
                     <option key={seg.id} value={seg.id}>{seg.name} ({seg.userCount} users)</option>
@@ -2414,7 +2440,16 @@ export default function OnboardingClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowAssignDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1" onClick={() => { setShowAssignDialog(false); toast.success('Checklist assigned', { description: 'Users will see this checklist on their next login' }) }}>
+                <Button className="flex-1" onClick={() => {
+                  if (selectedChecklist) {
+                    const segmentName = assignedSegmentId ? segments.find(s => s.id === assignedSegmentId)?.name : 'All Users'
+                    setChecklists(prev => prev.map(c => c.id === selectedChecklist.id ? { ...c, segmentId: assignedSegmentId || undefined } : c))
+                    setShowAssignDialog(false)
+                    toast.success('Checklist assigned', { description: `Assigned to ${segmentName}. Users will see this checklist on their next login` })
+                  } else {
+                    toast.error('No checklist selected')
+                  }
+                }}>
                   Assign
                 </Button>
               </div>

@@ -3,27 +3,41 @@
 
 export interface AIInsight {
   id: string
-  query: string
-  insight: string
-  confidence: number // 0-1
-  category: 'revenue' | 'engagement' | 'conversion' | 'retention' | 'efficiency' | 'risk'
-  priority: 'high' | 'medium' | 'low'
-  timestamp: string
-  actionable: boolean
+  type?: 'recommendation' | 'alert' | 'opportunity' | 'prediction'
+  title?: string
+  description?: string
+  query?: string
+  insight?: string
+  confidence?: number // 0-1
+  category?: 'revenue' | 'engagement' | 'conversion' | 'retention' | 'efficiency' | 'risk'
+  priority?: 'high' | 'medium' | 'low'
+  impact?: 'high' | 'medium' | 'low' | string
+  timestamp?: string | Date
+  createdAt?: Date
+  actionable?: boolean
   suggestedAction?: string
-  impact?: string
+  action?: string
+  metric?: string
+  change?: number
   relatedMetrics?: string[]
 }
 
 export interface Prediction {
-  id: string
-  metric: string
-  currentValue: number
-  predictedValue: number
+  id?: string
+  label?: string
+  title?: string
+  metric?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
   confidence: number
   trend: 'up' | 'down' | 'stable'
-  timeframe: string
-  factors: string[]
+  timeframe?: string
+  impact?: string
+  factors?: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }> | string[]
   accuracy?: number
 }
 

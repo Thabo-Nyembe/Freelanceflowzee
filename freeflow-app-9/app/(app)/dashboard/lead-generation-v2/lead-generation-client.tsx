@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useLeads, LeadInput, LeadStats } from '@/lib/hooks/use-leads'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

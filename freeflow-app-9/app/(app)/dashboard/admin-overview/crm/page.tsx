@@ -122,7 +122,8 @@ export default function CRMPage() {
       qualified: filterDealsByStage(filtered, 'qualified'),
       proposal: filterDealsByStage(filtered, 'proposal'),
       negotiation: filterDealsByStage(filtered, 'negotiation'),
-      won: filterDealsByStage(filtered, 'won')
+      won: filterDealsByStage(filtered, 'won'),
+      lost: filterDealsByStage(filtered, 'lost')
     }
   }, [deals, searchQuery])
 
@@ -685,7 +686,7 @@ export default function CRMPage() {
                 <div className="text-2xl font-bold text-blue-700">
                   <NumberFlow
                     value={pipelineStats.totalValue}
-                    format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    format="currency"
                   />
                 </div>
                 <div className="text-xs text-gray-600">{pipelineStats.dealCount} deals</div>
@@ -704,7 +705,7 @@ export default function CRMPage() {
                 <div className="text-2xl font-bold text-purple-700">
                   <NumberFlow
                     value={pipelineStats.averageDealSize}
-                    format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    format="currency"
                   />
                 </div>
                 <div className="text-xs text-gray-600">Per deal</div>
@@ -752,7 +753,7 @@ export default function CRMPage() {
                         No deals in this stage
                       </div>
                     ) : (
-                      stageDeals.map((deal) => (
+                      stageDeals.map((deal: Deal) => (
                         <motion.div
                           key={deal.id}
                           layout
@@ -809,8 +810,9 @@ export default function CRMPage() {
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   const nextStageIndex = STAGES.findIndex(s => s.id === deal.stage) + 1
-                                  if (nextStageIndex < STAGES.length) {
-                                    handleMoveDeal(deal.id, STAGES[nextStageIndex].id)
+                                  const nextStage = STAGES[nextStageIndex]
+                                  if (nextStageIndex < STAGES.length && nextStage) {
+                                    handleMoveDeal(deal.id, nextStage.id)
                                   }
                                 }}
                                 className="flex-1 px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition-colors flex items-center justify-center gap-1"

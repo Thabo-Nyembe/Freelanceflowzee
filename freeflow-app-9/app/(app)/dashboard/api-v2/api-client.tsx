@@ -485,6 +485,8 @@ export default function ApiClient() {
   const [showEditKeyDialog, setShowEditKeyDialog] = useState(false)
   const [showDeleteKeyDialog, setShowDeleteKeyDialog] = useState(false)
   const [showRateLimitDialog, setShowRateLimitDialog] = useState(false)
+  const [showOAuthConfigDialog, setShowOAuthConfigDialog] = useState(false)
+  const [showInviteTeamMemberDialog, setShowInviteTeamMemberDialog] = useState(false)
   const [selectedKeyForEdit, setSelectedKeyForEdit] = useState<ApiKey | null>(null)
   const [editKeyForm, setEditKeyForm] = useState({ name: '', description: '', rateLimit: 1000, scopes: [] as string[] })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -495,6 +497,15 @@ export default function ApiClient() {
   const [monitorForm, setMonitorForm] = useState({ name: '', endpoint: '', interval: '5m', alertThreshold: 500 })
   const [webhookForm, setWebhookForm] = useState({ name: '', url: '', events: ['request.created'], secret: '' })
   const [testSuiteForm, setTestSuiteForm] = useState({ name: '', description: '', endpoints: [] as string[] })
+  const [oauthConfigForm, setOauthConfigForm] = useState({
+    clientId: '',
+    clientSecret: '',
+    redirectUri: 'https://app.freeflow.com/callback',
+    tokenEndpoint: 'https://oauth.freeflow.com/token',
+    authorizationEndpoint: 'https://oauth.freeflow.com/authorize',
+    scopes: ['openid', 'profile', 'email']
+  })
+  const [inviteForm, setInviteForm] = useState({ email: '', role: 'developer', permissions: ['read', 'write'] })
 
   // Form states
   const [endpointForm, setEndpointForm] = useState<EndpointFormData>({
@@ -870,6 +881,58 @@ export default function ApiClient() {
       setSelectedKeyForEdit(null)
     } catch (err) {
       toast.error('Failed to update rate limit', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // OAuth configuration handler
+  const handleSaveOAuthConfig = async () => {
+    if (!oauthConfigForm.clientId || !oauthConfigForm.clientSecret) {
+      toast.error('Please fill in required fields', { description: 'Client ID and Client Secret are required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Simulate API call to save OAuth configuration
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('OAuth 2.0 Configuration Saved', {
+        description: 'Your OAuth settings have been updated successfully'
+      })
+      setShowOAuthConfigDialog(false)
+    } catch (err) {
+      toast.error('Failed to save OAuth configuration', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Team member invite handler
+  const handleInviteTeamMember = async () => {
+    if (!inviteForm.email) {
+      toast.error('Please enter an email address')
+      return
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(inviteForm.email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Simulate API call to send invitation
+      await new Promise(resolve => setTimeout(resolve, 800))
+      toast.success('Invitation Sent', {
+        description: `Invite sent to ${inviteForm.email} with ${inviteForm.role} role`
+      })
+      setInviteForm({ email: '', role: 'developer', permissions: ['read', 'write'] })
+      setShowInviteTeamMemberDialog(false)
+    } catch (err) {
+      toast.error('Failed to send invitation', { description: err instanceof Error ? err.message : 'Unknown error' })
     } finally {
       setIsSubmitting(false)
     }
@@ -2750,7 +2813,7 @@ export default function ApiClient() {
                       <p className="font-medium text-sm">OAuth 2.0</p>
                       <p className="text-xs text-gray-500">Connected</p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('OAuth 2.0 Configuration', { description: 'Configure client ID, client secret, redirect URIs, and token endpoints' })}>Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowOAuthConfigDialog(true)}>Configure</Button>
                   </div>
 
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
@@ -2772,7 +2835,7 @@ export default function ApiClient() {
                       <p className="font-medium text-sm">Team Access</p>
                       <p className="text-xs text-gray-500">5 members</p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Invite Team Member', { description: 'Enter email address to invite a new team member with API access', action: { label: 'Send Invite', onClick: () => toast.success('Invitation sent!') } })}>Invite</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowInviteTeamMemberDialog(true)}>Invite</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -3741,6 +3804,164 @@ export default function ApiClient() {
               <Button onClick={handleUpdateRateLimit} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
                 Update Rate Limit
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* OAuth 2.0 Configuration Dialog */}
+        <Dialog open={showOAuthConfigDialog} onOpenChange={setShowOAuthConfigDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5" />
+                OAuth 2.0 Configuration
+              </DialogTitle>
+              <DialogDescription>
+                Configure your OAuth 2.0 client credentials and endpoints
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Client ID *</Label>
+                <Input
+                  placeholder="your-client-id"
+                  value={oauthConfigForm.clientId}
+                  onChange={(e) => setOauthConfigForm({ ...oauthConfigForm, clientId: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Client Secret *</Label>
+                <Input
+                  type="password"
+                  placeholder="your-client-secret"
+                  value={oauthConfigForm.clientSecret}
+                  onChange={(e) => setOauthConfigForm({ ...oauthConfigForm, clientSecret: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Redirect URI</Label>
+                <Input
+                  placeholder="https://app.freeflow.com/callback"
+                  value={oauthConfigForm.redirectUri}
+                  onChange={(e) => setOauthConfigForm({ ...oauthConfigForm, redirectUri: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Authorization Endpoint</Label>
+                <Input
+                  placeholder="https://oauth.provider.com/authorize"
+                  value={oauthConfigForm.authorizationEndpoint}
+                  onChange={(e) => setOauthConfigForm({ ...oauthConfigForm, authorizationEndpoint: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Token Endpoint</Label>
+                <Input
+                  placeholder="https://oauth.provider.com/token"
+                  value={oauthConfigForm.tokenEndpoint}
+                  onChange={(e) => setOauthConfigForm({ ...oauthConfigForm, tokenEndpoint: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Scopes</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['openid', 'profile', 'email', 'read', 'write', 'admin'].map((scope) => (
+                    <label key={scope} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={oauthConfigForm.scopes.includes(scope)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setOauthConfigForm({ ...oauthConfigForm, scopes: [...oauthConfigForm.scopes, scope] })
+                          } else {
+                            setOauthConfigForm({ ...oauthConfigForm, scopes: oauthConfigForm.scopes.filter(s => s !== scope) })
+                          }
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm">{scope}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowOAuthConfigDialog(false)}>Cancel</Button>
+              <Button onClick={handleSaveOAuthConfig} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
+                Save Configuration
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Team Member Dialog */}
+        <Dialog open={showInviteTeamMemberDialog} onOpenChange={setShowInviteTeamMemberDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCog className="w-5 h-5" />
+                Invite Team Member
+              </DialogTitle>
+              <DialogDescription>
+                Send an invitation to grant API access to a new team member
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Email Address *</Label>
+                <Input
+                  type="email"
+                  placeholder="colleague@company.com"
+                  value={inviteForm.email}
+                  onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select
+                  value={inviteForm.role}
+                  onValueChange={(value) => setInviteForm({ ...inviteForm, role: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="viewer">Viewer - Read-only access</SelectItem>
+                    <SelectItem value="developer">Developer - Read & Write access</SelectItem>
+                    <SelectItem value="admin">Admin - Full access</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Permissions</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['read', 'write', 'delete', 'manage_keys', 'manage_webhooks'].map((permission) => (
+                    <label key={permission} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={inviteForm.permissions.includes(permission)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setInviteForm({ ...inviteForm, permissions: [...inviteForm.permissions, permission] })
+                          } else {
+                            setInviteForm({ ...inviteForm, permissions: inviteForm.permissions.filter(p => p !== permission) })
+                          }
+                        }}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm capitalize">{permission.replace('_', ' ')}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInviteTeamMemberDialog(false)}>Cancel</Button>
+              <Button onClick={handleInviteTeamMember} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Send Invitation
               </Button>
             </DialogFooter>
           </DialogContent>

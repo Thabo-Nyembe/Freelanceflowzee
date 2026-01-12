@@ -612,12 +612,7 @@ export default function AnalyticsPage() {
             <div className="text-3xl font-bold text-gray-800 mb-2">
               <NumberFlow
                 value={totalRevenue}
-                format={{
-                  style: 'currency',
-                  currency: 'USD',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0
-                }}
+                format="currency"
               />
             </div>
             <div className="flex items-center gap-1 text-sm">
@@ -672,12 +667,7 @@ export default function AnalyticsPage() {
             <div className="text-3xl font-bold text-gray-800 mb-2">
               <NumberFlow
                 value={averageOrderValue}
-                format={{
-                  style: 'currency',
-                  currency: 'USD',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0
-                }}
+                format="currency"
               />
             </div>
             <div className="flex items-center gap-1 text-sm">

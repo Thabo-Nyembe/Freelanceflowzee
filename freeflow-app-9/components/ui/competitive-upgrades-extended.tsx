@@ -54,7 +54,8 @@ import { Label } from "@/components/ui/label"
 interface ActivityItem {
   id: string
   type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
-  title: string
+  title?: string
+  action?: string
   description?: string
   user: {
     id: string
@@ -67,7 +68,7 @@ interface ActivityItem {
     url?: string
   }
   metadata?: Record<string, unknown>
-  timestamp: Date
+  timestamp: Date | string
   isRead?: boolean
   isPinned?: boolean
   actions?: Array<{
@@ -294,7 +295,7 @@ export function ActivityFeed({
                               <div className="flex items-center gap-2">
                                 {getActivityIcon(activity.type)}
                                 <span className="font-medium text-sm">{activity.user?.name || 'User'}</span>
-                                <span className="text-sm text-muted-foreground">{activity.title}</span>
+                                <span className="text-sm text-muted-foreground">{activity.title || activity.action}</span>
                               </div>
                               <span className="text-xs text-muted-foreground whitespace-nowrap">
                                 {formatTimeAgo(activity.timestamp)}

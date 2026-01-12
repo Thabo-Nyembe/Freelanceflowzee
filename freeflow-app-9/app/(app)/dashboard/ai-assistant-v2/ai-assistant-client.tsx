@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import {

@@ -860,3 +860,67 @@ export async function getCodeQualityTrend(
 
   return { data: trend, error: null }
 }
+
+/**
+ * Update AI Code stats for a user
+ * Increments counters for completions, tokens used, etc.
+ */
+export async function updateCodeStats(
+  userId: string,
+  updates: {
+    total_completions?: number
+    total_tokens_used?: number
+    total_bugs_fixed?: number
+    total_optimizations?: number
+    code_quality_improvement?: number
+  }
+): Promise<{ data: AICodeStats | null; error: any }> {
+  const supabase = createClient()
+
+  // First, get existing stats
+  const { data: existingStats } = await supabase
+    .from('ai_code_stats')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+
+  if (existingStats) {
+    // Update existing stats by incrementing values
+    const { data, error } = await supabase
+      .from('ai_code_stats')
+      .update({
+        total_completions: existingStats.total_completions + (updates.total_completions || 0),
+        total_tokens_used: existingStats.total_tokens_used + (updates.total_tokens_used || 0),
+        total_bugs_fixed: existingStats.total_bugs_fixed + (updates.total_bugs_fixed || 0),
+        total_optimizations: existingStats.total_optimizations + (updates.total_optimizations || 0),
+        code_quality_improvement: updates.code_quality_improvement !== undefined
+          ? updates.code_quality_improvement
+          : existingStats.code_quality_improvement,
+        last_used_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    return { data, error }
+  } else {
+    // Create new stats record
+    const { data, error } = await supabase
+      .from('ai_code_stats')
+      .insert({
+        user_id: userId,
+        total_completions: updates.total_completions || 0,
+        total_tokens_used: updates.total_tokens_used || 0,
+        total_bugs_fixed: updates.total_bugs_fixed || 0,
+        total_optimizations: updates.total_optimizations || 0,
+        code_quality_improvement: updates.code_quality_improvement || 0,
+        average_confidence: 0,
+        last_used_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    return { data, error }
+  }
+}

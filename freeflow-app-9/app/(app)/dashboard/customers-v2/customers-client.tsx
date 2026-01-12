@@ -473,6 +473,50 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const [emailRecipient, setEmailRecipient] = useState<Contact | Client | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
 
+  // Local state for CRM entities
+  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS)
+  const [campaigns, setCampaigns] = useState<Campaign[]>(MOCK_CAMPAIGNS)
+  const [pipelineStages, setPipelineStages] = useState(PIPELINE_STAGES)
+  const [leadScoringRules, setLeadScoringRules] = useState<LeadScoreRule[]>([
+    { id: '1', name: 'Job Title Contains VP/Director', field: 'job_title', operator: 'contains', value: 'VP,Director', points: 15, isActive: true },
+    { id: '2', name: 'Company Size > 100', field: 'company_size', operator: 'greater-than', value: '100', points: 10, isActive: true },
+    { id: '3', name: 'Email Opened (Last 7 Days)', field: 'email_opens', operator: 'greater-than', value: '0', points: 5, isActive: true },
+    { id: '4', name: 'Website Visit (Last 30 Days)', field: 'website_visits', operator: 'greater-than', value: '0', points: 8, isActive: true }
+  ])
+  const [selectedStage, setSelectedStage] = useState<typeof PIPELINE_STAGES[0] | null>(null)
+
+  // Form state for dialogs
+  const [newTaskForm, setNewTaskForm] = useState({
+    subject: '',
+    description: '',
+    dueDate: '',
+    priority: 'medium' as TaskPriority,
+    contactId: ''
+  })
+  const [newCampaignForm, setNewCampaignForm] = useState({
+    name: '',
+    type: 'email' as CampaignType,
+    status: 'planned' as CampaignStatus,
+    startDate: '',
+    endDate: '',
+    budget: 0,
+    expectedRevenue: 0,
+    description: ''
+  })
+  const [newStageForm, setNewStageForm] = useState({
+    name: '',
+    probability: 50,
+    color: 'blue'
+  })
+  const [newRuleForm, setNewRuleForm] = useState({
+    name: '',
+    field: '',
+    operator: 'equals' as 'equals' | 'contains' | 'greater-than' | 'less-than',
+    value: '',
+    points: 10,
+    isActive: true
+  })
+
   // Supabase hooks - using clients table
   const {
     clients: dbClients,
@@ -1175,10 +1219,13 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="space-y-4">
             <div className="flex justify-end">
-              <Button onClick={() => { setShowAddTaskDialog(true); toast.success('Task Form Opened', { description: 'Create a new task for your CRM workflow' }) }}><Plus className="h-4 w-4 mr-2" />New Task</Button>
+              <Button onClick={() => {
+                setNewTaskForm({ subject: '', description: '', dueDate: '', priority: 'medium', contactId: '' })
+                setShowAddTaskDialog(true)
+              }}><Plus className="h-4 w-4 mr-2" />New Task</Button>
             </div>
             <div className="space-y-3">
-              {MOCK_TASKS.map(task => (
+              {tasks.map(task => (
                 <Card key={task.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
@@ -1209,10 +1256,13 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-4">
             <div className="flex justify-end">
-              <Button onClick={() => { setShowAddCampaignDialog(true); toast.success('Campaign Builder Opened', { description: 'Create email, webinar, or social campaigns' }) }}><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
+              <Button onClick={() => {
+                setNewCampaignForm({ name: '', type: 'email', status: 'planned', startDate: '', endDate: '', budget: 0, expectedRevenue: 0, description: '' })
+                setShowAddCampaignDialog(true)
+              }}><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {MOCK_CAMPAIGNS.map(campaign => {
+              {campaigns.map(campaign => {
                 const responseRate = campaign.numSent > 0 ? (campaign.actualResponses / campaign.numSent * 100) : 0
                 const conversionRate = campaign.actualResponses > 0 ? (campaign.numConverted / campaign.actualResponses * 100) : 0
                 return (
@@ -1572,7 +1622,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                         <CardDescription>Configure your sales pipeline stages</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {PIPELINE_STAGES.map((stage, index) => (
+                        {pipelineStages.map((stage, index) => (
                           <div key={stage.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div className={`w-4 h-4 rounded-full ${stage.color}`} />
                             <div className="flex-1">
@@ -1582,10 +1632,13 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                               <Input type="number" defaultValue={stage.probability} min={0} max={100} className="text-center" />
                             </div>
                             <span className="text-sm text-gray-500">% Probability</span>
-                            <Button size="sm" variant="ghost" onClick={() => setShowStageOptionsDialog(true)}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => { setSelectedStage(stage); setShowStageOptionsDialog(true) }}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => { setShowAddStageDialog(true); toast.success('New Stage Form', { description: 'Configure stage name and probability' }) }}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setNewStageForm({ name: '', probability: 50, color: 'blue' })
+                          setShowAddStageDialog(true)
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1755,7 +1808,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                               <Switch defaultChecked />
                             </div>
                           </div>
-                          <Button variant="outline" className="w-full" onClick={() => { setShowLeadScoringRuleDialog(true); toast.success('Rule Builder Opened', { description: 'Create a new lead scoring rule based on field values' }) }}>
+                          <Button variant="outline" className="w-full" onClick={() => {
+                            setNewRuleForm({ name: '', field: '', operator: 'equals', value: '', points: 10, isActive: true })
+                            setShowLeadScoringRuleDialog(true)
+                          }}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Scoring Rule
                           </Button>
@@ -2481,20 +2537,35 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Task Subject</Label>
-                <Input placeholder="Enter task subject..." />
+                <Input
+                  placeholder="Enter task subject..."
+                  value={newTaskForm.subject}
+                  onChange={(e) => setNewTaskForm(prev => ({ ...prev, subject: e.target.value }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea placeholder="Enter task description..." />
+                <Textarea
+                  placeholder="Enter task description..."
+                  value={newTaskForm.description}
+                  onChange={(e) => setNewTaskForm(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Due Date</Label>
-                  <Input type="date" />
+                  <Input
+                    type="date"
+                    value={newTaskForm.dueDate}
+                    onChange={(e) => setNewTaskForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Priority</Label>
-                  <Select defaultValue="medium">
+                  <Select
+                    value={newTaskForm.priority}
+                    onValueChange={(value: TaskPriority) => setNewTaskForm(prev => ({ ...prev, priority: value }))}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="low">Low</SelectItem>
@@ -2507,7 +2578,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               </div>
               <div className="space-y-2">
                 <Label>Related Contact</Label>
-                <Select>
+                <Select
+                  value={newTaskForm.contactId}
+                  onValueChange={(value) => setNewTaskForm(prev => ({ ...prev, contactId: value }))}
+                >
                   <SelectTrigger><SelectValue placeholder="Select contact..." /></SelectTrigger>
                   <SelectContent>
                     {MOCK_CONTACTS.map(c => (
@@ -2519,7 +2593,33 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowAddTaskDialog(false); toast.success('Task Created', { description: 'New task has been added to your workflow' }) }}>Create Task</Button>
+              <Button onClick={() => {
+                if (!newTaskForm.subject.trim()) {
+                  toast.error('Task subject is required')
+                  return
+                }
+                const newTask: Task = {
+                  id: `t${Date.now()}`,
+                  subject: newTaskForm.subject,
+                  description: newTaskForm.description,
+                  status: 'open',
+                  priority: newTaskForm.priority,
+                  dueDate: newTaskForm.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                  contactId: newTaskForm.contactId || null,
+                  accountId: null,
+                  opportunityId: null,
+                  ownerId: 'u1',
+                  ownerName: 'Current User',
+                  reminder: null,
+                  isRecurring: false,
+                  createdDate: new Date().toISOString().split('T')[0],
+                  completedDate: null
+                }
+                setTasks(prev => [newTask, ...prev])
+                setShowAddTaskDialog(false)
+                setNewTaskForm({ subject: '', description: '', dueDate: '', priority: 'medium', contactId: '' })
+                toast.success('Task Created', { description: `"${newTask.subject}" has been added to your workflow` })
+              }}>Create Task</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2532,16 +2632,52 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               <DialogDescription>{selectedTask?.subject}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Opening task editor', { description: 'Edit task details' }) }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedTask) {
+                  setNewTaskForm({
+                    subject: selectedTask.subject,
+                    description: selectedTask.description,
+                    dueDate: selectedTask.dueDate,
+                    priority: selectedTask.priority,
+                    contactId: selectedTask.contactId || ''
+                  })
+                  setShowTaskOptionsDialog(false)
+                  setShowAddTaskDialog(true)
+                  toast.success('Editing Task', { description: 'Update task details below' })
+                }
+              }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Task
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Task Reassigned', { description: 'Task has been reassigned' }) }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedTask) {
+                  setTasks(prev => prev.map(t =>
+                    t.id === selectedTask.id ? { ...t, ownerName: 'New Assignee', ownerId: 'u2' } : t
+                  ))
+                  setShowTaskOptionsDialog(false)
+                  toast.success('Task Reassigned', { description: `"${selectedTask.subject}" has been reassigned` })
+                }
+              }}>
                 <Users className="h-4 w-4 mr-2" />Reassign Task
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Task Completed', { description: 'Task marked as complete' }) }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedTask) {
+                  setTasks(prev => prev.map(t =>
+                    t.id === selectedTask.id ? { ...t, status: 'completed', completedDate: new Date().toISOString().split('T')[0] } : t
+                  ))
+                  setShowTaskOptionsDialog(false)
+                  toast.success('Task Completed', { description: `"${selectedTask.subject}" marked as complete` })
+                }
+              }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Mark Complete
               </Button>
-              <Button variant="destructive" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Task Deleted', { description: 'Task has been removed' }) }}>
+              <Button variant="destructive" className="w-full justify-start" onClick={() => {
+                if (selectedTask) {
+                  setTasks(prev => prev.filter(t => t.id !== selectedTask.id))
+                  setShowTaskOptionsDialog(false)
+                  toast.success('Task Deleted', { description: `"${selectedTask.subject}" has been removed` })
+                  setSelectedTask(null)
+                }
+              }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Task
               </Button>
             </div>
@@ -2561,12 +2697,19 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Campaign Name</Label>
-                <Input placeholder="Enter campaign name..." />
+                <Input
+                  placeholder="Enter campaign name..."
+                  value={newCampaignForm.name}
+                  onChange={(e) => setNewCampaignForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Campaign Type</Label>
-                  <Select defaultValue="email">
+                  <Select
+                    value={newCampaignForm.type}
+                    onValueChange={(value: CampaignType) => setNewCampaignForm(prev => ({ ...prev, type: value }))}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="email">Email</SelectItem>
@@ -2580,7 +2723,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 </div>
                 <div className="space-y-2">
                   <Label>Status</Label>
-                  <Select defaultValue="planned">
+                  <Select
+                    value={newCampaignForm.status}
+                    onValueChange={(value: CampaignStatus) => setNewCampaignForm(prev => ({ ...prev, status: value }))}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="planned">Planned</SelectItem>
@@ -2592,31 +2738,82 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
-                  <Input type="date" />
+                  <Input
+                    type="date"
+                    value={newCampaignForm.startDate}
+                    onChange={(e) => setNewCampaignForm(prev => ({ ...prev, startDate: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>End Date</Label>
-                  <Input type="date" />
+                  <Input
+                    type="date"
+                    value={newCampaignForm.endDate}
+                    onChange={(e) => setNewCampaignForm(prev => ({ ...prev, endDate: e.target.value }))}
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Budget</Label>
-                  <Input type="number" placeholder="0" />
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={newCampaignForm.budget || ''}
+                    onChange={(e) => setNewCampaignForm(prev => ({ ...prev, budget: Number(e.target.value) || 0 }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Expected Revenue</Label>
-                  <Input type="number" placeholder="0" />
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={newCampaignForm.expectedRevenue || ''}
+                    onChange={(e) => setNewCampaignForm(prev => ({ ...prev, expectedRevenue: Number(e.target.value) || 0 }))}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea placeholder="Describe your campaign..." />
+                <Textarea
+                  placeholder="Describe your campaign..."
+                  value={newCampaignForm.description}
+                  onChange={(e) => setNewCampaignForm(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddCampaignDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowAddCampaignDialog(false); toast.success('Campaign Created', { description: 'New campaign has been created' }) }}>Create Campaign</Button>
+              <Button onClick={() => {
+                if (!newCampaignForm.name.trim()) {
+                  toast.error('Campaign name is required')
+                  return
+                }
+                const newCampaign: Campaign = {
+                  id: `camp${Date.now()}`,
+                  name: newCampaignForm.name,
+                  type: newCampaignForm.type,
+                  status: newCampaignForm.status,
+                  startDate: newCampaignForm.startDate || new Date().toISOString().split('T')[0],
+                  endDate: newCampaignForm.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                  description: newCampaignForm.description,
+                  expectedRevenue: newCampaignForm.expectedRevenue,
+                  budgetedCost: newCampaignForm.budget,
+                  actualCost: 0,
+                  expectedResponse: 0,
+                  actualResponses: 0,
+                  numSent: 0,
+                  numConverted: 0,
+                  ownerId: 'u1',
+                  parentCampaignId: null,
+                  isActive: newCampaignForm.status === 'active',
+                  members: []
+                }
+                setCampaigns(prev => [newCampaign, ...prev])
+                setShowAddCampaignDialog(false)
+                setNewCampaignForm({ name: '', type: 'email', status: 'planned', startDate: '', endDate: '', budget: 0, expectedRevenue: 0, description: '' })
+                toast.success('Campaign Created', { description: `"${newCampaign.name}" has been created` })
+              }}>Create Campaign</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2634,15 +2831,29 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Stage Name</Label>
-                <Input placeholder="e.g., Discovery, Demo, POC..." />
+                <Input
+                  placeholder="e.g., Discovery, Demo, POC..."
+                  value={newStageForm.name}
+                  onChange={(e) => setNewStageForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Win Probability (%)</Label>
-                <Input type="number" min={0} max={100} placeholder="50" />
+                <Input
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="50"
+                  value={newStageForm.probability}
+                  onChange={(e) => setNewStageForm(prev => ({ ...prev, probability: Number(e.target.value) || 0 }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Stage Color</Label>
-                <Select defaultValue="blue">
+                <Select
+                  value={newStageForm.color}
+                  onValueChange={(value) => setNewStageForm(prev => ({ ...prev, color: value }))}
+                >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="gray">Gray</SelectItem>
@@ -2657,7 +2868,30 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowAddStageDialog(false); toast.success('Stage Added', { description: 'New pipeline stage has been created' }) }}>Add Stage</Button>
+              <Button onClick={() => {
+                if (!newStageForm.name.trim()) {
+                  toast.error('Stage name is required')
+                  return
+                }
+                const colorMap: Record<string, string> = {
+                  gray: 'bg-gray-500',
+                  blue: 'bg-blue-500',
+                  green: 'bg-green-500',
+                  yellow: 'bg-yellow-500',
+                  orange: 'bg-orange-500',
+                  purple: 'bg-purple-500'
+                }
+                const newStage = {
+                  id: newStageForm.name.toLowerCase().replace(/\s+/g, '-') as DealStage,
+                  name: newStageForm.name,
+                  color: colorMap[newStageForm.color] || 'bg-blue-500',
+                  probability: newStageForm.probability
+                }
+                setPipelineStages(prev => [...prev.slice(0, -2), newStage, ...prev.slice(-2)])
+                setShowAddStageDialog(false)
+                setNewStageForm({ name: '', probability: 50, color: 'blue' })
+                toast.success('Stage Added', { description: `"${newStage.name}" has been added to your pipeline` })
+              }}>Add Stage</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2667,19 +2901,71 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle>Stage Options</DialogTitle>
-              <DialogDescription>Manage pipeline stage settings</DialogDescription>
+              <DialogDescription>{selectedStage?.name || 'Manage pipeline stage settings'}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Opening stage editor', { description: 'Edit pipeline stage settings' }) }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedStage) {
+                  const newName = prompt('Enter new stage name:', selectedStage.name)
+                  if (newName && newName.trim()) {
+                    setPipelineStages(prev => prev.map(s =>
+                      s.id === selectedStage.id ? { ...s, name: newName.trim() } : s
+                    ))
+                    toast.success('Stage Updated', { description: `Stage renamed to "${newName.trim()}"` })
+                  }
+                }
+                setShowStageOptionsDialog(false)
+              }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Stage Name
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Updated Probability', { description: 'Stage probability updated' }) }}>
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedStage) {
+                  const newProbability = prompt('Enter new probability (0-100):', String(selectedStage.probability))
+                  if (newProbability !== null) {
+                    const prob = Math.min(100, Math.max(0, Number(newProbability) || 0))
+                    setPipelineStages(prev => prev.map(s =>
+                      s.id === selectedStage.id ? { ...s, probability: prob } : s
+                    ))
+                    toast.success('Probability Updated', { description: `Stage probability set to ${prob}%` })
+                  }
+                }
+                setShowStageOptionsDialog(false)
+              }}>
                 <Target className="h-4 w-4 mr-2" />Update Probability
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Stage Reordered', { description: 'Pipeline stages reordered' }) }}>
-                <Layers className="h-4 w-4 mr-2" />Reorder Stage
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                if (selectedStage) {
+                  const currentIndex = pipelineStages.findIndex(s => s.id === selectedStage.id)
+                  if (currentIndex > 0) {
+                    setPipelineStages(prev => {
+                      const newStages = [...prev]
+                      const temp = newStages[currentIndex]
+                      newStages[currentIndex] = newStages[currentIndex - 1]
+                      newStages[currentIndex - 1] = temp
+                      return newStages
+                    })
+                    toast.success('Stage Reordered', { description: `"${selectedStage.name}" moved up in pipeline` })
+                  } else {
+                    toast.info('Already First', { description: 'This stage is already at the top' })
+                  }
+                }
+                setShowStageOptionsDialog(false)
+              }}>
+                <Layers className="h-4 w-4 mr-2" />Move Up
               </Button>
-              <Button variant="destructive" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Stage Deleted', { description: 'Pipeline stage has been removed' }) }}>
+              <Button variant="destructive" className="w-full justify-start" onClick={() => {
+                if (selectedStage) {
+                  if (pipelineStages.length <= 2) {
+                    toast.error('Cannot Delete', { description: 'Must have at least 2 pipeline stages' })
+                    setShowStageOptionsDialog(false)
+                    return
+                  }
+                  setPipelineStages(prev => prev.filter(s => s.id !== selectedStage.id))
+                  toast.success('Stage Deleted', { description: `"${selectedStage.name}" has been removed` })
+                  setSelectedStage(null)
+                }
+                setShowStageOptionsDialog(false)
+              }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Stage
               </Button>
             </div>
@@ -2699,11 +2985,18 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Rule Name</Label>
-                <Input placeholder="e.g., Enterprise Company Size..." />
+                <Input
+                  placeholder="e.g., Enterprise Company Size..."
+                  value={newRuleForm.name}
+                  onChange={(e) => setNewRuleForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Field</Label>
-                <Select>
+                <Select
+                  value={newRuleForm.field}
+                  onValueChange={(value) => setNewRuleForm(prev => ({ ...prev, field: value }))}
+                >
                   <SelectTrigger><SelectValue placeholder="Select field..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="company_size">Company Size</SelectItem>
@@ -2717,7 +3010,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Operator</Label>
-                  <Select defaultValue="equals">
+                  <Select
+                    value={newRuleForm.operator}
+                    onValueChange={(value: 'equals' | 'contains' | 'greater-than' | 'less-than') => setNewRuleForm(prev => ({ ...prev, operator: value }))}
+                  >
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="equals">Equals</SelectItem>
@@ -2729,21 +3025,57 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 </div>
                 <div className="space-y-2">
                   <Label>Value</Label>
-                  <Input placeholder="Enter value..." />
+                  <Input
+                    placeholder="Enter value..."
+                    value={newRuleForm.value}
+                    onChange={(e) => setNewRuleForm(prev => ({ ...prev, value: e.target.value }))}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>Points to Add</Label>
-                <Input type="number" placeholder="10" min={-100} max={100} />
+                <Input
+                  type="number"
+                  placeholder="10"
+                  min={-100}
+                  max={100}
+                  value={newRuleForm.points}
+                  onChange={(e) => setNewRuleForm(prev => ({ ...prev, points: Number(e.target.value) || 0 }))}
+                />
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <Label>Enable Rule</Label>
-                <Switch defaultChecked />
+                <Switch
+                  checked={newRuleForm.isActive}
+                  onCheckedChange={(checked) => setNewRuleForm(prev => ({ ...prev, isActive: checked }))}
+                />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLeadScoringRuleDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowLeadScoringRuleDialog(false); toast.success('Scoring Rule Created', { description: 'New lead scoring rule has been added' }) }}>Create Rule</Button>
+              <Button onClick={() => {
+                if (!newRuleForm.name.trim()) {
+                  toast.error('Rule name is required')
+                  return
+                }
+                if (!newRuleForm.field) {
+                  toast.error('Please select a field')
+                  return
+                }
+                const newRule: LeadScoreRule = {
+                  id: `rule${Date.now()}`,
+                  name: newRuleForm.name,
+                  field: newRuleForm.field,
+                  operator: newRuleForm.operator,
+                  value: newRuleForm.value,
+                  points: newRuleForm.points,
+                  isActive: newRuleForm.isActive
+                }
+                setLeadScoringRules(prev => [...prev, newRule])
+                setShowLeadScoringRuleDialog(false)
+                setNewRuleForm({ name: '', field: '', operator: 'equals', value: '', points: 10, isActive: true })
+                toast.success('Scoring Rule Created', { description: `"${newRule.name}" will add ${newRule.points} points` })
+              }}>Create Rule</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2823,10 +3155,58 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   const input = document.createElement('input')
                   input.type = 'file'
                   input.accept = '.csv,.xlsx,.xls'
-                  input.onchange = (e) => {
+                  input.onchange = async (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) {
                       toast.success('File Selected', { description: `Ready to import ${file.name}` })
+                      // Parse file and import customers
+                      if (file.name.endsWith('.csv')) {
+                        const text = await file.text()
+                        const lines = text.split('\n').filter(line => line.trim())
+                        if (lines.length > 1) {
+                          const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+                          const nameIdx = headers.findIndex(h => h.includes('name'))
+                          const emailIdx = headers.findIndex(h => h.includes('email'))
+
+                          let imported = 0
+                          for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''))
+                            const name = nameIdx >= 0 ? values[nameIdx] : `Contact ${i}`
+                            const email = emailIdx >= 0 ? values[emailIdx] : null
+
+                            if (name) {
+                              try {
+                                await createCustomer({
+                                  name,
+                                  email: email || null,
+                                  phone: null,
+                                  company: null,
+                                  notes: `Imported from ${file.name}`,
+                                  status: 'active',
+                                  type: 'individual',
+                                  tags: ['imported'],
+                                  total_revenue: 0,
+                                  total_projects: 0,
+                                  metadata: {}
+                                })
+                                imported++
+                              } catch (err) {
+                                console.error('Failed to import row:', err)
+                              }
+                            }
+                          }
+
+                          if (imported > 0) {
+                            refetch()
+                            toast.success('Import Complete', { description: `Successfully imported ${imported} customers` })
+                            setShowImportDialog(false)
+                          } else {
+                            toast.error('Import Failed', { description: 'No valid records found in file' })
+                          }
+                        }
+                      } else {
+                        toast.info('Excel Support', { description: 'Excel files will be supported in future update. Please use CSV for now.' })
+                      }
                     }
                   }
                   input.click()
@@ -2840,15 +3220,34 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               </div>
               <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <FileText className="h-4 w-4 text-blue-600" />
-                <a href="#" className="text-sm text-blue-600 hover:underline" onClick={(e) => { e.preventDefault(); toast.success('Template Downloaded', { description: 'CSV template downloaded' }) }}>
+                <a href="#" className="text-sm text-blue-600 hover:underline" onClick={(e) => {
+                  e.preventDefault()
+                  // Generate and download CSV template
+                  const template = 'Name,Email,Phone,Company,Notes\nJohn Doe,john@example.com,+1234567890,Acme Inc,Sample contact\nJane Smith,jane@example.com,+0987654321,Tech Corp,Another contact'
+                  const blob = new Blob([template], { type: 'text/csv' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'customers-import-template.csv'
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Template Downloaded', { description: 'CSV template downloaded - fill it with your data' })
+                }}>
                   Download sample CSV template
                 </a>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowImportDialog(false); toast.success('Import Started', { description: 'Customers are being imported...' }) }}>
-                <Upload className="h-4 w-4 mr-2" />Start Import
+              <Button onClick={() => {
+                // Trigger file input
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = '.csv,.xlsx,.xls'
+                input.click()
+                toast.info('Select a File', { description: 'Choose a CSV or Excel file to import' })
+              }}>
+                <Upload className="h-4 w-4 mr-2" />Select File to Import
               </Button>
             </DialogFooter>
           </DialogContent>

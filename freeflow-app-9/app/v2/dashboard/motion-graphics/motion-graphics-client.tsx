@@ -546,6 +546,24 @@ export default function MotionGraphicsClient({
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
 
+  // Preset library dialogs
+  const [showEffectsLibraryDialog, setShowEffectsLibraryDialog] = useState(false)
+  const [showMotionPresetsDialog, setShowMotionPresetsDialog] = useState(false)
+  const [showTextPresetsDialog, setShowTextPresetsDialog] = useState(false)
+  const [showShapePresetsDialog, setShowShapePresetsDialog] = useState(false)
+  const [showColorPresetsDialog, setShowColorPresetsDialog] = useState(false)
+  const [showImportPresetDialog, setShowImportPresetDialog] = useState(false)
+  const [showExportPresetDialog, setShowExportPresetDialog] = useState(false)
+
+  // Analytics dialogs
+  const [showAnalyticsOverviewDialog, setShowAnalyticsOverviewDialog] = useState(false)
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showViewStatsDialog, setShowViewStatsDialog] = useState(false)
+  const [showEngagementDialog, setShowEngagementDialog] = useState(false)
+  const [showDownloadStatsDialog, setShowDownloadStatsDialog] = useState(false)
+  const [showPerformanceMetricsDialog, setShowPerformanceMetricsDialog] = useState(false)
+  const [showAudienceInsightsDialog, setShowAudienceInsightsDialog] = useState(false)
+
   // Timeline state
   const [isMuted, setIsMuted] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -1464,13 +1482,13 @@ export default function MotionGraphicsClient({
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: Plus, label: 'Create Preset', desc: 'New effect', color: 'text-green-500', action: () => setShowAddEffectDialog(true) },
-                { icon: Sparkles, label: 'Effects', desc: 'Visual effects', color: 'text-purple-500', action: () => toast.info('Effects library opened') },
-                { icon: Move, label: 'Motion', desc: 'Animations', color: 'text-blue-500', action: () => toast.info('Motion presets opened') },
-                { icon: Type, label: 'Text', desc: 'Typography', color: 'text-orange-500', action: () => toast.info('Text presets opened') },
-                { icon: Shapes, label: 'Shapes', desc: 'Shape presets', color: 'text-pink-500', action: () => toast.info('Shape presets opened') },
-                { icon: Palette, label: 'Colors', desc: 'Color presets', color: 'text-red-500', action: () => toast.info('Color presets opened') },
-                { icon: Download, label: 'Import', desc: 'Import preset', color: 'text-cyan-500', action: () => toast.success('Import dialog opened') },
-                { icon: Upload, label: 'Export', desc: 'Share preset', color: 'text-amber-500', action: () => toast.success('Export dialog opened') },
+                { icon: Sparkles, label: 'Effects', desc: 'Visual effects', color: 'text-purple-500', action: () => setShowEffectsLibraryDialog(true) },
+                { icon: Move, label: 'Motion', desc: 'Animations', color: 'text-blue-500', action: () => setShowMotionPresetsDialog(true) },
+                { icon: Type, label: 'Text', desc: 'Typography', color: 'text-orange-500', action: () => setShowTextPresetsDialog(true) },
+                { icon: Shapes, label: 'Shapes', desc: 'Shape presets', color: 'text-pink-500', action: () => setShowShapePresetsDialog(true) },
+                { icon: Palette, label: 'Colors', desc: 'Color presets', color: 'text-red-500', action: () => setShowColorPresetsDialog(true) },
+                { icon: Download, label: 'Import', desc: 'Import preset', color: 'text-cyan-500', action: () => setShowImportPresetDialog(true) },
+                { icon: Upload, label: 'Export', desc: 'Share preset', color: 'text-amber-500', action: () => setShowExportPresetDialog(true) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
@@ -1653,13 +1671,13 @@ export default function MotionGraphicsClient({
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-indigo-500', action: () => toast.info('Analytics overview loaded') },
-                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.info('Trend analysis loaded') },
-                { icon: Eye, label: 'Views', desc: 'View stats', color: 'text-blue-500', action: () => toast.info('View statistics loaded') },
-                { icon: Heart, label: 'Engagement', desc: 'Likes & shares', color: 'text-pink-500', action: () => toast.info('Engagement metrics loaded') },
-                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.info('Download statistics loaded') },
-                { icon: Timer, label: 'Performance', desc: 'Render times', color: 'text-amber-500', action: () => toast.info('Performance metrics loaded') },
-                { icon: Users, label: 'Audience', desc: 'User insights', color: 'text-purple-500', action: () => toast.info('Audience insights loaded') },
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-indigo-500', action: () => setShowAnalyticsOverviewDialog(true) },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => setShowTrendsDialog(true) },
+                { icon: Eye, label: 'Views', desc: 'View stats', color: 'text-blue-500', action: () => setShowViewStatsDialog(true) },
+                { icon: Heart, label: 'Engagement', desc: 'Likes & shares', color: 'text-pink-500', action: () => setShowEngagementDialog(true) },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => setShowDownloadStatsDialog(true) },
+                { icon: Timer, label: 'Performance', desc: 'Render times', color: 'text-amber-500', action: () => setShowPerformanceMetricsDialog(true) },
+                { icon: Users, label: 'Audience', desc: 'User insights', color: 'text-purple-500', action: () => setShowAudienceInsightsDialog(true) },
                 { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-orange-500', action: () => setShowExportAnalyticsDialog(true) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -2236,7 +2254,7 @@ export default function MotionGraphicsClient({
             <AIInsightsPanel
               insights={mockMotionGraphicsAIInsights}
               title="Motion Graphics Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -3191,6 +3209,454 @@ export default function MotionGraphicsClient({
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Changes
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Effects Library Dialog */}
+        <Dialog open={showEffectsLibraryDialog} onOpenChange={setShowEffectsLibraryDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-500" />
+                Visual Effects Library
+              </DialogTitle>
+              <DialogDescription>Browse and apply visual effects to your animations</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Input placeholder="Search effects..." className="mb-4" />
+              <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {['Glow', 'Blur', 'Shadow', 'Reflection', 'Distortion', 'Noise', 'Vignette', 'Color Correction', 'Bloom'].map(effect => (
+                  <Card key={effect} className="p-4 cursor-pointer hover:border-purple-500 transition-colors" onClick={() => {
+                    toast.success(`Applied "${effect}" effect`)
+                    setShowEffectsLibraryDialog(false)
+                  }}>
+                    <div className="w-full h-16 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded mb-2" />
+                    <p className="font-medium text-sm">{effect}</p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Motion Presets Dialog */}
+        <Dialog open={showMotionPresetsDialog} onOpenChange={setShowMotionPresetsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Move className="w-5 h-5 text-blue-500" />
+                Motion Presets
+              </DialogTitle>
+              <DialogDescription>Apply pre-built animation presets</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                {['Slide In', 'Fade In', 'Bounce', 'Elastic', 'Zoom', 'Rotate', 'Flip', 'Swing'].map(preset => (
+                  <Card key={preset} className="p-4 cursor-pointer hover:border-blue-500 transition-colors" onClick={() => {
+                    toast.success(`Applied "${preset}" motion preset`)
+                    setShowMotionPresetsDialog(false)
+                  }}>
+                    <Move className="w-8 h-8 text-blue-500 mb-2" />
+                    <p className="font-medium">{preset}</p>
+                    <p className="text-xs text-gray-500">Click to apply</p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Text Presets Dialog */}
+        <Dialog open={showTextPresetsDialog} onOpenChange={setShowTextPresetsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Type className="w-5 h-5 text-orange-500" />
+                Text Presets
+              </DialogTitle>
+              <DialogDescription>Typography animation styles</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                {['Typewriter', 'Letter by Letter', 'Word Reveal', 'Glitch Text', 'Neon', 'Handwritten', '3D Extrude', 'Kinetic'].map(preset => (
+                  <Card key={preset} className="p-4 cursor-pointer hover:border-orange-500 transition-colors" onClick={() => {
+                    toast.success(`Applied "${preset}" text preset`)
+                    setShowTextPresetsDialog(false)
+                  }}>
+                    <Type className="w-8 h-8 text-orange-500 mb-2" />
+                    <p className="font-medium">{preset}</p>
+                    <p className="text-xs text-gray-500">Click to apply</p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Shape Presets Dialog */}
+        <Dialog open={showShapePresetsDialog} onOpenChange={setShowShapePresetsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shapes className="w-5 h-5 text-pink-500" />
+                Shape Presets
+              </DialogTitle>
+              <DialogDescription>Animated shape templates</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {['Circle Expand', 'Rectangle Wipe', 'Morphing Shapes', 'Polygon Spin', 'Star Burst', 'Wave Pattern', 'Spiral', 'Grid', 'Particles'].map(shape => (
+                  <Card key={shape} className="p-4 cursor-pointer hover:border-pink-500 transition-colors" onClick={() => {
+                    toast.success(`Applied "${shape}" shape preset`)
+                    setShowShapePresetsDialog(false)
+                  }}>
+                    <Shapes className="w-8 h-8 text-pink-500 mb-2" />
+                    <p className="font-medium text-sm">{shape}</p>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Color Presets Dialog */}
+        <Dialog open={showColorPresetsDialog} onOpenChange={setShowColorPresetsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5 text-red-500" />
+                Color Presets
+              </DialogTitle>
+              <DialogDescription>Pre-built color schemes and gradients</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              {[
+                { name: 'Sunset', colors: ['#FF6B6B', '#FFA07A', '#FFD700'] },
+                { name: 'Ocean', colors: ['#0077B6', '#00B4D8', '#90E0EF'] },
+                { name: 'Forest', colors: ['#2D6A4F', '#40916C', '#74C69D'] },
+                { name: 'Neon', colors: ['#FF00FF', '#00FFFF', '#FFFF00'] },
+                { name: 'Pastel', colors: ['#FFB3BA', '#BAFFC9', '#BAE1FF'] },
+              ].map(scheme => (
+                <Card key={scheme.name} className="p-4 cursor-pointer hover:border-red-500 transition-colors" onClick={() => {
+                  toast.success(`Applied "${scheme.name}" color scheme`)
+                  setShowColorPresetsDialog(false)
+                }}>
+                  <div className="flex items-center gap-3">
+                    <div className="flex">
+                      {scheme.colors.map((color, i) => (
+                        <div key={i} className="w-8 h-8 rounded-full -ml-2 first:ml-0 border-2 border-white" style={{ backgroundColor: color }} />
+                      ))}
+                    </div>
+                    <p className="font-medium">{scheme.name}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Preset Dialog */}
+        <Dialog open={showImportPresetDialog} onOpenChange={setShowImportPresetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-cyan-500" />
+                Import Preset
+              </DialogTitle>
+              <DialogDescription>Import a preset from file</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                <input type="file" className="hidden" id="preset-import" accept=".json,.preset" onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      { loading: `Importing ${file.name}...`, success: `Preset "${file.name}" imported successfully`, error: 'Import failed' }
+                    )
+                    setShowImportPresetDialog(false)
+                  }
+                }} />
+                <label htmlFor="preset-import" className="cursor-pointer">
+                  <Download className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  <p className="font-medium">Drop preset file here</p>
+                  <p className="text-sm text-gray-500">or click to browse (.json, .preset)</p>
+                </label>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Preset Dialog */}
+        <Dialog open={showExportPresetDialog} onOpenChange={setShowExportPresetDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-amber-500" />
+                Export Preset
+              </DialogTitle>
+              <DialogDescription>Share your preset with others</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Preset Name</label>
+                <Input placeholder="My Custom Preset" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <Input placeholder="A brief description..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Export Format</label>
+                <select className="w-full px-3 py-2 border rounded-lg">
+                  <option value="json">JSON (.json)</option>
+                  <option value="preset">Preset Package (.preset)</option>
+                </select>
+              </div>
+              <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-600 text-white" onClick={() => {
+                const blob = new Blob([JSON.stringify({ name: 'Custom Preset', effects: [] })], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'custom-preset.json'
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Preset exported successfully')
+                setShowExportPresetDialog(false)
+              }}>
+                <Upload className="w-4 h-4 mr-2" />
+                Export Preset
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Overview Dialog */}
+        <Dialog open={showAnalyticsOverviewDialog} onOpenChange={setShowAnalyticsOverviewDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-indigo-500" />
+                Analytics Overview
+              </DialogTitle>
+              <DialogDescription>Key metrics for your animations</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4">
+                  <p className="text-sm text-gray-500">Total Views</p>
+                  <p className="text-3xl font-bold">{stats.totalViews.toLocaleString()}</p>
+                  <p className="text-xs text-green-500">+12.5% from last week</p>
+                </Card>
+                <Card className="p-4">
+                  <p className="text-sm text-gray-500">Total Downloads</p>
+                  <p className="text-3xl font-bold">{stats.totalDownloads.toLocaleString()}</p>
+                  <p className="text-xs text-green-500">+8.3% from last week</p>
+                </Card>
+                <Card className="p-4">
+                  <p className="text-sm text-gray-500">Total Likes</p>
+                  <p className="text-3xl font-bold">{stats.totalLikes.toLocaleString()}</p>
+                  <p className="text-xs text-green-500">+15.2% from last week</p>
+                </Card>
+                <Card className="p-4">
+                  <p className="text-sm text-gray-500">Total Projects</p>
+                  <p className="text-3xl font-bold">{stats.total}</p>
+                  <p className="text-xs text-gray-500">{stats.ready} ready</p>
+                </Card>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trends Dialog */}
+        <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+                Trend Analysis
+              </DialogTitle>
+              <DialogDescription>Performance trends over time</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="h-48 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg flex items-center justify-center">
+                <p className="text-gray-500">Trend chart visualization</p>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <TrendingUp className="w-6 h-6 text-green-500 mx-auto mb-1" />
+                  <p className="text-sm font-medium">Views Up</p>
+                  <p className="text-lg font-bold text-green-600">+23%</p>
+                </div>
+                <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <TrendingUp className="w-6 h-6 text-blue-500 mx-auto mb-1" />
+                  <p className="text-sm font-medium">Engagement Up</p>
+                  <p className="text-lg font-bold text-blue-600">+18%</p>
+                </div>
+                <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                  <TrendingUp className="w-6 h-6 text-purple-500 mx-auto mb-1" />
+                  <p className="text-sm font-medium">Downloads Up</p>
+                  <p className="text-lg font-bold text-purple-600">+31%</p>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Stats Dialog */}
+        <Dialog open={showViewStatsDialog} onOpenChange={setShowViewStatsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5 text-blue-500" />
+                View Statistics
+              </DialogTitle>
+              <DialogDescription>Detailed view breakdown</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              {initialAnimations.slice(0, 5).map(animation => (
+                <div key={animation.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">{animation.title}</p>
+                    <p className="text-xs text-gray-500">{animation.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold">{animation.views.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">views</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Engagement Dialog */}
+        <Dialog open={showEngagementDialog} onOpenChange={setShowEngagementDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-pink-500" />
+                Engagement Metrics
+              </DialogTitle>
+              <DialogDescription>Likes, shares, and interactions</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4 text-center">
+                  <Heart className="w-8 h-8 text-pink-500 mx-auto mb-2" />
+                  <p className="text-2xl font-bold">{stats.totalLikes.toLocaleString()}</p>
+                  <p className="text-sm text-gray-500">Total Likes</p>
+                </Card>
+                <Card className="p-4 text-center">
+                  <Share2 className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+                  <p className="text-2xl font-bold">2,341</p>
+                  <p className="text-sm text-gray-500">Total Shares</p>
+                </Card>
+              </div>
+              <Card className="p-4">
+                <p className="font-medium mb-2">Top Engaged Animation</p>
+                <p className="text-lg">{initialAnimations[0]?.title}</p>
+                <p className="text-sm text-gray-500">{initialAnimations[0]?.likes} likes</p>
+              </Card>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Download Stats Dialog */}
+        <Dialog open={showDownloadStatsDialog} onOpenChange={setShowDownloadStatsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-cyan-500" />
+                Download Statistics
+              </DialogTitle>
+              <DialogDescription>Download breakdown by animation</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              {initialAnimations.slice(0, 5).map(animation => (
+                <div key={animation.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">{animation.title}</p>
+                    <p className="text-xs text-gray-500">{animation.resolution}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-cyan-600">{animation.downloads.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">downloads</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Performance Metrics Dialog */}
+        <Dialog open={showPerformanceMetricsDialog} onOpenChange={setShowPerformanceMetricsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Timer className="w-5 h-5 text-amber-500" />
+                Performance Metrics
+              </DialogTitle>
+              <DialogDescription>Render times and performance data</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="p-4 text-center">
+                  <p className="text-3xl font-bold text-amber-600">4.2s</p>
+                  <p className="text-sm text-gray-500">Avg Render Time</p>
+                </Card>
+                <Card className="p-4 text-center">
+                  <p className="text-3xl font-bold text-green-600">98%</p>
+                  <p className="text-sm text-gray-500">Success Rate</p>
+                </Card>
+              </div>
+              <Card className="p-4">
+                <p className="font-medium mb-3">Recent Render Jobs</p>
+                {mockRenderQueue.map(job => (
+                  <div key={job.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                    <p className="text-sm">{job.animationTitle}</p>
+                    <Badge className={getStatusColor(job.status as AnimationStatus)}>{job.status}</Badge>
+                  </div>
+                ))}
+              </Card>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audience Insights Dialog */}
+        <Dialog open={showAudienceInsightsDialog} onOpenChange={setShowAudienceInsightsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-purple-500" />
+                Audience Insights
+              </DialogTitle>
+              <DialogDescription>Who&apos;s viewing your content</DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+              <Card className="p-4">
+                <p className="font-medium mb-3">Top Locations</p>
+                {['United States', 'United Kingdom', 'Germany', 'Canada', 'Australia'].map((country, i) => (
+                  <div key={country} className="flex items-center justify-between py-2">
+                    <p className="text-sm">{country}</p>
+                    <p className="text-sm font-medium">{[32, 18, 14, 12, 8][i]}%</p>
+                  </div>
+                ))}
+              </Card>
+              <Card className="p-4">
+                <p className="font-medium mb-3">Device Breakdown</p>
+                <div className="flex gap-4">
+                  <div className="flex-1 text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                    <Monitor className="w-5 h-5 mx-auto mb-1 text-blue-500" />
+                    <p className="text-sm font-medium">Desktop 68%</p>
+                  </div>
+                  <div className="flex-1 text-center p-2 bg-purple-50 dark:bg-purple-900/20 rounded">
+                    <Camera className="w-5 h-5 mx-auto mb-1 text-purple-500" />
+                    <p className="text-sm font-medium">Mobile 32%</p>
+                  </div>
+                </div>
+              </Card>
             </div>
           </DialogContent>
         </Dialog>

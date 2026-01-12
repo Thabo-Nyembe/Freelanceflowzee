@@ -465,6 +465,8 @@ export default function WebinarsClient() {
   const [recordings, setRecordings] = useState<Recording[]>(mockRecordings)
   const [registrations, setRegistrations] = useState<Registration[]>(mockRegistrations)
   const [templates, setTemplates] = useState<EmailTemplate[]>(mockTemplates)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editingWebinar, setEditingWebinar] = useState<Webinar | null>(null)
 
   // Helper functions for real functionality
   const copyToClipboard = async (text: string, successMessage: string) => {
@@ -641,6 +643,28 @@ export default function WebinarsClient() {
     }
     setWebinars(prev => [...prev, newWebinar])
     toast.success('Webinar duplicated successfully!')
+  }
+
+  const openEditWebinar = (webinar: Webinar) => {
+    setEditingWebinar({ ...webinar })
+    setShowEditDialog(true)
+  }
+
+  const saveWebinarEdits = () => {
+    if (!editingWebinar) return
+
+    setWebinars(prev => prev.map(w =>
+      w.id === editingWebinar.id ? editingWebinar : w
+    ))
+
+    // Update selectedWebinar if it's the same webinar being edited
+    if (selectedWebinar?.id === editingWebinar.id) {
+      setSelectedWebinar(editingWebinar)
+    }
+
+    setShowEditDialog(false)
+    setEditingWebinar(null)
+    toast.success('Webinar updated successfully')
   }
 
   // Quick actions for the toolbar
@@ -1056,7 +1080,7 @@ export default function WebinarsClient() {
                             Join
                           </Button>
                         )}
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedWebinar(webinar); toast.success('Edit webinar details below') }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); openEditWebinar(webinar) }}>
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button variant="outline" size="sm" onClick={(e) => {
@@ -2532,21 +2556,168 @@ export default function WebinarsClient() {
                     </Button>
                   )}
                   <Button variant="outline" className="gap-2" onClick={() => {
-                    toast.loading('Loading webinar editor...', { id: 'webinar-edit' })
-                    setTimeout(() => {
-                      toast.success(`Editing webinar: ${selectedWebinar.title}`, { id: 'webinar-edit' })
-                    }, 500)
+                    openEditWebinar(selectedWebinar)
+                    setSelectedWebinar(null)
                   }}>
                     <Edit className="w-4 h-4" />
                     Edit
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('registrations'); setSelectedWebinar(null); toast.success(`${selectedWebinar.registeredCount} registrations found`); }}>
+                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('registrations'); setSelectedWebinar(null); }}>
                     <Users className="w-4 h-4" />
                     View Registrations
                   </Button>
                   <Button variant="outline" className="gap-2" onClick={() => shareWebinar(selectedWebinar)}>
                     <Share2 className="w-4 h-4" />
                     Share
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Webinar Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={(open) => { if (!open) { setShowEditDialog(false); setEditingWebinar(null); } }}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Edit className="w-5 h-5 text-blue-600" />
+                Edit Webinar
+              </DialogTitle>
+            </DialogHeader>
+
+            {editingWebinar && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="edit-title">Title</Label>
+                  <Input
+                    id="edit-title"
+                    value={editingWebinar.title}
+                    onChange={(e) => setEditingWebinar({ ...editingWebinar, title: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Input
+                    id="edit-description"
+                    value={editingWebinar.description}
+                    onChange={(e) => setEditingWebinar({ ...editingWebinar, description: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-type">Type</Label>
+                    <select
+                      id="edit-type"
+                      value={editingWebinar.type}
+                      onChange={(e) => setEditingWebinar({ ...editingWebinar, type: e.target.value as WebinarType })}
+                      className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+                    >
+                      <option value="webinar">Webinar</option>
+                      <option value="meeting">Meeting</option>
+                      <option value="training">Training</option>
+                      <option value="demo">Demo</option>
+                      <option value="conference">Conference</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-status">Status</Label>
+                    <select
+                      id="edit-status"
+                      value={editingWebinar.status}
+                      onChange={(e) => setEditingWebinar({ ...editingWebinar, status: e.target.value as WebinarStatus })}
+                      className="mt-1 w-full px-3 py-2 border rounded-md dark:bg-gray-800 dark:border-gray-700"
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="scheduled">Scheduled</option>
+                      <option value="live">Live</option>
+                      <option value="ended">Ended</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-duration">Duration (minutes)</Label>
+                    <Input
+                      id="edit-duration"
+                      type="number"
+                      value={editingWebinar.duration}
+                      onChange={(e) => setEditingWebinar({ ...editingWebinar, duration: parseInt(e.target.value) || 0 })}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-max-participants">Max Participants</Label>
+                    <Input
+                      id="edit-max-participants"
+                      type="number"
+                      value={editingWebinar.maxParticipants}
+                      onChange={(e) => setEditingWebinar({ ...editingWebinar, maxParticipants: parseInt(e.target.value) || 0 })}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-medium">Features</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm">Recording</span>
+                      <Switch
+                        checked={editingWebinar.recordingEnabled}
+                        onCheckedChange={(checked) => setEditingWebinar({ ...editingWebinar, recordingEnabled: checked })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm">Q&A</span>
+                      <Switch
+                        checked={editingWebinar.qnaEnabled}
+                        onCheckedChange={(checked) => setEditingWebinar({ ...editingWebinar, qnaEnabled: checked })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm">Polls</span>
+                      <Switch
+                        checked={editingWebinar.pollsEnabled}
+                        onCheckedChange={(checked) => setEditingWebinar({ ...editingWebinar, pollsEnabled: checked })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm">Chat</span>
+                      <Switch
+                        checked={editingWebinar.chatEnabled}
+                        onCheckedChange={(checked) => setEditingWebinar({ ...editingWebinar, chatEnabled: checked })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm">Waiting Room</span>
+                      <Switch
+                        checked={editingWebinar.waitingRoomEnabled}
+                        onCheckedChange={(checked) => setEditingWebinar({ ...editingWebinar, waitingRoomEnabled: checked })}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <span className="text-sm">Registration Required</span>
+                      <Switch
+                        checked={editingWebinar.registrationRequired}
+                        onCheckedChange={(checked) => setEditingWebinar({ ...editingWebinar, registrationRequired: checked })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4">
+                  <Button variant="outline" onClick={() => { setShowEditDialog(false); setEditingWebinar(null); }}>
+                    Cancel
+                  </Button>
+                  <Button onClick={saveWebinarEdits}>
+                    Save Changes
                   </Button>
                 </div>
               </div>

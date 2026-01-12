@@ -568,10 +568,16 @@ const mockMyDayActivities = [
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {
   const [activeTab, setActiveTab] = useState('today')
   const [tasks, setTasks] = useState<Task[]>(mockTasks)
-  const [projects] = useState<Project[]>(mockProjects)
-  const [labels] = useState<Label[]>(mockLabels)
+  const [projects, setProjects] = useState<Project[]>(mockProjects)
+  const [labels, setLabels] = useState<Label[]>(mockLabels)
   const [filters] = useState<SavedFilter[]>(mockFilters)
   const [stats] = useState<ProductivityStats>(mockStats)
+
+  // Settings state
+  const [settingsFocusDuration, setSettingsFocusDuration] = useState('25')
+  const [settingsAutoStartBreaks, setSettingsAutoStartBreaks] = useState(true)
+  const [settingsSoundNotifications, setSettingsSoundNotifications] = useState(true)
+  const [settingsShowCompleted, setSettingsShowCompleted] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [showTaskDialog, setShowTaskDialog] = useState(false)
@@ -950,8 +956,26 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       toast.error('Section name is required')
       return
     }
-    // Section would be added to the selected project
-    toast.success('Section created', { description: `"${newSectionName}" has been added` })
+    // Add section to the first project (or selected project if available)
+    const targetProjectId = selectedProject || projects[0]?.id
+    if (targetProjectId) {
+      const newSection: Section = {
+        id: `sec${Date.now()}`,
+        name: newSectionName.trim(),
+        projectId: targetProjectId,
+        taskCount: 0,
+        order: projects.find(p => p.id === targetProjectId)?.sections.length || 0
+      }
+      setProjects(prev => prev.map(p =>
+        p.id === targetProjectId
+          ? { ...p, sections: [...p.sections, newSection] }
+          : p
+      ))
+      toast.success('Section created', { description: `"${newSectionName}" has been added` })
+      setNewSectionName('')
+    } else {
+      toast.error('No project selected for section')
+    }
     setShowAddSectionDialog(false)
   }
 
@@ -960,7 +984,16 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       toast.error('Label name is required')
       return
     }
+    const newLabel: Label = {
+      id: `label${Date.now()}`,
+      name: newLabelName.trim(),
+      color: newLabelColor,
+      taskCount: 0
+    }
+    setLabels(prev => [...prev, newLabel])
     toast.success('Label created', { description: `@${newLabelName} has been created` })
+    setNewLabelName('')
+    setNewLabelColor('#6366F1')
     setShowAddLabelDialog(false)
   }
 
@@ -969,7 +1002,23 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       toast.error('Project name is required')
       return
     }
+    const newProject: Project = {
+      id: `proj${Date.now()}`,
+      name: newProjectName.trim(),
+      color: newProjectColor,
+      description: newProjectDescription.trim() || undefined,
+      taskCount: 0,
+      completedCount: 0,
+      isFavorite: false,
+      isShared: false,
+      sections: [],
+      createdAt: new Date().toISOString()
+    }
+    setProjects(prev => [...prev, newProject])
     toast.success('Project created', { description: `"${newProjectName}" has been created` })
+    setNewProjectName('')
+    setNewProjectColor('#10B981')
+    setNewProjectDescription('')
     setShowAddProjectDialog(false)
   }
 
@@ -2063,7 +2112,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             <AIInsightsPanel
               insights={mockMyDayAIInsights}
               title="Daily Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2514,7 +2563,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   <p className="font-medium">Focus Mode Duration</p>
                   <p className="text-sm text-muted-foreground">Default pomodoro length</p>
                 </div>
-                <Select defaultValue="25">
+                <Select value={settingsFocusDuration} onValueChange={setSettingsFocusDuration}>
                   <SelectTrigger className="w-24">
                     <SelectValue />
                   </SelectTrigger>
@@ -2531,26 +2580,31 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   <p className="font-medium">Auto-start Breaks</p>
                   <p className="text-sm text-muted-foreground">Automatically start break timer</p>
                 </div>
-                <Checkbox defaultChecked />
+                <Checkbox checked={settingsAutoStartBreaks} onCheckedChange={(checked) => setSettingsAutoStartBreaks(checked === true)} />
               </div>
               <div className="flex items-center justify-between py-2 border-b">
                 <div>
                   <p className="font-medium">Sound Notifications</p>
                   <p className="text-sm text-muted-foreground">Play sound when timer ends</p>
                 </div>
-                <Checkbox defaultChecked />
+                <Checkbox checked={settingsSoundNotifications} onCheckedChange={(checked) => setSettingsSoundNotifications(checked === true)} />
               </div>
               <div className="flex items-center justify-between py-2">
                 <div>
                   <p className="font-medium">Show Completed Tasks</p>
                   <p className="text-sm text-muted-foreground">Display finished tasks in list</p>
                 </div>
-                <Checkbox defaultChecked />
+                <Checkbox checked={settingsShowCompleted} onCheckedChange={(checked) => setSettingsShowCompleted(checked === true)} />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved') }}>Save Changes</Button>
+              <Button onClick={() => {
+                // Apply settings - update default timer duration
+                setTimerSeconds(parseInt(settingsFocusDuration) * 60)
+                setShowSettingsDialog(false)
+                toast.success('Settings saved', { description: 'Your preferences have been updated' })
+              }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

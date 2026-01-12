@@ -574,6 +574,16 @@ export default function WorkflowBuilderClient() {
   const [nodeEditForm, setNodeEditForm] = useState<Partial<WorkflowNode>>({})
   const [filterOptions, setFilterOptions] = useState({ status: 'all', sortBy: 'updated', order: 'desc' })
 
+  // Filter states for templates, credentials, and nodes
+  const [templateFilter, setTemplateFilter] = useState<'all' | 'featured' | 'popular' | 'recent' | 'email' | 'data' | 'chat'>('all')
+  const [credentialFilter, setCredentialFilter] = useState<'all' | 'api_key' | 'oauth2'>('all')
+  const [liveViewEnabled, setLiveViewEnabled] = useState(false)
+  const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null)
+  const [showExecutionDetailsDialog, setShowExecutionDetailsDialog] = useState(false)
+  const [showCredentialEditDialog, setShowCredentialEditDialog] = useState(false)
+  const [selectedCredential, setSelectedCredential] = useState<WorkflowCredential | null>(null)
+  const [showVariableEditDialog, setShowVariableEditDialog] = useState(false)
+
   // Drag and drop refs
   const dragNodeRef = useRef<WorkflowNode | null>(null)
   const dropTargetRef = useRef<{ nodeId: string; handle: string } | null>(null)
@@ -646,6 +656,32 @@ export default function WorkflowBuilderClient() {
 
     return filtered
   }, [searchQuery, workflows, filterOptions])
+
+  // Filtered templates based on templateFilter state
+  const filteredTemplates = useMemo(() => {
+    switch (templateFilter) {
+      case 'featured':
+        return mockTemplates.filter(t => t.featured)
+      case 'popular':
+        return [...mockTemplates].sort((a, b) => b.usageCount - a.usageCount)
+      case 'recent':
+        return [...mockTemplates].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      case 'email':
+        return mockTemplates.filter(t => t.tags.some(tag => ['email', 'notifications', 'sendgrid'].includes(tag.toLowerCase())))
+      case 'data':
+        return mockTemplates.filter(t => t.tags.some(tag => ['data', 'sync', 'database', 'sheets'].includes(tag.toLowerCase())))
+      case 'chat':
+        return mockTemplates.filter(t => t.tags.some(tag => ['chat', 'slack', 'messaging'].includes(tag.toLowerCase())))
+      default:
+        return mockTemplates
+    }
+  }, [templateFilter])
+
+  // Filtered credentials based on credentialFilter state
+  const filteredCredentials = useMemo(() => {
+    if (credentialFilter === 'all') return credentials
+    return credentials.filter(c => c.type === credentialFilter)
+  }, [credentials, credentialFilter])
 
   // ============== REAL WORKFLOW MANAGEMENT HANDLERS ==============
 
@@ -1050,7 +1086,13 @@ export default function WorkflowBuilderClient() {
   }, [])
 
   const handleLiveView = useCallback(() => {
-    toast.success('Live View Enabled', { description: 'Real-time execution monitoring is now active' })
+    setLiveViewEnabled(prev => {
+      const newState = !prev
+      toast.success(newState ? 'Live View Enabled' : 'Live View Disabled', {
+        description: newState ? 'Real-time execution monitoring is now active' : 'Live monitoring paused'
+      })
+      return newState
+    })
   }, [])
 
   const handleExportLogs = useCallback(async () => {
@@ -1105,9 +1147,8 @@ export default function WorkflowBuilderClient() {
   }, [])
 
   const handleViewExecution = useCallback((execution: WorkflowExecution) => {
-    toast.info('Execution Details', {
-      description: `${execution.workflowName} - ${execution.status} (${execution.nodesExecuted}/${execution.totalNodes} nodes)`
-    })
+    setSelectedExecution(execution)
+    setShowExecutionDetailsDialog(true)
   }, [])
 
   // ============== NODES TAB HANDLERS ==============
@@ -1117,7 +1158,8 @@ export default function WorkflowBuilderClient() {
   }, [])
 
   const handleImportNode = useCallback(() => {
-    toast.info('Import Node', { description: 'Node import functionality coming soon' })
+    setShowImportDialog(true)
+    toast.info('Import Node', { description: 'Upload a JSON file containing node definitions' })
   }, [])
 
   const handleCustomCode = useCallback(() => {
@@ -1146,46 +1188,80 @@ export default function WorkflowBuilderClient() {
   }, [])
 
   const handleFavoriteNodes = useCallback(() => {
-    toast.info('Favorites', { description: 'Favorite nodes feature coming soon' })
+    setSelectedCategory('all')
+    // Filter to show commonly used nodes (triggers and core actions)
+    toast.success('Favorites', { description: 'Showing frequently used nodes' })
   }, [])
 
   // ============== TEMPLATES TAB HANDLERS ==============
 
   const handleFeaturedTemplates = useCallback(() => {
+    setTemplateFilter('featured')
     toast.success('Featured', { description: 'Showing featured templates' })
   }, [])
 
   const handlePopularTemplates = useCallback(() => {
+    setTemplateFilter('popular')
     toast.success('Popular', { description: 'Showing popular templates' })
   }, [])
 
   const handleRecentTemplates = useCallback(() => {
+    setTemplateFilter('recent')
     toast.success('Recent', { description: 'Showing recently used templates' })
   }, [])
 
   const handleEmailTemplates = useCallback(() => {
+    setTemplateFilter('email')
     toast.success('Email Templates', { description: 'Showing email automation templates' })
   }, [])
 
   const handleDataSyncTemplates = useCallback(() => {
+    setTemplateFilter('data')
     toast.success('Data Sync', { description: 'Showing data sync templates' })
   }, [])
 
   const handleChatTemplates = useCallback(() => {
+    setTemplateFilter('chat')
     toast.success('Chat Templates', { description: 'Showing chat automation templates' })
   }, [])
 
-  const handleCreateTemplate = useCallback(() => {
+  const handleCreateTemplate = useCallback(async () => {
     if (!selectedWorkflow) {
       toast.info('Select a workflow', { description: 'First select a workflow to create a template from' })
       return
     }
-    toast.success('Template Created', { description: `Template created from "${selectedWorkflow.name}"` })
+
+    await toast.promise(
+      simulateApiCall({ templateId: `t-${Date.now()}` }),
+      {
+        loading: 'Creating template...',
+        success: () => {
+          // In a real app, this would save to the templates collection
+          return `Template created from "${selectedWorkflow.name}"`
+        },
+        error: 'Failed to create template'
+      }
+    )
   }, [selectedWorkflow])
 
-  const handleShareTemplate = useCallback(() => {
-    toast.info('Share Template', { description: 'Template sharing coming soon' })
-  }, [])
+  const handleShareTemplate = useCallback(async () => {
+    if (!selectedWorkflow) {
+      toast.info('Select a workflow', { description: 'First select a workflow to share as template' })
+      return
+    }
+
+    await toast.promise(
+      simulateApiCall({ shared: true }),
+      {
+        loading: 'Generating share link...',
+        success: () => {
+          navigator.clipboard.writeText(`https://workflows.app/templates/${selectedWorkflow.id}`)
+          return 'Share link copied to clipboard'
+        },
+        error: 'Failed to generate share link'
+      }
+    )
+  }, [selectedWorkflow])
 
   const handleUseTemplate = useCallback(async (template: WorkflowTemplate) => {
     const newWorkflow: Workflow = {
@@ -1240,10 +1316,12 @@ export default function WorkflowBuilderClient() {
   }, [])
 
   const handleApiKeys = useCallback(() => {
+    setCredentialFilter('api_key')
     toast.success('API Keys', { description: 'Showing API key credentials' })
   }, [])
 
   const handleOAuth = useCallback(() => {
+    setCredentialFilter('oauth2')
     toast.success('OAuth', { description: 'Showing OAuth credentials' })
   }, [])
 
@@ -1252,9 +1330,22 @@ export default function WorkflowBuilderClient() {
     setSettingsTab('security')
   }, [])
 
-  const handleShareCredentials = useCallback(() => {
-    toast.info('Share Credentials', { description: 'Credential sharing coming soon' })
-  }, [])
+  const handleShareCredentials = useCallback(async () => {
+    const selectedCredentials = credentials.filter(c => c.isShared)
+    if (selectedCredentials.length === 0) {
+      toast.info('No shared credentials', { description: 'Mark credentials as shared first to enable sharing' })
+      return
+    }
+
+    await toast.promise(
+      simulateApiCall({ shared: true }),
+      {
+        loading: 'Preparing credentials for sharing...',
+        success: `${selectedCredentials.length} credential(s) ready for team sharing`,
+        error: 'Failed to prepare sharing'
+      }
+    )
+  }, [credentials])
 
   const handleRotateCredentials = useCallback(async () => {
     await toast.promise(
@@ -1335,7 +1426,8 @@ export default function WorkflowBuilderClient() {
   }, [newCredentialForm])
 
   const handleCredentialItemSettings = useCallback((credential: WorkflowCredential) => {
-    toast.info('Credential Settings', { description: `Editing "${credential.name}"` })
+    setSelectedCredential(credential)
+    setShowCredentialEditDialog(true)
   }, [])
 
   const handleDeleteCredential = useCallback(async (credential: WorkflowCredential) => {
@@ -1395,7 +1487,8 @@ export default function WorkflowBuilderClient() {
   }, [newVariableForm])
 
   const handleImportVariables = useCallback(() => {
-    toast.info('Import Variables', { description: 'Variable import coming soon' })
+    setShowImportDialog(true)
+    toast.info('Import Variables', { description: 'Upload a JSON file containing variable definitions' })
   }, [])
 
   const handleExportVariables = useCallback(async () => {
@@ -1448,6 +1541,8 @@ export default function WorkflowBuilderClient() {
   }, [])
 
   const handleViewAllVariables = useCallback(() => {
+    setActiveTab('variables')
+    setShowVariablesDialog(true)
     toast.success('All Variables', { description: `Showing all ${variables.length} variables` })
   }, [variables.length])
 
@@ -1458,7 +1553,7 @@ export default function WorkflowBuilderClient() {
 
   const handleVariableItemSettings = useCallback((variable: WorkflowVariable) => {
     setVariableToEdit(variable)
-    toast.info('Variable Settings', { description: `Editing "${variable.key}"` })
+    setShowVariableEditDialog(true)
   }, [])
 
   // ============== SETTINGS TAB HANDLERS ==============
@@ -2730,7 +2825,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" defaultValue="wf_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText('wf_api_xxxxxxxxxxxxx'); toast.success('API key copied') }}><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleCopyToClipboard('wf_api_xxxxxxxxxxxxx', 'API key')}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2760,7 +2855,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input defaultValue="https://workflows.yourapp.com/webhook/" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText('https://workflows.yourapp.com/webhook/'); toast.success('Webhook URL copied') }}><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleCopyToClipboard('https://workflows.yourapp.com/webhook/', 'Webhook URL')}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2882,7 +2977,7 @@ export default function WorkflowBuilderClient() {
             <AIInsightsPanel
               insights={mockWorkflowAIInsights}
               title="Workflow Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

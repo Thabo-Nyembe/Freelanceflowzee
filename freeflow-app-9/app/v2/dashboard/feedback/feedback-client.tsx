@@ -526,6 +526,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     tags: ''
   })
 
+  // Quick Action Form States
+  const [newIdeaForm, setNewIdeaForm] = useState({ title: '', description: '', category: 'feature', priority: 'medium' })
+  const [respondForm, setRespondForm] = useState({ feedbackId: '', response: '', newStatus: 'under_review' })
+  const [mergeForm, setMergeForm] = useState({ primaryId: '', duplicateId: '' })
+  const [commentForm, setCommentForm] = useState({ text: '', subscribe: true })
+
   // Fetch feedback data
   const fetchFeedback = useCallback(async () => {
     if (!user?.id) return
@@ -669,6 +675,153 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     } catch (error) {
       console.error('Error exporting:', error)
       toast.error('Failed to export feedback')
+    }
+  }
+
+  // Create idea from quick action dialog
+  const handleCreateQuickIdea = async () => {
+    if (!user?.id) {
+      toast.error('Please sign in to submit feedback')
+      return
+    }
+    if (!newIdeaForm.title.trim() || !newIdeaForm.description.trim()) {
+      toast.error('Please fill in title and description')
+      return
+    }
+    setSaving(true)
+    try {
+      const { error } = await supabase.from('feedback').insert({
+        user_id: user.id,
+        title: newIdeaForm.title,
+        description: newIdeaForm.description,
+        feedback_type: newIdeaForm.category === 'bug' ? 'bug' : 'feature-request',
+        status: 'new',
+        priority: newIdeaForm.priority,
+        category: newIdeaForm.category,
+        is_public: true
+      })
+      if (error) throw error
+      toast.success('Idea created successfully')
+      setNewIdeaForm({ title: '', description: '', category: 'feature', priority: 'medium' })
+      setShowNewIdeaDialog(false)
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error creating idea:', error)
+      toast.error('Failed to create idea')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Post response to feedback
+  const handlePostResponse = async () => {
+    if (!respondForm.feedbackId || !respondForm.response.trim()) {
+      toast.error('Please select feedback and write a response')
+      return
+    }
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .update({
+          admin_response: respondForm.response,
+          status: respondForm.newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', respondForm.feedbackId)
+      if (error) throw error
+      toast.success('Response posted successfully')
+      setRespondForm({ feedbackId: '', response: '', newStatus: 'under_review' })
+      setShowRespondDialog(false)
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error posting response:', error)
+      toast.error('Failed to post response')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Merge feedback items
+  const handleMergeFeedback = async () => {
+    if (!mergeForm.primaryId || !mergeForm.duplicateId) {
+      toast.error('Please select both primary and duplicate feedback')
+      return
+    }
+    if (mergeForm.primaryId === mergeForm.duplicateId) {
+      toast.error('Primary and duplicate cannot be the same')
+      return
+    }
+    setSaving(true)
+    try {
+      // Get both items to combine votes
+      const { data: items } = await supabase
+        .from('feedback')
+        .select('*')
+        .in('id', [mergeForm.primaryId, mergeForm.duplicateId])
+
+      if (items && items.length === 2) {
+        const primary = items.find(i => i.id === mergeForm.primaryId)
+        const duplicate = items.find(i => i.id === mergeForm.duplicateId)
+        const combinedVotes = (primary?.upvotes_count || 0) + (duplicate?.upvotes_count || 0)
+
+        // Update primary with combined votes
+        await supabase
+          .from('feedback')
+          .update({ upvotes_count: combinedVotes, updated_at: new Date().toISOString() })
+          .eq('id', mergeForm.primaryId)
+
+        // Mark duplicate as merged/declined
+        await supabase
+          .from('feedback')
+          .update({ status: 'declined', admin_response: `Merged into feedback #${mergeForm.primaryId}`, updated_at: new Date().toISOString() })
+          .eq('id', mergeForm.duplicateId)
+      }
+
+      toast.success('Feedback items merged successfully')
+      setMergeForm({ primaryId: '', duplicateId: '' })
+      setShowMergeDialog(false)
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error merging feedback:', error)
+      toast.error('Failed to merge feedback')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Post comment
+  const handlePostComment = async () => {
+    if (!selectedIdea || !commentForm.text.trim()) {
+      toast.error('Please write a comment')
+      return
+    }
+    setSaving(true)
+    try {
+      // Update the feedback with the comment in the description or a comments field
+      const { data: existing } = await supabase
+        .from('feedback')
+        .select('description')
+        .eq('id', selectedIdea.id)
+        .single()
+
+      const updatedDescription = `${existing?.description || ''}\n\n---\nComment: ${commentForm.text}`
+
+      const { error } = await supabase
+        .from('feedback')
+        .update({ description: updatedDescription, updated_at: new Date().toISOString() })
+        .eq('id', selectedIdea.id)
+
+      if (error) throw error
+      toast.success('Comment posted successfully')
+      setCommentForm({ text: '', subscribe: true })
+      setShowCommentDialog(false)
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error posting comment:', error)
+      toast.error('Failed to post comment')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -2043,7 +2196,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <AIInsightsPanel
               insights={mockFeedbackAIInsights}
               title="Feedback Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2261,19 +2414,26 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <div className="space-y-4">
               <div>
                 <Label>Idea Title</Label>
-                <Input placeholder="Enter your idea title..." className="mt-1" />
+                <Input
+                  placeholder="Enter your idea title..."
+                  className="mt-1"
+                  value={newIdeaForm.title}
+                  onChange={(e) => setNewIdeaForm(prev => ({ ...prev, title: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Description</Label>
                 <textarea
                   className="w-full mt-1 p-3 rounded-lg border resize-none h-24 dark:bg-gray-800 dark:border-gray-700"
                   placeholder="Describe your idea in detail..."
+                  value={newIdeaForm.description}
+                  onChange={(e) => setNewIdeaForm(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Category</Label>
-                  <Select defaultValue="feature">
+                  <Select value={newIdeaForm.category} onValueChange={(val) => setNewIdeaForm(prev => ({ ...prev, category: val }))}>
                     <SelectTrigger className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
@@ -2287,7 +2447,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 </div>
                 <div>
                   <Label>Priority</Label>
-                  <Select defaultValue="medium">
+                  <Select value={newIdeaForm.priority} onValueChange={(val) => setNewIdeaForm(prev => ({ ...prev, priority: val }))}>
                     <SelectTrigger className="mt-1">
                       <SelectValue />
                     </SelectTrigger>
@@ -2305,14 +2465,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    toast.success('Idea created successfully')
-                    setShowNewIdeaDialog(false)
-                  }}
+                  onClick={handleCreateQuickIdea}
+                  disabled={saving}
                   className="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                 >
                   <Lightbulb className="w-4 h-4 mr-2" />
-                  Create Idea
+                  {saving ? 'Creating...' : 'Create Idea'}
                 </Button>
               </div>
             </div>
@@ -2331,12 +2489,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <div className="space-y-4">
               <div>
                 <Label>Select Feedback Item</Label>
-                <Select>
+                <Select value={respondForm.feedbackId} onValueChange={(val) => setRespondForm(prev => ({ ...prev, feedbackId: val }))}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Choose feedback to respond to..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockIdeas.slice(0, 5).map(idea => (
+                    {feedbackItems.length > 0 ? feedbackItems.slice(0, 10).map(item => (
+                      <SelectItem key={item.id} value={item.id}>{item.title}</SelectItem>
+                    )) : mockIdeas.slice(0, 5).map(idea => (
                       <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2347,11 +2507,13 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <textarea
                   className="w-full mt-1 p-3 rounded-lg border resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
                   placeholder="Write your official response..."
+                  value={respondForm.response}
+                  onChange={(e) => setRespondForm(prev => ({ ...prev, response: e.target.value }))}
                 />
               </div>
               <div>
                 <Label>Update Status</Label>
-                <Select defaultValue="under_review">
+                <Select value={respondForm.newStatus} onValueChange={(val) => setRespondForm(prev => ({ ...prev, newStatus: val }))}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -2369,14 +2531,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    toast.success('Response posted successfully')
-                    setShowRespondDialog(false)
-                  }}
+                  onClick={handlePostResponse}
+                  disabled={saving}
                   className="flex-1"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Post Response
+                  {saving ? 'Posting...' : 'Post Response'}
                 </Button>
               </div>
             </div>
@@ -2395,12 +2555,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <div className="space-y-4">
               <div>
                 <Label>Primary Feedback (Keep)</Label>
-                <Select>
+                <Select value={mergeForm.primaryId} onValueChange={(val) => setMergeForm(prev => ({ ...prev, primaryId: val }))}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select primary feedback..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockIdeas.map(idea => (
+                    {feedbackItems.length > 0 ? feedbackItems.map(item => (
+                      <SelectItem key={item.id} value={item.id}>{item.title}</SelectItem>
+                    )) : mockIdeas.map(idea => (
                       <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2408,12 +2570,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
               </div>
               <div>
                 <Label>Duplicate Feedback (Merge Into Primary)</Label>
-                <Select>
+                <Select value={mergeForm.duplicateId} onValueChange={(val) => setMergeForm(prev => ({ ...prev, duplicateId: val }))}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select duplicate feedback..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockIdeas.map(idea => (
+                    {feedbackItems.length > 0 ? feedbackItems.filter(item => item.id !== mergeForm.primaryId).map(item => (
+                      <SelectItem key={item.id} value={item.id}>{item.title}</SelectItem>
+                    )) : mockIdeas.map(idea => (
                       <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2429,14 +2593,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    toast.success('Feedback items merged successfully')
-                    setShowMergeDialog(false)
-                  }}
+                  onClick={handleMergeFeedback}
+                  disabled={saving}
                   className="flex-1"
                 >
                   <GitBranch className="w-4 h-4 mr-2" />
-                  Merge Items
+                  {saving ? 'Merging...' : 'Merge Items'}
                 </Button>
               </div>
             </div>
@@ -2512,8 +2674,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    toast.success('Export started - download will begin shortly')
+                  onClick={async () => {
+                    await handleExportFeedback()
                     setShowExportDialog(false)
                   }}
                   className="flex-1"
@@ -3344,6 +3506,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <textarea
                   className="w-full p-3 rounded-lg border resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
                   placeholder="Share your thoughts on this idea..."
+                  value={commentForm.text}
+                  onChange={(e) => setCommentForm(prev => ({ ...prev, text: e.target.value }))}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -3351,22 +3515,18 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   <Label>Subscribe to this idea</Label>
                   <p className="text-sm text-gray-500">Get notified of new comments</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch
+                  checked={commentForm.subscribe}
+                  onCheckedChange={(checked) => setCommentForm(prev => ({ ...prev, subscribe: checked }))}
+                />
               </div>
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowCommentDialog(false)} className="flex-1">
                   Cancel
                 </Button>
-                <Button onClick={async () => {
-                  toast.loading('Posting comment...', { id: 'post-comment' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Comment posted successfully', { id: 'post-comment' })
-                    setShowCommentDialog(false)
-                  } catch { toast.error('Failed to post comment', { id: 'post-comment' }) }
-                }} className="flex-1">
+                <Button onClick={handlePostComment} disabled={saving} className="flex-1">
                   <Send className="w-4 h-4 mr-2" />
-                  Post Comment
+                  {saving ? 'Posting...' : 'Post Comment'}
                 </Button>
               </div>
             </div>

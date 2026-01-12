@@ -2194,9 +2194,9 @@ export default defineConfig({
                       { loading: 'Running tests...', success: 'Tests completed!', error: 'Some tests failed' }
                     );
                     break;
-                  case '2': setShowReportViewer(true); toast.success('Test report loaded'); break;
-                  case '3': setActiveTab('debug'); toast.success('Debug mode activated'); break;
-                  case '4': setShowAddTestDialog(true); toast.success('Ready to add new test'); break;
+                  case '2': setShowReportViewer(true); break;
+                  case '3': setActiveTab('debug'); break;
+                  case '4': setShowAddTestDialog(true); break;
                 }
               }
             }))}

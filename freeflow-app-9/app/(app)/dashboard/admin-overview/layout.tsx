@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { usePathname, useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -56,11 +56,9 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
         logger.info('Loading admin dashboard stats', { userId })
 
         const { getDashboardStats } = await import('@/lib/admin-overview-queries')
-        const statsResult = await getDashboardStats(userId)
+        const statsData = await getDashboardStats(userId)
 
-        if (statsResult.error) throw statsResult.error
-
-        setStats(statsResult.data)
+        setStats(statsData)
         setLastUpdated(new Date())
         setIsLoading(false)
 
@@ -71,7 +69,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
 
         logger.info('Dashboard stats loaded successfully', {
           userId,
-          hasStats: !!statsResult.data
+          hasStats: !!statsData
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard stats'
@@ -152,18 +150,16 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
       logger.info('Refreshing admin overview data', { timestamp: new Date().toISOString(), userId })
 
       const { getDashboardStats } = await import('@/lib/admin-overview-queries')
-      const statsResult = await getDashboardStats(userId)
+      const statsData = await getDashboardStats(userId)
 
-      if (statsResult.error) throw statsResult.error
-
-      setStats(statsResult.data)
+      setStats(statsData)
       setLastUpdated(new Date())
 
       toast.success('Data Refreshed', {
         description: 'All admin metrics have been updated successfully'
       })
       announce('Dashboard data refreshed', 'polite')
-      logger.info('Data refresh completed', { success: true, hasStats: !!statsResult.data })
+      logger.info('Data refresh completed', { success: true, hasStats: !!statsData })
     } catch (error) {
       toast.error('Refresh Failed', {
         description: error instanceof Error ? error.message : 'Unable to refresh data'
@@ -280,12 +276,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                       <div className="text-2xl font-bold text-green-700 dark:text-green-300">
                         <NumberFlow
                           value={stats?.totalRevenue || 0}
-                          format={{
-                            style: 'currency',
-                            currency: 'USD',
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0
-                          }}
+                          format="currency"
                         />
                       </div>
                     </div>

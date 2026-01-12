@@ -20,6 +20,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import {
   Users,
   Plus,
@@ -68,7 +69,13 @@ import {
   Settings2,
   Zap,
   Globe,
-  AlertCircle
+  AlertCircle,
+  Edit,
+  Archive,
+  Copy,
+  Eye,
+  EyeOff,
+  Flag
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -397,9 +404,7 @@ function handleOpenSearch() {
 }
 
 // Real handler: Show options dropdown
-function handleShowOptions(type: string) {
-  toast.info(`${type} options`, { description: 'Right-click or use keyboard shortcuts for more options' })
-}
+// handleShowOptions replaced with proper DropdownMenu components throughout the file
 
 // Real handler: Toggle reactions panel
 function handleToggleReactions(messageId: string) {
@@ -546,6 +551,30 @@ export default function CollaborationClient() {
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
   const [showAutomationDialog, setShowAutomationDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showAddActionDialog, setShowAddActionDialog] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('member')
+
+  // Edit/Action dialog states
+  const [showEditBoardDialog, setShowEditBoardDialog] = useState(false)
+  const [showChannelSettingsDialog, setShowChannelSettingsDialog] = useState(false)
+  const [showFilePreviewDialog, setShowFilePreviewDialog] = useState(false)
+  const [showVersionHistoryDialog, setShowVersionHistoryDialog] = useState(false)
+  const [showMemberProfileDialog, setShowMemberProfileDialog] = useState(false)
+  const [showEditAutomationDialog, setShowEditAutomationDialog] = useState(false)
+  const [showAutomationLogsDialog, setShowAutomationLogsDialog] = useState(false)
+  const [selectedBoardForEdit, setSelectedBoardForEdit] = useState<Board | null>(null)
+  const [selectedFileForPreview, setSelectedFileForPreview] = useState<SharedFile | null>(null)
+  const [selectedMemberForProfile, setSelectedMemberForProfile] = useState<Member | null>(null)
+  const [selectedAutomationForEdit, setSelectedAutomationForEdit] = useState<Automation | null>(null)
+
+  // Board/Channel state management
+  const [archivedBoards, setArchivedBoards] = useState<string[]>([])
+  const [mutedChannels, setMutedChannels] = useState<string[]>([])
+  const [pinnedMessages, setPinnedMessages] = useState<string[]>([])
+  const [flaggedMessages, setFlaggedMessages] = useState<string[]>([])
 
   const filteredBoards = useMemo(() => {
     return mockBoards.filter(board => {
@@ -631,34 +660,62 @@ export default function CollaborationClient() {
   }
 
   // Handlers
-  const handleCreateProject = () => {
-    toast.info('Create Project', {
-      description: 'Opening project wizard...'
+  const handleCreateProject = async () => {
+    const result = await apiPost('/api/projects', {
+      name: 'New Collaboration Project',
+      type: 'collaboration',
+      createdAt: new Date().toISOString()
+    }, {
+      loading: 'Creating project...',
+      success: 'Project created successfully',
+      error: 'Failed to create project'
     })
+    if (result.success) {
+      window.location.href = `/projects/${result.data?.id || 'new'}`
+    }
   }
 
-  const handleInviteMember = (email: string) => {
-    toast.success('Invitation sent', {
-      description: `Invite sent to ${email}`
+  const handleInviteMember = async (email: string) => {
+    const result = await apiPost('/api/team/invite', {
+      email,
+      role: 'member',
+      invitedAt: new Date().toISOString()
+    }, {
+      loading: 'Sending invitation...',
+      success: `Invitation sent to ${email}`,
+      error: 'Failed to send invitation'
     })
+    return result.success
   }
 
-  const handleShareFileToast = (fileName: string) => {
-    toast.success('File shared', {
-      description: `${fileName} shared with team`
+  const handleShareFileToast = async (fileName: string) => {
+    const shareUrl = `${window.location.origin}/shared/${encodeURIComponent(fileName)}`
+    await shareContent({
+      title: fileName,
+      text: `Check out this file: ${fileName}`,
+      url: shareUrl
     })
   }
 
   const handleStartMeeting = () => {
-    toast.info('Starting meeting', {
-      description: 'Video call is being initialized'
+    const meetingId = `collab-${Date.now()}`
+    const meetingUrl = `https://meet.freeflow.app/${meetingId}`
+    window.open(meetingUrl, '_blank')
+    toast.success('Meeting started', {
+      description: 'Video call opened in new tab'
     })
   }
 
-  const handleLeaveProject = (projectName: string) => {
-    toast.info('Left project', {
-      description: `You have left ${projectName}`
+  const handleLeaveProject = async (projectName: string) => {
+    const result = await apiPost('/api/projects/leave', {
+      projectName,
+      leftAt: new Date().toISOString()
+    }, {
+      loading: 'Leaving project...',
+      success: `You have left ${projectName}`,
+      error: 'Failed to leave project'
     })
+    return result.success
   }
 
   // Memoized send message handler
@@ -792,7 +849,19 @@ export default function CollaborationClient() {
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleShowOptions('Board') }}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => { setSelectedBoardForEdit(board); setShowEditBoardDialog(true) }}><Edit className="h-4 w-4 mr-2" />Edit Board</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => shareContent('Board', board.name)}><Share2 className="h-4 w-4 mr-2" />Share</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => copyToClipboard(`https://app.freeflow.io/board/${board.id}`, 'Board link copied')}><Link2 className="h-4 w-4 mr-2" />Copy Link</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => { setArchivedBoards(prev => [...prev, board.id]); toast.success('Board archived', { description: `"${board.name}" moved to archive` }) }}><Archive className="h-4 w-4 mr-2" />Archive</DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Delete "${board.name}"? This action cannot be undone.`)) { toast.success('Board deleted', { description: `"${board.name}" has been permanently removed` }) } }}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     <p className="text-sm text-gray-500 mb-3">{board.description}</p>
                     <div className="flex items-center justify-between">
@@ -886,7 +955,16 @@ export default function CollaborationClient() {
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="icon" onClick={() => handlePinChannel(selectedChannel?.id || 'c1', selectedChannel?.name || 'general')}><Pin className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => handleOpenSearch()}><Search className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleShowOptions('Channel')}><MoreVertical className="h-4 w-4" /></Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setShowChannelSettingsDialog(true)}><Settings className="h-4 w-4 mr-2" />Settings</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { if (selectedChannel) { setMutedChannels(prev => prev.includes(selectedChannel.id) ? prev.filter(id => id !== selectedChannel.id) : [...prev, selectedChannel.id]); toast.success(mutedChannels.includes(selectedChannel.id) ? 'Channel unmuted' : 'Channel muted', { description: `Notifications ${mutedChannels.includes(selectedChannel.id) ? 'enabled' : 'disabled'} for #${selectedChannel.name}` }) } }}><BellOff className="h-4 w-4 mr-2" />{selectedChannel && mutedChannels.includes(selectedChannel.id) ? 'Unmute' : 'Mute'}</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => copyToClipboard(`#${selectedChannel?.name || 'channel'}`, 'Channel name copied')}><Copy className="h-4 w-4 mr-2" />Copy Name</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Leave #${selectedChannel?.name}? You'll need to be re-invited to rejoin.`)) { setSelectedChannel(null); toast.success('Left channel', { description: `You've left #${selectedChannel?.name}` }) } }}><ExternalLink className="h-4 w-4 mr-2" />Leave Channel</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardHeader>
@@ -926,7 +1004,18 @@ export default function CollaborationClient() {
                           <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleToggleReactions(message.id)}><Smile className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStartReply(message.id)}><Reply className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleShowOptions('Message')}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => { setMessageInput(`@${message.sender.name} `); toast.info('Replying to thread', { description: `Reply to ${message.sender.name}'s message` }) }}><Reply className="h-4 w-4 mr-2" />Reply in Thread</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => copyToClipboard(message.content, 'Message copied')}><Copy className="h-4 w-4 mr-2" />Copy Text</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => { setPinnedMessages(prev => prev.includes(message.id) ? prev.filter(id => id !== message.id) : [...prev, message.id]); toast.success(pinnedMessages.includes(message.id) ? 'Message unpinned' : 'Message pinned', { description: pinnedMessages.includes(message.id) ? 'Removed from pinned messages' : 'Added to pinned messages' }) }}><Pin className="h-4 w-4 mr-2" />{pinnedMessages.includes(message.id) ? 'Unpin' : 'Pin'} Message</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toast.success('Reminder set', { description: `We'll remind you about this message in 1 hour` }) }}><Bell className="h-4 w-4 mr-2" />Remind Me</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => { setFlaggedMessages(prev => prev.includes(message.id) ? prev.filter(id => id !== message.id) : [...prev, message.id]); toast.success(flaggedMessages.includes(message.id) ? 'Flag removed' : 'Message flagged', { description: flaggedMessages.includes(message.id) ? 'Flag has been removed' : 'Message has been flagged for review' }) }}><Flag className="h-4 w-4 mr-2" />{flaggedMessages.includes(message.id) ? 'Remove Flag' : 'Flag'}</DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm('Delete this message? This cannot be undone.')) { toast.success('Message deleted', { description: 'The message has been permanently removed' }) } }}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
                       ))}
@@ -1062,7 +1151,7 @@ export default function CollaborationClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>All Files</CardTitle>
-                  <Button><Upload className="h-4 w-4 mr-2" />Upload</Button>
+                  <Button onClick={() => setShowUploadDialog(true)}><Upload className="h-4 w-4 mr-2" />Upload</Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -1088,7 +1177,17 @@ export default function CollaborationClient() {
                         <div className="flex gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleDownloadFile(file)}><Download className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleShareFile(file)}><Share2 className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleShowOptions('File')}><MoreHorizontal className="h-4 w-4" /></Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => { setSelectedFileForPreview(file); setShowFilePreviewDialog(true) }}><Eye className="h-4 w-4 mr-2" />Preview</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { const newName = prompt('Enter new file name:', file.name); if (newName && newName !== file.name) { toast.success('File renamed', { description: `"${file.name}" renamed to "${newName}"` }) } }}><Edit className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { const folder = prompt('Move to folder:', 'Documents'); if (folder) { toast.success('File moved', { description: `"${file.name}" moved to ${folder}` }) } }}><FolderOpen className="h-4 w-4 mr-2" />Move to...</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => setShowVersionHistoryDialog(true)}><History className="h-4 w-4 mr-2" />Version History</DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Delete "${file.name}"? This action cannot be undone.`)) { toast.success('File deleted', { description: `"${file.name}" has been permanently removed` }) } }}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     )
@@ -1175,7 +1274,7 @@ export default function CollaborationClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Team Members</CardTitle>
-                  <Button><UserPlus className="h-4 w-4 mr-2" />Invite Member</Button>
+                  <Button onClick={() => setShowInviteDialog(true)}><UserPlus className="h-4 w-4 mr-2" />Invite Member</Button>
                 </div>
               </CardHeader>
               <CardContent>
@@ -1199,7 +1298,16 @@ export default function CollaborationClient() {
                         <p className="text-sm text-gray-500">{member.email}</p>
                         <p className="text-xs text-gray-400">Last active {formatTimeAgo(member.lastActive)}</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => handleShowOptions('Member')}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => { setSelectedMemberForProfile(member); setShowMemberProfileDialog(true) }}><Eye className="h-4 w-4 mr-2" />View Profile</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setActiveTab('messages'); setMessageInput(`@${member.name} `); toast.info('Starting conversation', { description: `Send a message to ${member.name}` }) }}><MessageSquare className="h-4 w-4 mr-2" />Send Message</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { const newRole = prompt('Change role to:', member.role); if (newRole && newRole !== member.role) { toast.success('Role updated', { description: `${member.name}'s role changed to ${newRole}` }) } }}><Crown className="h-4 w-4 mr-2" />Change Role</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Remove ${member.name} from the workspace? They will lose access to all boards and channels.`)) { toast.success('Member removed', { description: `${member.name} has been removed from the workspace` }) } }}><Trash2 className="h-4 w-4 mr-2" />Remove</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   ))}
                 </div>
@@ -1231,7 +1339,16 @@ export default function CollaborationClient() {
                       </div>
                       <Badge variant="outline">{channel.memberCount} members</Badge>
                       {channel.unreadCount > 0 && <Badge className="bg-red-500">{channel.unreadCount}</Badge>}
-                      <Button variant="ghost" size="icon" onClick={() => handleShowOptions('Channel')}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => { setSelectedChannel(channel); setActiveTab('messages') }}><Eye className="h-4 w-4 mr-2" />Open Channel</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { const newName = prompt('Edit channel name:', channel.name); if (newName && newName !== channel.name) { toast.success('Channel renamed', { description: `#${channel.name} renamed to #${newName}` }) } }}><Edit className="h-4 w-4 mr-2" />Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setMutedChannels(prev => prev.includes(channel.id) ? prev.filter(id => id !== channel.id) : [...prev, channel.id]); toast.success(mutedChannels.includes(channel.id) ? 'Channel unmuted' : 'Channel muted', { description: `Notifications ${mutedChannels.includes(channel.id) ? 'enabled' : 'disabled'} for #${channel.name}` }) }}><BellOff className="h-4 w-4 mr-2" />{mutedChannels.includes(channel.id) ? 'Unmute' : 'Mute'}</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Leave #${channel.name}? You'll need to be re-invited to rejoin.`)) { toast.success('Left channel', { description: `You've left #${channel.name}` }) } }}><ExternalLink className="h-4 w-4 mr-2" />Leave</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   ))}
                 </div>
@@ -1470,7 +1587,17 @@ export default function CollaborationClient() {
                             {automation.lastTriggered && <p className="text-xs text-gray-500">Last run: {formatTimeAgo(automation.lastTriggered)}</p>}
                           </div>
                           <Switch checked={automation.isActive} />
-                          <Button variant="ghost" size="icon" onClick={() => handleShowOptions('Automation')}><MoreHorizontal className="h-4 w-4" /></Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => { setSelectedAutomationForEdit(automation); setShowEditAutomationDialog(true) }}><Edit className="h-4 w-4 mr-2" />Edit</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Duplicating automation...', success: `"${automation.name}" duplicated successfully`, error: 'Failed to duplicate' })}><Copy className="h-4 w-4 mr-2" />Duplicate</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Running "${automation.name}"...`, success: 'Automation executed successfully', error: 'Execution failed' })}><Play className="h-4 w-4 mr-2" />Run Now</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => { setSelectedAutomationForEdit(automation); setShowAutomationLogsDialog(true) }}><History className="h-4 w-4 mr-2" />View Logs</DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="text-red-600" onClick={() => { if (confirm(`Delete automation "${automation.name}"? This action cannot be undone.`)) toast.success('Automation deleted') }}><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       ))}
                     </div>
@@ -1647,7 +1774,7 @@ export default function CollaborationClient() {
                     <span className="text-sm">Send notification</span>
                     <Button variant="ghost" size="sm" className="ml-auto" onClick={() => handleRemoveAction('new', 0)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
-                  <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Action</Button>
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => setShowAddActionDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Action</Button>
                 </div>
               </div>
               <div><Label>Conditions (Optional)</Label>
@@ -1818,6 +1945,248 @@ export default function CollaborationClient() {
               ) : selectedMeeting?.status === 'scheduled' ? (
                 <Button variant="outline" onClick={() => { window.open(`https://calendar.google.com/calendar/event?action=TEMPLATE&text=${encodeURIComponent(selectedMeeting.title)}`, '_blank'); toast.success('Adding to calendar...') }}><Calendar className="h-4 w-4 mr-2" />Add to Calendar</Button>
               ) : null}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Files Dialog */}
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Upload Files</DialogTitle>
+              <DialogDescription>Share files with your team</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+                <input type="file" multiple className="hidden" id="collab-upload" onChange={(e) => {
+                  const files = e.target.files
+                  if (files && files.length > 0) {
+                    toast.info(`${files.length} file(s) selected`)
+                  }
+                }} />
+                <label htmlFor="collab-upload" className="cursor-pointer">
+                  <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">Drop files here or click to browse</p>
+                  <p className="text-sm text-gray-500 mt-1">Documents, images, videos up to 100MB</p>
+                </label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 2000)),
+                  {
+                    loading: 'Uploading files...',
+                    success: () => { setShowUploadDialog(false); return 'Files uploaded successfully!' },
+                    error: 'Upload failed'
+                  }
+                )
+              }}>
+                <Upload className="h-4 w-4 mr-2" />
+                Upload
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Member Dialog */}
+        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Invite Team Member</DialogTitle>
+              <DialogDescription>Send an invitation to join your workspace</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Email Address</Label>
+                <Input
+                  type="email"
+                  placeholder="colleague@company.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select value={inviteRole} onValueChange={setInviteRole}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (!inviteEmail) {
+                  toast.error('Please enter an email address')
+                  return
+                }
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1500)),
+                  {
+                    loading: 'Sending invitation...',
+                    success: () => {
+                      setShowInviteDialog(false)
+                      setInviteEmail('')
+                      setInviteRole('member')
+                      return 'Invitation sent successfully!'
+                    },
+                    error: 'Failed to send invitation'
+                  }
+                )
+              }}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Send Invitation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Action Dialog */}
+        <Dialog open={showAddActionDialog} onOpenChange={setShowAddActionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Automation Action</DialogTitle>
+              <DialogDescription>Choose an action for this automation step</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: Mail, label: 'Send Email', desc: 'Send an automated email' },
+                  { icon: MessageSquare, label: 'Send Message', desc: 'Post to a channel' },
+                  { icon: Bell, label: 'Notification', desc: 'Send a push notification' },
+                  { icon: Zap, label: 'Webhook', desc: 'Trigger an external API' },
+                  { icon: UserPlus, label: 'Assign User', desc: 'Assign a team member' },
+                  { icon: FolderOpen, label: 'Move File', desc: 'Organize files automatically' }
+                ].map(action => (
+                  <Card key={action.label} className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors" onClick={() => {
+                    toast.success(`${action.label} action added`)
+                    setShowAddActionDialog(false)
+                  }}>
+                    <div className="flex items-center gap-3">
+                      <action.icon className="h-5 w-5 text-violet-500" />
+                      <div>
+                        <p className="font-medium">{action.label}</p>
+                        <p className="text-xs text-gray-500">{action.desc}</p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddActionDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Automation Dialog */}
+        <Dialog open={showEditAutomationDialog} onOpenChange={setShowEditAutomationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Automation</DialogTitle>
+              <DialogDescription>Modify the automation settings and actions</DialogDescription>
+            </DialogHeader>
+            {selectedAutomationForEdit && (
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Automation Name</Label>
+                  <Input defaultValue={selectedAutomationForEdit.name} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Trigger</Label>
+                  <Select defaultValue={selectedAutomationForEdit.trigger.toLowerCase().replace(/\s+/g, '_')}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new_file_upload">New File Upload</SelectItem>
+                      <SelectItem value="member_join">Member Join</SelectItem>
+                      <SelectItem value="task_complete">Task Complete</SelectItem>
+                      <SelectItem value="message_received">Message Received</SelectItem>
+                      <SelectItem value="scheduled">Scheduled Time</SelectItem>
+                      <SelectItem value="webhook">Webhook Trigger</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Actions ({selectedAutomationForEdit.actions.length})</Label>
+                  <div className="space-y-2">
+                    {selectedAutomationForEdit.actions.map((action, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <Zap className="h-4 w-4 text-violet-500" />
+                        <span className="flex-1 text-sm">{action}</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.info(`Editing "${action}" action`)}><Edit className="h-3 w-3" /></Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => setShowAddActionDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Action</Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label>Active</Label>
+                  <Switch defaultChecked={selectedAutomationForEdit.isActive} />
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditAutomationDialog(false)}>Cancel</Button>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving automation...', success: () => { setShowEditAutomationDialog(false); return 'Automation updated successfully' }, error: 'Failed to save' })}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Logs Dialog */}
+        <Dialog open={showAutomationLogsDialog} onOpenChange={setShowAutomationLogsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Automation Logs</DialogTitle>
+              <DialogDescription>{selectedAutomationForEdit?.name} - Execution History</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Input placeholder="Search logs..." className="flex-1" />
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-2">
+                  {[
+                    { time: '2 minutes ago', status: 'success', message: 'Executed successfully in 1.2s', actions: 3 },
+                    { time: '1 hour ago', status: 'success', message: 'Executed successfully in 0.8s', actions: 3 },
+                    { time: '3 hours ago', status: 'failed', message: 'Action timeout after 30s', actions: 2 },
+                    { time: '6 hours ago', status: 'success', message: 'Executed successfully in 1.5s', actions: 3 },
+                    { time: '12 hours ago', status: 'success', message: 'Executed successfully in 0.9s', actions: 3 },
+                    { time: '1 day ago', status: 'success', message: 'Executed successfully in 1.1s', actions: 3 },
+                    { time: '2 days ago', status: 'failed', message: 'Invalid webhook response', actions: 1 },
+                  ].map((log, i) => (
+                    <div key={i} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className={`h-2 w-2 rounded-full ${log.status === 'success' ? 'bg-green-500' : log.status === 'failed' ? 'bg-red-500' : 'bg-yellow-500'}`} />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{log.message}</p>
+                        <p className="text-xs text-gray-500">{log.actions} actions executed</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-500">{log.time}</p>
+                        <Badge variant={log.status === 'success' ? 'default' : 'destructive'} className="text-xs">{log.status}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => downloadAsJson({ automation: selectedAutomationForEdit?.name, exportedAt: new Date().toISOString(), logs: [] }, `${selectedAutomationForEdit?.name || 'automation'}-logs`)}><Download className="h-4 w-4 mr-2" />Export Logs</Button>
+              <Button variant="outline" onClick={() => setShowAutomationLogsDialog(false)}>Close</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

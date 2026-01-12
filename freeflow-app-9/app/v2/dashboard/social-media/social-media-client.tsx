@@ -383,6 +383,7 @@ export default function SocialMediaClient() {
 
   // Dialog states
   const [showCreatePostDialog, setShowCreatePostDialog] = useState(false)
+  const [showEditPostDialog, setShowEditPostDialog] = useState(false)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
   const [showConnectAccountDialog, setShowConnectAccountDialog] = useState(false)
@@ -744,15 +745,27 @@ export default function SocialMediaClient() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => toast.info('Editing post')}>
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedPost(post)
+                              setShowEditPostDialog(true)
+                              toast.info('Editing post')
+                            }}>
                               <PenTool className="w-4 h-4 mr-2" />
                               Edit Post
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.info('Scheduling post')}>
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedPost(post)
+                              setShowScheduleDialog(true)
+                              toast.info('Scheduling post')
+                            }}>
                               <Clock className="w-4 h-4 mr-2" />
                               Reschedule
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.info('Opening analytics')}>
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedPost(post)
+                              setShowAnalyticsDialog(true)
+                              toast.info('Opening analytics')
+                            }}>
                               <BarChart3 className="w-4 h-4 mr-2" />
                               View Analytics
                             </DropdownMenuItem>
@@ -1889,7 +1902,7 @@ export default function SocialMediaClient() {
             <AIInsightsPanel
               insights={mockSocialMediaAIInsights}
               title="Social Media Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2041,11 +2054,67 @@ export default function SocialMediaClient() {
           </DialogContent>
         </Dialog>
 
+        {/* Edit Post Dialog */}
+        <Dialog open={showEditPostDialog} onOpenChange={setShowEditPostDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Post</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Post Content</Label>
+                <textarea
+                  className="w-full mt-1 p-3 border rounded-lg resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="What would you like to share?"
+                  defaultValue={selectedPost?.content || ''}
+                />
+              </div>
+              <div>
+                <Label>Select Platforms</Label>
+                <div className="flex gap-2 mt-2">
+                  {['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].map(platform => (
+                    <Badge
+                      key={platform}
+                      variant="outline"
+                      className={`cursor-pointer hover:bg-violet-100 ${
+                        selectedPost?.platforms.includes(platform.toLowerCase() as Platform)
+                          ? 'bg-violet-100 dark:bg-violet-900/30'
+                          : ''
+                      }`}
+                    >
+                      {platform}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label>Hashtags</Label>
+                <Input
+                  className="mt-1"
+                  placeholder="#innovation #tech"
+                  defaultValue={selectedPost?.hashtags.map(h => `#${h}`).join(' ') || ''}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowEditPostDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.loading('Updating post...', { id: 'edit-post' })
+                  setTimeout(() => {
+                    toast.success('Post updated successfully!', { id: 'edit-post' })
+                    setShowEditPostDialog(false)
+                    setSelectedPost(null)
+                  }, 1000)
+                }}>Save Changes</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Schedule Dialog */}
         <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Schedule Post</DialogTitle>
+              <DialogTitle>{selectedPost ? `Reschedule: ${selectedPost.content.substring(0, 30)}...` : 'Schedule Post'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
@@ -2078,28 +2147,78 @@ export default function SocialMediaClient() {
         </Dialog>
 
         {/* Analytics Dialog */}
-        <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <Dialog open={showAnalyticsDialog} onOpenChange={(open) => {
+          setShowAnalyticsDialog(open)
+          if (!open) setSelectedPost(null)
+        }}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Social Media Analytics</DialogTitle>
+              <DialogTitle>{selectedPost ? `Analytics: ${selectedPost.content.substring(0, 40)}...` : 'Social Media Analytics'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-violet-600">{formatNumber(stats.totalFollowers)}</p>
-                  <p className="text-sm text-gray-500">Total Followers</p>
+              {selectedPost ? (
+                <>
+                  {/* Post-specific analytics */}
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-violet-600">{formatNumber(selectedPost.views)}</p>
+                      <p className="text-sm text-gray-500">Views</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-pink-600">{formatNumber(selectedPost.likes)}</p>
+                      <p className="text-sm text-gray-500">Likes</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-blue-600">{formatNumber(selectedPost.comments)}</p>
+                      <p className="text-sm text-gray-500">Comments</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-green-600">{formatNumber(selectedPost.shares)}</p>
+                      <p className="text-sm text-gray-500">Shares</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-orange-600">{formatNumber(selectedPost.reach)}</p>
+                      <p className="text-sm text-gray-500">Reach</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-teal-600">{selectedPost.engagementRate.toFixed(1)}%</p>
+                      <p className="text-sm text-gray-500">Engagement Rate</p>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Platforms</p>
+                    <div className="flex gap-2">
+                      {selectedPost.platforms.map(platform => (
+                        <Badge key={platform} className={getPlatformColor(platform)}>
+                          {platform}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-violet-600">{formatNumber(stats.totalFollowers)}</p>
+                    <p className="text-sm text-gray-500">Total Followers</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-pink-600">{formatNumber(stats.totalEngagement)}</p>
+                    <p className="text-sm text-gray-500">Total Engagement</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{stats.avgEngagementRate.toFixed(1)}%</p>
+                    <p className="text-sm text-gray-500">Avg Engagement Rate</p>
+                  </div>
                 </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-pink-600">{formatNumber(stats.totalEngagement)}</p>
-                  <p className="text-sm text-gray-500">Total Engagement</p>
-                </div>
-                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-green-600">{stats.avgEngagementRate.toFixed(1)}%</p>
-                  <p className="text-sm text-gray-500">Avg Engagement Rate</p>
-                </div>
-              </div>
+              )}
               <div className="flex justify-end">
-                <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>Close</Button>
+                <Button variant="outline" onClick={() => {
+                  setShowAnalyticsDialog(false)
+                  setSelectedPost(null)
+                }}>Close</Button>
               </div>
             </div>
           </DialogContent>

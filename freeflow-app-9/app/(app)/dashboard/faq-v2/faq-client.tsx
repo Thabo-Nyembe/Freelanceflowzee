@@ -453,6 +453,8 @@ export default function FAQClient() {
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [reorderMode, setReorderMode] = useState(false)
   const [collectionsOrder, setCollectionsOrder] = useState<Collection[]>(mockCollections)
+  const [apiKey, setApiKey] = useState('sk_live_abc123xyz...')
+  const [bulkSelectionMode, setBulkSelectionMode] = useState(false)
 
   // New collection form state
   const [newCollection, setNewCollection] = useState({
@@ -2083,14 +2085,14 @@ export default function FAQClient() {
                           <div className="mt-1 flex gap-2">
                             <input
                               type="password"
-                              defaultValue="sk_live_abc123xyz..."
+                              value={apiKey}
                               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 font-mono text-sm"
                               readOnly
                             />
-                            <button onClick={() => { navigator.clipboard.writeText('sk_live_abc123xyz...').then(() => toast.success('API Key Copied', { description: 'API key copied to clipboard' })).catch(() => toast.error('Copy Failed', { description: 'Could not copy to clipboard' })) }} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
+                            <button onClick={() => { navigator.clipboard.writeText(apiKey).then(() => toast.success('API Key Copied', { description: 'API key copied to clipboard' })).catch(() => toast.error('Copy Failed', { description: 'Could not copy to clipboard' })) }} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
                               <Copy className="w-4 h-4" />
                             </button>
-                            <button onClick={() => { if (confirm('Regenerate API key? This will invalidate your current key.')) { toast.success('API Key Regenerated', { description: 'Your new API key has been generated' }) } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium">
+                            <button onClick={() => { if (confirm('Regenerate API key? This will invalidate your current key.')) { const newKey = 'faq_' + crypto.randomUUID().slice(0, 24); setApiKey(newKey); toast.success('API Key Regenerated', { description: 'Your new API key has been generated' }) } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium">
                               Regenerate
                             </button>
                           </div>
@@ -2238,7 +2240,7 @@ export default function FAQClient() {
                           <p className="font-medium">Version History</p>
                           <p className="text-xs text-gray-500">View all article revisions</p>
                         </button>
-                        <button onClick={() => { setStatusFilter('published'); setActiveTab('articles'); toast.success('Bulk Archive Mode', { description: 'Select articles to archive from the list' }) }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-red-500 transition-colors">
+                        <button onClick={() => { setStatusFilter('published'); setActiveTab('articles'); setBulkSelectionMode(true); toast.success('Bulk Archive Mode', { description: 'Select articles to archive from the list' }) }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-red-500 transition-colors">
                           <Archive className="w-5 h-5 text-amber-600 mb-2" />
                           <p className="font-medium">Bulk Archive</p>
                           <p className="text-xs text-gray-500">Archive multiple articles</p>
@@ -2257,7 +2259,7 @@ export default function FAQClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Analytics</p>
                             <p className="text-xs text-gray-500">Clear all view counts and feedback</p>
                           </div>
-                          <button onClick={() => { if (confirm('Reset all analytics data? This cannot be undone.')) { toast.success('Analytics Reset', { description: 'All view counts and feedback have been cleared' }) } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200">
+                          <button onClick={async () => { if (confirm('Reset all analytics data? This cannot be undone.')) { try { for (const faq of dbFaqs) { await updateFAQ(faq.id, { views_count: 0, helpful_count: 0, not_helpful_count: 0, searches_count: 0 }) } toast.success('Analytics Reset', { description: 'All view counts and feedback have been cleared' }) } catch { toast.error('Failed to reset analytics') } } }} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200">
                             Reset
                           </button>
                         </div>
@@ -2266,7 +2268,7 @@ export default function FAQClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Articles</p>
                             <p className="text-xs text-gray-500">Permanently delete all content</p>
                           </div>
-                          <button onClick={() => { if (confirm('DELETE ALL ARTICLES? This action is PERMANENT and cannot be undone!')) { if (confirm('Are you absolutely sure? Type "DELETE" to confirm.')) { toast.success('All Articles Deleted', { description: 'All content has been permanently removed' }) } } }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                          <button onClick={async () => { if (confirm('DELETE ALL ARTICLES? This action is PERMANENT and cannot be undone!')) { if (confirm('Are you absolutely sure? This will delete all FAQ articles.')) { try { for (const faq of dbFaqs) { await deleteFAQ(faq.id) } toast.success('All Articles Deleted', { description: 'All content has been permanently removed' }) } catch { toast.error('Failed to delete articles') } } } }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
                             Delete All
                           </button>
                         </div>

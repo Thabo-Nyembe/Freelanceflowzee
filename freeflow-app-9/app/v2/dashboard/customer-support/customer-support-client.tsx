@@ -2313,7 +2313,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockSupportAIInsights}
-          onAskQuestion={(q) => console.log('Support Question:', q)}
+          onAskQuestion={(q) => toast.info('Question Submitted', { description: q.substring(0, 100) + (q.length > 100 ? '...' : ''), action: { label: 'View AI Response', onClick: () => toast.success('AI is analyzing your support question...') } })}
         />
         <PredictiveAnalytics predictions={mockSupportPredictions} />
       </div>

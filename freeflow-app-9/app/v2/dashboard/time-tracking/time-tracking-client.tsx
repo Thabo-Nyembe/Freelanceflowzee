@@ -321,6 +321,8 @@ export default function TimeTrackingClient() {
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TimeEntry | null>(null)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [selectedTag, setSelectedTag] = useState<Tag | null>(null)
+  const [selectedReport, setSelectedReport] = useState<SavedReport | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [reportsTab, setReportsTab] = useState('overview')
   const [teamTab, setTeamTab] = useState('activity')
@@ -683,6 +685,13 @@ export default function TimeTrackingClient() {
   const [showTeamMemberDialog, setShowTeamMemberDialog] = useState(false)
   const [showTimeOffDialog, setShowTimeOffDialog] = useState(false)
   const [showReminderDialog, setShowReminderDialog] = useState(false)
+  const [showAddIntegrationDialog, setShowAddIntegrationDialog] = useState(false)
+  const [showReportPreviewDialog, setShowReportPreviewDialog] = useState(false)
+  const [apiKey, setApiKey] = useState('tt_api_xxxxxxxxxxxxx')
+  const [showClearEntriesDialog, setShowClearEntriesDialog] = useState(false)
+  const [showDeleteWorkspaceDialog, setShowDeleteWorkspaceDialog] = useState(false)
+  const [showArchiveProjectsDialog, setShowArchiveProjectsDialog] = useState(false)
+  const [integrationToRemove, setIntegrationToRemove] = useState<string | null>(null)
 
   // Real Quick Actions with actual functionality
   const timeTrackingQuickActions = mockTimeTrackingQuickActionsBase.map(action => ({
@@ -855,7 +864,7 @@ export default function TimeTrackingClient() {
                             {entry.status === 'stopped' && (
                               <Button variant="ghost" size="icon" onClick={() => handleSubmitEntry(entry.id)} title="Submit for approval" className="text-blue-600"><Send className="h-4 w-4" /></Button>
                             )}
-                            <Button variant="ghost" size="icon" onClick={() => { setSelectedEntry(entry); setShowEntryDialog(true); toast.info('Edit entry', { description: 'Modify entry details below' }) }} title="Edit entry"><Edit2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => { setSelectedEntry(entry); setShowEntryDialog(true) }} title="Edit entry"><Edit2 className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteEntry(entry.id)} disabled={entriesLoading} title="Delete entry"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </div>
@@ -1227,7 +1236,7 @@ export default function TimeTrackingClient() {
                               ? mockProjects.map(p => ({ Project: p.name, Budget: p.budget, Spent: p.spent }))
                               : mockClients.map(c => ({ Client: c.name, Billed: c.totalBilled }))
                             downloadAsCsv(reportData, `${report.name.toLowerCase().replace(/ /g, '-')}-${new Date().toISOString().split('T')[0]}`)
-                          }} title="Run report"><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={handleExportTimesheet} title="Download"><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => { setShowReportDialog(true); toast.info('Edit report', { description: 'Modify report settings' }) }} title="Edit report"><Edit2 className="h-4 w-4" /></Button></div></td>
+                          }} title="Run report"><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={handleExportTimesheet} title="Download"><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => { setSelectedReport(report); setShowReportDialog(true) }} title="Edit report"><Edit2 className="h-4 w-4" /></Button></div></td>
                         </tr>
                       ))}
                     </tbody>
@@ -1250,7 +1259,7 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4"><span className="font-bold text-emerald-600">${client.totalBilled.toLocaleString()}</span></td>
                           <td className="px-4 py-4">{client.outstandingBalance > 0 ? <span className="font-medium text-amber-600">${client.outstandingBalance.toLocaleString()}</span> : <span className="text-gray-400">$0</span>}</td>
                           <td className="px-4 py-4"><Badge className={getStatusColor(client.status)}>{client.status}</Badge></td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => { setSelectedClient(client); setShowClientDialog(true); toast.info('Client details', { description: 'View and edit client information' }) }}><MoreHorizontal className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => { setSelectedClient(client); setShowClientDialog(true) }}><MoreHorizontal className="h-4 w-4" /></Button></td>
                         </tr>
                       ))}
                     </tbody>
@@ -1268,7 +1277,7 @@ export default function TimeTrackingClient() {
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${tag.color}-500`}></div><span className="font-medium">{tag.name}</span></div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setShowTagDialog(true); toast.info('Edit tag', { description: `Editing tag: ${tag.name}` }) }}><Edit2 className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setSelectedTag(tag); setShowTagDialog(true) }}><Edit2 className="h-3 w-3" /></Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold">{tag.usageCount}</span>
@@ -1308,7 +1317,7 @@ export default function TimeTrackingClient() {
             {/* Projects Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Project', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => { setShowNewProjectDialog(true); toast.info('New project', { description: 'Create a new project' }) } },
+                { icon: Plus, label: 'New Project', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowNewProjectDialog(true) },
                 { icon: Users, label: 'Team View', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setActiveTab('team') },
                 { icon: DollarSign, label: 'Budgets', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {
                   // Export budget data
@@ -1322,7 +1331,7 @@ export default function TimeTrackingClient() {
                   }))
                   downloadAsCsv(budgetData, `project-budgets-${new Date().toISOString().split('T')[0]}`)
                 } },
-                { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => { setShowMilestoneDialog(true); toast.info('Milestones', { description: 'View project milestones' }) } },
+                { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowMilestoneDialog(true) },
                 { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => {
                   const archivedProjects = mockProjects.filter(p => p.status === 'completed' || p.status === 'archived')
                   if (archivedProjects.length > 0) {
@@ -1360,7 +1369,7 @@ export default function TimeTrackingClient() {
             </div>
 
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Projects</CardTitle><Button onClick={() => { setShowNewProjectDialog(true); toast.info('New project', { description: 'Create a new project' }) }}><Plus className="h-4 w-4 mr-2" />New Project</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Projects</CardTitle><Button onClick={() => setShowNewProjectDialog(true)}><Plus className="h-4 w-4 mr-2" />New Project</Button></CardHeader>
               <CardContent className="p-0">
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Budget</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
@@ -1436,8 +1445,8 @@ export default function TimeTrackingClient() {
                 { icon: Coffee, label: 'Time Off', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setTeamTab('timeoff') },
                 { icon: Target, label: 'Utilization', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setTeamTab('utilization') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setActiveTab('reports') },
-                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => { setShowReminderDialog(true); toast.info('Reminders', { description: 'Configure team reminders' }) } },
-                { icon: Plus, label: 'Add Member', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => { setShowTeamMemberDialog(true); toast.info('Add team member', { description: 'Add a new team member' }) } },
+                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowReminderDialog(true) },
+                { icon: Plus, label: 'Add Member', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowTeamMemberDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1515,7 +1524,7 @@ export default function TimeTrackingClient() {
 
             {teamTab === 'timeoff' && (
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => { setShowTimeOffDialog(true); toast.info('Time off request', { description: 'Submit a new time off request' }) }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => setShowTimeOffDialog(true)}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
                 <CardContent className="p-0">
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
@@ -2172,7 +2181,7 @@ export default function TimeTrackingClient() {
                     <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
                       <CardHeader className="flex flex-row items-center justify-between">
                         <div><CardTitle className="flex items-center gap-2"><Network className="h-5 w-5 text-blue-600" />Connected Apps</CardTitle><CardDescription>Third-party integrations</CardDescription></div>
-                        <Button><Plus className="h-4 w-4 mr-2" />Add</Button>
+                        <Button onClick={() => setShowAddIntegrationDialog(true)}><Plus className="h-4 w-4 mr-2" />Add</Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {mockIntegrations.map(integration => (
@@ -2192,7 +2201,7 @@ export default function TimeTrackingClient() {
                               <Button variant="ghost" size="sm" onClick={async () => {
                                 await apiPost(`/api/integrations/${integration.id}/sync`, {}, { loading: `Syncing ${integration.name}...`, success: 'Sync completed', error: 'Sync failed' })
                               }}><RefreshCw className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="sm" className="text-red-500"><X className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => setIntegrationToRemove(integration.id)}><X className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -2207,11 +2216,18 @@ export default function TimeTrackingClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div><Label className="text-base">API Key</Label><p className="text-xs text-gray-500">For programmatic access</p></div>
-                            <Button size="sm" variant="outline"><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
+                            <Button size="sm" variant="outline" onClick={async () => {
+                              const newKey = `tt_api_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+                              setApiKey(newKey)
+                              toast.success('API key regenerated', { description: 'Your old key is now invalid' })
+                            }}><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Input type="password" defaultValue="tt_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost">Copy</Button>
+                            <Input type="password" value={apiKey} readOnly className="font-mono" />
+                            <Button size="sm" variant="ghost" onClick={() => {
+                              navigator.clipboard.writeText(apiKey)
+                              toast.success('API key copied to clipboard')
+                            }}>Copy</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2306,8 +2322,12 @@ export default function TimeTrackingClient() {
                           <Switch defaultChecked />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1"><Download className="h-4 w-4 mr-2" />Export All</Button>
-                          <Button variant="outline" className="flex-1"><Archive className="h-4 w-4 mr-2" />Archive Projects</Button>
+                          <Button variant="outline" className="flex-1" onClick={() => {
+                            const exportData = { entries: mockTimeEntries, projects: mockProjects, exportDate: new Date().toISOString() }
+                            downloadAsJson(exportData, `time-tracking-export-${new Date().toISOString().split('T')[0]}`)
+                            toast.success('Data exported successfully')
+                          }}><Download className="h-4 w-4 mr-2" />Export All</Button>
+                          <Button variant="outline" className="flex-1" onClick={() => setShowArchiveProjectsDialog(true)}><Archive className="h-4 w-4 mr-2" />Archive Projects</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2316,11 +2336,11 @@ export default function TimeTrackingClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div><Label className="text-base text-red-700 dark:text-red-400">Clear Time Entries</Label><p className="text-sm text-red-600/70">Delete all tracking data</p></div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700"><TrashIcon className="h-4 w-4 mr-2" />Clear</Button>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700" onClick={() => setShowClearEntriesDialog(true)}><TrashIcon className="h-4 w-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                           <div><Label className="text-base text-red-700 dark:text-red-400">Delete Workspace</Label><p className="text-sm text-red-600/70">Permanently delete</p></div>
-                          <Button variant="destructive"><AlertOctagon className="h-4 w-4 mr-2" />Delete</Button>
+                          <Button variant="destructive" onClick={() => setShowDeleteWorkspaceDialog(true)}><AlertOctagon className="h-4 w-4 mr-2" />Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2337,7 +2357,7 @@ export default function TimeTrackingClient() {
             <AIInsightsPanel
               insights={mockTimeTrackingAIInsights}
               title="Time Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2406,30 +2426,30 @@ export default function TimeTrackingClient() {
         </Dialog>
 
         {/* Tag Dialog */}
-        <Dialog open={showTagDialog} onOpenChange={setShowTagDialog}>
-          <DialogContent><DialogHeader><DialogTitle>Create New Tag</DialogTitle><DialogDescription>Add a tag to categorize time entries</DialogDescription></DialogHeader>
+        <Dialog open={showTagDialog} onOpenChange={(open) => { setShowTagDialog(open); if (!open) setSelectedTag(null); }}>
+          <DialogContent><DialogHeader><DialogTitle>{selectedTag ? 'Edit Tag' : 'Create New Tag'}</DialogTitle><DialogDescription>{selectedTag ? `Editing tag: ${selectedTag.name}` : 'Add a tag to categorize time entries'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Tag Name</Label><Input placeholder="e.g., development, meeting, review" className="mt-1" /></div>
+              <div><Label>Tag Name</Label><Input placeholder="e.g., development, meeting, review" className="mt-1" defaultValue={selectedTag?.name || ''} /></div>
               <div><Label>Color</Label>
                 <div className="flex gap-2 mt-2">
                   {['red', 'orange', 'amber', 'green', 'blue', 'indigo', 'purple', 'pink'].map(color => (
-                    <button key={color} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all`} />
+                    <button key={color} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all ${selectedTag?.color === color ? 'ring-2 ring-offset-2' : ''}`} />
                   ))}
                 </div>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowTagDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Create Tag</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => { setShowTagDialog(false); setSelectedTag(null); }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">{selectedTag ? 'Save Changes' : 'Create Tag'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
         {/* Report Builder Dialog */}
-        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-          <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>Create New Report</DialogTitle><DialogDescription>Build a custom report with your preferred filters</DialogDescription></DialogHeader>
+        <Dialog open={showReportDialog} onOpenChange={(open) => { setShowReportDialog(open); if (!open) setSelectedReport(null); }}>
+          <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>{selectedReport ? 'Edit Report' : 'Create New Report'}</DialogTitle><DialogDescription>{selectedReport ? `Editing: ${selectedReport.name}` : 'Build a custom report with your preferred filters'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" /></div>
+              <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" defaultValue={selectedReport?.name || ''} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Report Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="summary">Summary</SelectItem><SelectItem value="detailed">Detailed</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="project">By Project</SelectItem><SelectItem value="client">By Client</SelectItem><SelectItem value="team">Team</SelectItem></SelectContent></Select></div>
-                <div><Label>Date Range</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select range" /></SelectTrigger><SelectContent><SelectItem value="week">This Week</SelectItem><SelectItem value="month">This Month</SelectItem><SelectItem value="quarter">This Quarter</SelectItem><SelectItem value="year">This Year</SelectItem><SelectItem value="custom">Custom Range</SelectItem></SelectContent></Select></div>
+                <div><Label>Report Type</Label><Select defaultValue={selectedReport?.type}><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="summary">Summary</SelectItem><SelectItem value="detailed">Detailed</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="project">By Project</SelectItem><SelectItem value="client">By Client</SelectItem><SelectItem value="team">Team</SelectItem></SelectContent></Select></div>
+                <div><Label>Date Range</Label><Select defaultValue={selectedReport?.dateRange}><SelectTrigger className="mt-1"><SelectValue placeholder="Select range" /></SelectTrigger><SelectContent><SelectItem value="week">This Week</SelectItem><SelectItem value="month">This Month</SelectItem><SelectItem value="quarter">This Quarter</SelectItem><SelectItem value="year">This Year</SelectItem><SelectItem value="custom">Custom Range</SelectItem></SelectContent></Select></div>
               </div>
               <div><Label>Filters</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -2441,11 +2461,158 @@ export default function TimeTrackingClient() {
               </div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div><p className="font-medium">Schedule Report</p><p className="text-sm text-gray-500">Automatically run and email this report</p></div>
-                <Switch />
+                <Switch defaultChecked={!!selectedReport?.schedule} />
               </div>
               <div><Label>Group By</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select grouping" /></SelectTrigger><SelectContent><SelectItem value="day">Day</SelectItem><SelectItem value="week">Week</SelectItem><SelectItem value="project">Project</SelectItem><SelectItem value="client">Client</SelectItem><SelectItem value="member">Team Member</SelectItem></SelectContent></Select></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button><Button variant="outline"><Eye className="h-4 w-4 mr-2" />Preview</Button><Button className="bg-amber-500 hover:bg-amber-600">Save Report</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => { setShowReportDialog(false); setSelectedReport(null); }}>Cancel</Button><Button variant="outline" onClick={() => setShowReportPreviewDialog(true)}><Eye className="h-4 w-4 mr-2" />Preview</Button><Button className="bg-amber-500 hover:bg-amber-600">{selectedReport ? 'Save Changes' : 'Save Report'}</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Project Dialog */}
+        <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+          <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Create New Project</DialogTitle><DialogDescription>Add a new project for time tracking</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Project Name</Label><Input placeholder="e.g., Website Redesign" className="mt-1" /></div>
+              <div><Label>Client</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" /></div>
+                <div><Label>Budget</Label><Input type="number" placeholder="20000" className="mt-1" /></div>
+              </div>
+              <div className="flex items-center gap-2"><Switch id="project-billable" defaultChecked /><Label htmlFor="project-billable">Billable Project</Label></div>
+              <div><Label>Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['red', 'orange', 'amber', 'green', 'blue', 'indigo', 'purple', 'pink'].map(color => (
+                    <button key={color} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Create Project</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Time Off Request Dialog */}
+        <Dialog open={showTimeOffDialog} onOpenChange={setShowTimeOffDialog}>
+          <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Request Time Off</DialogTitle><DialogDescription>Submit a time off request for approval</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="vacation">Vacation</SelectItem><SelectItem value="sick">Sick Leave</SelectItem><SelectItem value="personal">Personal</SelectItem><SelectItem value="holiday">Holiday</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent></Select></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Start Date</Label><Input type="date" className="mt-1" /></div>
+                <div><Label>End Date</Label><Input type="date" className="mt-1" /></div>
+              </div>
+              <div><Label>Estimated Hours</Label><Input type="number" placeholder="8" className="mt-1" /></div>
+              <div><Label>Notes</Label><Input placeholder="Reason for time off request" className="mt-1" /></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowTimeOffDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Submit Request</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Integration Dialog */}
+        <Dialog open={showAddIntegrationDialog} onOpenChange={setShowAddIntegrationDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Add Integration</DialogTitle><DialogDescription>Connect a third-party service</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[{name:'Google Calendar', icon:'📅', type:'calendar'},{name:'Asana', icon:'📋', type:'project'},{name:'QuickBooks', icon:'💰', type:'accounting'},{name:'Slack', icon:'💬', type:'communication'},{name:'Salesforce', icon:'☁️', type:'crm'},{name:'Jira', icon:'🎯', type:'project'}].map(app => (
+                  <button key={app.name} className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left" onClick={async () => {
+                    await apiPost('/api/integrations', { name: app.name, type: app.type }, { loading: `Connecting ${app.name}...`, success: `${app.name} connected successfully`, error: 'Connection failed' })
+                    setShowAddIntegrationDialog(false)
+                  }}>
+                    <span className="text-2xl">{app.icon}</span>
+                    <div><p className="font-medium">{app.name}</p><p className="text-xs text-gray-500">{app.type}</p></div>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowAddIntegrationDialog(false)}>Cancel</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Remove Integration Confirmation Dialog */}
+        <Dialog open={!!integrationToRemove} onOpenChange={(open) => !open && setIntegrationToRemove(null)}>
+          <DialogContent><DialogHeader><DialogTitle>Remove Integration</DialogTitle><DialogDescription>Are you sure you want to disconnect this integration? You can reconnect it later.</DialogDescription></DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIntegrationToRemove(null)}>Cancel</Button>
+              <Button variant="destructive" onClick={async () => {
+                await apiPost(`/api/integrations/${integrationToRemove}/disconnect`, {}, { loading: 'Disconnecting...', success: 'Integration removed', error: 'Failed to disconnect' })
+                setIntegrationToRemove(null)
+              }}>Remove</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Preview Dialog */}
+        <Dialog open={showReportPreviewDialog} onOpenChange={setShowReportPreviewDialog}>
+          <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>Report Preview</DialogTitle><DialogDescription>Preview of your custom report</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h3 className="font-bold text-lg mb-4">Time Summary Report</h3>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="p-3 bg-white dark:bg-gray-700 rounded"><p className="text-sm text-gray-500">Total Hours</p><p className="text-2xl font-bold">164.5h</p></div>
+                  <div className="p-3 bg-white dark:bg-gray-700 rounded"><p className="text-sm text-gray-500">Billable</p><p className="text-2xl font-bold text-green-600">142.0h</p></div>
+                  <div className="p-3 bg-white dark:bg-gray-700 rounded"><p className="text-sm text-gray-500">Revenue</p><p className="text-2xl font-bold">$21,300</p></div>
+                </div>
+                <div className="space-y-2">
+                  {mockProjects.slice(0, 3).map(p => (
+                    <div key={p.id} className="flex justify-between p-2 bg-white dark:bg-gray-700 rounded"><span>{p.name}</span><span className="font-medium">{Math.floor(Math.random() * 40 + 10)}h</span></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReportPreviewDialog(false)}>Close</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+              toast.success('Report exported')
+              setShowReportPreviewDialog(false)
+            }}><Download className="h-4 w-4 mr-2" />Export</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Projects Dialog */}
+        <Dialog open={showArchiveProjectsDialog} onOpenChange={setShowArchiveProjectsDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Archive Projects</DialogTitle><DialogDescription>Select projects to archive. Archived projects will be hidden but not deleted.</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              {mockProjects.filter(p => p.status === 'completed').slice(0, 4).map(p => (
+                <div key={p.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                  <input type="checkbox" className="w-4 h-4 rounded" />
+                  <div className="flex-1"><p className="font-medium">{p.name}</p><p className="text-sm text-gray-500">{p.client} • Completed</p></div>
+                </div>
+              ))}
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowArchiveProjectsDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={async () => {
+              await apiPost('/api/projects/archive', { projectIds: [] }, { loading: 'Archiving projects...', success: 'Projects archived', error: 'Archive failed' })
+              setShowArchiveProjectsDialog(false)
+            }}><Archive className="h-4 w-4 mr-2" />Archive Selected</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Clear Time Entries Confirmation */}
+        <Dialog open={showClearEntriesDialog} onOpenChange={setShowClearEntriesDialog}>
+          <DialogContent><DialogHeader><DialogTitle className="text-red-600">Clear All Time Entries</DialogTitle><DialogDescription>This action cannot be undone. All time tracking data will be permanently deleted.</DialogDescription></DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Type <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1 rounded">DELETE</span> to confirm:</p>
+              <Input className="mt-2" placeholder="Type DELETE to confirm" id="confirm-clear" />
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowClearEntriesDialog(false)}>Cancel</Button><Button variant="destructive" onClick={async () => {
+              const input = document.getElementById('confirm-clear') as HTMLInputElement
+              if (input?.value !== 'DELETE') { toast.error('Please type DELETE to confirm'); return }
+              await apiPost('/api/time-entries/clear', {}, { loading: 'Clearing entries...', success: 'All time entries cleared', error: 'Failed to clear entries' })
+              setShowClearEntriesDialog(false)
+            }}><TrashIcon className="h-4 w-4 mr-2" />Clear All</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Workspace Confirmation */}
+        <Dialog open={showDeleteWorkspaceDialog} onOpenChange={setShowDeleteWorkspaceDialog}>
+          <DialogContent><DialogHeader><DialogTitle className="text-red-600">Delete Workspace</DialogTitle><DialogDescription>This will permanently delete your workspace, all projects, time entries, and settings. This cannot be undone.</DialogDescription></DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">Type <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1 rounded">DELETE WORKSPACE</span> to confirm:</p>
+              <Input className="mt-2" placeholder="Type DELETE WORKSPACE to confirm" id="confirm-delete-workspace" />
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowDeleteWorkspaceDialog(false)}>Cancel</Button><Button variant="destructive" onClick={async () => {
+              const input = document.getElementById('confirm-delete-workspace') as HTMLInputElement
+              if (input?.value !== 'DELETE WORKSPACE') { toast.error('Please type DELETE WORKSPACE to confirm'); return }
+              await apiPost('/api/workspace/delete', {}, { loading: 'Deleting workspace...', success: 'Workspace deleted', error: 'Failed to delete workspace' })
+              setShowDeleteWorkspaceDialog(false)
+            }}><AlertOctagon className="h-4 w-4 mr-2" />Delete Workspace</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

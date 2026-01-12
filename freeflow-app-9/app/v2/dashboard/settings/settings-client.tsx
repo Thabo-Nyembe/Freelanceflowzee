@@ -821,6 +821,40 @@ export default function SettingsClient() {
     }
   }
 
+  // Handle AI insights action clicks with real operations
+  const handleInsightAction = (insight: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; category?: string }) => {
+    switch (insight.category) {
+      case 'Security':
+        // Navigate to security tab for security-related insights
+        const securityTab = document.querySelector('[value="security"]') as HTMLElement
+        if (securityTab) {
+          securityTab.click()
+          toast.success('Security settings opened', { description: `Review: ${insight.title}` })
+        }
+        break
+      case 'Usage':
+        // Navigate to billing tab for usage/storage insights
+        const billingTab = document.querySelector('[value="billing"]') as HTMLElement
+        if (billingTab) {
+          billingTab.click()
+          toast.info('Billing & usage opened', { description: 'Review your usage and consider upgrading' })
+        }
+        break
+      default:
+        // Generic handling based on insight type
+        if (insight.type === 'warning') {
+          // For warnings, show sessions and prompt review
+          const sessionsTab = document.querySelector('[value="security"]') as HTMLElement
+          if (sessionsTab) sessionsTab.click()
+          toast.warning('Action required', { description: insight.title })
+        } else if (insight.type === 'info') {
+          toast.info('Insight noted', { description: insight.title })
+        } else {
+          toast.success('Action completed', { description: insight.title })
+        }
+    }
+  }
+
   // Quick actions with real functionality
   const settingsQuickActions = [
     {
@@ -953,7 +987,7 @@ export default function SettingsClient() {
       <AIInsightsPanel
         insights={mockSettingsAIInsights}
         title="Account Insights"
-        onActionClick={(insight) => toast.success(`Action taken on: ${insight.title}`)}
+        onActionClick={handleInsightAction}
       />
 
       {/* Main Settings Tabs */}

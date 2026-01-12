@@ -128,6 +128,7 @@ interface SharedLink {
   viewCount: number
   downloadCount: number
   isPasswordProtected: boolean
+  link: string
 }
 
 interface FileActivity {
@@ -303,9 +304,9 @@ const mockFolders: FolderItem[] = [
 ]
 
 const mockSharedLinks: SharedLink[] = [
-  { id: '1', fileId: '1', fileName: 'Project Proposal.docx', access: 'edit', createdAt: '2024-12-20', viewCount: 45, downloadCount: 12, isPasswordProtected: false },
-  { id: '2', fileId: '2', fileName: 'Financial Report Q4.xlsx', access: 'view', createdAt: '2024-12-18', expiresAt: '2024-12-31', viewCount: 89, downloadCount: 23, isPasswordProtected: true },
-  { id: '3', fileId: '5', fileName: 'Brand Guidelines.pdf', access: 'view', createdAt: '2024-12-15', viewCount: 156, downloadCount: 67, isPasswordProtected: false }
+  { id: '1', fileId: '1', fileName: 'Project Proposal.docx', access: 'edit', createdAt: '2024-12-20', viewCount: 45, downloadCount: 12, isPasswordProtected: false, link: 'https://freeflow.app/share/proj-prop-abc123' },
+  { id: '2', fileId: '2', fileName: 'Financial Report Q4.xlsx', access: 'view', createdAt: '2024-12-18', expiresAt: '2024-12-31', viewCount: 89, downloadCount: 23, isPasswordProtected: true, link: 'https://freeflow.app/share/fin-rep-xyz789' },
+  { id: '3', fileId: '5', fileName: 'Brand Guidelines.pdf', access: 'view', createdAt: '2024-12-15', viewCount: 156, downloadCount: 67, isPasswordProtected: false, link: 'https://freeflow.app/share/brand-guide-def456' }
 ]
 
 const mockActivity: FileActivity[] = [
@@ -1002,7 +1003,7 @@ export default function FilesHubClient() {
                         {viewMode === 'list' && (
                           <div className="flex items-center gap-2">
                             <Badge className={getStatusColor(file.status)}>{file.status}</Badge>
-                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('File options', { description: 'Click the file to view details and actions' }) }}>
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedFile(file); setShowFileDialog(true) }}>
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1747,7 +1748,7 @@ export default function FilesHubClient() {
                           >
                             {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </Button>
-                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('Key copied'); }}><Copy className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API key copied to clipboard', { description: 'Paste it in your integration settings' }); }}><Copy className="w-4 h-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -2189,7 +2190,7 @@ export default function FilesHubClient() {
             <AIInsightsPanel
               insights={mockFilesHubAIInsights}
               title="Files Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">

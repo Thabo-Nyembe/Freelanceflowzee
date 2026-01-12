@@ -892,3 +892,105 @@ export async function getUserVoiceStats(
 
   return { data: stats, error: null }
 }
+
+/**
+ * Increment voice usage count
+ * Tracks how many times a voice has been used for synthesis
+ */
+export async function incrementVoiceUsage(
+  voiceId: string
+): Promise<{ data: Voice | null; error: any }> {
+  const supabase = createClient()
+
+  // First, get current usage count
+  const { data: currentVoice } = await supabase
+    .from('voices')
+    .select('usage_count, popularity')
+    .eq('id', voiceId)
+    .single()
+
+  if (!currentVoice) {
+    return { data: null, error: new Error('Voice not found') }
+  }
+
+  // Increment usage count and update popularity
+  const { data, error } = await supabase
+    .from('voices')
+    .update({
+      usage_count: (currentVoice.usage_count || 0) + 1,
+      popularity: (currentVoice.popularity || 0) + 1,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', voiceId)
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * Track voice synthesis analytics
+ * Updates daily analytics data for voice usage
+ */
+export async function trackVoiceAnalytics(
+  userId: string,
+  analytics: {
+    total_syntheses?: number
+    total_characters?: number
+    total_duration?: number
+    total_cost?: number
+    voice_usage?: Record<string, number>
+  }
+): Promise<{ data: VoiceAnalytics | null; error: any }> {
+  const supabase = createClient()
+  const today = new Date().toISOString().split('T')[0]
+
+  // Check if we already have analytics for today
+  const { data: existingAnalytics } = await supabase
+    .from('voice_analytics')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('date', today)
+    .single()
+
+  if (existingAnalytics) {
+    // Update existing analytics by incrementing values
+    const updatedVoiceUsage = {
+      ...(existingAnalytics.voice_usage || {}),
+      ...(analytics.voice_usage || {})
+    }
+
+    const { data, error } = await supabase
+      .from('voice_analytics')
+      .update({
+        total_syntheses: existingAnalytics.total_syntheses + (analytics.total_syntheses || 0),
+        total_characters: existingAnalytics.total_characters + (analytics.total_characters || 0),
+        total_duration: existingAnalytics.total_duration + (analytics.total_duration || 0),
+        total_cost: existingAnalytics.total_cost + (analytics.total_cost || 0),
+        voice_usage: updatedVoiceUsage,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existingAnalytics.id)
+      .select()
+      .single()
+
+    return { data, error }
+  } else {
+    // Create new analytics record for today
+    const { data, error } = await supabase
+      .from('voice_analytics')
+      .insert({
+        user_id: userId,
+        date: today,
+        total_syntheses: analytics.total_syntheses || 0,
+        total_characters: analytics.total_characters || 0,
+        total_duration: analytics.total_duration || 0,
+        total_cost: analytics.total_cost || 0,
+        voice_usage: analytics.voice_usage || {}
+      })
+      .select()
+      .single()
+
+    return { data, error }
+  }
+}

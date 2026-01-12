@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { copyToClipboard, downloadAsJson, shareContent, apiPost } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

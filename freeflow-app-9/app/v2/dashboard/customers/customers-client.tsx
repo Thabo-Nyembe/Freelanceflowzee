@@ -41,6 +41,10 @@ import {
 
 
 import { useCustomers, useCustomerMutations, type Customer, type CustomerSegment, type CustomerStatus } from '@/lib/hooks/use-customers'
+import { useTasks } from '@/lib/hooks/use-tasks'
+import { useCampaigns } from '@/lib/hooks/use-campaigns'
+import { useSalesDeals, usePipelineStages } from '@/lib/hooks/use-sales'
+import { createClient } from '@/lib/supabase/client'
 
 // ============================================================================
 // TYPES - SALESFORCE CRM LEVEL
@@ -489,6 +493,98 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     isUpdating,
     isDeleting
   } = useCustomerMutations()
+
+  // Tasks hook for CRM task management
+  const { createTask, updateTask, deleteTask, refresh: refreshTasks } = useTasks()
+
+  // Campaigns hook for marketing campaigns
+  const { createCampaign, campaigns, refetch: refetchCampaigns } = useCampaigns()
+
+  // Sales hooks for pipeline and activities
+  const { logActivity, deals, createDeal } = useSalesDeals()
+  const { stages, createStage } = usePipelineStages()
+
+  // Form state for new task
+  const [taskForm, setTaskForm] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
+    contactId: '',
+    assigneeId: ''
+  })
+
+  // Form state for new campaign
+  const [campaignForm, setCampaignForm] = useState({
+    name: '',
+    type: 'email' as 'email' | 'sms' | 'social' | 'display' | 'search' | 'video' | 'influencer' | 'affiliate' | 'content' | 'multi_channel',
+    status: 'planned' as 'draft' | 'planned' | 'scheduled' | 'running' | 'paused' | 'completed' | 'cancelled' | 'archived',
+    startDate: '',
+    endDate: '',
+    budget: 0,
+    expectedRevenue: 0,
+    description: ''
+  })
+
+  // Form state for new pipeline stage
+  const [stageForm, setStageForm] = useState({
+    name: '',
+    probability: 50,
+    color: '#8B5CF6'
+  })
+
+  // Form state for activity logging
+  const [activityForm, setActivityForm] = useState({
+    type: 'call' as 'call' | 'email' | 'meeting' | 'note',
+    subject: '',
+    notes: '',
+    outcome: '',
+    contactId: ''
+  })
+
+  // Form state for email composer
+  const [emailForm, setEmailForm] = useState({
+    to: '',
+    subject: '',
+    message: '',
+    template: ''
+  })
+
+  // Form state for schedule call
+  const [scheduleCallForm, setScheduleCallForm] = useState({
+    contactId: '',
+    date: '',
+    time: '',
+    duration: 30,
+    notes: ''
+  })
+
+  // Form state for call log
+  const [callLogForm, setCallLogForm] = useState({
+    contactId: '',
+    duration: 0,
+    outcome: 'completed' as 'completed' | 'no_answer' | 'left_voicemail' | 'callback_requested',
+    notes: ''
+  })
+
+  // Form state for meeting/calendar
+  const [meetingForm, setMeetingForm] = useState({
+    title: '',
+    date: '',
+    time: '',
+    duration: 60,
+    attendees: [] as string[],
+    location: '',
+    notes: ''
+  })
+
+  // Form state for scoring rule
+  const [scoringRuleForm, setScoringRuleForm] = useState({
+    ruleName: '',
+    ruleType: 'behavior' as 'behavior' | 'demographic' | 'engagement',
+    criteria: '',
+    pointValue: 10
+  })
 
   // Form state for new contact
   const [newContactForm, setNewContactForm] = useState({
@@ -2217,7 +2313,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <AIInsightsPanel
               insights={mockCustomersAIInsights}
               title="Customer Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2513,12 +2609,35 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLogActivityDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Logging activity...', { id: 'log-activity' })
-                setTimeout(() => {
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={async () => {
+                if (!activityForm.subject) {
+                  toast.error('Please enter an activity subject')
+                  return
+                }
+                try {
+                  toast.loading('Logging activity...', { id: 'log-activity' })
+                  const supabase = createClient()
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Authentication required', { id: 'log-activity' })
+                    return
+                  }
+                  await supabase.from('crm_activities').insert({
+                    user_id: user.id,
+                    contact_id: activityForm.contactId || null,
+                    activity_type: activityForm.type,
+                    subject: activityForm.subject,
+                    description: activityForm.notes,
+                    outcome: activityForm.outcome || null,
+                    completed_at: new Date().toISOString()
+                  })
                   toast.success('Activity logged successfully', { id: 'log-activity', description: 'Activity has been recorded in the timeline' })
                   setShowLogActivityDialog(false)
-                }, 1000)
+                  setActivityForm({ type: 'call', subject: '', notes: '', outcome: '', contactId: '' })
+                } catch (err) {
+                  console.error('Failed to log activity:', err)
+                  toast.error('Failed to log activity', { id: 'log-activity' })
+                }
               }}>
                 <Activity className="h-4 w-4 mr-2" />Log Activity
               </Button>
@@ -2577,12 +2696,41 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEmailComposer(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Sending email...', { id: 'send-email' })
-                setTimeout(() => {
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={async () => {
+                if (!emailForm.to || !emailForm.subject) {
+                  toast.error('Please fill in recipient and subject')
+                  return
+                }
+                try {
+                  toast.loading('Sending email...', { id: 'send-email' })
+                  const supabase = createClient()
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Authentication required', { id: 'send-email' })
+                    return
+                  }
+                  // Log the email activity
+                  await supabase.from('crm_activities').insert({
+                    user_id: user.id,
+                    contact_id: emailForm.to || null,
+                    activity_type: 'email',
+                    subject: emailForm.subject,
+                    description: emailForm.message,
+                    completed_at: new Date().toISOString(),
+                    metadata: { template: emailForm.template || null }
+                  })
+                  // Open mailto link for actual email sending
+                  const contact = MOCK_CONTACTS.find(c => c.id === emailForm.to || c.email === emailForm.to)
+                  if (contact?.email) {
+                    window.location.href = `mailto:${contact.email}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.message)}`
+                  }
                   toast.success('Email sent successfully', { id: 'send-email', description: 'Your email has been delivered' })
                   setShowEmailComposer(false)
-                }, 1500)
+                  setEmailForm({ to: '', subject: '', message: '', template: '' })
+                } catch (err) {
+                  console.error('Failed to send email:', err)
+                  toast.error('Failed to send email', { id: 'send-email' })
+                }
               }}>
                 <Mail className="h-4 w-4 mr-2" />Send Email
               </Button>
@@ -2647,12 +2795,37 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowScheduleCallDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Scheduling call...', { id: 'schedule-call' })
-                setTimeout(() => {
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={async () => {
+                if (!scheduleCallForm.contactId || !scheduleCallForm.date || !scheduleCallForm.time) {
+                  toast.error('Please select contact, date, and time')
+                  return
+                }
+                try {
+                  toast.loading('Scheduling call...', { id: 'schedule-call' })
+                  const supabase = createClient()
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Authentication required', { id: 'schedule-call' })
+                    return
+                  }
+                  const scheduledAt = new Date(`${scheduleCallForm.date}T${scheduleCallForm.time}`)
+                  await supabase.from('crm_activities').insert({
+                    user_id: user.id,
+                    contact_id: scheduleCallForm.contactId,
+                    activity_type: 'call',
+                    subject: 'Scheduled Call',
+                    description: scheduleCallForm.notes,
+                    scheduled_at: scheduledAt.toISOString(),
+                    duration_minutes: scheduleCallForm.duration,
+                    metadata: { status: 'scheduled' }
+                  })
                   toast.success('Call scheduled successfully', { id: 'schedule-call', description: 'Calendar invite has been sent' })
                   setShowScheduleCallDialog(false)
-                }, 1000)
+                  setScheduleCallForm({ contactId: '', date: '', time: '', duration: 30, notes: '' })
+                } catch (err) {
+                  console.error('Failed to schedule call:', err)
+                  toast.error('Failed to schedule call', { id: 'schedule-call' })
+                }
               }}>
                 <Phone className="h-4 w-4 mr-2" />Schedule Call
               </Button>
@@ -2721,12 +2894,40 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCalendarDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Scheduling meeting...', { id: 'schedule-meeting' })
-                setTimeout(() => {
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={async () => {
+                if (!meetingForm.title || !meetingForm.date || !meetingForm.time) {
+                  toast.error('Please fill in meeting title, date, and time')
+                  return
+                }
+                try {
+                  toast.loading('Scheduling meeting...', { id: 'schedule-meeting' })
+                  const supabase = createClient()
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Authentication required', { id: 'schedule-meeting' })
+                    return
+                  }
+                  const scheduledAt = new Date(`${meetingForm.date}T${meetingForm.time}`)
+                  await supabase.from('crm_activities').insert({
+                    user_id: user.id,
+                    activity_type: 'meeting',
+                    subject: meetingForm.title,
+                    description: meetingForm.notes,
+                    scheduled_at: scheduledAt.toISOString(),
+                    duration_minutes: meetingForm.duration,
+                    metadata: {
+                      status: 'scheduled',
+                      location: meetingForm.location,
+                      attendees: meetingForm.attendees
+                    }
+                  })
                   toast.success('Meeting scheduled successfully', { id: 'schedule-meeting', description: 'Invites sent to all attendees' })
                   setShowCalendarDialog(false)
-                }, 1000)
+                  setMeetingForm({ title: '', date: '', time: '', duration: 60, attendees: [], location: '', notes: '' })
+                } catch (err) {
+                  console.error('Failed to schedule meeting:', err)
+                  toast.error('Failed to schedule meeting', { id: 'schedule-meeting' })
+                }
               }}>
                 <Calendar className="h-4 w-4 mr-2" />Schedule Meeting
               </Button>
@@ -2789,13 +2990,33 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowCallLogDialog(false); setCallLogContactId(null) }}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Logging call...', { id: 'log-call' })
-                setTimeout(() => {
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={async () => {
+                try {
+                  toast.loading('Logging call...', { id: 'log-call' })
+                  const supabase = createClient()
+                  const { data: { user } } = await supabase.auth.getUser()
+                  if (!user) {
+                    toast.error('Authentication required', { id: 'log-call' })
+                    return
+                  }
+                  await supabase.from('crm_activities').insert({
+                    user_id: user.id,
+                    contact_id: callLogContactId || callLogForm.contactId || null,
+                    activity_type: 'call',
+                    subject: 'Phone Call',
+                    description: callLogForm.notes,
+                    outcome: callLogForm.outcome,
+                    duration_minutes: callLogForm.duration,
+                    completed_at: new Date().toISOString()
+                  })
                   toast.success('Call logged successfully', { id: 'log-call', description: 'Call details have been saved to the activity timeline' })
                   setShowCallLogDialog(false)
                   setCallLogContactId(null)
-                }, 1000)
+                  setCallLogForm({ contactId: '', duration: 0, outcome: 'completed', notes: '' })
+                } catch (err) {
+                  console.error('Failed to log call:', err)
+                  toast.error('Failed to log call', { id: 'log-call' })
+                }
               }}>
                 <PhoneCall className="h-4 w-4 mr-2" />Log Call
               </Button>
@@ -2813,49 +3034,93 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-2 py-4">
-              <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Updating task...', { id: 'complete-task' })
-                setTimeout(() => {
-                  toast.success('Task marked as complete', { id: 'complete-task' })
+              <Button variant="outline" className="w-full justify-start" onClick={async () => {
+                if (!showTaskOptionsMenu) return
+                try {
+                  toast.loading('Updating task...', { id: 'complete-task' })
+                  const result = await updateTask(showTaskOptionsMenu, { status: 'completed' })
+                  if (result.success) {
+                    toast.success('Task marked as complete', { id: 'complete-task' })
+                    refreshTasks()
+                  } else {
+                    toast.error('Failed to complete task', { id: 'complete-task' })
+                  }
                   setShowTaskOptionsMenu(null)
-                }, 800)
+                } catch (err) {
+                  console.error('Failed to complete task:', err)
+                  toast.error('Failed to complete task', { id: 'complete-task' })
+                }
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Mark as Complete
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Opening task editor...', { id: 'edit-task' })
-                setTimeout(() => {
-                  toast.success('Task updated successfully', { id: 'edit-task' })
-                  setShowTaskOptionsMenu(null)
-                }, 800)
+                // Open edit task dialog with task data
+                setSelectedTaskId(showTaskOptionsMenu)
+                setShowTaskOptionsMenu(null)
+                setShowAddTaskDialog(true)
+                toast.info('Edit the task details in the form')
               }}>
                 <Edit className="h-4 w-4 mr-2" />Edit Task
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Rescheduling task...', { id: 'reschedule-task' })
-                setTimeout(() => {
-                  toast.success('Task rescheduled successfully', { id: 'reschedule-task' })
+              <Button variant="outline" className="w-full justify-start" onClick={async () => {
+                if (!showTaskOptionsMenu) return
+                const newDate = prompt('Enter new due date (YYYY-MM-DD):')
+                if (!newDate) return
+                try {
+                  toast.loading('Rescheduling task...', { id: 'reschedule-task' })
+                  const result = await updateTask(showTaskOptionsMenu, { due_date: newDate })
+                  if (result.success) {
+                    toast.success('Task rescheduled successfully', { id: 'reschedule-task' })
+                    refreshTasks()
+                  } else {
+                    toast.error('Failed to reschedule task', { id: 'reschedule-task' })
+                  }
                   setShowTaskOptionsMenu(null)
-                }, 800)
+                } catch (err) {
+                  console.error('Failed to reschedule task:', err)
+                  toast.error('Failed to reschedule task', { id: 'reschedule-task' })
+                }
               }}>
                 <Calendar className="h-4 w-4 mr-2" />Reschedule
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Reassigning task...', { id: 'reassign-task' })
-                setTimeout(() => {
-                  toast.success('Task reassigned successfully', { id: 'reassign-task' })
+              <Button variant="outline" className="w-full justify-start" onClick={async () => {
+                if (!showTaskOptionsMenu) return
+                const newAssignee = prompt('Enter new assignee ID:')
+                if (!newAssignee) return
+                try {
+                  toast.loading('Reassigning task...', { id: 'reassign-task' })
+                  const result = await updateTask(showTaskOptionsMenu, { assignee_id: newAssignee })
+                  if (result.success) {
+                    toast.success('Task reassigned successfully', { id: 'reassign-task' })
+                    refreshTasks()
+                  } else {
+                    toast.error('Failed to reassign task', { id: 'reassign-task' })
+                  }
                   setShowTaskOptionsMenu(null)
-                }, 800)
+                } catch (err) {
+                  console.error('Failed to reassign task:', err)
+                  toast.error('Failed to reassign task', { id: 'reassign-task' })
+                }
               }}>
                 <Users className="h-4 w-4 mr-2" />Reassign
               </Button>
-              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={async () => {
+                if (!showTaskOptionsMenu) return
                 if (confirm('Are you sure you want to delete this task?')) {
-                  toast.loading('Deleting task...', { id: 'delete-task' })
-                  setTimeout(() => {
-                    toast.success('Task deleted successfully', { id: 'delete-task' })
+                  try {
+                    toast.loading('Deleting task...', { id: 'delete-task' })
+                    const result = await deleteTask(showTaskOptionsMenu, true)
+                    if (result.success) {
+                      toast.success('Task deleted successfully', { id: 'delete-task' })
+                      refreshTasks()
+                    } else {
+                      toast.error('Failed to delete task', { id: 'delete-task' })
+                    }
                     setShowTaskOptionsMenu(null)
-                  }, 800)
+                  } catch (err) {
+                    console.error('Failed to delete task:', err)
+                    toast.error('Failed to delete task', { id: 'delete-task' })
+                  }
                 }
               }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Task

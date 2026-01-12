@@ -446,6 +446,10 @@ export default function HelpDocsClient() {
   const [editingArticle, setEditingArticle] = useState<DbHelpArticle | null>(null)
   const [showReviewQueueDialog, setShowReviewQueueDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showNewPostDialog, setShowNewPostDialog] = useState(false)
+  const [showUploadVideoDialog, setShowUploadVideoDialog] = useState(false)
+  const [newPostData, setNewPostData] = useState({ title: '', content: '', category: 'general' })
+  const [videoUploadData, setVideoUploadData] = useState({ title: '', description: '', file: null as File | null })
 
   // Chatbot State
   const [chatMessages, setChatMessages] = useState<{role: 'user' | 'bot'; content: string}[]>([
@@ -1546,7 +1550,7 @@ export default function HelpDocsClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Community Discussions</h2>
-              <Button><Plus className="w-4 h-4 mr-2" />New Post</Button>
+              <Button onClick={() => setShowNewPostDialog(true)}><Plus className="w-4 h-4 mr-2" />New Post</Button>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
@@ -1799,7 +1803,7 @@ export default function HelpDocsClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Video Tutorials</h2>
-              <Button><Upload className="w-4 h-4 mr-2" />Upload Video</Button>
+              <Button onClick={() => setShowUploadVideoDialog(true)}><Upload className="w-4 h-4 mr-2" />Upload Video</Button>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
@@ -2245,7 +2249,7 @@ export default function HelpDocsClient() {
             <AIInsightsPanel
               insights={mockHelpDocsAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(_insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(insight.title, { description: insight.description, action: insight.action ? { label: insight.action, onClick: () => toast.success(`Action: ${insight.action}`) } : undefined })}
             />
           </div>
           <div className="space-y-6">
@@ -2311,8 +2315,8 @@ export default function HelpDocsClient() {
                 <div className="border-t dark:border-gray-700 pt-6">
                   <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">Was this article helpful?</h4>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline"><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
-                    <Button variant="outline"><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => toast.success('Thanks for your feedback!', { description: 'Your vote helps us improve our documentation' })}><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
+                    <Button variant="outline" onClick={() => toast.info('Feedback recorded', { description: 'We\'ll work on improving this article' })}><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
                   </div>
                 </div>
 
@@ -2848,6 +2852,154 @@ export default function HelpDocsClient() {
             }}>
               <Download className="w-4 h-4 mr-2" />
               Export Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Post Dialog */}
+      <Dialog open={showNewPostDialog} onOpenChange={setShowNewPostDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Discussion Post</DialogTitle>
+            <DialogDescription>Start a new discussion in the community</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="post-title">Title</Label>
+              <Input
+                id="post-title"
+                placeholder="What would you like to discuss?"
+                value={newPostData.title}
+                onChange={(e) => setNewPostData(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="post-category">Category</Label>
+              <Select value={newPostData.category} onValueChange={(v) => setNewPostData(prev => ({ ...prev, category: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General Discussion</SelectItem>
+                  <SelectItem value="feature-request">Feature Request</SelectItem>
+                  <SelectItem value="bug-report">Bug Report</SelectItem>
+                  <SelectItem value="question">Question</SelectItem>
+                  <SelectItem value="tips">Tips & Tricks</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="post-content">Content</Label>
+              <Textarea
+                id="post-content"
+                placeholder="Share your thoughts..."
+                rows={6}
+                value={newPostData.content}
+                onChange={(e) => setNewPostData(prev => ({ ...prev, content: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewPostDialog(false)}>Cancel</Button>
+            <Button onClick={async () => {
+              if (!newPostData.title || !newPostData.content) {
+                toast.error('Please fill in all fields')
+                return
+              }
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 1500)),
+                {
+                  loading: 'Creating post...',
+                  success: () => {
+                    setShowNewPostDialog(false)
+                    setNewPostData({ title: '', content: '', category: 'general' })
+                    return 'Post created successfully!'
+                  },
+                  error: 'Failed to create post'
+                }
+              )
+            }}>
+              <Send className="w-4 h-4 mr-2" />
+              Post Discussion
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upload Video Dialog */}
+      <Dialog open={showUploadVideoDialog} onOpenChange={setShowUploadVideoDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Upload Video Tutorial</DialogTitle>
+            <DialogDescription>Share a video tutorial with the community</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="video-title">Video Title</Label>
+              <Input
+                id="video-title"
+                placeholder="Enter video title"
+                value={videoUploadData.title}
+                onChange={(e) => setVideoUploadData(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="video-description">Description</Label>
+              <Textarea
+                id="video-description"
+                placeholder="Describe what this video covers..."
+                rows={3}
+                value={videoUploadData.description}
+                onChange={(e) => setVideoUploadData(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Video File</Label>
+              <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  id="video-file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setVideoUploadData(prev => ({ ...prev, file }))
+                      toast.info(`Selected: ${file.name}`)
+                    }
+                  }}
+                />
+                <label htmlFor="video-file" className="cursor-pointer">
+                  <Video className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {videoUploadData.file ? videoUploadData.file.name : 'Drop your video here or click to browse'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">MP4, WebM, or MOV up to 500MB</p>
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUploadVideoDialog(false)}>Cancel</Button>
+            <Button onClick={async () => {
+              if (!videoUploadData.title || !videoUploadData.file) {
+                toast.error('Please provide a title and select a video file')
+                return
+              }
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 3000)),
+                {
+                  loading: 'Uploading video...',
+                  success: () => {
+                    setShowUploadVideoDialog(false)
+                    setVideoUploadData({ title: '', description: '', file: null })
+                    return 'Video uploaded successfully!'
+                  },
+                  error: 'Failed to upload video'
+                }
+              )
+            }}>
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Video
             </Button>
           </DialogFooter>
         </DialogContent>
