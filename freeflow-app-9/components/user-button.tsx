@@ -69,31 +69,31 @@ export default function UserButton({ user }: UserButtonProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="flex items-center">
+          <Link href="/dashboard/profile-v2" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
             Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="flex items-center">
+          <Link href="/dashboard/settings-v2" className="flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             Settings
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/billing" className="flex items-center">
+          <Link href="/dashboard/billing-v2" className="flex items-center">
             <CreditCard className="mr-2 h-4 w-4" />
             Billing
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/notifications" className="flex items-center">
+          <Link href="/dashboard/notifications-v2" className="flex items-center">
             <Bell className="mr-2 h-4 w-4" />
             Notifications
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/help" className="flex items-center">
+          <Link href="/dashboard/help-center-v2" className="flex items-center">
             <HelpCircle className="mr-2 h-4 w-4" />
             Help & Support
           </Link>
