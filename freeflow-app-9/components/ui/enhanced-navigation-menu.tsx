@@ -140,25 +140,25 @@ const mainNavigation: NavGroup[] = [
 const toolsAndResources: NavItem[] = [
   {
     title: 'API Documentation',
-    href: '/docs/api',
+    href: '/dashboard/api-v2',
     description: 'Complete API reference and guides',
     icon: Code,
   },
   {
     title: 'Templates Library',
-    href: '/templates',
+    href: '/dashboard/templates-v2',
     description: 'Pre-built templates and components',
     icon: FileText,
   },
   {
     title: 'Learning Center',
-    href: '/learn',
+    href: '/dashboard/tutorials-v2',
     description: 'Tutorials, guides, and best practices',
     icon: BookOpen,
   },
   {
     title: 'Community Forum',
-    href: '/community',
+    href: '/dashboard/community-v2',
     description: 'Connect with other creators and developers',
     icon: Globe,
   },
@@ -341,7 +341,7 @@ export function EnhancedNavigationMenu({ className }: EnhancedNavigationMenuProp
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <Link href="/help" legacyBehavior passHref>
+          <Link href="/dashboard/help-center-v2" legacyBehavior passHref>
             <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "h-9")}>
               <HelpCircle className="mr-2 h-4 w-4" />
               Help

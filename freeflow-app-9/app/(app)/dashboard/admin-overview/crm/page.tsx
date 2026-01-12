@@ -1006,7 +1006,7 @@ export default function CRMPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Deal?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{deleteDeal?.title}". This action cannot be undone.
+              This will permanently delete &quot;{deleteDeal?.title}&quot;. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1024,7 +1024,7 @@ export default function CRMPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Contact?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{deleteContact?.name}". This action cannot be undone.
+              This will permanently delete &quot;{deleteContact?.name}&quot;. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

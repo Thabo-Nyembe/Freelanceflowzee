@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
-import { copyToClipboard, apiPost, apiDelete, downloadAsJson } from '@/lib/button-handlers'
+import { apiPost, apiDelete, downloadAsJson } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
