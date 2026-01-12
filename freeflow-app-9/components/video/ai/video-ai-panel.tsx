@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { 
-  Brain, 
-  Play, 
+import {
+  Brain,
+  Play,
   Loader2,
   AlertCircle,
   CheckCircle,
@@ -17,7 +17,8 @@ import {
   Megaphone,
   Shield,
   FileVideo,
-  Users
+  Users,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

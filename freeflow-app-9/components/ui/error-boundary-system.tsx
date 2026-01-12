@@ -246,7 +246,7 @@ function FeatureLevelError(props: ErrorBoundaryState & ReturnType<ErrorBoundaryC
       animate={{ opacity: 1, scale: 1 }}
       className="p-6"
     >
-      <GlassCard className="p-6 border-destructive/20">
+      <Card className="p-6 border-destructive/20">
         <div className="flex items-start gap-4">
           <div className="p-2 rounded-lg bg-destructive/10">
             <Zap className="w-5 h-5 text-destructive" />
@@ -271,7 +271,7 @@ function FeatureLevelError(props: ErrorBoundaryState & ReturnType<ErrorBoundaryC
           </div>
         </div>
         <ErrorDetails {...props} />
-      </GlassCard>
+      </Card>
     </motion.div>
   )
 }
@@ -292,12 +292,12 @@ function ComponentLevelError(props: ErrorBoundaryState & ReturnType<ErrorBoundar
           </span>
         </div>
         <div className="flex gap-1">
-          <Context7Button size="sm" variant="ghost" onClick={props.onRetry} className="h-6 px-2">
+          <Button size="sm" variant="ghost" onClick={props.onRetry} className="h-6 px-2">
             <RefreshCw className="w-3 h-3" />
-          </Context7Button>
-          <Context7Button size="sm" variant="ghost" onClick={props.onReport} className="h-6 px-2">
+          </Button>
+          <Button size="sm" variant="ghost" onClick={props.onReport} className="h-6 px-2">
             <Bug className="w-3 h-3" />
-          </Context7Button>
+          </Button>
         </div>
       </div>
       <ErrorDetails {...props} />
@@ -313,7 +313,7 @@ function ErrorDetails(props: ErrorBoundaryState & ReturnType<ErrorBoundaryClass[
 
   return (
     <div className="mt-4 pt-4 border-t border-border">
-      <Context7Button
+      <Button
         size="sm"
         variant="ghost"
         onClick={props.onToggleCollapse}
@@ -321,7 +321,7 @@ function ErrorDetails(props: ErrorBoundaryState & ReturnType<ErrorBoundaryClass[
       >
         <Bug className="w-3 h-3" />
         {props.isCollapsed ? 'Show' : 'Hide'} Error Details
-      </Context7Button>
+      </Button>
 
       {!props.isCollapsed && (
         <motion.div
