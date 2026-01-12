@@ -1701,7 +1701,7 @@ export default function CampaignsClient() {
                           <div className="text-xs text-gray-500">Segments</div>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          /* TODO: Implement audience details view - open detail panel or navigate to audience page */
+                          toast.info(`Viewing audience: ${audience.name}`, { description: `${audience.totalMembers.toLocaleString()} members` })
                           setActiveTab('audiences')
                         }}>
                           <ChevronRight className="w-4 h-4" />
@@ -2737,8 +2737,19 @@ export default function CampaignsClient() {
             <Button variant="outline" onClick={() => setShowSendTestDialog(false)}>Cancel</Button>
             <Button
               className="bg-gradient-to-r from-rose-600 to-pink-600"
-              onClick={() => {
-                /* TODO: Implement test email sending - call email API with testEmail recipient */
+              onClick={async () => {
+                toast.promise(
+                  fetch('/api/email-marketing/campaigns', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'send_test', email: testEmail })
+                  }),
+                  {
+                    loading: 'Sending test email...',
+                    success: 'Test email sent successfully!',
+                    error: 'Failed to send test email'
+                  }
+                )
                 setShowSendTestDialog(false)
               }}
             >

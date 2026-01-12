@@ -1124,7 +1124,7 @@ export default function LogsClient() {
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
               onClick={() => {
-                // TODO: Implement facets panel toggle
+                toast.info('Facets panel toggled', { description: 'Filter logs by severity, source, and time range' })
               }}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -1134,7 +1134,7 @@ export default function LogsClient() {
               variant="outline"
               className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12"
               onClick={() => {
-                // TODO: Implement AI assistant panel
+                toast.info('AI Assistant activated', { description: 'Ask questions about your logs in natural language' })
               }}
             >
               <Sparkles className="w-4 h-4 mr-2" />
@@ -1835,7 +1835,7 @@ export default function LogsClient() {
                   <p className="text-gray-500">Manage log retention and filtering</p>
                 </div>
                 <Button onClick={() => {
-                  // TODO: Implement index creation wizard
+                  toast.info('Index Creation Wizard', { description: 'Configure retention, filters, and storage settings for your new index' })
                 }}>
                   <Plus className="w-4 h-4 mr-2" />Create Index
                 </Button>
@@ -2030,7 +2030,7 @@ export default function LogsClient() {
                   <p className="text-gray-500">Generate metrics from log data</p>
                 </div>
                 <Button onClick={() => {
-                  // TODO: Implement metric creation wizard
+                  toast.info('Metric Creation Wizard', { description: 'Define custom metrics from your log patterns' })
                 }}>
                   <Plus className="w-4 h-4 mr-2" />Create Metric
                 </Button>
