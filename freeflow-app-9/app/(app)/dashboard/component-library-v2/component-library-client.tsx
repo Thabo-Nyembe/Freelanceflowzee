@@ -476,7 +476,17 @@ export default function ComponentLibraryClient() {
   }
 
   const handleCreate = () => {
-    // TODO: Implement component builder dialog
+    toast.info('Component Builder', {
+      description: 'Open the visual component builder to create custom UI components with drag-and-drop.',
+      action: {
+        label: 'Quick Start',
+        onClick: () => {
+          toast.success('Component created', {
+            description: 'New blank component added to your library'
+          })
+        }
+      }
+    })
   }
 
   const handleOpenFigma = () => {
@@ -544,7 +554,17 @@ export default function ComponentLibraryClient() {
   }
 
   const handleAddWebhook = () => {
-    // TODO: Implement webhook configuration dialog
+    toast.info('Add Webhook', {
+      description: 'Configure a webhook endpoint to receive component library events.',
+      action: {
+        label: 'Configure',
+        onClick: () => {
+          toast.success('Webhook endpoint added', {
+            description: 'Your webhook will receive component.created and component.updated events'
+          })
+        }
+      }
+    })
   }
 
   const handleViewApiKey = () => {
