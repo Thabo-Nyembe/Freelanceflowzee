@@ -25,6 +25,7 @@ import {
   X
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 interface StorageOnboardingWizardProps {
   open: boolean
@@ -155,7 +156,7 @@ export function StorageOnboardingWizard({
 
       case 'box':
       case 'icloud':
-        alert(`${provider.name} integration coming soon!`)
+        toast.info(`${provider.name} integration coming soon!`)
         setConnecting(false)
         return
     }

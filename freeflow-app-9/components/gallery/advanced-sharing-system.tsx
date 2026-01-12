@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -190,7 +191,7 @@ export function AdvancedGallerySharingSystem({
 
     if (platform === 'copy') {
       await navigator.clipboard.writeText(shareUrls.copy)
-      alert('Link copied to clipboard!')
+      toast.success('Link copied to clipboard')
     } else if (shareUrls[platform]) {
       window.open(shareUrls[platform], '_blank', 'width=600,height=400')
     }
@@ -204,7 +205,7 @@ export function AdvancedGallerySharingSystem({
     license: 'digital' | 'print' | 'commercial'
   ) => {
     if (!settings.allowDownloads && currentUser.role === 'viewer') {
-      alert('Downloads are not enabled for this gallery')
+      toast.warning('Downloads not enabled', { description: 'This gallery does not allow downloads' })
       return
     }
 

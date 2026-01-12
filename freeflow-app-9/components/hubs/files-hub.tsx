@@ -400,9 +400,15 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
           }, 500)
         }
 
-        // Show share details
+        // Show share details and copy URL
         setTimeout(() => {
-          alert(`📤 File Shared!\n\nShare URL: ${result.shareUrl}\n\nQR Code: ${result.shareLinks.qrCode}\n\nExpires: ${result.expiresIn}`)
+          toast.success('File shared', {
+            description: `Expires: ${result.expiresIn}`
+          })
+          if (navigator.clipboard && result.shareUrl) {
+            navigator.clipboard.writeText(result.shareUrl)
+            toast.info('Share URL copied to clipboard')
+          }
         }, 1000)
       }
     } catch (error: any) {
@@ -414,65 +420,73 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const toggleStar = (fileId: string) => {
-    console.log('⭐ TOGGLE STAR - File ID:', fileId)
     setFiles(prev => prev.map(f =>
       f.id === fileId ? { ...f, starred: !f.starred } : f
     ))
     const file = files.find(f => f.id === fileId)
     if (file) {
-      alert(`${file.starred ? '✅ Removed from' : '⭐ Added to'} starred files`)
+      toast.success(file.starred ? 'Removed from starred' : 'Added to starred', {
+        description: file.name
+      })
     }
   }
 
   const handleDownloadFile = (file: FileItem) => {
-    console.log('📥 DOWNLOAD FILE:', file.name)
-    alert(`📥 Downloading File\n\nFile: ${file.name}\nSize: ${formatFileSize(file.size)}\n\nDownload started...`)
+    toast.success('Download started', {
+      description: `${file.name} (${formatFileSize(file.size)})`
+    })
     // In production: window.open(file.url, '_blank')
   }
 
   const handlePreviewFile = (file: FileItem) => {
-    console.log('👁️ PREVIEW FILE:', file.name)
-    alert(`👁️ Preview File\n\nFile: ${file.name}\nType: ${file.type}\n\nOpening preview...`)
+    toast.info('Opening preview', {
+      description: `${file.name} (${file.type})`
+    })
   }
 
   const handleRenameFile = (fileId: string) => {
-    console.log('✏️ RENAME FILE - ID:', fileId)
     const file = files.find(f => f.id === fileId)
     if (file) {
       const newName = prompt('Enter new file name:', file.name)
       if (newName && newName.trim()) {
+        const oldName = file.name
         setFiles(prev => prev.map(f =>
           f.id === fileId ? { ...f, name: newName.trim() } : f
         ))
-        alert(`✅ File Renamed\n\nOld: ${file.name}\nNew: ${newName.trim()}`)
+        toast.success('File renamed', {
+          description: `${oldName} → ${newName.trim()}`
+        })
       }
     }
   }
 
   const handleCopyLink = (file: FileItem) => {
-    console.log('🔗 COPY LINK:', file.name)
     const link = `${window.location.origin}/files/${file.id}`
     if (navigator.clipboard) {
       navigator.clipboard.writeText(link)
-      alert(`🔗 Link Copied!\n\nFile: ${file.name}\nLink: ${link}`)
+      toast.success('Link copied', {
+        description: file.name
+      })
     } else {
-      alert(`🔗 Share Link\n\n${link}`)
+      toast.info('Share link', {
+        description: link
+      })
     }
   }
 
   const handleMoveToFolder = (fileId: string) => {
-    console.log('📁 MOVE TO FOLDER - File ID:', fileId)
     const folderName = prompt('Enter folder name:', 'New Folder')
     if (folderName && folderName.trim()) {
       setFiles(prev => prev.map(f =>
         f.id === fileId ? { ...f, folder: folderName.trim() } : f
       ))
-      alert(`📁 File Moved\n\nFolder: ${folderName.trim()}`)
+      toast.success('File moved', {
+        description: `Moved to "${folderName.trim()}"`
+      })
     }
   }
 
   const handleAddTags = (fileId: string) => {
-    console.log('🏷️ ADD TAGS - File ID:', fileId)
     const file = files.find(f => f.id === fileId)
     if (file) {
       const tags = prompt('Enter tags (comma-separated):', file.tags.join(', '))
@@ -481,13 +495,14 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
         setFiles(prev => prev.map(f =>
           f.id === fileId ? { ...f, tags: newTags } : f
         ))
-        alert(`🏷️ Tags Updated\n\nTags: ${newTags.join(', ')}`)
+        toast.success('Tags updated', {
+          description: newTags.join(', ')
+        })
       }
     }
   }
 
   const handleSelectFile = (fileId: string) => {
-    console.log('✅ SELECT FILE:', fileId)
     setSelectedFiles(prev =>
       prev.includes(fileId)
         ? prev.filter(id => id !== fileId)
@@ -496,38 +511,38 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
   }
 
   const handleSelectAll = () => {
-    console.log('✅ SELECT ALL FILES')
     if (selectedFiles.length === sortedFiles.length) {
       setSelectedFiles([])
-      alert('✅ All files deselected')
+      toast.info('All files deselected')
     } else {
       setSelectedFiles(sortedFiles.map(f => f.id))
-      alert(`✅ Selected ${sortedFiles.length} files`)
+      toast.success(`Selected ${sortedFiles.length} files`)
     }
   }
 
   const handleBulkDelete = () => {
-    console.log('🗑️ BULK DELETE - Files:', selectedFiles.length)
     if (selectedFiles.length === 0) {
-      alert('⚠️ No Files Selected\n\nPlease select files to delete.')
+      toast.warning('No files selected', { description: 'Please select files to delete' })
       return
     }
-    if (confirm(`⚠️ Delete ${selectedFiles.length} file(s)?\n\nThis action cannot be undone.`)) {
+    if (confirm(`Delete ${selectedFiles.length} file(s)? This action cannot be undone.`)) {
+      const count = selectedFiles.length
       setFiles(prev => prev.filter(f => !selectedFiles.includes(f.id)))
-      alert(`✅ Deleted ${selectedFiles.length} file(s)`)
+      toast.success(`Deleted ${count} file(s)`)
       setSelectedFiles([])
     }
   }
 
   const handleBulkDownload = () => {
-    console.log('📥 BULK DOWNLOAD - Files:', selectedFiles.length)
     if (selectedFiles.length === 0) {
-      alert('⚠️ No Files Selected\n\nPlease select files to download.')
+      toast.warning('No files selected', { description: 'Please select files to download' })
       return
     }
     const selectedFileObjects = files.filter(f => selectedFiles.includes(f.id))
     const totalSize = selectedFileObjects.reduce((sum, f) => sum + f.size, 0)
-    alert(`📥 Bulk Download\n\nFiles: ${selectedFiles.length}\nTotal Size: ${formatFileSize(totalSize)}\n\nCreating zip archive...`)
+    toast.success('Creating download archive', {
+      description: `${selectedFiles.length} files (${formatFileSize(totalSize)})`
+    })
   }
 
   const handleCreateFolder = async () => {
@@ -573,7 +588,9 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
 
         // Show next steps
         setTimeout(() => {
-          alert(`✅ Folder Created Successfully!\n\nNext Steps:\n• Upload files to this folder\n• Set folder permissions and sharing settings\n• Add collaborators if needed\n• Organize with subfolders\n• Add folder description and tags`)
+          toast.info('Next steps', {
+            description: 'Upload files, set permissions, add collaborators, or organize with subfolders'
+          })
         }, 500)
 
         // Note: In production, this would update the local folders state
@@ -622,52 +639,60 @@ export default function FilesHub({ userId, onFileUpload, onFileDelete, onFileSha
     a.click()
     URL.revokeObjectURL(url)
 
-    alert(`💾 File List Exported\n\nFormat: ${format.toUpperCase()}\nFile: ${filename}\nRecords: ${data.length}`)
+    toast.success('File list exported', {
+      description: `${filename} (${data.length} records)`
+    })
   }
 
   const handleGenerateShareLink = (file: FileItem) => {
-    console.log('🔗 GENERATE SHARE LINK:', file.name)
     const shareLink = `${window.location.origin}/share/${file.id}?expires=7d`
     if (navigator.clipboard) {
       navigator.clipboard.writeText(shareLink)
-      alert(`🔗 Share Link Generated!\n\nFile: ${file.name}\nLink: ${shareLink}\n\nExpires: 7 days\n\nLink copied to clipboard!`)
+      toast.success('Share link copied', {
+        description: `${file.name} - expires in 7 days`
+      })
+    } else {
+      toast.info('Share link generated', {
+        description: shareLink
+      })
     }
   }
 
   const handleBulkMove = () => {
-    console.log('📁 BULK MOVE - Files:', selectedFiles.length)
     if (selectedFiles.length === 0) {
-      alert('⚠️ No Files Selected\n\nPlease select files to move.')
+      toast.warning('No files selected', { description: 'Please select files to move' })
       return
     }
     const folderName = prompt('Enter destination folder:', 'New Folder')
     if (folderName && folderName.trim()) {
+      const count = selectedFiles.length
       setFiles(prev => prev.map(f =>
         selectedFiles.includes(f.id) ? { ...f, folder: folderName.trim() } : f
       ))
-      alert(`📁 Moved ${selectedFiles.length} file(s)\n\nDestination: ${folderName.trim()}`)
+      toast.success(`Moved ${count} file(s)`, {
+        description: `Destination: ${folderName.trim()}`
+      })
       setSelectedFiles([])
     }
   }
 
   const handleFilterByFolder = (folder: string | null) => {
-    console.log('📁 FILTER BY FOLDER:', folder || 'All')
     setSelectedFolder(folder)
-    alert(`📁 Filter Applied\n\nFolder: ${folder || 'All Files'}`)
+    toast.info('Filter applied', {
+      description: folder || 'Showing all files'
+    })
   }
 
   const handleClearSearch = () => {
-    console.log('🔍 CLEAR SEARCH')
     setSearchQuery('')
     setFilterType('all')
     setSelectedFolder(null)
-    alert('🔍 Search Cleared\n\nShowing all files.')
+    toast.info('Search cleared', { description: 'Showing all files' })
   }
 
   const handleSortChange = (newSortBy: 'name' | 'date' | 'size' | 'downloads') => {
-    console.log('🔄 SORT CHANGED:', newSortBy)
     setSortBy(newSortBy)
-    alert(`🔄 Files sorted by: ${newSortBy}`)
+    toast.info(`Sorted by ${newSortBy}`)
   }
 
   const FileCard = ({ file }: { file: FileItem }) => {

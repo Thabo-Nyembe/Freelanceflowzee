@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { X, Copy, Share2, Facebook, Twitter, Linkedin, Instagram, Mail, Link, Download } from 'lucide-react';
+import { toast } from 'sonner'
 
 interface SharingModalProps {
   isOpen: boolean;
@@ -83,8 +84,10 @@ export function EnhancedSharingModal({
 
   const handleSocialShare = (platform: typeof socialPlatforms[0]) => {
     if (platform.name === 'Instagram') {
-      // Instagram doesn&apos;t support direct URL sharing, show instructions
-      alert('To share on Instagram, save the image and post it manually with the link in your bio or story.');
+      // Instagram doesn't support direct URL sharing, show instructions
+      toast.info('Instagram sharing', {
+        description: 'Save the image and post manually with the link in your bio or story'
+      });
       return;
     }
     window.open(platform.url, '_blank', 'width=600,height=400');

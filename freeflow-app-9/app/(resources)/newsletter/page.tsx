@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { 
-  Mail, 
-  Send, 
+import {
+  Mail,
+  Send,
   Calendar,
   Users,
   CheckCircle,
@@ -20,6 +20,7 @@ import {
   Share2,
   Bell
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 const newsletterArchive = [
   {
@@ -105,15 +106,17 @@ export default function NewsletterPage() {
         setIsSubscribed(true)
         setEmail('')
 
-        // Show success alert with next steps
+        // Show success toast with next steps
         setTimeout(() => {
-          const message = result.alreadySubscribed
-            ? `✅ Already Subscribed\n\n${result.message}\n\nYou're all set! Keep an eye on your inbox for our weekly insights.`
+          const title = result.alreadySubscribed
+            ? 'Already subscribed'
             : result.reactivated
-            ? `✅ Welcome Back!\n\n${result.message}\n\nNext Steps:\n${result.nextSteps.map((step: string) => `• ${step}`).join('\n')}`
-            : `✅ Successfully Subscribed!\n\n${result.message}\n\nNext Steps:\n${result.nextSteps.map((step: string) => `• ${step}`).join('\n')}`
+            ? 'Welcome back!'
+            : 'Successfully subscribed!'
 
-          alert(message)
+          toast.success(title, {
+            description: result.message
+          })
         }, 500)
       } else {
         setErrorMessage(result.error || 'Failed to subscribe')

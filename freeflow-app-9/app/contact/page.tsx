@@ -121,9 +121,11 @@ export default function ContactPage() {
           description: `Case ID: ${result.caseId}`
         })
 
-        // Show next steps alert
+        // Show next steps toast
         setTimeout(() => {
-          alert(`✅ Message Sent Successfully\n\nCase ID: ${result.caseId}\n\nNext Steps:\n${result.nextSteps.map(step => `• ${step}`).join('\n')}`)
+          toast.info('Next steps', {
+            description: result.nextSteps?.slice(0, 2).join(', ') || 'We will get back to you soon'
+          })
         }, 500)
 
         // Reset form

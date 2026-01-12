@@ -1697,7 +1697,7 @@ Best regards,
                             <div className="font-medium">Delete All Data</div>
                             <p className="text-sm text-gray-500">Permanently delete all invoice data</p>
                           </div>
-                          <Button variant="destructive" onClick={() => { alert('Please contact support to permanently delete all invoice data.') }}>
+                          <Button variant="destructive" onClick={() => { toast.info('Contact support', { description: 'Please contact support to permanently delete all invoice data.' }) }}>
                             Delete All Data
                           </Button>
                         </div>

@@ -99,9 +99,11 @@ export const PricingCard = memo(function PricingCard({ plan }: PricingCardProps)
           description: result.plan.name
         })
 
-        // Show next steps alert
+        // Show next steps toast
         setTimeout(() => {
-          alert(`✅ ${result.message}\n\nNext Steps:\n${result.nextSteps.map(step => `• ${step}`).join('\n')}`)
+          toast.info('Next steps', {
+            description: result.nextSteps.slice(0, 2).join(', ')
+          })
         }, 500)
 
         // Handle redirect or checkout

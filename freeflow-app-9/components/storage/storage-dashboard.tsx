@@ -6,18 +6,19 @@ import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Activity, 
-  Upload, 
-  HardDrive, 
-  DollarSign, 
-  TrendingDown, 
-  Server, 
-  Cloud, 
-  Image, 
-  Video, 
-  FileText 
+import {
+  Activity,
+  Upload,
+  HardDrive,
+  DollarSign,
+  TrendingDown,
+  Server,
+  Cloud,
+  Image,
+  Video,
+  FileText
 } from 'lucide-react';
+import { toast } from 'sonner'
 
 interface StorageAnalytics {
   totalFiles: number;
@@ -101,12 +102,12 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
       });
       
       if (response.ok) {
-        alert('Storage optimization completed successfully!');
+        toast.success('Storage optimization completed');
         await loadAnalytics(); // Refresh analytics
       }
     } catch (error) {
       console.error('Optimization failed: ', error);
-      alert('Storage optimization failed. Please try again.');
+      toast.error('Storage optimization failed', { description: 'Please try again' });
     } finally {
       setOptimizing(false);
     }
@@ -131,14 +132,14 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
       const data = await response.json();
       
       if (data.success) {
-        alert(`${data.message} - ${data.costOptimized}`);
+        toast.success(data.message, { description: data.costOptimized });
         await Promise.all([loadAnalytics(), loadFiles()]);
       } else {
-        alert(`Upload failed: ${data.error}`);
+        toast.error('Upload failed', { description: data.error });
       }
     } catch (error) {
       console.error('Upload failed: ', error);
-      alert('Upload failed. Please try again.');
+      toast.error('Upload failed', { description: 'Please try again' });
     }
 
     // Reset file input

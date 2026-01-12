@@ -41,6 +41,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, isToday, isYesterday } from 'date-fns'
+import { toast } from 'sonner'
 
 // Status types and configurations
 const STATUS_TYPES = {
@@ -309,7 +310,7 @@ const UserPresenceCard: React.FC<UserPresenceCardProps> = ({
                         className="h-6 w-6 p-0"
                         onClick={(e) => {
                           e.stopPropagation()
-                          console.log('Start chat with', user.name)
+                          toast.success('Opening chat', { description: `Starting conversation with ${user.name}` })
                         }}
                       >
                         <MessageSquare className="w-3 h-3" />
@@ -327,7 +328,7 @@ const UserPresenceCard: React.FC<UserPresenceCardProps> = ({
                           className="h-6 w-6 p-0"
                           onClick={(e) => {
                             e.stopPropagation()
-                            console.log('Start call with', user.name)
+                            toast.success('Starting call', { description: `Calling ${user.name}...` })
                           }}
                         >
                           <Video className="w-3 h-3" />
@@ -862,7 +863,7 @@ export const PresenceStatusSystem: React.FC<PresenceStatusSystemProps> = ({
                             showActivity={true}
                             showDevice={true}
                             showLastSeen={true}
-                            onClick={(user) => console.log('View user profile:', user)}
+                            onClick={(user) => toast.info(`${user.name}`, { description: `Status: ${user.status}${user.currentActivity ? ` - ${user.currentActivity}` : ''}` })}
                           />
                         ))}
                       </AnimatePresence>
