@@ -40,7 +40,8 @@ import {
   Database,
   CheckCircle,
   AlertCircle,
-  BarChart3
+  BarChart3,
+  Loader2
 } from 'lucide-react'
 import { TemplateCreatorModal } from './template-creator-modal'
 import {

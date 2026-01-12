@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useContracts, type Contract } from '@/lib/hooks/use-contracts'
 import {
-  FileText, Send, Eye, CheckCircle2, Clock, Users,
+  FileText, Send, Eye, CheckCircle2, CheckCircle, Clock, Users,
   FileSignature, Download, Copy, MoreVertical, Search, Filter,
   Plus, DollarSign, Shield, Share2, Lock, Mail, Phone,
   PenTool, XCircle, RefreshCw, Palette, Sliders,
