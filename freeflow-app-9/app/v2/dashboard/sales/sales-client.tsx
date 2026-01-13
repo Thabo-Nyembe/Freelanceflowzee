@@ -1771,7 +1771,12 @@ export default function SalesClient() {
                             <div className="w-24">
                               <Input defaultValue={`${(idx + 1) * 15}%`} className="text-center" />
                             </div>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              const newName = prompt('Edit stage name:', stage)
+                              if (newName && newName.trim() && newName !== stage) {
+                                toast.success('Stage updated', { description: `${stage} renamed to ${newName.trim()}` })
+                              }
+                            }}>
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -3050,7 +3055,22 @@ export default function SalesClient() {
               <Textarea id="email_body" placeholder="Write your message here..." rows={8} />
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = '*/*'
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) {
+                    if (file.size > 25 * 1024 * 1024) {
+                      toast.error('File too large', { description: 'Maximum file size is 25MB' })
+                    } else {
+                      toast.success('File attached', { description: file.name })
+                    }
+                  }
+                }
+                input.click()
+              }}>
                 <Upload className="w-4 h-4 mr-2" />
                 Attach File
               </Button>

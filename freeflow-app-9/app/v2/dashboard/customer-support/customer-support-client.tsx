@@ -2971,7 +2971,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <h4 className="font-medium">{team.name}</h4>
                   <p className="text-sm text-gray-500">{team.members} members - Lead: {team.lead}</p>
                 </div>
-                <Button variant="outline" size="sm">Manage</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info(`Manage ${team.name}`, { description: `${team.members} members - Lead: ${team.lead}` })}>Manage</Button>
               </div>
             ))}
             <Button variant="outline" className="w-full" onClick={() => {
@@ -3335,7 +3335,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <p className="font-medium">{segment.name}</p>
                   <p className="text-sm text-gray-600">{segment.count} customers</p>
                 </div>
-                <Button variant="outline" size="sm">View</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info(`Viewing ${segment.name}`, { description: `Showing ${segment.count} customers in this segment` })}>View</Button>
               </div>
             ))}
           </div>

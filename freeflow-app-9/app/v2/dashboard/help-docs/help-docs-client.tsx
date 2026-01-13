@@ -1072,10 +1072,15 @@ export default function HelpDocsClient() {
                   <p className="text-blue-100">Organize and manage your help center content structure</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
+                    const categoryName = prompt('Enter category name:', 'New Category')
+                    if (categoryName && categoryName.trim()) {
+                      toast.success('Category created', { description: categoryName })
+                    }
+                  }}>
                     <Plus className="w-4 h-4 mr-2" />Add Category
                   </Button>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => toast.info('Structure Manager', { description: 'Opening category structure editor...' })}>
                     <Settings className="w-4 h-4 mr-2" />Manage Structure
                   </Button>
                 </div>

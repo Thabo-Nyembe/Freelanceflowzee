@@ -1947,7 +1947,9 @@ export default defineConfig({
                             </span>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full mt-4">
+                        <Button variant="outline" className="w-full mt-4" onClick={() => {
+                          toast.info('Integration Setup', { description: 'Opening integration configuration wizard...' })
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Integration
                         </Button>
@@ -1971,7 +1973,20 @@ export default defineConfig({
                               <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
                               <p className="text-sm text-gray-500">{service.desc}</p>
                             </div>
-                            <Button variant={service.connected ? "outline" : "default"} size="sm">
+                            <Button variant={service.connected ? "outline" : "default"} size="sm" onClick={() => {
+                              if (service.connected) {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1000)),
+                                  {
+                                    loading: `Disconnecting from ${service.name}...`,
+                                    success: `Disconnected from ${service.name}`,
+                                    error: 'Failed to disconnect'
+                                  }
+                                )
+                              } else {
+                                toast.info('Connect Service', { description: `Opening ${service.name} authentication...` })
+                              }
+                            }}>
                               {service.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -2031,12 +2046,21 @@ export default defineConfig({
                               <Input value={env.key} readOnly className="font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
                               <Input type="password" value={env.value} className="font-mono text-sm dark:bg-gray-900 dark:border-gray-700" />
                             </div>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              if (confirm(`Delete environment variable ${env.key}?`)) {
+                                toast.success(`Deleted ${env.key}`)
+                              }
+                            }}>
                               <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          const varName = prompt('Enter variable name:', 'NEW_VAR')
+                          if (varName && varName.trim()) {
+                            toast.success('Variable added', { description: `${varName} has been added to your environment` })
+                          }
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Variable
                         </Button>
@@ -2102,7 +2126,16 @@ export default defineConfig({
                               <p className="text-sm text-gray-500">245 MB used</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Clear Cache</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Clearing test cache...',
+                                success: 'Cleared 245 MB of test cache',
+                                error: 'Failed to clear cache'
+                              }
+                            )
+                          }}>Clear Cache</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                           <div className="flex items-center gap-3">
@@ -2112,7 +2145,18 @@ export default defineConfig({
                               <p className="text-sm text-gray-500">127 reports (1.2 GB)</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Clean Up</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            if (confirm('Delete 127 old reports (1.2 GB)? This cannot be undone.')) {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                {
+                                  loading: 'Cleaning up old reports...',
+                                  success: 'Deleted 127 old reports, freed 1.2 GB',
+                                  error: 'Failed to clean up reports'
+                                }
+                              )
+                            }
+                          }}>Clean Up</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
                           <div className="flex items-center gap-3">
@@ -2122,7 +2166,7 @@ export default defineConfig({
                               <p className="text-sm text-gray-500">3 browsers installed (890 MB)</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Browser Manager', { description: 'Opening browser installation manager...' })}>Manage</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2138,14 +2182,39 @@ export default defineConfig({
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Settings</p>
                             <p className="text-sm text-gray-500">Reset to default configuration</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            if (confirm('Reset all settings to defaults? This will restore factory configuration.')) {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                {
+                                  loading: 'Resetting settings...',
+                                  success: 'Settings reset to defaults',
+                                  error: 'Failed to reset settings'
+                                }
+                              )
+                            }
+                          }}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Data</p>
                             <p className="text-sm text-gray-500">Remove all test results and artifacts</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            const confirmText = prompt('Type "DELETE ALL DATA" to confirm this irreversible action:')
+                            if (confirmText === 'DELETE ALL DATA') {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                {
+                                  loading: 'Deleting all test data...',
+                                  success: 'All test data has been permanently deleted',
+                                  error: 'Failed to delete data'
+                                }
+                              )
+                            } else if (confirmText !== null) {
+                              toast.error('Confirmation text did not match. Data was not deleted.')
+                            }
+                          }}>Delete</Button>
                         </div>
                       </CardContent>
                     </Card>

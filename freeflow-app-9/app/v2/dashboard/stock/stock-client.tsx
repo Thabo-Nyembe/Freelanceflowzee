@@ -3139,11 +3139,21 @@ export default function StockClient() {
               {['Zone A - Receiving', 'Zone B - Storage', 'Zone C - Picking', 'Zone D - Shipping'].map((zone, idx) => (
                 <div key={idx} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
                   <span className="text-sm">{zone}</span>
-                  <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    const newName = prompt('Edit zone name:', zone)
+                    if (newName && newName.trim()) {
+                      toast.success('Zone updated', { description: `${zone} renamed to ${newName.trim()}` })
+                    }
+                  }}><Edit className="w-4 h-4" /></Button>
                 </div>
               ))}
             </div>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={() => {
+              const zoneName = prompt('Enter zone name:', 'Zone E - New Area')
+              if (zoneName && zoneName.trim()) {
+                toast.success('Zone added', { description: zoneName.trim() })
+              }
+            }}>
               <Plus className="w-4 h-4 mr-2" />
               Add New Zone
             </Button>

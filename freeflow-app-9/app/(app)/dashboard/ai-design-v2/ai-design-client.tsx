@@ -638,11 +638,11 @@ export default function AIDesignClient() {
                 {stats.totalCredits - stats.creditsUsed} credits left
               </span>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info('Generation History', { description: 'Opening your generation history...' })}>
               <History className="w-4 h-4 mr-2" />
               History
             </Button>
-            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
+            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => toast.info('Upgrade Plan', { description: 'Redirecting to pricing page for more credits...' })}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>

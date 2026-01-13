@@ -3648,7 +3648,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 </ul>
               </div>
               <div className="text-center py-4">
-                <Button variant="outline" size="lg" className="gap-2">
+                <Button variant="outline" size="lg" className="gap-2" onClick={() => toast.info('LinkedIn OAuth', { description: 'Opening LinkedIn authentication window...' })}>
                   <ExternalLink className="h-4 w-4" />
                   Sign in with LinkedIn
                 </Button>

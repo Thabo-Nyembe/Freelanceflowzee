@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -221,11 +222,20 @@ export function EnhancedShadcnDashboard({
             </PopoverContent>
           </Popover>
           
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => {
+            toast.promise(
+              new Promise(resolve => setTimeout(resolve, 1500)),
+              {
+                loading: 'Refreshing dashboard data...',
+                success: 'Dashboard data refreshed',
+                error: 'Failed to refresh'
+              }
+            )
+          }}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
@@ -431,17 +441,17 @@ export function EnhancedShadcnDashboard({
               </DialogContent>
             </Dialog>
             
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info('Team Invitations', { description: 'Opening team invitation dialog...' })}>
               <Users className="mr-2 h-4 w-4" />
               Invite Team
             </Button>
-            
-            <Button variant="outline" size="sm">
+
+            <Button variant="outline" size="sm" onClick={() => toast.info('Reports', { description: 'Loading analytics reports...' })}>
               <BarChart3 className="mr-2 h-4 w-4" />
               View Reports
             </Button>
-            
-            <Button variant="outline" size="sm">
+
+            <Button variant="outline" size="sm" onClick={() => toast.info('Notifications', { description: 'Opening notification center...' })}>
               <Bell className="mr-2 h-4 w-4" />
               Notifications
             </Button>

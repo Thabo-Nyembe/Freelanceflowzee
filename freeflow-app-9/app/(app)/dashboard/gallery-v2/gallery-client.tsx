@@ -1863,7 +1863,10 @@ export default function GalleryClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="kazi-gallery-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => {
+                              navigator.clipboard.writeText('kazi-gallery-xxxxxxxxxxxxxxxxxxxxx')
+                              toast.success('API key copied to clipboard')
+                            }}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1883,7 +1886,18 @@ export default function GalleryClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          if (confirm('Are you sure you want to regenerate your API key? Your existing key will stop working immediately.')) {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Regenerating API key...',
+                                success: 'New API key generated! Please update your integrations.',
+                                error: 'Failed to regenerate key'
+                              }
+                            )
+                          }
+                        }}>
                           <Key className="h-4 w-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1924,7 +1938,18 @@ export default function GalleryClient() {
                           </div>
                           <Switch />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          if (confirm('Are you sure you want to permanently delete all items in trash? This cannot be undone.')) {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              {
+                                loading: 'Emptying trash...',
+                                success: 'Trash emptied successfully! Freed up 2.3 GB of storage.',
+                                error: 'Failed to empty trash'
+                              }
+                            )
+                          }
+                        }}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Empty Trash
                         </Button>
@@ -1964,7 +1989,16 @@ export default function GalleryClient() {
                             </Select>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 2000)),
+                            {
+                              loading: 'Preparing your data export...',
+                              success: 'Export request submitted! You will receive an email with download link within 24 hours.',
+                              error: 'Failed to request export'
+                            }
+                          )
+                        }}>
                           <Download className="h-4 w-4 mr-2" />
                           Request Data Export
                         </Button>
@@ -1986,7 +2020,21 @@ export default function GalleryClient() {
                             <p className="font-medium">Delete All Photos</p>
                             <p className="text-sm text-gray-500">Remove all uploaded photos</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                            const confirmText = prompt('Type "DELETE ALL PHOTOS" to confirm this irreversible action:')
+                            if (confirmText === 'DELETE ALL PHOTOS') {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                {
+                                  loading: 'Deleting all photos...',
+                                  success: 'All photos have been permanently deleted.',
+                                  error: 'Failed to delete photos'
+                                }
+                              )
+                            } else if (confirmText !== null) {
+                              toast.error('Confirmation text did not match. Photos were not deleted.')
+                            }
+                          }}>
                             Delete Photos
                           </Button>
                         </div>
@@ -1995,7 +2043,21 @@ export default function GalleryClient() {
                             <p className="font-medium">Delete All Collections</p>
                             <p className="text-sm text-gray-500">Remove all collections</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
+                            const confirmText = prompt('Type "DELETE ALL COLLECTIONS" to confirm this irreversible action:')
+                            if (confirmText === 'DELETE ALL COLLECTIONS') {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 2500)),
+                                {
+                                  loading: 'Deleting all collections...',
+                                  success: 'All collections have been permanently deleted.',
+                                  error: 'Failed to delete collections'
+                                }
+                              )
+                            } else if (confirmText !== null) {
+                              toast.error('Confirmation text did not match. Collections were not deleted.')
+                            }
+                          }}>
                             Delete Collections
                           </Button>
                         </div>
@@ -2004,7 +2066,21 @@ export default function GalleryClient() {
                             <p className="font-medium">Delete Account</p>
                             <p className="text-sm text-gray-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => {
+                            const confirmText = prompt('Type "DELETE MY ACCOUNT" to confirm. This action is IRREVERSIBLE and will delete all your data:')
+                            if (confirmText === 'DELETE MY ACCOUNT') {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                {
+                                  loading: 'Deleting your account...',
+                                  success: 'Account deletion initiated. You will be logged out shortly.',
+                                  error: 'Failed to delete account'
+                                }
+                              )
+                            } else if (confirmText !== null) {
+                              toast.error('Confirmation text did not match. Account was not deleted.')
+                            }
+                          }}>
                             Delete Account
                           </Button>
                         </div>

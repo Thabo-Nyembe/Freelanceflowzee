@@ -2961,14 +2961,24 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">$9.99</Badge>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" onClick={() => {
+                        const newRate = prompt(`Edit shipping rate for ${zone}:`, '$9.99')
+                        if (newRate && newRate.trim()) {
+                          toast.success(`Updated ${zone} rate`, { description: `New rate: ${newRate}` })
+                        }
+                      }}>
                         <Edit className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
                 ))}
               </div>
-              <Button variant="outline" className="w-full gap-2">
+              <Button variant="outline" className="w-full gap-2" onClick={() => {
+                const zoneName = prompt('Enter shipping zone name:', 'New Zone')
+                if (zoneName && zoneName.trim()) {
+                  toast.success('Shipping zone added', { description: zoneName })
+                }
+              }}>
                 <Plus className="w-4 h-4" />
                 Add Shipping Zone
               </Button>

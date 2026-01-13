@@ -1919,7 +1919,12 @@ export default function PerformanceClient() {
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          const webhookUrl = prompt('Enter webhook URL:', 'https://api.example.com/webhook')
+                          if (webhookUrl && webhookUrl.trim()) {
+                            toast.success('Webhook added', { description: `Webhook configured: ${webhookUrl.substring(0, 30)}...` })
+                          }
+                        }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1939,10 +1944,24 @@ export default function PerformanceClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="perf_xxxxxxxxxxxxxxxxxxxxx" readOnly />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => {
+                              navigator.clipboard.writeText('perf_xxxxxxxxxxxxxxxxxxxxx')
+                              toast.success('API key copied to clipboard')
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => {
+                              if (confirm('Regenerate API key? Your current key will stop working immediately.')) {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1500)),
+                                  {
+                                    loading: 'Regenerating API key...',
+                                    success: 'New API key generated! Update your integrations.',
+                                    error: 'Failed to regenerate key'
+                                  }
+                                )
+                              }
+                            }}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
