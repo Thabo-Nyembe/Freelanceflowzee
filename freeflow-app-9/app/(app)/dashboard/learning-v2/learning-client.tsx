@@ -1706,7 +1706,16 @@ export default function LearningClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+                        <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1000)),
+                            {
+                              loading: 'Saving preferences...',
+                              success: 'Preferences saved successfully',
+                              error: 'Failed to save preferences'
+                            }
+                          )
+                        }}>
                           Save Preferences
                         </Button>
                       </CardContent>
@@ -1777,7 +1786,12 @@ export default function LearningClient() {
                             <Input type="number" defaultValue={skill.level + 20} className="w-20" />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          const skillName = prompt('Enter skill name:', 'New Skill')
+                          if (skillName && skillName.trim()) {
+                            toast.success('Skill goal added', { description: `Target: ${skillName}` })
+                          }
+                        }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Skill Goal
                         </Button>
@@ -1869,7 +1883,27 @@ export default function LearningClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => {
+                              if (integration.status === 'connected') {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 1500)),
+                                  {
+                                    loading: `Disconnecting ${integration.name}...`,
+                                    success: `${integration.name} disconnected successfully`,
+                                    error: 'Failed to disconnect'
+                                  }
+                                )
+                              } else {
+                                toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 2000)),
+                                  {
+                                    loading: `Connecting to ${integration.name}...`,
+                                    success: `${integration.name} connected successfully`,
+                                    error: 'Failed to connect'
+                                  }
+                                )
+                              }
+                            }}>
                               {integration.status === 'connected' ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -1889,12 +1923,26 @@ export default function LearningClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="sk_learning_****************************" readOnly className="font-mono" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => {
+                              navigator.clipboard.writeText('sk_learning_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6')
+                              toast.success('API key copied to clipboard')
+                            }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => {
+                          if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Regenerating API key...',
+                                success: 'New API key generated. Please update your integrations.',
+                                error: 'Failed to regenerate API key'
+                              }
+                            )
+                          }
+                        }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
