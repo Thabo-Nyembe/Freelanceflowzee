@@ -1889,7 +1889,7 @@ export default function GalleryClient() {
                         <Button variant="outline" className="w-full" onClick={() => {
                           if (confirm('Are you sure you want to regenerate your API key? Your existing key will stop working immediately.')) {
                             toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              fetch('/api/gallery/api-key', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                               {
                                 loading: 'Regenerating API key...',
                                 success: 'New API key generated! Please update your integrations.',
@@ -1941,7 +1941,7 @@ export default function GalleryClient() {
                         <Button variant="outline" className="w-full" onClick={() => {
                           if (confirm('Are you sure you want to permanently delete all items in trash? This cannot be undone.')) {
                             toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              fetch('/api/gallery/trash', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                               {
                                 loading: 'Emptying trash...',
                                 success: 'Trash emptied successfully! Freed up 2.3 GB of storage.',
@@ -1991,7 +1991,7 @@ export default function GalleryClient() {
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 2000)),
+                            fetch('/api/gallery/export', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                             {
                               loading: 'Preparing your data export...',
                               success: 'Export request submitted! You will receive an email with download link within 24 hours.',
@@ -2024,7 +2024,7 @@ export default function GalleryClient() {
                             const confirmText = prompt('Type "DELETE ALL PHOTOS" to confirm this irreversible action:')
                             if (confirmText === 'DELETE ALL PHOTOS') {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                fetch('/api/gallery/photos', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                 {
                                   loading: 'Deleting all photos...',
                                   success: 'All photos have been permanently deleted.',
@@ -2047,7 +2047,7 @@ export default function GalleryClient() {
                             const confirmText = prompt('Type "DELETE ALL COLLECTIONS" to confirm this irreversible action:')
                             if (confirmText === 'DELETE ALL COLLECTIONS') {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 2500)),
+                                fetch('/api/gallery/collections', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                 {
                                   loading: 'Deleting all collections...',
                                   success: 'All collections have been permanently deleted.',
@@ -2070,7 +2070,7 @@ export default function GalleryClient() {
                             const confirmText = prompt('Type "DELETE MY ACCOUNT" to confirm. This action is IRREVERSIBLE and will delete all your data:')
                             if (confirmText === 'DELETE MY ACCOUNT') {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                fetch('/api/account', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                 {
                                   loading: 'Deleting your account...',
                                   success: 'Account deletion initiated. You will be logged out shortly.',

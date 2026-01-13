@@ -602,8 +602,12 @@ export default function PerformanceClient() {
         description: `Analyzing ${testUrl}`
       })
 
-      // Simulate audit (in production, this would call a real Lighthouse API)
-      await new Promise(resolve => setTimeout(resolve, 2500))
+      // Call performance audit API
+      const auditResponse = await fetch('/api/performance/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: testUrl, device: selectedDevice })
+      }).catch(() => null) // Continue even if API fails
 
       // Store performance metric in Supabase
       const { error } = await supabase
@@ -657,8 +661,12 @@ export default function PerformanceClient() {
         description: 'Please wait while we compile your data'
       })
 
-      // Simulate export delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Track export event
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'performance_report_export', device: selectedDevice })
+      }).catch(() => {}) // Non-blocking analytics
 
       // Create exportable data
       const exportData = {
@@ -1953,7 +1961,7 @@ export default function PerformanceClient() {
                             <Button variant="outline" onClick={() => {
                               if (confirm('Regenerate API key? Your current key will stop working immediately.')) {
                                 toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1500)),
+                                  fetch('/api/performance/api-key', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                   {
                                     loading: 'Regenerating API key...',
                                     success: 'New API key generated! Update your integrations.',

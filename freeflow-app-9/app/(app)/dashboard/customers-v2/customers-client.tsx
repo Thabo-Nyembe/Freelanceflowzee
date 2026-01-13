@@ -895,9 +895,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         priority: 'medium'
       }
 
-      // In a real app, this would call an API
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 800)),
+        fetch('/api/customers/activities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newActivity) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
         {
           loading: 'Saving activity...',
           success: () => {

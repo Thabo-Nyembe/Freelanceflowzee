@@ -918,15 +918,23 @@ export default function AIAssistantClient() {
         description: `${file.name} is being processed`
       })
 
-      // Simulate processing completion
-      setTimeout(() => {
+      // Process file via API
+      fetch('/api/ai/knowledge/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId: data.id, storagePath: uploadData.path })
+      }).then(res => res.ok ? res.json() : null).then(processedData => {
         setFiles(prev => prev.map(f =>
-          f.id === newFile.id ? { ...f, status: 'ready', chunks: Math.floor(file.size / 1000) } : f
+          f.id === newFile.id ? { ...f, status: 'ready', chunks: processedData?.chunks || Math.floor(file.size / 1000) } : f
         ))
         toast.success('File ready', {
           description: `${file.name} has been processed and is ready to use`
         })
-      }, 3000)
+      }).catch(() => {
+        setFiles(prev => prev.map(f =>
+          f.id === newFile.id ? { ...f, status: 'error' } : f
+        ))
+      })
     } catch (err) {
       console.error('Error uploading file:', err)
       toast.error('Failed to upload file', {

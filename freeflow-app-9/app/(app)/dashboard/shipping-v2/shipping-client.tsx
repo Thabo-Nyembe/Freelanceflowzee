@@ -3652,16 +3652,10 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowBatchPrintDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Preparing labels for printing...', { id: 'batch-print' })
-                try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  window.print()
-                  toast.success('Labels sent to printer', { id: 'batch-print', description: `${mockLabels.length} labels queued` })
-                  setShowBatchPrintDialog(false)
-                } catch {
-                  toast.error('Print job failed', { id: 'batch-print' })
-                }
+              <Button onClick={() => {
+                window.print()
+                toast.success('Labels sent to printer', { description: `${mockLabels.length} labels queued` })
+                setShowBatchPrintDialog(false)
               }}>Print All</Button>
             </div>
           </DialogContent>
@@ -3715,15 +3709,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowVoidLabelDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={async () => {
-                toast.loading('Voiding label...', { id: 'void-label' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Label voided', { id: 'void-label', description: 'Carrier will process within 24 hours' })
-                  setShowVoidLabelDialog(false)
-                } catch {
-                  toast.error('Failed to void label', { id: 'void-label' })
-                }
+              <Button variant="destructive" onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/labels/void', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ trackingNumber: '' }) }).then(res => { if (!res.ok) throw new Error('Failed'); setShowVoidLabelDialog(false); }),
+                  { loading: 'Voiding label...', success: 'Label voided - Carrier will process within 24 hours', error: 'Failed to void label' }
+                )
               }}>Void Label</Button>
             </div>
           </DialogContent>
@@ -3744,16 +3734,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowDuplicateLabelDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Duplicating label...', { id: 'duplicate-label' })
-                try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  const newTrackingNum = `TRK${Math.random().toString(36).substring(2, 10).toUpperCase()}`
-                  toast.success('Label duplicated', { id: 'duplicate-label', description: `New tracking: ${newTrackingNum}` })
-                  setShowDuplicateLabelDialog(false)
-                } catch {
-                  toast.error('Failed to duplicate label', { id: 'duplicate-label' })
-                }
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/labels/duplicate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sourceLabelId: '' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }).then(data => { setShowDuplicateLabelDialog(false); return data; }),
+                  { loading: 'Duplicating label...', success: (data) => `Label duplicated - New tracking: ${data.trackingNumber || 'TRK' + Math.random().toString(36).substring(2, 10).toUpperCase()}`, error: 'Failed to duplicate label' }
+                )
               }}>Duplicate</Button>
             </div>
           </DialogContent>
@@ -3932,16 +3917,10 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPrintLabelDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Sending to printer...', { id: 'print-label' })
-                try {
-                  await new Promise(r => setTimeout(r, 800))
-                  window.print()
-                  toast.success('Label sent to printer', { id: 'print-label', description: selectedLabel?.trackingNumber || 'Label printed' })
-                  setShowPrintLabelDialog(false)
-                } catch {
-                  toast.error('Print failed', { id: 'print-label' })
-                }
+              <Button onClick={() => {
+                window.print()
+                toast.success('Label sent to printer', { description: selectedLabel?.trackingNumber || 'Label printed' })
+                setShowPrintLabelDialog(false)
               }}>Print</Button>
             </div>
           </DialogContent>
@@ -4010,15 +3989,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowSyncRatesDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Syncing rates from carriers...', { id: 'sync-rates' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  toast.success('Rates synced successfully', { id: 'sync-rates', description: `${mockCarriers.length} carriers updated` })
-                  setShowSyncRatesDialog(false)
-                } catch {
-                  toast.error('Failed to sync rates', { id: 'sync-rates' })
-                }
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/carriers/sync', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); setShowSyncRatesDialog(false); }),
+                  { loading: 'Syncing rates from carriers...', success: `Rates synced - ${mockCarriers.length} carriers updated`, error: 'Failed to sync rates' }
+                )
               }}>Sync All</Button>
             </div>
           </DialogContent>
@@ -4309,29 +4284,23 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Generating shipping report...', { id: 'gen-report' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  const reportData = {
-                    type: 'Summary Report',
-                    dateRange: 'Last 30 days',
-                    totalShipments: mockShipments.length,
-                    totalCost: mockAnalytics.totalCost,
-                    generatedAt: new Date().toISOString()
-                  }
-                  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `shipping-report-${new Date().toISOString().split('T')[0]}.json`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('Report generated', { id: 'gen-report', description: 'Download started' })
-                  setShowReportsDialog(false)
-                } catch {
-                  toast.error('Failed to generate report', { id: 'gen-report' })
+              <Button onClick={() => {
+                const reportData = {
+                  type: 'Summary Report',
+                  dateRange: 'Last 30 days',
+                  totalShipments: mockShipments.length,
+                  totalCost: mockAnalytics.totalCost,
+                  generatedAt: new Date().toISOString()
                 }
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `shipping-report-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Report generated', { description: 'Download started' })
+                setShowReportsDialog(false)
               }}>Generate</Button>
             </div>
           </DialogContent>
@@ -4564,18 +4533,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={async () => {
-                toast.loading('Clearing cache...', { id: 'clear-cache' })
-                try {
-                  localStorage.removeItem('shipping_rates_cache')
-                  localStorage.removeItem('shipping_tracking_cache')
-                  await new Promise(r => setTimeout(r, 1000))
-                  await fetchShipments()
-                  toast.success('Cache cleared', { id: 'clear-cache', description: 'Fresh data loaded from carriers' })
-                  setShowClearCacheDialog(false)
-                } catch {
-                  toast.error('Failed to clear cache', { id: 'clear-cache' })
-                }
+              <Button variant="destructive" onClick={() => {
+                localStorage.removeItem('shipping_rates_cache')
+                localStorage.removeItem('shipping_tracking_cache')
+                toast.promise(
+                  fetchShipments().then(() => setShowClearCacheDialog(false)),
+                  { loading: 'Clearing cache...', success: 'Cache cleared - Fresh data loaded from carriers', error: 'Failed to clear cache' }
+                )
               }}>Clear Cache</Button>
             </div>
           </DialogContent>

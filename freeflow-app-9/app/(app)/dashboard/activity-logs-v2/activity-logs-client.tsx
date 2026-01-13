@@ -952,7 +952,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleRegenerateApiKey = async () => {
     await toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/activity-logs/api-key', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
       {
         loading: 'Regenerating API key...',
         success: 'New API key generated',
@@ -2300,7 +2300,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                           <button
                             onClick={() => {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                fetch('/api/activity-logs/parsers/reset', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                 {
                                   loading: 'Resetting parsers...',
                                   success: 'All parsers have been reset to defaults',

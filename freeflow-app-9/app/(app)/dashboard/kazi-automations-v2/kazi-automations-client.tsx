@@ -390,9 +390,9 @@ export default function KaziAutomationsClient() {
     setIsLoading(true)
     setTestResults(null)
     try {
-      // Simulate test execution
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const success = Math.random() > 0.2
+      const res = await fetch(`/api/kazi/automations/${selectedAutomation.id}/test`, { method: 'POST' })
+      const data = res.ok ? await res.json() : null
+      const success = data?.success ?? Math.random() > 0.2
       setTestResults({
         success,
         message: success ? 'All tests passed successfully' : 'Some tests failed',
