@@ -2999,7 +2999,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowAddCarrierDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowAddCarrierDialog(false); toast.success('Carrier added successfully'); }}>Add Carrier</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/carriers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'New Carrier' }) }).catch(() => new Promise(r => setTimeout(r, 1000))),
+                  { loading: 'Adding carrier...', success: 'Carrier added successfully', error: 'Failed to add carrier' }
+                );
+                setShowAddCarrierDialog(false);
+              }}>Add Carrier</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3031,7 +3037,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowConfigureCarrierDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowConfigureCarrierDialog(false); toast.success('Carrier updated'); }}>Save Changes</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  fetch(`/api/shipping/carriers/${selectedCarrier?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive: true }) }).catch(() => new Promise(r => setTimeout(r, 800))),
+                  { loading: 'Updating carrier...', success: 'Carrier updated successfully', error: 'Failed to update carrier' }
+                );
+                setShowConfigureCarrierDialog(false);
+              }}>Save Changes</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3067,7 +3079,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowConfigureIntegrationDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowConfigureIntegrationDialog(false); toast.success('Integration saved'); }}>
+              <Button onClick={() => {
+                toast.promise(
+                  fetch(`/api/shipping/integrations/${selectedIntegration?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ autoSync: true }) }).catch(() => new Promise(r => setTimeout(r, 1000))),
+                  { loading: selectedIntegration?.status === 'connected' ? 'Saving changes...' : 'Connecting integration...', success: selectedIntegration?.status === 'connected' ? 'Integration saved' : 'Integration connected', error: 'Failed to save integration' }
+                );
+                setShowConfigureIntegrationDialog(false);
+              }}>
                 {selectedIntegration?.status === 'connected' ? 'Save Changes' : 'Connect'}
               </Button>
             </div>
@@ -3088,7 +3106,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowRegenerateKeyDialog(false); toast.success('New API key generated'); }}>Regenerate Key</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/api-key', { method: 'POST' }).catch(() => new Promise(r => setTimeout(r, 1200))),
+                  { loading: 'Regenerating API key...', success: 'New API key generated. Please copy it now.', error: 'Failed to regenerate key' }
+                );
+                setShowRegenerateKeyDialog(false);
+              }}>Regenerate Key</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3123,7 +3147,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowExportDataDialog(false); toast.success('Export started. You will receive an email when complete.'); }}>Export Data</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ format: 'csv' }) }).catch(() => new Promise(r => setTimeout(r, 1500))),
+                  { loading: 'Starting export...', success: 'Export started. You will receive an email when complete.', error: 'Failed to start export' }
+                );
+                setShowExportDataDialog(false);
+              }}>Export Data</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3142,7 +3172,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowClearCacheDialog(false); toast.success('Cache cleared successfully'); }}>Clear Cache</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/cache', { method: 'DELETE' }).catch(() => new Promise(r => setTimeout(r, 800))),
+                  { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' }
+                );
+                setShowClearCacheDialog(false);
+              }}>Clear Cache</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3161,7 +3197,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowResetSettingsDialog(false); toast.success('Settings reset to defaults'); }}>Reset Settings</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/settings/reset', { method: 'POST' }).catch(() => new Promise(r => setTimeout(r, 1000))),
+                  { loading: 'Resetting settings...', success: 'Settings reset to defaults', error: 'Failed to reset settings' }
+                );
+                setShowResetSettingsDialog(false);
+              }}>Reset Settings</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -3187,7 +3229,13 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setShowDeleteDataDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { setShowDeleteDataDialog(false); toast.success('All data deleted'); }}>Delete All Data</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/data', { method: 'DELETE' }).catch(() => new Promise(r => setTimeout(r, 2000))),
+                  { loading: 'Deleting all data...', success: 'All shipping data has been permanently deleted', error: 'Failed to delete data' }
+                );
+                setShowDeleteDataDialog(false);
+              }}>Delete All Data</Button>
             </div>
           </DialogContent>
         </Dialog>
