@@ -1155,7 +1155,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     })
     setShowNewWebhookDialog(false)
     setNewWebhookForm({ name: '', method: 'POST', scenarioId: '' })
-    }
   }
 
   // Submit template handler
