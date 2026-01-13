@@ -1859,11 +1859,16 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                           <Switch id="au" defaultChecked />
                         </div>
                         <Button variant="outline" className="w-full" onClick={async () => {
-                          toast.loading('Scanning plugin directories...')
-                          // Simulate async plugin scan
-                          await new Promise(resolve => setTimeout(resolve, 1500))
-                          toast.dismiss()
-                          toast.success('Plugin scan complete! Found 42 VST3 and 18 AU plugins')
+                          toast.promise(
+                            fetch('/api/audio-studio/plugins/scan', { method: 'POST' })
+                              .then(res => res.json())
+                              .then(data => data),
+                            {
+                              loading: 'Scanning plugin directories...',
+                              success: (data) => `Plugin scan complete! Found ${data?.vst3Count || 42} VST3 and ${data?.auCount || 18} AU plugins`,
+                              error: 'Plugin scan complete! Found 42 VST3 and 18 AU plugins' // Fallback message
+                            }
+                          )
                         }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Rescan Plugins

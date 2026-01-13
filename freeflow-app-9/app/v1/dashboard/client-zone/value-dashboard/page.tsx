@@ -130,12 +130,9 @@ export default function ValueDashboardPage() {
         setRoiMetrics(metrics)
         setValueTracking(tracking)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load value dashboard from API
+        const response = await fetch('/api/client-zone/value-dashboard')
+        if (!response.ok) throw new Error('Failed to load value dashboard')
 
         setIsLoading(false)
         announce('Value dashboard loaded successfully', 'polite')

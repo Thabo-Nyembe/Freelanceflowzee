@@ -747,8 +747,13 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
     toast.promise(
       (async () => {
-        // In a real app, this would call an API to create the folder
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Real API call to create the folder
+        const response = await fetch('/api/contracts/folders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newFolderName })
+        })
+        if (!response.ok) throw new Error('Failed to create folder')
         return newFolderName
       })(),
       {
@@ -805,8 +810,16 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
     toast.promise(
       (async () => {
-        // In a real app, this would call an API to add the recipient
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Real API call to add the recipient
+        const response = await fetch('/api/contracts/recipients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            envelopeId: selectedEnvelope.id,
+            email: newRecipientEmail
+          })
+        })
+        if (!response.ok) throw new Error('Failed to add recipient')
         return newRecipientEmail
       })(),
       {
@@ -843,8 +856,13 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           const templatesToImport = Array.isArray(importedData) ? importedData : importedData.templates
           const count = templatesToImport.length
 
-          // In a real app, this would save to Supabase
-          await new Promise(resolve => setTimeout(resolve, 800))
+          // Real API call to save templates to Supabase
+          const response = await fetch('/api/contracts/templates/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ templates: templatesToImport })
+          })
+          if (!response.ok) throw new Error('Failed to import templates')
 
           return count
         })(),

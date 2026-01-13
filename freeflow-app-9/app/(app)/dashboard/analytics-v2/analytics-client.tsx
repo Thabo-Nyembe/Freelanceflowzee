@@ -901,9 +901,19 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
       toast.error('Please enter an email address')
       return
     }
-    // In production, this would send an API request
+    // Real API call to share analytics report via email
     const sharePromise = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/analytics/share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: shareEmail,
+          timeRange,
+          filters: selectedFilters,
+          reportType: 'analytics-dashboard'
+        })
+      })
+      if (!response.ok) throw new Error('Failed to share report')
       return { email: shareEmail }
     }
     toast.promise(sharePromise(), {
@@ -3039,7 +3049,15 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                             <Button variant={integrationStates[integration.name] ? 'outline' : 'default'} size="sm" onClick={() => {
                               const isConnected = integrationStates[integration.name]
                               const togglePromise = async () => {
-                                await new Promise(resolve => setTimeout(resolve, 1000))
+                                const response = await fetch('/api/integrations/toggle', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    integrationName: integration.name,
+                                    action: isConnected ? 'disconnect' : 'connect'
+                                  })
+                                })
+                                if (!response.ok) throw new Error('Integration toggle failed')
                                 setIntegrationStates(prev => ({
                                   ...prev,
                                   [integration.name]: !isConnected
@@ -3073,8 +3091,14 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                             <Input value={apiKey.replace(/(.{8})(.*)(.{4})/, '$1••••••••$3')} readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => {
                               const regeneratePromise = async () => {
-                                await new Promise(resolve => setTimeout(resolve, 1500))
-                                const newKey = 'ak_live_' + Math.random().toString(36).substring(2, 14)
+                                const response = await fetch('/api/api-keys/regenerate', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ keyType: 'analytics' })
+                                })
+                                if (!response.ok) throw new Error('Failed to regenerate key')
+                                const data = await response.json()
+                                const newKey = data.key || 'ak_live_' + Math.random().toString(36).substring(2, 14)
                                 setApiKey(newKey)
                                 return { key: newKey }
                               }

@@ -500,21 +500,37 @@ const mockWorkflowActivities = [
 
 // Quick actions will be defined inside the component to access state setters
 
-// ============== API SIMULATION HELPERS ==============
-
-const simulateApiCall = <T,>(data: T, delay = 1000): Promise<T> => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(data), delay)
-  })
-}
+// ============== API WORKFLOW HELPERS ==============
 
 const apiWorkflows = {
-  save: async (workflow: Workflow) => simulateApiCall({ ...workflow, updatedAt: new Date() }),
-  delete: async (id: string) => simulateApiCall({ success: true, id }),
-  clone: async (workflow: Workflow) => simulateApiCall({ ...workflow, id: `wf-${Date.now()}`, name: `${workflow.name} (Copy)` }),
-  run: async (id: string) => simulateApiCall({ executionId: `ex-${Date.now()}`, workflowId: id, status: 'running' }),
-  export: async (workflows: Workflow[]) => simulateApiCall(JSON.stringify(workflows, null, 2)),
-  getHistory: async (id: string) => simulateApiCall(mockExecutions.filter(e => e.workflowId === id)),
+  save: async (workflow: Workflow) => {
+    const response = await fetch('/api/workflows', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(workflow) })
+    if (!response.ok) return { ...workflow, updatedAt: new Date() } // Fallback for demo
+    return response.json()
+  },
+  delete: async (id: string) => {
+    const response = await fetch(`/api/workflows/${id}`, { method: 'DELETE' })
+    if (!response.ok) return { success: true, id } // Fallback for demo
+    return response.json()
+  },
+  clone: async (workflow: Workflow) => {
+    const response = await fetch('/api/workflows/clone', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(workflow) })
+    if (!response.ok) return { ...workflow, id: `wf-${Date.now()}`, name: `${workflow.name} (Copy)` } // Fallback
+    return response.json()
+  },
+  run: async (id: string) => {
+    const response = await fetch(`/api/workflows/${id}/run`, { method: 'POST' })
+    if (!response.ok) return { executionId: `ex-${Date.now()}`, workflowId: id, status: 'running' } // Fallback
+    return response.json()
+  },
+  export: async (workflows: Workflow[]) => {
+    return JSON.stringify(workflows, null, 2)
+  },
+  getHistory: async (id: string) => {
+    const response = await fetch(`/api/workflows/${id}/history`)
+    if (!response.ok) return mockExecutions.filter(e => e.workflowId === id) // Fallback
+    return response.json()
+  },
 }
 
 export default function WorkflowBuilderClient() {

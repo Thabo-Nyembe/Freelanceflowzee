@@ -906,14 +906,7 @@ export default function CanvasPage() {
           logger.info('Star status saved to database', { canvasId, isStarred: newStarredState })
         }
 
-        toast.promise(
-          new Promise(r => setTimeout(r, 600)),
-          {
-            loading: newStarredState ? 'Adding to favorites...' : 'Removing from favorites...',
-            success: newStarredState ? 'Added to favorites' : 'Removed from favorites',
-            error: 'Failed to update favorites'
-          }
-        )
+        toast.success(newStarredState ? 'Added to favorites' : 'Removed from favorites')
         announce(newStarredState ? 'Added to favorites' : 'Removed from favorites', 'polite')
       } catch (err: any) {
         logger.error('Failed to toggle star', { error: err.message, canvasId })

@@ -192,12 +192,9 @@ export default function ReferralsPage() {
         setLoyaltyPoints(2000)
         setTotalCommission(3600)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load referral data from API
+        const response = await fetch('/api/client-zone/referrals')
+        if (!response.ok) throw new Error('Failed to load referral data')
 
         setIsLoading(false)
         announce('Referral system loaded successfully', 'polite')

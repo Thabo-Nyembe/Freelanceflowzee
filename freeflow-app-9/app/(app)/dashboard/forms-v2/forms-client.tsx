@@ -426,7 +426,17 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
   const handleExportResponses = (formTitle: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
+      fetch(`/api/forms/responses/export?form=${encodeURIComponent(formTitle)}`).then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${formTitle}-responses.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
       {
         loading: `Exporting responses for "${formTitle}"...`,
         success: `Responses for "${formTitle}" exported successfully`,
@@ -593,10 +603,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 </Dialog>
                 <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => {
                   setActiveTab('settings')
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 500)),
-                    { loading: 'Opening settings...', success: 'Settings panel opened', error: 'Failed to open settings' }
-                  )
+                  toast.success('Settings panel opened')
                 }}>
                   <Settings className="h-5 w-5" />
                 </Button>
@@ -704,10 +711,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <CardTitle className="text-lg font-semibold">Recent Forms</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => {
                     setActiveTab('forms')
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 500)),
-                      { loading: 'Loading all forms...', success: 'All forms loaded', error: 'Failed to load forms' }
-                    )
+                    toast.success('All forms loaded')
                   }}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -743,10 +747,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   <CardTitle className="text-lg font-semibold">Recent Responses</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => {
                     setActiveTab('responses')
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 500)),
-                      { loading: 'Loading all responses...', success: 'All responses loaded', error: 'Failed to load responses' }
-                    )
+                    toast.success('All responses loaded')
                   }}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -815,7 +816,17 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      fetch('/api/forms/responses/export/all').then(res => {
+                        if (!res.ok) throw new Error('Export failed')
+                        return res.blob()
+                      }).then(blob => {
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = 'all-responses.csv'
+                        a.click()
+                        URL.revokeObjectURL(url)
+                      }),
                       { loading: 'Exporting all responses...', success: 'All responses exported successfully', error: 'Failed to export responses' }
                     )
                   }}>
@@ -952,10 +963,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <Badge className={getStatusColor(form.status)}>{form.status}</Badge>
                         <Button variant="ghost" size="sm" onClick={(e) => {
                           e.stopPropagation()
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 500)),
-                            { loading: 'Loading form options...', success: 'Form options loaded', error: 'Failed to load options' }
-                          )
+                          toast.info('Form options loaded')
                         }}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
@@ -981,7 +989,17 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   </select>
                   <Button variant="outline" onClick={() => {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      fetch('/api/forms/responses/export').then(res => {
+                        if (!res.ok) throw new Error('Export failed')
+                        return res.blob()
+                      }).then(blob => {
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = 'responses.csv'
+                        a.click()
+                        URL.revokeObjectURL(url)
+                      }),
                       { loading: 'Exporting responses...', success: 'Responses exported successfully', error: 'Failed to export responses' }
                     )
                   }}>
@@ -1014,10 +1032,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         </Badge>
                         <span className="text-sm text-gray-500">{response.submittedAt.toLocaleString()}</span>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            { loading: 'Loading response details...', success: 'Response details loaded', error: 'Failed to load response' }
-                          )
+                          toast.success('Response details loaded')
                         }}>
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -1132,13 +1147,17 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         )}
                         <Button variant={integration.connected ? 'outline' : 'default'} size="sm" className="mt-4" onClick={() => {
                           if (integration.connected) {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 800)),
-                              { loading: `Configuring ${integration.name}...`, success: `${integration.name} configuration opened`, error: `Failed to configure ${integration.name}` }
-                            )
+                            toast.success(`${integration.name} configuration opened`)
                           } else {
                             toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1200)),
+                              fetch('/api/integrations/connect', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ integration: integration.name })
+                              }).then(res => {
+                                if (!res.ok) throw new Error('Connection failed')
+                                return res.json()
+                              }),
                               { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connection initiated`, error: `Failed to connect to ${integration.name}` }
                             )
                           }
@@ -1250,10 +1269,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <p className="text-sm text-gray-500">Drag & drop or click to upload</p>
                             <p className="text-xs text-gray-400 mt-1">PNG, JPG, SVG up to 2MB</p>
                             <Button variant="outline" size="sm" className="mt-3" onClick={() => {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 800)),
-                                { loading: 'Opening file browser...', success: 'File browser opened', error: 'Failed to open file browser' }
-                              )
+                              toast.success('File browser opened')
                             }}>Browse Files</Button>
                           </div>
                         </div>
@@ -1492,7 +1508,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
                             toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1000)),
+                              fetch('/api/integrations/ms-teams/connect', { method: 'POST' }).then(res => {
+                                if (!res.ok) throw new Error('Connection failed')
+                                return res.json()
+                              }),
                               { loading: 'Connecting to Microsoft Teams...', success: 'Microsoft Teams connection initiated', error: 'Failed to connect to Microsoft Teams' }
                             )
                           }}>Connect</Button>
@@ -1541,7 +1560,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1500)),
+                            fetch('/api/forms/api-key/regenerate', { method: 'POST' }).then(res => {
+                              if (!res.ok) throw new Error('Regenerate failed')
+                              return res.json()
+                            }),
                             { loading: 'Regenerating API key...', success: 'New API key generated - please copy it now', error: 'Failed to regenerate API key' }
                           )
                         }}>
@@ -1559,7 +1581,14 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         </div>
                         <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1000)),
+                            fetch('/api/webhooks', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ events: ['submission.created'] })
+                            }).then(res => {
+                              if (!res.ok) throw new Error('Create failed')
+                              return res.json()
+                            }),
                             { loading: 'Creating new webhook...', success: 'Webhook created successfully', error: 'Failed to create webhook' }
                           )
                         }}>
@@ -1580,10 +1609,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                                   {webhook.status}
                                 </Badge>
                                 <Button variant="ghost" size="sm" onClick={() => {
-                                  toast.promise(
-                                    new Promise(resolve => setTimeout(resolve, 500)),
-                                    { loading: 'Loading webhook options...', success: 'Webhook options loaded', error: 'Failed to load webhook options' }
-                                  )
+                                  toast.success('Webhook editor opened')
                                 }}>
                                   <MoreVertical className="h-4 w-4" />
                                 </Button>
@@ -1763,7 +1789,14 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <Input placeholder="forms.yourcompany.com" />
                             <Button onClick={() => {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                fetch('/api/domains/verify', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ domain: 'forms.yourcompany.com' })
+                                }).then(res => {
+                                  if (!res.ok) throw new Error('Verification failed')
+                                  return res.json()
+                                }),
                                 { loading: 'Verifying domain DNS records...', success: 'Domain verified successfully', error: 'Domain verification failed - check DNS settings' }
                               )
                             }}>Verify</Button>
@@ -1844,7 +1877,17 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                         <div className="grid grid-cols-2 gap-4">
                           <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => {
                             toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              fetch('/api/forms/export/all').then(res => {
+                                if (!res.ok) throw new Error('Export failed')
+                                return res.blob()
+                              }).then(blob => {
+                                const url = URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = 'all-forms.json'
+                                a.click()
+                                URL.revokeObjectURL(url)
+                              }),
                               { loading: 'Exporting all forms as JSON...', success: 'All forms exported successfully', error: 'Failed to export forms' }
                             )
                           }}>
@@ -1853,10 +1896,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <span className="text-xs text-gray-500">Download JSON backup</span>
                           </Button>
                           <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              { loading: 'Preparing import wizard...', success: 'Import wizard ready', error: 'Failed to initialize import' }
-                            )
+                            toast.success('Import wizard ready')
                           }}>
                             <Upload className="h-6 w-6 mb-2" />
                             <span className="font-medium">Import Forms</span>
@@ -1885,10 +1925,15 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <p className="text-sm text-gray-500">Permanently remove all form responses</p>
                           </div>
                           <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => {
-                            toast.promise(
-                              new Promise((resolve, reject) => setTimeout(reject, 1000)),
-                              { loading: 'Deleting all responses...', success: 'All responses deleted', error: 'Deletion cancelled - confirmation required' }
-                            )
+                            if (confirm('Are you sure you want to delete all responses? This action cannot be undone.')) {
+                              toast.promise(
+                                fetch('/api/forms/responses', { method: 'DELETE' }).then(res => {
+                                  if (!res.ok) throw new Error('Delete failed')
+                                  return res.json()
+                                }),
+                                { loading: 'Deleting all responses...', success: 'All responses deleted', error: 'Failed to delete responses' }
+                              )
+                            }
                           }}>
                             Delete All
                           </Button>
@@ -1899,10 +1944,15 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                             <p className="text-sm text-gray-500">Delete this workspace and all its data</p>
                           </div>
                           <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => {
-                            toast.promise(
-                              new Promise((resolve, reject) => setTimeout(reject, 1000)),
-                              { loading: 'Deleting workspace...', success: 'Workspace deleted', error: 'Deletion cancelled - confirmation required' }
-                            )
+                            if (confirm('Are you sure you want to delete this workspace? This action cannot be undone.')) {
+                              toast.promise(
+                                fetch('/api/workspace', { method: 'DELETE' }).then(res => {
+                                  if (!res.ok) throw new Error('Delete failed')
+                                  return res.json()
+                                }),
+                                { loading: 'Deleting workspace...', success: 'Workspace deleted', error: 'Failed to delete workspace' }
+                              )
+                            }
                           }}>
                             Delete
                           </Button>
@@ -1953,10 +2003,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           <Switch defaultChecked={false} />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1000)),
-                            { loading: 'Loading API logs...', success: 'API logs loaded', error: 'Failed to load API logs' }
-                          )
+                          toast.success('API logs loaded')
                         }}>
                           <Database className="h-4 w-4 mr-2" />
                           View API Logs
@@ -2090,7 +2137,14 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => {
                   toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
+                    fetch(`/api/forms/${selectedForm?.id}/visibility`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ is_public: !selectedForm?.is_public })
+                    }).then(res => {
+                      if (!res.ok) throw new Error('Update failed')
+                      return res.json()
+                    }),
                     { loading: 'Changing visibility settings...', success: 'Visibility settings updated', error: 'Failed to update visibility' }
                   )
                 }}>Change</Button>

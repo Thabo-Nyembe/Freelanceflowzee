@@ -58,15 +58,9 @@ export default function AgentsPage() {
       try {
         setIsLoading(true)
         setError(null)
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load agents'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load agents data from API
+        const response = await fetch('/api/admin/agents')
+        if (!response.ok) throw new Error('Failed to load agents')
         setIsLoading(false)
         announce('Agents loaded successfully', 'polite')
       } catch (err) {

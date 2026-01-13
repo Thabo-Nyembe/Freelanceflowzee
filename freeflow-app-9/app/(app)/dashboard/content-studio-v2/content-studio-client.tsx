@@ -718,8 +718,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/content/entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newEntryTitle, type: newEntryType, slug: newEntrySlug })
+      })
+      if (!res.ok) throw new Error('Failed to create entry')
       toast.success('Entry created successfully', {
         description: `"${newEntryTitle}" has been created as a draft`
       })
@@ -738,7 +742,10 @@ export default function ContentStudioClient() {
     if (!files || files.length === 0) return
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const formData = new FormData()
+      Array.from(files).forEach(file => formData.append('files', file))
+      const res = await fetch('/api/content/media/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Failed to upload files')
       toast.success(`${files.length} file(s) uploaded successfully`, {
         description: 'Assets are now available in your media library'
       })
@@ -757,7 +764,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/content/types', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newContentTypeName, description: newContentTypeDescription })
+      })
+      if (!res.ok) throw new Error('Failed to create content type')
       toast.success('Content type created', {
         description: `"${newContentTypeName}" is ready to use`
       })
@@ -778,7 +790,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/content/locales', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: newLocaleCode, name: newLocaleName })
+      })
+      if (!res.ok) throw new Error('Failed to add locale')
       toast.success('Locale added successfully', {
         description: `${newLocaleName} (${newLocaleCode}) is now available`
       })
@@ -815,7 +832,8 @@ export default function ContentStudioClient() {
     setIsProcessing(true)
     try {
       const drafts = mockEntries.filter(e => e.status === 'draft')
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const res = await fetch('/api/content/entries/publish-all', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to publish all entries')
       toast.success(`${drafts.length} entries published`, {
         description: 'All draft content is now live'
       })
@@ -830,7 +848,8 @@ export default function ContentStudioClient() {
   const handleSyncChanges = async () => {
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/content/sync', { method: 'POST' })
+      if (!res.ok) throw new Error('Sync failed')
       toast.success('Changes synced', {
         description: 'All content is up to date with remote'
       })
@@ -845,7 +864,15 @@ export default function ContentStudioClient() {
   const handleExportContent = async (format: string) => {
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const res = await fetch(`/api/content/export?format=${format}`)
+      if (!res.ok) throw new Error('Export failed')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `content-export.${format}`
+      a.click()
+      URL.revokeObjectURL(url)
       toast.success('Export complete', {
         description: `Content exported as ${format.toUpperCase()}`
       })
@@ -864,7 +891,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const res = await fetch('/api/content/fields', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newFieldName, type: newFieldType })
+      })
+      if (!res.ok) throw new Error('Failed to add field')
       toast.success('Field added', {
         description: `${newFieldName} (${newFieldType}) has been added to the content type`
       })
@@ -885,7 +917,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const res = await fetch('/api/content/folders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newFolderName })
+      })
+      if (!res.ok) throw new Error('Failed to create folder')
       toast.success('Folder created', {
         description: `"${newFolderName}" is now available`
       })
@@ -901,7 +938,8 @@ export default function ContentStudioClient() {
   const handleUpdateAssetMetadata = async () => {
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const res = await fetch('/api/content/assets/metadata', { method: 'PATCH' })
+      if (!res.ok) throw new Error('Failed to update metadata')
       toast.success('Metadata updated', {
         description: 'Asset information has been saved'
       })
@@ -920,7 +958,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      const res = await fetch('/api/content/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceLocale: translateSourceLocale, targetLocale: translateTargetLocale })
+      })
+      if (!res.ok) throw new Error('Translation failed')
       toast.success('Translation complete', {
         description: `Content translated from ${translateSourceLocale} to ${translateTargetLocale}`
       })
@@ -940,7 +983,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const res = await fetch('/api/content/locales/fallback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locale: fallbackLocale })
+      })
+      if (!res.ok) throw new Error('Failed to set fallback')
       toast.success('Fallback set', {
         description: `${fallbackLocale} is now the fallback locale`
       })
@@ -960,7 +1008,12 @@ export default function ContentStudioClient() {
     }
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/content/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: webhookName, url: webhookUrl, events: webhookEvents })
+      })
+      if (!res.ok) throw new Error('Failed to create webhook')
       toast.success('Webhook created', {
         description: `"${webhookName}" is now active`
       })
@@ -3476,10 +3529,16 @@ export default function ContentStudioClient() {
               <Button variant="outline" onClick={() => setShowDeleteAllContentDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={async () => {
                 setIsProcessing(true)
-                await new Promise(resolve => setTimeout(resolve, 2000))
-                toast.success('Content deleted', { description: 'All entries and content types have been removed' })
-                setShowDeleteAllContentDialog(false)
-                setIsProcessing(false)
+                try {
+                  const res = await fetch('/api/content/delete-all', { method: 'DELETE' })
+                  if (!res.ok) throw new Error('Failed to delete content')
+                  toast.success('Content deleted', { description: 'All entries and content types have been removed' })
+                  setShowDeleteAllContentDialog(false)
+                } catch {
+                  toast.error('Failed to delete content')
+                } finally {
+                  setIsProcessing(false)
+                }
               }} disabled={isProcessing}>
                 {isProcessing ? 'Deleting...' : 'Delete Everything'}
               </Button>
@@ -3509,10 +3568,16 @@ export default function ContentStudioClient() {
               <Button variant="outline" onClick={() => setShowResetSpaceDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={async () => {
                 setIsProcessing(true)
-                await new Promise(resolve => setTimeout(resolve, 2000))
-                toast.success('Space reset', { description: 'Your space has been reset to defaults' })
-                setShowResetSpaceDialog(false)
-                setIsProcessing(false)
+                try {
+                  const res = await fetch('/api/content/space/reset', { method: 'POST' })
+                  if (!res.ok) throw new Error('Failed to reset space')
+                  toast.success('Space reset', { description: 'Your space has been reset to defaults' })
+                  setShowResetSpaceDialog(false)
+                } catch {
+                  toast.error('Failed to reset space')
+                } finally {
+                  setIsProcessing(false)
+                }
               }} disabled={isProcessing}>
                 {isProcessing ? 'Resetting...' : 'Reset Space'}
               </Button>
@@ -3548,10 +3613,16 @@ export default function ContentStudioClient() {
               <Button variant="outline" onClick={() => setShowRegenerateKeysDialog(false)}>Cancel</Button>
               <Button onClick={async () => {
                 setIsProcessing(true)
-                await new Promise(resolve => setTimeout(resolve, 1500))
-                toast.success('API keys regenerated', { description: 'New keys are now active. Update your applications.' })
-                setShowRegenerateKeysDialog(false)
-                setIsProcessing(false)
+                try {
+                  const res = await fetch('/api/content/api-keys/regenerate', { method: 'POST' })
+                  if (!res.ok) throw new Error('Failed to regenerate keys')
+                  toast.success('API keys regenerated', { description: 'New keys are now active. Update your applications.' })
+                  setShowRegenerateKeysDialog(false)
+                } catch {
+                  toast.error('Failed to regenerate API keys')
+                } finally {
+                  setIsProcessing(false)
+                }
               }} disabled={isProcessing}>
                 {isProcessing ? 'Generating...' : 'Regenerate Keys'}
               </Button>
@@ -3671,12 +3742,23 @@ export default function ContentStudioClient() {
                   toast.error('Title is required')
                   return
                 }
+                if (!entryMenuTarget) return
                 setIsProcessing(true)
-                await new Promise(resolve => setTimeout(resolve, 1000))
-                toast.success('Entry updated', { description: `"${editEntryTitle}" has been saved` })
-                setShowEditEntryDialog(false)
-                setSelectedEntry(null)
-                setIsProcessing(false)
+                try {
+                  const res = await fetch(`/api/content/entries/${entryMenuTarget.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: editEntryTitle, slug: editEntrySlug })
+                  })
+                  if (!res.ok) throw new Error('Failed to update entry')
+                  toast.success('Entry updated', { description: `"${editEntryTitle}" has been saved` })
+                  setShowEditEntryDialog(false)
+                  setSelectedEntry(null)
+                } catch {
+                  toast.error('Failed to update entry')
+                } finally {
+                  setIsProcessing(false)
+                }
               }} disabled={isProcessing}>
                 {isProcessing ? 'Saving...' : 'Save Changes'}
               </Button>
@@ -3712,12 +3794,19 @@ export default function ContentStudioClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPublishEntryDialog(false)}>Cancel</Button>
               <Button onClick={async () => {
+                if (!entryMenuTarget) return
                 setIsProcessing(true)
-                await new Promise(resolve => setTimeout(resolve, 1000))
-                toast.success('Entry published', { description: 'Content is now live' })
-                setShowPublishEntryDialog(false)
-                setSelectedEntry(null)
-                setIsProcessing(false)
+                try {
+                  const res = await fetch(`/api/content/entries/${entryMenuTarget.id}/publish`, { method: 'POST' })
+                  if (!res.ok) throw new Error('Failed to publish entry')
+                  toast.success('Entry published', { description: 'Content is now live' })
+                  setShowPublishEntryDialog(false)
+                  setSelectedEntry(null)
+                } catch {
+                  toast.error('Failed to publish entry')
+                } finally {
+                  setIsProcessing(false)
+                }
               }} disabled={isProcessing}>
                 {isProcessing ? 'Publishing...' : 'Publish'}
               </Button>
@@ -3773,12 +3862,23 @@ export default function ContentStudioClient() {
                   toast.error('Name is required')
                   return
                 }
+                if (!selectedContentType) return
                 setIsProcessing(true)
-                await new Promise(resolve => setTimeout(resolve, 1000))
-                toast.success('Content type updated', { description: `"${editContentTypeName}" has been saved` })
-                setShowEditContentTypeDialog(false)
-                setSelectedContentType(null)
-                setIsProcessing(false)
+                try {
+                  const res = await fetch(`/api/content/types/${selectedContentType.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: editContentTypeName, description: editContentTypeDescription })
+                  })
+                  if (!res.ok) throw new Error('Failed to update content type')
+                  toast.success('Content type updated', { description: `"${editContentTypeName}" has been saved` })
+                  setShowEditContentTypeDialog(false)
+                  setSelectedContentType(null)
+                } catch {
+                  toast.error('Failed to update content type')
+                } finally {
+                  setIsProcessing(false)
+                }
               }} disabled={isProcessing}>
                 {isProcessing ? 'Saving...' : 'Save Changes'}
               </Button>

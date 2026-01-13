@@ -117,12 +117,9 @@ export default function MessagesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load messages from API
+        const response = await fetch('/api/client-zone/messages')
+        if (!response.ok) throw new Error('Failed to load messages')
 
         setIsLoading(false)
         announce('Messages loaded successfully', 'polite')

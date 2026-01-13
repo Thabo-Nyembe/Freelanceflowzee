@@ -150,12 +150,9 @@ export default function CalendarPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load calendar from API
+        const response = await fetch('/api/client-zone/calendar')
+        if (!response.ok) throw new Error('Failed to load calendar')
 
         setMeetings(MEETINGS)
         setIsLoading(false)

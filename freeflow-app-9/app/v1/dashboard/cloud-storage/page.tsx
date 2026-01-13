@@ -47,16 +47,11 @@ export default function CloudStoragePage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load cloud storage'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load cloud storage configuration from API
+        const response = await fetch('/api/cloud-storage/providers')
+        if (!response.ok) {
+          throw new Error('Failed to load cloud storage')
+        }
 
         setIsLoading(false)
         announce('Cloud storage loaded successfully', 'polite')

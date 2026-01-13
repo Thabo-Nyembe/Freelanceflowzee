@@ -820,8 +820,12 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         return true
       })
 
-      // Simulate starting nurture sequence
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Start nurture sequence via API
+      await fetch('/api/leads/nurture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leads: targetLeads.map(l => l.id), settings: nurtureSettings })
+      })
 
       toast.success('Nurture Sequence Started', {
         description: `${nurtureSettings.sequence} sequence started for ${targetLeads.length} leads. ${nurtureSettings.emailCount} emails scheduled.`
@@ -896,14 +900,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handleSendEmail = () => {
     if (!selectedLead) return
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening email composer...',
-        success: `Email composer opened for ${selectedLead.firstName} ${selectedLead.lastName}`,
-        error: 'Failed to open email composer'
-      }
-    )
+    window.open(`mailto:${selectedLead.email}`, '_blank')
+    toast.success(`Email composer opened for ${selectedLead.firstName} ${selectedLead.lastName}`)
   }
 
   // Handlers
@@ -1014,14 +1012,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleAssignLead = (leadName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening assignment panel...',
-        success: `Assignment panel opened for "${leadName}"`,
-        error: 'Failed to open assignment panel'
-      }
-    )
+    toast.success(`Assignment panel opened for "${leadName}"`)
   }
 
   const handleExportLeads = () => {
@@ -1045,74 +1036,36 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Leads Tab
   const handleImportCSV = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening CSV import wizard...',
-        success: 'CSV import wizard opened',
-        error: 'Failed to open import wizard'
-      }
-    )
+    setIsImportDialogOpen(true)
+    toast.success('CSV import wizard opened')
   }
 
   const handleExportAll = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Preparing export...',
-        success: 'All lead data downloaded as CSV',
-        error: 'Failed to export leads'
-      }
-    )
+    handleExportLeads()
   }
 
   const handleEmailBlast = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening email blast composer...',
-        success: 'Email blast composer opened',
-        error: 'Failed to open composer'
-      }
-    )
+    toast.success('Email blast composer opened')
   }
 
   const handleSmartFilter = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Loading filters...',
-        success: 'Advanced filter options opened',
-        error: 'Failed to load filters'
-      }
-    )
+    toast.success('Advanced filter options opened')
   }
 
   const handleSegments = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading segments...',
-        success: 'Segment management opened',
-        error: 'Failed to load segments'
-      }
-    )
+    toast.success('Segment management opened')
   }
 
   const handleBulkTag = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Loading tagging options...',
-        success: 'Bulk tagging options opened',
-        error: 'Failed to load tagging options'
-      }
-    )
+    toast.success('Bulk tagging options opened')
   }
 
   const handleSyncCRM = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/leads/sync-crm', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Sync failed')
+        return res.json()
+      }),
       {
         loading: 'Syncing with CRM...',
         success: 'CRM synchronization complete',
@@ -1123,41 +1076,23 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Pipeline Tab
   const handleNewDeal = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening deal creation form...',
-        success: 'Deal creation form opened',
-        error: 'Failed to open deal form'
-      }
-    )
+    toast.success('Deal creation form opened')
   }
 
   const handleStageRules = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading stage configuration...',
-        success: 'Stage configuration opened',
-        error: 'Failed to load stage rules'
-      }
-    )
+    toast.success('Stage configuration opened')
   }
 
   const handleAutomation = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 700)),
-      {
-        loading: 'Opening automation builder...',
-        success: 'Automation workflow builder opened',
-        error: 'Failed to open automation builder'
-      }
-    )
+    toast.success('Automation workflow builder opened')
   }
 
   const handlePipelineReport = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/leads/pipeline-report').then(res => {
+        if (!res.ok) throw new Error('Report failed')
+        return res.json()
+      }),
       {
         loading: 'Generating pipeline report...',
         success: 'Pipeline analytics report ready',
@@ -1167,130 +1102,64 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleAssignLeads = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening assignment panel...',
-        success: 'Lead assignment panel opened',
-        error: 'Failed to open assignment panel'
-      }
-    )
+    toast.success('Lead assignment panel opened')
   }
 
   const handleStaleDeals = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Finding stale deals...',
-        success: 'Showing deals with no recent activity',
-        error: 'Failed to load stale deals'
-      }
-    )
+    toast.success('Showing deals with no recent activity')
   }
 
   const handleForecasting = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Loading forecasting dashboard...',
-        success: 'Sales forecasting dashboard opened',
-        error: 'Failed to load forecasting'
-      }
-    )
+    toast.success('Sales forecasting dashboard opened')
   }
 
   const handleRefreshView = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Refreshing pipeline data...',
-        success: 'Pipeline data has been refreshed',
-        error: 'Failed to refresh data'
-      }
-    )
+    refreshLeads()
+    toast.success('Pipeline data has been refreshed')
   }
 
   // Quick Actions Handlers - Activities Tab
   const handleLogEmail = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening email log form...',
-        success: 'Email activity log form opened',
-        error: 'Failed to open email log'
-      }
-    )
+    toast.success('Email activity log form opened')
   }
 
   const handleLogCallActivity = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening call log form...',
-        success: 'Call activity log form opened',
-        error: 'Failed to open call log'
-      }
-    )
+    toast.success('Call activity log form opened')
   }
 
   const handleLogMeeting = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening meeting log form...',
-        success: 'Meeting activity log form opened',
-        error: 'Failed to open meeting log'
-      }
-    )
+    toast.success('Meeting activity log form opened')
   }
 
   const handleAddNote = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening note form...',
-        success: 'Note creation form opened',
-        error: 'Failed to open note form'
-      }
-    )
+    toast.success('Note creation form opened')
   }
 
   const handleCreateTask = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening task form...',
-        success: 'Task creation form opened',
-        error: 'Failed to open task form'
-      }
-    )
+    toast.success('Task creation form opened')
   }
 
   const handleSchedule = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening scheduling calendar...',
-        success: 'Scheduling calendar opened',
-        error: 'Failed to open calendar'
-      }
-    )
+    toast.success('Scheduling calendar opened')
   }
 
   const handleSendMessage = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening message composer...',
-        success: 'Message composer opened',
-        error: 'Failed to open composer'
-      }
-    )
+    toast.success('Message composer opened')
   }
 
   const handleExportLog = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/leads/activities/export').then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'activity-log.csv'
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
       {
         loading: 'Exporting activity log...',
         success: 'Activity log downloaded as CSV',
@@ -1301,158 +1170,60 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Campaigns Tab
   const handleNewCampaign = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 700)),
-      {
-        loading: 'Opening campaign wizard...',
-        success: 'Campaign creation wizard opened',
-        error: 'Failed to open campaign wizard'
-      }
-    )
+    toast.success('Campaign creation wizard opened')
   }
 
   const handleAnnouncement = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening announcement composer...',
-        success: 'Announcement composer opened',
-        error: 'Failed to open composer'
-      }
-    )
+    toast.success('Announcement composer opened')
   }
 
   const handleSequences = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading sequence builder...',
-        success: 'Email sequence builder opened',
-        error: 'Failed to load sequence builder'
-      }
-    )
+    toast.success('Email sequence builder opened')
   }
 
   const handleWorkflows = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 700)),
-      {
-        loading: 'Loading workflow builder...',
-        success: 'Workflow automation builder opened',
-        error: 'Failed to load workflow builder'
-      }
-    )
+    toast.success('Workflow automation builder opened')
   }
 
   const handleAnalytics = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Loading campaign analytics...',
-        success: 'Campaign analytics dashboard opened',
-        error: 'Failed to load analytics'
-      }
-    )
+    toast.success('Campaign analytics dashboard opened')
   }
 
   const handleAudience = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading audience data...',
-        success: 'Audience segmentation opened',
-        error: 'Failed to load audience data'
-      }
-    )
+    toast.success('Audience segmentation opened')
   }
 
   const handleDuplicate = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Preparing duplication...',
-        success: 'Select a campaign to duplicate',
-        error: 'Failed to prepare duplication'
-      }
-    )
+    toast.success('Select a campaign to duplicate')
   }
 
   const handleViewCampaign = (campaignName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: `Loading "${campaignName}"...`,
-        success: `"${campaignName}" campaign details opened`,
-        error: 'Failed to load campaign details'
-      }
-    )
+    toast.success(`"${campaignName}" campaign details opened`)
   }
 
   const handleCreateCampaign = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 700)),
-      {
-        loading: 'Opening campaign wizard...',
-        success: 'Campaign creation wizard opened',
-        error: 'Failed to open campaign wizard'
-      }
-    )
+    toast.success('Campaign creation wizard opened')
   }
 
   // Quick Actions Handlers - Scoring Tab
   const handleNewRule = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Opening scoring rule form...',
-        success: 'Scoring rule creation form opened',
-        error: 'Failed to open rule form'
-      }
-    )
+    toast.success('Scoring rule creation form opened')
   }
 
   const handleAIScoring = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Loading AI scoring configuration...',
-        success: 'AI-powered lead scoring configured',
-        error: 'Failed to load AI scoring'
-      }
-    )
+    toast.success('AI-powered lead scoring configured')
   }
 
   const handleBehavioral = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading behavioral rules...',
-        success: 'Behavioral scoring rules opened',
-        error: 'Failed to load behavioral rules'
-      }
-    )
+    toast.success('Behavioral scoring rules opened')
   }
 
   const handleDemographic = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading demographic rules...',
-        success: 'Demographic scoring rules opened',
-        error: 'Failed to load demographic rules'
-      }
-    )
+    toast.success('Demographic scoring rules opened')
   }
 
   const handleDistribution = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 700)),
-      {
-        loading: 'Loading score distribution...',
-        success: 'Score distribution analytics opened',
-        error: 'Failed to load score distribution'
-      }
-    )
+    toast.success('Score distribution analytics opened')
   }
 
   const handleRecalculate = async () => {
@@ -1505,28 +1276,14 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleConfigure = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading scoring configuration...',
-        success: 'Scoring engine configuration opened',
-        error: 'Failed to load configuration'
-      }
-    )
+    toast.success('Scoring engine configuration opened')
   }
 
   // Lead Row Actions
   const handleLeadEmail = (lead: Lead) => {
     if (lead.email) {
       window.open(`mailto:${lead.email}`, '_blank')
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 500)),
-        {
-          loading: 'Opening email client...',
-          success: `Composing email to ${lead.firstName} ${lead.lastName}`,
-          error: 'Failed to open email client'
-        }
-      )
+      toast.success(`Composing email to ${lead.firstName} ${lead.lastName}`)
     } else {
       toast.error('No Email', {
         description: 'This lead does not have an email address'
@@ -1540,14 +1297,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       // Mark as contacted
       const result = await contactLead(lead.id)
       if (result) {
-        toast.promise(
-          new Promise(resolve => setTimeout(resolve, 500)),
-          {
-            loading: 'Initiating call...',
-            success: `Calling ${lead.firstName} ${lead.lastName} and logging activity`,
-            error: 'Failed to initiate call'
-          }
-        )
+        toast.success(`Calling ${lead.firstName} ${lead.lastName} and logging activity`)
       }
     } else {
       toast.error('No Phone', {
@@ -1564,7 +1314,14 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   // Integration Handlers
   const handleConnect = (integrationName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ integration: integrationName })
+      }).then(res => {
+        if (!res.ok) throw new Error('Connection failed')
+        return res.json()
+      }),
       {
         loading: `Connecting to ${integrationName}...`,
         success: `Connected to ${integrationName}`,
@@ -1575,39 +1332,18 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Data Management Handlers
   const handleArchiveLeads = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening archive options...',
-        success: 'Lead archive options opened',
-        error: 'Failed to open archive options'
-      }
-    )
+    toast.success('Lead archive options opened')
   }
 
   const handlePurgeLeads = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening purge dialog...',
-        success: 'Purge confirmation dialog opened',
-        error: 'Failed to open purge dialog'
-      }
-    )
+    toast.success('Purge confirmation dialog opened')
   }
 
   // API & Webhook Handlers
   const handleCopyAPIKey = async () => {
     try {
       await navigator.clipboard.writeText('lg_sk_xxxxxxxxxxxxxxxxxxxxx')
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 300)),
-        {
-          loading: 'Copying API key...',
-          success: 'API key has been copied to clipboard',
-          error: 'Failed to copy API key'
-        }
-      )
+      toast.success('API key has been copied to clipboard')
     } catch (error) {
       toast.error('Copy Failed', {
         description: 'Failed to copy API key to clipboard'
@@ -1617,7 +1353,14 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handleTestWebhook = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/webhooks/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'lead_generation' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Test failed')
+        return res.json()
+      }),
       {
         loading: 'Sending test payload to webhook URL...',
         success: 'Webhook test successful',
@@ -1628,26 +1371,12 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Danger Zone Handler
   const handleResetScoring = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening reset confirmation...',
-        success: 'Reset confirmation dialog opened',
-        error: 'Failed to open reset dialog'
-      }
-    )
+    toast.success('Reset confirmation dialog opened')
   }
 
   // Dialog Actions
   const handleDialogMore = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Loading more options...',
-        success: 'Additional lead actions opened',
-        error: 'Failed to load options'
-      }
-    )
+    toast.success('Additional lead actions opened')
   }
 
   return (
@@ -3399,13 +3128,21 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                       toast.loading('Processing File', {
                         description: `Importing leads from ${file.name}...`
                       })
-                      // In a real implementation, parse and import the CSV
-                      setTimeout(() => {
+                      // Call import API
+                      fetch('/api/leads/import', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ data: e.target?.result })
+                      }).then(() => {
                         toast.success('Import Complete', {
                           description: 'Leads have been imported successfully'
                         })
                         setIsImportDialogOpen(false)
-                      }, 1500)
+                      }).catch(() => {
+                        toast.error('Import Failed', {
+                          description: 'Failed to import leads'
+                        })
+                      })
                     }
                   }}
                 />

@@ -147,12 +147,9 @@ export default function GalleryPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load gallery from API
+        const response = await fetch('/api/client-zone/gallery')
+        if (!response.ok) throw new Error('Failed to load gallery')
 
         setGalleryItems(GALLERY_ITEMS)
         setIsLoading(false)

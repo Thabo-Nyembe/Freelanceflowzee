@@ -127,13 +127,6 @@ export default function FeedbackPage() {
 
         setFeedbackHistory(history)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
-
         setIsLoading(false)
         announce('Feedback system loaded successfully', 'polite')
         logger.info('Feedback data loaded', {

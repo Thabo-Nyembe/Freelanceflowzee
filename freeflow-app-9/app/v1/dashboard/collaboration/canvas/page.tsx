@@ -333,22 +333,14 @@ export default function CanvasPage() {
 
   const handleOpenProject = async (project: CanvasProject) => {
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            logger.info("Opening canvas project", { projectId: project.id });
-
-            setActiveProject(project);
-            setActiveTab("canvas");
-
-            logger.info("Project opened successfully");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to open project", { error });
-            reject(error);
-          }
-        }, 800);
-      }),
+      (async () => {
+        logger.info("Opening canvas project", { projectId: project.id });
+        const response = await fetch(`/api/collaboration/canvas/${project.id}`)
+        if (!response.ok) throw new Error('Failed to open project')
+        setActiveProject(project);
+        setActiveTab("canvas");
+        logger.info("Project opened successfully");
+      })(),
       {
         loading: "Opening canvas...",
         success: "Canvas opened",
@@ -410,59 +402,46 @@ export default function CanvasPage() {
     }
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            logger.info("Exporting canvas", { format, projectName: activeProject?.name });
+      (async () => {
+        logger.info("Exporting canvas", { format, projectName: activeProject?.name });
+        const filename = `${activeProject?.name || "canvas"}_${new Date().toISOString().split("T")[0]}`;
 
-            const filename = `${activeProject?.name || "canvas"}_${new Date().toISOString().split("T")[0]}`;
-
-            if (format === "png") {
-              const dataUrl = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.download = `${filename}.png`;
-              link.href = dataUrl;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            } else if (format === "pdf") {
-              // For PDF, we'll convert the canvas to an image and create a basic PDF
-              const dataUrl = canvas.toDataURL("image/png");
-              // Create a printable HTML page with the image
-              const printWindow = window.open("", "_blank");
-              if (printWindow) {
-                printWindow.document.write(`
-                  <html>
-                    <head><title>${filename}</title></head>
-                    <body style="margin:0;display:flex;justify-content:center;align-items:center;">
-                      <img src="${dataUrl}" style="max-width:100%;max-height:100vh;" />
-                    </body>
-                  </html>
-                `);
-                printWindow.document.close();
-                printWindow.print();
-              }
-            } else if (format === "svg") {
-              // Export canvas as PNG with SVG-like naming (actual SVG would need vector data)
-              const dataUrl = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.download = `${filename}.png`; // Note: Canvas exports raster, not vector
-              link.href = dataUrl;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-            }
-
-            logger.info("Canvas exported successfully", { format, filename });
-            announce(`Canvas exported as ${format.toUpperCase()}`, "polite");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to export canvas", { error, format });
-            announce("Error exporting canvas", "assertive");
-            reject(error);
+        if (format === "png") {
+          const dataUrl = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = `${filename}.png`;
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else if (format === "pdf") {
+          const dataUrl = canvas.toDataURL("image/png");
+          const printWindow = window.open("", "_blank");
+          if (printWindow) {
+            printWindow.document.write(`
+              <html>
+                <head><title>${filename}</title></head>
+                <body style="margin:0;display:flex;justify-content:center;align-items:center;">
+                  <img src="${dataUrl}" style="max-width:100%;max-height:100vh;" />
+                </body>
+              </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
           }
-        }, 2500);
-      }),
+        } else if (format === "svg") {
+          const dataUrl = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = `${filename}.png`;
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+
+        logger.info("Canvas exported successfully", { format, filename });
+        announce(`Canvas exported as ${format.toUpperCase()}`, "polite");
+      })(),
       {
         loading: `Exporting as ${format.toUpperCase()}...`,
         success: `Exported as ${format.toUpperCase()}`,
@@ -473,35 +452,21 @@ export default function CanvasPage() {
 
   const handleClearCanvas = async () => {
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            logger.info("Clearing canvas");
+      (async () => {
+        logger.info("Clearing canvas");
 
-            const canvas = canvasRef.current;
-            if (!canvas) {
-              reject(new Error("Canvas not found"));
-              return;
-            }
+        const canvas = canvasRef.current;
+        if (!canvas) throw new Error("Canvas not found");
 
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-              reject(new Error("Context not found"));
-              return;
-            }
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Context not found");
 
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            saveToHistory();
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        saveToHistory();
 
-            logger.info("Canvas cleared");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to clear canvas", { error });
-            reject(error);
-          }
-        }, 1500);
-      }),
+        logger.info("Canvas cleared");
+      })(),
       {
         loading: "Clearing canvas...",
         success: "Canvas cleared",
@@ -514,32 +479,17 @@ export default function CanvasPage() {
     if (historyStep <= 0) return;
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            const canvas = canvasRef.current;
-            if (!canvas) {
-              reject(new Error("Canvas not found"));
-              return;
-            }
+      (async () => {
+        const canvas = canvasRef.current;
+        if (!canvas) throw new Error("Canvas not found");
 
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-              reject(new Error("Context not found"));
-              return;
-            }
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Context not found");
 
-            setHistoryStep(historyStep - 1);
-            ctx.putImageData(history[historyStep - 1], 0, 0);
-
-            logger.info("Undo performed");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to undo", { error });
-            reject(error);
-          }
-        }, 500);
-      }),
+        setHistoryStep(historyStep - 1);
+        ctx.putImageData(history[historyStep - 1], 0, 0);
+        logger.info("Undo performed");
+      })(),
       {
         loading: "Undoing...",
         success: "Undo completed",
@@ -552,32 +502,17 @@ export default function CanvasPage() {
     if (historyStep >= history.length - 1) return;
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            const canvas = canvasRef.current;
-            if (!canvas) {
-              reject(new Error("Canvas not found"));
-              return;
-            }
+      (async () => {
+        const canvas = canvasRef.current;
+        if (!canvas) throw new Error("Canvas not found");
 
-            const ctx = canvas.getContext("2d");
-            if (!ctx) {
-              reject(new Error("Context not found"));
-              return;
-            }
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Context not found");
 
-            setHistoryStep(historyStep + 1);
-            ctx.putImageData(history[historyStep + 1], 0, 0);
-
-            logger.info("Redo performed");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to redo", { error });
-            reject(error);
-          }
-        }, 500);
-      }),
+        setHistoryStep(historyStep + 1);
+        ctx.putImageData(history[historyStep + 1], 0, 0);
+        logger.info("Redo performed");
+      })(),
       {
         loading: "Redoing...",
         success: "Redo completed",
@@ -587,89 +522,31 @@ export default function CanvasPage() {
   };
 
   const handleZoomIn = async () => {
-    toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            logger.info("Zooming in");
-
-            setCanvasState({
-              ...canvasState,
-              zoom: Math.min(canvasState.zoom + 10, 200),
-            });
-
-            logger.info("Zoomed in");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to zoom in", { error });
-            reject(error);
-          }
-        }, 600);
-      }),
-      {
-        loading: "Zooming in...",
-        success: "Zoomed in",
-        error: "Failed to zoom in"
-      }
-    );
+    logger.info("Zooming in");
+    setCanvasState({
+      ...canvasState,
+      zoom: Math.min(canvasState.zoom + 10, 200),
+    });
+    toast.success("Zoomed in");
   };
 
   const handleZoomOut = async () => {
-    toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            logger.info("Zooming out");
-
-            setCanvasState({
-              ...canvasState,
-              zoom: Math.max(canvasState.zoom - 10, 50),
-            });
-
-            logger.info("Zoomed out");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to zoom out", { error });
-            reject(error);
-          }
-        }, 600);
-      }),
-      {
-        loading: "Zooming out...",
-        success: "Zoomed out",
-        error: "Failed to zoom out"
-      }
-    );
+    logger.info("Zooming out");
+    setCanvasState({
+      ...canvasState,
+      zoom: Math.max(canvasState.zoom - 10, 50),
+    });
+    toast.success("Zoomed out");
   };
 
   const handleToggleGrid = async () => {
     const newGridVisible = !canvasState.gridVisible;
-
-    toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            logger.info("Toggling grid");
-
-            setCanvasState({
-              ...canvasState,
-              gridVisible: newGridVisible,
-            });
-
-            logger.info("Grid toggled");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to toggle grid", { error });
-            reject(error);
-          }
-        }, 600);
-      }),
-      {
-        loading: "Toggling grid...",
-        success: newGridVisible ? "Grid visible" : "Grid hidden",
-        error: "Failed to toggle grid"
-      }
-    );
+    logger.info("Toggling grid");
+    setCanvasState({
+      ...canvasState,
+      gridVisible: newGridVisible,
+    });
+    toast.success(newGridVisible ? "Grid shown" : "Grid hidden");
   };
 
   const handleSelectTool = async (toolId: string) => {
@@ -952,49 +829,48 @@ export default function CanvasPage() {
     const emailToInvite = inviteEmail;
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            logger.info("Sending collaborator invitation", { projectId: activeProject.id, email: emailToInvite });
+      (async () => {
+        logger.info("Sending collaborator invitation", { projectId: activeProject.id, email: emailToInvite });
 
-            // Generate share link
-            const shareUrl = `${window.location.origin}/dashboard/collaboration/canvas/join/${activeProject.id}`;
+        // Send invitation via API
+        const response = await fetch('/api/collaboration/invitations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId: activeProject.id, email: emailToInvite })
+        })
+        if (!response.ok) throw new Error('Failed to send invitation')
 
-            // Open email client with invitation
-            const subject = encodeURIComponent(`Invitation to collaborate on "${activeProject.name}"`);
-            const body = encodeURIComponent(
-              `You've been invited to collaborate on a canvas!\n\n` +
-              `Project: ${activeProject.name}\n\n` +
-              `Click here to join: ${shareUrl}\n\n` +
-              `Start collaborating in real-time!`
-            );
+        // Generate share link
+        const shareUrl = `${window.location.origin}/dashboard/collaboration/canvas/join/${activeProject.id}`;
 
-            window.open(`mailto:${emailToInvite}?subject=${subject}&body=${body}`, "_blank");
+        // Open email client with invitation
+        const subject = encodeURIComponent(`Invitation to collaborate on "${activeProject.name}"`);
+        const body = encodeURIComponent(
+          `You've been invited to collaborate on a canvas!\n\n` +
+          `Project: ${activeProject.name}\n\n` +
+          `Click here to join: ${shareUrl}\n\n` +
+          `Start collaborating in real-time!`
+        );
 
-            // Update collaborator count in local state
-            setProjects(
-              projects.map((p) =>
-                p.id === activeProject.id
-                  ? { ...p, collaborators: p.collaborators + 1 }
-                  : p
-              )
-            );
-            setActiveProject({ ...activeProject, collaborators: activeProject.collaborators + 1 });
-            setStats(prev => ({ ...prev, activeCollaborators: prev.activeCollaborators + 1 }));
+        window.open(`mailto:${emailToInvite}?subject=${subject}&body=${body}`, "_blank");
 
-            setIsInviteOpen(false);
-            setInviteEmail("");
+        // Update collaborator count in local state
+        setProjects(
+          projects.map((p) =>
+            p.id === activeProject.id
+              ? { ...p, collaborators: p.collaborators + 1 }
+              : p
+          )
+        );
+        setActiveProject({ ...activeProject, collaborators: activeProject.collaborators + 1 });
+        setStats(prev => ({ ...prev, activeCollaborators: prev.activeCollaborators + 1 }));
 
-            logger.info("Collaborator invitation sent", { projectId: activeProject.id, email: emailToInvite });
-            announce("Collaborator invitation email opened", "polite");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to invite collaborator", { error });
-            announce("Error sending invitation", "assertive");
-            reject(error);
-          }
-        }, 1000);
-      }),
+        setIsInviteOpen(false);
+        setInviteEmail("");
+
+        logger.info("Collaborator invitation sent", { projectId: activeProject.id, email: emailToInvite });
+        announce("Collaborator invitation email opened", "polite");
+      })(),
       {
         loading: "Preparing invitation...",
         success: `Invitation ready for ${emailToInvite}`,

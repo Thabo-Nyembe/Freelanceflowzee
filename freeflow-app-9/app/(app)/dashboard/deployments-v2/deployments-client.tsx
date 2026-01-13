@@ -571,8 +571,13 @@ export default function DeploymentsClient() {
   const handleInsightAction = useCallback(async (insight: { id: string; type: string; title: string; description: string }) => {
     setIsProcessing(true)
     try {
-      // Simulate API call to handle insight action
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Real API call to handle insight action
+      const response = await fetch('/api/deployments/insights/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ insightId: insight.id, type: insight.type })
+      })
+      if (!response.ok) throw new Error('Failed to process insight')
 
       switch (insight.type) {
         case 'warning':
@@ -676,7 +681,11 @@ export default function DeploymentsClient() {
   const handleClearLogs = async () => {
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/deployments/logs/clear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) throw new Error('Failed to clear logs')
       setRealTimeLogs([])
       toast.success('Logs Cleared', { description: 'All logs have been cleared' })
       setShowClearLogsDialog(false)
@@ -724,7 +733,14 @@ export default function DeploymentsClient() {
     setIsProcessing(true)
     toast.info('Installing Plugin', { description: `${pluginName} is being installed...` })
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Real API call to install plugin
+      const response = await fetch('/api/plugins/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: pluginName })
+      })
+      if (!response.ok) throw new Error('Plugin installation failed')
+
       const { error } = await supabase.from('installed_plugins').insert({
         name: pluginName,
         installed_at: new Date().toISOString(),
@@ -743,7 +759,12 @@ export default function DeploymentsClient() {
   const handleSaveEnvVariables = async () => {
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/deployments/env', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ variables: envVariables })
+      })
+      if (!response.ok) throw new Error('Failed to save environment variables')
       toast.success('Environment Variables Saved', { description: 'Your changes have been saved' })
       setShowEnvDialog(false)
     } catch (error: any) {
@@ -760,7 +781,12 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/deployments/alerts', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userData.user.id, alerts: alertSettings })
+      })
+      if (!response.ok) throw new Error('Failed to save alerts')
       toast.success('Alerts Configured', { description: 'Alert settings saved successfully' })
       setShowAlertsDialog(false)
     } catch (error: any) {
@@ -849,8 +875,13 @@ export default function DeploymentsClient() {
   const handleApplyFilters = async (filters: { status?: string; branch?: string; author?: string; dateFrom?: string; dateTo?: string }) => {
     setIsProcessing(true)
     try {
-      // In a real implementation, this would update the filter state and refetch
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // Update filter state and refetch deployments with filters
+      const response = await fetch('/api/deployments/filter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filters)
+      })
+      if (!response.ok) throw new Error('Failed to apply filters')
       toast.success('Filters Applied', { description: 'Deployment list filtered' })
       setShowFiltersDialog(false)
     } catch (error: any) {
@@ -867,7 +898,12 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/deployments/settings/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userData.user.id })
+      })
+      if (!response.ok) throw new Error('Failed to reset settings')
       toast.success('Settings Reset', { description: 'Project settings have been reset to defaults' })
       setShowResetSettingsDialog(false)
     } catch (error: any) {
@@ -884,10 +920,12 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      await new Promise(resolve => setTimeout(resolve, 500))
-      if (notifyTeam) {
-        // Would send notifications in real implementation
-      }
+      const response = await fetch('/api/deployments/disable', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userData.user.id, reason, notifyTeam })
+      })
+      if (!response.ok) throw new Error('Failed to disable deployments')
       toast.success('Deployments Disabled', { description: 'New deployments have been disabled' })
       setShowDisableDeploymentsDialog(false)
     } catch (error: any) {
@@ -3275,8 +3313,13 @@ export default function DeploymentsClient() {
               <Button className="bg-gradient-to-r from-indigo-600 to-violet-600" onClick={async () => {
                 setIsProcessing(true)
                 try {
-                  // Simulating file upload to storage
-                  await new Promise(resolve => setTimeout(resolve, 1500))
+                  // Real API call to upload files to storage
+                  const response = await fetch('/api/storage/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ destination: 'blob-storage' })
+                  })
+                  if (!response.ok) throw new Error('Upload failed')
                   toast.success('Upload Complete', { description: 'Files have been uploaded to blob storage' })
                   setShowUploadDialog(false)
                 } catch (error: any) {
@@ -3391,7 +3434,11 @@ export default function DeploymentsClient() {
               <Button onClick={async () => {
                 setIsProcessing(true)
                 try {
-                  await new Promise(resolve => setTimeout(resolve, 500))
+                  const response = await fetch('/api/deployments/errors/stack-traces', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                  })
+                  if (!response.ok) throw new Error('Failed to load stack traces')
                   toast.info('Stack Traces Loaded', { description: 'Opening detailed error analysis in new panel...' })
                   setShowErrorsDialog(false)
                   setActiveTab('logs')
@@ -3490,13 +3537,12 @@ export default function DeploymentsClient() {
               <Button onClick={async () => {
                 setIsProcessing(true)
                 try {
-                  await new Promise(resolve => setTimeout(resolve, 1000))
-                  const reportData = {
-                    logs24h: 3200,
-                    errors: 28,
-                    warnings: 45,
-                    generatedAt: new Date().toISOString()
-                  }
+                  const response = await fetch('/api/deployments/logs/analytics', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                  })
+                  if (!response.ok) throw new Error('Failed to fetch analytics')
+                  const reportData = await response.json()
                   const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
                   const url = URL.createObjectURL(blob)
                   const link = document.createElement('a')
@@ -3702,18 +3748,12 @@ export default function DeploymentsClient() {
               <Button onClick={async () => {
                 setIsProcessing(true)
                 try {
-                  await new Promise(resolve => setTimeout(resolve, 1000))
-                  const reportData = {
-                    securityScore: 'A+',
-                    checks: [
-                      { check: 'SSL/TLS Configuration', status: 'pass', detail: 'A+ Grade, HSTS enabled' },
-                      { check: 'DDoS Protection', status: 'pass', detail: 'Enterprise protection active' },
-                      { check: 'WAF Rules', status: 'pass', detail: '12 rules active, 247 attacks blocked' },
-                      { check: 'Secrets Exposure', status: 'pass', detail: 'No exposed secrets detected' },
-                      { check: 'Dependency Vulnerabilities', status: 'warn', detail: '2 low-severity issues' },
-                    ],
-                    generatedAt: new Date().toISOString()
-                  }
+                  const response = await fetch('/api/deployments/security/audit', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                  })
+                  if (!response.ok) throw new Error('Failed to generate report')
+                  const reportData = await response.json()
                   const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
                   const url = URL.createObjectURL(blob)
                   const link = document.createElement('a')
@@ -4114,7 +4154,11 @@ export default function DeploymentsClient() {
               <Button variant="destructive" onClick={async () => {
                 setIsProcessing(true)
                 try {
-                  await new Promise(resolve => setTimeout(resolve, 500))
+                  const response = await fetch(`/api/edge-configs/${selectedEdgeConfig?.id}/items/${selectedConfigItem}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                  })
+                  if (!response.ok) throw new Error('Failed to delete config item')
                   toast.success('Config Item Deleted', { description: `${selectedConfigItem} has been removed from ${selectedEdgeConfig?.name}` })
                   setShowDeleteConfigItemDialog(false)
                   setSelectedConfigItem('')

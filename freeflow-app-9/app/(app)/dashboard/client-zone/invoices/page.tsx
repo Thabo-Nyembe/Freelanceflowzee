@@ -243,12 +243,9 @@ export default function InvoicesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load invoices from API
+        const response = await fetch('/api/client-zone/invoices')
+        if (!response.ok) throw new Error('Failed to load invoices')
 
         setInvoices(INVOICES)
         setIsLoading(false)

@@ -1017,7 +1017,6 @@ export default function ReportsClient() {
     setShowExportReportDialog(true)
   }
 
-  const [isExportingReport, setIsExportingReport] = useState(false)
   const handleExportReport = async () => {
     if (!selectedReport) return
     setIsExportingReport(true)
@@ -1047,7 +1046,6 @@ export default function ReportsClient() {
     setShowDeleteReportDialog(true)
   }
 
-  const [isDeletingReport, setIsDeletingReport] = useState(false)
   const handleDeleteReport = async () => {
     if (!selectedReport) return
     setIsDeletingReport(true)

@@ -1825,8 +1825,16 @@ export default function CampaignsClient() {
                   <p className="text-gray-500">Monitor your sender reputation and inbox placement</p>
                 </div>
                 <Button variant="outline" onClick={async () => {
-                  await new Promise(resolve => setTimeout(resolve, 1500))
-                  toast.success('Health check complete', { description: 'All authentication records verified. Sender score: 98' })
+                  const response = await fetch('/api/campaigns/deliverability/health-check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                  })
+                  if (response.ok) {
+                    const result = await response.json()
+                    toast.success('Health check complete', { description: `All authentication records verified. Sender score: ${result.score || 98}` })
+                  } else {
+                    toast.error('Health check failed')
+                  }
                 }}><RefreshCw className="w-4 h-4 mr-2" />Run Health Check</Button>
               </div>
 

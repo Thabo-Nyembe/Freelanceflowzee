@@ -171,54 +171,43 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
       resolution: `${deviceWidth}x${deviceHeight}`
     })
 
-    toast.promise(
-      new Promise<{ fileName: string; fileSizeKB: string }>((resolve, reject) => {
-        setTimeout(() => {
-          // Generate canvas-based screenshot
-          const canvas = document.createElement('canvas')
-          canvas.width = deviceWidth
-          canvas.height = deviceHeight
-          const ctx = canvas.getContext('2d')
-          if (ctx) {
-            ctx.fillStyle = '#ffffff'
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
-            ctx.fillStyle = '#000000'
-            ctx.font = '14px Arial'
-            ctx.fillText(`${device.name} - ${currentScreen}`, 20, 30)
-          }
+    // Generate canvas-based screenshot
+    const canvas = document.createElement('canvas')
+    canvas.width = deviceWidth
+    canvas.height = deviceHeight
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = '#000000'
+      ctx.font = '14px Arial'
+      ctx.fillText(`${device.name} - ${currentScreen}`, 20, 30)
+    }
 
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const fileName = `mobile-${selectedDevice}-${currentScreen}-${Date.now()}.png`
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = fileName
-              a.click()
-              URL.revokeObjectURL(url)
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const fileName = `mobile-${selectedDevice}-${currentScreen}-${Date.now()}.png`
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName
+        a.click()
+        URL.revokeObjectURL(url)
 
-              const fileSizeKB = (blob.size / 1024).toFixed(1)
+        const fileSizeKB = (blob.size / 1024).toFixed(1)
 
-              logger.info('Export completed', {
-                fileName,
-                fileSize: blob.size,
-                device: selectedDevice,
-                screen: currentScreen
-              })
+        logger.info('Export completed', {
+          fileName,
+          fileSize: blob.size,
+          device: selectedDevice,
+          screen: currentScreen
+        })
 
-              resolve({ fileName, fileSizeKB })
-            } else {
-              reject(new Error('Failed to generate image'))
-            }
-          })
-        }, 1500)
-      }),
-      {
-        loading: `Exporting ${device.name} preview...`,
-        success: (data) => `Mobile preview exported: ${data.fileName} (${data.fileSizeKB} KB)`,
-        error: 'Failed to export mobile preview'
+        toast.success(`Mobile preview exported: ${fileName} (${fileSizeKB} KB)`)
+      } else {
+        toast.error('Failed to export mobile preview')
       }
-    )
+    })
   }
 
   const sharePreview = () => {

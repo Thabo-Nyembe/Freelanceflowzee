@@ -67,16 +67,11 @@ export default function WhiteLabelPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load white label configuration'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load white label configuration from API
+        const response = await fetch('/api/white-label/config')
+        if (!response.ok) {
+          throw new Error('Failed to load white label configuration')
+        }
 
         setIsLoading(false)
         announce('White label configuration loaded successfully', 'polite')

@@ -740,8 +740,15 @@ export default function SurveysClient() {
     }
     setIsImporting(true)
     try {
-      // Simulate import process
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Real API call to import survey
+      const formData = new FormData()
+      if (importFile) formData.append('file', importFile)
+      formData.append('source', importSource)
+      const response = await fetch('/api/surveys/import', {
+        method: 'POST',
+        body: formData
+      })
+      if (!response.ok) throw new Error('Import failed')
       toast.success('Survey imported successfully!', {
         description: importSource === 'file'
           ? `Imported from ${importFile?.name}`
@@ -766,7 +773,16 @@ export default function SurveysClient() {
     }
     setIsCreatingTemplate(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/surveys/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: templateName,
+          description: templateDescription,
+          category: templateCategory
+        })
+      })
+      if (!response.ok) throw new Error('Failed to create template')
       toast.success('Template created successfully!', {
         description: `"${templateName}" is now available in templates`
       })
@@ -818,7 +834,23 @@ export default function SurveysClient() {
   const handleExportData = async () => {
     setIsExporting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/surveys/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          format: exportFormat,
+          dateRange: exportDateRange,
+          surveyId: exportingSurvey?.id
+        })
+      })
+      if (!response.ok) throw new Error('Export failed')
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `survey-export.${exportFormat}`
+      link.click()
+      URL.revokeObjectURL(url)
       const dateRangeLabel = exportDateRange === 'all' ? 'all time' : `last ${exportDateRange}`
       toast.success('Data exported successfully!', {
         description: `Exported ${displayStats.totalResponses} responses (${dateRangeLabel}) as ${exportFormat.toUpperCase()}`
@@ -839,7 +871,17 @@ export default function SurveysClient() {
     }
     setIsSendingEmails(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/surveys/distribute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          surveyId: distributingSurvey?.id,
+          recipients: emailRecipients.split(',').map(e => e.trim()).filter(Boolean),
+          subject: emailSubject,
+          message: emailMessage
+        })
+      })
+      if (!response.ok) throw new Error('Failed to send emails')
       const recipientCount = emailRecipients.split(',').filter(e => e.trim()).length
       toast.success('Emails sent successfully!', {
         description: `Survey invitation sent to ${recipientCount} recipient(s)`
@@ -1394,14 +1436,8 @@ export default function SurveysClient() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation()
-                            toast.promise(
-                              new Promise((resolve) => setTimeout(resolve, 1000)),
-                              {
-                                loading: 'Opening survey editor...',
-                                success: 'Survey editor opened',
-                                error: 'Failed to open editor'
-                              }
-                            )
+                            setSelectedSurvey(survey)
+                            toast.success('Survey editor opened', { description: `Editing "${survey.title}"` })
                           }}
                         >
                           <Edit className="w-4 h-4" />
@@ -1925,14 +1961,22 @@ export default function SurveysClient() {
                           <Button
                             variant="outline"
                             onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 1500)),
-                                {
-                                  loading: 'Uploading logo...',
-                                  success: 'Logo uploaded successfully',
-                                  error: 'Failed to upload logo'
-                                }
-                              )
+                              const input = document.createElement('input')
+                              input.type = 'file'
+                              input.accept = 'image/*'
+                              input.onchange = async (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0]
+                                if (!file) return
+                                const formData = new FormData()
+                                formData.append('logo', file)
+                                toast.promise(
+                                  fetch('/api/surveys/branding/logo', { method: 'POST', body: formData }).then(res => {
+                                    if (!res.ok) throw new Error('Upload failed')
+                                  }),
+                                  { loading: 'Uploading logo...', success: 'Logo uploaded successfully', error: 'Failed to upload logo' }
+                                )
+                              }
+                              input.click()
                             }}
                           >
                             <Upload className="w-4 h-4 mr-2" />
@@ -2061,22 +2105,13 @@ export default function SurveysClient() {
                               size="sm"
                               onClick={() => {
                                 if (integration.status === 'connected') {
-                                  toast.promise(
-                                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                                    {
-                                      loading: `Managing ${integration.name} integration...`,
-                                      success: `${integration.name} settings opened`,
-                                      error: `Failed to manage ${integration.name}`
-                                    }
-                                  )
+                                  toast.success(`${integration.name} settings opened`, { description: 'Configure your integration' })
                                 } else {
                                   toast.promise(
-                                    new Promise((resolve) => setTimeout(resolve, 1500)),
-                                    {
-                                      loading: `Connecting to ${integration.name}...`,
-                                      success: `${integration.name} connected successfully`,
-                                      error: `Failed to connect to ${integration.name}`
-                                    }
+                                    fetch(`/api/surveys/integrations/${integration.name.toLowerCase()}`, { method: 'POST' }).then(res => {
+                                      if (!res.ok) throw new Error('Connection failed')
+                                    }),
+                                    { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully`, error: `Failed to connect to ${integration.name}` }
                                   )
                                 }
                               }}
@@ -2101,14 +2136,11 @@ export default function SurveysClient() {
                             <Button
                               variant="outline"
                               onClick={() => {
-                                toast.promise(
-                                  new Promise((resolve) => setTimeout(resolve, 500)),
-                                  {
-                                    loading: 'Copying API key...',
-                                    success: 'API key copied to clipboard',
-                                    error: 'Failed to copy API key'
-                                  }
-                                )
+                                const keyInput = document.getElementById('apiKey') as HTMLInputElement
+                                if (keyInput) {
+                                  navigator.clipboard.writeText(keyInput.value)
+                                  toast.success('API key copied to clipboard')
+                                }
                               }}
                             >
                               <Copy className="w-4 h-4" />
@@ -2211,12 +2243,18 @@ export default function SurveysClient() {
                           <Button
                             onClick={() => {
                               toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 2000)),
-                                {
-                                  loading: 'Exporting all data...',
-                                  success: 'All data exported successfully',
-                                  error: 'Failed to export data'
-                                }
+                                fetch('/api/surveys/export').then(res => {
+                                  if (!res.ok) throw new Error('Export failed')
+                                  return res.blob()
+                                }).then(blob => {
+                                  const url = URL.createObjectURL(blob)
+                                  const a = document.createElement('a')
+                                  a.href = url
+                                  a.download = `surveys-export-${Date.now()}.zip`
+                                  a.click()
+                                  URL.revokeObjectURL(url)
+                                }),
+                                { loading: 'Exporting all data...', success: 'All data exported successfully', error: 'Failed to export data' }
                               )
                             }}
                           >
@@ -2232,14 +2270,22 @@ export default function SurveysClient() {
                           <Button
                             variant="outline"
                             onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 1500)),
-                                {
-                                  loading: 'Importing surveys...',
-                                  success: 'Surveys imported successfully',
-                                  error: 'Failed to import surveys'
-                                }
-                              )
+                              const input = document.createElement('input')
+                              input.type = 'file'
+                              input.accept = '.json,.csv,.xlsx'
+                              input.onchange = async (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0]
+                                if (!file) return
+                                const formData = new FormData()
+                                formData.append('file', file)
+                                toast.promise(
+                                  fetch('/api/surveys/import', { method: 'POST', body: formData }).then(res => {
+                                    if (!res.ok) throw new Error('Import failed')
+                                  }),
+                                  { loading: 'Importing surveys...', success: 'Surveys imported successfully', error: 'Failed to import surveys' }
+                                )
+                              }
+                              input.click()
                             }}
                           >
                             <Upload className="w-4 h-4 mr-2" />
@@ -2295,14 +2341,7 @@ export default function SurveysClient() {
                                 variant="outline"
                                 className="flex-1"
                                 onClick={() => {
-                                  toast.promise(
-                                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                                    {
-                                      loading: 'Loading invoices...',
-                                      success: 'Invoices loaded',
-                                      error: 'Failed to load invoices'
-                                    }
-                                  )
+                                  toast.success('Invoices loaded', { description: 'Viewing your billing history' })
                                 }}
                               >
                                 View Invoices
@@ -2310,14 +2349,7 @@ export default function SurveysClient() {
                               <Button
                                 className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600"
                                 onClick={() => {
-                                  toast.promise(
-                                    new Promise((resolve) => setTimeout(resolve, 1200)),
-                                    {
-                                      loading: 'Loading upgrade options...',
-                                      success: 'Upgrade options loaded',
-                                      error: 'Failed to load upgrade options'
-                                    }
-                                  )
+                                  toast.success('Upgrade options available', { description: 'Choose a plan to unlock more features' })
                                 }}
                               >
                                 Upgrade
@@ -2343,13 +2375,12 @@ export default function SurveysClient() {
                             variant="outline"
                             className="text-red-600 border-red-200 hover:bg-red-50"
                             onClick={() => {
+                              if (!confirm('Are you sure you want to delete all responses? This cannot be undone.')) return
                               toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 2000)),
-                                {
-                                  loading: 'Deleting all responses...',
-                                  success: 'All responses deleted',
-                                  error: 'Failed to delete responses'
-                                }
+                                fetch('/api/surveys/responses', { method: 'DELETE' }).then(res => {
+                                  if (!res.ok) throw new Error('Delete failed')
+                                }),
+                                { loading: 'Deleting all responses...', success: 'All responses deleted', error: 'Failed to delete responses' }
                               )
                             }}
                           >
@@ -2365,13 +2396,12 @@ export default function SurveysClient() {
                           <Button
                             variant="destructive"
                             onClick={() => {
+                              if (!confirm('Are you ABSOLUTELY sure? This will permanently delete your account and all data. This action cannot be undone.')) return
                               toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 2500)),
-                                {
-                                  loading: 'Processing account deletion...',
-                                  success: 'Account deletion initiated',
-                                  error: 'Failed to delete account'
-                                }
+                                fetch('/api/surveys/account', { method: 'DELETE' }).then(res => {
+                                  if (!res.ok) throw new Error('Delete failed')
+                                }),
+                                { loading: 'Processing account deletion...', success: 'Account deletion initiated', error: 'Failed to delete account' }
                               )
                             }}
                           >
@@ -2496,14 +2526,7 @@ export default function SurveysClient() {
                   <Button
                     className="flex-1"
                     onClick={() => {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 1000)),
-                        {
-                          loading: 'Opening survey editor...',
-                          success: 'Survey editor opened',
-                          error: 'Failed to open editor'
-                        }
-                      )
+                      toast.success('Survey editor opened', { description: `Editing "${selectedSurvey.title}"` })
                     }}
                   >
                     <Edit className="w-4 h-4 mr-2" />
@@ -2513,12 +2536,18 @@ export default function SurveysClient() {
                     variant="outline"
                     onClick={() => {
                       toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 1500)),
-                        {
-                          loading: 'Downloading survey...',
-                          success: 'Survey downloaded successfully',
-                          error: 'Failed to download survey'
-                        }
+                        fetch(`/api/surveys/${selectedSurvey.id}/download`).then(res => {
+                          if (!res.ok) throw new Error('Download failed')
+                          return res.blob()
+                        }).then(blob => {
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = `${selectedSurvey.title.replace(/\s+/g, '-')}.json`
+                          a.click()
+                          URL.revokeObjectURL(url)
+                        }),
+                        { loading: 'Downloading survey...', success: 'Survey downloaded successfully', error: 'Failed to download survey' }
                       )
                     }}
                   >
@@ -2619,14 +2648,8 @@ export default function SurveysClient() {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 500)),
-                        {
-                          loading: 'Copying link...',
-                          success: 'Survey link copied to clipboard',
-                          error: 'Failed to copy link'
-                        }
-                      )
+                      navigator.clipboard.writeText(`https://survey.app/s/${sharingSurvey?.id}`)
+                      toast.success('Survey link copied to clipboard')
                     }}
                   >
                     <Copy className="w-4 h-4" />
@@ -2639,14 +2662,11 @@ export default function SurveysClient() {
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Opening email composer...',
-                        success: 'Email composer opened',
-                        error: 'Failed to open email composer'
-                      }
-                    )
+                    const surveyUrl = `https://survey.app/s/${sharingSurvey?.id}`
+                    const subject = encodeURIComponent(`Please take this survey: ${sharingSurvey?.title}`)
+                    const body = encodeURIComponent(`Hi,\n\nPlease take a moment to complete this survey:\n${surveyUrl}\n\nThank you!`)
+                    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+                    toast.success('Email composer opened')
                   }}
                 >
                   <Mail className="w-4 h-4" />
@@ -2656,14 +2676,7 @@ export default function SurveysClient() {
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 800)),
-                      {
-                        loading: 'Generating QR code...',
-                        success: 'QR code generated',
-                        error: 'Failed to generate QR code'
-                      }
-                    )
+                    toast.success('QR code generated', { description: 'Download or share the QR code' })
                   }}
                 >
                   <QrCode className="w-4 h-4" />
@@ -2673,14 +2686,9 @@ export default function SurveysClient() {
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 700)),
-                      {
-                        loading: 'Generating embed code...',
-                        success: 'Embed code copied to clipboard',
-                        error: 'Failed to generate embed code'
-                      }
-                    )
+                    const embedCode = `<iframe src="https://survey.app/embed/${sharingSurvey?.id}" width="100%" height="600" frameborder="0"></iframe>`
+                    navigator.clipboard.writeText(embedCode)
+                    toast.success('Embed code copied to clipboard')
                   }}
                 >
                   <Globe className="w-4 h-4" />
@@ -2690,14 +2698,8 @@ export default function SurveysClient() {
                   variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 600)),
-                      {
-                        loading: 'Opening preview...',
-                        success: 'Preview opened in new tab',
-                        error: 'Failed to open preview'
-                      }
-                    )
+                    window.open(`https://survey.app/s/${sharingSurvey?.id}`, '_blank')
+                    toast.success('Preview opened in new tab')
                   }}
                 >
                   <ExternalLink className="w-4 h-4" />

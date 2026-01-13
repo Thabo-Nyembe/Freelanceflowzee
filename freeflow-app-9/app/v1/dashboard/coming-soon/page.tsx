@@ -26,12 +26,9 @@ export default function ComingSoonPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Load coming soon features from API
+        const response = await fetch('/api/features/coming-soon')
+        if (!response.ok) throw new Error('Failed to load coming soon features')
 
         setIsLoading(false)
         announce('Coming soon features loaded successfully', 'polite')

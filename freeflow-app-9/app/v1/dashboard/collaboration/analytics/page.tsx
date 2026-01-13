@@ -223,27 +223,17 @@ export default function AnalyticsPage() {
     logger.info("Scheduling analytics report");
 
     toast.promise(
-      new Promise<void>(async (resolve, reject) => {
-        setTimeout(async () => {
-          try {
-            // Save schedule to database
-            if (userId) {
-              const { error } = await upsertReportSchedule(userId, 'weekly');
-              if (error) {
-                logger.error("Failed to save schedule to database", { error });
-                reject(new Error("Failed to schedule report"));
-                return;
-              }
-            }
-
-            logger.info("Report scheduled successfully");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to schedule report", { error });
-            reject(error);
+      (async () => {
+        // Save schedule to database
+        if (userId) {
+          const { error } = await upsertReportSchedule(userId, 'weekly');
+          if (error) {
+            logger.error("Failed to save schedule to database", { error });
+            throw new Error("Failed to schedule report");
           }
-        }, 1000);
-      }),
+        }
+        logger.info("Report scheduled successfully");
+      })(),
       {
         loading: 'Scheduling weekly report...',
         success: 'Weekly report scheduled',
@@ -256,19 +246,11 @@ export default function AnalyticsPage() {
     logger.info("Sharing analytics");
 
     toast.promise(
-      new Promise<void>(async (resolve, reject) => {
-        setTimeout(async () => {
-          try {
-            // Copy share link to clipboard
-            await navigator.clipboard.writeText(`${window.location.origin}/analytics/report`);
-            logger.info("Analytics shared");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to share analytics", { error });
-            reject(error);
-          }
-        }, 600);
-      }),
+      (async () => {
+        // Copy share link to clipboard
+        await navigator.clipboard.writeText(`${window.location.origin}/analytics/report`);
+        logger.info("Analytics shared");
+      })(),
       {
         loading: 'Copying analytics link...',
         success: 'Analytics link copied to clipboard',

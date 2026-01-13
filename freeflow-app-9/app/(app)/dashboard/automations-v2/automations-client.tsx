@@ -755,8 +755,13 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
     toast.promise(
       (async () => {
-        // Simulate refreshing connections
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        // Real API call to refresh connections
+        const response = await fetch('/api/automations/connections/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ connectionIds: expiredConnections.map(c => c.id) })
+        })
+        if (!response.ok) throw new Error('Failed to refresh')
         return { count: expiredConnections.length }
       })(),
       {
@@ -2185,8 +2190,13 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             <Button variant="outline" onClick={async () => {
                               toast.loading('Regenerating secret...', { id: 'webhook-secret' })
                               try {
-                                await new Promise(r => setTimeout(r, 1000))
-                                const newSecret = 'whsec_' + Math.random().toString(36).substring(2, 18)
+                                const response = await fetch('/api/webhooks/secret/regenerate', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' }
+                                })
+                                if (!response.ok) throw new Error('Failed to regenerate')
+                                const data = await response.json()
+                                const newSecret = data.secret || 'whsec_' + Math.random().toString(36).substring(2, 18)
                                 navigator.clipboard.writeText(newSecret)
                                 toast.success('Webhook secret regenerated', { id: 'webhook-secret', description: 'New secret copied to clipboard' })
                               } catch {

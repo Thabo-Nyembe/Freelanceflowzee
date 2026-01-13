@@ -192,13 +192,6 @@ export default function ReferralsPage() {
         setLoyaltyPoints(2000)
         setTotalCommission(3600)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
-
         setIsLoading(false)
         announce('Referral system loaded successfully', 'polite')
         logger.info('Referral data loaded', {

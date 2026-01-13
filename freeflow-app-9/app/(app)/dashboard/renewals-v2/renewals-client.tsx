@@ -807,7 +807,16 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     if (!selectedRenewal) return
     try {
       toast.loading('Sending reminder...', { id: 'reminder' })
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/renewals/reminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          renewalId: selectedRenewal.id,
+          type: reminderType,
+          message: reminderMessage
+        })
+      })
+      if (!response.ok) throw new Error('Failed to send reminder')
       toast.success('Reminder sent', {
         id: 'reminder',
         description: `${reminderType === 'both' ? 'Email and SMS' : reminderType.toUpperCase()} reminder sent to ${selectedRenewal.customerName}`
@@ -831,12 +840,21 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
       escalate: 'escalated'
     }
     toast.loading(`Processing renewal...`, { id: 'process' })
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.success(`Renewal ${actionLabels[action]}`, {
-      id: 'process',
-      description: `${selectedRenewal.customerName} renewal has been ${actionLabels[action]}`
-    })
-    setIsProcessRenewalDialogOpen(false)
+    try {
+      const response = await fetch('/api/renewals/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ renewalId: selectedRenewal.id, action })
+      })
+      if (!response.ok) throw new Error('Failed to process renewal')
+      toast.success(`Renewal ${actionLabels[action]}`, {
+        id: 'process',
+        description: `${selectedRenewal.customerName} renewal has been ${actionLabels[action]}`
+      })
+      setIsProcessRenewalDialogOpen(false)
+    } catch {
+      toast.error('Failed to process renewal', { id: 'process' })
+    }
   }
 
   const handleOpenSettings = () => {

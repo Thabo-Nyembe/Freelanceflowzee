@@ -364,8 +364,15 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleDownloadBuild = async (buildId: string, buildVersion: string) => {
     toast.promise(
       (async () => {
-        // Simulate download initiation
-        await new Promise(r => setTimeout(r, 800))
+        const res = await fetch(`/api/mobile-app/builds/${buildId}/download`)
+        if (!res.ok) throw new Error('Download failed')
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `build-v${buildVersion}.zip`
+        a.click()
+        URL.revokeObjectURL(url)
         // Log download event
         try {
           await supabase.from('mobile_app_downloads').insert({ build_id: buildId, user_id: userId, downloaded_at: new Date().toISOString() })
@@ -528,7 +535,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
   const handleRefreshData = useCallback(() => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch('/api/mobile-app/refresh', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Failed to refresh')
+      }),
       {
         loading: 'Refreshing mobile app data...',
         success: 'All mobile app data has been updated',
@@ -1804,7 +1813,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                             asc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => { toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate API key' }); }}>
+                        <Button variant="outline" className="w-full" onClick={() => { toast.promise(fetch('/api/mobile-app/api-keys/regenerate', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate API key' }); }}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -2635,7 +2644,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button onClick={async () => {
                 toast.loading('Saving TestFlight settings...', { id: 'testflight-save' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  const res = await fetch('/api/mobile-app/testflight/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: true }) })
+                  if (!res.ok) throw new Error('Failed to save')
                   toast.success('TestFlight settings saved', { id: 'testflight-save', description: '156 active testers configured' })
                   setShowTestFlightDialog(false)
                 } catch {
@@ -2703,7 +2713,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button onClick={async () => {
                 toast.loading('Updating privacy labels...', { id: 'privacy-save' })
                 try {
-                  await new Promise(r => setTimeout(r, 1200))
+                  const res = await fetch('/api/mobile-app/privacy-labels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ labels: {} }) })
+                  if (!res.ok) throw new Error('Failed to update')
                   toast.success('Privacy settings updated', { id: 'privacy-save', description: 'App Store privacy labels configured' })
                   setShowPrivacyDialog(false)
                 } catch {
@@ -2807,7 +2818,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button onClick={async () => {
                 toast.loading('Updating app metadata...', { id: 'metadata-save' })
                 try {
-                  await new Promise(r => setTimeout(r, 1500))
+                  const res = await fetch('/api/mobile-app/metadata', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ metadata: {} }) })
+                  if (!res.ok) throw new Error('Failed to update')
                   toast.success('App metadata updated successfully', { id: 'metadata-save', description: 'Changes will appear in App Store within 24 hours' })
                   setShowMetadataDialog(false)
                 } catch {
@@ -2866,7 +2878,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 <Button onClick={async () => {
                   toast.loading('Updating campaign...', { id: 'campaign-update' })
                   try {
-                    await new Promise(r => setTimeout(r, 1000))
+                    const res = await fetch(`/api/mobile-app/campaigns/${selectedCampaignForEdit?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: selectedCampaignForEdit?.title }) })
+                    if (!res.ok) throw new Error('Failed to update')
                     toast.success('Campaign updated successfully', { id: 'campaign-update', description: selectedCampaignForEdit?.title })
                     setShowEditCampaignDialog(false)
                   } catch {
@@ -2928,7 +2941,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 <Button onClick={async () => {
                   toast.loading('Updating in-app purchase...', { id: 'iap-update' })
                   try {
-                    await new Promise(r => setTimeout(r, 1200))
+                    const res = await fetch(`/api/mobile-app/iaps/${selectedIapForEdit?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: selectedIapForEdit?.name }) })
+                    if (!res.ok) throw new Error('Failed to update')
                     toast.success('Product updated successfully', { id: 'iap-update', description: selectedIapForEdit?.name })
                     setShowEditIapDialog(false)
                   } catch {
@@ -2962,7 +2976,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 }
                 toast.loading('Updating app name...', { id: 'app-name' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  const res = await fetch('/api/mobile-app/name', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: appNameValue }) })
+                  if (!res.ok) throw new Error('Failed to update')
                   toast.success('App name updated', { id: 'app-name', description: appNameValue })
                   setShowEditAppNameDialog(false)
                 } catch {
@@ -3020,7 +3035,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 }
                 toast.loading('Sending test webhook...', { id: 'webhook-test' })
                 try {
-                  await new Promise(r => setTimeout(r, 1500))
+                  const res = await fetch('/api/mobile-app/webhooks/test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: webhookUrl }) })
+                  if (!res.ok) throw new Error('Test failed')
                   toast.success('Webhook test successful!', { id: 'webhook-test', description: 'Status: 200 OK - Response time: 142ms' })
                   setShowWebhookTestDialog(false)
                 } catch {
@@ -3092,7 +3108,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   <Button variant="destructive" onClick={async () => {
                     toast.loading('Disconnecting...', { id: 'cicd-disconnect' })
                     try {
-                      await new Promise(r => setTimeout(r, 800))
+                      const res = await fetch(`/api/mobile-app/cicd/${selectedCiCd?.id}/disconnect`, { method: 'POST' })
+                      if (!res.ok) throw new Error('Failed')
                       toast.success(`${selectedCiCd?.name} disconnected`, { id: 'cicd-disconnect' })
                       setShowCiCdDialog(false)
                     } catch {
@@ -3102,7 +3119,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   <Button onClick={async () => {
                     toast.loading('Saving configuration...', { id: 'cicd-save' })
                     try {
-                      await new Promise(r => setTimeout(r, 1000))
+                      const res = await fetch(`/api/mobile-app/cicd/${selectedCiCd?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ config: {} }) })
+                      if (!res.ok) throw new Error('Failed')
                       toast.success('Configuration saved', { id: 'cicd-save', description: selectedCiCd?.name })
                       setShowCiCdDialog(false)
                     } catch {
@@ -3114,7 +3132,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 <Button onClick={async () => {
                   toast.loading('Connecting...', { id: 'cicd-connect' })
                   try {
-                    await new Promise(r => setTimeout(r, 1500))
+                    const res = await fetch('/api/mobile-app/cicd/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: selectedCiCd?.name }) })
+                    if (!res.ok) throw new Error('Failed')
                     toast.success(`${selectedCiCd?.name} connected successfully`, { id: 'cicd-connect', description: 'CI/CD pipeline is now active' })
                     setShowCiCdDialog(false)
                   } catch {
@@ -3229,16 +3248,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button onClick={async () => {
                 toast.loading('Preparing export...', { id: 'analytics-export' })
                 try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  const analyticsData = {
-                    exportDate: new Date().toISOString(),
-                    app: 'FreeFlow Mobile',
-                    downloads: 45200,
-                    activeUsers: 12800,
-                    sessions: 89000,
-                    revenue: 15600
-                  }
-                  const blob = new Blob([JSON.stringify(analyticsData, null, 2)], { type: 'application/json' })
+                  const res = await fetch('/api/mobile-app/analytics/export')
+                  if (!res.ok) throw new Error('Export failed')
+                  const blob = await res.blob()
                   const url = URL.createObjectURL(blob)
                   const a = document.createElement('a')
                   a.href = url
@@ -3300,7 +3312,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button variant="destructive" onClick={async () => {
                 toast.loading('Removing from store...', { id: 'remove-store' })
                 try {
-                  await new Promise(r => setTimeout(r, 1500))
+                  const res = await fetch('/api/mobile-app/store/remove', { method: 'POST' })
+                  if (!res.ok) throw new Error('Failed')
                   toast.success('App removed from sale', { id: 'remove-store', description: 'App will be hidden from App Store within 24 hours' })
                   setShowRemoveFromStoreDialog(false)
                 } catch {
@@ -3349,7 +3362,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <Button variant="destructive" disabled={confirmDeleteText !== 'DELETE'} onClick={async () => {
                 toast.loading('Deleting app...', { id: 'delete-app' })
                 try {
-                  await new Promise(r => setTimeout(r, 2000))
+                  const res = await fetch('/api/mobile-app', { method: 'DELETE' })
+                  if (!res.ok) throw new Error('Failed')
                   toast.success('App permanently deleted', { id: 'delete-app', description: 'All data has been removed' })
                   setConfirmDeleteText('')
                   setShowDeleteAppDialog(false)

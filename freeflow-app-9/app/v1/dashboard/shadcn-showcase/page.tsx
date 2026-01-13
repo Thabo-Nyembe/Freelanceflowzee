@@ -131,16 +131,9 @@ export default function ShadcnShowcasePage() {
         setIsPageLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load component showcase'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load component showcase from API
+        const response = await fetch('/api/ui/components')
+        if (!response.ok) throw new Error('Failed to load component showcase')
 
         setIsPageLoading(false)
         announce('Component showcase loaded successfully', 'polite')

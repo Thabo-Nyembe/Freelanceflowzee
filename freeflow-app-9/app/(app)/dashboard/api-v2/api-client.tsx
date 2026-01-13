@@ -895,8 +895,13 @@ export default function ApiClient() {
 
     setIsSubmitting(true)
     try {
-      // Simulate API call to save OAuth configuration
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Real API call to save OAuth configuration
+      const response = await fetch('/api/oauth/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(oauthConfigForm)
+      })
+      if (!response.ok) throw new Error('Failed to save configuration')
       toast.success('OAuth 2.0 Configuration Saved', {
         description: 'Your OAuth settings have been updated successfully'
       })
@@ -924,8 +929,13 @@ export default function ApiClient() {
 
     setIsSubmitting(true)
     try {
-      // Simulate API call to send invitation
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Real API call to send invitation
+      const response = await fetch('/api/team/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inviteForm)
+      })
+      if (!response.ok) throw new Error('Failed to send invitation')
       toast.success('Invitation Sent', {
         description: `Invite sent to ${inviteForm.email} with ${inviteForm.role} role`
       })

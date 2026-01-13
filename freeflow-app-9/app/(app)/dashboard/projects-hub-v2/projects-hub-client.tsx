@@ -1899,7 +1899,14 @@ export default function ProjectsHubClient() {
               insights={mockProjectsAIInsights as any}
               onInsightAction={(insight: any) => {
                 toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
+                  fetch('/api/projects/insights/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ insightId: insight.id, action: insight.action })
+                  }).then(res => {
+                    if (!res.ok) throw new Error('Failed to apply insight')
+                    return res.json()
+                  }),
                   {
                     loading: `Processing insight: ${insight.title || 'AI recommendation'}...`,
                     success: `Insight action completed: ${insight.title || 'Applied AI recommendation'}`,
@@ -2122,7 +2129,12 @@ export default function ProjectsHubClient() {
                   <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={async () => {
                   toast.loading('Moving issue...', { id: 'move-issue' })
                   try {
-                    await new Promise(r => setTimeout(r, 800))
+                    const res = await fetch(`/api/projects/issues/${selectedIssue.id}/status`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ status: 'in_progress' })
+                    })
+                    if (!res.ok) throw new Error('Failed to move issue')
                     setIssues(prev => prev.map(i => i.id === selectedIssue.id ? { ...i, status: 'in_progress' } : i))
                     toast.success(`Issue ${selectedIssue.key} moved to In Progress`, { id: 'move-issue' })
                     setShowIssueDialog(false)
@@ -2213,8 +2225,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Creating milestone...', { id: 'create-milestone' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setMilestones(prev => [...prev, { id: `M-${Date.now()}`, title: milestoneForm.title, quarter: milestoneForm.quarter, status: milestoneForm.status, progress: 0 }])
+                const res = await fetch('/api/projects/milestones', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(milestoneForm)
+                })
+                if (!res.ok) throw new Error('Failed to create milestone')
+                const data = await res.json()
+                setMilestones(prev => [...prev, { id: data.id || `M-${Date.now()}`, title: milestoneForm.title, quarter: milestoneForm.quarter, status: milestoneForm.status, progress: 0 }])
                 toast.success(`Milestone "${milestoneForm.title}" created`, { id: 'create-milestone' })
                 setShowMilestoneDialog(false)
                 setMilestoneForm({ title: '', quarter: 'Q1 2026', status: 'planned' })
@@ -2261,7 +2279,8 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Completing sprint...', { id: 'complete-sprint' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch(`/api/projects/sprints/${selectedSprint?.id}/complete`, { method: 'POST' })
+                if (!res.ok) throw new Error('Failed to complete sprint')
                 if (selectedSprint) {
                   setSprints(prev => prev.map(s => s.id === selectedSprint.id ? { ...s, status: 'completed' } : s))
                 }
@@ -2324,8 +2343,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Adding backlog item...', { id: 'add-backlog' })
               try {
-                await new Promise(r => setTimeout(r, 800))
-                setBacklogItems(prev => [...prev, { id: `BL-${Date.now()}`, ...backlogForm }])
+                const res = await fetch('/api/projects/backlog', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(backlogForm)
+                })
+                if (!res.ok) throw new Error('Failed to add backlog item')
+                const data = await res.json()
+                setBacklogItems(prev => [...prev, { id: data.id || `BL-${Date.now()}`, ...backlogForm }])
                 toast.success(`Backlog item "${backlogForm.title}" created`, { id: 'add-backlog' })
                 setShowBacklogItemDialog(false)
                 setBacklogForm({ title: '', description: '', type: 'feature', priority: 'medium', points: 3 })
@@ -2373,8 +2398,13 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Creating report...', { id: 'create-report' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
-                const reportData = { id: `RPT-${Date.now()}`, ...reportForm, createdAt: new Date().toISOString() }
+                const res = await fetch('/api/projects/reports', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(reportForm)
+                })
+                if (!res.ok) throw new Error('Failed to create report')
+                const reportData = await res.json()
                 const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
@@ -2446,8 +2476,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Creating automation...', { id: 'create-automation' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setAutomations(prev => [...prev, { id: `AUTO-${Date.now()}`, ...automationForm }])
+                const res = await fetch('/api/projects/automations', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(automationForm)
+                })
+                if (!res.ok) throw new Error('Failed to create automation')
+                const data = await res.json()
+                setAutomations(prev => [...prev, { id: data.id || `AUTO-${Date.now()}`, ...automationForm }])
                 toast.success(`Automation "${automationForm.name}" created`, { id: 'create-automation' })
                 setShowAutomationDialog(false)
                 setAutomationForm({ name: '', trigger: '', action: '', enabled: true })
@@ -2494,8 +2530,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Creating project from template...', { id: 'create-from-template' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
-                setProjects(prev => [...prev, { id: `PRJ-${Date.now()}`, name: `${selectedTemplate?.name} Project`, template: selectedTemplate?.name, createdAt: new Date().toISOString() }])
+                const res = await fetch('/api/projects/from-template', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ templateId: selectedTemplate?.id })
+                })
+                if (!res.ok) throw new Error('Failed to create project')
+                const data = await res.json()
+                setProjects(prev => [...prev, { id: data.id || `PRJ-${Date.now()}`, name: `${selectedTemplate?.name} Project`, template: selectedTemplate?.name, createdAt: new Date().toISOString() }])
                 toast.success(`Project created from "${selectedTemplate?.name}" template`, { id: 'create-from-template' })
                 setShowTemplateDialog(false)
               } catch {
@@ -2536,7 +2578,12 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Saving Slack configuration...', { id: 'save-slack' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch('/api/integrations/slack/channel', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ channel: slackChannel })
+                })
+                if (!res.ok) throw new Error('Failed to save configuration')
                 toast.success(`Slack channel updated to ${slackChannel}`, { id: 'save-slack' })
                 setShowSlackConfigDialog(false)
               } catch {
@@ -2576,8 +2623,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Adding webhook...', { id: 'add-webhook' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setWebhooks(prev => [...prev, { id: `WH-${Date.now()}`, ...webhookForm }])
+                const res = await fetch('/api/projects/webhooks', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(webhookForm)
+                })
+                if (!res.ok) throw new Error('Failed to add webhook')
+                const data = await res.json()
+                setWebhooks(prev => [...prev, { id: data.id || `WH-${Date.now()}`, ...webhookForm }])
                 toast.success('Webhook added successfully', { id: 'add-webhook' })
                 setShowWebhookDialog(false)
                 setWebhookForm({ url: '', events: ['issue.created'] })
@@ -2645,7 +2698,12 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading(selectedIntegration ? 'Saving settings...' : 'Connecting...', { id: 'integration-action' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch(`/api/integrations/${selectedIntegration?.id || 'new'}`, {
+                  method: selectedIntegration ? 'PATCH' : 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ integrationId: selectedIntegration?.id })
+                })
+                if (!res.ok) throw new Error('Action failed')
                 if (selectedIntegration) {
                   setIntegrations(prev => prev.map(i => i.id === selectedIntegration.id ? { ...i, connected: true } : i))
                 }
@@ -2681,8 +2739,10 @@ export default function ProjectsHubClient() {
               <Button variant="destructive" onClick={async () => {
               toast.loading('Regenerating API token...', { id: 'regen-token' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
-                const newToken = `pat_${Math.random().toString(36).substring(2, 30)}`
+                const res = await fetch('/api/projects/tokens/regenerate', { method: 'POST' })
+                if (!res.ok) throw new Error('Failed to regenerate token')
+                const data = await res.json()
+                const newToken = data.token || `pat_${Math.random().toString(36).substring(2, 30)}`
                 await navigator.clipboard.writeText(newToken)
                 toast.success('New API token generated', { id: 'regen-token', description: 'Copied to clipboard' })
                 setShowApiTokenDialog(false)
@@ -2734,11 +2794,17 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading(selectedCustomField ? 'Updating field...' : 'Creating field...', { id: 'custom-field-action' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch(`/api/projects/custom-fields${selectedCustomField ? `/${selectedCustomField.id}` : ''}`, {
+                  method: selectedCustomField ? 'PATCH' : 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(customFieldForm)
+                })
+                if (!res.ok) throw new Error('Action failed')
+                const data = await res.json()
                 if (selectedCustomField) {
                   setCustomFields(prev => prev.map(f => f.id === selectedCustomField.id ? { ...f, ...customFieldForm } : f))
                 } else {
-                  setCustomFields(prev => [...prev, { id: `CF-${Date.now()}`, ...customFieldForm }])
+                  setCustomFields(prev => [...prev, { id: data.id || `CF-${Date.now()}`, ...customFieldForm }])
                 }
                 toast.success(selectedCustomField ? `Field "${customFieldForm.name}" updated` : `Field "${customFieldForm.name}" created`, { id: 'custom-field-action' })
                 setShowCustomFieldDialog(false)
@@ -2777,7 +2843,8 @@ export default function ProjectsHubClient() {
               <Button variant="destructive" onClick={async () => {
               toast.loading('Archiving projects...', { id: 'archive-all' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
+                const res = await fetch('/api/projects/archive-all', { method: 'POST' })
+                if (!res.ok) throw new Error('Archive failed')
                 const projectCount = projects.length
                 setProjects(prev => prev.map(p => ({ ...p, archived: true })))
                 toast.success('All projects archived', { id: 'archive-all', description: `${projectCount} projects archived` })
@@ -2815,7 +2882,8 @@ export default function ProjectsHubClient() {
               <Button variant="destructive" onClick={async () => {
               toast.loading('Deleting all data...', { id: 'delete-all' })
               try {
-                await new Promise(r => setTimeout(r, 2000))
+                const res = await fetch('/api/projects/delete-all', { method: 'DELETE' })
+                if (!res.ok) throw new Error('Delete failed')
                 setProjects([])
                 setIssues([])
                 setBacklogItems([])
@@ -2865,8 +2933,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Adding status...', { id: 'add-status' })
               try {
-                await new Promise(r => setTimeout(r, 800))
-                setWorkflowStatuses(prev => [...prev, { id: `ST-${Date.now()}`, ...workflowStatusForm }])
+                const res = await fetch('/api/projects/workflow-statuses', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(workflowStatusForm)
+                })
+                if (!res.ok) throw new Error('Failed to add status')
+                const data = await res.json()
+                setWorkflowStatuses(prev => [...prev, { id: data.id || `ST-${Date.now()}`, ...workflowStatusForm }])
                 toast.success(`Status "${workflowStatusForm.name}" added`, { id: 'add-status' })
                 setShowWorkflowStatusDialog(false)
                 setWorkflowStatusForm({ name: '', color: 'bg-gray-500' })
@@ -2940,7 +3014,8 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Importing data...', { id: 'import-data' })
               try {
-                await new Promise(r => setTimeout(r, 2000))
+                const res = await fetch('/api/projects/import', { method: 'POST' })
+                if (!res.ok) throw new Error('Import failed')
                 toast.success('Data imported successfully', { id: 'import-data' })
                 setShowImportDialog(false)
               } catch {
@@ -3021,8 +3096,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Logging time...', { id: 'log-time' })
               try {
-                await new Promise(r => setTimeout(r, 800))
-                setTimeEntries(prev => [...prev, { id: `TE-${Date.now()}`, ...logTimeForm, date: new Date().toISOString() }])
+                const res = await fetch('/api/projects/time-entries', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ...logTimeForm, date: new Date().toISOString() })
+                })
+                if (!res.ok) throw new Error('Failed to log time')
+                const data = await res.json()
+                setTimeEntries(prev => [...prev, { id: data.id || `TE-${Date.now()}`, ...logTimeForm, date: new Date().toISOString() }])
                 toast.success(`${logTimeForm.hours} hours logged`, { id: 'log-time' })
                 setShowLogTimeDialog(false)
                 setLogTimeForm({ hours: 0, description: '' })
@@ -3055,7 +3136,8 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Uploading attachment...', { id: 'upload-attachment' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
+                const res = await fetch('/api/projects/attachments', { method: 'POST' })
+                if (!res.ok) throw new Error('Upload failed')
                 toast.success('Attachment uploaded', { id: 'upload-attachment' })
                 setShowAttachmentDialog(false)
               } catch {
@@ -3097,8 +3179,14 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Linking issue...', { id: 'link-issue' })
               try {
-                await new Promise(r => setTimeout(r, 800))
-                setIssueLinks(prev => [...prev, { id: `LNK-${Date.now()}`, ...linkIssueForm }])
+                const res = await fetch('/api/projects/issue-links', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(linkIssueForm)
+                })
+                if (!res.ok) throw new Error('Failed to link issue')
+                const data = await res.json()
+                setIssueLinks(prev => [...prev, { id: data.id || `LNK-${Date.now()}`, ...linkIssueForm }])
                 toast.success(`Issue linked to ${linkIssueForm.issueKey}`, { id: 'link-issue' })
                 setShowLinkIssueDialog(false)
                 setLinkIssueForm({ issueKey: '', linkType: 'blocks' })
@@ -3162,7 +3250,12 @@ export default function ProjectsHubClient() {
               <Button onClick={async () => {
               toast.loading('Saving changes...', { id: 'save-issue' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch(`/api/projects/issues/${selectedIssue?.id}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(selectedIssue)
+                })
+                if (!res.ok) throw new Error('Failed to save changes')
                 toast.success(`Issue ${selectedIssue?.key} updated`, { id: 'save-issue' })
                 setShowEditIssueDialog(false)
               } catch {

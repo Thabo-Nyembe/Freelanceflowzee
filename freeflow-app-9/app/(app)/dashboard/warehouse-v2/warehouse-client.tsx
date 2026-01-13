@@ -531,7 +531,14 @@ export default function WarehouseClient() {
     }
 
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newInventory)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to add inventory')
+        return res.json()
+      }),
       {
         loading: 'Adding inventory item...',
         success: () => {
@@ -563,7 +570,14 @@ export default function WarehouseClient() {
     }
 
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/cycle-counts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cycleCount)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to start cycle count')
+        return res.json()
+      }),
       {
         loading: 'Starting cycle count...',
         success: () => {
@@ -589,7 +603,14 @@ export default function WarehouseClient() {
     }
 
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newTask)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to create task')
+        return res.json()
+      }),
       {
         loading: 'Creating task...',
         success: () => {
@@ -613,7 +634,19 @@ export default function WarehouseClient() {
   // Handler for Export
   const handleExport = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch(`/api/warehouse/export?type=${exportData.dataType}&format=${exportData.format}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Export failed')
+          return res.blob()
+        })
+        .then(blob => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `warehouse-${exportData.dataType}.${exportData.format}`
+          a.click()
+          URL.revokeObjectURL(url)
+        }),
       {
         loading: `Exporting ${exportData.dataType} data as ${exportData.format.toUpperCase()}...`,
         success: () => {
@@ -633,7 +666,14 @@ export default function WarehouseClient() {
     }
 
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/transfers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transferData)
+      }).then(res => {
+        if (!res.ok) throw new Error('Transfer failed')
+        return res.json()
+      }),
       {
         loading: 'Processing transfer...',
         success: () => {
@@ -649,7 +689,14 @@ export default function WarehouseClient() {
   // Handler for Import
   const handleImport = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/warehouse/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'inventory' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Import failed')
+        return res.json()
+      }),
       {
         loading: 'Importing data...',
         success: () => {
@@ -664,7 +711,14 @@ export default function WarehouseClient() {
   // Handler for Scan Mode activation
   const handleActivateScanMode = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch('/api/warehouse/scan-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scanMode)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to activate')
+        return res.json()
+      }),
       {
         loading: 'Activating scan mode...',
         success: () => {
@@ -681,7 +735,14 @@ export default function WarehouseClient() {
     if (!selectedEditItem) return
 
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch(`/api/warehouse/inventory/${selectedEditItem?.sku}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(selectedEditItem)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to update')
+        return res.json()
+      }),
       {
         loading: 'Saving changes...',
         success: () => {
@@ -702,7 +763,14 @@ export default function WarehouseClient() {
 
   const handleProcessReceiving = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/warehouse/receiving', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shipmentId: selectedShipment?.id })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to process')
+        return res.json()
+      }),
       {
         loading: 'Processing receiving...',
         success: () => {
@@ -723,7 +791,14 @@ export default function WarehouseClient() {
 
   const handleProcessPicking = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/picking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selectedOrder?.id })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to start')
+        return res.json()
+      }),
       {
         loading: 'Starting picking process...',
         success: () => {
@@ -744,7 +819,14 @@ export default function WarehouseClient() {
 
   const handleProcessPacking = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/packing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selectedOrder?.id })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to start')
+        return res.json()
+      }),
       {
         loading: 'Starting packing process...',
         success: () => {
@@ -765,7 +847,14 @@ export default function WarehouseClient() {
 
   const handleProcessShipping = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/warehouse/shipping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selectedOrder?.id })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to ship')
+        return res.json()
+      }),
       {
         loading: 'Processing shipment...',
         success: () => {
@@ -791,7 +880,14 @@ export default function WarehouseClient() {
     }
 
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch(`/api/warehouse/tasks/${selectedTask?.id}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(assignTaskData)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to assign')
+        return res.json()
+      }),
       {
         loading: 'Assigning task...',
         success: () => {
@@ -808,7 +904,12 @@ export default function WarehouseClient() {
   // Handler for Task Start
   const handleStartTask = (task: WarehouseTask) => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch(`/api/warehouse/tasks/${task.id}/start`, {
+        method: 'POST'
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to start')
+        return res.json()
+      }),
       {
         loading: 'Starting task...',
         success: `Task ${task.task_number} started`,
@@ -820,7 +921,12 @@ export default function WarehouseClient() {
   // Handler for Task Complete
   const handleCompleteTask = (task: WarehouseTask) => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch(`/api/warehouse/tasks/${task.id}/complete`, {
+        method: 'POST'
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to complete')
+        return res.json()
+      }),
       {
         loading: 'Completing task...',
         success: `Task ${task.task_number} completed`,
@@ -844,7 +950,12 @@ export default function WarehouseClient() {
   // Handler for Starting/Continuing Cycle Count
   const handleStartCycleCountFromList = (count: CycleCount) => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch(`/api/warehouse/cycle-counts/${count.id}/${count.status === 'scheduled' ? 'start' : 'resume'}`, {
+        method: 'POST'
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to process')
+        return res.json()
+      }),
       {
         loading: count.status === 'scheduled' ? 'Starting cycle count...' : 'Resuming cycle count...',
         success: count.status === 'scheduled' ? `Cycle count ${count.count_number} started` : `Cycle count ${count.count_number} resumed`,
@@ -861,7 +972,14 @@ export default function WarehouseClient() {
 
   const handleSaveConfigure = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch('/api/warehouse/configuration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: configureTarget })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save')
+        return res.json()
+      }),
       {
         loading: 'Saving configuration...',
         success: () => {
@@ -877,7 +995,14 @@ export default function WarehouseClient() {
   // Handler for Priority Rules
   const handleSavePriorityRules = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch('/api/warehouse/priority-rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rules: [] })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save')
+        return res.json()
+      }),
       {
         loading: 'Saving priority rules...',
         success: () => {
@@ -892,7 +1017,12 @@ export default function WarehouseClient() {
   // Handler for API Key regeneration
   const handleRegenerateApiKey = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/api-key/regenerate', {
+        method: 'POST'
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to regenerate')
+        return res.json()
+      }),
       {
         loading: 'Regenerating API key...',
         success: 'New API key generated successfully',
@@ -904,7 +1034,12 @@ export default function WarehouseClient() {
   // Handler for Database Optimization
   const handleOptimizeDatabase = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
+      fetch('/api/warehouse/database/optimize', {
+        method: 'POST'
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to optimize')
+        return res.json()
+      }),
       {
         loading: 'Optimizing database...',
         success: 'Database optimization completed',
@@ -916,7 +1051,19 @@ export default function WarehouseClient() {
   // Handler for Export Configuration
   const handleExportConfig = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/configuration/export')
+        .then(res => {
+          if (!res.ok) throw new Error('Export failed')
+          return res.blob()
+        })
+        .then(blob => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = 'warehouse-config.json'
+          a.click()
+          URL.revokeObjectURL(url)
+        }),
       {
         loading: 'Exporting configuration...',
         success: 'Configuration exported successfully',
@@ -928,7 +1075,14 @@ export default function WarehouseClient() {
   // Handler for Import Configuration
   const handleImportConfig = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/warehouse/configuration/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      }).then(res => {
+        if (!res.ok) throw new Error('Import failed')
+        return res.json()
+      }),
       {
         loading: 'Importing configuration...',
         success: 'Configuration imported successfully',
@@ -940,7 +1094,12 @@ export default function WarehouseClient() {
   // Handler for Purge Data
   const handlePurgeData = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
+      fetch('/api/warehouse/data/purge', {
+        method: 'DELETE'
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to purge')
+        return res.json()
+      }),
       {
         loading: 'Purging old data...',
         success: () => {
@@ -955,7 +1114,12 @@ export default function WarehouseClient() {
   // Handler for Reset Defaults
   const handleResetDefaults = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/warehouse/settings/reset', {
+        method: 'POST'
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to reset')
+        return res.json()
+      }),
       {
         loading: 'Resetting to defaults...',
         success: () => {
@@ -970,7 +1134,14 @@ export default function WarehouseClient() {
   // Handler for Save Settings
   const handleSaveSettings = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/warehouse/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save')
+        return res.json()
+      }),
       {
         loading: 'Saving settings...',
         success: 'Settings saved successfully',
@@ -1137,36 +1308,18 @@ export default function WarehouseClient() {
 
   // Handlers
   const handleCreateShipment = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening shipment form...',
-        success: 'Create Shipment form ready',
-        error: 'Failed to open shipment form'
-      }
-    )
+    setShowShipOrderDialog(true)
+    toast.success('Create Shipment form ready')
   }
 
   const handleReceiveInventory = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening receiving form...',
-        success: 'Receive Inventory form ready',
-        error: 'Failed to open receiving form'
-      }
-    )
+    setShowReceivingDialog(true)
+    toast.success('Receive Inventory form ready')
   }
 
   const handleStartInventoryCount = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Starting inventory count...',
-        success: 'Inventory count started - Count session is now active',
-        error: 'Failed to start inventory count'
-      }
-    )
+    setShowCycleCountDialog(true)
+    toast.success('Inventory count started - Count session is now active')
   }
 
   return (
@@ -3207,7 +3360,11 @@ export default function WarehouseClient() {
               <Button className="gap-2" onClick={async () => {
                 toast.loading('Creating replenishment task...', { id: 'replenish' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  await fetch('/api/warehouse/tasks/replenish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemSku: selectedItem?.sku })
+                  })
                   toast.success('Replenishment task created', { id: 'replenish', description: 'Task added to the queue' })
                   setShowReplenishDialog(false)
                 } catch {

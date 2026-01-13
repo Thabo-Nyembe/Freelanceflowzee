@@ -193,12 +193,9 @@ export default function SettingsPage() {
         setEmail(KAZI_CLIENT_DATA.clientInfo.email)
         setPhone(KAZI_CLIENT_DATA.clientInfo.phone)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load settings from API
+        const response = await fetch('/api/client-zone/settings')
+        if (!response.ok) throw new Error('Failed to load settings')
 
         setIsLoading(false)
         announce('Settings loaded successfully', 'polite')

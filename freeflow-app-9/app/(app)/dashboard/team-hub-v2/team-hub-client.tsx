@@ -849,10 +849,20 @@ export default function TeamHubClient() {
 
   const handleSaveSettings = async () => {
     setShowSaveSettingsDialog(true)
-    // Simulate save operation
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.success('Settings saved', { description: 'Workspace settings updated' })
-    setShowSaveSettingsDialog(false)
+    try {
+      // Real API call to save workspace settings
+      const response = await fetch('/api/workspace/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: settingsState })
+      })
+      if (!response.ok) throw new Error('Failed to save settings')
+      toast.success('Settings saved', { description: 'Workspace settings updated' })
+    } catch (error) {
+      toast.error('Failed to save settings', { description: 'Please try again' })
+    } finally {
+      setShowSaveSettingsDialog(false)
+    }
   }
 
   // Combined stats from mock + db

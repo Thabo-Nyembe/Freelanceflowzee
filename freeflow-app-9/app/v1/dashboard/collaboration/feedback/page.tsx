@@ -641,28 +641,19 @@ export default function FeedbackPage() {
     logger.info("Exporting feedback");
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            // Export feedback data as JSON
-            const blob = new Blob([JSON.stringify(feedbacks, null, 2)], { type: 'application/json' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `feedback-export-${Date.now()}.json`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
-
-            logger.info("Feedback exported successfully");
-            resolve();
-          } catch (error) {
-            logger.error("Failed to export feedback", { error });
-            reject(error);
-          }
-        }, 1500);
-      }),
+      (async () => {
+        // Export feedback data as JSON
+        const blob = new Blob([JSON.stringify(feedbacks, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `feedback-export-${Date.now()}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        logger.info("Feedback exported successfully");
+      })(),
       {
         loading: "Exporting feedback data...",
         success: "Feedback data exported successfully",

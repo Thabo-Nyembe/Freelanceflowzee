@@ -926,29 +926,36 @@ export default function ReportsPage() {
     announce('Exporting financial data', 'polite')
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            const csvContent = `Financial Report - ${new Date().toLocaleDateString()}\nMetric,Value\nCurrent Month Revenue,$${financialData?.revenueData.currentMonth}\nYear to Date,$${financialData?.revenueData.yearly.revenue}\nClient Retention,${financialData?.insights.clientRetention}%\nAvg Project Value,$${financialData?.revenueData.averageProjectValue}\nCash Runway,${financialData?.cashFlow.runway} months`
+      (async () => {
+        // Call API to generate export and log the action
+        const response = await fetch('/api/reports/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'financial',
+            format: 'csv',
+            data: financialData
+          })
+        })
 
-            const blob = new Blob([csvContent], { type: 'text/csv' })
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `financial-report-${new Date().toISOString().split('T')[0]}.csv`
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
+        if (!response.ok) {
+          throw new Error('Export generation failed')
+        }
 
-            announce('Financial data exported successfully', 'polite')
-            resolve()
-          } catch (err: any) {
-            logger.error('Export failed', { error: err.message })
-            reject(err)
-          }
-        }, 1200)
-      }),
+        const csvContent = `Financial Report - ${new Date().toLocaleDateString()}\nMetric,Value\nCurrent Month Revenue,$${financialData?.revenueData.currentMonth}\nYear to Date,$${financialData?.revenueData.yearly.revenue}\nClient Retention,${financialData?.insights.clientRetention}%\nAvg Project Value,$${financialData?.revenueData.averageProjectValue}\nCash Runway,${financialData?.cashFlow.runway} months`
+
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `financial-report-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+
+        announce('Financial data exported successfully', 'polite')
+      })(),
       {
         loading: 'Exporting financial data...',
         success: 'Financial data exported - CSV file downloaded',
@@ -1056,26 +1063,32 @@ export default function ReportsPage() {
     })
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          try {
-            // Open email client to share report
-            const subject = encodeURIComponent(`Report: ${reportName}`)
-            const body = encodeURIComponent(`Please find the attached report "${reportName}".\n\nReport URL: ${window.location.origin}/reports/${shareReport.id}`)
-            window.open(`mailto:${recipientList.join(',')}?subject=${subject}&body=${body}`, '_blank')
+      (async () => {
+        // Log share action to API
+        const response = await fetch('/api/reports/share', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reportId: shareReport.id,
+            recipients: recipientList,
+            reportName
+          })
+        })
 
-            announce('Report shared successfully', 'polite')
-            setIsShareModalOpen(false)
-            setShareReport(null)
-            setIsSaving(false)
-            resolve()
-          } catch (err: any) {
-            logger.error('Share failed', { error: err.message })
-            setIsSaving(false)
-            reject(err)
-          }
-        }, 800)
-      }),
+        if (!response.ok) {
+          throw new Error('Failed to log share action')
+        }
+
+        // Open email client to share report
+        const subject = encodeURIComponent(`Report: ${reportName}`)
+        const body = encodeURIComponent(`Please find the attached report "${reportName}".\n\nReport URL: ${window.location.origin}/reports/${shareReport.id}`)
+        window.open(`mailto:${recipientList.join(',')}?subject=${subject}&body=${body}`, '_blank')
+
+        announce('Report shared successfully', 'polite')
+        setIsShareModalOpen(false)
+        setShareReport(null)
+        setIsSaving(false)
+      })(),
       {
         loading: `Sharing "${reportName}"...`,
         success: `"${reportName}" shared with ${recipientList.length} recipient(s)`,
@@ -1091,27 +1104,19 @@ export default function ReportsPage() {
     })
 
     toast.promise(
-      new Promise<void>((resolve, reject) => {
-        setTimeout(async () => {
-          try {
-            const { createReport } = await import('@/lib/reports-queries')
+      (async () => {
+        const { createReport } = await import('@/lib/reports-queries')
 
-            const duplicatedReport = {
-              ...report,
-              name: `${report.name} (Copy)`,
-              status: 'draft' as ReportStatus
-            }
+        const duplicatedReport = {
+          ...report,
+          name: `${report.name} (Copy)`,
+          status: 'draft' as ReportStatus
+        }
 
-            // await createReport('user-id', duplicatedReport)
+        await createReport('user-id', duplicatedReport)
 
-            announce('Report duplicated successfully', 'polite')
-            resolve()
-          } catch (err: any) {
-            logger.error('Duplication failed', { error: err.message })
-            reject(err)
-          }
-        }, 1000)
-      }),
+        announce('Report duplicated successfully', 'polite')
+      })(),
       {
         loading: `Duplicating "${report.name}"...`,
         success: `Created copy of "${report.name}"`,

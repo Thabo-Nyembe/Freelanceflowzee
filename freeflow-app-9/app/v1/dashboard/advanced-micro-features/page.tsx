@@ -212,16 +212,9 @@ export default function AdvancedMicroFeaturesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load advanced micro features'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load advanced micro features from API
+        const response = await fetch('/api/dashboard/micro-features')
+        if (!response.ok) throw new Error('Failed to load advanced micro features')
 
         // Initialize data after load
         setWidgetData(mockWidgetDataDefault)

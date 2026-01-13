@@ -598,16 +598,15 @@ export default function MessagesClient() {
       // Store in session
       sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
 
-        toast.success(`${channelName} muted`, {
-          id: 'mute',
-          description: 'You will not receive notifications from this channel',
-          action: {
-            label: 'Undo',
-            onClick: () => handleMuteChannel(channelName)
-          }
-        })
-      }
-    }, 800)
+      toast.success(`${channelName} muted`, {
+        id: 'mute',
+        description: 'You will not receive notifications from this channel',
+        action: {
+          label: 'Undo',
+          onClick: () => handleMuteChannel(channelName)
+        }
+      })
+    }
   }
 
   const handleInvitePeople = () => {

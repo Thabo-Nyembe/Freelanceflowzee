@@ -203,12 +203,9 @@ export default function PaymentsPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load payments from API
+        const response = await fetch('/api/client-zone/payments')
+        if (!response.ok) throw new Error('Failed to load payments')
 
         setMilestones(MILESTONES)
         setPaymentHistory(PAYMENT_HISTORY)

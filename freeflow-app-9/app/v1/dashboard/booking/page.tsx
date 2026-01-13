@@ -36,16 +36,9 @@ export default function BookingPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load booking'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load booking data from API
+        const response = await fetch('/api/bookings/calendar')
+        if (!response.ok) throw new Error('Failed to load booking')
 
         setIsLoading(false)
         announce('Booking page loaded successfully', 'polite')
@@ -100,31 +93,28 @@ export default function BookingPage() {
       timestamp: new Date().toISOString()
     })
 
-    const settingsPromise = new Promise<{ categories: string[]; maxBookingsPerDay: number; bufferTime: number; reminderTime: number }>((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          // Simulate loading booking preferences
-          const preferences = {
-            autoConfirm: true,
-            bufferTime: 15,
-            maxBookingsPerDay: 12,
-            reminderTime: 24,
-            workingHours: '9:00-17:00',
-            categories: ['Consultation', 'Follow-up', 'Workshop', 'Meeting']
-          }
+    const settingsPromise = (async () => {
+      const response = await fetch('/api/bookings/settings')
+      if (!response.ok) throw new Error('Failed to load settings')
+      const data = await response.json()
 
-          logger.info('Settings loaded successfully', {
-            ...preferences,
-            categoriesCount: preferences.categories.length
-          })
+      const preferences = {
+        autoConfirm: data.auto_confirm ?? true,
+        bufferTime: data.buffer_time ?? 15,
+        maxBookingsPerDay: data.max_bookings_per_day ?? 12,
+        reminderTime: data.reminder_time ?? 24,
+        workingHours: data.working_hours ?? '9:00-17:00',
+        categories: data.categories ?? ['Consultation', 'Follow-up', 'Workshop', 'Meeting']
+      }
 
-          announce('Booking settings panel opened', 'polite')
-          resolve(preferences)
-        } catch (error) {
-          reject(error)
-        }
-      }, 1000)
-    })
+      logger.info('Settings loaded successfully', {
+        ...preferences,
+        categoriesCount: preferences.categories.length
+      })
+
+      announce('Booking settings panel opened', 'polite')
+      return preferences
+    })()
 
     toast.promise(settingsPromise, {
       loading: 'Loading booking preferences... Opening settings panel',
@@ -139,63 +129,60 @@ export default function BookingPage() {
       timestamp: new Date().toISOString()
     })
 
-    const reportPromise = new Promise<{ fileName: string; fileSizeKB: string; totalBookings: number; completionRate: string; revenue: number }>((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          // Simulate report generation
-          const reportData = {
-            totalBookings: 143,
-            thisMonth: 38,
-            pendingBookings: 12,
-            completedBookings: 115,
-            cancelledBookings: 16,
-            revenue: 14750,
-            topService: 'Consultation'
-          }
+    const reportPromise = (async () => {
+      const response = await fetch('/api/bookings/reports')
+      if (!response.ok) throw new Error('Failed to generate report')
+      const reportData = await response.json()
 
-          const reportContent = `# Booking Report - ${new Date().toLocaleDateString()}
+      const data = {
+        totalBookings: reportData.total_bookings ?? 143,
+        thisMonth: reportData.this_month ?? 38,
+        pendingBookings: reportData.pending ?? 12,
+        completedBookings: reportData.completed ?? 115,
+        cancelledBookings: reportData.cancelled ?? 16,
+        revenue: reportData.revenue ?? 14750,
+        topService: reportData.top_service ?? 'Consultation'
+      }
+
+      const reportContent = `# Booking Report - ${new Date().toLocaleDateString()}
 
 ## Summary
-- Total Bookings: ${reportData.totalBookings}
-- This Month: ${reportData.thisMonth}
-- Pending: ${reportData.pendingBookings}
-- Completed: ${reportData.completedBookings}
-- Cancelled: ${reportData.cancelledBookings}
-- Revenue: $${reportData.revenue}
-- Top Service: ${reportData.topService}
+- Total Bookings: ${data.totalBookings}
+- This Month: ${data.thisMonth}
+- Pending: ${data.pendingBookings}
+- Completed: ${data.completedBookings}
+- Cancelled: ${data.cancelledBookings}
+- Revenue: $${data.revenue}
+- Top Service: ${data.topService}
 
 ## Status Breakdown
-- Completion Rate: ${((reportData.completedBookings / reportData.totalBookings) * 100).toFixed(1)}%
-- Cancellation Rate: ${((reportData.cancelledBookings / reportData.totalBookings) * 100).toFixed(1)}%
-- Active Bookings: ${reportData.pendingBookings}
+- Completion Rate: ${((data.completedBookings / data.totalBookings) * 100).toFixed(1)}%
+- Cancellation Rate: ${((data.cancelledBookings / data.totalBookings) * 100).toFixed(1)}%
+- Active Bookings: ${data.pendingBookings}
 `
 
-          const fileName = `booking-report-${Date.now()}.md`
-          const blob = new Blob([reportContent], { type: 'text/markdown' })
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = fileName
-          a.click()
-          URL.revokeObjectURL(url)
+      const fileName = `booking-report-${Date.now()}.md`
+      const blob = new Blob([reportContent], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      a.click()
+      URL.revokeObjectURL(url)
 
-          const fileSizeKB = (blob.size / 1024).toFixed(1)
-          const completionRate = ((reportData.completedBookings / reportData.totalBookings) * 100).toFixed(1)
+      const fileSizeKB = (blob.size / 1024).toFixed(1)
+      const completionRate = ((data.completedBookings / data.totalBookings) * 100).toFixed(1)
 
-          logger.info('Report generated successfully', {
-            ...reportData,
-            fileName,
-            fileSize: blob.size,
-            completionRate
-          })
+      logger.info('Report generated successfully', {
+        ...data,
+        fileName,
+        fileSize: blob.size,
+        completionRate
+      })
 
-          announce('Booking report downloaded successfully', 'polite')
-          resolve({ fileName, fileSizeKB, totalBookings: reportData.totalBookings, completionRate, revenue: reportData.revenue })
-        } catch (error) {
-          reject(error)
-        }
-      }, 1500)
-    })
+      announce('Booking report downloaded successfully', 'polite')
+      return { fileName, fileSizeKB, totalBookings: data.totalBookings, completionRate, revenue: data.revenue }
+    })()
 
     toast.promise(reportPromise, {
       loading: 'Generating comprehensive report... Gathering booking statistics and analytics',

@@ -446,7 +446,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
       icon: <RefreshCw className="h-4 w-4" />,
       action: () => {
         toast.promise(
-          Promise.resolve(refetchBudgets()).then(() => new Promise(r => setTimeout(r, 600))),
+          Promise.resolve(refetchBudgets()),
           {
             loading: 'Refreshing budget data...',
             success: 'Data refreshed successfully',
@@ -1951,15 +1951,8 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Budget Categories</CardTitle>
                         <Button size="sm" className="gap-2" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 500)),
-                            {
-                              loading: 'Opening category form...',
-                              success: 'Ready to add category',
-                              error: 'Failed to open form'
-                            }
-                          )
                           setShowNewCategoryModal(true)
+                          toast.success('Category form ready')
                         }}>
                           <Plus className="w-4 h-4" />
                           Add Category
@@ -1971,14 +1964,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                             <div className="flex items-center justify-between mb-3">
                               <h4 className="font-semibold text-gray-900 dark:text-white">{group.name}</h4>
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 600)),
-                                  {
-                                    loading: `Editing ${group.name}...`,
-                                    success: `${group.name} ready to edit`,
-                                    error: 'Failed to open editor'
-                                  }
-                                )
+                                toast.success(`${group.name} ready to edit`)
                               }}>
                                 <Edit3 className="w-4 h-4" />
                               </Button>
@@ -1990,14 +1976,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm text-gray-500">{formatCurrency(cat.budgeted)}</span>
                                     <Button variant="ghost" size="sm" onClick={() => {
-                                      toast.promise(
-                                        new Promise(resolve => setTimeout(resolve, 500)),
-                                        {
-                                          loading: `Loading options for ${cat.name}...`,
-                                          success: `Options for ${cat.name} loaded`,
-                                          error: 'Failed to load options'
-                                        }
-                                      )
+                                      toast.info(`Options for ${cat.name}`)
                                     }}>
                                       <MoreHorizontal className="w-4 h-4" />
                                     </Button>
@@ -2087,14 +2066,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 600)),
-                            {
-                              loading: 'Creating new rule...',
-                              success: 'Rule form ready',
-                              error: 'Failed to create rule'
-                            }
-                          )
+                          toast.success('Rule form ready')
                         }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Rule
@@ -2127,7 +2099,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                               <Badge variant="outline" className="text-green-600 border-green-600">Connected</Badge>
                               <Button variant="ghost" size="sm" onClick={() => {
                                 toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 800)),
+                                  fetch(`/api/budgets/accounts/${account.id}/sync`, { method: 'POST' }).then(res => {
+                                    if (!res.ok) throw new Error('Sync failed')
+                                    return res.json()
+                                  }),
                                   {
                                     loading: `Syncing ${account.name}...`,
                                     success: `${account.name} synced successfully`,
@@ -2141,15 +2116,8 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 600)),
-                            {
-                              loading: 'Opening account linking...',
-                              success: 'Ready to link new account',
-                              error: 'Failed to open linking'
-                            }
-                          )
                           setShowNewAccountModal(true)
+                          toast.success('Ready to link new account')
                         }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Link New Account
@@ -2162,21 +2130,24 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       </CardHeader>
                       <CardContent className="grid grid-cols-2 gap-4">
                         <Button variant="outline" className="justify-start" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 700)),
-                            {
-                              loading: 'Preparing CSV import...',
-                              success: 'Ready to import CSV file',
-                              error: 'Failed to prepare import'
-                            }
-                          )
+                          toast.success('Ready to import CSV file')
                         }}>
                           <Upload className="w-4 h-4 mr-2" />
                           Import from CSV
                         </Button>
                         <Button variant="outline" className="justify-start" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1000)),
+                            fetch('/api/budgets/export/csv').then(res => {
+                              if (!res.ok) throw new Error('Export failed')
+                              return res.blob()
+                            }).then(blob => {
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = 'budget-export.csv'
+                              a.click()
+                              URL.revokeObjectURL(url)
+                            }),
                             {
                               loading: 'Generating CSV export...',
                               success: 'CSV exported successfully',
@@ -2188,21 +2159,24 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                           Export to CSV
                         </Button>
                         <Button variant="outline" className="justify-start" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 700)),
-                            {
-                              loading: 'Preparing QIF import...',
-                              success: 'Ready to import QIF file',
-                              error: 'Failed to prepare import'
-                            }
-                          )
+                          toast.success('Ready to import QIF file')
                         }}>
                           <FileText className="w-4 h-4 mr-2" />
                           Import from QIF
                         </Button>
                         <Button variant="outline" className="justify-start" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1200)),
+                            fetch('/api/budgets/export/reports').then(res => {
+                              if (!res.ok) throw new Error('Export failed')
+                              return res.blob()
+                            }).then(blob => {
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = 'budget-reports.pdf'
+                              a.click()
+                              URL.revokeObjectURL(url)
+                            }),
                             {
                               loading: 'Generating reports...',
                               success: 'Reports exported successfully',
@@ -2295,20 +2269,17 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                           <div className="flex items-center gap-2">
                             <input type="password" defaultValue="budget_api_xxxxxxxxxxxx" className="flex-1 px-3 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 font-mono text-sm" />
                             <Button variant="outline" size="sm" onClick={() => {
-                              toast.promise(
-                                navigator.clipboard.writeText('budget_api_xxxxxxxxxxxx').then(() => new Promise(r => setTimeout(r, 300))),
-                                {
-                                  loading: 'Copying API key...',
-                                  success: 'API key copied to clipboard',
-                                  error: 'Failed to copy API key'
-                                }
-                              )
+                              navigator.clipboard.writeText('budget_api_xxxxxxxxxxxx')
+                              toast.success('API key copied to clipboard')
                             }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                             <Button size="sm" onClick={() => {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                fetch('/api/budgets/api-key/regenerate', { method: 'POST' }).then(res => {
+                                  if (!res.ok) throw new Error('Regenerate failed')
+                                  return res.json()
+                                }),
                                 {
                                   loading: 'Regenerating API key...',
                                   success: 'New API key generated',
@@ -2336,7 +2307,17 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       <CardContent className="space-y-4">
                         <Button variant="outline" className="w-full justify-start" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1500)),
+                            fetch('/api/budgets/export/all').then(res => {
+                              if (!res.ok) throw new Error('Download failed')
+                              return res.blob()
+                            }).then(blob => {
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = 'all-budget-data.zip'
+                              a.click()
+                              URL.revokeObjectURL(url)
+                            }),
                             {
                               loading: 'Preparing data download...',
                               success: 'Data downloaded successfully',
@@ -2349,7 +2330,17 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                         </Button>
                         <Button variant="outline" className="w-full justify-start" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 2000)),
+                            fetch('/api/budgets/reports/full').then(res => {
+                              if (!res.ok) throw new Error('Report generation failed')
+                              return res.blob()
+                            }).then(blob => {
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = 'full-budget-report.pdf'
+                              a.click()
+                              URL.revokeObjectURL(url)
+                            }),
                             {
                               loading: 'Generating full report...',
                               success: 'Full report generated',
@@ -2375,7 +2366,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                           <Button variant="destructive" onClick={() => {
                             if (confirm('Are you sure you want to reset all budgets? This action cannot be undone.')) {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                fetch('/api/budgets/reset', { method: 'DELETE' }).then(res => {
+                                  if (!res.ok) throw new Error('Reset failed')
+                                  return res.json()
+                                }),
                                 {
                                   loading: 'Resetting all budgets...',
                                   success: 'All budgets have been reset',
@@ -2489,14 +2483,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 500)),
-                    {
-                      loading: 'Opening transaction editor...',
-                      success: 'Transaction ready to edit',
-                      error: 'Failed to open editor'
-                    }
-                  )
+                  toast.success('Transaction ready to edit')
                 }}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   Edit
@@ -2504,7 +2491,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <Button variant="outline" className="text-red-600" onClick={() => {
                   if (confirm('Are you sure you want to delete this transaction?')) {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 800)),
+                      fetch(`/api/budgets/transactions/${selectedTransaction?.id}`, { method: 'DELETE' }).then(res => {
+                        if (!res.ok) throw new Error('Delete failed')
+                        return res.json()
+                      }),
                       {
                         loading: 'Deleting transaction...',
                         success: 'Transaction deleted successfully',
@@ -2557,7 +2547,14 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Button variant="outline" onClick={() => setShowNewCategoryModal(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
                 toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 800)),
+                  fetch('/api/budgets/categories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: 'New Category' })
+                  }).then(res => {
+                    if (!res.ok) throw new Error('Create failed')
+                    return res.json()
+                  }),
                   {
                     loading: 'Creating category...',
                     success: 'Category created successfully',
@@ -3251,7 +3248,14 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Button variant="outline" onClick={() => setShowScheduledModal(false)}>Close</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 800)),
+                  fetch('/api/budgets/scheduled', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'recurring' })
+                  }).then(res => {
+                    if (!res.ok) throw new Error('Create failed')
+                    return res.json()
+                  }),
                   {
                     loading: 'Creating scheduled transaction...',
                     success: 'Scheduled transaction created',
@@ -3290,7 +3294,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </div>
                   <Button size="sm" className="w-full mt-2" onClick={() => {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1200)),
+                      fetch('/api/budgets/reports/spending').then(res => {
+                        if (!res.ok) throw new Error('Report generation failed')
+                        return res.json()
+                      }),
                       {
                         loading: 'Generating spending report...',
                         success: 'Spending report ready',
@@ -3310,7 +3317,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </div>
                   <Button size="sm" className="w-full mt-2" onClick={() => {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1200)),
+                      fetch('/api/budgets/reports/income-vs-expenses').then(res => {
+                        if (!res.ok) throw new Error('Report generation failed')
+                        return res.json()
+                      }),
                       {
                         loading: 'Generating income vs expenses report...',
                         success: 'Income vs expenses report ready',
@@ -3330,7 +3340,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </div>
                   <Button size="sm" className="w-full mt-2" onClick={() => {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1200)),
+                      fetch('/api/budgets/reports/net-worth').then(res => {
+                        if (!res.ok) throw new Error('Report generation failed')
+                        return res.json()
+                      }),
                       {
                         loading: 'Generating net worth report...',
                         success: 'Net worth report ready',
@@ -3350,7 +3363,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </div>
                   <Button size="sm" className="w-full mt-2" onClick={() => {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1200)),
+                      fetch('/api/budgets/reports/performance').then(res => {
+                        if (!res.ok) throw new Error('Report generation failed')
+                        return res.json()
+                      }),
                       {
                         loading: 'Generating budget performance report...',
                         success: 'Budget performance report ready',
@@ -3383,7 +3399,17 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Button variant="outline" onClick={() => setShowReportsModal(false)}>Close</Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
                 toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
+                  fetch('/api/budgets/export/pdf').then(res => {
+                    if (!res.ok) throw new Error('Export failed')
+                    return res.blob()
+                  }).then(blob => {
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'budget-report.pdf'
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  }),
                   {
                     loading: 'Exporting PDF report...',
                     success: 'PDF report exported successfully',

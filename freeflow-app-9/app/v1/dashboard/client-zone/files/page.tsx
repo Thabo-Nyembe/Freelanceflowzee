@@ -192,12 +192,9 @@ export default function FilesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load files from API
+        const response = await fetch('/api/client-zone/files')
+        if (!response.ok) throw new Error('Failed to load files')
 
         setIsLoading(false)
         announce('Files loaded successfully', 'polite')

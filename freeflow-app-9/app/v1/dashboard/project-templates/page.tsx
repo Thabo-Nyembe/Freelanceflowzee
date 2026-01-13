@@ -52,12 +52,9 @@ export default function ProjectTemplatesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Load data from API
+        const response = await fetch('/api/templates/project')
+        if (!response.ok) throw new Error('Failed to load project templates')
 
         setIsLoading(false)
         announce('Project templates loaded successfully', 'polite')

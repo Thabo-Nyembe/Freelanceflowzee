@@ -617,152 +617,122 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
   }
 
   // Handlers
-  const handleShareRoadmap = () => toast.promise(
-    new Promise<void>((resolve) => { navigator.clipboard.writeText('https://app.example.com/roadmap'); setTimeout(resolve, 400); }),
-    { loading: 'Copying link...', success: 'Roadmap link copied to clipboard', error: 'Failed to copy link' }
-  )
-
-  const handleNewFeature = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      { loading: 'Opening feature form...', success: 'Feature creation form ready', error: 'Failed to open form' }
-    )
+  const handleShareRoadmap = () => {
+    navigator.clipboard.writeText('https://app.example.com/roadmap')
+    toast.success('Roadmap link copied to clipboard')
   }
+
+  const handleNewFeature = () => toast.success('Feature creation form ready')
 
   const handleVote = () => {
     if (!selectedFeature) return
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
+      fetch(`/api/roadmap/features/${selectedFeature.id}/vote`, { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Vote failed')
+        return res.json()
+      }),
       { loading: 'Recording vote...', success: `Vote recorded for ${selectedFeature.title}`, error: 'Failed to record vote' }
     )
   }
 
   const handleComment = () => {
     if (!selectedFeature) return
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      { loading: 'Opening comment editor...', success: 'Comment editor ready', error: 'Failed to open editor' }
-    )
+    toast.success('Comment editor ready')
   }
 
   const handleShareFeature = () => {
     if (!selectedFeature) return
-    toast.promise(
-      new Promise<void>((resolve) => { navigator.clipboard.writeText(`https://app.example.com/feature/${selectedFeature.id}`); setTimeout(resolve, 400); }),
-      { loading: 'Copying link...', success: `Share link for ${selectedFeature.title} copied`, error: 'Failed to copy link' }
-    )
+    navigator.clipboard.writeText(`https://app.example.com/feature/${selectedFeature.id}`)
+    toast.success(`Share link for ${selectedFeature.title} copied`)
   }
 
-  const handleAddMilestone = () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening milestone form...', success: 'Milestone form ready', error: 'Failed to open form' }
-  )
+  const handleAddMilestone = () => toast.success('Milestone form ready')
 
-  const handleEditMilestone = (n: string) => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: `Loading "${n}"...`, success: `Editing "${n}"`, error: 'Failed to load milestone' }
-  )
+  const handleEditMilestone = (n: string) => toast.success(`Editing "${n}"`)
 
   const handleCompleteMilestone = (n: string) => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
+    fetch('/api/roadmap/milestones/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: n })
+    }).then(res => {
+      if (!res.ok) throw new Error('Failed')
+      return res.json()
+    }),
     { loading: `Completing "${n}"...`, success: `"${n}" marked as complete`, error: 'Failed to complete milestone' }
   )
 
   const handleExportRoadmap = () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
+    fetch('/api/roadmap/export').then(res => {
+      if (!res.ok) throw new Error('Export failed')
+      return res.blob()
+    }).then(blob => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'roadmap.json'
+      a.click()
+      URL.revokeObjectURL(url)
+    }),
     { loading: 'Preparing export...', success: 'Roadmap exported successfully', error: 'Failed to export roadmap' }
   )
 
-  const handleQuickAction = (actionLabel: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      { loading: `${actionLabel}...`, success: `${actionLabel} completed`, error: `${actionLabel} failed` }
-    )
-  }
+  const handleQuickAction = (actionLabel: string) => toast.success(`${actionLabel} completed`)
 
-  const handleNewRelease = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      { loading: 'Opening release form...', success: 'Release creation form ready', error: 'Failed to open form' }
-    )
-  }
+  const handleNewRelease = () => toast.success('Release creation form ready')
 
-  const handleSubmitIdea = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      { loading: 'Opening idea form...', success: 'Idea submission form ready', error: 'Failed to open form' }
-    )
-  }
+  const handleSubmitIdea = () => toast.success('Idea submission form ready')
 
-  const handleSetOKR = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      { loading: 'Opening OKR configuration...', success: 'OKR configuration ready', error: 'Failed to open configuration' }
-    )
-  }
+  const handleSetOKR = () => toast.success('OKR configuration ready')
 
-  const handleSyncJira = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      { loading: 'Syncing with Jira...', success: 'Jira sync completed', error: 'Failed to sync with Jira' }
-    )
-  }
+  const handleSyncJira = () => toast.promise(
+    fetch('/api/integrations/jira/sync', { method: 'POST' }).then(res => {
+      if (!res.ok) throw new Error('Sync failed')
+      return res.json()
+    }),
+    { loading: 'Syncing with Jira...', success: 'Jira sync completed', error: 'Failed to sync with Jira' }
+  )
 
-  const handleViewAnalytics = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 700)),
-      { loading: 'Loading analytics...', success: 'Analytics dashboard ready', error: 'Failed to load analytics' }
-    )
-  }
+  const handleViewAnalytics = () => toast.success('Analytics dashboard ready')
 
-  const handleRecalculateScores = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      { loading: 'Recalculating RICE scores...', success: 'RICE scores updated', error: 'Failed to recalculate scores' }
-    )
-  }
+  const handleRecalculateScores = () => toast.promise(
+    fetch('/api/roadmap/recalculate-scores', { method: 'POST' }).then(res => {
+      if (!res.ok) throw new Error('Recalculate failed')
+      return res.json()
+    }),
+    { loading: 'Recalculating RICE scores...', success: 'RICE scores updated', error: 'Failed to recalculate scores' }
+  )
 
-  const handleAddFeature = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      { loading: 'Opening feature form...', success: 'Feature creation form ready', error: 'Failed to open form' }
-    )
-  }
+  const handleAddFeature = () => toast.success('Feature creation form ready')
 
   const handleCopyPublicUrl = () => {
-    toast.promise(
-      new Promise<void>((resolve) => { navigator.clipboard.writeText('https://roadmap.yourcompany.com'); setTimeout(resolve, 400); }),
-      { loading: 'Copying URL...', success: 'Public roadmap URL copied to clipboard', error: 'Failed to copy URL' }
-    )
+    navigator.clipboard.writeText('https://roadmap.yourcompany.com')
+    toast.success('Public roadmap URL copied to clipboard')
   }
 
-  const handleManageIntegration = (integrationName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      { loading: `Loading ${integrationName} settings...`, success: `${integrationName} settings ready`, error: `Failed to load ${integrationName}` }
-    )
-  }
+  const handleManageIntegration = (integrationName: string) => toast.success(`${integrationName} settings ready`)
 
-  const handleConnectIntegration = (integrationName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      { loading: `Connecting to ${integrationName}...`, success: `Connected to ${integrationName}`, error: `Failed to connect to ${integrationName}` }
-    )
-  }
+  const handleConnectIntegration = (integrationName: string) => toast.promise(
+    fetch('/api/integrations/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ integration: integrationName })
+    }).then(res => {
+      if (!res.ok) throw new Error('Connection failed')
+      return res.json()
+    }),
+    { loading: `Connecting to ${integrationName}...`, success: `Connected to ${integrationName}`, error: `Failed to connect to ${integrationName}` }
+  )
 
-  const handleImportFeatures = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      { loading: 'Opening import wizard...', success: 'CSV import wizard ready', error: 'Failed to open import wizard' }
-    )
-  }
+  const handleImportFeatures = () => toast.success('CSV import wizard ready')
 
-  const handleArchiveCompleted = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      { loading: 'Archiving released features...', success: 'All released features archived', error: 'Failed to archive features' }
-    )
-  }
+  const handleArchiveCompleted = () => toast.promise(
+    fetch('/api/roadmap/archive-completed', { method: 'POST' }).then(res => {
+      if (!res.ok) throw new Error('Archive failed')
+      return res.json()
+    }),
+    { loading: 'Archiving released features...', success: 'All released features archived', error: 'Failed to archive features' }
+  )
 
   const handleDeleteRoadmap = () => {
     toast.error('Delete Roadmap', { description: 'This action cannot be undone' })
@@ -775,7 +745,14 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
       return
     }
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/roadmap/initiatives', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newInitiative)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to create initiative')
+        return res.json()
+      }),
       {
         loading: 'Creating initiative...',
         success: () => {
@@ -798,18 +775,9 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
   // Handler for applying timeline settings
   const handleApplyTimelineSettings = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Applying timeline settings...',
-        success: () => {
-          setShowTimelineDialog(false)
-          setViewMode('timeline')
-          return `Timeline configured: ${timelineSettings.startQuarter}-${timelineSettings.endQuarter} ${timelineSettings.year}`
-        },
-        error: 'Failed to apply timeline settings'
-      }
-    )
+    setShowTimelineDialog(false)
+    setViewMode('timeline')
+    toast.success(`Timeline configured: ${timelineSettings.startQuarter}-${timelineSettings.endQuarter} ${timelineSettings.year}`)
   }
 
   // Group features by status for Kanban view

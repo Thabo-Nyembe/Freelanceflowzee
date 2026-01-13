@@ -172,16 +172,11 @@ export default function DesktopAppPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load desktop app studio'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load desktop app configuration from API
+        const response = await fetch('/api/desktop-app/config')
+        if (!response.ok) {
+          throw new Error('Failed to load desktop app studio')
+        }
 
         setIsLoading(false)
         announce('Desktop app studio loaded successfully', 'polite')

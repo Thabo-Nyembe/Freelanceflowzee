@@ -654,7 +654,17 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   const handleDownloadRelease = useCallback((version: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch(`/api/releases/${version}/download`).then(res => {
+        if (!res.ok) throw new Error('Download failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `release-${version}.zip`
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
       {
         loading: `Preparing ${version} download...`,
         success: `${version} download started successfully`,
@@ -664,19 +674,20 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   }, [])
 
   const handleCompareVersions = useCallback(() => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening version comparison tool...',
-        success: 'Version comparison tool ready',
-        error: 'Failed to open comparison tool'
-      }
-    )
+    setIsCompareDialogOpen(true)
+    toast.success('Version comparison tool ready')
   }, [])
 
   const handleSubscribeUpdates = useCallback(async () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch('/api/changelog/subscriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'releases' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Subscription failed')
+        return res.json()
+      }),
       {
         loading: 'Subscribing to updates...',
         success: 'Subscribed! You will receive notifications for new releases',
@@ -686,14 +697,9 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   }, [])
 
   const handleViewReleaseNotes = useCallback((version: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: `Loading release notes for ${version}...`,
-        success: `Release notes for ${version} loaded`,
-        error: 'Failed to load release notes'
-      }
-    )
+    setSelectedVersion(version)
+    setIsReleaseNotesDialogOpen(true)
+    toast.success(`Release notes for ${version} loaded`)
   }, [])
 
   // Form field update helper
@@ -704,7 +710,17 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   // Handler functions for buttons without onClick handlers
   const handleDownloadAsset = useCallback((assetName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch(`/api/assets/${encodeURIComponent(assetName)}/download`).then(res => {
+        if (!res.ok) throw new Error('Download failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = assetName
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
       {
         loading: `Preparing download for ${assetName}...`,
         success: `Download started for ${assetName}`,
@@ -722,7 +738,10 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   const handleResetTemplate = useCallback(() => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
+      fetch('/api/changelog/templates/reset', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Reset failed')
+        return res.json()
+      }),
       {
         loading: 'Resetting template...',
         success: 'Template reset to default successfully',
@@ -742,7 +761,10 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   const handleRegenerateToken = useCallback(() => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/changelog/tokens/regenerate', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Token regeneration failed')
+        return res.json()
+      }),
       {
         loading: 'Regenerating API token...',
         success: 'New API token generated successfully. Please copy it now.',
@@ -754,33 +776,37 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   const handleDeleteAllDrafts = useCallback(() => {
     setIsSubmitting(true)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/changelog/drafts', { method: 'DELETE' }).then(res => {
+        if (!res.ok) throw new Error('Delete failed')
+        return res.json()
+      }).finally(() => {
+        setIsDeleteDraftsDialogOpen(false)
+        setIsSubmitting(false)
+      }),
       {
         loading: 'Deleting all draft releases...',
         success: 'All draft releases have been deleted',
         error: 'Failed to delete draft releases'
       }
     )
-    setTimeout(() => {
-      setIsDeleteDraftsDialogOpen(false)
-      setIsSubmitting(false)
-    }, 800)
   }, [])
 
   const handleResetSettings = useCallback(() => {
     setIsSubmitting(true)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/changelog/settings/reset', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Reset failed')
+        return res.json()
+      }).finally(() => {
+        setIsResetSettingsDialogOpen(false)
+        setIsSubmitting(false)
+      }),
       {
         loading: 'Resetting settings to defaults...',
         success: 'Settings have been reset to default values',
         error: 'Failed to reset settings'
       }
     )
-    setTimeout(() => {
-      setIsResetSettingsDialogOpen(false)
-      setIsSubmitting(false)
-    }, 800)
   }, [])
 
   const handleAddEnvironment = useCallback(() => {
@@ -792,34 +818,49 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     }
     setIsSubmitting(true)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch('/api/changelog/environments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEnvironmentForm)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to add environment')
+        return res.json()
+      }).finally(() => {
+        setIsAddEnvironmentDialogOpen(false)
+        setNewEnvironmentForm({ name: '', url: '' })
+        setIsSubmitting(false)
+      }),
       {
         loading: 'Adding environment...',
         success: `Environment "${newEnvironmentForm.name}" added successfully`,
         error: 'Failed to add environment'
       }
     )
-    setTimeout(() => {
-      setIsAddEnvironmentDialogOpen(false)
-      setNewEnvironmentForm({ name: '', url: '' })
-      setIsSubmitting(false)
-    }, 600)
   }, [newEnvironmentForm])
 
   const handleExportAnalytics = useCallback(() => {
     setIsSubmitting(true)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch(`/api/changelog/analytics/export?format=${exportFormat}`).then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `changelog-analytics.${exportFormat}`
+        a.click()
+        URL.revokeObjectURL(url)
+      }).finally(() => {
+        setIsExportAnalyticsDialogOpen(false)
+        setIsSubmitting(false)
+      }),
       {
         loading: `Exporting analytics as ${exportFormat.toUpperCase()}...`,
         success: `Analytics exported successfully as ${exportFormat.toUpperCase()}`,
         error: 'Failed to export analytics'
       }
     )
-    setTimeout(() => {
-      setIsExportAnalyticsDialogOpen(false)
-      setIsSubmitting(false)
-    }, 1000)
   }, [exportFormat])
 
   // Quick actions for toolbar
@@ -1538,15 +1579,23 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                       </Button>
                       <Button onClick={() => {
                         toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 600)),
+                          fetch('/api/changelog/discussions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(discussionForm)
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Failed to create discussion')
+                            return res.json()
+                          }).finally(() => {
+                            setIsDiscussionDialogOpen(false)
+                            setDiscussionForm({ title: '', body: '', category: 'feedback' })
+                          }),
                           {
                             loading: 'Creating discussion...',
                             success: 'Discussion created successfully',
                             error: 'Failed to create discussion'
                           }
                         )
-                        setIsDiscussionDialogOpen(false)
-                        setDiscussionForm({ title: '', body: '', category: 'feedback' })
                       }}>
                         Post Discussion
                       </Button>
@@ -1704,15 +1753,23 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                         }
                         const webhookName = webhookForm.name
                         toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 600)),
+                          fetch('/api/changelog/webhooks', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(webhookForm)
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Failed to create webhook')
+                            return res.json()
+                          }).finally(() => {
+                            setIsWebhookDialogOpen(false)
+                            setWebhookForm({ name: '', url: '', events: [] })
+                          }),
                           {
                             loading: 'Creating webhook...',
                             success: `${webhookName} webhook configured successfully`,
                             error: 'Failed to create webhook'
                           }
                         )
-                        setIsWebhookDialogOpen(false)
-                        setWebhookForm({ name: '', url: '', events: [] })
                       }}>
                         Create Webhook
                       </Button>
@@ -3038,17 +3095,23 @@ Thanks to all contributors!`}
               </Button>
               <Button onClick={() => {
                 toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 800)),
+                  fetch('/api/changelog/ci-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tool: selectedCITool })
+                  }).then(res => {
+                    if (!res.ok) throw new Error('Configuration failed')
+                    return res.json()
+                  }).finally(() => {
+                    setIsCIConfigDialogOpen(false)
+                    setSelectedCITool(null)
+                  }),
                   {
                     loading: `Configuring ${selectedCITool}...`,
                     success: `${selectedCITool} configured successfully`,
                     error: 'Failed to configure CI/CD'
                   }
                 )
-                setTimeout(() => {
-                  setIsCIConfigDialogOpen(false)
-                  setSelectedCITool(null)
-                }, 800)
               }}>
                 Save Configuration
               </Button>

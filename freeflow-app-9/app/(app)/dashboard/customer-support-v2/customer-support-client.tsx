@@ -2537,7 +2537,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Assigning tickets...', { id: 'assign-tickets' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch('/api/support/tickets/assign', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ticketIds: selectedTickets, assignee: 'Assigned Agent' })
+                })
+                if (!res.ok) throw new Error('Failed to assign')
                 setTickets(prev => prev.map(t =>
                   selectedTickets.includes(t.id) ? { ...t, assignee: 'Assigned Agent' } : t
                 ))
@@ -2619,7 +2624,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               toast.loading('Archiving tickets...', { id: 'archive-tickets' })
               try {
                 const solvedCount = filteredTickets.filter(t => t.status === 'solved').length
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch('/api/support/tickets/archive', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ticketIds: filteredTickets.filter(t => t.status === 'solved').map(t => t.id) })
+                })
+                if (!res.ok) throw new Error('Failed to archive')
                 setTickets(prev => prev.filter(t => t.status !== 'solved'))
                 toast.success('Tickets archived successfully', { id: 'archive-tickets', description: `${solvedCount} tickets archived` })
                 setShowArchiveDialog(false)
@@ -2720,8 +2730,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               }
               toast.loading('Adding agent...', { id: 'add-agent' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setAgents(prev => [...prev, { id: `AGT-${Date.now()}`, ...newAgentForm, ticketsHandled: 0, avgResponseTime: '0m', satisfaction: 0, status: 'online' as const }])
+                const res = await fetch('/api/support/agents', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(newAgentForm)
+                })
+                if (!res.ok) throw new Error('Failed to add agent')
+                const data = await res.json()
+                setAgents(prev => [...prev, { id: data.id || `AGT-${Date.now()}`, ...newAgentForm, ticketsHandled: 0, avgResponseTime: '0m', satisfaction: 0, status: 'online' as const }])
                 toast.success('Agent added successfully', { id: 'add-agent', description: newAgentForm.name })
                 setShowAddAgentDialog(false)
                 setNewAgentForm({ name: '', email: '', role: 'agent' })
@@ -2938,8 +2954,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               }
               toast.loading('Adding customer...', { id: 'add-customer' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setCustomers(prev => [...prev, { id: `CUS-${Date.now()}`, ...newCustomerForm, totalTickets: 0, avgSatisfaction: 0 }])
+                const res = await fetch('/api/support/customers', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(newCustomerForm)
+                })
+                if (!res.ok) throw new Error('Failed to add customer')
+                const data = await res.json()
+                setCustomers(prev => [...prev, { id: data.id || `CUS-${Date.now()}`, ...newCustomerForm, totalTickets: 0, avgSatisfaction: 0 }])
                 toast.success('Customer added successfully', { id: 'add-customer', description: newCustomerForm.name })
                 setShowAddCustomerDialog(false)
                 setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' })
@@ -2989,7 +3011,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               }
               toast.loading('Sending emails...', { id: 'send-emails' })
               try {
-                await new Promise(r => setTimeout(r, 2000))
+                const res = await fetch('/api/support/customers/email', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ...emailAllForm, customerIds: customers.map(c => c.id) })
+                })
+                if (!res.ok) throw new Error('Failed to send emails')
                 toast.success('Emails sent successfully', { id: 'send-emails', description: `${customers.length} customers notified` })
                 setShowEmailAllDialog(false)
                 setEmailAllForm({ subject: '', message: '' })
@@ -3143,9 +3170,18 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
             <Button onClick={async () => {
+              const fileInput = document.getElementById('import-file-input') as HTMLInputElement
+              const file = fileInput?.files?.[0]
+              if (!file) {
+                toast.error('Please select a file to import')
+                return
+              }
+              const formData = new FormData()
+              formData.append('file', file)
               toast.loading('Importing data...', { id: 'import-data' })
               try {
-                await new Promise(r => setTimeout(r, 2000))
+                const res = await fetch('/api/support/customers/import', { method: 'POST', body: formData })
+                if (!res.ok) throw new Error('Import failed')
                 toast.success('Import completed', { id: 'import-data', description: 'Data imported successfully' })
                 setShowImportDialog(false)
               } catch {
@@ -3329,8 +3365,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Creating SLA policy...', { id: 'create-sla' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setSLAPolicies(prev => [...prev, { id: `SLA-${Date.now()}`, name: 'New Policy', responseTime: '4h', resolutionTime: '24h', priority: 'normal' }])
+                const res = await fetch('/api/support/sla', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(newSLAForm)
+                })
+                if (!res.ok) throw new Error('Failed to create SLA')
+                const data = await res.json()
+                setSLAPolicies(prev => [...prev, { id: data.id || `SLA-${Date.now()}`, name: newSLAForm.name || 'New Policy', responseTime: '4h', resolutionTime: '24h', priority: newSLAForm.priority || 'normal' }])
                 toast.success('SLA policy created', { id: 'create-sla' })
                 setShowAddSLADialog(false)
               } catch {
@@ -3371,9 +3413,15 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditSLADialog(false)}>Cancel</Button>
             <Button onClick={async () => {
+              if (!selectedSLA) return
               toast.loading('Updating SLA policy...', { id: 'update-sla' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch(`/api/support/sla/${selectedSLA.id}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(selectedSLA)
+                })
+                if (!res.ok) throw new Error('Failed to update SLA')
                 toast.success('SLA policy updated', { id: 'update-sla' })
                 setShowEditSLADialog(false)
               } catch {
@@ -3421,7 +3469,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Updating automation...', { id: 'update-automation' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch('/api/support/automations', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(newAutomationForm)
+                })
+                if (!res.ok) throw new Error('Failed to update automation')
                 toast.success('Automation updated', { id: 'update-automation' })
                 setShowEditAutomationDialog(false)
               } catch {
@@ -3477,8 +3530,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Creating automation...', { id: 'create-automation' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setAutomations(prev => [...prev, { id: `AUTO-${Date.now()}`, name: 'New Automation', trigger: 'ticket_created', action: 'assign_agent', enabled: true }])
+                const res = await fetch('/api/support/automations', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name: 'New Automation', trigger: 'ticket_created', action: 'assign_agent' })
+                })
+                if (!res.ok) throw new Error('Failed to create automation')
+                const data = await res.json()
+                setAutomations(prev => [...prev, { id: data.id || `AUTO-${Date.now()}`, name: 'New Automation', trigger: 'ticket_created', action: 'assign_agent', enabled: true }])
                 toast.success('Automation created', { id: 'create-automation' })
                 setShowCreateAutomationDialog(false)
               } catch {
@@ -3561,7 +3620,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Updating response...', { id: 'update-response' })
               try {
-                await new Promise(r => setTimeout(r, 800))
+                const res = await fetch('/api/support/responses', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(newResponseForm)
+                })
+                if (!res.ok) throw new Error('Failed to update response')
                 toast.success('Response updated', { id: 'update-response' })
                 setShowEditResponseDialog(false)
               } catch {
@@ -3611,8 +3675,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Creating response...', { id: 'create-response' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
-                setCannedResponses(prev => [...prev, { id: `RESP-${Date.now()}`, title: 'New Response', content: '', category: 'general', usageCount: 0 }])
+                const res = await fetch('/api/support/responses', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ title: 'New Response', content: '', category: 'general' })
+                })
+                if (!res.ok) throw new Error('Failed to create response')
+                const data = await res.json()
+                setCannedResponses(prev => [...prev, { id: data.id || `RESP-${Date.now()}`, title: 'New Response', content: '', category: 'general', usageCount: 0 }])
                 toast.success('Response created', { id: 'create-response' })
                 setShowAddResponseDialog(false)
               } catch {
@@ -3650,7 +3720,13 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               toast.loading('Deleting closed tickets...', { id: 'delete-tickets' })
               try {
                 const closedCount = tickets.filter(t => t.status === 'solved' || t.status === 'closed').length
-                await new Promise(r => setTimeout(r, 1500))
+                const closedIds = tickets.filter(t => t.status === 'solved' || t.status === 'closed').map(t => t.id)
+                const res = await fetch('/api/support/tickets/delete', {
+                  method: 'DELETE',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ticketIds: closedIds })
+                })
+                if (!res.ok) throw new Error('Failed to delete tickets')
                 setTickets(prev => prev.filter(t => t.status !== 'solved' && t.status !== 'closed'))
                 toast.success('Closed tickets deleted', { id: 'delete-tickets', description: `${closedCount} tickets removed` })
                 setShowDeleteTicketsDialog(false)
@@ -3685,7 +3761,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button variant="destructive" onClick={async () => {
               toast.loading('Resetting settings...', { id: 'reset-settings' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch('/api/support/settings/reset', { method: 'POST' })
+                if (!res.ok) throw new Error('Failed to reset settings')
                 // Reset settings to defaults
                 setAutoAssign(false)
                 setEmailNotifications(true)
@@ -3819,9 +3896,19 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAttachmentDialog(false)}>Cancel</Button>
             <Button onClick={async () => {
+              const fileInput = document.getElementById('attachment-file-input') as HTMLInputElement
+              const file = fileInput?.files?.[0]
+              if (!file) {
+                toast.error('Please select a file first')
+                return
+              }
+              const formData = new FormData()
+              formData.append('file', file)
+              if (selectedTicket) formData.append('ticketId', selectedTicket.id)
               toast.loading('Uploading attachment...', { id: 'upload-attachment' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
+                const res = await fetch('/api/support/attachments', { method: 'POST', body: formData })
+                if (!res.ok) throw new Error('Failed to upload')
                 toast.success('Attachment added', { id: 'upload-attachment', description: 'File uploaded successfully' })
                 setShowAttachmentDialog(false)
               } catch {
@@ -3949,13 +4036,18 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAgentMessageDialog(false)}>Cancel</Button>
             <Button onClick={async () => {
-              if (!agentMessageForm.trim()) {
+              if (!agentMessageForm.trim() || !selectedAgent) {
                 toast.error('Please enter a message')
                 return
               }
               toast.loading('Sending message...', { id: 'send-agent-message' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const res = await fetch('/api/support/agents/message', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ agentId: selectedAgent.id, message: agentMessageForm })
+                })
+                if (!res.ok) throw new Error('Failed to send message')
                 toast.success(`Message sent to ${selectedAgent?.name}`, { id: 'send-agent-message' })
                 setShowAgentMessageDialog(false)
                 setAgentMessageForm('')

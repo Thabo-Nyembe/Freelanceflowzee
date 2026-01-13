@@ -521,12 +521,9 @@ export default function ComprehensiveTestingClient() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Load testing configuration from API
+        const response = await fetch('/api/testing/config')
+        if (!response.ok) throw new Error('Failed to load comprehensive testing suite')
 
         setIsLoading(false)
         announce('Comprehensive testing suite loaded successfully', 'polite')

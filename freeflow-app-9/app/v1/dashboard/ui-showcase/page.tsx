@@ -40,16 +40,9 @@ export default function UIShowcasePage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load UI showcase'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load UI showcase data from API
+        const response = await fetch('/api/ui/showcase')
+        if (!response.ok) throw new Error('Failed to load UI showcase')
 
         setIsLoading(false)
         announce('UI showcase loaded successfully', 'polite')

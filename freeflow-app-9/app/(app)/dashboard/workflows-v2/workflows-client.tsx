@@ -711,15 +711,20 @@ export default function WorkflowsClient() {
   const handleSubmitExport = async () => {
     setIsExporting(true)
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Real API call to export workflows
+      const response = await fetch('/api/workflows/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workflowIds: filteredWorkflows.map(w => w.id),
+          format: exportFormat
+        })
+      })
 
-      // Generate export data
-      const exportData = {
-        workflows: filteredWorkflows,
-        exportedAt: new Date().toISOString(),
-        format: exportFormat
-      }
+      if (!response.ok) throw new Error('Export failed')
+
+      // Get export data from API response
+      const exportData = await response.json()
 
       // Create downloadable file
       const blob = new Blob(
@@ -760,11 +765,21 @@ export default function WorkflowsClient() {
       // Find the selected workflow
       const workflow = filteredWorkflows.find(w => w.id === selectedWorkflowsForTest)
 
-      // Simulate test run
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Real API call to run workflow test
+      const response = await fetch('/api/workflows/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workflowId: selectedWorkflowsForTest,
+          testData: { mode: 'sample' }
+        })
+      })
+
+      if (!response.ok) throw new Error('Test failed')
+      const result = await response.json()
 
       toast.success('Test Completed', {
-        description: `${workflow?.name || 'Workflow'} test passed successfully with sample data`
+        description: `${workflow?.name || 'Workflow'} test passed successfully${result.message ? `: ${result.message}` : ' with sample data'}`
       })
       setShowRunTestDialog(false)
       setSelectedWorkflowsForTest('')

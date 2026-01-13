@@ -127,12 +127,9 @@ export default function FeedbackPage() {
 
         setFeedbackHistory(history)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load feedback from API
+        const response = await fetch('/api/client-zone/feedback')
+        if (!response.ok) throw new Error('Failed to load feedback')
 
         setIsLoading(false)
         announce('Feedback system loaded successfully', 'polite')

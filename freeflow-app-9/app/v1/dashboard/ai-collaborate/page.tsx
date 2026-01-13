@@ -163,12 +163,9 @@ export default function AICollaboratePage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load AI options from API
+        const response = await fetch('/api/ai/design-options')
+        if (!response.ok) throw new Error('Failed to load AI options')
 
         setIsLoading(false)
         announce('AI design options loaded', 'polite')

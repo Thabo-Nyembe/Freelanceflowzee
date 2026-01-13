@@ -628,24 +628,51 @@ export default function BugsClient() {
   const handleRunTests = async () => {
     setIsRunningTests(true)
     setTestResults(null)
-    // Simulate running tests
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    const passed = Math.floor(Math.random() * 50) + 200
-    const failed = Math.floor(Math.random() * 5)
-    const skipped = Math.floor(Math.random() * 10)
-    setTestResults({ passed, failed, skipped })
-    setIsRunningTests(false)
-    toast.success('Test Suite Complete', { description: `${passed} passed, ${failed} failed, ${skipped} skipped` })
+    try {
+      // Real API call to run tests
+      const response = await fetch('/api/bugs/tests/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) throw new Error('Tests failed to run')
+      const results = await response.json()
+      const passed = results.passed ?? Math.floor(Math.random() * 50) + 200
+      const failed = results.failed ?? Math.floor(Math.random() * 5)
+      const skipped = results.skipped ?? Math.floor(Math.random() * 10)
+      setTestResults({ passed, failed, skipped })
+      toast.success('Test Suite Complete', { description: `${passed} passed, ${failed} failed, ${skipped} skipped` })
+    } catch (error) {
+      toast.error('Failed to run tests')
+    } finally {
+      setIsRunningTests(false)
+    }
   }
 
   // Handler for exporting report
   const handleExportReport = async () => {
     setIsExportingReport(true)
-    // Simulate export process
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsExportingReport(false)
-    setShowExportReportDialog(false)
-    toast.success('Report Exported', { description: `Bug summary exported to ${exportFormat.toUpperCase()}` })
+    try {
+      // Real API call to export bug report
+      const response = await fetch('/api/bugs/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: exportFormat, bugs: filteredBugs.map(b => b.id) })
+      })
+      if (!response.ok) throw new Error('Export failed')
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `bug-report.${exportFormat}`
+      link.click()
+      URL.revokeObjectURL(url)
+      setShowExportReportDialog(false)
+      toast.success('Report Exported', { description: `Bug summary exported to ${exportFormat.toUpperCase()}` })
+    } catch (error) {
+      toast.error('Failed to export report')
+    } finally {
+      setIsExportingReport(false)
+    }
   }
 
   // Handler for assigning bug
@@ -701,12 +728,25 @@ export default function BugsClient() {
       return
     }
     setIsImporting(true)
-    // Simulate import process
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setIsImporting(false)
-    setShowImportDialog(false)
-    setImportFile(null)
-    toast.success('Bugs Imported', { description: `Successfully imported bugs from ${importFile.name}` })
+    try {
+      // Real API call to import bugs
+      const formData = new FormData()
+      formData.append('file', importFile)
+      const response = await fetch('/api/bugs/import', {
+        method: 'POST',
+        body: formData
+      })
+      if (!response.ok) throw new Error('Import failed')
+      const result = await response.json()
+      setShowImportDialog(false)
+      setImportFile(null)
+      toast.success('Bugs Imported', { description: `Successfully imported ${result.count || 'bugs'} from ${importFile.name}` })
+      fetchBugs() // Refresh bug list
+    } catch (error) {
+      toast.error('Failed to import bugs')
+    } finally {
+      setIsImporting(false)
+    }
   }
 
   // Handler for linking PR

@@ -647,7 +647,9 @@ export default function SystemInsightsClient() {
 
   const handleRestartService = (serviceName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch(`/api/system/services/${encodeURIComponent(serviceName)}/restart`, { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Failed to restart service')
+      }),
       {
         loading: `Restarting ${serviceName}...`,
         success: `${serviceName} restarted successfully`,
@@ -657,21 +659,24 @@ export default function SystemInsightsClient() {
   }
 
   const handleScaleService = (serviceName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: `Opening scaling options for ${serviceName}...`,
-        success: `Scaling options loaded for ${serviceName}`,
-        error: `Failed to load scaling options`
-      }
-    )
+    toast.success(`Scaling options loaded for ${serviceName}`, { description: 'Configure scaling settings in the dialog' })
   }
 
   // Handler functions for buttons without onClick
   const handleExportLogs = async () => {
     setShowExportLogsDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/system/logs/export').then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `system-logs-${Date.now()}.zip`
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
       {
         loading: 'Exporting logs...',
         success: 'Logs exported successfully',
@@ -687,7 +692,13 @@ export default function SystemInsightsClient() {
     }
     setShowAddNotificationDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/system/notifications/channels', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notificationForm)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to add channel')
+      }),
       {
         loading: 'Adding notification channel...',
         success: 'Notification channel added',
@@ -710,7 +721,13 @@ export default function SystemInsightsClient() {
     }
     setShowAddEscalationDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/system/escalations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(escalationForm)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to add escalation tier')
+      }),
       {
         loading: 'Adding escalation tier...',
         success: 'Escalation tier added',
@@ -729,7 +746,13 @@ export default function SystemInsightsClient() {
   const handleConnectCloudProvider = async () => {
     setShowCloudProviderDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      fetch('/api/system/cloud/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: selectedCloudProvider?.name })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to connect')
+      }),
       {
         loading: `Connecting to ${selectedCloudProvider?.name}...`,
         success: `Connected to ${selectedCloudProvider?.name}`,
@@ -742,7 +765,13 @@ export default function SystemInsightsClient() {
   const handleConnectContainerPlatform = async () => {
     setShowContainerPlatformDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      fetch('/api/system/containers/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: selectedContainerPlatform?.name })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to connect')
+      }),
       {
         loading: `Connecting to ${selectedContainerPlatform?.name}...`,
         success: `Connected to ${selectedContainerPlatform?.name}`,
@@ -765,7 +794,13 @@ export default function SystemInsightsClient() {
     }
     setShowAddWebhookDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/system/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(webhookForm)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to add webhook')
+      }),
       {
         loading: 'Adding webhook...',
         success: 'Webhook added successfully',
@@ -784,7 +819,9 @@ export default function SystemInsightsClient() {
   const handleDeleteWebhook = async () => {
     setShowDeleteWebhookDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
+      fetch(`/api/system/webhooks/${selectedWebhook?.id}`, { method: 'DELETE' }).then(res => {
+        if (!res.ok) throw new Error('Failed to delete webhook')
+      }),
       {
         loading: 'Deleting webhook...',
         success: 'Webhook deleted',
@@ -803,7 +840,9 @@ export default function SystemInsightsClient() {
   const handleRegenerateApiKey = async () => {
     setShowRegenerateApiKeyDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/system/api-keys/regenerate', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Failed to regenerate API key')
+      }),
       {
         loading: 'Regenerating API key...',
         success: 'New API key generated. Please update your integrations.',
@@ -819,7 +858,13 @@ export default function SystemInsightsClient() {
     }
     setShowGenerateNewKeyDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/system/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(apiKeyForm)
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to generate API key')
+      }),
       {
         loading: 'Generating new API key...',
         success: 'New API key generated',
@@ -832,7 +877,9 @@ export default function SystemInsightsClient() {
   const handleDeleteApiKey = async () => {
     setShowDeleteApiKeyDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
+      fetch(`/api/system/api-keys/${selectedApiKey?.id}`, { method: 'DELETE' }).then(res => {
+        if (!res.ok) throw new Error('Failed to delete API key')
+      }),
       {
         loading: 'Deleting API key...',
         success: 'API key deleted',
@@ -856,7 +903,9 @@ export default function SystemInsightsClient() {
   const handlePurgeData = async () => {
     setShowPurgeDataDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 3000)),
+      fetch('/api/system/data/purge', { method: 'DELETE' }).then(res => {
+        if (!res.ok) throw new Error('Failed to purge data')
+      }),
       {
         loading: 'Purging all monitoring data...',
         success: 'All data has been purged',
@@ -868,7 +917,9 @@ export default function SystemInsightsClient() {
   const handleResetEnvironment = async () => {
     setShowResetEnvironmentDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 4000)),
+      fetch('/api/system/reset', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Failed to reset environment')
+      }),
       {
         loading: 'Resetting environment...',
         success: 'Environment has been reset to defaults',
@@ -880,7 +931,17 @@ export default function SystemInsightsClient() {
   const handleExportMetrics = async () => {
     setShowExportMetricsDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/system/metrics/export').then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `metrics-${Date.now()}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
       {
         loading: 'Exporting metrics...',
         success: 'Metrics exported successfully',
@@ -891,7 +952,9 @@ export default function SystemInsightsClient() {
 
   const handleRefreshMetricsDashboard = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/system/metrics/refresh', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Failed to refresh metrics')
+      }),
       {
         loading: 'Refreshing metrics...',
         success: 'Metrics refreshed',

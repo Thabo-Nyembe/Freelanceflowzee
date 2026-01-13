@@ -1032,8 +1032,13 @@ export default function ProfileClient() {
   const handleSignOutDevice = async (deviceId: string) => {
     toast.loading('Signing out device...')
     try {
-      // In a real app, you'd call an API to revoke the session
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Real API call to revoke the session
+      const response = await fetch('/api/auth/sessions/revoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId })
+      })
+      if (!response.ok) throw new Error('Failed to revoke session')
       toast.dismiss()
       toast.success('Device signed out successfully')
     } catch (error) {
