@@ -2235,10 +2235,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                 ))}
               </div>
               <Button variant="outline" size="sm" onClick={() => {
-                toast.loading('Refreshing logs...', { id: 'refresh-logs' })
-                setTimeout(() => {
-                  toast.success('Logs refreshed successfully', { id: 'refresh-logs' })
-                }, 1000)
+                toast.success('Logs refreshed successfully')
               }}>
                 <RefreshCw className="w-4 h-4 mr-1" />
                 Refresh
@@ -2280,10 +2277,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <span className="text-sm text-gray-500">{filteredLogs.length} log entries</span>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.loading('Exporting logs to CSV...', { id: 'export-logs' })
-                  setTimeout(() => {
-                    toast.success('Logs exported successfully', { id: 'export-logs' })
-                  }, 1500)
+                  toast.success('Logs exported successfully')
                 }}>
                   <Download className="w-4 h-4 mr-1" />
                   Export
@@ -2633,11 +2627,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowSubmitAppDialog(false)}>Cancel</Button>
               <Button className="bg-teal-600" onClick={() => {
-                toast.loading('Submitting app for review...', { id: 'submit-app' })
-                setTimeout(() => {
-                  toast.success('App submitted for review successfully', { id: 'submit-app' })
-                  setShowSubmitAppDialog(false)
-                }, 1500)
+                toast.success('App submitted for review successfully')
+                setShowSubmitAppDialog(false)
               }}>Submit for Review</Button>
             </div>
           </div>
@@ -2701,11 +2692,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowConfigureAppDialog(false)}>Cancel</Button>
                 <Button className="bg-teal-600" onClick={() => {
-                  toast.loading('Saving configuration...', { id: 'save-config' })
-                  setTimeout(() => {
-                    toast.success('Configuration saved successfully', { id: 'save-config' })
-                    setShowConfigureAppDialog(false)
-                  }, 1000)
+                  toast.success('Configuration saved successfully')
+                  setShowConfigureAppDialog(false)
                 }}>Save Configuration</Button>
               </div>
             </div>
@@ -2737,18 +2725,15 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                 <Button variant="outline" onClick={() => setShowUninstallDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
                   if (confirm(`Are you sure you want to uninstall ${selectedAppForAction.name}?`)) {
-                    toast.loading('Uninstalling app...', { id: 'uninstall-app' })
                     // Update app status to available
                     setApps(prev => prev.map(a =>
                       a.id === selectedAppForAction.id
                         ? { ...a, status: 'available' as const, currentPlan: undefined }
                         : a
                     ))
-                    setTimeout(() => {
-                      toast.success(`${selectedAppForAction.name} uninstalled successfully`, { id: 'uninstall-app' })
-                      setShowUninstallDialog(false)
-                      setSelectedAppForAction(null)
-                    }, 1500)
+                    toast.success(`${selectedAppForAction.name} uninstalled successfully`)
+                    setShowUninstallDialog(false)
+                    setSelectedAppForAction(null)
                   }
                 }}>Uninstall</Button>
               </div>
@@ -2777,11 +2762,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <div className="flex justify-end gap-2 pt-4 border-t">
                 <Button variant="outline" onClick={() => setShowReconnectDialog(false)}>Cancel</Button>
                 <Button className="bg-teal-600" onClick={() => {
-                  toast.loading('Reconnecting app...', { id: 'reconnect-app' })
-                  setTimeout(() => {
-                    toast.success(`${selectedAppForAction.name} reconnected successfully`, { id: 'reconnect-app' })
-                    setShowReconnectDialog(false)
-                  }, 1500)
+                  toast.success(`${selectedAppForAction.name} reconnected successfully`)
+                  setShowReconnectDialog(false)
                 }}>Reconnect</Button>
               </div>
             </div>
@@ -2805,11 +2787,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                 <Button variant="outline" onClick={() => setShowDisconnectDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
                   if (confirm(`Are you sure you want to disconnect ${selectedAppForAction.name}?`)) {
-                    toast.loading('Disconnecting app...', { id: 'disconnect-app' })
-                    setTimeout(() => {
-                      toast.success(`${selectedAppForAction.name} disconnected successfully`, { id: 'disconnect-app' })
-                      setShowDisconnectDialog(false)
-                    }, 1000)
+                    toast.success(`${selectedAppForAction.name} disconnected successfully`)
+                    setShowDisconnectDialog(false)
                   }
                 }}>Disconnect</Button>
               </div>
@@ -2836,11 +2815,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
               <Button className="bg-yellow-600 hover:bg-yellow-700" onClick={() => {
                 if (confirm(`Are you sure you want to regenerate your ${keyTypeToRegenerate} API key? This will invalidate your current key.`)) {
-                  toast.loading('Regenerating API key...', { id: 'regenerate-key' })
-                  setTimeout(() => {
-                    toast.success(`${keyTypeToRegenerate} API key regenerated successfully`, { id: 'regenerate-key' })
-                    setShowRegenerateKeyDialog(false)
-                  }, 1500)
+                  toast.success(`${keyTypeToRegenerate} API key regenerated successfully`)
+                  setShowRegenerateKeyDialog(false)
                 }
               }}>Regenerate Key</Button>
             </div>
@@ -2894,12 +2870,9 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => { setShowCreateApiKeyDialog(false); setNewApiKeyName('') }}>Cancel</Button>
               <Button className="bg-teal-600" onClick={() => {
-                toast.loading('Creating new API key...', { id: 'create-key' })
-                setTimeout(() => {
-                  toast.success('API key created successfully', { id: 'create-key' })
-                  setShowCreateApiKeyDialog(false)
-                  setNewApiKeyName('')
-                }, 1500)
+                toast.success('API key created successfully')
+                setShowCreateApiKeyDialog(false)
+                setNewApiKeyName('')
               }}>Create Key</Button>
             </div>
           </div>
@@ -2950,13 +2923,10 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => { setShowAddWebhookDialog(false); setNewWebhookUrl(''); setNewWebhookEvents([]) }}>Cancel</Button>
               <Button className="bg-teal-600" onClick={() => {
-                toast.loading('Adding webhook endpoint...', { id: 'add-webhook' })
-                setTimeout(() => {
-                  toast.success('Webhook endpoint added successfully', { id: 'add-webhook' })
-                  setShowAddWebhookDialog(false)
-                  setNewWebhookUrl('')
-                  setNewWebhookEvents([])
-                }, 1500)
+                toast.success('Webhook endpoint added successfully')
+                setShowAddWebhookDialog(false)
+                setNewWebhookUrl('')
+                setNewWebhookEvents([])
               }}>Add Webhook</Button>
             </div>
           </div>
@@ -2977,11 +2947,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowUnblockAppDialog(false)}>Cancel</Button>
               <Button className="bg-green-600" onClick={() => {
-                toast.loading('Unblocking app...', { id: 'unblock-app' })
-                setTimeout(() => {
-                  toast.success('App unblocked successfully', { id: 'unblock-app' })
-                  setShowUnblockAppDialog(false)
-                }, 1000)
+                toast.success('App unblocked successfully')
+                setShowUnblockAppDialog(false)
               }}>Unblock</Button>
             </div>
           </div>
@@ -3020,12 +2987,9 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <Button variant="outline" onClick={() => { setShowBlockAppDialog(false); setAppToBlock('') }}>Cancel</Button>
               <Button variant="destructive" disabled={!appToBlock} onClick={() => {
                 if (confirm('Are you sure you want to block this app?')) {
-                  toast.loading('Blocking app...', { id: 'block-app' })
-                  setTimeout(() => {
-                    toast.success('App blocked successfully', { id: 'block-app' })
-                    setShowBlockAppDialog(false)
-                    setAppToBlock('')
-                  }, 1000)
+                  toast.success('App blocked successfully')
+                  setShowBlockAppDialog(false)
+                  setAppToBlock('')
                 }
               }}>Block App</Button>
             </div>
@@ -3077,11 +3041,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
               <Button className="bg-teal-600" onClick={() => {
-                toast.loading('Exporting marketplace data...', { id: 'export-data' })
-                setTimeout(() => {
-                  toast.success('Marketplace data exported successfully', { id: 'export-data' })
-                  setShowExportDialog(false)
-                }, 2000)
+                toast.success('Marketplace data exported successfully')
+                setShowExportDialog(false)
               }}>Export</Button>
             </div>
           </div>
@@ -3108,11 +3069,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
               <Button className="bg-teal-600" onClick={() => {
-                toast.loading('Importing configuration...', { id: 'import-config' })
-                setTimeout(() => {
-                  toast.success('Configuration imported successfully', { id: 'import-config' })
-                  setShowImportDialog(false)
-                }, 2000)
+                toast.success('Configuration imported successfully')
+                setShowImportDialog(false)
               }}>Import</Button>
             </div>
           </div>
@@ -3136,11 +3094,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <div className="flex justify-end gap-2 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
               <Button className="bg-teal-600" onClick={() => {
-                toast.loading('Clearing cache...', { id: 'clear-cache' })
-                setTimeout(() => {
-                  toast.success('Cache cleared successfully', { id: 'clear-cache' })
-                  setShowClearCacheDialog(false)
-                }, 1500)
+                toast.success('Cache cleared successfully')
+                setShowClearCacheDialog(false)
               }}>Clear Cache</Button>
             </div>
           </div>
@@ -3165,11 +3120,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you sure you want to reset all settings? This action cannot be undone.')) {
-                  toast.loading('Resetting all settings...', { id: 'reset-settings' })
-                  setTimeout(() => {
-                    toast.success('All settings reset successfully', { id: 'reset-settings' })
-                    setShowResetSettingsDialog(false)
-                  }, 2000)
+                  toast.success('All settings reset successfully')
+                  setShowResetSettingsDialog(false)
                 }
               }}>Reset All Settings</Button>
             </div>
@@ -3205,11 +3157,8 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <Button variant="outline" onClick={() => setShowDisconnectAllDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you sure you want to disconnect all apps? This action cannot be undone.')) {
-                  toast.loading('Disconnecting all apps...', { id: 'disconnect-all' })
-                  setTimeout(() => {
-                    toast.success('All apps disconnected successfully', { id: 'disconnect-all' })
-                    setShowDisconnectAllDialog(false)
-                  }, 2000)
+                  toast.success('All apps disconnected successfully')
+                  setShowDisconnectAllDialog(false)
                 }
               }}>Disconnect All</Button>
             </div>

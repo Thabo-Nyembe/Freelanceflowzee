@@ -1262,10 +1262,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 className="h-20 flex-col gap-2 bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400 hover:scale-105 transition-all duration-200"
                 onClick={() => {
                   if (selectedFolder) {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      { loading: 'Archiving folder...', success: `Folder "${selectedFolder.name}" archived`, error: 'Failed to archive' }
-                    )
+                    toast.success(`Folder "${selectedFolder.name}" archived`)
                   } else {
                     toast.info('Select a folder first to archive')
                   }
@@ -1510,10 +1507,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    { loading: 'Making documents private...', success: 'Selected documents are now private', error: 'Failed to update privacy' }
-                  )
+                  toast.success('Selected documents are now private')
                 }}
               >
                 <Lock className="w-5 h-5" />
@@ -1897,19 +1891,13 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                         </div>
                         <div className="flex gap-3">
                           <Button variant="outline" className="flex-1" onClick={() => {
-                            toast.promise(
-                              new Promise((resolve) => setTimeout(resolve, 2000)),
-                              { loading: 'Exporting all documents...', success: 'Export complete! Download starting...', error: 'Export failed' }
-                            )
+                            toast.success('Export complete! Download starting...')
                           }}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All
                           </Button>
                           <Button variant="outline" className="flex-1" onClick={() => {
-                            toast.promise(
-                              new Promise((resolve) => setTimeout(resolve, 2500)),
-                              { loading: 'Creating backup archive...', success: 'Backup downloaded successfully!', error: 'Backup failed' }
-                            )
+                            toast.success('Backup downloaded successfully!')
                           }}>
                             <Archive className="h-4 w-4 mr-2" />
                             Download Backup
@@ -2136,15 +2124,9 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                             </div>
                             <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => {
                               if (integration.connected) {
-                                toast.promise(
-                                  new Promise((resolve) => setTimeout(resolve, 1000)),
-                                  { loading: `Disconnecting ${integration.name}...`, success: `${integration.name} disconnected`, error: 'Disconnect failed' }
-                                )
+                                toast.success(`${integration.name} disconnected`)
                               } else {
-                                toast.promise(
-                                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                                  { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully!`, error: 'Connection failed' }
-                                )
+                                toast.success(`${integration.name} connected successfully!`)
                               }
                             }}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
@@ -2183,10 +2165,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                           </code>
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 1500)),
-                            { loading: 'Regenerating API token...', success: 'New API token generated!', error: 'Failed to regenerate token' }
-                          )
+                          toast.success('New API token generated!')
                         }}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate Token
@@ -2330,10 +2309,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 } else if (insight.type === 'info') {
                   setActiveTab('documents')
                 }
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 800)),
-                  { loading: 'Processing insight...', success: `${insight.title} - Action completed`, error: 'Failed to process' }
-                )
+                toast.success(`${insight.title} - Action completed`)
               }}
             />
           </div>
@@ -2646,10 +2622,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
               <Button
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1500)),
-                    { loading: `Exporting ${selectedDocumentsForAction.length} documents...`, success: 'Export completed! Download starting...', error: 'Export failed' }
-                  )
+                  toast.success('Export completed! Download starting...')
                   setShowExportDialog(false)
                   setSelectedDocumentsForAction([])
                 }}
@@ -2704,10 +2677,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>Cancel</Button>
               <Button
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    { loading: 'Duplicating document...', success: `"${duplicateName}" created successfully`, error: 'Duplication failed' }
-                  )
+                  toast.success(`"${duplicateName}" created successfully`)
                   setShowDuplicateDialog(false)
                   setDuplicateName('')
                 }}
@@ -2761,10 +2731,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     <button
                       key={folder.id}
                       onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1000)),
-                          { loading: `Moving ${selectedDocumentsForAction.length} items...`, success: `Items moved to "${folder.name}"`, error: 'Move failed' }
-                        )
+                        toast.success(`${selectedDocumentsForAction.length} items moved to "${folder.name}"`)
                         setShowBulkMoveDialog(false)
                         setSelectedDocumentsForAction([])
                       }}
@@ -2824,10 +2791,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="destructive"
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1200)),
-                    { loading: `Deleting ${selectedDocumentsForAction.length} documents...`, success: 'Documents deleted successfully', error: 'Delete failed' }
-                  )
+                  toast.success(`${selectedDocumentsForAction.length} documents deleted successfully`)
                   setShowBulkDeleteDialog(false)
                   setSelectedDocumentsForAction([])
                 }}
@@ -2922,10 +2886,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button variant="outline" onClick={() => { setShowCreateFolderDialog(false); setNewFolderName('') }}>Cancel</Button>
               <Button
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 800)),
-                    { loading: 'Creating folder...', success: `Folder "${newFolderName}" created successfully`, error: 'Failed to create folder' }
-                  )
+                  toast.success(`Folder "${newFolderName}" created successfully`)
                   setShowCreateFolderDialog(false)
                   setNewFolderName('')
                 }}
@@ -2967,10 +2928,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                         <Edit3 className="h-3 w-3" />
                       </Button>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-500" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1000)),
-                          { loading: `Deleting "${folder.name}"...`, success: `Folder "${folder.name}" deleted`, error: 'Delete failed' }
-                        )
+                        toast.success(`Folder "${folder.name}" deleted`)
                       }}>
                         <Trash2 className="h-3 w-3" />
                       </Button>
@@ -3157,10 +3115,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   id="template-file-input"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 1500)),
-                        { loading: `Importing ${e.target.files[0].name}...`, success: 'Template imported successfully', error: 'Import failed' }
-                      )
+                      toast.success(`Template "${e.target.files[0].name}" imported successfully`)
                       setShowImportTemplateDialog(false)
                     }
                   }}
@@ -3171,10 +3126,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportTemplateDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                  { loading: 'Importing template...', success: 'Template imported successfully', error: 'Import failed' }
-                )
+                toast.success('Template imported successfully')
                 setShowImportTemplateDialog(false)
               }}>Import</Button>
             </DialogFooter>
@@ -3222,10 +3174,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 className="bg-gradient-to-r from-fuchsia-500 to-purple-500"
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 3000)),
-                    { loading: 'AI is generating your document...', success: 'Document generated successfully!', error: 'Generation failed' }
-                  )
+                  toast.success('Document generated successfully!')
                   setShowAIGenerateDialog(false)
                   setAIPrompt('')
                 }}
@@ -3496,10 +3445,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button variant="outline" onClick={() => { setShowEmailShareDialog(false); setEmailRecipient(''); setShareMessage('') }}>Cancel</Button>
               <Button
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    { loading: 'Sending email...', success: `Document shared with ${emailRecipient}`, error: 'Failed to send' }
-                  )
+                  toast.success(`Document shared with ${emailRecipient}`)
                   setShowEmailShareDialog(false)
                   setEmailRecipient('')
                   setShareMessage('')
@@ -3612,10 +3558,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button variant="outline" onClick={() => { setShowBulkDownloadDialog(false); setSelectedDocumentsForAction([]) }}>Cancel</Button>
               <Button
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 2000)),
-                    { loading: `Preparing ${selectedDocumentsForAction.length} files...`, success: 'Download started!', error: 'Download failed' }
-                  )
+                  toast.success(`Downloading ${selectedDocumentsForAction.length} files as ZIP archive`)
                   setShowBulkDownloadDialog(false)
                   setSelectedDocumentsForAction([])
                 }}
@@ -3680,10 +3623,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSyncSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
-                  { loading: 'Syncing now...', success: 'All documents synced!', error: 'Sync failed' }
-                )
+                toast.success('All documents synced!')
               }}>Sync Now</Button>
             </DialogFooter>
           </DialogContent>
@@ -3732,19 +3672,13 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 2000)),
-                    { loading: 'Exporting all documents...', success: 'Export complete!', error: 'Export failed' }
-                  )
+                  toast.success('Export complete! All documents exported')
                 }}>
                   <Download className="h-4 w-4 mr-2" />
                   Export All
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1500)),
-                    { loading: 'Creating backup...', success: 'Backup created!', error: 'Backup failed' }
-                  )
+                  toast.success('Backup created!')
                 }}>
                   <Archive className="h-4 w-4 mr-2" />
                   Backup
@@ -3918,11 +3852,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 <Palette className="h-4 w-4 mr-3" />
                 Change Color
               </Button>
-              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowFolderMenuDialog(false); toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: 'Archiving folder...', success: `Folder "${menuFolder?.name}" archived`, error: 'Archive failed' }); }}>
+              <Button variant="ghost" className="w-full justify-start" onClick={() => { setShowFolderMenuDialog(false); toast.success(`Folder "${menuFolder?.name}" archived`); }}>
                 <Archive className="h-4 w-4 mr-3" />
                 Archive
               </Button>
-              <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => { setShowFolderMenuDialog(false); toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: `Deleting "${menuFolder?.name}"...`, success: `Folder "${menuFolder?.name}" deleted`, error: 'Delete failed' }); }}>
+              <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => { setShowFolderMenuDialog(false); toast.success(`Folder "${menuFolder?.name}" deleted`); }}>
                 <Trash2 className="h-4 w-4 mr-3" />
                 Delete
               </Button>
@@ -3963,10 +3897,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowRestoreVersionDialog(false); setVersionToRestore(null); }}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                  { loading: `Restoring to version ${versionToRestore?.version}...`, success: 'Document restored successfully!', error: 'Restore failed' }
-                )
+                toast.success(`Document restored to version ${versionToRestore?.version}!`)
                 setShowRestoreVersionDialog(false)
                 setVersionToRestore(null)
               }}>
@@ -4026,10 +3957,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowQuickShareDialog(false); setEmailRecipient(''); setShareMessage(''); }}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
-                  { loading: 'Sharing document...', success: `Document shared with ${emailRecipient}`, error: 'Share failed' }
-                )
+                toast.success(`Document shared with ${emailRecipient}`)
                 setShowQuickShareDialog(false)
                 setEmailRecipient('')
                 setShareMessage('')
@@ -4055,30 +3983,21 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </DialogHeader>
             <div className="py-4 space-y-2">
               <Button variant="ghost" className="w-full justify-start" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 500)),
-                  { loading: 'Opening in browser...', success: 'Document opened in new tab', error: 'Failed to open' }
-                )
+                toast.success('Document opened in new tab')
                 setShowOpenDocumentDialog(false)
               }}>
                 <Globe className="h-4 w-4 mr-3" />
                 Open in Browser
               </Button>
               <Button variant="ghost" className="w-full justify-start" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 500)),
-                  { loading: 'Opening in desktop app...', success: 'Opening in desktop application', error: 'Desktop app not installed' }
-                )
+                toast.success('Opening in desktop application')
                 setShowOpenDocumentDialog(false)
               }}>
                 <FileText className="h-4 w-4 mr-3" />
                 Open in Desktop App
               </Button>
               <Button variant="ghost" className="w-full justify-start" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 500)),
-                  { loading: 'Creating preview...', success: 'Preview ready', error: 'Preview failed' }
-                )
+                toast.success('Preview ready')
                 setShowOpenDocumentDialog(false)
               }}>
                 <ImageIcon className="h-4 w-4 mr-3" />
@@ -4165,10 +4084,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowClearTrashDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                  { loading: 'Clearing trash...', success: 'Trash cleared successfully!', error: 'Failed to clear trash' }
-                )
+                toast.success('Trash cleared successfully!')
                 setShowClearTrashDialog(false)
               }}>
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -4204,10 +4120,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAllDocsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 2000)),
-                  { loading: 'Deleting all documents...', success: 'All documents deleted', error: 'Delete failed' }
-                )
+                toast.success('All documents deleted')
                 setShowDeleteAllDocsDialog(false)
               }}>
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -4258,10 +4171,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUpgradePremiumDialog(false)}>Maybe Later</Button>
               <Button className="bg-gradient-to-r from-amber-500 to-orange-500" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                  { loading: 'Processing upgrade...', success: 'Welcome to Premium!', error: 'Upgrade failed' }
-                )
+                toast.success('Welcome to Premium!')
                 setShowUpgradePremiumDialog(false)
               }}>
                 <Star className="h-4 w-4 mr-2" />
@@ -4311,10 +4221,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowAddPersonDialog(false); setNewPersonEmail(''); }}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
-                  { loading: 'Adding person...', success: `${newPersonEmail} added as ${newPersonRole}`, error: 'Failed to add person' }
-                )
+                toast.success(`${newPersonEmail} added as ${newPersonRole}`)
                 setShowAddPersonDialog(false)
                 setNewPersonEmail('')
               }} disabled={!newPersonEmail}>
@@ -4363,10 +4270,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowEditFolderDialog(false); setNewFolderName(''); setEditFolderData(null); }}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 800)),
-                  { loading: 'Updating folder...', success: `Folder renamed to "${newFolderName}"`, error: 'Update failed' }
-                )
+                toast.success(`Folder renamed to "${newFolderName}"`)
                 setShowEditFolderDialog(false)
                 setNewFolderName('')
                 setEditFolderData(null)
@@ -4422,10 +4326,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCheckoutDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-amber-500 to-orange-500" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 2000)),
-                  { loading: 'Processing payment...', success: `Welcome to Documents Pro! Your ${selectedPlan} subscription is now active.`, error: 'Payment failed. Please try again.' }
-                )
+                toast.success(`Welcome to Documents Pro! Your ${selectedPlan} subscription is now active.`)
                 setShowCheckoutDialog(false)
                 setShowUpgradePremiumDialog(false)
               }}>

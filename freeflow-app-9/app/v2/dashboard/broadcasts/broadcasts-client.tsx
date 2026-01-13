@@ -1953,10 +1953,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                             </Button>
                             <Button variant="outline" onClick={() => {
                               if (confirm('Are you sure you want to refresh your API key? All existing integrations will need to be updated.')) {
-                                toast.loading('Refreshing API key...', { id: 'api-key-refresh' })
-                                setTimeout(() => {
-                                  toast.success('API key refreshed successfully', { id: 'api-key-refresh' })
-                                }, 1000)
+                                toast.success('API key refreshed successfully')
                               }
                             }}>
                               <RefreshCw className="w-4 h-4" />
@@ -2453,11 +2450,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowImportContactsDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Importing contacts...', { id: 'import-contacts' })
-                setTimeout(() => {
-                  toast.success('Contacts imported successfully', { id: 'import-contacts' })
-                  setShowImportContactsDialog(false)
-                }, 1500)
+                toast.success('Contacts imported successfully')
+                setShowImportContactsDialog(false)
               }}>Import</Button>
             </div>
           </div>
@@ -2496,11 +2490,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Creating automation...', { id: 'create-automation' })
-                setTimeout(() => {
-                  toast.success('Automation created successfully', { id: 'create-automation' })
-                  setShowCreateAutomationDialog(false)
-                }, 1000)
+                toast.success('Automation created successfully')
+                setShowCreateAutomationDialog(false)
               }}>Create Automation</Button>
             </div>
           </div>
@@ -2539,11 +2530,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowCreateSeriesDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Creating series...', { id: 'create-series' })
-                setTimeout(() => {
-                  toast.success('Series created successfully', { id: 'create-series' })
-                  setShowCreateSeriesDialog(false)
-                }, 1000)
+                toast.success('Series created successfully')
+                setShowCreateSeriesDialog(false)
               }}>Create Series</Button>
             </div>
           </div>
@@ -2593,11 +2581,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Creating template...', { id: 'create-template' })
-                setTimeout(() => {
-                  toast.success('Template created successfully', { id: 'create-template' })
-                  setShowCreateTemplateDialog(false)
-                }, 1000)
+                toast.success('Template created successfully')
+                setShowCreateTemplateDialog(false)
               }}>Create Template</Button>
             </div>
           </div>
@@ -2636,11 +2621,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowCreateSegmentDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Creating segment...', { id: 'create-segment' })
-                setTimeout(() => {
-                  toast.success('Segment created successfully', { id: 'create-segment' })
-                  setShowCreateSegmentDialog(false)
-                }, 1000)
+                toast.success('Segment created successfully')
+                setShowCreateSegmentDialog(false)
               }}>Create Segment</Button>
             </div>
           </div>
@@ -2670,11 +2652,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowDefineEventDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Defining event...', { id: 'define-event' })
-                setTimeout(() => {
-                  toast.success('Event defined successfully', { id: 'define-event' })
-                  setShowDefineEventDialog(false)
-                }, 1000)
+                toast.success('Event defined successfully')
+                setShowDefineEventDialog(false)
               }}>Define Event</Button>
             </div>
           </div>
@@ -2713,11 +2692,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowConfigureDmarcDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Saving DMARC configuration...', { id: 'save-dmarc' })
-                setTimeout(() => {
-                  toast.success('DMARC configuration saved successfully', { id: 'save-dmarc' })
-                  setShowConfigureDmarcDialog(false)
-                }, 1000)
+                toast.success('DMARC configuration saved successfully')
+                setShowConfigureDmarcDialog(false)
               }}>Save Configuration</Button>
             </div>
           </div>
@@ -2753,11 +2729,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Adding webhook endpoint...', { id: 'add-webhook' })
-                setTimeout(() => {
-                  toast.success('Webhook endpoint added successfully', { id: 'add-webhook' })
-                  setShowAddWebhookDialog(false)
-                }, 1000)
+                toast.success('Webhook endpoint added successfully')
+                setShowAddWebhookDialog(false)
               }}>Add Endpoint</Button>
             </div>
           </div>
@@ -2792,20 +2765,13 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowManageSubscriptionDialog(false)}>Close</Button>
-              <Button variant="outline" onClick={async () => {
-                toast.loading('Loading payment methods...', { id: 'update-payment' })
-                try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  toast.success('Payment form ready', { id: 'update-payment', description: 'Update your card details' })
-                } catch { toast.error('Failed to load payment form', { id: 'update-payment' }) }
+              <Button variant="outline" onClick={() => {
+                toast.success('Payment form ready', { description: 'Update your card details' })
               }}>Update Payment</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
-                  toast.loading('Cancelling subscription...', { id: 'cancel-subscription' })
-                  setTimeout(() => {
-                    toast.success('Subscription cancelled successfully', { id: 'cancel-subscription' })
-                    setShowManageSubscriptionDialog(false)
-                  }, 1500)
+                  toast.success('Subscription cancelled successfully')
+                  setShowManageSubscriptionDialog(false)
                 }
               }}>Cancel Subscription</Button>
             </div>
@@ -2898,11 +2864,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.loading('Preparing data export...', { id: 'export-data' })
-                setTimeout(() => {
-                  toast.success('Data export started - you will receive an email when ready', { id: 'export-data' })
-                  setShowExportDataDialog(false)
-                }, 1500)
+                toast.success('Data export started - you will receive an email when ready')
+                setShowExportDataDialog(false)
               }}>Start Export</Button>
             </div>
           </div>
@@ -2929,11 +2892,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowPurgeContactsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to purge ALL contacts? This action is irreversible and will permanently delete all your subscriber data.')) {
-                  toast.loading('Purging all contacts...', { id: 'purge-contacts' })
-                  setTimeout(() => {
-                    toast.success('All contacts have been purged', { id: 'purge-contacts' })
-                    setShowPurgeContactsDialog(false)
-                  }, 2000)
+                  toast.success('All contacts have been purged')
+                  setShowPurgeContactsDialog(false)
                 }
               }}>Purge All Contacts</Button>
             </div>
@@ -2961,11 +2921,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowDeleteCampaignsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to delete ALL campaigns? This action is irreversible and will permanently delete all campaign data and analytics.')) {
-                  toast.loading('Deleting all campaigns...', { id: 'delete-campaigns' })
-                  setTimeout(() => {
-                    toast.success('All campaigns have been deleted', { id: 'delete-campaigns' })
-                    setShowDeleteCampaignsDialog(false)
-                  }, 2000)
+                  toast.success('All campaigns have been deleted')
+                  setShowDeleteCampaignsDialog(false)
                 }
               }}>Delete All Campaigns</Button>
             </div>
@@ -3000,11 +2957,8 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowCloseAccountDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to close your account? This action is irreversible and will permanently delete all your data.')) {
-                  toast.loading('Closing account...', { id: 'close-account' })
-                  setTimeout(() => {
-                    toast.success('Account closed - redirecting to home page', { id: 'close-account' })
-                    setShowCloseAccountDialog(false)
-                  }, 2000)
+                  toast.success('Account closed - redirecting to home page')
+                  setShowCloseAccountDialog(false)
                 }
               }}>Close My Account</Button>
             </div>

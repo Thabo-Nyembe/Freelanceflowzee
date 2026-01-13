@@ -860,14 +860,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
   const handleCreateOpportunity = () => {
     setShowAddOpportunity(true)
-    toast.promise(
-      new Promise(r => setTimeout(r, 300)),
-      {
-        loading: 'Opening opportunity form...',
-        success: 'Opportunity form ready',
-        error: 'Failed to open opportunity form'
-      }
-    )
+    toast.success('Opportunity form ready')
   }
 
   const handleConvertLead = (contact: Contact) => {
@@ -877,14 +870,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   const handleSendEmail = (contact: Contact) => {
-    toast.promise(
-      new Promise(r => setTimeout(r, 300)),
-      {
-        loading: `Opening email composer for ${contact.email}...`,
-        success: `Email composer ready for ${contact.email}`,
-        error: 'Failed to open email composer'
-      }
-    )
+    toast.success(`Email composer ready for ${contact.email}`)
   }
 
   const handleLogActivity = () => {
@@ -2126,12 +2112,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <p className="text-xs text-gray-500">Use this key for API access</p>
                             </div>
                             <Button size="sm" variant="outline" onClick={() => {
-                              toast.loading('Regenerating API key...', { id: 'api-key' })
-                              setTimeout(() => {
-                                const newKey = 'crm_api_key_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-                                navigator.clipboard.writeText(newKey)
-                                toast.success('API key regenerated and copied to clipboard', { id: 'api-key' })
-                              }, 1000)
+                              const newKey = 'crm_api_key_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+                              navigator.clipboard.writeText(newKey)
+                              toast.success('API key regenerated and copied to clipboard')
                             }}>
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
@@ -3140,48 +3123,33 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </DialogHeader>
             <div className="space-y-2 py-4">
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Updating stage...', { id: 'rename-stage' })
-                setTimeout(() => {
-                  toast.success('Stage renamed successfully', { id: 'rename-stage' })
-                  setShowStageOptionsMenu(null)
-                }, 800)
+                toast.success('Stage renamed successfully')
+                setShowStageOptionsMenu(null)
               }}>
                 <Edit className="h-4 w-4 mr-2" />Rename Stage
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Updating probability...', { id: 'change-probability' })
-                setTimeout(() => {
-                  toast.success('Stage probability updated', { id: 'change-probability' })
-                  setShowStageOptionsMenu(null)
-                }, 800)
+                toast.success('Stage probability updated')
+                setShowStageOptionsMenu(null)
               }}>
                 <Target className="h-4 w-4 mr-2" />Change Probability
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Moving stage...', { id: 'move-stage-up' })
-                setTimeout(() => {
-                  toast.success('Stage moved up', { id: 'move-stage-up' })
-                  setShowStageOptionsMenu(null)
-                }, 800)
+                toast.success('Stage moved up')
+                setShowStageOptionsMenu(null)
               }}>
                 <ArrowUpRight className="h-4 w-4 mr-2" />Move Up
               </Button>
               <Button variant="outline" className="w-full justify-start" onClick={() => {
-                toast.loading('Moving stage...', { id: 'move-stage-down' })
-                setTimeout(() => {
-                  toast.success('Stage moved down', { id: 'move-stage-down' })
-                  setShowStageOptionsMenu(null)
-                }, 800)
+                toast.success('Stage moved down')
+                setShowStageOptionsMenu(null)
               }}>
                 <ArrowUpRight className="h-4 w-4 mr-2 rotate-90" />Move Down
               </Button>
               <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
                 if (confirm('Are you sure you want to delete this stage?')) {
-                  toast.loading('Deleting stage...', { id: 'delete-stage' })
-                  setTimeout(() => {
-                    toast.success('Stage deleted successfully', { id: 'delete-stage' })
-                    setShowStageOptionsMenu(null)
-                  }, 800)
+                  toast.success('Stage deleted successfully')
+                  setShowStageOptionsMenu(null)
                 }
               }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete Stage
@@ -3220,11 +3188,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Importing contacts...', { id: 'import-contacts' })
-                setTimeout(() => {
-                  toast.success('Import completed', { id: 'import-contacts', description: 'Contacts have been imported successfully' })
-                  setShowImportDialog(false)
-                }, 2000)
+                toast.success('Import completed', { description: 'Contacts have been imported successfully' })
+                setShowImportDialog(false)
               }}>
                 <Upload className="h-4 w-4 mr-2" />Start Import
               </Button>
@@ -3303,11 +3268,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Creating task...', { id: 'create-task' })
-                setTimeout(() => {
-                  toast.success('Task created successfully', { id: 'create-task', description: 'New task has been added to your list' })
-                  setShowAddTaskDialog(false)
-                }, 1000)
+                toast.success('Task created successfully', { description: 'New task has been added to your list' })
+                setShowAddTaskDialog(false)
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Create Task
               </Button>
@@ -3391,11 +3353,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddCampaignDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Creating campaign...', { id: 'create-campaign' })
-                setTimeout(() => {
-                  toast.success('Campaign created successfully', { id: 'create-campaign', description: 'Your new campaign is ready to launch' })
-                  setShowAddCampaignDialog(false)
-                }, 1000)
+                toast.success('Campaign created successfully', { description: 'Your new campaign is ready to launch' })
+                setShowAddCampaignDialog(false)
               }}>
                 <Megaphone className="h-4 w-4 mr-2" />Create Campaign
               </Button>
@@ -3458,11 +3417,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Adding pipeline stage...', { id: 'add-stage' })
-                setTimeout(() => {
-                  toast.success('Stage added successfully', { id: 'add-stage', description: 'New stage has been added to your pipeline' })
-                  setShowAddStageDialog(false)
-                }, 1000)
+                toast.success('Stage added successfully', { description: 'New stage has been added to your pipeline' })
+                setShowAddStageDialog(false)
               }}>
                 <Layers className="h-4 w-4 mr-2" />Add Stage
               </Button>
@@ -3529,11 +3485,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddScoringRuleDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Adding scoring rule...', { id: 'add-scoring-rule' })
-                setTimeout(() => {
-                  toast.success('Scoring rule added', { id: 'add-scoring-rule', description: 'Lead scoring will now apply this rule' })
-                  setShowAddScoringRuleDialog(false)
-                }, 1000)
+                toast.success('Scoring rule added', { description: 'Lead scoring will now apply this rule' })
+                setShowAddScoringRuleDialog(false)
               }}>
                 <Target className="h-4 w-4 mr-2" />Add Rule
               </Button>
@@ -3571,11 +3524,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectSlackDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Connecting to Slack...', { id: 'connect-slack' })
-                setTimeout(() => {
-                  toast.success('Slack connected successfully', { id: 'connect-slack', description: 'You will now receive CRM notifications in Slack' })
-                  setShowConnectSlackDialog(false)
-                }, 1500)
+                toast.success('Slack connected successfully', { description: 'You will now receive CRM notifications in Slack' })
+                setShowConnectSlackDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Connect Slack
               </Button>
@@ -3613,11 +3563,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectZapierDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Connecting to Zapier...', { id: 'connect-zapier' })
-                setTimeout(() => {
-                  toast.success('Zapier connected successfully', { id: 'connect-zapier', description: 'Automations are now enabled' })
-                  setShowConnectZapierDialog(false)
-                }, 1500)
+                toast.success('Zapier connected successfully', { description: 'Automations are now enabled' })
+                setShowConnectZapierDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Connect Zapier
               </Button>
@@ -3657,11 +3604,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConnectLinkedInDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Connecting LinkedIn Sales Navigator...', { id: 'connect-linkedin' })
-                setTimeout(() => {
-                  toast.success('LinkedIn connected successfully', { id: 'connect-linkedin', description: 'Your LinkedIn data is now synced' })
-                  setShowConnectLinkedInDialog(false)
-                }, 1500)
+                toast.success('LinkedIn connected successfully', { description: 'Your LinkedIn data is now synced' })
+                setShowConnectLinkedInDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Complete Setup
               </Button>
@@ -3724,19 +3668,16 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Exporting CRM data...', { id: 'export-data' })
-                setTimeout(() => {
-                  const data = JSON.stringify({ contacts: MOCK_CONTACTS, accounts: MOCK_ACCOUNTS, opportunities: MOCK_OPPORTUNITIES }, null, 2)
-                  const blob = new Blob([data], { type: 'application/json' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `crm-export-${new Date().toISOString().split('T')[0]}.json`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('Data exported successfully', { id: 'export-data', description: 'Your CRM data has been downloaded' })
-                  setShowExportAllDataDialog(false)
-                }, 1500)
+                const data = JSON.stringify({ contacts: MOCK_CONTACTS, accounts: MOCK_ACCOUNTS, opportunities: MOCK_OPPORTUNITIES }, null, 2)
+                const blob = new Blob([data], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `crm-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Data exported successfully', { description: 'Your CRM data has been downloaded' })
+                setShowExportAllDataDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Export Data
               </Button>
@@ -3785,11 +3726,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Importing data...', { id: 'import-data' })
-                setTimeout(() => {
-                  toast.success('Data imported successfully', { id: 'import-data', description: 'Your CRM has been updated with imported data' })
-                  setShowImportDataDialog(false)
-                }, 2000)
+                toast.success('Data imported successfully', { description: 'Your CRM has been updated with imported data' })
+                setShowImportDataDialog(false)
               }}>
                 <Upload className="h-4 w-4 mr-2" />Import Data
               </Button>
@@ -3824,11 +3762,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button variant="outline" onClick={() => setShowDeleteAllContactsDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to delete ALL contacts? This action cannot be undone.')) {
-                  toast.loading('Deleting all contacts...', { id: 'delete-all' })
-                  setTimeout(() => {
-                    toast.success('All contacts deleted', { id: 'delete-all', description: 'Your CRM contacts have been removed' })
-                    setShowDeleteAllContactsDialog(false)
-                  }, 2000)
+                  toast.success('All contacts deleted', { description: 'Your CRM contacts have been removed' })
+                  setShowDeleteAllContactsDialog(false)
                 }
               }}>
                 <Trash2 className="h-4 w-4 mr-2" />Delete All Contacts
@@ -3864,11 +3799,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to clear all activity history? This action cannot be undone.')) {
-                  toast.loading('Clearing activity history...', { id: 'clear-history' })
-                  setTimeout(() => {
-                    toast.success('Activity history cleared', { id: 'clear-history', description: 'All activity records have been removed' })
-                    setShowClearHistoryDialog(false)
-                  }, 2000)
+                  toast.success('Activity history cleared', { description: 'All activity records have been removed' })
+                  setShowClearHistoryDialog(false)
                 }
               }}>
                 <Archive className="h-4 w-4 mr-2" />Clear History
@@ -3909,11 +3841,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button variant="outline" onClick={() => setShowFactoryResetDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                 if (confirm('Are you absolutely sure you want to factory reset the CRM? ALL data will be permanently deleted.')) {
-                  toast.loading('Performing factory reset...', { id: 'factory-reset' })
-                  setTimeout(() => {
-                    toast.success('Factory reset complete', { id: 'factory-reset', description: 'CRM has been reset to default settings' })
-                    setShowFactoryResetDialog(false)
-                  }, 3000)
+                  toast.success('Factory reset complete', { description: 'CRM has been reset to default settings' })
+                  setShowFactoryResetDialog(false)
                 }
               }}>
                 <AlertOctagon className="h-4 w-4 mr-2" />Factory Reset

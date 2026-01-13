@@ -924,28 +924,12 @@ export default function HelpCenterClient() {
       toast.error('Title Required', { description: 'Please enter an article title' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating article...',
-        success: () => {
-          setShowCreateArticleDialog(false)
-          return `Article "${newArticleTitle}" created successfully`
-        },
-        error: 'Failed to create article'
-      }
-    )
+    setShowCreateArticleDialog(false)
+    toast.success(`Article "${newArticleTitle}" created successfully`)
   }
 
   const handlePublishArticle = (n: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Publishing article...',
-        success: `"${n}" is now live`,
-        error: 'Failed to publish'
-      }
-    )
+    toast.success(`"${n}" is now live`)
   }
 
   const handleCreateCategory = () => {
@@ -959,17 +943,8 @@ export default function HelpCenterClient() {
       toast.error('Name Required', { description: 'Please enter a category name' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: 'Creating category...',
-        success: () => {
-          setShowCreateCategoryDialog(false)
-          return `Category "${newCategoryName}" created`
-        },
-        error: 'Failed to create category'
-      }
-    )
+    setShowCreateCategoryDialog(false)
+    toast.success(`Category "${newCategoryName}" created`)
   }
 
   const handleSearch = () => setShowSmartSearchDialog(true)
@@ -984,18 +959,9 @@ export default function HelpCenterClient() {
       toast.error('Query Required', { description: 'Please enter a search term' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Searching with AI...',
-        success: () => {
-          setShowSmartSearchDialog(false)
-          setSearchQuery(smartSearchQuery)
-          return `Found results for "${smartSearchQuery}"`
-        },
-        error: 'Search failed'
-      }
-    )
+    setShowSmartSearchDialog(false)
+    setSearchQuery(smartSearchQuery)
+    toast.success(`Found results for "${smartSearchQuery}"`)
   }
 
   const handleAnalytics = () => setShowAnalyticsDialog(true)
@@ -1006,17 +972,8 @@ export default function HelpCenterClient() {
   }
 
   const handleExecuteImport = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'Importing articles...',
-        success: () => {
-          setShowImportDialog(false)
-          return 'Articles imported successfully'
-        },
-        error: 'Import failed'
-      }
-    )
+    setShowImportDialog(false)
+    toast.success('Articles imported successfully')
   }
 
   const handleManageTags = () => setShowManageTagsDialog(true)
@@ -1027,17 +984,8 @@ export default function HelpCenterClient() {
   }
 
   const handleExecuteTranslation = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2500)),
-      {
-        loading: 'Translating content...',
-        success: () => {
-          setShowTranslateDialog(false)
-          return `Content translated to ${translationLanguage.toUpperCase()}`
-        },
-        error: 'Translation failed'
-      }
-    )
+    setShowTranslateDialog(false)
+    toast.success(`Content translated to ${translationLanguage.toUpperCase()}`)
   }
 
   const handleArchives = () => setShowArchivesDialog(true)
@@ -1053,17 +1001,8 @@ export default function HelpCenterClient() {
   }
 
   const handleExecuteAutoSort = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'AI is organizing content...',
-        success: () => {
-          setShowAutoSortDialog(false)
-          return 'Content auto-sorted successfully'
-        },
-        error: 'Auto-sort failed'
-      }
-    )
+    setShowAutoSortDialog(false)
+    toast.success('Content auto-sorted successfully')
   }
 
   const handleCrossLink = () => setShowCrossLinkDialog(true)
@@ -1071,17 +1010,8 @@ export default function HelpCenterClient() {
   const handleCleanup = () => setShowCleanupDialog(true)
 
   const handleExecuteCleanup = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'Cleaning up content...',
-        success: () => {
-          setShowCleanupDialog(false)
-          return 'Content cleanup completed'
-        },
-        error: 'Cleanup failed'
-      }
-    )
+    setShowCleanupDialog(false)
+    toast.success('Content cleanup completed')
   }
 
   const handleViewCollection = (collectionName: string) => {
@@ -1103,17 +1033,8 @@ export default function HelpCenterClient() {
       toast.error('Name Required', { description: 'Please enter a collection name' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: 'Creating collection...',
-        success: () => {
-          setShowNewCollectionDialog(false)
-          return `Collection "${newCollectionName}" created`
-        },
-        error: 'Failed to create collection'
-      }
-    )
+    setShowNewCollectionDialog(false)
+    toast.success(`Collection "${newCollectionName}" created`)
   }
 
   const handleAllFeedback = () => {
@@ -1147,17 +1068,8 @@ export default function HelpCenterClient() {
   }
 
   const handleExecuteExport = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: `Exporting as ${exportFormat.toUpperCase()}...`,
-        success: () => {
-          setShowExportDialog(false)
-          return `Export completed (${exportFormat.toUpperCase()})`
-        },
-        error: 'Export failed'
-      }
-    )
+    setShowExportDialog(false)
+    toast.success(`Export completed (${exportFormat.toUpperCase()})`)
   }
 
   const handleReports = () => setShowReportsDialog(true)
@@ -1182,17 +1094,8 @@ export default function HelpCenterClient() {
       toast.error('Message Required', { description: 'Please enter a follow-up message' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Sending follow-up...',
-        success: () => {
-          setShowFollowUpDialog(false)
-          return 'Follow-up sent successfully'
-        },
-        error: 'Failed to send'
-      }
-    )
+    setShowFollowUpDialog(false)
+    toast.success('Follow-up sent successfully')
   }
 
   const handleOverview = () => setShowAnalyticsDialog(true)
@@ -1213,17 +1116,8 @@ export default function HelpCenterClient() {
       toast.error('Date Required', { description: 'Please select a date' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Scheduling content...',
-        success: () => {
-          setShowScheduleDialog(false)
-          return 'Content scheduled successfully'
-        },
-        error: 'Failed to schedule'
-      }
-    )
+    setShowScheduleDialog(false)
+    toast.success('Content scheduled successfully')
   }
 
   const handleEditArticle = () => {
@@ -1231,17 +1125,8 @@ export default function HelpCenterClient() {
   }
 
   const handleSaveArticleEdit = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Saving changes...',
-        success: () => {
-          setShowEditArticleDialog(false)
-          return 'Article updated successfully'
-        },
-        error: 'Failed to save'
-      }
-    )
+    setShowEditArticleDialog(false)
+    toast.success('Article updated successfully')
   }
 
   const handleViewLive = (articleTitle: string) => {
@@ -1249,14 +1134,7 @@ export default function HelpCenterClient() {
   }
 
   const handleDuplicate = (articleTitle: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Duplicating article...',
-        success: `"${articleTitle}" duplicated`,
-        error: 'Failed to duplicate'
-      }
-    )
+    toast.success(`"${articleTitle}" duplicated`)
   }
 
   const handleShare = () => {
@@ -1269,28 +1147,12 @@ export default function HelpCenterClient() {
       toast.error('Email Required', { description: 'Please enter an email address' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Sharing article...',
-        success: () => {
-          setShowShareDialog(false)
-          return `Article shared with ${shareEmail}`
-        },
-        error: 'Failed to share'
-      }
-    )
+    setShowShareDialog(false)
+    toast.success(`Article shared with ${shareEmail}`)
   }
 
   const handleArchive = (articleTitle: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Archiving article...',
-        success: `"${articleTitle}" archived`,
-        error: 'Failed to archive'
-      }
-    )
+    toast.success(`"${articleTitle}" archived`)
   }
 
   const handleEditCategory = (categoryName: string) => {
@@ -1304,73 +1166,28 @@ export default function HelpCenterClient() {
   }
 
   const handleSaveCategoryEdit = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: 'Saving category...',
-        success: () => {
-          setShowEditCategoryDialog(false)
-          return 'Category updated successfully'
-        },
-        error: 'Failed to update category'
-      }
-    )
+    setShowEditCategoryDialog(false)
+    toast.success('Category updated successfully')
   }
 
   const handleSaveSettings = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: 'Saving settings...',
-        success: () => {
-          setShowSettingsDialog(false)
-          return 'Help center settings saved successfully'
-        },
-        error: 'Failed to save settings'
-      }
-    )
+    setShowSettingsDialog(false)
+    toast.success('Help center settings saved successfully')
   }
 
   const handleSubmitSubcategory = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: 'Creating subcategory...',
-        success: () => {
-          setShowSubcategoryDialog(false)
-          return 'Subcategory created successfully'
-        },
-        error: 'Failed to create subcategory'
-      }
-    )
+    setShowSubcategoryDialog(false)
+    toast.success('Subcategory created successfully')
   }
 
   const handleSaveOrganize = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Organizing content...',
-        success: () => {
-          setShowOrganizeDialog(false)
-          return 'Content organization saved'
-        },
-        error: 'Failed to organize content'
-      }
-    )
+    setShowOrganizeDialog(false)
+    toast.success('Content organization saved')
   }
 
   const handleCreateCrossLink = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Linking articles...',
-        success: () => {
-          setShowCrossLinkDialog(false)
-          return 'Articles linked successfully'
-        },
-        error: 'Failed to link articles'
-      }
-    )
+    setShowCrossLinkDialog(false)
+    toast.success('Articles linked successfully')
   }
 
   // Quick actions with real handlers
@@ -2740,14 +2557,7 @@ export default function HelpCenterClient() {
                       <p className="text-sm text-muted-foreground">Archived on {new Date(article.updatedAt).toLocaleDateString()}</p>
                     </div>
                     <Button size="sm" variant="outline" onClick={() => {
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1000)),
-                        {
-                          loading: 'Restoring article...',
-                          success: `"${article.title}" has been restored`,
-                          error: 'Failed to restore article'
-                        }
-                      )
+                      toast.success(`"${article.title}" has been restored`)
                     }}>Restore</Button>
                   </div>
                 ))

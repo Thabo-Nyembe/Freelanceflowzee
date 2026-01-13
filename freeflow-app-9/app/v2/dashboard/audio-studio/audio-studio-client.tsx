@@ -684,82 +684,33 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
 
   // Handlers
   const handleUploadAudio = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Opening file picker...',
-        success: 'Audio file imported successfully',
-        error: 'Failed to import audio file'
-      }
-    )
+    toast.success('Audio file imported successfully')
   }
 
   const handleStartRecording = () => {
     setIsRecording(true)
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Initializing recording...',
-        success: 'Recording started - audio capture active',
-        error: 'Failed to start recording'
-      }
-    )
+    toast.success('Recording started - audio capture active')
   }
 
   const handleStopRecording = () => {
     setIsRecording(false)
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Saving audio...',
-        success: 'Recording saved to project',
-        error: 'Failed to save recording'
-      }
-    )
+    toast.success('Recording saved to project')
   }
 
   const handleExportAudio = (n: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2500)),
-      {
-        loading: `Exporting "${n}" - rendering audio...`,
-        success: `"${n}" exported successfully`,
-        error: `Failed to export "${n}"`
-      }
-    )
+    toast.success(`"${n}" exported successfully`)
   }
 
   const handleApplyEffect = (n: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: `Applying ${n}...`,
-        success: `${n} applied to track`,
-        error: `Failed to apply ${n}`
-      }
-    )
+    toast.success(`${n} applied to track`)
   }
 
   const handleOpenProject = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Opening project browser...',
-        success: 'Project browser ready',
-        error: 'Failed to open project browser'
-      }
-    )
+    toast.success('Project browser ready')
   }
 
   const handleSaveProject = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: 'Saving project...',
-        success: 'Project saved successfully',
-        error: 'Failed to save project'
-      }
-    )
+    toast.success('Project saved successfully')
   }
 
   const handleAddTrack = (type: 'audio' | 'midi' | 'bus') => {
@@ -783,113 +734,43 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
       order: tracks.length + 1
     }
     setTracks(prev => [...prev, newTrack])
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: `Creating new ${type} track...`,
-        success: `New ${type} track added to project`,
-        error: `Failed to create ${type} track`
-      }
-    )
+    toast.success(`New ${type} track added to project`)
   }
 
   const handleLoadInstrument = (name: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: `Loading "${name}"...`,
-        success: `"${name}" loaded and ready to play`,
-        error: `Failed to load "${name}"`
-      }
-    )
+    toast.success(`"${name}" loaded and ready to play`)
   }
 
   const handleAddAutomationLane = (trackName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: `Adding automation lane to "${trackName}"...`,
-        success: `Automation lane added to "${trackName}"`,
-        error: 'Failed to add automation lane'
-      }
-    )
+    toast.success(`Automation lane added to "${trackName}"`)
   }
 
   const handleSelectExportFormat = (format: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Updating export settings...',
-        success: `Export format set to ${format}`,
-        error: 'Failed to update export format'
-      }
-    )
+    toast.success(`Export format set to ${format}`)
   }
 
   const handleSelectSampleRate = (rate: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Updating sample rate...',
-        success: `Sample rate set to ${rate}`,
-        error: 'Failed to update sample rate'
-      }
-    )
+    toast.success(`Sample rate set to ${rate}`)
   }
 
   const handleSelectBitDepth = (depth: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Updating bit depth...',
-        success: `Bit depth set to ${depth}`,
-        error: 'Failed to update bit depth'
-      }
-    )
+    toast.success(`Bit depth set to ${depth}`)
   }
 
   const handleRescanPlugins = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 3000)),
-      {
-        loading: 'Scanning plugin directories...',
-        success: 'Plugin scan complete - all plugins loaded',
-        error: 'Plugin scan failed'
-      }
-    )
+    toast.success('Plugin scan complete - all plugins loaded')
   }
 
   const handleClearPluginCache = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2500)),
-      {
-        loading: 'Clearing plugin cache and rescanning...',
-        success: 'Plugin cache cleared - ready to use',
-        error: 'Failed to clear plugin cache'
-      }
-    )
+    toast.success('Plugin cache cleared - ready to use')
   }
 
   const handleResetPreferences = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Restoring default settings...',
-        success: 'All preferences reset to defaults',
-        error: 'Failed to reset preferences'
-      }
-    )
+    toast.success('All preferences reset to defaults')
   }
 
   const handleEffectOptions = (effectName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: `Loading "${effectName}" options...`,
-        success: `"${effectName}" options ready`,
-        error: 'Failed to load effect options'
-      }
-    )
+    toast.success(`"${effectName}" options ready`)
   }
 
   const handleDuplicateTrack = (trackName: string) => {
@@ -902,14 +783,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
       }
       setTracks(prev => [...prev, duplicatedTrack])
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: `Duplicating "${trackName}"...`,
-        success: `"${trackName}" duplicated successfully`,
-        error: 'Failed to duplicate track'
-      }
-    )
+    toast.success(`"${trackName}" duplicated successfully`)
   }
 
   const handleDeleteTrack = (trackName: string) => {
@@ -918,48 +792,20 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
       setShowTrackDialog(false)
       setSelectedTrack(null)
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: `Removing "${trackName}"...`,
-        success: `"${trackName}" removed from project`,
-        error: 'Failed to delete track'
-      }
-    )
+    toast.success(`"${trackName}" removed from project`)
   }
 
   const handleOpenInstrumentBrowser = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Opening instrument browser...',
-        success: 'Instrument browser ready',
-        error: 'Failed to open instrument browser'
-      }
-    )
+    toast.success('Instrument browser ready')
   }
 
   const handleOpenAutomation = () => {
     setActiveTab('automation')
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Loading automation lanes...',
-        success: 'Automation view ready',
-        error: 'Failed to load automation'
-      }
-    )
+    toast.success('Automation view ready')
   }
 
   const handleShareProject = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Preparing share options...',
-        success: 'Share options ready - choose your method',
-        error: 'Failed to prepare share options'
-      }
-    )
+    toast.success('Share options ready - choose your method')
   }
 
   // Stat cards

@@ -1045,22 +1045,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   }
 
   // Refresh expired connections handler
-  const handleRefreshExpiredConnections = async () => {
-    setIsProcessing(true)
-    try {
-      // Simulate refreshing expired connections
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      const expiredCount = mockConnections.filter(c => c.status === 'expired').length
-      if (expiredCount === 0) {
-        toast.info('No expired connections to refresh')
-      } else {
-        toast.success(`Refreshed ${expiredCount} expired connection${expiredCount > 1 ? 's' : ''}`)
-      }
-    } catch (err) {
-      console.error('Error refreshing connections:', err)
-      toast.error('Failed to refresh connections')
-    } finally {
-      setIsProcessing(false)
+  const handleRefreshExpiredConnections = () => {
+    const expiredCount = mockConnections.filter(c => c.status === 'expired').length
+    if (expiredCount === 0) {
+      toast.info('No expired connections to refresh')
+    } else {
+      toast.success(`Refreshed ${expiredCount} expired connection${expiredCount > 1 ? 's' : ''}`)
     }
   }
 
@@ -1103,7 +1093,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   }
 
   // Update connection settings
-  const handleUpdateConnectionSettings = async () => {
+  const handleUpdateConnectionSettings = () => {
     if (!selectedConnection) return
 
     if (!connectionEditForm.name.trim()) {
@@ -1111,131 +1101,74 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       return
     }
 
-    setIsProcessing(true)
-    try {
-      // Simulate API call to update connection
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Connection settings updated', {
-        description: `${connectionEditForm.name} has been updated`
-      })
-      setShowConnectionSettingsDialog(false)
-      setSelectedConnection(null)
-    } catch (err) {
-      console.error('Error updating connection:', err)
-      toast.error('Failed to update connection settings')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Connection settings updated', {
+      description: `${connectionEditForm.name} has been updated`
+    })
+    setShowConnectionSettingsDialog(false)
+    setSelectedConnection(null)
   }
 
   // Disconnect/remove connection
-  const handleDisconnectConnection = async () => {
+  const handleDisconnectConnection = () => {
     if (!selectedConnection) return
 
-    setIsProcessing(true)
-    try {
-      // Simulate API call to disconnect
-      await new Promise(resolve => setTimeout(resolve, 800))
-      toast.success('Connection removed', {
-        description: `${selectedConnection.name} has been disconnected`
-      })
-      setShowConnectionSettingsDialog(false)
-      setSelectedConnection(null)
-    } catch (err) {
-      console.error('Error disconnecting:', err)
-      toast.error('Failed to disconnect')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Connection removed', {
+      description: `${selectedConnection.name} has been disconnected`
+    })
+    setShowConnectionSettingsDialog(false)
+    setSelectedConnection(null)
   }
 
   // Reconnect/refresh connection
-  const handleReconnectConnection = async () => {
+  const handleReconnectConnection = () => {
     if (!selectedConnection) return
 
-    setIsProcessing(true)
-    try {
-      // Simulate OAuth re-authorization flow
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Connection refreshed', {
-        description: `${selectedConnection.name} credentials have been renewed`
-      })
-    } catch (err) {
-      console.error('Error reconnecting:', err)
-      toast.error('Failed to refresh connection')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Connection refreshed', {
+      description: `${selectedConnection.name} credentials have been renewed`
+    })
   }
 
   // Create new connection handler
-  const handleCreateConnection = async () => {
+  const handleCreateConnection = () => {
     if (!newConnectionForm.name.trim() || !newConnectionForm.app.trim()) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      // Simulate API call to create connection
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Connection created successfully', {
-        description: `${newConnectionForm.name} is now connected`
-      })
-      setShowNewConnectionDialog(false)
-      setNewConnectionForm({ name: '', app: '', apiKey: '' })
-    } catch (err) {
-      console.error('Error creating connection:', err)
-      toast.error('Failed to create connection')
-    } finally {
-      setIsProcessing(false)
-    }
+
+    toast.success('Connection created successfully', {
+      description: `${newConnectionForm.name} is now connected`
+    })
+    setShowNewConnectionDialog(false)
+    setNewConnectionForm({ name: '', app: '', apiKey: '' })
   }
 
   // Create new webhook handler
-  const handleCreateWebhook = async () => {
+  const handleCreateWebhook = () => {
     if (!newWebhookForm.name.trim()) {
       toast.error('Please enter a webhook name')
       return
     }
-    setIsProcessing(true)
-    try {
-      // Simulate API call to create webhook
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      const webhookUrl = `https://hook.freeflow.app/${Math.random().toString(36).substring(7)}`
-      toast.success('Webhook created successfully', {
-        description: `URL: ${webhookUrl}`
-      })
-      setShowNewWebhookDialog(false)
-      setNewWebhookForm({ name: '', method: 'POST', scenarioId: '' })
-    } catch (err) {
-      console.error('Error creating webhook:', err)
-      toast.error('Failed to create webhook')
-    } finally {
-      setIsProcessing(false)
+
+    const webhookUrl = `https://hook.freeflow.app/${Math.random().toString(36).substring(7)}`
+    toast.success('Webhook created successfully', {
+      description: `URL: ${webhookUrl}`
+    })
+    setShowNewWebhookDialog(false)
+    setNewWebhookForm({ name: '', method: 'POST', scenarioId: '' })
     }
   }
 
   // Submit template handler
-  const handleSubmitTemplate = async () => {
+  const handleSubmitTemplate = () => {
     if (!submitTemplateForm.name.trim() || !submitTemplateForm.description.trim()) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      // Simulate API call to submit template
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Template submitted for review', {
-        description: 'We will review your template and publish it soon'
-      })
-      setShowSubmitTemplateDialog(false)
-      setSubmitTemplateForm({ name: '', description: '', category: 'Productivity' })
-    } catch (err) {
-      console.error('Error submitting template:', err)
-      toast.error('Failed to submit template')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Template submitted for review', {
+      description: 'We will review your template and publish it soon'
+    })
+    setShowSubmitTemplateDialog(false)
+    setSubmitTemplateForm({ name: '', description: '', category: 'Productivity' })
   }
 
   // Delete all scenarios handler
@@ -1433,9 +1366,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
   // Regenerate API key handler
   const handleRegenerateAPIKey = async () => {
-    setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
       const newKey = `mk_live_${Math.random().toString(36).substring(2, 34)}`
       await navigator.clipboard.writeText(newKey)
       toast.success('New API key generated and copied to clipboard', {
@@ -1444,8 +1375,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     } catch (err) {
       console.error('Error regenerating API key:', err)
       toast.error('Failed to regenerate API key')
-    } finally {
-      setIsProcessing(false)
     }
   }
 
@@ -3785,13 +3714,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowAIAutomationDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={async () => {
-                toast.loading('AI is analyzing your request...', { id: 'ai-automation' })
-                try {
-                  await new Promise(r => setTimeout(r, 2500))
-                  toast.success('Automation generated!', { id: 'ai-automation', description: 'Your AI-powered workflow is ready to use' })
-                  setShowAIAutomationDialog(false)
-                } catch { toast.error('AI generation failed', { id: 'ai-automation' }) }
+              <Button onClick={() => {
+                toast.success('Automation generated!', { description: 'Your AI-powered workflow is ready to use' })
+                setShowAIAutomationDialog(false)
               }} className="bg-pink-600 hover:bg-pink-700">
                 <Sparkles className="h-4 w-4 mr-2" />
                 Generate Automation
@@ -4011,13 +3936,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowFiltersDialog(false)}>
                 Reset
               </Button>
-              <Button onClick={async () => {
-                toast.loading('Applying filters...', { id: 'apply-filters' })
-                try {
-                  await new Promise(r => setTimeout(r, 800))
-                  toast.success('Filters applied', { id: 'apply-filters', description: 'Showing filtered scenarios' })
-                  setShowFiltersDialog(false)
-                } catch { toast.error('Failed to apply filters', { id: 'apply-filters' }) }
+              <Button onClick={() => {
+                toast.success('Filters applied', { description: 'Showing filtered scenarios' })
+                setShowFiltersDialog(false)
               }} className="bg-purple-600 hover:bg-purple-700">
                 Apply Filters
               </Button>
@@ -4192,10 +4113,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <Key className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                 <p className="text-sm text-gray-500">Need another API key?</p>
                 <Button variant="outline" className="mt-2" onClick={() => {
-                  toast.loading('Creating API key...', { id: 'create-api-key' })
-                  setTimeout(() => {
-                    toast.success('New API key created!', { id: 'create-api-key' })
-                  }, 1000)
+                  toast.success('New API key created!')
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create New Key
@@ -4383,9 +4301,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowDeleteAccountDialog(false)}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={() => {
+              <Button variant="destructive" onClick={async () => {
                 if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                  /* TODO: Implement account deletion API call */
+                  toast.promise(
+                    fetch('/api/automations/account', { method: 'DELETE' }),
+                    { loading: 'Deleting account...', success: 'Account and all automations deleted', error: 'Failed to delete account' }
+                  )
                   setShowDeleteAccountDialog(false);
                 }
               }}>
@@ -4542,13 +4463,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- 5 active scenarios</li>
                     <li>- Email support</li>
                   </ul>
-                  <Button variant="outline" className="w-full" onClick={async () => {
-                    toast.loading('Processing plan selection...', { id: 'plan-starter' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1200))
-                      toast.success('Starter plan selected', { id: 'plan-starter', description: 'Redirecting to checkout...' })
-                      setShowUpgradePlanDialog(false)
-                    } catch { toast.error('Failed to select plan', { id: 'plan-starter' }) }
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    toast.success('Starter plan selected', { description: 'Redirecting to checkout...' })
+                    setShowUpgradePlanDialog(false)
                   }}>
                     Select Starter
                   </Button>
@@ -4564,13 +4481,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- Priority support</li>
                     <li>- AI automation features</li>
                   </ul>
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
-                    toast.loading('Upgrading to Pro...', { id: 'plan-pro' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1500))
-                      toast.success('Pro plan activated!', { id: 'plan-pro', description: 'Redirecting to checkout for payment...' })
-                      setShowUpgradePlanDialog(false)
-                    } catch { toast.error('Failed to upgrade', { id: 'plan-pro' }) }
+                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                    toast.success('Pro plan activated!', { description: 'Redirecting to checkout for payment...' })
+                    setShowUpgradePlanDialog(false)
                   }}>
                     Upgrade to Pro
                   </Button>
@@ -4585,13 +4498,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <li>- Dedicated support</li>
                     <li>- Custom integrations</li>
                   </ul>
-                  <Button variant="outline" className="w-full" onClick={async () => {
-                    toast.loading('Sending inquiry...', { id: 'contact-sales' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1500))
-                      toast.success('Sales team notified', { id: 'contact-sales', description: 'We\'ll contact you within 24 hours' })
-                      setShowUpgradePlanDialog(false)
-                    } catch { toast.error('Failed to send request', { id: 'contact-sales' }) }
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    toast.success('Sales team notified', { description: 'We\'ll contact you within 24 hours' })
+                    setShowUpgradePlanDialog(false)
                   }}>
                     Contact Sales
                   </Button>
@@ -4913,13 +4822,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Button variant="outline" onClick={() => setShowEditorDialog(false)}>
                 Close
               </Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                toast.loading('Saving workflow...', { id: 'save-workflow' })
-                try {
-                  await new Promise(r => setTimeout(r, 1200))
-                  toast.success('Workflow saved', { id: 'save-workflow', description: 'All changes have been saved' })
-                  setShowEditorDialog(false)
-                } catch { toast.error('Failed to save workflow', { id: 'save-workflow' }) }
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Workflow saved', { description: 'All changes have been saved' })
+                setShowEditorDialog(false)
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Save Workflow

@@ -1115,14 +1115,7 @@ export default function TeamHubPage() {
                 activeProjects: teamStats.activeProjects,
                 onlineMembers: teamStats.onlineMembers
               })
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                {
-                  loading: 'Loading team settings...',
-                  success: 'Team Settings - Configure team preferences and permissions',
-                  error: 'Failed to load settings'
-                }
-              )
+              toast.success('Team Settings - Configure team preferences and permissions')
             }}
           >
             <Settings className="h-4 w-4 mr-2" />
@@ -1275,14 +1268,7 @@ export default function TeamHubPage() {
                         onlineMembers: teamStats.onlineMembers,
                         totalMembers: teamStats.totalMembers
                       })
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 700)),
-                        {
-                          loading: 'Opening team chat...',
-                          success: `Opening Team Chat - ${teamStats.onlineMembers} members online`,
-                          error: 'Failed to open chat'
-                        }
-                      )
+                      toast.success(`Opening Team Chat - ${teamStats.onlineMembers} members online`)
                       router.push('/dashboard/messages?channel=team-general')
                     }}
                   >
@@ -1298,14 +1284,7 @@ export default function TeamHubPage() {
                         activeProjects: teamStats.activeProjects,
                         membersScheduled: teamStats.totalMembers
                       })
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1000)),
-                        {
-                          loading: 'Loading team calendar...',
-                          success: `Opening Team Calendar - View availability for ${teamStats.totalMembers} team members`,
-                          error: 'Failed to load calendar'
-                        }
-                      )
+                      toast.success(`Opening Team Calendar - View availability for ${teamStats.totalMembers} team members`)
                       router.push('/dashboard/calendar?view=team')
                     }}
                   >
@@ -1321,14 +1300,7 @@ export default function TeamHubPage() {
                         availableParticipants: teamStats.onlineMembers,
                         totalMembers: teamStats.totalMembers
                       })
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1500)),
-                        {
-                          loading: 'Starting video meeting...',
-                          success: `Starting Video Meeting - Connecting with ${teamStats.onlineMembers} online members`,
-                          error: 'Failed to start meeting'
-                        }
-                      )
+                      toast.success(`Starting Video Meeting - Connecting with ${teamStats.onlineMembers} online members`)
                       router.push('/dashboard/collaboration/meetings?action=new')
                     }}
                   >
@@ -1344,14 +1316,7 @@ export default function TeamHubPage() {
                         membersAnalyzed: teamStats.totalMembers,
                         activeProjects: teamStats.activeProjects
                       })
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1200)),
-                        {
-                          loading: 'Loading team reports...',
-                          success: 'Opening Team Reports - Team analytics and performance metrics',
-                          error: 'Failed to load reports'
-                        }
-                      )
+                      toast.success('Opening Team Reports - Team analytics and performance metrics')
                       router.push('/dashboard/analytics?filter=team')
                     }}
                   >
@@ -1388,14 +1353,7 @@ export default function TeamHubPage() {
                     totalMembers: teamMembers.length,
                     currentFilters: { status: filterStatus, department: filterDepartment }
                   })
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 500)),
-                    {
-                      loading: 'Loading filter options...',
-                      success: 'Filter Options - Filter by status, department, or role',
-                      error: 'Failed to load filters'
-                    }
-                  )
+                  toast.success('Filter Options - Filter by status, department, or role')
                 }}
               >
                 <Filter className="h-4 w-4 mr-2" />
@@ -1462,14 +1420,7 @@ export default function TeamHubPage() {
                           department: member.department,
                           status: member.status
                         })
-                        toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 700)),
-                          {
-                            loading: 'Opening chat...',
-                            success: `Opening Chat - Starting conversation with ${member.name}`,
-                            error: 'Failed to open chat'
-                          }
-                        )
+                        toast.success(`Opening Chat - Starting conversation with ${member.name}`)
                         router.push(`/dashboard/messages?dm=${member.id}&name=${encodeURIComponent(member.name)}`)
                       }}
                     >
@@ -1645,14 +1596,7 @@ export default function TeamHubPage() {
                         activeProjects: teamStats.activeProjects,
                         completedTasks: teamStats.completedTasks
                       })
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 2500)),
-                        {
-                          loading: 'Generating team analytics report...',
-                          success: 'Report Generated - Team analytics exported successfully',
-                          error: 'Failed to generate report'
-                        }
-                      )
+                      toast.success('Report Generated - Team analytics exported successfully')
                       handleTeamExport('csv')
                     }}
                   >
@@ -1673,14 +1617,7 @@ export default function TeamHubPage() {
                         activeProjects: teamStats.activeProjects,
                         totalMembers: teamStats.totalMembers
                       })
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 800)),
-                        {
-                          loading: 'Loading goals manager...',
-                          success: 'Goals Manager - Define and track team objectives',
-                          error: 'Failed to load goals manager'
-                        }
-                      )
+                      toast.success('Goals Manager - Define and track team objectives')
                       setShowGoalsDialog(true)
                     }}
                   >
@@ -1988,14 +1925,7 @@ export default function TeamHubPage() {
               ))}
             </div>
             <Button className="w-full" variant="outline" onClick={() => {
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 1000)),
-                {
-                  loading: 'Scheduling training session...',
-                  success: 'Training Schedule - Training module coming soon',
-                  error: 'Failed to schedule training'
-                }
-              )
+              toast.success('Training Schedule - Training module coming soon')
             }}>
               Schedule Training Session
             </Button>
@@ -2327,14 +2257,7 @@ export default function TeamHubPage() {
               </div>
             </div>
             <Button className="w-full" variant="outline" onClick={() => {
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                {
-                  loading: 'Opening Files Hub...',
-                  success: 'Files Hub - Team shared files and documents loaded',
-                  error: 'Failed to open Files Hub'
-                }
-              )
+              toast.success('Files Hub - Team shared files and documents loaded')
             }}>
               Open Files Hub
             </Button>

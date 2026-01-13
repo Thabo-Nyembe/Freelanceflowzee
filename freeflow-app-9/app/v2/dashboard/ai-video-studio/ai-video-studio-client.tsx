@@ -489,10 +489,23 @@ export default function AiVideoStudioClient() {
                   value={shareEmail}
                   onChange={(e) => setShareEmail(e.target.value)}
                 />
-                <Button onClick={() => {
+                <Button onClick={async () => {
                   if (shareEmail) {
-                    /* TODO: Implement send email invitation API call */
-                    toast.success(`Invitation sent to ${shareEmail}`)
+                    toast.promise(
+                      fetch('/api/share/invite', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: shareEmail, type: 'video' })
+                      }).then(res => {
+                        if (!res.ok) throw new Error('Failed to send')
+                        return res.json()
+                      }),
+                      {
+                        loading: `Sending invitation to ${shareEmail}...`,
+                        success: `Invitation sent to ${shareEmail}`,
+                        error: 'Failed to send invitation'
+                      }
+                    )
                     setShareEmail('')
                   } else {
                     toast.error('Please enter an email address')
@@ -688,9 +701,26 @@ export default function AiVideoStudioClient() {
                       </div>
                       <div className="flex gap-1">
                         {item.status === 'completed' && (
-                          <Button variant="ghost" size="icon" onClick={() => {
-                            /* TODO: Implement actual video download - trigger file download */
-                            toast.success('Video downloaded')
+                          <Button variant="ghost" size="icon" onClick={async () => {
+                            toast.promise(
+                              fetch(`/api/video/download/${item.id}`).then(async (res) => {
+                                if (!res.ok) throw new Error('Download failed')
+                                const blob = await res.blob()
+                                const url = URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = `${item.name || 'video'}.mp4`
+                                document.body.appendChild(a)
+                                a.click()
+                                document.body.removeChild(a)
+                                URL.revokeObjectURL(url)
+                              }),
+                              {
+                                loading: 'Preparing download...',
+                                success: 'Video downloaded successfully',
+                                error: 'Failed to download video'
+                              }
+                            )
                           }}>
                             <Download className="h-4 w-4" />
                           </Button>

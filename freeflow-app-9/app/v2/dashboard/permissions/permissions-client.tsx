@@ -2019,9 +2019,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <AIInsightsPanel
               insights={mockPermissionsAIInsights}
               title="Security Intelligence"
-              onInsightAction={async (insight) => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 800))
+              onInsightAction={(insight) => {
                 switch (insight.type) {
                   case 'warning':
                     toast.warning(insight.title, { description: 'Security review initiated' })
@@ -2035,7 +2033,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   default:
                     toast.success(`${insight.title} action completed`)
                 }
-                setIsLoading(false)
               }}
             />
           </div>
@@ -2536,11 +2533,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 <KeyRound className="w-4 h-4" />
                 Reset Password
               </Button>
-              <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 500))
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
                 toast.success('Session revoked', { description: `All sessions for ${selectedUserForOptions?.displayName} have been revoked` })
-                setIsLoading(false)
                 setShowUserOptionsDialog(false)
               }}>
                 <LockKeyhole className="w-4 h-4" />
@@ -2613,19 +2607,16 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreatePolicyDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newPolicy.name) {
                   toast.error('Validation Error', { description: 'Policy name is required' })
                   return
                 }
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 800))
                 toast.success('Policy created', { description: `${newPolicy.name} has been created successfully` })
                 setNewPolicy({ name: '', description: '', type: 'sign_on', priority: 1 })
                 setShowCreatePolicyDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Creating...' : 'Create Policy'}
+              }}>
+                Create Policy
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2673,19 +2664,16 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddApplicationDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newApplication.name) {
                   toast.error('Validation Error', { description: 'Application name is required' })
                   return
                 }
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1000))
                 toast.success('Application added', { description: `${newApplication.name} has been added successfully` })
                 setNewApplication({ name: '', type: 'saml', ssoEnabled: true })
                 setShowAddApplicationDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Adding...' : 'Add Application'}
+              }}>
+                Add Application
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2727,15 +2715,19 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportLogsDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1500))
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 const filename = `audit-logs-${new Date().toISOString().split('T')[0]}.${exportLogsOptions.format}`
+                const blob = new Blob([`Audit logs export - ${exportLogsOptions.dateRange}`], { type: exportLogsOptions.format === 'json' ? 'application/json' : 'text/csv' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = filename
+                a.click()
+                URL.revokeObjectURL(url)
                 toast.success('Export complete', { description: `Downloaded ${filename}` })
                 setShowExportLogsDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Exporting...' : 'Export Logs'}
+              }}>
+                Export Logs
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2800,14 +2792,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRegenerateTokenDialog(false)}>Cancel</Button>
-              <Button className="bg-orange-600 hover:bg-orange-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1200))
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
                 toast.success('Token regenerated', { description: 'New SCIM token has been generated. Please copy it now.' })
                 setShowRegenerateTokenDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Regenerating...' : 'Regenerate Token'}
+              }}>
+                Regenerate Token
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2852,19 +2841,16 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddMappingDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newMapping.source || !newMapping.target) {
                   toast.error('Validation Error', { description: 'Source and target fields are required' })
                   return
                 }
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 700))
                 toast.success('Mapping added', { description: `${newMapping.source} -> ${newMapping.target}` })
                 setNewMapping({ source: '', target: '', required: false })
                 setShowAddMappingDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Adding...' : 'Add Mapping'}
+              }}>
+                Add Mapping
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2889,21 +2875,15 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 <Copy className="w-4 h-4" />
                 Copy API Key
               </Button>
-              <Button variant="outline" className="w-full justify-start gap-2" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 800))
+              <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
                 toast.success('API key rotated', { description: 'New key has been generated' })
-                setIsLoading(false)
                 setShowAPIKeyOptionsDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4" />
                 Rotate Key
               </Button>
-              <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:bg-red-50" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 600))
+              <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:bg-red-50" onClick={() => {
                 toast.success('API key revoked', { description: `${selectedAPIKey?.name} has been revoked` })
-                setIsLoading(false)
                 setShowAPIKeyOptionsDialog(false)
               }}>
                 <AlertTriangle className="w-4 h-4" />
@@ -2959,19 +2939,16 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newWebhook.url) {
                   toast.error('Validation Error', { description: 'Webhook URL is required' })
                   return
                 }
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 800))
                 toast.success('Webhook added', { description: 'Webhook endpoint has been configured' })
                 setNewWebhook({ url: '', events: [] })
                 setShowAddWebhookDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Adding...' : 'Add Webhook'}
+              }}>
+                Add Webhook
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -2999,12 +2976,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       <CheckCircle className="w-5 h-5 text-green-600" />
                       <span className="font-medium text-green-800 dark:text-green-200">Connected</span>
                     </div>
-                    <Button variant="outline" size="sm" onClick={async () => {
-                      setIsLoading(true)
-                      await new Promise(resolve => setTimeout(resolve, 1000))
+                    <Button variant="outline" size="sm" onClick={() => {
                       toast.success('Sync complete', { description: 'Directory synchronized successfully' })
-                      setIsLoading(false)
-                    }} disabled={isLoading}>
+                    }}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync Now
                     </Button>
@@ -3050,14 +3024,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 {selectedDirectoryIntegration?.status === 'connected' ? 'Close' : 'Cancel'}
               </Button>
               {selectedDirectoryIntegration?.status !== 'connected' && (
-                <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                  setIsLoading(true)
-                  await new Promise(resolve => setTimeout(resolve, 1500))
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                   toast.success('Connected', { description: `${selectedDirectoryIntegration?.name} has been connected` })
                   setShowDirectoryConfigDialog(false)
-                  setIsLoading(false)
-                }} disabled={isLoading}>
-                  {isLoading ? 'Connecting...' : 'Connect'}
+                }}>
+                  Connect
                 </Button>
               )}
             </DialogFooter>
@@ -3086,12 +3057,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       <CheckCircle className="w-5 h-5 text-green-600" />
                       <span className="font-medium text-green-800 dark:text-green-200">Connected</span>
                     </div>
-                    <Button variant="outline" size="sm" onClick={async () => {
-                      setIsLoading(true)
-                      await new Promise(resolve => setTimeout(resolve, 1000))
+                    <Button variant="outline" size="sm" onClick={() => {
                       toast.success('Sync complete', { description: 'HR data synchronized successfully' })
-                      setIsLoading(false)
-                    }} disabled={isLoading}>
+                    }}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync Now
                     </Button>
@@ -3129,14 +3097,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 {selectedHRIntegration?.connected ? 'Close' : 'Cancel'}
               </Button>
               {!selectedHRIntegration?.connected && (
-                <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                  setIsLoading(true)
-                  await new Promise(resolve => setTimeout(resolve, 1500))
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                   toast.success('Connected', { description: `${selectedHRIntegration?.name} has been connected` })
                   setShowHRIntegrationDialog(false)
-                  setIsLoading(false)
-                }} disabled={isLoading}>
-                  {isLoading ? 'Connecting...' : 'Connect'}
+                }}>
+                  Connect
                 </Button>
               )}
             </DialogFooter>
@@ -3176,14 +3141,18 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 2000))
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                const blob = new Blob([JSON.stringify({ export: 'permissions-data', date: new Date().toISOString() })], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `permissions-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
                 toast.success('Export complete', { description: 'Data export has been downloaded' })
                 setShowExportDataDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Exporting...' : 'Export Data'}
+              }}>
+                Export Data
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3212,14 +3181,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetPermissionsDialog(false)}>Cancel</Button>
-              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1500))
+              <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
                 toast.success('Permissions reset', { description: 'All permissions have been reset to defaults' })
                 setShowResetPermissionsDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Resetting...' : 'Reset Permissions'}
+              }}>
+                Reset Permissions
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3247,14 +3213,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRevokeSessionsDialog(false)}>Cancel</Button>
-              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1800))
+              <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
                 toast.success('Sessions revoked', { description: 'All users must re-authenticate' })
                 setShowRevokeSessionsDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Revoking...' : 'Revoke All Sessions'}
+              }}>
+                Revoke All Sessions
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3286,14 +3249,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAPIKeysDialog(false)}>Cancel</Button>
-              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1200))
+              <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
                 toast.success('API keys deleted', { description: 'All API keys have been revoked' })
                 setShowDeleteAPIKeysDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Deleting...' : 'Delete All Keys'}
+              }}>
+                Delete All Keys
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3349,14 +3309,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditUserDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 800))
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 toast.success('User updated', { description: `${selectedUser?.displayName} has been updated` })
                 setShowEditUserDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save Changes'}
+              }}>
+                Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3388,14 +3345,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetPasswordDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1000))
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 toast.success('Reset email sent', { description: `Password reset email sent to ${selectedUser?.email}` })
                 setShowResetPasswordDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Sending...' : 'Send Reset Email'}
+              }}>
+                Send Reset Email
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3424,14 +3378,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLockAccountDialog(false)}>Cancel</Button>
-              <Button className="bg-orange-600 hover:bg-orange-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 600))
+              <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
                 toast.success('Account locked', { description: `${selectedUser?.displayName || selectedUserForOptions?.displayName} has been suspended` })
                 setShowLockAccountDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Locking...' : 'Lock Account'}
+              }}>
+                Lock Account
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3466,12 +3417,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                         <p className="text-xs text-gray-500">{user.email}</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={async () => {
-                      setIsLoading(true)
-                      await new Promise(resolve => setTimeout(resolve, 500))
+                    <Button variant="outline" size="sm" onClick={() => {
                       toast.success('Member added', { description: `${user.displayName} has been added to ${selectedGroup?.name}` })
-                      setIsLoading(false)
-                    }} disabled={isLoading}>{isLoading ? 'Adding...' : 'Add'}</Button>
+                    }}>Add</Button>
                   </div>
                 ))}
               </div>
@@ -3516,14 +3464,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditGroupDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 600))
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 toast.success('Group updated', { description: `${selectedGroup?.name} has been updated` })
                 setShowEditGroupDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save Changes'}
+              }}>
+                Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3613,14 +3558,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditRoleDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 700))
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 toast.success('Role updated', { description: `${selectedRole?.displayName} has been updated` })
                 setShowEditRoleDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save Changes'}
+              }}>
+                Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3666,19 +3608,16 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAPIKeyDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
                 if (!newAPIKey.name) {
                   toast.error('Validation Error', { description: 'Key name is required' })
                   return
                 }
-                setIsLoading(true)
-                await new Promise(resolve => setTimeout(resolve, 1000))
                 toast.success('API key created', { description: 'New API key has been generated. Copy it now!' })
                 setNewAPIKey({ name: '', environment: 'production' })
                 setShowAPIKeyDialog(false)
-                setIsLoading(false)
-              }} disabled={isLoading}>
-                {isLoading ? 'Creating...' : 'Create API Key'}
+              }}>
+                Create API Key
               </Button>
             </DialogFooter>
           </DialogContent>

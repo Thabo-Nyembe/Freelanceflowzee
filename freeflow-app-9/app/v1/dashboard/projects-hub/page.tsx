@@ -410,14 +410,7 @@ export default function ProjectsOverviewPage() {
 
       setDisplayedProjectsCount(prev => Math.min(prev + 12, filteredProjects.length))
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 800)),
-        {
-          loading: 'Loading more projects...',
-          success: `Showing ${Math.min(displayedProjectsCount + 12, filteredProjects.length)} of ${filteredProjects.length} projects`,
-          error: 'Failed to load more projects'
-        }
-      )
+      toast.success(`Showing ${Math.min(displayedProjectsCount + 12, filteredProjects.length)} of ${filteredProjects.length} projects`)
     }
   }, [displayedProjectsCount, filteredProjects.length])
 
@@ -523,14 +516,7 @@ export default function ProjectsOverviewPage() {
         p.id === selectedProject.id ? updatedUIProject : p
       ))
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 500)),
-        {
-          loading: 'Updating project...',
-          success: `Project "${data.name}" updated! Budget: $${data.budget.toLocaleString()} • Priority: ${data.priority}`,
-          error: 'Failed to update project'
-        }
-      )
+      toast.success(`Project "${data.name}" updated! Budget: $${data.budget.toLocaleString()} • Priority: ${data.priority}`)
 
       logger.info('Project updated successfully', {
         projectId: data.id,
@@ -579,14 +565,7 @@ export default function ProjectsOverviewPage() {
       // Remove from local state
       setProjects(projects.filter(p => p.id !== selectedProject.id))
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 500)),
-        {
-          loading: 'Deleting project...',
-          success: `Project "${selectedProject.title}" deleted. Project has been permanently removed.`,
-          error: 'Failed to delete project'
-        }
-      )
+      toast.success(`Project "${selectedProject.title}" deleted. Project has been permanently removed.`)
 
       logger.info('Project deleted successfully', {
         projectId: selectedProject.id,
@@ -674,14 +653,7 @@ export default function ProjectsOverviewPage() {
         permissions: 'private'
       })
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 500)),
-        {
-          loading: 'Creating project...',
-          success: `Project created successfully! ${newProject.title} - Ready to add milestones and team members`,
-          error: 'Failed to create project'
-        }
-      )
+      toast.success(`Project created successfully! ${newProject.title} - Ready to add milestones and team members`)
       announce(`Project ${newProject.title} created successfully`, 'polite')
     } catch (error: any) {
       logger.error('Failed to create project', { error, userId })
@@ -731,14 +703,7 @@ export default function ProjectsOverviewPage() {
         } : p
       ))
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 500)),
-        {
-          loading: 'Updating project status...',
-          success: `Project status updated to ${newStatus}. ${project?.title || 'Project'} is now ${newStatus}`,
-          error: 'Failed to update project status'
-        }
-      )
+      toast.success(`Project status updated to ${newStatus}. ${project?.title || 'Project'} is now ${newStatus}`)
       announce(`Project status changed to ${newStatus}`, 'polite')
     } catch (error: any) {
       logger.error('Failed to update project status', { error, projectId })
@@ -809,24 +774,10 @@ export default function ProjectsOverviewPage() {
 
         if (transformedProjects.length === 0) {
           announce('Demo projects loaded for presentation', 'polite')
-          toast.promise(
-            new Promise(resolve => setTimeout(resolve, 500)),
-            {
-              loading: 'Loading demo projects...',
-              success: 'Demo Mode: Showing sample projects for demonstration',
-              error: 'Failed to load demo projects'
-            }
-          )
+          toast.success('Demo Mode: Showing sample projects for demonstration')
         } else {
           announce(`${transformedProjects.length} projects loaded successfully`, 'polite')
-          toast.promise(
-            new Promise(resolve => setTimeout(resolve, 500)),
-            {
-              loading: 'Loading projects...',
-              success: `Projects loaded: ${transformedProjects.length} projects from database`,
-              error: 'Failed to load projects'
-            }
-          )
+          toast.success(`Projects loaded: ${transformedProjects.length} projects from database`)
         }
       } catch (err) {
         logger.error('Failed to load projects', { error: err, userId })
@@ -836,14 +787,7 @@ export default function ProjectsOverviewPage() {
         setError(null) // Clear error since we're showing demo data
         setLoading(false)
         announce('Demo projects loaded for presentation', 'polite')
-        toast.promise(
-          new Promise(resolve => setTimeout(resolve, 500)),
-          {
-            loading: 'Loading demo projects...',
-            success: 'Demo Mode: Showing sample projects for demonstration',
-            error: 'Failed to load demo projects'
-          }
-        )
+        toast.success('Demo Mode: Showing sample projects for demonstration')
       }
     }
 

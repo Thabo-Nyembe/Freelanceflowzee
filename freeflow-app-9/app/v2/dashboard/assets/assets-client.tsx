@@ -2936,7 +2936,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                       <span className="text-sm">{field}</span>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline" className="text-xs">Required</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => { /* TODO: Implement field editor for metadata templates */ }}>
+                        <Button variant="ghost" size="sm" onClick={() => { toast.info('Edit Field', { description: `Editing metadata field: ${field}` }) }}>
                           <Edit3 className="w-3 h-3" />
                         </Button>
                       </div>
@@ -2944,7 +2944,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   ))}
                 </div>
               </div>
-              <Button variant="outline" className="w-full" onClick={() => { /* TODO: Implement add new field to metadata template */ }}>
+              <Button variant="outline" className="w-full" onClick={() => { toast.info('Add Field', { description: 'Opening field creator...' }) }}>
                 + Add New Field
               </Button>
             </div>

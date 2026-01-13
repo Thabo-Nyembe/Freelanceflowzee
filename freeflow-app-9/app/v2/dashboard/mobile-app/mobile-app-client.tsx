@@ -620,7 +620,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     } finally { setIsLoading(false) }
   }
 
-  // Test Webhook
+  // Test Webhook - Actually sends a test payload to the webhook URL
   const handleTestWebhook = async (webhookUrl: string) => {
     if (!webhookUrl.trim()) {
       toast.error('Enter webhook URL', { description: 'Please enter a valid webhook URL first' })
@@ -628,12 +628,30 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
+      await toast.promise(
+        fetch('/api/webhooks/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            webhookUrl,
+            payload: {
+              event: 'test',
+              timestamp: new Date().toISOString(),
+              app: 'mobile-app',
+              message: 'Test webhook from Kazi Mobile App'
+            }
+          })
+        }).then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            throw new Error(data.error || 'Webhook delivery failed')
+          }
+          return res.json()
+        }),
         {
           loading: 'Testing webhook...',
           success: 'Webhook test successful! Payload delivered.',
-          error: 'Webhook test failed'
+          error: (err) => `Webhook test failed: ${err.message}`
         }
       )
     } finally { setIsLoading(false) }
@@ -689,10 +707,44 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     } finally { setIsLoading(false) }
   }
 
-  // Export Analytics
+  // Export Analytics - Exports real analytics data to CSV
   const handleExportAnalytics = async () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+    await toast.promise(
+      (async () => {
+        // Fetch analytics data from Supabase
+        const { data: analytics, error } = await supabase
+          .from('mobile_app_analytics')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        // Create CSV content
+        const headers = ['Date', 'Downloads', 'Active Users', 'Sessions', 'Revenue', 'Crash Rate', 'Rating']
+        const rows = (analytics || []).map(a => [
+          new Date(a.created_at).toLocaleDateString(),
+          a.downloads || 0,
+          a.active_users || 0,
+          a.sessions || 0,
+          a.revenue || 0,
+          a.crash_rate || 0,
+          a.rating || 0
+        ])
+
+        const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+
+        // Download as CSV
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `mobile-app-analytics-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      })(),
       {
         loading: 'Preparing analytics export...',
         success: 'Analytics exported! Check your downloads folder.',

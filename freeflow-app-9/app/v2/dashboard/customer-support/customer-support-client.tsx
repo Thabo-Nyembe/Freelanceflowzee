@@ -2792,11 +2792,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Assigning ticket...', { id: 'assign' })
-              setTimeout(() => {
-                toast.success('Ticket assigned successfully', { id: 'assign' })
-                setShowAssignDialog(false)
-              }, 1000)
+              toast.success('Ticket assigned successfully')
+              setShowAssignDialog(false)
             }} className="bg-purple-600 hover:bg-purple-700">Assign</Button>
           </DialogFooter>
         </DialogContent>
@@ -2822,10 +2819,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <div className="flex gap-2 mt-1">
                 <Input placeholder="Enter tag name" />
                 <Button onClick={() => {
-                  toast.loading('Adding tag...', { id: 'add-tag' })
-                  setTimeout(() => {
-                    toast.success('Tag added successfully', { id: 'add-tag' })
-                  }, 1000)
+                  toast.success('Tag added successfully')
                 }}>Add</Button>
               </div>
             </div>
@@ -2862,11 +2856,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Archiving tickets...', { id: 'archive' })
-              setTimeout(() => {
-                toast.success('Tickets archived successfully', { id: 'archive' })
-                setShowArchiveDialog(false)
-              }, 1000)
+              toast.success('Tickets archived successfully')
+              setShowArchiveDialog(false)
             }}>Archive Selected</Button>
           </DialogFooter>
         </DialogContent>
@@ -2940,12 +2931,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddAgentDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Sending invite...', { id: 'invite' })
-              setTimeout(() => {
-                toast.success('Invite sent successfully', { id: 'invite' })
-                setShowAddAgentDialog(false)
-                setNewAgentForm({ name: '', email: '', role: 'agent', skills: [] })
-              }, 1000)
+              toast.success('Invite sent successfully')
+              setShowAddAgentDialog(false)
+              setNewAgentForm({ name: '', email: '', role: 'agent', skills: [] })
             }} className="bg-green-600 hover:bg-green-700">Send Invite</Button>
           </DialogFooter>
         </DialogContent>
@@ -3019,11 +3007,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.loading('Opening schedule editor...', { id: 'schedule' })
-              setTimeout(() => {
-                toast.success('Schedule updated successfully', { id: 'schedule' })
-                setShowScheduleDialog(false)
-              }, 1000)
+              toast.success('Schedule updated successfully')
+              setShowScheduleDialog(false)
             }}>Edit Schedules</Button>
           </DialogFooter>
         </DialogContent>
@@ -3057,11 +3042,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.loading('Saving goals...', { id: 'goals' })
-              setTimeout(() => {
-                toast.success('Goals saved successfully', { id: 'goals' })
-                setShowGoalsDialog(false)
-              }, 1000)
+              toast.success('Goals saved successfully')
+              setShowGoalsDialog(false)
             }}>Update Goals</Button>
           </DialogFooter>
         </DialogContent>
@@ -3102,18 +3084,15 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.loading('Preparing export...', { id: 'export-reports' })
-              setTimeout(() => {
-                const csv = ['Agent,Active,Resolved,Avg Response,CSAT', ...agents.map(a => `${a.name},${a.activeTickets},${a.resolvedToday},${a.avgResponseTime}m,${a.satisfactionScore}`)].join('\n')
-                const blob = new Blob([csv], { type: 'text/csv' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `agent-reports-${new Date().toISOString().split('T')[0]}.csv`
-                a.click()
-                toast.success('Report exported successfully', { id: 'export-reports' })
-                setShowReportsDialog(false)
-              }, 1000)
+              const csv = ['Agent,Active,Resolved,Avg Response,CSAT', ...agents.map(a => `${a.name},${a.activeTickets},${a.resolvedToday},${a.avgResponseTime}m,${a.satisfactionScore}`)].join('\n')
+              const blob = new Blob([csv], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `agent-reports-${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+              toast.success('Report exported successfully')
+              setShowReportsDialog(false)
             }}>Export</Button>
           </DialogFooter>
         </DialogContent>
@@ -3220,11 +3199,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAgentSettingsDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Saving settings...', { id: 'agent-settings' })
-              setTimeout(() => {
-                toast.success('Agent settings saved successfully', { id: 'agent-settings' })
-                setShowAgentSettingsDialog(false)
-              }, 1000)
+              toast.success('Agent settings saved successfully')
+              setShowAgentSettingsDialog(false)
             }}>Save Settings</Button>
           </DialogFooter>
         </DialogContent>
@@ -3267,12 +3243,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddCustomerDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Adding customer...', { id: 'add-customer' })
-              setTimeout(() => {
-                toast.success('Customer added successfully', { id: 'add-customer' })
-                setShowAddCustomerDialog(false)
-                setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' })
-              }, 1000)
+              toast.success('Customer added successfully')
+              setShowAddCustomerDialog(false)
+              setNewCustomerForm({ name: '', email: '', company: '', tier: 'basic' })
             }} className="bg-purple-600 hover:bg-purple-700">Add Customer</Button>
           </DialogFooter>
         </DialogContent>
@@ -3303,12 +3276,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailAllDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Sending emails...', { id: 'email-all' })
-              setTimeout(() => {
-                toast.success(`Email sent to ${customers.length} customers`, { id: 'email-all' })
-                setShowEmailAllDialog(false)
-                setEmailAllForm({ subject: '', message: '' })
-              }, 1500)
+              toast.success(`Email sent to ${customers.length} customers`)
+              setShowEmailAllDialog(false)
+              setEmailAllForm({ subject: '', message: '' })
             }} className="bg-violet-600 hover:bg-violet-700">Send to All</Button>
           </DialogFooter>
         </DialogContent>
@@ -3342,11 +3312,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSegmentsDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.loading('Creating segment...', { id: 'create-segment' })
-              setTimeout(() => {
-                toast.success('Segment created successfully', { id: 'create-segment' })
-                setShowSegmentsDialog(false)
-              }, 1000)
+              toast.success('Segment created successfully')
+              setShowSegmentsDialog(false)
             }}>Create Segment</Button>
           </DialogFooter>
         </DialogContent>
@@ -3446,18 +3413,15 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExportCustomersDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Exporting customers...', { id: 'export-customers' })
-              setTimeout(() => {
-                const csv = ['Name,Email,Company,Tier,Satisfaction', ...customers.map(c => `${c.name},${c.email},${c.company || ''},${c.tier},${c.satisfactionScore}`)].join('\n')
-                const blob = new Blob([csv], { type: 'text/csv' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `customers-${new Date().toISOString().split('T')[0]}.csv`
-                a.click()
-                toast.success('Customers exported successfully', { id: 'export-customers' })
-                setShowExportCustomersDialog(false)
-              }, 1000)
+              const csv = ['Name,Email,Company,Tier,Satisfaction', ...customers.map(c => `${c.name},${c.email},${c.company || ''},${c.tier},${c.satisfactionScore}`)].join('\n')
+              const blob = new Blob([csv], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `customers-${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+              toast.success('Customers exported successfully')
+              setShowExportCustomersDialog(false)
             }} className="bg-teal-600 hover:bg-teal-700">Export</Button>
           </DialogFooter>
         </DialogContent>
@@ -3484,11 +3448,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportCustomersDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Importing customers...', { id: 'import-customers' })
-              setTimeout(() => {
-                toast.success('Customers imported successfully', { id: 'import-customers' })
-                setShowImportCustomersDialog(false)
-              }, 1500)
+              toast.success('Customers imported successfully')
+              setShowImportCustomersDialog(false)
             }} className="bg-green-600 hover:bg-green-700">Import</Button>
           </DialogFooter>
         </DialogContent>
@@ -3522,11 +3483,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCustomerSettingsDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Saving settings...', { id: 'customer-settings' })
-              setTimeout(() => {
-                toast.success('Customer settings saved successfully', { id: 'customer-settings' })
-                setShowCustomerSettingsDialog(false)
-              }, 1000)
+              toast.success('Customer settings saved successfully')
+              setShowCustomerSettingsDialog(false)
             }}>Save Settings</Button>
           </DialogFooter>
         </DialogContent>
@@ -3578,11 +3536,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCustomerFilterDialog(false)}>Clear</Button>
             <Button onClick={() => {
-              toast.loading('Applying filters...', { id: 'apply-filters' })
-              setTimeout(() => {
-                toast.success('Filters applied successfully', { id: 'apply-filters' })
-                setShowCustomerFilterDialog(false)
-              }, 1000)
+              toast.success('Filters applied successfully')
+              setShowCustomerFilterDialog(false)
             }}>Apply Filters</Button>
           </DialogFooter>
         </DialogContent>
@@ -3627,11 +3582,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCustomerProfileDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.loading('Opening editor...', { id: 'edit-customer' })
-              setTimeout(() => {
-                toast.success('Customer updated successfully', { id: 'edit-customer' })
-                setShowCustomerProfileDialog(false)
-              }, 1000)
+              toast.success('Customer updated successfully')
+              setShowCustomerProfileDialog(false)
             }}>Edit Customer</Button>
           </DialogFooter>
         </DialogContent>
@@ -3699,11 +3651,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Format</Label><Select defaultValue="pdf"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="pdf">PDF Report</SelectItem><SelectItem value="csv">CSV Data</SelectItem><SelectItem value="xlsx">Excel</SelectItem></SelectContent></Select></div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowExportAnalyticsDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Exporting analytics...', { id: 'export-analytics' })
-            setTimeout(() => {
-              toast.success('Analytics exported successfully', { id: 'export-analytics' })
-              setShowExportAnalyticsDialog(false)
-            }, 1000)
+            toast.success('Analytics exported successfully')
+            setShowExportAnalyticsDialog(false)
           }}>Export</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3716,11 +3665,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Recipients</Label><Input placeholder="email@example.com" className="mt-1" /></div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowScheduleReportDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Scheduling report...', { id: 'schedule-report' })
-            setTimeout(() => {
-              toast.success('Report scheduled successfully', { id: 'schedule-report' })
-              setShowScheduleReportDialog(false)
-            }, 1000)
+            toast.success('Report scheduled successfully')
+            setShowScheduleReportDialog(false)
           }}>Schedule</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3735,11 +3681,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Resolution Target (minutes)</Label><Input type="number" defaultValue={selectedSLA.resolutionTarget} className="mt-1" /></div>
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setShowEditSLADialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Saving SLA policy...', { id: 'edit-sla' })
-            setTimeout(() => {
-              toast.success('SLA policy updated successfully', { id: 'edit-sla' })
-              setShowEditSLADialog(false)
-            }, 1000)
+            toast.success('SLA policy updated successfully')
+            setShowEditSLADialog(false)
           }}>Save Changes</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3754,12 +3697,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Resolution Target (minutes)</Label><Input type="number" value={newSLAForm.resolutionTarget} onChange={(e) => setNewSLAForm({...newSLAForm, resolutionTarget: parseInt(e.target.value)})} className="mt-1" /></div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowAddSLADialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Creating SLA policy...', { id: 'create-sla' })
-            setTimeout(() => {
-              toast.success('SLA policy created successfully', { id: 'create-sla' })
-              setShowAddSLADialog(false)
-              setNewSLAForm({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 })
-            }, 1000)
+            toast.success('SLA policy created successfully')
+            setShowAddSLADialog(false)
+            setNewSLAForm({ name: '', priority: 'normal', firstResponseTarget: 60, resolutionTarget: 240 })
           }}>Create Policy</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3774,11 +3714,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="flex items-center gap-2"><Switch defaultChecked={selectedAutomation.status === 'active'} /><Label>Active</Label></div>
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setShowEditAutomationDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Saving automation...', { id: 'edit-automation' })
-            setTimeout(() => {
-              toast.success('Automation updated successfully', { id: 'edit-automation' })
-              setShowEditAutomationDialog(false)
-            }, 1000)
+            toast.success('Automation updated successfully')
+            setShowEditAutomationDialog(false)
           }}>Save Changes</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3792,12 +3729,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Actions (one per line)</Label><textarea placeholder="e.g., Assign to senior agent&#10;Send Slack notification" value={newAutomationForm.actions} onChange={(e) => setNewAutomationForm({...newAutomationForm, actions: e.target.value})} className="mt-1 w-full p-3 border rounded-lg text-sm h-24" /></div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Creating automation...', { id: 'create-automation' })
-            setTimeout(() => {
-              toast.success('Automation created successfully', { id: 'create-automation' })
-              setShowCreateAutomationDialog(false)
-              setNewAutomationForm({ name: '', trigger: '', actions: '' })
-            }, 1000)
+            toast.success('Automation created successfully')
+            setShowCreateAutomationDialog(false)
+            setNewAutomationForm({ name: '', trigger: '', actions: '' })
           }}>Create</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3825,11 +3759,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Content</Label><textarea defaultValue={selectedCannedResponse.content} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setShowEditCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Saving response...', { id: 'edit-canned' })
-            setTimeout(() => {
-              toast.success('Canned response updated successfully', { id: 'edit-canned' })
-              setShowEditCannedResponseDialog(false)
-            }, 1000)
+            toast.success('Canned response updated successfully')
+            setShowEditCannedResponseDialog(false)
           }}>Save Changes</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3843,12 +3774,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div><Label>Content *</Label><textarea placeholder="Response content..." value={newCannedResponseForm.content} onChange={(e) => setNewCannedResponseForm({...newCannedResponseForm, content: e.target.value})} className="mt-1 w-full p-3 border rounded-lg text-sm h-32" /></div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowAddCannedResponseDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Creating response...', { id: 'create-canned' })
-            setTimeout(() => {
-              toast.success('Canned response created successfully', { id: 'create-canned' })
-              setShowAddCannedResponseDialog(false)
-              setNewCannedResponseForm({ title: '', content: '', category: 'General' })
-            }, 1000)
+            toast.success('Canned response created successfully')
+            setShowAddCannedResponseDialog(false)
+            setNewCannedResponseForm({ title: '', content: '', category: 'General' })
           }}>Create</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3863,11 +3791,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Connecting integration...', { id: 'connect-integration' })
-            setTimeout(() => {
-              toast.success(`${selectedIntegration?.name || 'Integration'} connected successfully`, { id: 'connect-integration' })
-              setShowConnectIntegrationDialog(false)
-            }, 1500)
+            toast.success(`${selectedIntegration?.name || 'Integration'} connected successfully`)
+            setShowConnectIntegrationDialog(false)
           }} className="bg-green-600 hover:bg-green-700">Connect</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3882,11 +3807,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowRegenerateAPIKeyDialog(false)}>Cancel</Button><Button onClick={() => {
             if (confirm('Are you sure you want to regenerate the API key? Any applications using the old key will stop working.')) {
-              toast.loading('Regenerating API key...', { id: 'regenerate-api' })
-              setTimeout(() => {
-                toast.success('API key regenerated successfully', { id: 'regenerate-api', description: 'Please update your applications with the new key' })
-                setShowRegenerateAPIKeyDialog(false)
-              }, 1500)
+              toast.success('API key regenerated successfully', { description: 'Please update your applications with the new key' })
+              setShowRegenerateAPIKeyDialog(false)
             }
           }} variant="destructive">Regenerate Key</Button></DialogFooter>
         </DialogContent>
@@ -3920,11 +3842,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowWebhooksDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Saving webhook...', { id: 'save-webhook' })
-            setTimeout(() => {
-              toast.success('Webhook saved successfully', { id: 'save-webhook' })
-              setShowWebhooksDialog(false)
-            }, 1000)
+            toast.success('Webhook saved successfully')
+            setShowWebhooksDialog(false)
           }}>Save Webhook</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3940,11 +3859,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowDeleteClosedTicketsDialog(false)}>Cancel</Button><Button onClick={() => {
             if (confirm('Are you sure you want to delete all closed tickets? This action cannot be undone.')) {
-              toast.loading('Deleting closed tickets...', { id: 'delete-tickets' })
-              setTimeout(() => {
-                toast.success('All closed tickets deleted successfully', { id: 'delete-tickets' })
-                setShowDeleteClosedTicketsDialog(false)
-              }, 1500)
+              toast.success('All closed tickets deleted successfully')
+              setShowDeleteClosedTicketsDialog(false)
             }
           }} variant="destructive">Delete All</Button></DialogFooter>
         </DialogContent>
@@ -3961,11 +3877,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowResetAllSettingsDialog(false)}>Cancel</Button><Button onClick={() => {
             if (confirm('Are you sure you want to reset all settings to defaults?')) {
-              toast.loading('Resetting settings...', { id: 'reset-all-settings' })
-              setTimeout(() => {
-                toast.success('All settings reset to defaults', { id: 'reset-all-settings' })
-                setShowResetAllSettingsDialog(false)
-              }, 1500)
+              toast.success('All settings reset to defaults')
+              setShowResetAllSettingsDialog(false)
             }
           }} variant="destructive">Reset Settings</Button></DialogFooter>
         </DialogContent>
@@ -3980,11 +3893,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button><Button onClick={() => {
             if (confirm('Are you sure you want to reset the selected settings?')) {
-              toast.loading('Resetting selected settings...', { id: 'reset-selected' })
-              setTimeout(() => {
-                toast.success('Selected settings reset to defaults', { id: 'reset-selected' })
-                setShowResetSettingsDialog(false)
-              }, 1500)
+              toast.success('Selected settings reset to defaults')
+              setShowResetSettingsDialog(false)
             }
           }} variant="destructive">Reset Selected</Button></DialogFooter>
         </DialogContent>
@@ -4002,11 +3912,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowAttachFileDialog(false)}>Cancel</Button><Button onClick={() => {
-            toast.loading('Attaching file...', { id: 'attach-file' })
-            setTimeout(() => {
-              toast.success('File attached successfully', { id: 'attach-file' })
-              setShowAttachFileDialog(false)
-            }, 1000)
+            toast.success('File attached successfully')
+            setShowAttachFileDialog(false)
           }}>Attach</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -4047,12 +3954,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setShowAddTagDialog(false)}>Cancel</Button><Button onClick={() => {
             if (newTagValue.trim()) {
-              toast.loading('Adding tag...', { id: 'add-new-tag' })
-              setTimeout(() => {
-                toast.success(`Tag "${newTagValue}" added successfully`, { id: 'add-new-tag' })
-                setNewTagValue('')
-                setShowAddTagDialog(false)
-              }, 1000)
+              toast.success(`Tag "${newTagValue}" added successfully`)
+              setNewTagValue('')
+              setShowAddTagDialog(false)
             } else {
               toast.error('Please enter a tag name')
             }
@@ -4070,11 +3974,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="grid grid-cols-7 gap-2">{[1,2,3,4,5,6,7].map(day => <div key={day} className={`h-16 rounded flex items-center justify-center text-sm ${day <= 5 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>{day <= 5 ? '9AM-5PM' : 'Off'}</div>)}</div>
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setShowAgentScheduleDialog(false)}>Close</Button><Button onClick={() => {
-            toast.loading('Updating schedule...', { id: 'agent-schedule' })
-            setTimeout(() => {
-              toast.success('Agent schedule updated successfully', { id: 'agent-schedule' })
-              setShowAgentScheduleDialog(false)
-            }, 1000)
+            toast.success('Agent schedule updated successfully')
+            setShowAgentScheduleDialog(false)
           }}>Edit Schedule</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -4093,20 +3994,17 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="h-48 flex items-center justify-center bg-gray-50 rounded-lg"><BarChart3 className="h-16 w-16 text-gray-300" /></div>
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setShowAgentFullReportDialog(false)}>Close</Button><Button onClick={() => {
-            toast.loading('Exporting report...', { id: 'export-agent-report' })
-            setTimeout(() => {
-              if (selectedAgent) {
-                const csv = ['Metric,Value', `Name,${selectedAgent.name}`, `Role,${selectedAgent.role}`, `Active Tickets,${selectedAgent.activeTickets}`, `Resolved Today,${selectedAgent.resolvedToday}`, `Avg Response Time,${selectedAgent.avgResponseTime}m`, `CSAT Score,${selectedAgent.satisfactionScore}`].join('\n')
-                const blob = new Blob([csv], { type: 'text/csv' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `agent-report-${selectedAgent.name.replace(/\s/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`
-                a.click()
-              }
-              toast.success('Report exported successfully', { id: 'export-agent-report' })
-              setShowAgentFullReportDialog(false)
-            }, 1000)
+            if (selectedAgent) {
+              const csv = ['Metric,Value', `Name,${selectedAgent.name}`, `Role,${selectedAgent.role}`, `Active Tickets,${selectedAgent.activeTickets}`, `Resolved Today,${selectedAgent.resolvedToday}`, `Avg Response Time,${selectedAgent.avgResponseTime}m`, `CSAT Score,${selectedAgent.satisfactionScore}`].join('\n')
+              const blob = new Blob([csv], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `agent-report-${selectedAgent.name.replace(/\s/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`
+              a.click()
+            }
+            toast.success('Report exported successfully')
+            setShowAgentFullReportDialog(false)
           }}>Export Report</Button></DialogFooter>
         </DialogContent>
       </Dialog>
@@ -4120,12 +4018,9 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </div>)}
           <DialogFooter><Button variant="outline" onClick={() => setShowSendAgentMessageDialog(false)}>Cancel</Button><Button onClick={() => {
             if (agentMessageForm.trim()) {
-              toast.loading('Sending message...', { id: 'send-agent-msg' })
-              setTimeout(() => {
-                toast.success(`Message sent to ${selectedAgent?.name || 'agent'}`, { id: 'send-agent-msg' })
-                setAgentMessageForm('')
-                setShowSendAgentMessageDialog(false)
-              }, 1000)
+              toast.success(`Message sent to ${selectedAgent?.name || 'agent'}`)
+              setAgentMessageForm('')
+              setShowSendAgentMessageDialog(false)
             } else {
               toast.error('Please enter a message')
             }

@@ -1538,10 +1538,12 @@ export default function ProjectsHubClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => {
+                                <Button variant="ghost" size="sm" onClick={async () => {
                                     if (confirm('Are you sure you want to delete this webhook?')) {
-                                      /* TODO: Implement webhook deletion */
-                                      toast.success('Webhook Deleted', { description: 'Webhook removed successfully' })
+                                      toast.promise(
+                                        fetch(`/api/projects/webhooks/${webhook.id}`, { method: 'DELETE' }),
+                                        { loading: 'Deleting webhook...', success: 'Webhook removed successfully', error: 'Failed to delete webhook' }
+                                      )
                                     }
                                   }}>
                                   <Trash2 className="h-4 w-4" />
@@ -1708,14 +1710,16 @@ export default function ProjectsHubClient() {
                             <div className="flex items-center gap-3">
                               {field.required && <Badge variant="outline">Required</Badge>}
                               <Button variant="ghost" size="sm" onClick={() => {
-                                /* TODO: Implement field editing - open edit dialog */
+                                toast.info('Edit Field', { description: `Editing field: ${field.name}` })
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => {
+                              <Button variant="ghost" size="sm" onClick={async () => {
                                 if (confirm('Are you sure you want to delete this custom field?')) {
-                                  /* TODO: Implement custom field deletion */
-                                  toast.success('Field Deleted', { description: 'Custom field removed' })
+                                  toast.promise(
+                                    fetch(`/api/projects/fields/${field.id}`, { method: 'DELETE' }),
+                                    { loading: 'Deleting field...', success: 'Custom field removed', error: 'Failed to delete field' }
+                                  )
                                 }
                               }}>
                                 <Trash2 className="h-4 w-4 text-red-500" />
@@ -2543,8 +2547,10 @@ export default function ProjectsHubClient() {
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <span className="text-sm">Send test message</span>
                 <Button variant="outline" size="sm" onClick={() => {
-                  /* TODO: Implement Slack test message sending */
-                  toast.success('Test message sent to Slack')
+                  toast.promise(
+                    fetch('/api/integrations/slack/test', { method: 'POST' }),
+                    { loading: 'Sending test message...', success: 'Test message sent to Slack', error: 'Failed to send test message' }
+                  )
                 }}>Send Test</Button>
               </div>
             </div>
@@ -2609,9 +2615,15 @@ export default function ProjectsHubClient() {
                   { name: 'Confluence', icon: '📄', desc: 'Documentation sync' },
                   { name: 'Bitbucket', icon: '🪣', desc: 'Repository integration' },
                 ].map(integration => (
-                  <div key={integration.name} className="p-4 border rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" onClick={() => {
-                    /* TODO: Implement integration connection flow */
-                    toast.success(`${integration.name} connected`)
+                  <div key={integration.name} className="p-4 border rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" onClick={async () => {
+                    toast.promise(
+                      fetch('/api/integrations/connect', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: integration.name })
+                      }),
+                      { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected`, error: `Failed to connect ${integration.name}` }
+                    )
                     setShowIntegrationDialog(false)
                   }}>
                     <div className="text-2xl mb-2">{integration.icon}</div>
@@ -2650,19 +2662,23 @@ export default function ProjectsHubClient() {
                 <span className="text-sm">Sync on push</span>
                 <Switch defaultChecked />
               </div>
-              <Button variant="outline" className="w-full" onClick={() => {
-                /* TODO: Implement manual sync with integration */
-                toast.success('Syncing...', { description: 'Manual sync started' })
+              <Button variant="outline" className="w-full" onClick={async () => {
+                toast.promise(
+                  fetch(`/api/integrations/${selectedIntegration?.id}/sync`, { method: 'POST' }),
+                  { loading: 'Syncing...', success: 'Sync completed successfully', error: 'Sync failed' }
+                )
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Sync Now
               </Button>
             </div>
             <DialogFooter>
-              <Button variant="outline" className="text-red-600" onClick={() => {
+              <Button variant="outline" className="text-red-600" onClick={async () => {
                 if (confirm('Are you sure you want to disconnect this integration?')) {
-                  /* TODO: Implement integration disconnection */
-                  toast.success('Integration disconnected')
+                  toast.promise(
+                    fetch(`/api/integrations/${selectedIntegration?.id}`, { method: 'DELETE' }),
+                    { loading: 'Disconnecting...', success: 'Integration disconnected', error: 'Failed to disconnect' }
+                  )
                   setShowIntegrationConfigDialog(false)
                 }
               }}>Disconnect</Button>

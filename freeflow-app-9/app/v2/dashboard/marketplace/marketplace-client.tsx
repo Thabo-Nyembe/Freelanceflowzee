@@ -868,14 +868,10 @@ export default function MarketplaceClient() {
                   <TrendingUp className="w-5 h-5 text-violet-600" />
                   Trending This Week
                 </CardTitle>
-                <Button variant="ghost" size="sm" onClick={async () => {
-                  toast.loading('Loading all apps...', { id: 'view-all' })
-                  try {
-                    await new Promise(r => setTimeout(r, 800))
-                    setCurrentPage(1)
-                    setSelectedCategory('all')
-                    toast.success('All apps loaded', { id: 'view-all', description: `Showing ${mockProducts.length} marketplace apps` })
-                  } catch { toast.error('Failed to load apps', { id: 'view-all' }) }
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setCurrentPage(1)
+                  setSelectedCategory('all')
+                  toast.success('All apps loaded', { description: `Showing ${mockProducts.length} marketplace apps` })
                 }}>View All</Button>
               </CardHeader>
               <CardContent>
@@ -1494,12 +1490,8 @@ export default function MarketplaceClient() {
                     <Input type="date" className="w-[150px]" />
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={async () => {
-                      toast.loading('Refreshing orders...', { id: 'refresh-orders' })
-                      try {
-                        await new Promise(r => setTimeout(r, 1000))
-                        toast.success('Orders refreshed', { id: 'refresh-orders', description: `${mockOrders.length} orders loaded` })
-                      } catch { toast.error('Failed to refresh', { id: 'refresh-orders' }) }
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast.success('Orders refreshed', { description: `${mockOrders.length} orders loaded` })
                     }}><RefreshCw className="h-4 w-4" /></Button>
                     <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}><Filter className="h-4 w-4 mr-1" />Filters</Button>
                   </div>
@@ -2010,12 +2002,8 @@ export default function MarketplaceClient() {
                               <Button variant="ghost" size="icon" onClick={() => toast.promise(navigator.clipboard.writeText(apiKey.key), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' })}><Copy className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="icon" className="text-red-500" onClick={async () => {
                                 if (confirm('Are you sure you want to revoke this API key?')) {
-                                  toast.loading('Revoking API key...', { id: 'revoke-key' })
-                                  try {
-                                    await new Promise(r => setTimeout(r, 1000))
-                                    setDbApiKeys(prev => prev.filter(k => k.id !== apiKey.id))
-                                    toast.success('API key revoked', { id: 'revoke-key' })
-                                  } catch { toast.error('Failed to revoke key', { id: 'revoke-key' }) }
+                                  setDbApiKeys(prev => prev.filter(k => k.id !== apiKey.id))
+                                  toast.success('API key revoked')
                                 }
                               }}><Trash2 className="h-4 w-4" /></Button>
                             </div>
@@ -2048,17 +2036,8 @@ export default function MarketplaceClient() {
                             <div className="flex items-center gap-4">
                               <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span> success</p>{webhook.lastTriggered && <p className="text-xs text-gray-500">Last: {webhook.lastTriggered}</p>}</div>
                               <Badge className={getStatusColor(webhook.status)}>{webhook.status}</Badge>
-                              <Button variant="ghost" size="icon" onClick={async () => {
-                                toast.loading('Testing webhook...', { id: 'test-webhook' })
-                                try {
-                                  await new Promise(r => setTimeout(r, 1500))
-                                  const testResult = Math.random() > 0.1
-                                  if (testResult) {
-                                    toast.success('Webhook test successful', { id: 'test-webhook', description: 'Received 200 OK response' })
-                                  } else {
-                                    toast.error('Webhook test failed', { id: 'test-webhook', description: 'Connection timeout' })
-                                  }
-                                } catch { toast.error('Webhook test failed', { id: 'test-webhook' }) }
+                              <Button variant="ghost" size="icon" onClick={() => {
+                                toast.success('Webhook test successful', { description: 'Received 200 OK response' })
                               }}><RefreshCw className="h-4 w-4" /></Button>
                             </div>
                           </div>
@@ -2233,13 +2212,9 @@ export default function MarketplaceClient() {
               </div>
               <div className="grid grid-cols-2 gap-4"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Creating bundle...', { id: 'create-bundle' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Bundle created successfully!', { id: 'create-bundle', description: 'Your product bundle is now available' })
-                  setShowBundleDialog(false)
-                } catch { toast.error('Failed to create bundle', { id: 'create-bundle' }) }
+            <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                toast.success('Bundle created successfully!', { description: 'Your product bundle is now available' })
+                setShowBundleDialog(false)
               }}>Create Bundle</Button></DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2323,13 +2298,9 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewListingDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Creating listing...', { id: 'create-listing' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Product listing created successfully!', { id: 'create-listing', description: 'Your product is now live on the marketplace' })
-                  setShowNewListingDialog(false)
-                } catch { toast.error('Failed to create listing', { id: 'create-listing' }) }
+              <Button onClick={() => {
+                toast.success('Product listing created successfully!', { description: 'Your product is now live on the marketplace' })
+                setShowNewListingDialog(false)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600">Create Listing</Button>
             </DialogFooter>
           </DialogContent>
@@ -2379,14 +2350,10 @@ export default function MarketplaceClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCheckoutDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Processing payment...', { id: 'checkout' })
-                try {
-                  await new Promise(r => setTimeout(r, 2500))
-                  toast.success('Purchase completed successfully!', { id: 'checkout', description: `You now have access to ${checkoutProduct?.name}` })
-                  setShowCheckoutDialog(false)
-                  setCheckoutProduct(null)
-                } catch { toast.error('Payment failed', { id: 'checkout' }) }
+              <Button onClick={() => {
+                toast.success('Purchase completed successfully!', { description: `You now have access to ${checkoutProduct?.name}` })
+                setShowCheckoutDialog(false)
+                setCheckoutProduct(null)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600"><CreditCard className="h-4 w-4 mr-2" />Complete Purchase</Button>
             </DialogFooter>
           </DialogContent>
@@ -2420,14 +2387,10 @@ export default function MarketplaceClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowContactDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Sending message...', { id: 'send-message' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Message sent!', { id: 'send-message', description: `Your message has been sent to ${contactProduct?.vendor.name}` })
-                  setShowContactDialog(false)
-                  setContactProduct(null)
-                } catch { toast.error('Failed to send message', { id: 'send-message' }) }
+              <Button onClick={() => {
+                toast.success('Message sent!', { description: `Your message has been sent to ${contactProduct?.vendor.name}` })
+                setShowContactDialog(false)
+                setContactProduct(null)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600"><Send className="h-4 w-4 mr-2" />Send Message</Button>
             </DialogFooter>
           </DialogContent>
@@ -2510,14 +2473,10 @@ export default function MarketplaceClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowInstallDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Installing app...', { id: 'install-app' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  toast.success('App installed successfully!', { id: 'install-app', description: `${installProduct?.name} is now ready to use` })
-                  setShowInstallDialog(false)
-                  setInstallProduct(null)
-                } catch { toast.error('Installation failed', { id: 'install-app' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                toast.success('App installed successfully!', { description: `${installProduct?.name} is now ready to use` })
+                setShowInstallDialog(false)
+                setInstallProduct(null)
               }}>
                 <Download className="h-4 w-4 mr-2" />Install App
               </Button>
@@ -2595,14 +2554,10 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowVisitStoreDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Opening store...', { id: 'visit-store' })
-                try {
-                  await new Promise(r => setTimeout(r, 800))
-                  window.open('https://techpro.marketplace.example.com', '_blank')
-                  toast.success('Store opened', { id: 'visit-store', description: 'Opened TechPro Solutions in new tab' })
-                  setShowVisitStoreDialog(false)
-                } catch { toast.error('Failed to open store', { id: 'visit-store' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                window.open('https://techpro.marketplace.example.com', '_blank')
+                toast.success('Store opened', { description: 'Opened TechPro Solutions in new tab' })
+                setShowVisitStoreDialog(false)
               }}>
                 <ExternalLink className="h-4 w-4 mr-2" />Visit Store
               </Button>
@@ -2645,13 +2600,9 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFollowDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Following vendor...', { id: 'follow-vendor' })
-                try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  toast.success('Now following TechPro Solutions!', { id: 'follow-vendor', description: 'You will receive updates on new products' })
-                  setShowFollowDialog(false)
-                } catch { toast.error('Failed to follow vendor', { id: 'follow-vendor' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                toast.success('Now following TechPro Solutions!', { description: 'You will receive updates on new products' })
+                setShowFollowDialog(false)
               }}>
                 <Heart className="h-4 w-4 mr-2" />Follow
               </Button>
@@ -2688,13 +2639,9 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowApplyVendorDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Submitting application...', { id: 'vendor-apply' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  toast.success('Application submitted!', { id: 'vendor-apply', description: 'We will review your application and get back to you soon.' })
-                  setShowApplyVendorDialog(false)
-                } catch { toast.error('Failed to submit application', { id: 'vendor-apply' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                toast.success('Application submitted!', { description: 'We will review your application and get back to you soon.' })
+                setShowApplyVendorDialog(false)
               }}>
                 Submit Application
               </Button>
@@ -2744,20 +2691,16 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportReviewsDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Exporting reviews...', { id: 'export-reviews' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  const blob = new Blob([JSON.stringify({ reviews: mockReviews, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `reviews-export-${new Date().toISOString().split('T')[0]}.json`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('Export complete', { id: 'export-reviews', description: 'Your file has been downloaded' })
-                  setShowExportReviewsDialog(false)
-                } catch { toast.error('Export failed', { id: 'export-reviews' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                const blob = new Blob([JSON.stringify({ reviews: mockReviews, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `reviews-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Export complete', { description: 'Your file has been downloaded' })
+                setShowExportReviewsDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Export
               </Button>
@@ -2796,14 +2739,10 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRespondAllDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const unreviewedCount = mockReviews.filter(r => !r.response).length
-                toast.loading('Sending responses...', { id: 'respond-all' })
-                try {
-                  await new Promise(r => setTimeout(r, 2500))
-                  toast.success('Responses sent!', { id: 'respond-all', description: `Responded to ${unreviewedCount} reviews` })
-                  setShowRespondAllDialog(false)
-                } catch { toast.error('Failed to send responses', { id: 'respond-all' }) }
+                toast.success('Responses sent!', { description: `Responded to ${unreviewedCount} reviews` })
+                setShowRespondAllDialog(false)
               }}>
                 <MessageSquare className="h-4 w-4 mr-2" />Send Responses
               </Button>
@@ -2847,20 +2786,16 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportOrdersDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Preparing export...', { id: 'export-orders' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  const blob = new Blob([JSON.stringify({ orders: mockOrders, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `orders-export-${new Date().toISOString().split('T')[0]}.json`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('Export complete', { id: 'export-orders', description: `Exported ${mockOrders.length} orders` })
-                  setShowExportOrdersDialog(false)
-                } catch { toast.error('Export failed', { id: 'export-orders' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                const blob = new Blob([JSON.stringify({ orders: mockOrders, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `orders-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Export complete', { description: `Exported ${mockOrders.length} orders` })
+                setShowExportOrdersDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Export
               </Button>
@@ -2911,26 +2846,22 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGenerateReportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Generating report...', { id: 'gen-report' })
-                try {
-                  await new Promise(r => setTimeout(r, 3000))
-                  const reportData = {
-                    generatedAt: new Date().toISOString(),
-                    summary: { totalOrders: mockOrders.length, totalRevenue: mockOrders.reduce((sum, o) => sum + o.amount, 0), avgOrderValue: mockOrders.reduce((sum, o) => sum + o.amount, 0) / mockOrders.length },
-                    orders: mockOrders,
-                    products: mockProducts.slice(0, 10)
-                  }
-                  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `marketplace-report-${new Date().toISOString().split('T')[0]}.json`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('Report generated!', { id: 'gen-report', description: 'Your report has been downloaded' })
-                  setShowGenerateReportDialog(false)
-                } catch { toast.error('Report generation failed', { id: 'gen-report' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                const reportData = {
+                  generatedAt: new Date().toISOString(),
+                  summary: { totalOrders: mockOrders.length, totalRevenue: mockOrders.reduce((sum, o) => sum + o.amount, 0), avgOrderValue: mockOrders.reduce((sum, o) => sum + o.amount, 0) / mockOrders.length },
+                  orders: mockOrders,
+                  products: mockProducts.slice(0, 10)
+                }
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `marketplace-report-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Report generated!', { description: 'Your report has been downloaded' })
+                setShowGenerateReportDialog(false)
               }}>
                 <FileText className="h-4 w-4 mr-2" />Generate
               </Button>
@@ -2992,14 +2923,10 @@ export default function MarketplaceClient() {
                 toast.success('Filters cleared', { description: 'Showing all orders' })
                 setShowFiltersDialog(false)
               }}>Clear All</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Applying filters...', { id: 'apply-filters' })
-                try {
-                  await new Promise(r => setTimeout(r, 800))
-                  setCurrentPage(1)
-                  toast.success('Filters applied', { id: 'apply-filters', description: 'Results updated' })
-                  setShowFiltersDialog(false)
-                } catch { toast.error('Failed to apply filters', { id: 'apply-filters' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                setCurrentPage(1)
+                toast.success('Filters applied', { description: 'Results updated' })
+                setShowFiltersDialog(false)
               }}>
                 <Filter className="h-4 w-4 mr-2" />Apply Filters
               </Button>
@@ -3015,55 +2942,35 @@ export default function MarketplaceClient() {
               <DialogDescription>{selectedOrderForOptions?.orderNumber}</DialogDescription>
             </DialogHeader>
             <div className="space-y-2 py-4">
-              <Button variant="outline" className="w-full justify-start" onClick={async () => {
-                toast.loading('Updating order...', { id: 'complete-order' })
-                try {
-                  await new Promise(r => setTimeout(r, 1200))
-                  toast.success('Order marked as complete', { id: 'complete-order', description: selectedOrderForOptions?.orderNumber })
-                  setShowMoreOptionsDialog(false)
-                } catch { toast.error('Failed to update order', { id: 'complete-order' }) }
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success('Order marked as complete', { description: selectedOrderForOptions?.orderNumber })
+                setShowMoreOptionsDialog(false)
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Mark as Complete
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={async () => {
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
                 if (!confirm('Are you sure you want to process a refund for this order?')) return
-                toast.loading('Processing refund...', { id: 'refund' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  toast.success('Refund initiated', { id: 'refund', description: 'Customer will be refunded within 5-7 business days' })
-                  setShowMoreOptionsDialog(false)
-                } catch { toast.error('Refund failed', { id: 'refund' }) }
+                toast.success('Refund initiated', { description: 'Customer will be refunded within 5-7 business days' })
+                setShowMoreOptionsDialog(false)
               }}>
                 <DollarSign className="h-4 w-4 mr-2" />Process Refund
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={async () => {
-                toast.loading('Sending email...', { id: 'email-customer' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Email sent to customer', { id: 'email-customer', description: 'Order confirmation email delivered' })
-                  setShowMoreOptionsDialog(false)
-                } catch { toast.error('Failed to send email', { id: 'email-customer' }) }
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success('Email sent to customer', { description: 'Order confirmation email delivered' })
+                setShowMoreOptionsDialog(false)
               }}>
                 <Mail className="h-4 w-4 mr-2" />Email Customer
               </Button>
-              <Button variant="outline" className="w-full justify-start" onClick={async () => {
-                toast.loading('Renewing license...', { id: 'renew-license' })
-                try {
-                  await new Promise(r => setTimeout(r, 1800))
-                  toast.success('License renewed', { id: 'renew-license', description: 'Extended for another year' })
-                  setShowMoreOptionsDialog(false)
-                } catch { toast.error('Failed to renew license', { id: 'renew-license' }) }
+              <Button variant="outline" className="w-full justify-start" onClick={() => {
+                toast.success('License renewed', { description: 'Extended for another year' })
+                setShowMoreOptionsDialog(false)
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />Renew License
               </Button>
-              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={async () => {
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
                 if (!confirm('Are you sure you want to cancel this order? This action cannot be undone.')) return
-                toast.loading('Cancelling order...', { id: 'cancel-order' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Order cancelled', { id: 'cancel-order', description: selectedOrderForOptions?.orderNumber })
-                  setShowMoreOptionsDialog(false)
-                } catch { toast.error('Failed to cancel order', { id: 'cancel-order' }) }
+                toast.success('Order cancelled', { description: selectedOrderForOptions?.orderNumber })
+                setShowMoreOptionsDialog(false)
               }}>
                 <XCircle className="h-4 w-4 mr-2" />Cancel Order
               </Button>
@@ -3094,14 +3001,10 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowProcessOrdersDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const pendingCount = mockOrders.filter(o => o.status === 'pending').length
-                toast.loading(`Processing ${pendingCount} orders...`, { id: 'process-orders' })
-                try {
-                  await new Promise(r => setTimeout(r, 3000))
-                  toast.success('Orders processed!', { id: 'process-orders', description: `${pendingCount} orders completed, confirmations sent` })
-                  setShowProcessOrdersDialog(false)
-                } catch { toast.error('Failed to process orders', { id: 'process-orders' }) }
+                toast.success('Orders processed!', { description: `${pendingCount} orders completed, confirmations sent` })
+                setShowProcessOrdersDialog(false)
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />Process Orders
               </Button>
@@ -3143,14 +3046,10 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGenerateInvoicesDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Generating invoices...', { id: 'gen-invoices' })
-                try {
-                  await new Promise(r => setTimeout(r, 2500))
-                  const invoiceCount = mockOrders.filter(o => o.status === 'completed').length
-                  toast.success('Invoices generated!', { id: 'gen-invoices', description: `Created ${invoiceCount} invoices and sent to customers` })
-                  setShowGenerateInvoicesDialog(false)
-                } catch { toast.error('Failed to generate invoices', { id: 'gen-invoices' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                const invoiceCount = mockOrders.filter(o => o.status === 'completed').length
+                toast.success('Invoices generated!', { description: `Created ${invoiceCount} invoices and sent to customers` })
+                setShowGenerateInvoicesDialog(false)
               }}>
                 <FileText className="h-4 w-4 mr-2" />Generate
               </Button>
@@ -3185,14 +3084,10 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowProcessPayoutsDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const payoutAmount = (mockOrders.reduce((sum, o) => sum + o.amount, 0) * 0.85).toFixed(2)
-                toast.loading('Processing payouts...', { id: 'process-payouts' })
-                try {
-                  await new Promise(r => setTimeout(r, 3500))
-                  toast.success('Payouts processed!', { id: 'process-payouts', description: `$${payoutAmount} sent to ${mockVendors.length} vendors` })
-                  setShowProcessPayoutsDialog(false)
-                } catch { toast.error('Failed to process payouts', { id: 'process-payouts' }) }
+                toast.success('Payouts processed!', { description: `$${payoutAmount} sent to ${mockVendors.length} vendors` })
+                setShowProcessPayoutsDialog(false)
               }}>
                 <DollarSign className="h-4 w-4 mr-2" />Process Payouts
               </Button>
@@ -3237,14 +3132,10 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSendNotificationsDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Sending notifications...', { id: 'send-notif' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  const recipientCount = mockOrders.filter(o => o.status === 'pending').length
-                  toast.success('Notifications sent!', { id: 'send-notif', description: `Notified ${recipientCount} customers via email` })
-                  setShowSendNotificationsDialog(false)
-                } catch { toast.error('Failed to send notifications', { id: 'send-notif' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                const recipientCount = mockOrders.filter(o => o.status === 'pending').length
+                toast.success('Notifications sent!', { description: `Notified ${recipientCount} customers via email` })
+                setShowSendNotificationsDialog(false)
               }}>
                 <Send className="h-4 w-4 mr-2" />Send
               </Button>
@@ -3285,22 +3176,18 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportCSVDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Generating CSV...', { id: 'export-csv' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  const csvHeader = 'Order ID,Date,Customer,Amount,Status\n'
-                  const csvRows = mockOrders.map(o => `${o.orderNumber},${o.date},${o.customerName},${o.amount},${o.status}`).join('\n')
-                  const blob = new Blob([csvHeader + csvRows], { type: 'text/csv' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('CSV exported!', { id: 'export-csv', description: `Downloaded ${mockOrders.length} orders` })
-                  setShowExportCSVDialog(false)
-                } catch { toast.error('Export failed', { id: 'export-csv' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                const csvHeader = 'Order ID,Date,Customer,Amount,Status\n'
+                const csvRows = mockOrders.map(o => `${o.orderNumber},${o.date},${o.customerName},${o.amount},${o.status}`).join('\n')
+                const blob = new Blob([csvHeader + csvRows], { type: 'text/csv' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('CSV exported!', { description: `Downloaded ${mockOrders.length} orders` })
+                setShowExportCSVDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Download CSV
               </Button>
@@ -3345,13 +3232,9 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddProviderDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Validating credentials...', { id: 'add-provider' })
-                try {
-                  await new Promise(r => setTimeout(r, 2000))
-                  toast.success('Payment provider added!', { id: 'add-provider', description: 'Integration is now active' })
-                  setShowAddProviderDialog(false)
-                } catch { toast.error('Failed to add provider', { id: 'add-provider' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                toast.success('Payment provider added!', { description: 'Integration is now active' })
+                setShowAddProviderDialog(false)
               }}>
                 <Plus className="h-4 w-4 mr-2" />Add Provider
               </Button>
@@ -3388,22 +3271,18 @@ export default function MarketplaceClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDownloadInvoiceDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
-                toast.loading('Generating invoice...', { id: 'download-invoice' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  const invoiceData = { generatedAt: new Date().toISOString(), order: selectedOrderForOptions, format: 'PDF' }
-                  const blob = new Blob([JSON.stringify(invoiceData, null, 2)], { type: 'application/pdf' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = `invoice-${selectedOrderForOptions?.orderNumber || 'unknown'}.pdf`
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('Invoice downloaded!', { id: 'download-invoice' })
-                  setShowDownloadInvoiceDialog(false)
-                  setShowOrderDialog(false)
-                } catch { toast.error('Download failed', { id: 'download-invoice' }) }
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
+                const invoiceData = { generatedAt: new Date().toISOString(), order: selectedOrderForOptions, format: 'PDF' }
+                const blob = new Blob([JSON.stringify(invoiceData, null, 2)], { type: 'application/pdf' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `invoice-${selectedOrderForOptions?.orderNumber || 'unknown'}.pdf`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Invoice downloaded!')
+                setShowDownloadInvoiceDialog(false)
+                setShowOrderDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Download
               </Button>

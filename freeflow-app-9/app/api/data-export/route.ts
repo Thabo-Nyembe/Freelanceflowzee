@@ -1,8 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextRequest, NextResponse } from 'next/server'
+// =====================================================
+// KAZI Data Export API - Database-Wired
+// Pipeline management and data export operations
+// =====================================================
 
-// Export data to various formats
-export async function GET(request: NextRequest) {
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+// =====================================================
+// GET - List pipelines, sources, destinations
+// =====================================================
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -11,90 +18,78 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const searchParams = request.nextUrl.searchParams
-    const table = searchParams.get('table')
-    const format = searchParams.get('format') || 'json'
-    const startDate = searchParams.get('start_date')
-    const endDate = searchParams.get('end_date')
-    const limit = parseInt(searchParams.get('limit') || '10000')
+    const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
 
-    if (!table) {
-      return NextResponse.json({ error: 'Table parameter is required' }, { status: 400 })
-    }
+    switch (action) {
+      case 'pipelines': {
+        const { data: pipelines, error } = await supabase
+          .from('data_pipelines')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
 
-    // Allowed tables for export
-    const allowedTables = [
-      'projects', 'tasks', 'invoices', 'clients', 'employees',
-      'sales_deals', 'campaigns', 'orders', 'inventory', 'contracts',
-      'time_entries', 'expenses', 'payments', 'tickets'
-    ]
-
-    if (!allowedTables.includes(table)) {
-      return NextResponse.json({ error: 'Invalid table' }, { status: 400 })
-    }
-
-    let query = supabase
-      .from(table)
-      .select('*')
-      .eq('user_id', user.id)
-      .is('deleted_at', null)
-      .limit(limit)
-
-    if (startDate) {
-      query = query.gte('created_at', startDate)
-    }
-    if (endDate) {
-      query = query.lte('created_at', endDate)
-    }
-
-    const { data, error } = await query
-
-    if (error) throw error
-
-    // Convert to requested format
-    if (format === 'csv') {
-      if (!data || data.length === 0) {
-        return new NextResponse('No data to export', { status: 200 })
+        if (error) throw error
+        return NextResponse.json({ success: true, pipelines: pipelines || [] })
       }
 
-      const headers = Object.keys(data[0])
-      const csvRows = [
-        headers.join(','),
-        ...data.map(row =>
-          headers.map(header => {
-            const value = row[header]
-            if (value === null || value === undefined) return ''
-            if (typeof value === 'object') return `"${JSON.stringify(value).replace(/"/g, '""')}"`
-            if (typeof value === 'string' && (value.includes(',') || value.includes('"') || value.includes('\n'))) {
-              return `"${value.replace(/"/g, '""')}"`
-            }
-            return value
-          }).join(',')
-        )
-      ]
+      case 'sources': {
+        const { data: sources, error } = await supabase
+          .from('data_sources')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('name')
 
-      return new NextResponse(csvRows.join('\n'), {
-        headers: {
-          'Content-Type': 'text/csv',
-          'Content-Disposition': `attachment; filename="${table}_export_${new Date().toISOString().split('T')[0]}.csv"`
-        }
-      })
+        if (error) throw error
+        return NextResponse.json({ success: true, sources: sources || [] })
+      }
+
+      case 'destinations': {
+        const { data: destinations, error } = await supabase
+          .from('data_destinations')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('name')
+
+        if (error) throw error
+        return NextResponse.json({ success: true, destinations: destinations || [] })
+      }
+
+      case 'exports': {
+        const { data: exports, error } = await supabase
+          .from('data_exports')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(50)
+
+        if (error) throw error
+        return NextResponse.json({ success: true, exports: exports || [] })
+      }
+
+      default: {
+        const { data: pipelines } = await supabase
+          .from('data_pipelines')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        return NextResponse.json({ success: true, pipelines: pipelines || [] })
+      }
     }
-
-    return NextResponse.json({
-      data,
-      count: data?.length || 0,
-      exportedAt: new Date().toISOString(),
-      table,
-      format
-    })
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Data Export GET error:', error)
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to fetch data' },
+      { status: 500 }
+    )
   }
 }
 
-// Create an export job for large datasets
-export async function POST(request: NextRequest) {
+// =====================================================
+// POST - Create pipelines, run exports, perform actions
+// =====================================================
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -104,36 +99,185 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { tables, format, filters, scheduled } = body
+    const { action, ...data } = body
 
-    // Create export job
-    const { data: exportJob, error } = await supabase
-      .from('export_jobs')
-      .insert({
-        user_id: user.id,
-        tables: tables || [],
-        format: format || 'json',
-        filters: filters || {},
-        status: scheduled ? 'scheduled' : 'pending',
-        scheduled_at: scheduled || null,
-        created_at: new Date().toISOString()
-      })
-      .select()
-      .single()
+    switch (action) {
+      case 'create-pipeline': {
+        const { data: pipeline, error } = await supabase
+          .from('data_pipelines')
+          .insert({
+            user_id: user.id,
+            name: data.name,
+            description: data.description,
+            source_type: data.sourceType,
+            destination_type: data.destinationType,
+            frequency: data.frequency || 'hourly',
+            status: 'active',
+            config: data.config || {}
+          })
+          .select()
+          .single()
 
-    if (error) throw error
+        if (error) throw error
+        return NextResponse.json({ success: true, pipeline }, { status: 201 })
+      }
 
-    return NextResponse.json({
-      data: exportJob,
-      message: scheduled ? 'Export scheduled successfully' : 'Export job created'
-    }, { status: 201 })
+      case 'pause-pipeline': {
+        const { error } = await supabase
+          .from('data_pipelines')
+          .update({ status: 'paused', updated_at: new Date().toISOString() })
+          .eq('id', data.pipelineId)
+          .eq('user_id', user.id)
+
+        if (error) throw error
+        return NextResponse.json({ success: true, message: 'Pipeline paused' })
+      }
+
+      case 'resume-pipeline': {
+        const { error } = await supabase
+          .from('data_pipelines')
+          .update({ status: 'active', updated_at: new Date().toISOString() })
+          .eq('id', data.pipelineId)
+          .eq('user_id', user.id)
+
+        if (error) throw error
+        return NextResponse.json({ success: true, message: 'Pipeline resumed' })
+      }
+
+      case 'run-pipeline': {
+        const { data: exportJob, error } = await supabase
+          .from('data_exports')
+          .insert({
+            user_id: user.id,
+            pipeline_id: data.pipelineId,
+            status: 'running',
+            started_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+        return NextResponse.json({ success: true, exportJob })
+      }
+
+      case 'clone-pipeline': {
+        const { data: original, error: fetchError } = await supabase
+          .from('data_pipelines')
+          .select('*')
+          .eq('id', data.pipelineId)
+          .eq('user_id', user.id)
+          .single()
+
+        if (fetchError) throw fetchError
+
+        const { data: clone, error: insertError } = await supabase
+          .from('data_pipelines')
+          .insert({
+            user_id: user.id,
+            name: `${original.name} (Copy)`,
+            description: original.description,
+            source_type: original.source_type,
+            destination_type: original.destination_type,
+            frequency: original.frequency,
+            status: 'paused',
+            config: original.config
+          })
+          .select()
+          .single()
+
+        if (insertError) throw insertError
+        return NextResponse.json({ success: true, pipeline: clone }, { status: 201 })
+      }
+
+      case 'pause-all': {
+        const { error } = await supabase
+          .from('data_pipelines')
+          .update({ status: 'paused', updated_at: new Date().toISOString() })
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+
+        if (error) throw error
+        return NextResponse.json({ success: true, message: 'All pipelines paused' })
+      }
+
+      case 'sync-source': {
+        const { error } = await supabase
+          .from('data_sources')
+          .update({ last_synced_at: new Date().toISOString(), status: 'connected' })
+          .eq('id', data.sourceId)
+          .eq('user_id', user.id)
+
+        if (error) throw error
+        return NextResponse.json({ success: true, message: 'Source synced' })
+      }
+
+      case 'create-source': {
+        const { data: source, error } = await supabase
+          .from('data_sources')
+          .insert({
+            user_id: user.id,
+            name: data.name,
+            type: data.type,
+            connection_string: data.connectionString,
+            config: data.config || {},
+            status: 'connected'
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+        return NextResponse.json({ success: true, source }, { status: 201 })
+      }
+
+      case 'create-destination': {
+        const { data: destination, error } = await supabase
+          .from('data_destinations')
+          .insert({
+            user_id: user.id,
+            name: data.name,
+            type: data.type,
+            connection_string: data.connectionString,
+            config: data.config || {},
+            status: 'connected'
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+        return NextResponse.json({ success: true, destination }, { status: 201 })
+      }
+
+      case 'export-data': {
+        const { data: exportJob, error } = await supabase
+          .from('data_exports')
+          .insert({
+            user_id: user.id,
+            export_type: data.exportType || 'manual',
+            format: data.format || 'csv',
+            filters: data.filters || {},
+            status: 'running',
+            started_at: new Date().toISOString()
+          })
+          .select()
+          .single()
+
+        if (error) throw error
+        return NextResponse.json({ success: true, exportJob }, { status: 201 })
+      }
+
+      default:
+        return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 })
+    }
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Data Export POST error:', error)
+    return NextResponse.json({ success: false, error: error.message || 'Operation failed' }, { status: 500 })
   }
 }
 
-// Get export job status
-export async function PATCH(request: NextRequest) {
+// =====================================================
+// DELETE - Delete pipelines, sources, destinations
+// =====================================================
+export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -142,72 +286,28 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { id, action } = body
-
-    if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
-    }
-
-    if (action === 'cancel') {
-      const { data, error } = await supabase
-        .from('export_jobs')
-        .update({
-          status: 'cancelled',
-          cancelled_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('user_id', user.id)
-        .select()
-        .single()
-
-      if (error) throw error
-      return NextResponse.json({ data })
-    }
-
-    // Get status
-    const { data, error } = await supabase
-      .from('export_jobs')
-      .select('*')
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .single()
-
-    if (error) throw error
-
-    return NextResponse.json({ data })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-}
-
-// Delete export job or downloaded file
-export async function DELETE(request: NextRequest) {
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const searchParams = request.nextUrl.searchParams
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type')
     const id = searchParams.get('id')
 
-    if (!id) {
-      return NextResponse.json({ error: 'ID is required' }, { status: 400 })
+    if (!type || !id) {
+      return NextResponse.json({ error: 'type and id required' }, { status: 400 })
     }
 
-    const { error } = await supabase
-      .from('export_jobs')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', user.id)
+    const tableName = type === 'pipeline' ? 'data_pipelines' : 
+                      type === 'source' ? 'data_sources' : 
+                      type === 'destination' ? 'data_destinations' : null
+
+    if (!tableName) {
+      return NextResponse.json({ success: false, error: `Unknown type: ${type}` }, { status: 400 })
+    }
+
+    const { error } = await supabase.from(tableName).delete().eq('id', id).eq('user_id', user.id)
 
     if (error) throw error
-
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: `${type} deleted` })
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('Data Export DELETE error:', error)
+    return NextResponse.json({ success: false, error: error.message || 'Delete failed' }, { status: 500 })
   }
 }

@@ -798,13 +798,9 @@ export default function TeamHubClient() {
 
   // Handle Email All
   const handleEmailAll = () => {
-    toast.loading('Preparing email composer...', { id: 'email-all' })
-    setTimeout(() => {
-      toast.success('Email ready', {
-        id: 'email-all',
-        description: `Compose message to ${members.length} team members`
-      })
-    }, 1500)
+    toast.success('Email ready', {
+      description: `Compose message to ${members.length} team members`
+    })
   }
 
   // Handle Approve
@@ -929,47 +925,30 @@ export default function TeamHubClient() {
   }
 
   // Handle Create Channel
-  const handleCreateChannel = async () => {
+  const handleCreateChannel = () => {
     if (!channelForm.name) {
       toast.error('Channel name is required')
       return
     }
-    try {
-      setIsSaving(true)
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Channel created', {
-        description: `#${channelForm.name} has been created successfully`
-      })
-      setShowCreateChannelDialog(false)
-      setChannelForm({ name: '', type: 'public', description: '', topic: '' })
-    } catch (error) {
-      toast.error('Failed to create channel')
-    } finally {
-      setIsSaving(false)
-    }
+    toast.success('Channel created', {
+      description: `#${channelForm.name} has been created successfully`
+    })
+    setShowCreateChannelDialog(false)
+    setChannelForm({ name: '', type: 'public', description: '', topic: '' })
   }
 
   // Handle Start Huddle
-  const handleStartHuddle = async () => {
+  const handleStartHuddle = () => {
     if (!huddleForm.channelId) {
       toast.error('Please select a channel for the huddle')
       return
     }
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const channel = channels.find(c => c.id === huddleForm.channelId)
-      toast.success('Huddle started', {
-        description: `Audio channel started in #${channel?.name || 'channel'}`
-      })
-      setShowStartHuddleDialog(false)
-      setHuddleForm({ channelId: '', participants: [] })
-    } catch (error) {
-      toast.error('Failed to start huddle')
-    } finally {
-      setIsSaving(false)
-    }
+    const channel = channels.find(c => c.id === huddleForm.channelId)
+    toast.success('Huddle started', {
+      description: `Audio channel started in #${channel?.name || 'channel'}`
+    })
+    setShowStartHuddleDialog(false)
+    setHuddleForm({ channelId: '', participants: [] })
   }
 
   // Handle Join Huddle
@@ -980,37 +959,24 @@ export default function TeamHubClient() {
   }
 
   // Handle Add App
-  const handleAddApp = async (appId: string) => {
-    try {
-      const app = apps.find(a => a.id === appId)
-      await new Promise(resolve => setTimeout(resolve, 300))
-      toast.success('App installed', {
-        description: `${app?.name} has been added to your workspace`
-      })
-    } catch (error) {
-      toast.error('Failed to install app')
-    }
+  const handleAddApp = (appId: string) => {
+    const app = apps.find(a => a.id === appId)
+    toast.success('App installed', {
+      description: `${app?.name} has been added to your workspace`
+    })
   }
 
   // Handle Create Workflow
-  const handleCreateWorkflow = async () => {
+  const handleCreateWorkflow = () => {
     if (!workflowForm.name) {
       toast.error('Workflow name is required')
       return
     }
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Workflow created', {
-        description: `${workflowForm.name} has been created successfully`
-      })
-      setShowCreateWorkflowDialog(false)
-      setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
-    } catch (error) {
-      toast.error('Failed to create workflow')
-    } finally {
-      setIsSaving(false)
-    }
+    toast.success('Workflow created', {
+      description: `${workflowForm.name} has been created successfully`
+    })
+    setShowCreateWorkflowDialog(false)
+    setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
   }
 
   // Handle Toggle Workflow
@@ -1023,41 +989,25 @@ export default function TeamHubClient() {
   }
 
   // Handle Save Settings
-  const handleSaveSettings = async () => {
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Settings saved', {
-        description: 'Your workspace settings have been updated'
-      })
-    } catch (error) {
-      toast.error('Failed to save settings')
-    } finally {
-      setIsSaving(false)
-    }
+  const handleSaveSettings = () => {
+    toast.success('Settings saved', {
+      description: 'Your workspace settings have been updated'
+    })
   }
 
   // Handle Integration Action
-  const handleIntegrationAction = async (integration: {name: string, status: string}) => {
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      if (integration.status === 'connected') {
-        toast.success('Integration configured', {
-          description: `${integration.name} settings have been updated`
-        })
-      } else {
-        toast.success('Integration connected', {
-          description: `${integration.name} has been connected to your workspace`
-        })
-      }
-      setShowIntegrationDialog(false)
-      setSelectedIntegration(null)
-    } catch (error) {
-      toast.error('Failed to update integration')
-    } finally {
-      setIsSaving(false)
+  const handleIntegrationAction = (integration: {name: string, status: string}) => {
+    if (integration.status === 'connected') {
+      toast.success('Integration configured', {
+        description: `${integration.name} settings have been updated`
+      })
+    } else {
+      toast.success('Integration connected', {
+        description: `${integration.name} has been connected to your workspace`
+      })
     }
+    setShowIntegrationDialog(false)
+    setSelectedIntegration(null)
   }
 
   // Handle Copy API Token
@@ -1073,18 +1023,10 @@ export default function TeamHubClient() {
   }
 
   // Handle Regenerate Token
-  const handleRegenerateToken = async () => {
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Token regenerated', {
-        description: 'A new API token has been generated'
-      })
-    } catch (error) {
-      toast.error('Failed to regenerate token')
-    } finally {
-      setIsSaving(false)
-    }
+  const handleRegenerateToken = () => {
+    toast.success('Token regenerated', {
+      description: 'A new API token has been generated'
+    })
   }
 
   // Handle Export Workspace Data
@@ -1145,90 +1087,50 @@ export default function TeamHubClient() {
   }
 
   // Handle Clear Cache
-  const handleClearCache = async () => {
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Cache cleared', {
-        description: 'All cached data has been cleared'
-      })
-      setShowClearCacheDialog(false)
-    } catch (error) {
-      toast.error('Failed to clear cache')
-    } finally {
-      setIsSaving(false)
-    }
+  const handleClearCache = () => {
+    toast.success('Cache cleared', {
+      description: 'All cached data has been cleared'
+    })
+    setShowClearCacheDialog(false)
   }
 
   // Handle Reset Workspace
-  const handleResetWorkspace = async () => {
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Workspace reset', {
-        description: 'All workspace settings have been reset to defaults'
-      })
-      setShowResetWorkspaceDialog(false)
-    } catch (error) {
-      toast.error('Failed to reset workspace')
-    } finally {
-      setIsSaving(false)
-    }
+  const handleResetWorkspace = () => {
+    toast.success('Workspace reset', {
+      description: 'All workspace settings have been reset to defaults'
+    })
+    setShowResetWorkspaceDialog(false)
   }
 
   // Handle Delete Workspace
-  const handleDeleteWorkspace = async () => {
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Workspace scheduled for deletion', {
-        description: 'Your workspace will be permanently deleted in 30 days'
-      })
-      setShowDeleteWorkspaceDialog(false)
-    } catch (error) {
-      toast.error('Failed to delete workspace')
-    } finally {
-      setIsSaving(false)
-    }
+  const handleDeleteWorkspace = () => {
+    toast.success('Workspace scheduled for deletion', {
+      description: 'Your workspace will be permanently deleted in 30 days'
+    })
+    setShowDeleteWorkspaceDialog(false)
   }
 
   // Handle Message Member
-  const handleMessageMember = async (member: TeamMember) => {
+  const handleMessageMember = (member: TeamMember) => {
     if (!messageForm.content.trim()) {
       toast.error('Please enter a message')
       return
     }
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 300))
-      toast.success('Message sent', {
-        description: `Your message has been sent to ${member.name}`
-      })
-      setShowMessageMemberDialog(false)
-      setMessageMemberTarget(null)
-      setMessageForm({ content: '' })
-    } catch (error) {
-      toast.error('Failed to send message')
-    } finally {
-      setIsSaving(false)
-    }
+    toast.success('Message sent', {
+      description: `Your message has been sent to ${member.name}`
+    })
+    setShowMessageMemberDialog(false)
+    setMessageMemberTarget(null)
+    setMessageForm({ content: '' })
   }
 
   // Handle Huddle Member
-  const handleHuddleMember = async (member: TeamMember) => {
-    try {
-      setIsSaving(true)
-      await new Promise(resolve => setTimeout(resolve, 300))
-      toast.success('Huddle invitation sent', {
-        description: `Inviting ${member.name} to a huddle...`
-      })
-      setShowHuddleMemberDialog(false)
-      setMessageMemberTarget(null)
-    } catch (error) {
-      toast.error('Failed to start huddle')
-    } finally {
-      setIsSaving(false)
-    }
+  const handleHuddleMember = (member: TeamMember) => {
+    toast.success('Huddle invitation sent', {
+      description: `Inviting ${member.name} to a huddle...`
+    })
+    setShowHuddleMemberDialog(false)
+    setMessageMemberTarget(null)
   }
 
   // Handle Open Channel

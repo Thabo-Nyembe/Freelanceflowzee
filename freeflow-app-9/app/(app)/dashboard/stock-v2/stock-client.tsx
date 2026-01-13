@@ -86,6 +86,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+// Stock Hooks
+import { useStockMovements, useStockLevels, useStockMovementMutations, useStockLevelMutations } from '@/lib/hooks/use-stock'
+
 
 
 
@@ -712,6 +715,12 @@ const mockStockActivities = [
 // QuickActions will be defined inside component to access state setters
 
 export default function StockClient() {
+  // Hook integration for real data
+  const { movements: dbMovements, stats: movementStats, isLoading: movementsLoading, refetch: refetchMovements } = useStockMovements()
+  const { stockLevels, lowStockItems, stats: levelStats, isLoading: levelsLoading, refetch: refetchLevels } = useStockLevels()
+  const { createMovement, isCreating } = useStockMovementMutations()
+  const { createStockLevel, updateStockLevel } = useStockLevelMutations()
+
   const [activeTab, setActiveTab] = useState('inventory')
   const [products] = useState<Product[]>(mockProducts)
   const [movements] = useState<StockMovement[]>(mockMovements)
@@ -867,44 +876,86 @@ export default function StockClient() {
     })
   }
 
-  const handleSubmitAddStock = () => {
+  const handleSubmitAddStock = async () => {
     if (!addStockForm.productId || !addStockForm.quantity || !addStockForm.warehouseId) {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Stock added successfully', {
-      description: `Added ${addStockForm.quantity} units to inventory`
-    })
-    setShowAddStockDialog(false)
-    setAddStockForm({
-      productId: '',
-      quantity: '',
-      warehouseId: '',
-      zone: '',
-      bin: '',
-      batchNumber: '',
-      notes: ''
-    })
+    try {
+      const product = products.find(p => p.id === addStockForm.productId)
+      await createMovement({
+        movement_type: 'inbound',
+        product_name: product?.name || 'Unknown Product',
+        sku: product?.sku || null,
+        quantity: parseInt(addStockForm.quantity),
+        unit_price: product?.unitCost || 0,
+        total_value: parseInt(addStockForm.quantity) * (product?.unitCost || 0),
+        to_warehouse_id: addStockForm.warehouseId,
+        to_location: `${addStockForm.zone || 'Zone A'}/${addStockForm.bin || 'Bin 1'}`,
+        status: 'completed',
+        batch_number: addStockForm.batchNumber || null,
+        notes: addStockForm.notes || null,
+        movement_date: new Date().toISOString()
+      })
+      toast.success('Stock added successfully', {
+        description: `Added ${addStockForm.quantity} units to inventory`
+      })
+      refetchMovements()
+      refetchLevels()
+      setShowAddStockDialog(false)
+      setAddStockForm({
+        productId: '',
+        quantity: '',
+        warehouseId: '',
+        zone: '',
+        bin: '',
+        batchNumber: '',
+        notes: ''
+      })
+    } catch (error) {
+      toast.error('Failed to add stock', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
   }
 
-  const handleSubmitTransfer = () => {
+  const handleSubmitTransfer = async () => {
     if (!transferForm.productId || !transferForm.quantity || !transferForm.fromWarehouse || !transferForm.toWarehouse) {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Transfer initiated', {
-      description: `${transferForm.quantity} units scheduled for transfer`
-    })
-    setShowTransferDialog(false)
-    setTransferForm({
-      productId: '',
-      quantity: '',
-      fromWarehouse: '',
-      toWarehouse: '',
-      fromZone: '',
-      toZone: '',
-      notes: ''
-    })
+    try {
+      const product = products.find(p => p.id === transferForm.productId)
+      await createMovement({
+        movement_type: 'transfer',
+        product_name: product?.name || 'Unknown Product',
+        sku: product?.sku || null,
+        quantity: parseInt(transferForm.quantity),
+        unit_price: product?.unitCost || 0,
+        total_value: parseInt(transferForm.quantity) * (product?.unitCost || 0),
+        from_warehouse_id: transferForm.fromWarehouse,
+        to_warehouse_id: transferForm.toWarehouse,
+        from_location: transferForm.fromZone || null,
+        to_location: transferForm.toZone || null,
+        status: 'in-transit',
+        notes: transferForm.notes || null,
+        movement_date: new Date().toISOString()
+      })
+      toast.success('Transfer initiated', {
+        description: `${transferForm.quantity} units scheduled for transfer`
+      })
+      refetchMovements()
+      setShowTransferDialog(false)
+      setTransferForm({
+        productId: '',
+        quantity: '',
+        fromWarehouse: '',
+        toWarehouse: '',
+        fromZone: '',
+        toZone: '',
+        notes: ''
+      })
+    } catch (error) {
+      toast.error('Failed to initiate transfer', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
   }
 
   const handleSubmitCount = () => {

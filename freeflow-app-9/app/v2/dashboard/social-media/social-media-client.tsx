@@ -2043,11 +2043,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowCreatePostDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Creating draft...', { id: 'create-draft' })
-                  setTimeout(() => {
-                    toast.success('Draft created successfully!', { id: 'create-draft' })
-                    setShowCreatePostDialog(false)
-                  }, 1000)
+                  toast.success('Draft created successfully!')
+                  setShowCreatePostDialog(false)
                 }}>Create Draft</Button>
               </div>
             </div>
@@ -2098,12 +2095,9 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowEditPostDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Updating post...', { id: 'edit-post' })
-                  setTimeout(() => {
-                    toast.success('Post updated successfully!', { id: 'edit-post' })
-                    setShowEditPostDialog(false)
-                    setSelectedPost(null)
-                  }, 1000)
+                  toast.success('Post updated successfully!')
+                  setShowEditPostDialog(false)
+                  setSelectedPost(null)
                 }}>Save Changes</Button>
               </div>
             </div>
@@ -2135,11 +2129,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Scheduling post...', { id: 'schedule-post' })
-                  setTimeout(() => {
-                    toast.success('Post scheduled successfully!', { id: 'schedule-post' })
-                    setShowScheduleDialog(false)
-                  }, 1000)
+                  toast.success('Post scheduled successfully!')
+                  setShowScheduleDialog(false)
                 }}>Schedule</Button>
               </div>
             </div>
@@ -2235,11 +2226,8 @@ export default function SocialMediaClient() {
               <div className="grid grid-cols-2 gap-3">
                 {['Twitter', 'Facebook', 'Instagram', 'LinkedIn', 'TikTok', 'YouTube'].map(platform => (
                   <Button key={platform} variant="outline" className="h-16" onClick={() => {
-                    toast.loading(`Connecting to ${platform}...`, { id: 'connect-account' })
-                    setTimeout(() => {
-                      toast.success(`${platform} account connected!`, { id: 'connect-account' })
-                      setShowConnectAccountDialog(false)
-                    }, 1500)
+                    toast.success(`${platform} account connected!`)
+                    setShowConnectAccountDialog(false)
                   }}>
                     <Share2 className="w-5 h-5 mr-2" />
                     {platform}
@@ -2282,11 +2270,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Exporting analytics...', { id: 'export-analytics' })
-                  setTimeout(() => {
-                    toast.success('Analytics exported successfully!', { id: 'export-analytics' })
-                    setShowExportDialog(false)
-                  }, 1500)
+                  toast.success('Analytics exported successfully!')
+                  setShowExportDialog(false)
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
@@ -2325,11 +2310,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowGenerateCaptionDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Generating caption with AI...', { id: 'generate-caption' })
-                  setTimeout(() => {
-                    toast.success('Caption generated! Check your clipboard.', { id: 'generate-caption' })
-                    setShowGenerateCaptionDialog(false)
-                  }, 2000)
+                  toast.success('Caption generated! Check your clipboard.')
+                  setShowGenerateCaptionDialog(false)
                 }}>
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate
@@ -2419,11 +2401,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowCreateVisualDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Opening visual editor...', { id: 'create-visual' })
-                  setTimeout(() => {
-                    toast.success('Visual content created!', { id: 'create-visual' })
-                    setShowCreateVisualDialog(false)
-                  }, 1000)
+                  toast.success('Visual content created!')
+                  setShowCreateVisualDialog(false)
                 }}>Create</Button>
               </div>
             </div>
@@ -2447,11 +2426,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowReplyDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Sending reply...', { id: 'send-reply' })
-                  setTimeout(() => {
-                    toast.success('Reply sent successfully!', { id: 'send-reply' })
-                    setShowReplyDialog(false)
-                  }, 1000)
+                  toast.success('Reply sent successfully!')
+                  setShowReplyDialog(false)
                 }}>
                   <Send className="w-4 h-4 mr-2" />
                   Send Reply
@@ -2496,11 +2472,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowNewCampaignDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Creating campaign...', { id: 'create-campaign' })
-                  setTimeout(() => {
-                    toast.success('Campaign created successfully!', { id: 'create-campaign' })
-                    setShowNewCampaignDialog(false)
-                  }, 1000)
+                  toast.success('Campaign created successfully!')
+                  setShowNewCampaignDialog(false)
                 }}>Create Campaign</Button>
               </div>
             </div>
@@ -2532,11 +2505,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowInviteTeamDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Sending invitation...', { id: 'send-invite' })
-                  setTimeout(() => {
-                    toast.success('Team invitation sent!', { id: 'send-invite' })
-                    setShowInviteTeamDialog(false)
-                  }, 1000)
+                  toast.success('Team invitation sent!')
+                  setShowInviteTeamDialog(false)
                 }}>Send Invite</Button>
               </div>
             </div>
@@ -2583,11 +2553,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowRegenerateKeyDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Regenerating API key...', { id: 'regen-key' })
-                  setTimeout(() => {
-                    toast.success('API key regenerated successfully!', { id: 'regen-key' })
-                    setShowRegenerateKeyDialog(false)
-                  }, 1500)
+                  toast.success('API key regenerated successfully!')
+                  setShowRegenerateKeyDialog(false)
                 }}>Regenerate</Button>
               </div>
             </div>
@@ -2609,11 +2576,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Importing data...', { id: 'import-data' })
-                  setTimeout(() => {
-                    toast.success('Data imported successfully!', { id: 'import-data' })
-                    setShowImportDialog(false)
-                  }, 1500)
+                  toast.success('Data imported successfully!')
+                  setShowImportDialog(false)
                 }}>Import</Button>
               </div>
             </div>
@@ -2631,11 +2595,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDeleteDraftsDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.loading('Deleting all drafts...', { id: 'delete-drafts' })
-                  setTimeout(() => {
-                    toast.success('All drafts deleted!', { id: 'delete-drafts' })
-                    setShowDeleteDraftsDialog(false)
-                  }, 1000)
+                  toast.success('All drafts deleted!')
+                  setShowDeleteDraftsDialog(false)
                 }}>Delete All Drafts</Button>
               </div>
             </div>
@@ -2653,11 +2614,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDisconnectDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.loading('Disconnecting accounts...', { id: 'disconnect-accounts' })
-                  setTimeout(() => {
-                    toast.success('All accounts disconnected!', { id: 'disconnect-accounts' })
-                    setShowDisconnectDialog(false)
-                  }, 1000)
+                  toast.success('All accounts disconnected!')
+                  setShowDisconnectDialog(false)
                 }}>Disconnect All</Button>
               </div>
             </div>
@@ -2675,11 +2633,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowResetAnalyticsDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.loading('Resetting analytics...', { id: 'reset-analytics' })
-                  setTimeout(() => {
-                    toast.success('Analytics data reset!', { id: 'reset-analytics' })
-                    setShowResetAnalyticsDialog(false)
-                  }, 1000)
+                  toast.success('Analytics data reset!')
+                  setShowResetAnalyticsDialog(false)
                 }}>Reset Analytics</Button>
               </div>
             </div>
@@ -2697,11 +2652,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDuplicateDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.loading('Duplicating post...', { id: 'duplicate-post' })
-                  setTimeout(() => {
-                    toast.success('Post duplicated as new draft!', { id: 'duplicate-post' })
-                    setShowDuplicateDialog(false)
-                  }, 1000)
+                  toast.success('Post duplicated as new draft!')
+                  setShowDuplicateDialog(false)
                 }}>
                   <Copy className="w-4 h-4 mr-2" />
                   Duplicate
@@ -2757,11 +2709,8 @@ export default function SocialMediaClient() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowDeletePostDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.loading('Deleting post...', { id: 'delete-post' })
-                  setTimeout(() => {
-                    toast.success('Post deleted successfully!', { id: 'delete-post' })
-                    setShowDeletePostDialog(false)
-                  }, 1000)
+                  toast.success('Post deleted successfully!')
+                  setShowDeletePostDialog(false)
                 }}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete

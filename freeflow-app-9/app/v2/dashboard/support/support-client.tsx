@@ -540,18 +540,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       toast.error('Missing required fields', { description: 'Please fill in subject, description, and customer email' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating new support ticket...',
-        success: () => {
-          setShowNewTicketDialog(false)
-          setNewTicketForm({ subject: '', description: '', priority: 'medium', type: 'question', customerEmail: '', tags: '' })
-          return `Ticket created successfully for ${newTicketForm.customerEmail}`
-        },
-        error: 'Failed to create ticket'
-      }
-    )
+    setShowNewTicketDialog(false)
+    toast.success(`Ticket created successfully for ${newTicketForm.customerEmail}`)
+    setNewTicketForm({ subject: '', description: '', priority: 'medium', type: 'question', customerEmail: '', tags: '' })
   }
 
   const handleAssignTicket = (id: string) => {
@@ -566,18 +557,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       return
     }
     const agent = mockAgents.find(a => a.id === selectedAgent)
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: `Assigning ticket to ${agent?.name}...`,
-        success: () => {
-          setShowAssignTicketDialog(false)
-          setCurrentActionTicketId(null)
-          return `Ticket assigned to ${agent?.name} successfully`
-        },
-        error: 'Failed to assign ticket'
-      }
-    )
+    setShowAssignTicketDialog(false)
+    setCurrentActionTicketId(null)
+    toast.success(`Ticket assigned to ${agent?.name} successfully`)
   }
 
   const handleResolveTicket = (id: string) => {
@@ -587,19 +569,10 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
   }
 
   const handleSubmitResolution = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Resolving ticket...',
-        success: () => {
-          setShowResolveTicketDialog(false)
-          setCurrentActionTicketId(null)
-          setResolutionNote('')
-          return 'Ticket resolved successfully'
-        },
-        error: 'Failed to resolve ticket'
-      }
-    )
+    setShowResolveTicketDialog(false)
+    setCurrentActionTicketId(null)
+    setResolutionNote('')
+    toast.success('Ticket resolved successfully')
   }
 
   const handleExportTickets = () => {
@@ -608,17 +581,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
   }
 
   const handleSubmitExport = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2500)),
-      {
-        loading: `Exporting tickets as ${exportFormat.toUpperCase()}...`,
-        success: () => {
-          setShowExportDialog(false)
-          return `Tickets exported successfully as ${exportFormat.toUpperCase()}`
-        },
-        error: 'Failed to export tickets'
-      }
-    )
+    setShowExportDialog(false)
+    toast.success(`Tickets exported successfully as ${exportFormat.toUpperCase()}`)
   }
 
   const handleOpenLiveChat = () => {
@@ -631,17 +595,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       toast.error('Empty message', { description: 'Please type a message to send' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Sending message...',
-        success: () => {
-          setLiveChatMessage('')
-          return 'Message sent to support agent'
-        },
-        error: 'Failed to send message'
-      }
-    )
+    setLiveChatMessage('')
+    toast.success('Message sent to support agent')
   }
 
   const handleOpenKnowledgeBase = () => {
@@ -663,18 +618,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       toast.error('Empty note', { description: 'Please enter a note before saving' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: 'Adding internal note...',
-        success: () => {
-          setShowNoteDialog(false)
-          setInternalNote('')
-          return 'Internal note added successfully'
-        },
-        error: 'Failed to add note'
-      }
-    )
+    setShowNoteDialog(false)
+    setInternalNote('')
+    toast.success('Internal note added successfully')
   }
 
   const handleOpenForwardDialog = () => {
@@ -688,19 +634,10 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       toast.error('Missing email', { description: 'Please enter an email address to forward to' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: `Forwarding ticket to ${forwardEmail}...`,
-        success: () => {
-          setShowForwardDialog(false)
-          setForwardEmail('')
-          setForwardMessage('')
-          return `Ticket forwarded to ${forwardEmail} successfully`
-        },
-        error: 'Failed to forward ticket'
-      }
-    )
+    setShowForwardDialog(false)
+    toast.success(`Ticket forwarded to ${forwardEmail} successfully`)
+    setForwardEmail('')
+    setForwardMessage('')
   }
 
   const handleSubmitCannedResponse = () => {
@@ -708,18 +645,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       toast.error('Missing required fields', { description: 'Please fill in title and content' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating canned response...',
-        success: () => {
-          setShowAddResponseDialog(false)
-          setNewResponseForm({ title: '', content: '', category: 'general', shortcut: '' })
-          return 'Canned response created successfully'
-        },
-        error: 'Failed to create canned response'
-      }
-    )
+    setShowAddResponseDialog(false)
+    setNewResponseForm({ title: '', content: '', category: 'general', shortcut: '' })
+    toast.success('Canned response created successfully')
   }
 
   const handleSubmitSLAPolicy = () => {
@@ -727,18 +655,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       toast.error('Missing policy name', { description: 'Please enter a name for the SLA policy' })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating SLA policy...',
-        success: () => {
-          setShowAddPolicyDialog(false)
-          setNewPolicyForm({ name: '', priority: 'medium', firstResponseTime: 8, resolutionTime: 24, businessHours: true })
-          return 'SLA policy created successfully'
-        },
-        error: 'Failed to create SLA policy'
-      }
-    )
+    setShowAddPolicyDialog(false)
+    setNewPolicyForm({ name: '', priority: 'medium', firstResponseTime: 8, resolutionTime: 24, businessHours: true })
+    toast.success('SLA policy created successfully')
   }
 
   // Quick actions with real dialog handlers
@@ -1576,15 +1495,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             </div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 2500)),
-                            {
-                              loading: 'Connecting to Facebook Messenger...',
-                              success: 'Facebook Messenger connected successfully',
-                              error: 'Failed to connect - please try again'
-                            }
-                          )
-                        }}>Connect</Button>
+                            toast.success('Facebook Messenger connected successfully')
+                          }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1801,15 +1713,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             </div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 2500)),
-                            {
-                              loading: 'Connecting to Microsoft Teams...',
-                              success: 'Microsoft Teams connected successfully',
-                              error: 'Failed to connect - please try again'
-                            }
-                          )
-                        }}>Connect</Button>
+                            toast.success('Microsoft Teams connected successfully')
+                          }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1829,24 +1734,10 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => {
                               navigator.clipboard?.writeText('STRIPE_KEY_PLACEHOLDER')
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 800)),
-                                {
-                                  loading: 'Copying to clipboard...',
-                                  success: 'API key copied to clipboard',
-                                  error: 'Failed to copy'
-                                }
-                              )
+                              toast.success('API key copied to clipboard')
                             }}>Copy</Button>
                             <Button variant="outline" onClick={() => {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 2500)),
-                                {
-                                  loading: 'Generating new API key...',
-                                  success: 'New API key generated successfully',
-                                  error: 'Failed to generate key'
-                                }
-                              )
+                              toast.success('New API key generated successfully')
                             }}>Regenerate</Button>
                           </div>
                         </div>
@@ -1860,15 +1751,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="text-sm text-gray-500">ticket.created, ticket.updated, ticket.resolved</div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1500)),
-                            {
-                              loading: 'Loading webhook configuration...',
-                              success: 'Webhook settings loaded',
-                              error: 'Failed to load settings'
-                            }
-                          )
-                        }}>Configure</Button>
+                            toast.success('Webhook settings loaded')
+                          }}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1921,14 +1805,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             Export All Data
                           </Button>
                           <Button variant="outline" className="flex-1" onClick={() => {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 2500)),
-                              {
-                                loading: 'Archiving old tickets...',
-                                success: 'Old tickets archived successfully',
-                                error: 'Failed to archive tickets'
-                              }
-                            )
+                            toast.success('Old tickets archived successfully')
                           }}>
                             <Archive className="w-4 h-4 mr-2" />
                             Archive Old Tickets
@@ -1986,14 +1863,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           </div>
                           <Button variant="destructive" size="sm" onClick={() => {
                             if (confirm('Are you sure you want to delete ALL tickets? This action cannot be undone.')) {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 2500)),
-                                {
-                                  loading: 'Deleting all tickets...',
-                                  success: 'All tickets deleted successfully',
-                                  error: 'Failed to delete tickets'
-                                }
-                              )
+                              toast.success('All tickets deleted successfully')
                             }
                           }}>
                             <Trash2 className="w-4 h-4 mr-2" />
@@ -2007,14 +1877,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           </div>
                           <Button variant="destructive" size="sm" onClick={() => {
                             if (confirm('Are you sure you want to reset the helpdesk? All settings will be restored to defaults.')) {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 2500)),
-                                {
-                                  loading: 'Resetting helpdesk settings...',
-                                  success: 'Helpdesk reset successfully',
-                                  error: 'Failed to reset helpdesk'
-                                }
-                              )
+                              toast.success('Helpdesk reset successfully')
                             }
                           }}>
                             <RotateCcw className="w-4 h-4 mr-2" />
@@ -2504,18 +2367,9 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                     toast.error('Empty reply', { description: 'Please enter a message before sending' })
                     return
                   }
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
-                    {
-                      loading: 'Sending reply...',
-                      success: () => {
-                        setShowReplyDialog(false)
-                        setReplyContent('')
-                        return 'Reply sent successfully'
-                      },
-                      error: 'Failed to send reply'
-                    }
-                  )
+                  setShowReplyDialog(false)
+                  setReplyContent('')
+                  toast.success('Reply sent successfully')
                 }}>
                   <Send className="w-4 h-4 mr-2" />
                   Send Reply
@@ -2833,14 +2687,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         />
                         <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
                           if (selectedTicket && replyContent.trim()) {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              {
-                                loading: `Sending reply to ticket #${selectedTicket.code}...`,
-                                success: `Reply sent successfully for ticket #${selectedTicket.code}`,
-                                error: 'Failed to send reply'
-                              }
-                            )
+                            toast.success(`Reply sent successfully for ticket #${selectedTicket.code}`)
                             setReplyContent('')
                           } else if (!replyContent.trim()) {
                             toast.error('Empty Reply', { description: 'Please enter a message before sending' })

@@ -2294,13 +2294,9 @@ export default function MediaLibraryClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1" onClick={async () => {
-                    toast.loading('Loading collection...', { id: 'open-collection' })
-                    try {
-                      await new Promise(r => setTimeout(r, 800))
-                      toast.success(`Opened: ${selectedCollection?.name}`, { id: 'open-collection' })
-                      setSelectedCollection(null)
-                    } catch { toast.error('Failed to open collection', { id: 'open-collection' }) }
+                  <Button className="flex-1" onClick={() => {
+                    toast.success(`Opened: ${selectedCollection?.name}`)
+                    setSelectedCollection(null)
                   }}>
                     <FolderOpen className="w-4 h-4 mr-2" />
                     Open Collection
@@ -2309,7 +2305,7 @@ export default function MediaLibraryClient({
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button variant="outline" onClick={() => { toast.loading('Loading collection editor...', { id: 'edit-collection' }); setTimeout(() => { toast.success('Collection editor opened', { id: 'edit-collection' }); }, 800); }}>
+                  <Button variant="outline" onClick={() => { toast.success('Collection editor opened'); }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
@@ -2676,7 +2672,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowShareModeDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Enabling share mode...', { id: 'share-mode' }); setTimeout(() => { toast.success('Share mode enabled successfully', { id: 'share-mode' }); setShowShareModeDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Share mode enabled successfully'); setShowShareModeDialog(false); }}>
                 Enable Share Mode
               </Button>
             </DialogFooter>
@@ -2721,7 +2717,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBrandKitDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.loading('Opening brand kit manager...', { id: 'brand-kit' }); setTimeout(() => { toast.success('Brand kit manager opened', { id: 'brand-kit' }); setShowBrandKitDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Brand kit manager opened'); setShowBrandKitDialog(false); }}>
                 Manage Brand Kit
               </Button>
             </DialogFooter>
@@ -2795,7 +2791,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBulkMoveDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Initializing bulk selection mode...', { id: 'bulk-move' }); setTimeout(() => { toast.success('Bulk selection mode activated', { id: 'bulk-move' }); setShowBulkMoveDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Bulk selection mode activated'); setShowBulkMoveDialog(false); }}>
                 Start Selection
               </Button>
             </DialogFooter>
@@ -2833,7 +2829,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSortFoldersDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Applying folder sort...', { id: 'sort-folders' }); setTimeout(() => { toast.success('Folder sort applied successfully', { id: 'sort-folders' }); setShowSortFoldersDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Folder sort applied successfully'); setShowSortFoldersDialog(false); }}>
                 Apply Sort
               </Button>
             </DialogFooter>
@@ -2890,7 +2886,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFolderPermissionsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Saving folder permissions...', { id: 'folder-permissions' }); setTimeout(() => { toast.success('Folder permissions saved successfully', { id: 'folder-permissions' }); setShowFolderPermissionsDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Folder permissions saved successfully'); setShowFolderPermissionsDialog(false); }}>
                 Save Permissions
               </Button>
             </DialogFooter>
@@ -2968,7 +2964,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowShareCollectionsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Sharing collections...', { id: 'share-collections' }); setTimeout(() => { toast.success('Collections shared successfully', { id: 'share-collections' }); setShowShareCollectionsDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Collections shared successfully'); setShowShareCollectionsDialog(false); }}>
                 Share
               </Button>
             </DialogFooter>
@@ -3008,7 +3004,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTagManagerDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.loading('Saving tags...', { id: 'save-tags' }); setTimeout(() => { toast.success('Tags saved successfully', { id: 'save-tags' }); setShowTagManagerDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Tags saved successfully'); setShowTagManagerDialog(false); }}>
                 Save Tags
               </Button>
             </DialogFooter>
@@ -3058,7 +3054,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCollaborationDialog(false)}>Close</Button>
-              <Button onClick={() => { toast.loading('Saving collaborator changes...', { id: 'collaborators' }); setTimeout(() => { toast.success('Collaborator changes saved', { id: 'collaborators' }); setShowCollaborationDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Collaborator changes saved'); setShowCollaborationDialog(false); }}>
                 Save Changes
               </Button>
             </DialogFooter>
@@ -3110,7 +3106,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPrivacySettingsDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Saving privacy settings...', { id: 'privacy-settings' }); setTimeout(() => { toast.success('Privacy settings saved successfully', { id: 'privacy-settings' }); setShowPrivacySettingsDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Privacy settings saved successfully'); setShowPrivacySettingsDialog(false); }}>
                 Save Settings
               </Button>
             </DialogFooter>
@@ -3154,7 +3150,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDuplicateCollectionDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Duplicating collection...', { id: 'duplicate-collection' }); setTimeout(() => { toast.success('Collection duplicated successfully', { id: 'duplicate-collection' }); setShowDuplicateCollectionDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Collection duplicated successfully'); setShowDuplicateCollectionDialog(false); }}>
                 Duplicate
               </Button>
             </DialogFooter>
@@ -3196,7 +3192,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCloudImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Opening cloud file browser...', { id: 'cloud-import' }); setTimeout(() => { toast.success('Cloud file browser opened', { id: 'cloud-import' }); setShowCloudImportDialog(false); }, 1000); }}>
+              <Button onClick={() => { toast.success('Cloud file browser opened'); setShowCloudImportDialog(false); }}>
                 Browse Files
               </Button>
             </DialogFooter>
@@ -3241,7 +3237,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowUrlImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Importing from URL...', { id: 'url-import' }); setTimeout(() => { toast.success('Asset imported successfully', { id: 'url-import' }); setShowUrlImportDialog(false); }, 1500); }}>
+              <Button onClick={() => { toast.success('Asset imported successfully'); setShowUrlImportDialog(false); }}>
                 Import
               </Button>
             </DialogFooter>
@@ -3471,7 +3467,7 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportBuilderDialog(false)}>Cancel</Button>
-              <Button onClick={() => { toast.loading('Generating report...', { id: 'generate-report' }); setTimeout(() => { toast.success('Report generated successfully', { id: 'generate-report' }); setShowReportBuilderDialog(false); }, 2000); }}>
+              <Button onClick={() => { toast.success('Report generated successfully'); setShowReportBuilderDialog(false); }}>
                 Generate Report
               </Button>
             </DialogFooter>

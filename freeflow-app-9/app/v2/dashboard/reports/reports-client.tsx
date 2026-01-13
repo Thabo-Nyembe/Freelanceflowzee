@@ -463,38 +463,26 @@ export default function ReportsClient() {
   ]
 
   // Handler functions
-  const handleCreateNewReport = async () => {
+  const handleCreateNewReport = () => {
     if (!newReportName.trim()) {
       toast.error('Report name is required')
       return
     }
 
-    setIsCreatingReport(true)
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Report created successfully', {
+      description: `"${newReportName}" has been created in the ${newReportFolder} folder`
+    })
 
-      toast.success('Report created successfully', {
-        description: `"${newReportName}" has been created in the ${newReportFolder} folder`
-      })
-
-      // Reset form
-      setNewReportName('')
-      setNewReportDescription('')
-      setNewReportType('dashboard')
-      setNewReportDataSource('')
-      setNewReportFolder('Sales')
-      setShowNewReportDialog(false)
-    } catch (error) {
-      toast.error('Failed to create report', {
-        description: 'Please try again later'
-      })
-    } finally {
-      setIsCreatingReport(false)
-    }
+    // Reset form
+    setNewReportName('')
+    setNewReportDescription('')
+    setNewReportType('dashboard')
+    setNewReportDataSource('')
+    setNewReportFolder('Sales')
+    setShowNewReportDialog(false)
   }
 
-  const handleScheduleExport = async () => {
+  const handleScheduleExport = () => {
     if (!scheduleExportReport) {
       toast.error('Please select a report to schedule')
       return
@@ -504,32 +492,20 @@ export default function ReportsClient() {
       return
     }
 
-    setIsSchedulingExport(true)
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Export scheduled successfully', {
+      description: `Report will be sent ${scheduleExportFrequency} at ${scheduleExportTime}`
+    })
 
-      toast.success('Export scheduled successfully', {
-        description: `Report will be sent ${scheduleExportFrequency} at ${scheduleExportTime}`
-      })
-
-      // Reset form
-      setScheduleExportReport('')
-      setScheduleExportFrequency('daily')
-      setScheduleExportFormat('pdf')
-      setScheduleExportRecipients('')
-      setScheduleExportTime('08:00')
-      setShowScheduleExportDialog(false)
-    } catch (error) {
-      toast.error('Failed to schedule export', {
-        description: 'Please try again later'
-      })
-    } finally {
-      setIsSchedulingExport(false)
-    }
+    // Reset form
+    setScheduleExportReport('')
+    setScheduleExportFrequency('daily')
+    setScheduleExportFormat('pdf')
+    setScheduleExportRecipients('')
+    setScheduleExportTime('08:00')
+    setShowScheduleExportDialog(false)
   }
 
-  const handleAddDataSource = async () => {
+  const handleAddDataSource = () => {
     if (!newDataSourceName.trim()) {
       toast.error('Data source name is required')
       return
@@ -539,27 +515,15 @@ export default function ReportsClient() {
       return
     }
 
-    setIsAddingDataSource(true)
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Data source connected', {
+      description: `"${newDataSourceName}" has been added and is now syncing`
+    })
 
-      toast.success('Data source connected', {
-        description: `"${newDataSourceName}" has been added and is now syncing`
-      })
-
-      // Reset form
-      setNewDataSourceName('')
-      setNewDataSourceType('database')
-      setNewDataSourceConnection('')
-      setShowDataSourcesDialog(false)
-    } catch (error) {
-      toast.error('Failed to connect data source', {
-        description: 'Please check connection details and try again'
-      })
-    } finally {
-      setIsAddingDataSource(false)
-    }
+    // Reset form
+    setNewDataSourceName('')
+    setNewDataSourceType('database')
+    setNewDataSourceConnection('')
+    setShowDataSourcesDialog(false)
   }
 
   // Apply Filters Handler
@@ -571,62 +535,37 @@ export default function ReportsClient() {
   }
 
   // Import Reports Handler
-  const handleImportReports = async () => {
+  const handleImportReports = () => {
     if (!importFile.trim()) {
       toast.error('Please enter a file URL or select a file')
       return
     }
-    setIsImporting(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Reports imported successfully', {
-        description: `Imported reports from ${importFormat.toUpperCase()} file`
-      })
-      setImportFile('')
-      setShowImportDialog(false)
-    } catch (error) {
-      toast.error('Failed to import reports')
-    } finally {
-      setIsImporting(false)
-    }
+    toast.success('Reports imported successfully', {
+      description: `Imported reports from ${importFormat.toUpperCase()} file`
+    })
+    setImportFile('')
+    setShowImportDialog(false)
   }
 
   // Export All Reports Handler
-  const handleExportAllReports = async () => {
-    setIsExportingAll(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Export started', {
-        description: `Exporting all reports as ${exportAllFormat.toUpperCase()}. Download will begin shortly.`
-      })
-      setShowExportAllDialog(false)
-    } catch (error) {
-      toast.error('Failed to export reports')
-    } finally {
-      setIsExportingAll(false)
-    }
+  const handleExportAllReports = () => {
+    toast.success('Export started', {
+      description: `Exporting all reports as ${exportAllFormat.toUpperCase()}. Download will begin shortly.`
+    })
+    setShowExportAllDialog(false)
   }
 
   // AI Insights Handler
-  const handleRunAIAnalysis = async () => {
-    setAiAnalysisRunning(true)
-    setAiInsightsResults([])
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2500))
-      setAiInsightsResults([
-        'Revenue trend shows 15% growth potential in Q2',
-        'Customer churn risk identified in segment B',
-        'Marketing spend optimization can save 20% budget',
-        'Product feature adoption correlates with retention'
-      ])
-      toast.success('AI analysis complete', {
-        description: 'Found 4 actionable insights'
-      })
-    } catch (error) {
-      toast.error('AI analysis failed')
-    } finally {
-      setAiAnalysisRunning(false)
-    }
+  const handleRunAIAnalysis = () => {
+    setAiInsightsResults([
+      'Revenue trend shows 15% growth potential in Q2',
+      'Customer churn risk identified in segment B',
+      'Marketing spend optimization can save 20% budget',
+      'Product feature adoption correlates with retention'
+    ])
+    toast.success('AI analysis complete', {
+      description: 'Found 4 actionable insights'
+    })
   }
 
   // Apply Theme Handler
@@ -638,25 +577,15 @@ export default function ReportsClient() {
   }
 
   // Publish Report Handler
-  const handlePublishReport = async () => {
-    setIsPublishing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Report published', {
-        description: `Report is now visible to ${publishVisibility === 'public' ? 'everyone' : publishVisibility}`
-      })
-      setShowPublishDialog(false)
-    } catch (error) {
-      toast.error('Failed to publish report')
-    } finally {
-      setIsPublishing(false)
-    }
+  const handlePublishReport = () => {
+    toast.success('Report published', {
+      description: `Report is now visible to ${publishVisibility === 'public' ? 'everyone' : publishVisibility}`
+    })
+    setShowPublishDialog(false)
   }
 
   // Refresh Data Source Handler
-  const handleRefreshDataSource = async (source: DataSource) => {
-    toast.info(`Refreshing ${source.name}...`)
-    await new Promise(resolve => setTimeout(resolve, 1500))
+  const handleRefreshDataSource = (source: DataSource) => {
     toast.success('Data source refreshed', {
       description: `${source.name} has been synced successfully`
     })
@@ -669,18 +598,13 @@ export default function ReportsClient() {
   }
 
   // Save Data Source Settings Handler
-  const handleSaveDataSourceSettings = async () => {
+  const handleSaveDataSourceSettings = () => {
     if (!selectedDataSource) return
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Settings saved', {
-        description: `${selectedDataSource.name} settings updated`
-      })
-      setShowDataSourceSettingsDialog(false)
-      setSelectedDataSource(null)
-    } catch (error) {
-      toast.error('Failed to save settings')
-    }
+    toast.success('Settings saved', {
+      description: `${selectedDataSource.name} settings updated`
+    })
+    setShowDataSourceSettingsDialog(false)
+    setSelectedDataSource(null)
   }
 
   // Scheduled Report Settings Handler
@@ -698,40 +622,24 @@ export default function ReportsClient() {
   }
 
   // Delete All Reports Handler
-  const handleDeleteAllReports = async () => {
+  const handleDeleteAllReports = () => {
     if (deleteConfirmText !== 'DELETE ALL') {
       toast.error('Please type "DELETE ALL" to confirm')
       return
     }
-    setIsDeletingAll(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('All reports deleted', {
-        description: 'All reports have been permanently removed'
-      })
-      setShowDeleteAllDialog(false)
-      setDeleteConfirmText('')
-    } catch (error) {
-      toast.error('Failed to delete reports')
-    } finally {
-      setIsDeletingAll(false)
-    }
+    toast.success('All reports deleted', {
+      description: 'All reports have been permanently removed'
+    })
+    setShowDeleteAllDialog(false)
+    setDeleteConfirmText('')
   }
 
   // Clear Cache Handler
-  const handleClearCache = async () => {
-    setIsClearingCache(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Cache cleared', {
-        description: 'All cached data has been refreshed'
-      })
-      setShowClearCacheDialog(false)
-    } catch (error) {
-      toast.error('Failed to clear cache')
-    } finally {
-      setIsClearingCache(false)
-    }
+  const handleClearCache = () => {
+    toast.success('Cache cleared', {
+      description: 'All cached data has been refreshed'
+    })
+    setShowClearCacheDialog(false)
   }
 
   // Open Report Handler
@@ -751,23 +659,15 @@ export default function ReportsClient() {
     setShowEditReportDialog(true)
   }
 
-  const handleSaveReportEdit = async () => {
+  const handleSaveReportEdit = () => {
     if (!editReportName.trim()) {
       toast.error('Report name is required')
       return
     }
-    setIsSavingReport(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Report updated', {
-        description: `"${editReportName}" has been saved`
-      })
-      setShowEditReportDialog(false)
-    } catch (error) {
-      toast.error('Failed to save report')
-    } finally {
-      setIsSavingReport(false)
-    }
+    toast.success('Report updated', {
+      description: `"${editReportName}" has been saved`
+    })
+    setShowEditReportDialog(false)
   }
 
   // Share Report Handler
@@ -777,24 +677,16 @@ export default function ReportsClient() {
     setShowShareReportDialog(true)
   }
 
-  const handleShareReport = async () => {
+  const handleShareReport = () => {
     if (!shareEmails.trim()) {
       toast.error('Please enter at least one email address')
       return
     }
-    setIsSharing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      const emailCount = shareEmails.split(',').length
-      toast.success('Report shared', {
-        description: `Shared with ${emailCount} recipient${emailCount > 1 ? 's' : ''} with ${sharePermission} access`
-      })
-      setShowShareReportDialog(false)
-    } catch (error) {
-      toast.error('Failed to share report')
-    } finally {
-      setIsSharing(false)
-    }
+    const emailCount = shareEmails.split(',').length
+    toast.success('Report shared', {
+      description: `Shared with ${emailCount} recipient${emailCount > 1 ? 's' : ''} with ${sharePermission} access`
+    })
+    setShowShareReportDialog(false)
   }
 
   // Export Single Report Handler
@@ -803,20 +695,12 @@ export default function ReportsClient() {
     setShowExportReportDialog(true)
   }
 
-  const handleExportReport = async () => {
+  const handleExportReport = () => {
     if (!selectedReport) return
-    setIsExportingReport(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Export started', {
-        description: `"${selectedReport.name}" will be downloaded as ${exportFormat.toUpperCase()}`
-      })
-      setShowExportReportDialog(false)
-    } catch (error) {
-      toast.error('Failed to export report')
-    } finally {
-      setIsExportingReport(false)
-    }
+    toast.success('Export started', {
+      description: `"${selectedReport.name}" will be downloaded as ${exportFormat.toUpperCase()}`
+    })
+    setShowExportReportDialog(false)
   }
 
   // Delete Single Report Handler
@@ -824,42 +708,26 @@ export default function ReportsClient() {
     setShowDeleteReportDialog(true)
   }
 
-  const handleDeleteReport = async () => {
+  const handleDeleteReport = () => {
     if (!selectedReport) return
-    setIsDeletingReport(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Report deleted', {
-        description: `"${selectedReport.name}" has been removed`
-      })
-      setShowDeleteReportDialog(false)
-      setSelectedReport(null)
-    } catch (error) {
-      toast.error('Failed to delete report')
-    } finally {
-      setIsDeletingReport(false)
-    }
+    toast.success('Report deleted', {
+      description: `"${selectedReport.name}" has been removed`
+    })
+    setShowDeleteReportDialog(false)
+    setSelectedReport(null)
   }
 
   // Connect Integration Handler
-  const handleConnectIntegration = async () => {
+  const handleConnectIntegration = () => {
     if (!integrationApiKey.trim()) {
       toast.error('Please enter an API key')
       return
     }
-    setIsConnectingIntegration(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Integration connected', {
-        description: 'Redshift has been successfully connected'
-      })
-      setShowConnectIntegrationDialog(false)
-      setIntegrationApiKey('')
-    } catch (error) {
-      toast.error('Failed to connect integration')
-    } finally {
-      setIsConnectingIntegration(false)
-    }
+    toast.success('Integration connected', {
+      description: 'Redshift has been successfully connected'
+    })
+    setShowConnectIntegrationDialog(false)
+    setIntegrationApiKey('')
   }
 
   // Copy API Key Handler
@@ -869,9 +737,7 @@ export default function ReportsClient() {
   }
 
   // Regenerate API Key Handler
-  const handleRegenerateApiKey = async () => {
-    toast.info('Regenerating API key...')
-    await new Promise(resolve => setTimeout(resolve, 1000))
+  const handleRegenerateApiKey = () => {
     toast.success('API key regenerated', {
       description: 'Your new API key has been generated. Please update your integrations.'
     })
@@ -891,7 +757,7 @@ export default function ReportsClient() {
     setShowAddConnectionDialog(true)
   }
 
-  const handleAddConnection = async () => {
+  const handleAddConnection = () => {
     if (!newDataSourceName.trim()) {
       toast.error('Connection name is required')
       return
@@ -900,21 +766,13 @@ export default function ReportsClient() {
       toast.error('Connection string is required')
       return
     }
-    setIsAddingDataSource(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Connection added', {
-        description: `"${newDataSourceName}" is now connected and syncing`
-      })
-      setShowAddConnectionDialog(false)
-      setNewDataSourceName('')
-      setNewDataSourceType('database')
-      setNewDataSourceConnection('')
-    } catch (error) {
-      toast.error('Failed to add connection')
-    } finally {
-      setIsAddingDataSource(false)
-    }
+    toast.success('Connection added', {
+      description: `"${newDataSourceName}" is now connected and syncing`
+    })
+    setShowAddConnectionDialog(false)
+    setNewDataSourceName('')
+    setNewDataSourceType('database')
+    setNewDataSourceConnection('')
   }
 
   // Create Report Continue Handler (from type selection)

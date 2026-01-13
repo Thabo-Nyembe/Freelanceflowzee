@@ -1034,10 +1034,7 @@ export default function FilesHubClient() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Button variant="ghost" size="sm" onClick={() => {
-                            toast.loading('Preparing download...', { id: 'download' })
-                            setTimeout(() => {
-                              toast.success(`${file.name} downloaded successfully!`, { id: 'download' })
-                            }, 1500)
+                            toast.success(`${file.name} downloaded successfully!`)
                           }}>
                             <Download className="w-4 h-4" />
                           </Button>
@@ -1253,19 +1250,13 @@ export default function FilesHubClient() {
                         </Select>
                       </div>
                       <Button variant="outline" className="w-full" onClick={() => {
-                        toast.loading('Clearing local cache...', { id: 'cache' })
-                        setTimeout(() => {
-                          toast.success('Local cache cleared successfully!', { id: 'cache' })
-                        }, 1500)
+                        toast.success('Local cache cleared successfully!')
                       }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Clear Local Cache
                       </Button>
                       <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600" onClick={() => {
-                        toast.loading('Loading upgrade options...', { id: 'upgrade' })
-                        setTimeout(() => {
-                          toast.success('Redirecting to upgrade page...', { id: 'upgrade' })
-                        }, 1000)
+                        toast.success('Redirecting to upgrade page...')
                       }}>
                         Upgrade Storage Plan
                       </Button>
@@ -1331,10 +1322,7 @@ export default function FilesHubClient() {
                             </div>
                           </div>
                           <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm(`Unlink ${device.name}?`)) {
-                            toast.loading('Unlinking device...', { id: 'unlink' })
-                            setTimeout(() => {
-                              toast.success(`${device.name} has been unlinked`, { id: 'unlink' })
-                            }, 1500)
+                            toast.success(`${device.name} has been unlinked`)
                           } }}>Unlink</Button>
                         </div>
                       ))}
@@ -1467,10 +1455,7 @@ export default function FilesHubClient() {
                                 toast.success('Share link copied to clipboard!')
                               }}><Copy className="w-4 h-4" /></Button>
                               <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm('Remove this link?')) {
-                                toast.loading('Removing share link...', { id: 'remove-link' })
-                                setTimeout(() => {
-                                  toast.success('Share link removed successfully!', { id: 'remove-link' })
-                                }, 1000)
+                                toast.success('Share link removed successfully!')
                               } }}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                           </div>
@@ -1683,10 +1668,7 @@ export default function FilesHubClient() {
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
                               <Button variant="outline" size="sm" onClick={() => {
-                                toast.loading(`Connecting to ${app.name}...`, { id: 'connect-app' })
-                                setTimeout(() => {
-                                  toast.success(`${app.name} connected successfully!`, { id: 'connect-app' })
-                                }, 2000)
+                                toast.success(`${app.name} connected successfully!`)
                               }}>Connect</Button>
                             )}
                           </div>
@@ -1757,10 +1739,7 @@ export default function FilesHubClient() {
                         </p>
                       </div>
                       <Button variant="outline" className="w-full" onClick={() => { if (confirm('Regenerate API key? Existing integrations will stop working.')) {
-                        toast.loading('Regenerating API key...', { id: 'regen-key' })
-                        setTimeout(() => {
-                          toast.success('New API key generated! Update your integrations.', { id: 'regen-key' })
-                        }, 2000)
+                        toast.success('New API key generated! Update your integrations.')
                       } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Regenerate API Key
@@ -1905,20 +1884,13 @@ export default function FilesHubClient() {
                         </Select>
                       </div>
                       <Button variant="outline" className="w-full" onClick={() => {
-                        toast.loading('Exporting audit log...', { id: 'export-audit' })
-                        setTimeout(() => {
-                          toast.success('Audit log exported to audit-log.csv', { id: 'export-audit' })
-                        }, 2000)
+                        toast.success('Audit log exported to audit-log.csv')
                       }}>
                         <Download className="w-4 h-4 mr-2" />
                         Export Audit Log
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={async () => {
-                        toast.loading('Loading audit log...', { id: 'audit-log' })
-                        try {
-                          await new Promise(r => setTimeout(r, 1200))
-                          toast.success('Audit log loaded', { id: 'audit-log', description: 'Displaying all activity records' })
-                        } catch { toast.error('Failed to load audit log', { id: 'audit-log' }) }
+                      <Button variant="outline" className="w-full" onClick={() => {
+                        toast.success('Audit log loaded', { description: 'Displaying all activity records' })
                       }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Full Audit Log
@@ -2011,19 +1983,13 @@ export default function FilesHubClient() {
                         </Select>
                       </div>
                       <Button variant="outline" className="w-full" onClick={() => {
-                        toast.loading('Preparing data export...', { id: 'export-data' })
-                        setTimeout(() => {
-                          toast.success('Data export ready for download!', { id: 'export-data' })
-                        }, 3000)
+                        toast.success('Data export ready for download!')
                       }}>
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
                       <Button variant="outline" className="w-full" onClick={() => { if (confirm('Empty trash? All deleted files will be permanently removed.')) {
-                        toast.loading('Emptying trash...', { id: 'empty-trash' })
-                        setTimeout(() => {
-                          toast.success('Trash emptied successfully!', { id: 'empty-trash' })
-                        }, 2000)
+                        toast.success('Trash emptied successfully!')
                       } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Empty Trash Now
@@ -2065,10 +2031,7 @@ export default function FilesHubClient() {
                         </p>
                       </div>
                       <Button variant="outline" className="w-full" onClick={() => {
-                        toast.loading('Creating backup...', { id: 'create-backup' })
-                        setTimeout(() => {
-                          toast.success('Backup created successfully!', { id: 'create-backup' })
-                        }, 3000)
+                        toast.success('Backup created successfully!')
                       }}>
                         <Download className="w-4 h-4 mr-2" />
                         Create Backup Now
@@ -2141,37 +2104,25 @@ export default function FilesHubClient() {
                         </p>
                       </div>
                       <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('DELETE ALL FILES? This action cannot be undone!')) {
-                        toast.loading('Deleting all files...', { id: 'delete-all' })
-                        setTimeout(() => {
-                          toast.success('All files have been deleted permanently', { id: 'delete-all' })
-                        }, 3000)
+                        toast.success('All files have been deleted permanently')
                       } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete All Files
                       </Button>
                       <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Revoke all shared links? This will break all active shared links immediately.')) {
-                        toast.loading('Revoking all shared links...', { id: 'revoke-links' })
-                        setTimeout(() => {
-                          toast.success('All shared links have been revoked', { id: 'revoke-links' })
-                        }, 2000)
+                        toast.success('All shared links have been revoked')
                       } }}>
                         <Link2 className="w-4 h-4 mr-2" />
                         Revoke All Shared Links
                       </Button>
                       <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Reset all settings to defaults?')) {
-                        toast.loading('Resetting all settings...', { id: 'reset-settings' })
-                        setTimeout(() => {
-                          toast.success('All settings have been reset to defaults', { id: 'reset-settings' })
-                        }, 1500)
+                        toast.success('All settings have been reset to defaults')
                       } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reset All Settings
                       </Button>
                       <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Disable Files Hub? You can re-enable it from account settings.')) {
-                        toast.loading('Disabling Files Hub...', { id: 'disable-hub' })
-                        setTimeout(() => {
-                          toast.success('Files Hub has been disabled', { id: 'disable-hub' })
-                        }, 1500)
+                        toast.success('Files Hub has been disabled')
                       } }}>
                         <Lock className="w-4 h-4 mr-2" />
                         Disable Files Hub
@@ -2269,11 +2220,8 @@ export default function FilesHubClient() {
                 )}
                 <div className="flex gap-2">
                   <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => {
-                    toast.loading('Preparing download...', { id: 'download-file' })
-                    setTimeout(() => {
-                      toast.success(`${selectedFile.name} downloaded successfully!`, { id: 'download-file' })
-                      setShowFileDialog(false)
-                    }, 1500)
+                    toast.success(`${selectedFile.name} downloaded successfully!`)
+                    setShowFileDialog(false)
                   }}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
@@ -2356,22 +2304,8 @@ export default function FilesHubClient() {
                   e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20')
                   const droppedFiles = Array.from(e.dataTransfer.files)
                   if (droppedFiles.length > 0) {
-                    // Simulate upload progress
-                    setUploadProgress(0)
-                    const interval = setInterval(() => {
-                      setUploadProgress(prev => {
-                        if (prev >= 100) {
-                          clearInterval(interval)
-                          toast.success(`${droppedFiles.length} file(s) uploaded successfully`)
-                          setTimeout(() => {
-                            setShowUploadDialog(false)
-                            setUploadProgress(0)
-                          }, 500)
-                          return 100
-                        }
-                        return prev + 10
-                      })
-                    }, 100)
+                    toast.success(`${droppedFiles.length} file(s) uploaded successfully`)
+                    setShowUploadDialog(false)
                   }
                 }}
               >
@@ -2383,22 +2317,8 @@ export default function FilesHubClient() {
                   onChange={(e) => {
                     const selectedFiles = Array.from(e.target.files || [])
                     if (selectedFiles.length > 0) {
-                      // Simulate upload progress
-                      setUploadProgress(0)
-                      const interval = setInterval(() => {
-                        setUploadProgress(prev => {
-                          if (prev >= 100) {
-                            clearInterval(interval)
-                            toast.success(`${selectedFiles.length} file(s) uploaded successfully`)
-                            setTimeout(() => {
-                              setShowUploadDialog(false)
-                              setUploadProgress(0)
-                            }, 500)
-                            return 100
-                          }
-                          return prev + 10
-                        })
-                      }, 100)
+                      toast.success(`${selectedFiles.length} file(s) uploaded successfully`)
+                      setShowUploadDialog(false)
                     }
                   }}
                 />

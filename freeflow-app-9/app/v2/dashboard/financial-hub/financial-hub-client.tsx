@@ -114,34 +114,13 @@ const financialHubActivities = [
 
 const financialHubQuickActions = [
   { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 700)),
-      {
-        loading: 'Creating new financial entry...',
-        success: 'Financial entry created successfully',
-        error: 'Failed to create entry'
-      }
-    )
+    toast.success('Financial entry created successfully')
   }},
   { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Generating financial report...',
-        success: 'Financial report exported to CSV',
-        error: 'Failed to export report'
-      }
-    )
+    toast.success('Financial report exported to CSV')
   }},
   { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 500)),
-      {
-        loading: 'Loading financial settings...',
-        success: 'Financial hub settings loaded',
-        error: 'Failed to load settings'
-      }
-    )
+    toast.success('Financial hub settings loaded')
   }},
 ]
 
@@ -546,18 +525,9 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Adding new client', { clientData: newClient })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Adding client...',
-        success: () => {
-          setShowAddClientDialog(false)
-          setNewClient({ name: '', email: '', company: '', notes: '' })
-          return `Client "${newClient.name}" added successfully`
-        },
-        error: 'Failed to add client'
-      }
-    )
+    toast.success(`Client "${newClient.name}" added successfully`)
+    setShowAddClientDialog(false)
+    setNewClient({ name: '', email: '', company: '', notes: '' })
   }
 
   const handleEditClient = (id: number) => {
@@ -580,18 +550,9 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Saving client changes', { client: editingClient })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Saving changes...',
-        success: () => {
-          setShowEditClientDialog(false)
-          setEditingClient(null)
-          return `Client "${editingClient.name}" updated successfully`
-        },
-        error: 'Failed to update client'
-      }
-    )
+    toast.success(`Client "${editingClient.name}" updated successfully`)
+    setShowEditClientDialog(false)
+    setEditingClient(null)
   }
 
   const handleDeleteClient = (id: number) => {
@@ -651,18 +612,9 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Saving new goal', { goalData: newGoal })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Creating goal...',
-        success: () => {
-          setShowCreateGoalDialog(false)
-          setNewGoal({ type: 'monthly', targetAmount: '', description: '' })
-          return `${newGoal.type === 'monthly' ? 'Monthly' : 'Yearly'} goal of $${parseFloat(newGoal.targetAmount).toLocaleString()} created`
-        },
-        error: 'Failed to create goal'
-      }
-    )
+    toast.success(`${newGoal.type === 'monthly' ? 'Monthly' : 'Yearly'} goal of $${parseFloat(newGoal.targetAmount).toLocaleString()} created`)
+    setShowCreateGoalDialog(false)
+    setNewGoal({ type: 'monthly', targetAmount: '', description: '' })
   }
 
   const handleEditGoal = (id: string) => {
@@ -686,18 +638,9 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Saving goal changes', { goal: editingGoal })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Saving goal...',
-        success: () => {
-          setShowEditGoalDialog(false)
-          setEditingGoal(null)
-          return `${editingGoal.type === 'monthly' ? 'Monthly' : 'Yearly'} goal updated to $${editingGoal.target.toLocaleString()}`
-        },
-        error: 'Failed to update goal'
-      }
-    )
+    toast.success(`${editingGoal.type === 'monthly' ? 'Monthly' : 'Yearly'} goal updated to $${editingGoal.target.toLocaleString()}`)
+    setShowEditGoalDialog(false)
+    setEditingGoal(null)
   }
 
   const handleDeleteGoal = (id: string) => {
@@ -747,18 +690,9 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Adding expense', { expenseData: newExpense })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Adding expense...',
-        success: () => {
-          setShowAddExpenseDialog(false)
-          setNewExpense({ description: '', amount: '', category: 'software', date: new Date().toISOString().split('T')[0] })
-          return `Expense of $${parseFloat(newExpense.amount).toLocaleString()} added to ${newExpense.category}`
-        },
-        error: 'Failed to add expense'
-      }
-    )
+    toast.success(`Expense of $${parseFloat(newExpense.amount).toLocaleString()} added to ${newExpense.category}`)
+    setShowAddExpenseDialog(false)
+    setNewExpense({ description: '', amount: '', category: 'software', date: new Date().toISOString().split('T')[0] })
   }
 
   const handleCategorizeExpense = () => {
@@ -879,18 +813,9 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Confirming payment record', { payment: recordingPayment })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Recording payment...',
-        success: () => {
-          setShowRecordPaymentDialog(false)
-          setRecordingPayment(null)
-          return `Payment of $${recordingPayment.amount.toLocaleString()} from ${recordingPayment.client} recorded`
-        },
-        error: 'Failed to record payment'
-      }
-    )
+    toast.success(`Payment of $${recordingPayment.amount.toLocaleString()} from ${recordingPayment.client} recorded`)
+    setShowRecordPaymentDialog(false)
+    setRecordingPayment(null)
   }
 
   const handleRefreshDashboard = () => {
@@ -949,17 +874,8 @@ Overdue: ${financialData.invoices.overdue}
   }
 
   const handleConfirmAudit = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Running comprehensive financial audit...',
-        success: () => {
-          setShowAuditDialog(false)
-          return `Audit complete - Analyzed ${recentTransactions.length} transactions - No discrepancies found`
-        },
-        error: 'Failed to complete audit'
-      }
-    )
+    toast.success(`Audit complete - Analyzed ${recentTransactions.length} transactions - No discrepancies found`)
+    setShowAuditDialog(false)
   }
 
   const handleAddTransaction = () => {
@@ -982,18 +898,9 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Adding transaction', { transactionData: newTransaction })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Adding transaction...',
-        success: () => {
-          setShowAddTransactionDialog(false)
-          setNewTransaction({ type: 'income', description: '', amount: '', category: '', date: new Date().toISOString().split('T')[0] })
-          return `${newTransaction.type === 'income' ? 'Income' : 'Expense'} of $${parseFloat(newTransaction.amount).toLocaleString()} added`
-        },
-        error: 'Failed to add transaction'
-      }
-    )
+    toast.success(`${newTransaction.type === 'income' ? 'Income' : 'Expense'} of $${parseFloat(newTransaction.amount).toLocaleString()} added`)
+    setShowAddTransactionDialog(false)
+    setNewTransaction({ type: 'income', description: '', amount: '', category: '', date: new Date().toISOString().split('T')[0] })
   }
 
   const handleOpenExportDialog = () => {
@@ -1004,18 +911,9 @@ Overdue: ${financialData.invoices.overdue}
   const handleConfirmExport = () => {
     logger.info('Exporting report', { format: exportFormat })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Generating ${exportFormat.toUpperCase()} report...`,
-        success: () => {
-          setShowExportReportDialog(false)
-          handleExportReport()
-          return `Financial report exported as ${exportFormat.toUpperCase()}`
-        },
-        error: 'Failed to export report'
-      }
-    )
+    toast.success(`Financial report exported as ${exportFormat.toUpperCase()}`)
+    setShowExportReportDialog(false)
+    handleExportReport()
   }
 
   const handleOpenStatementDialog = () => {
@@ -1026,17 +924,8 @@ Overdue: ${financialData.invoices.overdue}
   const handleConfirmGenerateStatement = () => {
     logger.info('Generating statement', { period: statementPeriod })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: `Generating ${statementPeriod} statement...`,
-        success: () => {
-          setShowGenerateStatementDialog(false)
-          return `${statementPeriod.charAt(0).toUpperCase() + statementPeriod.slice(1)} financial statement generated`
-        },
-        error: 'Failed to generate statement'
-      }
-    )
+    toast.success(`${statementPeriod.charAt(0).toUpperCase() + statementPeriod.slice(1)} financial statement generated`)
+    setShowGenerateStatementDialog(false)
   }
 
   const handleOpenSettings = () => {
@@ -1047,17 +936,8 @@ Overdue: ${financialData.invoices.overdue}
   const handleSaveSettings = () => {
     logger.info('Saving settings')
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Saving settings...',
-        success: () => {
-          setShowSettingsDialog(false)
-          return 'Financial hub settings saved'
-        },
-        error: 'Failed to save settings'
-      }
-    )
+    toast.success('Financial hub settings saved')
+    setShowSettingsDialog(false)
   }
 
   const handleOpenTaxReportDialog = () => {
@@ -1070,17 +950,8 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Generating tax report', { year: taxYear, taxableIncome })
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: `Generating tax report for ${taxYear}...`,
-        success: () => {
-          setShowTaxReportDialog(false)
-          return `Tax report for ${taxYear} generated - Taxable income: $${taxableIncome.toLocaleString()}`
-        },
-        error: 'Failed to generate tax report'
-      }
-    )
+    toast.success(`Tax report for ${taxYear} generated - Taxable income: $${taxableIncome.toLocaleString()}`)
+    setShowTaxReportDialog(false)
   }
 
   // Calculate progress percentages for goals

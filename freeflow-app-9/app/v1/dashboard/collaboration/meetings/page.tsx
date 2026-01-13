@@ -364,14 +364,7 @@ export default function MeetingsPage() {
       });
 
       logger.info("Left meeting successfully");
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1000)),
-        {
-          loading: 'Leaving meeting...',
-          success: 'Left meeting successfully',
-          error: 'Failed to leave meeting'
-        }
-      );
+      toast.success('Left meeting successfully');
       announce("Left meeting", "polite");
     } catch (error) {
       logger.error("Failed to leave meeting", { error });
@@ -383,22 +376,9 @@ export default function MeetingsPage() {
   const handleToggleCamera = async () => {
     try {
       logger.info("Toggling camera");
-
       const newState = !callState.isCameraOn;
-      toast.promise(
-        new Promise((resolve) => {
-          setTimeout(() => {
-            setCallState({ ...callState, isCameraOn: newState });
-            resolve(true);
-          }, 600);
-        }),
-        {
-          loading: newState ? 'Turning camera on...' : 'Turning camera off...',
-          success: newState ? 'Camera on' : 'Camera off',
-          error: 'Failed to toggle camera'
-        }
-      );
-
+      setCallState({ ...callState, isCameraOn: newState });
+      toast.success(newState ? 'Camera on' : 'Camera off');
       logger.info("Camera toggled", { isCameraOn: newState });
     } catch (error) {
       logger.error("Failed to toggle camera", { error });
@@ -409,22 +389,9 @@ export default function MeetingsPage() {
   const handleToggleMic = async () => {
     try {
       logger.info("Toggling microphone");
-
       const newState = !callState.isMicOn;
-      toast.promise(
-        new Promise((resolve) => {
-          setTimeout(() => {
-            setCallState({ ...callState, isMicOn: newState });
-            resolve(true);
-          }, 600);
-        }),
-        {
-          loading: newState ? 'Turning microphone on...' : 'Turning microphone off...',
-          success: newState ? 'Microphone on' : 'Microphone off',
-          error: 'Failed to toggle microphone'
-        }
-      );
-
+      setCallState({ ...callState, isMicOn: newState });
+      toast.success(newState ? 'Microphone on' : 'Microphone off');
       logger.info("Microphone toggled", { isMicOn: newState });
     } catch (error) {
       logger.error("Failed to toggle microphone", { error });
@@ -451,39 +418,18 @@ export default function MeetingsPage() {
           // Listen for when user stops sharing via browser UI
           videoTrack.onended = () => {
             setCallState(prev => ({ ...prev, isScreenSharing: false }));
-            toast.promise(
-              new Promise((resolve) => setTimeout(resolve, 500)),
-              {
-                loading: 'Stopping screen share...',
-                success: 'Screen sharing ended',
-                error: 'Failed to stop screen share'
-              }
-            );
+            toast.success('Screen sharing ended');
             announce("Screen sharing ended", "polite");
           };
 
           setCallState({ ...callState, isScreenSharing: true });
           logger.info("Screen sharing started");
-          toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 800)),
-            {
-              loading: 'Starting screen share...',
-              success: 'Screen sharing started',
-              error: 'Failed to start screen share'
-            }
-          );
+          toast.success('Screen sharing started');
           announce("Screen sharing started", "polite");
         } catch (err) {
           // User cancelled or permission denied
           logger.info("Screen share cancelled or denied", { err });
-          toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 500)),
-            {
-              loading: 'Cancelling...',
-              success: 'Screen share cancelled',
-              error: 'Error cancelling'
-            }
-          );
+          toast.info('Screen share cancelled');
           return;
         }
       } else {
@@ -498,14 +444,7 @@ export default function MeetingsPage() {
 
         setCallState({ ...callState, isScreenSharing: false });
         logger.info("Screen sharing stopped");
-        toast.promise(
-          new Promise((resolve) => setTimeout(resolve, 600)),
-          {
-            loading: 'Stopping screen share...',
-            success: 'Screen share stopped',
-            error: 'Failed to stop screen share'
-          }
-        );
+        toast.success('Screen share stopped');
         announce("Screen sharing stopped", "polite");
       }
     } catch (error) {
@@ -546,14 +485,7 @@ export default function MeetingsPage() {
       ));
 
       logger.info("Recording toggled", { isRecording: newRecordingState });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
-        {
-          loading: newRecordingState ? 'Starting recording...' : 'Stopping recording...',
-          success: newRecordingState ? 'Recording started' : 'Recording stopped',
-          error: newRecordingState ? 'Failed to start recording' : 'Failed to stop recording'
-        }
-      );
+      toast.success(newRecordingState ? 'Recording started' : 'Recording stopped');
       announce(newRecordingState ? "Recording started" : "Recording stopped", "polite");
     } catch (error) {
       logger.error("Failed to toggle recording", { error });
@@ -565,21 +497,8 @@ export default function MeetingsPage() {
   const handleChangeViewMode = async (mode: "grid" | "speaker" | "sidebar") => {
     try {
       logger.info("Changing view mode", { mode });
-
-      toast.promise(
-        new Promise((resolve) => {
-          setTimeout(() => {
-            setCallState({ ...callState, viewMode: mode });
-            resolve(true);
-          }, 500);
-        }),
-        {
-          loading: `Switching to ${mode} view...`,
-          success: `Switched to ${mode} view`,
-          error: 'Failed to change view mode'
-        }
-      );
-
+      setCallState({ ...callState, viewMode: mode });
+      toast.success(`Switched to ${mode} view`);
       logger.info("View mode changed successfully");
     } catch (error) {
       logger.error("Failed to change view mode", { error });
@@ -639,14 +558,7 @@ export default function MeetingsPage() {
       setInviteMeetingId(null);
 
       logger.info("Invitation sent successfully", { meetingId: inviteMeetingId, email: inviteEmail });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1000)),
-        {
-          loading: 'Opening email client...',
-          success: `Invitation ready to send to ${inviteEmail}`,
-          error: 'Failed to open email client'
-        }
-      );
+      toast.success(`Invitation ready to send to ${inviteEmail}`);
       announce("Invitation email opened", "polite");
     } catch (error) {
       logger.error("Failed to invite participant", { error });
@@ -685,14 +597,7 @@ export default function MeetingsPage() {
       }
 
       logger.info("Meeting deleted successfully", { meetingId });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1200)),
-        {
-          loading: 'Deleting meeting...',
-          success: 'Meeting deleted successfully',
-          error: 'Failed to delete meeting'
-        }
-      );
+      toast.success('Meeting deleted successfully');
       announce("Meeting deleted successfully", "polite");
     } catch (error) {
       logger.error("Failed to delete meeting", { error, meetingId });
@@ -714,14 +619,7 @@ export default function MeetingsPage() {
 
       // Check if recording URL is a pending marker (recording in progress)
       if (meeting.recordingUrl.startsWith("pending_")) {
-        toast.promise(
-          new Promise((resolve) => setTimeout(resolve, 1000)),
-          {
-            loading: 'Checking recording status...',
-            success: 'Recording is still being processed',
-            error: 'Failed to check recording status'
-          }
-        );
+        toast.info('Recording is still being processed');
         announce("Recording is still being processed", "polite");
         return;
       }
@@ -736,14 +634,7 @@ export default function MeetingsPage() {
       document.body.removeChild(link);
 
       logger.info("Recording download started", { meetingId });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 2000)),
-        {
-          loading: 'Preparing download...',
-          success: 'Download started',
-          error: 'Failed to start download'
-        }
-      );
+      toast.success('Download started');
       announce("Recording download started", "polite");
     } catch (error) {
       logger.error("Failed to download recording", { error, meetingId });
@@ -775,14 +666,7 @@ export default function MeetingsPage() {
       }
 
       logger.info("Meeting link copied", { meetingId, meetingUrl });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 800)),
-        {
-          loading: 'Copying link...',
-          success: `Meeting link copied${meeting?.title ? ` - ${meeting.title}` : ''}`,
-          error: 'Failed to copy link'
-        }
-      );
+      toast.success(`Meeting link copied${meeting?.title ? ` - ${meeting.title}` : ''}`);
       announce("Meeting link copied to clipboard", "polite");
     } catch (error) {
       logger.error("Failed to share meeting", { error, meetingId });
@@ -803,27 +687,16 @@ export default function MeetingsPage() {
         const participant = activeMeeting.participants.find(p => p.id === participantId);
         const isRaised = participant?.isHandRaised;
 
-        toast.promise(
-          new Promise((resolve) => {
-            setTimeout(() => {
-              const updatedParticipants = activeMeeting.participants.map((p) =>
-                p.id === participantId ? { ...p, isHandRaised: !p.isHandRaised } : p
-              );
-
-              setActiveMeeting({
-                ...activeMeeting,
-                participants: updatedParticipants,
-              });
-              resolve(true);
-            }, 500);
-          }),
-          {
-            loading: isRaised ? 'Lowering hand...' : 'Raising hand...',
-            success: isRaised ? 'Hand lowered' : 'Hand raised',
-            error: 'Failed to update hand status'
-          }
+        const updatedParticipants = activeMeeting.participants.map((p) =>
+          p.id === participantId ? { ...p, isHandRaised: !p.isHandRaised } : p
         );
 
+        setActiveMeeting({
+          ...activeMeeting,
+          participants: updatedParticipants,
+        });
+
+        toast.success(isRaised ? 'Hand lowered' : 'Hand raised');
         logger.info("Hand raised successfully");
       }
     } catch (error) {
@@ -840,27 +713,16 @@ export default function MeetingsPage() {
         const participant = activeMeeting.participants.find(p => p.id === participantId);
         const isMuted = participant?.isMuted;
 
-        toast.promise(
-          new Promise((resolve) => {
-            setTimeout(() => {
-              const updatedParticipants = activeMeeting.participants.map((p) =>
-                p.id === participantId ? { ...p, isMuted: !p.isMuted } : p
-              );
-
-              setActiveMeeting({
-                ...activeMeeting,
-                participants: updatedParticipants,
-              });
-              resolve(true);
-            }, 600);
-          }),
-          {
-            loading: isMuted ? 'Unmuting participant...' : 'Muting participant...',
-            success: isMuted ? 'Participant unmuted' : 'Participant muted',
-            error: 'Failed to update mute status'
-          }
+        const updatedParticipants = activeMeeting.participants.map((p) =>
+          p.id === participantId ? { ...p, isMuted: !p.isMuted } : p
         );
 
+        setActiveMeeting({
+          ...activeMeeting,
+          participants: updatedParticipants,
+        });
+
+        toast.success(isMuted ? 'Participant unmuted' : 'Participant muted');
         logger.info("Participant muted successfully");
       }
     } catch (error) {
@@ -1113,14 +975,7 @@ export default function MeetingsPage() {
                       variant="secondary"
                       className="rounded-full"
                       onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 800)),
-                          {
-                            loading: 'Opening meeting chat...',
-                            success: 'Meeting chat opened',
-                            error: 'Failed to open chat'
-                          }
-                        );
+                        toast.success('Meeting chat opened');
                         announce("Meeting chat opened", "polite");
                       }}
                     >
@@ -1214,14 +1069,7 @@ export default function MeetingsPage() {
                       className="w-full"
                       onClick={() => {
                         setIsJoinOpen(false);
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1500)),
-                          {
-                            loading: 'Connecting to meeting...',
-                            success: 'Joined meeting successfully',
-                            error: 'Failed to join meeting'
-                          }
-                        );
+                        toast.success('Joined meeting successfully');
                       }}
                     >
                       Join Meeting

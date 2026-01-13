@@ -1971,10 +1971,7 @@ export default function AllocationClient() {
                         <p className="text-sm text-gray-500">Notify when resources are over-booked</p>
                       </div>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.loading('Updating alert settings...', { id: 'toggle-overalloc' })
-                        setTimeout(() => {
-                          toast.success('Over-allocation alerts disabled', { id: 'toggle-overalloc' })
-                        }, 800)
+                        toast.success('Over-allocation alerts disabled')
                       }}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
@@ -1983,10 +1980,7 @@ export default function AllocationClient() {
                         <p className="text-sm text-gray-500">Daily digest of pending requests</p>
                       </div>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.loading('Updating notification settings...', { id: 'toggle-approvals' })
-                        setTimeout(() => {
-                          toast.success('Pending approvals digest disabled', { id: 'toggle-approvals' })
-                        }, 800)
+                        toast.success('Pending approvals digest disabled')
                       }}>Enabled</Button>
                     </div>
                     <div className="flex items-center justify-between">
@@ -1995,10 +1989,7 @@ export default function AllocationClient() {
                         <p className="text-sm text-gray-500">Alert when capacity runs low</p>
                       </div>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.loading('Updating warning settings...', { id: 'toggle-capacity' })
-                        setTimeout(() => {
-                          toast.success('Capacity warnings disabled', { id: 'toggle-capacity' })
-                        }, 800)
+                        toast.success('Capacity warnings disabled')
                       }}>Enabled</Button>
                     </div>
                   </div>
@@ -2631,11 +2622,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddResourceDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Adding resource...', { id: 'add-resource' })
-                setTimeout(() => {
-                  toast.success('Resource added successfully', { id: 'add-resource' })
-                  setShowAddResourceDialog(false)
-                }, 1000)
+                toast.success('Resource added successfully')
+                setShowAddResourceDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Resource
@@ -2817,11 +2805,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTimeOffDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Submitting time off request...', { id: 'time-off' })
-                setTimeout(() => {
-                  toast.success('Time off request submitted', { id: 'time-off' })
-                  setShowTimeOffDialog(false)
-                }, 1000)
+                toast.success('Time off request submitted')
+                setShowTimeOffDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Request Time Off
@@ -2864,11 +2849,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRatesDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Opening rate editor...', { id: 'edit-rates' })
-                setTimeout(() => {
-                  toast.success('Rate editor opened', { id: 'edit-rates' })
-                  setShowRatesDialog(false)
-                }, 800)
+                toast.success('Rate editor opened')
+                setShowRatesDialog(false)
               }}>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Rates
@@ -2976,11 +2958,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Creating project...', { id: 'create-project' })
-                setTimeout(() => {
-                  toast.success('Project created successfully', { id: 'create-project' })
-                  setShowNewProjectDialog(false)
-                }, 1000)
+                toast.success('Project created successfully')
+                setShowNewProjectDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Project
@@ -3066,11 +3045,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowMilestonesDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Adding milestone...', { id: 'add-milestone' })
-                setTimeout(() => {
-                  toast.success('Milestone added successfully', { id: 'add-milestone' })
-                  setShowMilestonesDialog(false)
-                }, 1000)
+                toast.success('Milestone added successfully')
+                setShowMilestonesDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Milestone
@@ -3115,11 +3091,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDependenciesDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Adding dependency...', { id: 'add-dependency' })
-                setTimeout(() => {
-                  toast.success('Dependency added successfully', { id: 'add-dependency' })
-                  setShowDependenciesDialog(false)
-                }, 1000)
+                toast.success('Dependency added successfully')
+                setShowDependenciesDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Dependency
@@ -3257,11 +3230,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Preparing export...', { id: 'export' })
-                setTimeout(() => {
-                  toast.success('Export downloaded successfully', { id: 'export' })
-                  setShowExportDialog(false)
-                }, 1500)
+                toast.success('Export downloaded successfully')
+                setShowExportDialog(false)
               }}>
                 <ArrowUpRight className="w-4 h-4 mr-2" />
                 Export
@@ -3308,11 +3278,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowWorkHoursDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Saving work hours settings...', { id: 'work-hours' })
-                setTimeout(() => {
-                  toast.success('Work hours settings saved', { id: 'work-hours' })
-                  setShowWorkHoursDialog(false)
-                }, 1000)
+                toast.success('Work hours settings saved')
+                setShowWorkHoursDialog(false)
               }}>
                 Save Settings
               </Button>
@@ -3357,11 +3324,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTargetsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Saving utilization targets...', { id: 'targets' })
-                setTimeout(() => {
-                  toast.success('Utilization targets saved', { id: 'targets' })
-                  setShowTargetsDialog(false)
-                }, 1000)
+                toast.success('Utilization targets saved')
+                setShowTargetsDialog(false)
               }}>
                 Save Targets
               </Button>
@@ -3407,11 +3371,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowBillingSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Saving billing settings...', { id: 'billing-settings' })
-                setTimeout(() => {
-                  toast.success('Billing settings saved', { id: 'billing-settings' })
-                  setShowBillingSettingsDialog(false)
-                }, 1000)
+                toast.success('Billing settings saved')
+                setShowBillingSettingsDialog(false)
               }}>
                 Save Settings
               </Button>
@@ -3438,10 +3399,7 @@ export default function AllocationClient() {
                   <p className="text-sm text-gray-500">When resources are over-booked</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.loading('Updating alert...', { id: 'alert-overalloc' })
-                  setTimeout(() => {
-                    toast.success('Over-allocation alerts toggled', { id: 'alert-overalloc' })
-                  }, 600)
+                  toast.success('Over-allocation alerts toggled')
                 }}>Enabled</Button>
               </div>
               <div className="flex items-center justify-between">
@@ -3450,10 +3408,7 @@ export default function AllocationClient() {
                   <p className="text-sm text-gray-500">Daily digest</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.loading('Updating alert...', { id: 'alert-pending' })
-                  setTimeout(() => {
-                    toast.success('Pending approvals alert toggled', { id: 'alert-pending' })
-                  }, 600)
+                  toast.success('Pending approvals alert toggled')
                 }}>Enabled</Button>
               </div>
               <div className="flex items-center justify-between">
@@ -3462,10 +3417,7 @@ export default function AllocationClient() {
                   <p className="text-sm text-gray-500">Low capacity alerts</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.loading('Updating alert...', { id: 'alert-capacity' })
-                  setTimeout(() => {
-                    toast.success('Capacity warnings toggled', { id: 'alert-capacity' })
-                  }, 600)
+                  toast.success('Capacity warnings toggled')
                 }}>Enabled</Button>
               </div>
             </div>
@@ -3504,10 +3456,7 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRolesDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Creating new role...', { id: 'add-role' })
-                setTimeout(() => {
-                  toast.success('Role created successfully', { id: 'add-role' })
-                }, 1000)
+                toast.success('Role created successfully')
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Role
@@ -3554,10 +3503,7 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowHolidaysDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Adding holiday...', { id: 'add-holiday' })
-                setTimeout(() => {
-                  toast.success('Holiday added successfully', { id: 'add-holiday' })
-                }, 1000)
+                toast.success('Holiday added successfully')
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Holiday
@@ -3593,10 +3539,7 @@ export default function AllocationClient() {
                     <p className="text-xs text-gray-500">Every 15 minutes</p>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => {
-                    toast.loading('Updating sync settings...', { id: 'auto-sync' })
-                    setTimeout(() => {
-                      toast.success('Auto-sync settings updated', { id: 'auto-sync' })
-                    }, 600)
+                    toast.success('Auto-sync settings updated')
                   }}>Enabled</Button>
                 </div>
               </div>
@@ -3604,11 +3547,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSyncDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Syncing data...', { id: 'sync-now' })
-                setTimeout(() => {
-                  toast.success('Data synced successfully', { id: 'sync-now' })
-                  setShowSyncDialog(false)
-                }, 1500)
+                toast.success('Data synced successfully')
+                setShowSyncDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Sync Now
@@ -3645,12 +3585,8 @@ export default function AllocationClient() {
                       variant={integration.status === 'connected' ? 'outline' : 'default'}
                       size="sm"
                       onClick={() => {
-                        const action = integration.status === 'connected' ? 'Disconnecting from' : 'Connecting to'
                         const actionDone = integration.status === 'connected' ? 'Disconnected from' : 'Connected to'
-                        toast.loading(`${action} ${integration.name}...`, { id: `integration-${integration.name}` })
-                        setTimeout(() => {
-                          toast.success(`${actionDone} ${integration.name}`, { id: `integration-${integration.name}` })
-                        }, 1000)
+                        toast.success(`${actionDone} ${integration.name}`)
                       }}
                     >
                       {integration.status === 'connected' ? 'Disconnect' : 'Connect'}
@@ -3736,11 +3672,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAssignResourceDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Assigning resource...', { id: 'assign-resource' })
-                setTimeout(() => {
-                  toast.success('Resource assigned successfully', { id: 'assign-resource' })
-                  setShowAssignResourceDialog(false)
-                }, 1000)
+                toast.success('Resource assigned successfully')
+                setShowAssignResourceDialog(false)
               }}>
                 <UserCheck className="w-4 h-4 mr-2" />
                 Assign Resource
@@ -3828,12 +3761,9 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTimeEntryDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Logging time entry...', { id: 'log-time' })
-                setTimeout(() => {
-                  toast.success('Time entry logged successfully', { id: 'log-time' })
-                  setShowTimeEntryDialog(false)
-                  setTimeEntryData({ resource: '', project: '', hours: 0, date: '', description: '' })
-                }, 1000)
+                toast.success('Time entry logged successfully')
+                setShowTimeEntryDialog(false)
+                setTimeEntryData({ resource: '', project: '', hours: 0, date: '', description: '' })
               }}>
                 <Clock className="w-4 h-4 mr-2" />
                 Log Time
@@ -3974,12 +3904,9 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => { setShowTransferAllocationDialog(false); setTransferData({ allocation: '', fromProject: '', toProject: '', hours: 0 }) }}>Cancel</Button>
               <Button onClick={() => {
-                toast.loading('Transferring allocation...', { id: 'transfer' })
-                setTimeout(() => {
-                  toast.success('Allocation transferred successfully', { id: 'transfer' })
-                  setShowTransferAllocationDialog(false)
-                  setTransferData({ allocation: '', fromProject: '', toProject: '', hours: 0 })
-                }, 1000)
+                toast.success('Allocation transferred successfully')
+                setShowTransferAllocationDialog(false)
+                setTransferData({ allocation: '', fromProject: '', toProject: '', hours: 0 })
               }}>
                 <GitBranch className="w-4 h-4 mr-2" />
                 Transfer
@@ -4090,11 +4017,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowHiringPlanDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Exporting hiring plan...', { id: 'export-hiring' })
-                setTimeout(() => {
-                  toast.success('Hiring plan exported successfully', { id: 'export-hiring' })
-                  setShowHiringPlanDialog(false)
-                }, 1500)
+                toast.success('Hiring plan exported successfully')
+                setShowHiringPlanDialog(false)
               }}>
                 <ArrowUpRight className="w-4 h-4 mr-2" />
                 Export Plan
@@ -4141,10 +4065,7 @@ export default function AllocationClient() {
                         <p className="text-sm text-gray-500">Move {resource.allocated_hours - resource.capacity_hours}h to available team members</p>
                       </div>
                       <Button size="sm" variant="outline" onClick={() => {
-                        toast.loading(`Rebalancing ${resource.name}'s workload...`, { id: `rebalance-${resource.id}` })
-                        setTimeout(() => {
-                          toast.success(`${resource.name}'s workload rebalanced`, { id: `rebalance-${resource.id}` })
-                        }, 1000)
+                        toast.success(`${resource.name}'s workload rebalanced`)
                       }}>
                         Rebalance
                       </Button>
@@ -4156,11 +4077,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowWorkloadBalanceDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Auto-balancing all workloads...', { id: 'auto-balance' })
-                setTimeout(() => {
-                  toast.success('All workloads balanced successfully', { id: 'auto-balance' })
-                  setShowWorkloadBalanceDialog(false)
-                }, 1500)
+                toast.success('All workloads balanced successfully')
+                setShowWorkloadBalanceDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Auto-Balance All
@@ -4192,10 +4110,7 @@ export default function AllocationClient() {
                     </div>
                   </div>
                   <Button className="w-full" variant="outline" onClick={() => {
-                    toast.loading('Running smart allocation analysis...', { id: 'smart-analysis' })
-                    setTimeout(() => {
-                      toast.success('Smart allocation analysis complete', { id: 'smart-analysis' })
-                    }, 2000)
+                    toast.success('Smart allocation analysis complete')
                   }}>
                     Run Analysis
                   </Button>
@@ -4209,10 +4124,7 @@ export default function AllocationClient() {
                     </div>
                   </div>
                   <Button className="w-full" variant="outline" onClick={() => {
-                    toast.loading('Balancing workload...', { id: 'balance-workload' })
-                    setTimeout(() => {
-                      toast.success('Workload balanced successfully', { id: 'balance-workload' })
-                    }, 1500)
+                    toast.success('Workload balanced successfully')
                   }}>
                     Balance Workload
                   </Button>
@@ -4226,10 +4138,7 @@ export default function AllocationClient() {
                     </div>
                   </div>
                   <Button className="w-full" variant="outline" onClick={() => {
-                    toast.loading('Optimizing utilization...', { id: 'optimize-util' })
-                    setTimeout(() => {
-                      toast.success('Utilization optimized', { id: 'optimize-util' })
-                    }, 1500)
+                    toast.success('Utilization optimized')
                   }}>
                     Optimize
                   </Button>
@@ -4239,11 +4148,8 @@ export default function AllocationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowOptimizeDialog(false)}>Close</Button>
               <Button onClick={() => {
-                toast.loading('Running full optimization...', { id: 'run-all' })
-                setTimeout(() => {
-                  toast.success('Full optimization complete', { id: 'run-all' })
-                  setShowOptimizeDialog(false)
-                }, 2000)
+                toast.success('Full optimization complete')
+                setShowOptimizeDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Run All

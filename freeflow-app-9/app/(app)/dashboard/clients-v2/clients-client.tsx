@@ -5,6 +5,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClients } from '@/lib/hooks/use-clients'
+import { useDeals } from '@/lib/hooks/use-deals'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -524,6 +525,9 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   // Database integration - use real clients hook
   const { clients: dbClients, fetchClients, createClient, updateClient, deleteClient, archiveClient, isLoading: clientsLoading } = useClients()
 
+  // Deals module integration
+  const { createDeal, updateDeal, deals: dbDeals, loading: dealsLoading } = useDeals()
+
   // Form state for new client
   const [newClientForm, setNewClientForm] = useState({
     company: '',
@@ -533,7 +537,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     contactTitle: '',
     email: '',
     phone: '',
-    status: 'prospect' as 'active' | 'inactive' | 'prospect' | 'archived'
+    status: 'prospect' as 'active' | 'inactive' | 'prospect' | 'lead' | 'churned'
   })
 
   // Form state for editing client
@@ -545,7 +549,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     contactName: '',
     email: '',
     phone: '',
-    status: 'active' as 'active' | 'inactive' | 'prospect' | 'archived'
+    status: 'active' as 'active' | 'inactive' | 'prospect' | 'lead' | 'churned'
   })
 
   // Fetch clients on mount
@@ -818,7 +822,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     setShowCreateDealDialog(true)
   }
 
-  // Submit deal creation
+  // Submit deal creation - integrated with useDeals hook
   const handleSubmitDeal = async () => {
     if (!dealForm.name || !dealForm.value || !selectedClientForAction) {
       toast.error('Please fill in deal name and value')
@@ -826,8 +830,27 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
     setIsSubmitting(true)
     try {
+      // Map form stage to deal stage
+      const stageMap: Record<string, 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost'> = {
+        'qualification': 'lead',
+        'discovery': 'qualified',
+        'proposal': 'proposal',
+        'negotiation': 'negotiation',
+        'closed_won': 'closed_won',
+        'closed_lost': 'closed_lost'
+      }
+
       await toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
+        createDeal({
+          client_id: selectedClientForAction.id,
+          title: dealForm.name,
+          value: parseFloat(dealForm.value),
+          stage: stageMap[dealForm.stage] || 'lead',
+          probability: dealForm.probability,
+          expected_close_date: dealForm.expectedClose || null,
+          description: dealForm.notes || null,
+          tags: dealForm.products ? dealForm.products.split(',').map(p => p.trim()) : []
+        }),
         {
           loading: `Creating deal for ${selectedClientForAction.company}...`,
           success: `Deal "${dealForm.name}" created successfully with value ${formatCurrency(parseFloat(dealForm.value))}`,
@@ -923,7 +946,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     setShowScheduleMeetingDialog(true)
   }
 
-  // Submit meeting scheduling
+  // Submit meeting scheduling - integrated with Calendar API
   const handleSubmitMeeting = async () => {
     if (!meetingForm.title || !meetingForm.date || !meetingForm.time || !selectedClientForAction) {
       toast.error('Please fill in meeting title, date, and time')
@@ -931,8 +954,36 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
     setIsSubmitting(true)
     try {
+      // Calculate start and end times
+      const startDate = new Date(`${meetingForm.date}T${meetingForm.time}`)
+      const endDate = new Date(startDate.getTime() + parseInt(meetingForm.duration) * 60000)
+
       await toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
+        fetch('/api/calendar/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create-event',
+            title: meetingForm.title,
+            description: meetingForm.notes || `Meeting with ${selectedClientForAction.company}`,
+            startTime: startDate.toISOString(),
+            endTime: endDate.toISOString(),
+            location: meetingForm.location || 'Video Call',
+            locationType: meetingForm.location?.toLowerCase().includes('video') ? 'video' : 'in-person',
+            clientId: selectedClientForAction.id,
+            attendees: meetingForm.attendees ? meetingForm.attendees.split(',').map(e => ({
+              email: e.trim(),
+              name: e.trim().split('@')[0],
+              status: 'pending'
+            })) : []
+          })
+        }).then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json()
+            throw new Error(data.error || 'Failed to create event')
+          }
+          return res.json()
+        }),
         {
           loading: `Scheduling meeting with ${selectedClientForAction.company}...`,
           success: `Meeting "${meetingForm.title}" scheduled for ${meetingForm.date} at ${meetingForm.time}`,

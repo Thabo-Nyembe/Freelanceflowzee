@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { OnboardingTourComponent, OnboardingTour } from './onboarding-tour'
+import { PlatformTourOverlay } from './platform-tour-overlay'
+import { useTour, TourProvider, PLATFORM_TOURS, type Tour as PlatformTour } from '@/lib/hooks/use-tour'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('OnboardingProvider')
@@ -12,35 +14,45 @@ const logger = createFeatureLogger('OnboardingProvider')
 
 interface OnboardingContextType {
   startTour: (tour: OnboardingTour) => void
+  startPlatformTour: (tourId: string) => void
   completeTour: (tourId: string) => void
   skipTour: () => void
   isAnyTourActive: boolean
   completedTours: string[]
+  platformTours: typeof PLATFORM_TOURS
+  getTourProgress: (tourId: string) => number
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined)
 
 // ============================================================================
-// ONBOARDING PROVIDER
+// ONBOARDING PROVIDER INNER - Uses the useTour hook
 // ============================================================================
 
-export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+function OnboardingProviderInner({ children }: { children: React.ReactNode }) {
   const [activeTour, setActiveTour] = useState<OnboardingTour | null>(null)
-  const [completedTours, setCompletedTours] = useState<string[]>([])
 
-  // Load completed tours from localStorage on mount
-  useEffect(() => {
-    const savedCompletedTours = localStorage.getItem('kazi_completed_tours')
-    if (savedCompletedTours) {
-      try {
-        const parsed = JSON.parse(savedCompletedTours)
-        setCompletedTours(parsed)
-        logger.info('Loaded completed tours from localStorage', { count: parsed.length })
-      } catch (error) {
-        logger.error('Failed to parse completed tours from localStorage', { error })
-      }
-    }
-  }, [])
+  // Use the centralized tour hook for platform tours (with database persistence)
+  const tourHook = useTour()
+  const {
+    isActive: isPlatformTourActive,
+    currentTour,
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    completedTours,
+    startTour: startPlatformTourHook,
+    nextStep,
+    prevStep,
+    skipStep,
+    endTour,
+    completeTour: completePlatformTour,
+    availableTours,
+    allTours,
+    getTourProgress,
+    isFirstStep,
+    isLastStep
+  } = tourHook
 
   const startTour = (tour: OnboardingTour) => {
     // Check if already completed
@@ -57,21 +69,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     })
   }
 
-  const completeTour = (tourId: string) => {
-    const newCompletedTours = [...completedTours, tourId]
-    setCompletedTours(newCompletedTours)
-    setActiveTour(null)
+  const startPlatformTour = (tourId: string) => {
+    startPlatformTourHook(tourId)
+  }
 
-    // Save to localStorage
-    try {
-      localStorage.setItem('kazi_completed_tours', JSON.stringify(newCompletedTours))
-      logger.info('Tour completed and saved', {
-        tourId,
-        totalCompleted: newCompletedTours.length
-      })
-    } catch (error) {
-      logger.error('Failed to save completed tour to localStorage', { error, tourId })
-    }
+  const completeTour = (tourId: string) => {
+    setActiveTour(null)
+    logger.info('Tour completed', { tourId })
   }
 
   const skipTour = () => {
@@ -79,29 +83,48 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       logger.info('Tour skipped', { tourId: activeTour.id })
     }
     setActiveTour(null)
+    if (isPlatformTourActive) {
+      endTour()
+    }
   }
 
   const value: OnboardingContextType = {
     startTour,
+    startPlatformTour,
     completeTour,
     skipTour,
-    isAnyTourActive: activeTour !== null,
-    completedTours
+    isAnyTourActive: activeTour !== null || isPlatformTourActive,
+    completedTours,
+    platformTours: PLATFORM_TOURS,
+    getTourProgress
   }
 
   return (
     <OnboardingContext.Provider value={value}>
-      {children}
-      {activeTour && (
-        <OnboardingTourComponent
-          tour={activeTour}
-          isActive={true}
-          onComplete={() => completeTour(activeTour.id)}
-          onSkip={skipTour}
-        />
-      )}
+      <TourProvider value={tourHook}>
+        {children}
+        {/* Custom onboarding tours */}
+        {activeTour && (
+          <OnboardingTourComponent
+            tour={activeTour}
+            isActive={true}
+            onComplete={() => completeTour(activeTour.id)}
+            onSkip={skipTour}
+          />
+        )}
+        {/* Platform tours with database persistence */}
+        {isPlatformTourActive && <PlatformTourOverlay />}
+      </TourProvider>
     </OnboardingContext.Provider>
   )
+}
+
+// ============================================================================
+// ONBOARDING PROVIDER - Wrapper
+// ============================================================================
+
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
+  return <OnboardingProviderInner>{children}</OnboardingProviderInner>
 }
 
 // ============================================================================

@@ -307,14 +307,7 @@ export default function FilesHubPage() {
         setIsPageLoading(false)
         announce(`${transformedFiles.length} files loaded from database`, 'polite')
 
-        toast.promise(
-          new Promise(resolve => setTimeout(resolve, 500)),
-          {
-            loading: 'Loading files...',
-            success: `${transformedFiles.length} files loaded from Supabase - ${formatFileSize(filesData.reduce((sum, f) => sum + f.size, 0))} total`,
-            error: 'Failed to load files'
-          }
-        )
+        toast.success(`${transformedFiles.length} files loaded from Supabase - ${formatFileSize(filesData.reduce((sum, f) => sum + f.size, 0))} total`)
 
         logger.info('Files loaded successfully', {
           count: transformedFiles.length,
@@ -597,14 +590,7 @@ export default function FilesHubPage() {
       const totalSize = uploadedFiles.reduce((sum, f) => sum + f.size, 0)
       const formattedSize = formatFileSize(totalSize)
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 800)),
-        {
-          loading: 'Processing uploaded files...',
-          success: `${uploadedFiles.length} file(s) uploaded! Total size: ${formattedSize}`,
-          error: 'Upload processing failed'
-        }
-      )
+      toast.success(`${uploadedFiles.length} file(s) uploaded! Total size: ${formattedSize}`)
 
       announce(`${uploadedFiles.length} files uploaded successfully`, 'polite')
     }
@@ -692,14 +678,7 @@ export default function FilesHubPage() {
       // 4. Update local state
       dispatch({ type: 'DELETE_FILE', fileId })
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 600)),
-        {
-          loading: 'Deleting file...',
-          success: `Deleted ${file.name}`,
-          error: 'Failed to delete file'
-        }
-      )
+      toast.success(`Deleted ${file.name}`)
       announce(`Deleted ${file.name}`, 'polite')
 
       logger.info('File deleted successfully', {
@@ -755,14 +734,7 @@ export default function FilesHubPage() {
         totalSize
       })
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 700)),
-        {
-          loading: 'Deleting selected files...',
-          success: `${filesToDelete.length} files deleted - ${Math.round(totalSize / 1024)}KB removed`,
-          error: 'Failed to delete files'
-        }
-      )
+      toast.success(`${filesToDelete.length} files deleted - ${Math.round(totalSize / 1024)}KB removed`)
     } catch (error: any) {
       logger.error('Bulk delete failed', {
         error: error.message,
@@ -844,14 +816,7 @@ export default function FilesHubPage() {
         const updatedFile = { ...file, downloads: file.downloads + 1 }
         dispatch({ type: 'UPDATE_FILE', file: updatedFile })
 
-        toast.promise(
-          new Promise(resolve => setTimeout(resolve, 500)),
-          {
-            loading: 'Preparing download...',
-            success: `Downloaded ${file.name} - Size: ${formatFileSize(file.size)}`,
-            error: 'Download failed'
-          }
-        )
+        toast.success(`Downloaded ${file.name} - Size: ${formatFileSize(file.size)}`)
 
         announce(`Downloaded ${file.name}`, 'polite')
 
@@ -868,14 +833,7 @@ export default function FilesHubPage() {
         a.click()
         document.body.removeChild(a)
 
-        toast.promise(
-          new Promise(resolve => setTimeout(resolve, 500)),
-          {
-            loading: 'Preparing download...',
-            success: `Downloaded ${file.name}`,
-            error: 'Download failed'
-          }
-        )
+        toast.success(`Downloaded ${file.name}`)
         announce(`Downloaded ${file.name}`, 'polite')
       }
 
@@ -949,14 +907,7 @@ export default function FilesHubPage() {
         userId
       })
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 600)),
-        {
-          loading: 'Sharing file...',
-          success: `File shared: ${state.selectedFile.name} - ${emails.length} recipient(s)`,
-          error: 'Failed to share file'
-        }
-      )
+      toast.success(`File shared: ${state.selectedFile.name} - ${emails.length} recipient(s)`)
       announce('File shared successfully', 'polite')
     } catch (error: any) {
       logger.error('File share failed', {
@@ -1023,14 +974,7 @@ export default function FilesHubPage() {
         userId
       })
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 500)),
-        {
-          loading: 'Moving file...',
-          success: `File moved: ${state.selectedFile.name} - ${previousFolder} to ${moveToFolder}`,
-          error: 'Failed to move file'
-        }
-      )
+      toast.success(`File moved: ${state.selectedFile.name} - ${previousFolder} to ${moveToFolder}`)
       announce('File moved successfully', 'polite')
     } catch (error: any) {
       logger.error('File move failed', {
@@ -1074,14 +1018,7 @@ export default function FilesHubPage() {
 
       dispatch({ type: 'TOGGLE_STAR', fileId })
 
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 400)),
-        {
-          loading: newStarred ? 'Adding to favorites...' : 'Removing from favorites...',
-          success: newStarred ? `Added to favorites: ${file.name}` : `Removed from favorites: ${file.name}`,
-          error: 'Failed to update favorites'
-        }
-      )
+      toast.success(newStarred ? `Added to favorites: ${file.name}` : `Removed from favorites: ${file.name}`)
     } catch (error: any) {
       logger.error('Toggle star failed', {
         error: error.message,

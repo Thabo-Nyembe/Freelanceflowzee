@@ -1681,10 +1681,12 @@ export default function ThirdPartyIntegrationsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>Production API Key</Label>
-                            <Button variant="ghost" size="sm" onClick={() => {
+                            <Button variant="ghost" size="sm" onClick={async () => {
                               if (confirm('Are you sure you want to regenerate the Production API key? This will invalidate your current key.')) {
-                                /* TODO: Implement API key regeneration */
-                                toast.success('Production API key regenerated', { description: 'Your new key is now active' })
+                                toast.promise(
+                                  fetch('/api/api-keys/regenerate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'production' }) }),
+                                  { loading: 'Regenerating key...', success: 'Production API key regenerated', error: 'Failed to regenerate key' }
+                                )
                               }
                             }}>Regenerate</Button>
                           </div>
@@ -1693,10 +1695,12 @@ export default function ThirdPartyIntegrationsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>Test API Key</Label>
-                            <Button variant="ghost" size="sm" onClick={() => {
+                            <Button variant="ghost" size="sm" onClick={async () => {
                               if (confirm('Are you sure you want to regenerate the Test API key? This will invalidate your current test key.')) {
-                                /* TODO: Implement test API key regeneration */
-                                toast.success('Test API key regenerated', { description: 'Your new test key is now active' })
+                                toast.promise(
+                                  fetch('/api/api-keys/regenerate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'test' }) }),
+                                  { loading: 'Regenerating key...', success: 'Test API key regenerated', error: 'Failed to regenerate key' }
+                                )
                               }
                             }}>Regenerate</Button>
                           </div>
@@ -1738,9 +1742,11 @@ export default function ThirdPartyIntegrationsClient() {
                                 <p className="text-xs text-gray-500 font-mono">{webhook.url}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" onClick={() => {
-                                /* TODO: Implement actual webhook test API call */
-                                toast.success(`Webhook test sent`, { description: `Test event sent to ${webhook.name}` })
+                                <Button variant="ghost" size="sm" onClick={async () => {
+                                toast.promise(
+                                  fetch('/api/webhooks/test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: webhook.url }) }),
+                                  { loading: 'Sending test...', success: `Test event sent to ${webhook.name}`, error: 'Test failed' }
+                                )
                               }}>Test</Button>
                                 <Button variant="ghost" size="sm" onClick={() => {
                                   setSelectedIntegrationForAction(webhook.name)
@@ -1816,9 +1822,21 @@ export default function ThirdPartyIntegrationsClient() {
                           <Switch defaultChecked />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2" onClick={() => {
-                          /* TODO: Implement data export functionality */
-                          toast.success('Export started', { description: 'Your data export will be ready for download shortly' })
+                          <Button variant="outline" className="flex items-center gap-2" onClick={async () => {
+                          toast.promise(
+                            fetch('/api/data-export', { method: 'POST' }).then(async (res) => {
+                              const blob = await res.blob()
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = 'integration-data-export.json'
+                              document.body.appendChild(a)
+                              a.click()
+                              document.body.removeChild(a)
+                              URL.revokeObjectURL(url)
+                            }),
+                            { loading: 'Preparing export...', success: 'Data export downloaded', error: 'Export failed' }
+                          )
                         }}>
                             <FileText className="w-4 h-4" />
                             Export All Data

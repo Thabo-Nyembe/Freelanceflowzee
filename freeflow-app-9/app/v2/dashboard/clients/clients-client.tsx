@@ -5,6 +5,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClients } from '@/lib/hooks/use-clients'
+import { useDeals } from '@/lib/hooks/use-deals'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -460,6 +461,31 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   // Database integration - use real clients hook
   const { clients: dbClients, fetchClients, createClient, updateClient, deleteClient, archiveClient, isLoading: clientsLoading } = useClients()
 
+  // Deals module integration
+  const { createDeal, deals: dbDeals, loading: dealsLoading } = useDeals()
+
+  // State for deal creation dialog
+  const [showDealDialog, setShowDealDialog] = useState(false)
+  const [dealForm, setDealForm] = useState({
+    title: '',
+    value: '',
+    stage: 'lead' as 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost',
+    probability: 25,
+    expectedCloseDate: '',
+    description: ''
+  })
+
+  // State for meeting scheduling dialog
+  const [showMeetingDialog, setShowMeetingDialog] = useState(false)
+  const [meetingForm, setMeetingForm] = useState({
+    title: '',
+    date: '',
+    time: '',
+    duration: '30',
+    location: 'Video Call',
+    notes: ''
+  })
+
   // Form state for new client
   const [newClientForm, setNewClientForm] = useState({
     company: '',
@@ -753,10 +779,46 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   }
 
   const handleCreateDeal = (client: typeof mockClients[0]) => {
-    toast.info('Create Deal', {
-      description: `Opening deal form for ${client.company}`
+    setSelectedClient(client)
+    setDealForm({
+      title: `Deal with ${client.company}`,
+      value: '',
+      stage: 'lead',
+      probability: 25,
+      expectedCloseDate: '',
+      description: ''
     })
-    // TODO: Integrate with deals module when available
+    setShowDealDialog(true)
+  }
+
+  // Submit deal creation - integrated with useDeals hook
+  const handleSubmitDeal = async () => {
+    if (!dealForm.title || !dealForm.value || !selectedClient) {
+      toast.error('Please fill in deal title and value')
+      return
+    }
+    try {
+      await toast.promise(
+        createDeal({
+          client_id: selectedClient.id,
+          title: dealForm.title,
+          value: parseFloat(dealForm.value),
+          stage: dealForm.stage,
+          probability: dealForm.probability,
+          expected_close_date: dealForm.expectedCloseDate || null,
+          description: dealForm.description || null
+        }),
+        {
+          loading: `Creating deal for ${selectedClient.company}...`,
+          success: `Deal "${dealForm.title}" created successfully`,
+          error: 'Failed to create deal'
+        }
+      )
+      setShowDealDialog(false)
+      setDealForm({ title: '', value: '', stage: 'lead', probability: 25, expectedCloseDate: '', description: '' })
+    } catch (error) {
+      console.error('Failed to create deal:', error)
+    }
   }
 
   const handleSendMessage = (client: typeof mockClients[0]) => {
@@ -774,10 +836,64 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   }
 
   const handleScheduleMeeting = (client: typeof mockClients[0]) => {
-    toast.success('Meeting scheduling', {
-      description: `Opening calendar for meeting with ${client.company}`
+    setSelectedClient(client)
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    setMeetingForm({
+      title: `Meeting with ${client.company}`,
+      date: tomorrow.toISOString().split('T')[0],
+      time: '10:00',
+      duration: '30',
+      location: 'Video Call',
+      notes: ''
     })
-    // TODO: Integrate with calendar module when available
+    setShowMeetingDialog(true)
+  }
+
+  // Submit meeting scheduling - integrated with Calendar API
+  const handleSubmitMeeting = async () => {
+    if (!meetingForm.title || !meetingForm.date || !meetingForm.time || !selectedClient) {
+      toast.error('Please fill in meeting title, date, and time')
+      return
+    }
+    try {
+      const startDate = new Date(`${meetingForm.date}T${meetingForm.time}`)
+      const endDate = new Date(startDate.getTime() + parseInt(meetingForm.duration) * 60000)
+
+      await toast.promise(
+        fetch('/api/calendar/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create-event',
+            title: meetingForm.title,
+            description: meetingForm.notes || `Meeting with ${selectedClient.company}`,
+            startTime: startDate.toISOString(),
+            endTime: endDate.toISOString(),
+            location: meetingForm.location,
+            locationType: meetingForm.location.toLowerCase().includes('video') ? 'video' : 'in-person',
+            clientId: selectedClient.id,
+            attendees: selectedClient.primaryContact?.email ? [{
+              email: selectedClient.primaryContact.email,
+              name: selectedClient.primaryContact.name,
+              status: 'pending'
+            }] : []
+          })
+        }).then(async (res) => {
+          if (!res.ok) throw new Error('Failed to create event')
+          return res.json()
+        }),
+        {
+          loading: `Scheduling meeting with ${selectedClient.company}...`,
+          success: `Meeting "${meetingForm.title}" scheduled for ${meetingForm.date} at ${meetingForm.time}`,
+          error: 'Failed to schedule meeting'
+        }
+      )
+      setShowMeetingDialog(false)
+      setMeetingForm({ title: '', date: '', time: '', duration: '30', location: 'Video Call', notes: '' })
+    } catch (error) {
+      console.error('Failed to schedule meeting:', error)
+    }
   }
 
   const handleCallClient = (client: typeof mockClients[0]) => {
@@ -3445,6 +3561,165 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <Search className="w-4 h-4 mr-2" />
                 Find Duplicates
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Deal Dialog */}
+        <Dialog open={showDealDialog} onOpenChange={setShowDealDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Handshake className="w-5 h-5 text-blue-500" />
+                Create New Deal
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Deal Title</Label>
+                <Input
+                  value={dealForm.title}
+                  onChange={(e) => setDealForm({ ...dealForm, title: e.target.value })}
+                  placeholder="Enter deal title"
+                />
+              </div>
+              <div>
+                <Label>Value ($)</Label>
+                <Input
+                  type="number"
+                  value={dealForm.value}
+                  onChange={(e) => setDealForm({ ...dealForm, value: e.target.value })}
+                  placeholder="Enter deal value"
+                />
+              </div>
+              <div>
+                <Label>Stage</Label>
+                <Select value={dealForm.stage} onValueChange={(value: any) => setDealForm({ ...dealForm, stage: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead">Lead</SelectItem>
+                    <SelectItem value="qualified">Qualified</SelectItem>
+                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="negotiation">Negotiation</SelectItem>
+                    <SelectItem value="closed_won">Closed Won</SelectItem>
+                    <SelectItem value="closed_lost">Closed Lost</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Probability (%)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={dealForm.probability}
+                  onChange={(e) => setDealForm({ ...dealForm, probability: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div>
+                <Label>Expected Close Date</Label>
+                <Input
+                  type="date"
+                  value={dealForm.expectedCloseDate}
+                  onChange={(e) => setDealForm({ ...dealForm, expectedCloseDate: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Input
+                  value={dealForm.description}
+                  onChange={(e) => setDealForm({ ...dealForm, description: e.target.value })}
+                  placeholder="Optional description"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowDealDialog(false)}>Cancel</Button>
+              <Button onClick={handleSubmitDeal}>Create Deal</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Meeting Dialog */}
+        <Dialog open={showMeetingDialog} onOpenChange={setShowMeetingDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-green-500" />
+                Schedule Meeting
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Meeting Title</Label>
+                <Input
+                  value={meetingForm.title}
+                  onChange={(e) => setMeetingForm({ ...meetingForm, title: e.target.value })}
+                  placeholder="Enter meeting title"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Date</Label>
+                  <Input
+                    type="date"
+                    value={meetingForm.date}
+                    onChange={(e) => setMeetingForm({ ...meetingForm, date: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Time</Label>
+                  <Input
+                    type="time"
+                    value={meetingForm.time}
+                    onChange={(e) => setMeetingForm({ ...meetingForm, time: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Duration</Label>
+                <Select value={meetingForm.duration} onValueChange={(value) => setMeetingForm({ ...meetingForm, duration: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Location</Label>
+                <Select value={meetingForm.location} onValueChange={(value) => setMeetingForm({ ...meetingForm, location: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Video Call">Video Call</SelectItem>
+                    <SelectItem value="Phone Call">Phone Call</SelectItem>
+                    <SelectItem value="In Person">In Person</SelectItem>
+                    <SelectItem value="Office">Office</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Input
+                  value={meetingForm.notes}
+                  onChange={(e) => setMeetingForm({ ...meetingForm, notes: e.target.value })}
+                  placeholder="Optional meeting notes"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setShowMeetingDialog(false)}>Cancel</Button>
+              <Button onClick={handleSubmitMeeting}>Schedule Meeting</Button>
             </div>
           </DialogContent>
         </Dialog>

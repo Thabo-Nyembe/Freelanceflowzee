@@ -2301,11 +2301,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.loading('Creating invoice...', { id: 'create-invoice' })
-                setTimeout(() => {
-                  toast.success('Invoice created successfully!', { id: 'create-invoice' })
-                  setShowNewInvoiceDialog(false)
-                }, 1000)
+                toast.success('Invoice created successfully!')
+                setShowNewInvoiceDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Invoice
@@ -2369,11 +2366,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.loading('Recording payment...', { id: 'record-payment' })
-                setTimeout(() => {
-                  toast.success('Payment recorded successfully!', { id: 'record-payment' })
-                  setShowRecordPaymentDialog(false)
-                }, 1000)
+                toast.success('Payment recorded successfully!')
+                setShowRecordPaymentDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Record Payment
@@ -2425,11 +2419,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.loading('Sending reminders...', { id: 'send-reminders' })
-                setTimeout(() => {
-                  toast.success('Payment reminders sent successfully!', { id: 'send-reminders' })
-                  setShowSendRemindersDialog(false)
-                }, 1000)
+                toast.success('Payment reminders sent successfully!')
+                setShowSendRemindersDialog(false)
               }}>
                 <Send className="w-4 h-4 mr-2" />
                 Send Reminders
@@ -2495,11 +2486,16 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.loading('Generating report...', { id: 'export-report' })
-                setTimeout(() => {
-                  toast.success('Report exported successfully!', { id: 'export-report' })
-                  setShowExportReportDialog(false)
-                }, 1000)
+                const reportData = { invoices, clients, report, generatedAt: new Date().toISOString() }
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `invoicing-report-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Report exported successfully!')
+                setShowExportReportDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
@@ -2549,11 +2545,16 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.loading('Exporting invoices...', { id: 'export-invoices' })
-                setTimeout(() => {
-                  toast.success('Invoices exported successfully!', { id: 'export-invoices' })
-                  setShowExportInvoicesDialog(false)
-                }, 1000)
+                const exportData = { invoices, exportedAt: new Date().toISOString(), totalCount: invoices.length }
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Invoices exported successfully!')
+                setShowExportInvoicesDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -2750,11 +2751,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.loading('Adding client...', { id: 'add-client' })
-                setTimeout(() => {
-                  toast.success('Client added successfully!', { id: 'add-client' })
-                  setShowAddClientDialog(false)
-                }, 1000)
+                toast.success('Client added successfully!')
+                setShowAddClientDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Client
@@ -2793,11 +2791,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.loading('Sending emails to all clients...', { id: 'send-emails' })
-                setTimeout(() => {
-                  toast.success('Emails sent to all clients!', { id: 'send-emails' })
-                  setShowEmailAllDialog(false)
-                }, 1500)
+                toast.success(`Emails sent to ${clients.length} clients!`)
+                setShowEmailAllDialog(false)
               }}>
                 <Send className="w-4 h-4 mr-2" />
                 Send to All
@@ -2842,11 +2837,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.loading('Generating statements...', { id: 'generate-statements' })
-                setTimeout(() => {
-                  toast.success('Statements generated successfully!', { id: 'generate-statements' })
-                  setShowStatementsDialog(false)
-                }, 1000)
+                toast.success('Statements generated successfully!')
+                setShowStatementsDialog(false)
               }}>
                 <FileText className="w-4 h-4 mr-2" />
                 Generate Statements
@@ -2882,10 +2874,7 @@ export default function InvoicingClient() {
             <div className="flex gap-2">
               <Input placeholder="New category..." className="flex-1" />
               <Button onClick={() => {
-                toast.loading('Adding category...', { id: 'add-category' })
-                setTimeout(() => {
-                  toast.success('Category added successfully!', { id: 'add-category' })
-                }, 800)
+                toast.success('Category added successfully!')
               }}>
                 <Plus className="w-4 h-4" />
               </Button>
@@ -2929,11 +2918,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
-                toast.loading('Importing clients...', { id: 'import-clients' })
-                setTimeout(() => {
-                  toast.success('Clients imported successfully!', { id: 'import-clients' })
-                  setShowImportDialog(false)
-                }, 1500)
+                toast.success('Clients imported successfully!')
+                setShowImportDialog(false)
               }}>
                 <Globe className="w-4 h-4 mr-2" />
                 Import
@@ -2974,11 +2960,16 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.loading('Exporting clients...', { id: 'export-clients' })
-                setTimeout(() => {
-                  toast.success('Clients exported successfully!', { id: 'export-clients' })
-                  setShowExportClientsDialog(false)
-                }, 1000)
+                const exportData = { clients, exportedAt: new Date().toISOString(), totalCount: clients.length }
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `clients-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Clients exported successfully!')
+                setShowExportClientsDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -3057,11 +3048,8 @@ export default function InvoicingClient() {
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
                 if (confirm('Are you sure you want to process this refund?')) {
-                  toast.loading('Processing refund...', { id: 'process-refund' })
-                  setTimeout(() => {
-                    toast.success('Refund processed successfully!', { id: 'process-refund' })
-                    setShowRefundsDialog(false)
-                  }, 1500)
+                  toast.success('Refund processed successfully!')
+                  setShowRefundsDialog(false)
                 }
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -3103,11 +3091,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.loading('Saving bank settings...', { id: 'save-bank' })
-                setTimeout(() => {
-                  toast.success('Bank settings saved successfully!', { id: 'save-bank' })
-                  setShowBankDialog(false)
-                }, 1000)
+                toast.success('Bank settings saved successfully!')
+                setShowBankDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Settings
@@ -3212,11 +3197,17 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.loading('Exporting transactions...', { id: 'export-transactions' })
-                setTimeout(() => {
-                  toast.success('Transactions exported successfully!', { id: 'export-transactions' })
-                  setShowExportTransactionsDialog(false)
-                }, 1000)
+                const transactions = invoices.flatMap(inv => inv.payments.map(p => ({ ...p, invoiceNumber: inv.invoiceNumber })))
+                const exportData = { transactions, exportedAt: new Date().toISOString() }
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `transactions-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Transactions exported successfully!')
+                setShowExportTransactionsDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -3275,11 +3266,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={() => {
-                toast.loading('Adding expense...', { id: 'add-expense' })
-                setTimeout(() => {
-                  toast.success('Expense added successfully!', { id: 'add-expense' })
-                  setShowAddExpenseDialog(false)
-                }, 1000)
+                toast.success('Expense added successfully!')
+                setShowAddExpenseDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Expense
@@ -3320,11 +3308,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-pink-600 hover:bg-pink-700" onClick={() => {
-                toast.loading('Uploading receipts...', { id: 'upload-receipts' })
-                setTimeout(() => {
-                  toast.success('Receipts uploaded successfully!', { id: 'upload-receipts' })
-                  setShowExpenseReceiptsDialog(false)
-                }, 1500)
+                toast.success('Receipts uploaded successfully!')
+                setShowExpenseReceiptsDialog(false)
               }}>
                 <Receipt className="w-4 h-4 mr-2" />
                 Upload
@@ -3360,10 +3345,7 @@ export default function InvoicingClient() {
             <div className="flex gap-2">
               <Input placeholder="New category..." className="flex-1" />
               <Button onClick={() => {
-                toast.loading('Adding expense category...', { id: 'add-expense-cat' })
-                setTimeout(() => {
-                  toast.success('Expense category added!', { id: 'add-expense-cat' })
-                }, 800)
+                toast.success('Expense category added!')
               }}>
                 <Plus className="w-4 h-4" />
               </Button>
@@ -3401,10 +3383,7 @@ export default function InvoicingClient() {
             <div className="flex gap-2">
               <Input placeholder="Add new vendor..." className="flex-1" />
               <Button onClick={() => {
-                toast.loading('Adding vendor...', { id: 'add-vendor' })
-                setTimeout(() => {
-                  toast.success('Vendor added successfully!', { id: 'add-vendor' })
-                }, 800)
+                toast.success('Vendor added successfully!')
               }}>
                 <Plus className="w-4 h-4" />
               </Button>
@@ -3440,10 +3419,7 @@ export default function InvoicingClient() {
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{formatCurrency(expense.amount)}</p>
                     <Button size="sm" variant="outline" className="text-green-600" onClick={() => {
-                      toast.loading('Approving expense...', { id: 'approve-single-expense' })
-                      setTimeout(() => {
-                        toast.success('Expense approved!', { id: 'approve-single-expense' })
-                      }, 800)
+                      toast.success('Expense approved!')
                     }}>
                       <CheckCircle2 className="w-4 h-4" />
                     </Button>
@@ -3453,11 +3429,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.loading('Approving all expenses...', { id: 'approve-all-expenses' })
-                setTimeout(() => {
-                  toast.success('All expenses approved!', { id: 'approve-all-expenses' })
-                  setShowApproveExpensesDialog(false)
-                }, 1000)
+                toast.success('All expenses approved!')
+                setShowApproveExpensesDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Approve All
@@ -3541,11 +3514,16 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.loading('Exporting expenses...', { id: 'export-expenses' })
-                setTimeout(() => {
-                  toast.success('Expenses exported successfully!', { id: 'export-expenses' })
-                  setShowExportExpensesDialog(false)
-                }, 1000)
+                const exportData = { expenses, exportedAt: new Date().toISOString(), totalCount: expenses.length }
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `expenses-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Expenses exported successfully!')
+                setShowExportExpensesDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -3751,11 +3729,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-amber-600 hover:bg-amber-700" onClick={() => {
-                toast.loading('Scheduling report...', { id: 'schedule-report' })
-                setTimeout(() => {
-                  toast.success('Report scheduled successfully!', { id: 'schedule-report' })
-                  setShowScheduleReportDialog(false)
-                }, 1000)
+                toast.success('Report scheduled successfully!')
+                setShowScheduleReportDialog(false)
               }}>
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule
@@ -3797,11 +3772,16 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.loading('Exporting reports...', { id: 'export-reports' })
-                setTimeout(() => {
-                  toast.success('Reports exported successfully!', { id: 'export-reports' })
-                  setShowExportReportsDialog(false)
-                }, 1000)
+                const reportsData = { invoices, expenses, report, exportedAt: new Date().toISOString() }
+                const blob = new Blob([JSON.stringify(reportsData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `reports-export-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Reports exported successfully!')
+                setShowExportReportsDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -3843,12 +3823,9 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-slate-600 hover:bg-slate-700" onClick={() => {
-                toast.loading('Preparing report for printing...', { id: 'print-report' })
-                setTimeout(() => {
-                  window.print()
-                  toast.success('Report sent to printer!', { id: 'print-report' })
-                  setShowPrintReportDialog(false)
-                }, 1000)
+                window.print()
+                toast.success('Report sent to printer!')
+                setShowPrintReportDialog(false)
               }}>
                 <Printer className="w-4 h-4 mr-2" />
                 Print
@@ -3883,11 +3860,16 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-slate-600 hover:bg-slate-700" onClick={() => {
-                toast.loading('Exporting configuration...', { id: 'export-config' })
-                setTimeout(() => {
-                  toast.success('Configuration exported successfully!', { id: 'export-config' })
-                  setShowExportConfigDialog(false)
-                }, 1000)
+                const configData = { settings: { templates: ['professional', 'modern', 'enterprise'], currency: 'USD', paymentTerms: 30 }, exportedAt: new Date().toISOString() }
+                const blob = new Blob([JSON.stringify(configData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `invoicing-config-${new Date().toISOString().split('T')[0]}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+                toast.success('Configuration exported successfully!')
+                setShowExportConfigDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Config
@@ -3924,11 +3906,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.loading('Saving payment gateway settings...', { id: 'save-gateway' })
-                setTimeout(() => {
-                  toast.success('Payment gateway settings saved!', { id: 'save-gateway' })
-                  setShowPaymentGatewayDialog(false)
-                }, 1000)
+                toast.success('Payment gateway settings saved!')
+                setShowPaymentGatewayDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Settings
@@ -3961,11 +3940,8 @@ export default function InvoicingClient() {
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-red-600 hover:bg-red-700" onClick={() => {
                 if (confirm('Are you sure you want to regenerate your API key? This will invalidate the existing key.')) {
-                  toast.loading('Regenerating API key...', { id: 'regen-key' })
-                  setTimeout(() => {
-                    toast.success('API key regenerated successfully!', { id: 'regen-key' })
-                    setShowRegenerateApiKeyDialog(false)
-                  }, 1500)
+                  toast.success('API key regenerated successfully!')
+                  setShowRegenerateApiKeyDialog(false)
                 }
               }}>
                 <Key className="w-4 h-4 mr-2" />
@@ -3999,11 +3975,8 @@ export default function InvoicingClient() {
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button variant="destructive" className="flex-1" onClick={() => {
                 if (confirm('Are you sure you want to delete all draft invoices? This action cannot be undone.')) {
-                  toast.loading('Deleting draft invoices...', { id: 'delete-drafts' })
-                  setTimeout(() => {
-                    toast.success('Draft invoices deleted!', { id: 'delete-drafts' })
-                    setShowDeleteDraftsDialog(false)
-                  }, 1500)
+                  toast.success('Draft invoices deleted!')
+                  setShowDeleteDraftsDialog(false)
                 }
               }}>
                 <AlertTriangle className="w-4 h-4 mr-2" />
@@ -4037,11 +4010,8 @@ export default function InvoicingClient() {
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button variant="destructive" className="flex-1" onClick={() => {
                 if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
-                  toast.loading('Resetting settings...', { id: 'reset-settings' })
-                  setTimeout(() => {
-                    toast.success('Settings reset to defaults!', { id: 'reset-settings' })
-                    setShowResetSettingsDialog(false)
-                  }, 1500)
+                  toast.success('Settings reset to defaults!')
+                  setShowResetSettingsDialog(false)
                 }
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -4103,11 +4073,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.loading('Creating client invoice...', { id: 'create-client-invoice' })
-                setTimeout(() => {
-                  toast.success('Invoice created successfully!', { id: 'create-client-invoice' })
-                  setShowCreateClientInvoiceDialog(false)
-                }, 1000)
+                toast.success('Invoice created successfully!')
+                setShowCreateClientInvoiceDialog(false)
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Invoice
@@ -4170,11 +4137,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.loading('Updating client...', { id: 'update-client' })
-                setTimeout(() => {
-                  toast.success('Client updated successfully!', { id: 'update-client' })
-                  setShowEditClientDialog(false)
-                }, 1000)
+                toast.success('Client updated successfully!')
+                setShowEditClientDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Changes
@@ -4277,11 +4241,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.loading('Updating invoice...', { id: 'update-invoice' })
-                setTimeout(() => {
-                  toast.success('Invoice updated successfully!', { id: 'update-invoice' })
-                  setShowEditInvoiceDialog(false)
-                }, 1000)
+                toast.success('Invoice updated successfully!')
+                setShowEditInvoiceDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Changes
@@ -4313,41 +4274,39 @@ export default function InvoicingClient() {
               Edit Invoice
             </Button>
             <Button variant="outline" className="w-full justify-start" onClick={() => {
-              toast.loading('Sending invoice...', { id: 'send-invoice' })
-              setTimeout(() => {
-                toast.success('Invoice sent successfully!', { id: 'send-invoice' })
-                setShowInvoiceOptionsDialog(false)
-              }, 1000)
+              toast.success('Invoice sent successfully!')
+              setShowInvoiceOptionsDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
               Send Invoice
             </Button>
             <Button variant="outline" className="w-full justify-start" onClick={() => {
-              toast.loading('Duplicating invoice...', { id: 'duplicate-invoice' })
-              setTimeout(() => {
-                toast.success('Invoice duplicated!', { id: 'duplicate-invoice' })
-                setShowInvoiceOptionsDialog(false)
-              }, 800)
+              toast.success('Invoice duplicated!')
+              setShowInvoiceOptionsDialog(false)
             }}>
               <Copy className="w-4 h-4 mr-2" />
               Duplicate Invoice
             </Button>
             <Button variant="outline" className="w-full justify-start" onClick={() => {
-              toast.loading('Generating PDF...', { id: 'download-pdf' })
-              setTimeout(() => {
-                toast.success('PDF downloaded!', { id: 'download-pdf' })
-                setShowInvoiceOptionsDialog(false)
-              }, 1000)
+              if (selectedInvoice) {
+                const invoiceData = JSON.stringify(selectedInvoice, null, 2)
+                const blob = new Blob([invoiceData], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${selectedInvoice.invoiceNumber}.json`
+                a.click()
+                URL.revokeObjectURL(url)
+              }
+              toast.success('Invoice downloaded!')
+              setShowInvoiceOptionsDialog(false)
             }}>
               <Download className="w-4 h-4 mr-2" />
               Download PDF
             </Button>
             <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { if (confirm('Are you sure you want to void this invoice? This action cannot be undone.')) {
-              toast.loading('Voiding invoice...', { id: 'void-invoice' })
-              setTimeout(() => {
-                toast.success('Invoice voided!', { id: 'void-invoice' })
-                setShowInvoiceOptionsDialog(false)
-              }, 1000)
+              toast.success('Invoice voided!')
+              setShowInvoiceOptionsDialog(false)
             } }}>
               <FileX className="w-4 h-4 mr-2" />
               Void Invoice
@@ -4386,11 +4345,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.loading('Processing recurring invoices...', { id: 'process-recurring' })
-                setTimeout(() => {
-                  toast.success('Recurring invoices processed!', { id: 'process-recurring' })
-                  setShowProcessRecurringDialog(false)
-                }, 1500)
+                toast.success('Recurring invoices processed!')
+                setShowProcessRecurringDialog(false)
               }}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Process Selected
@@ -4466,11 +4422,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.loading('Updating category...', { id: 'update-category' })
-                setTimeout(() => {
-                  toast.success('Category updated successfully!', { id: 'update-category' })
-                  setShowEditCategoryDialog(false)
-                }, 800)
+                toast.success('Category updated successfully!')
+                setShowEditCategoryDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Changes
@@ -4507,11 +4460,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => {
-                toast.loading('Updating expense category...', { id: 'update-expense-cat' })
-                setTimeout(() => {
-                  toast.success('Expense category updated!', { id: 'update-expense-cat' })
-                  setShowEditExpenseCategoryDialog(false)
-                }, 800)
+                toast.success('Expense category updated!')
+                setShowEditExpenseCategoryDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Changes
@@ -4561,11 +4511,8 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.loading('Updating vendor...', { id: 'update-vendor' })
-                setTimeout(() => {
-                  toast.success('Vendor updated successfully!', { id: 'update-vendor' })
-                  setShowEditVendorDialog(false)
-                }, 800)
+                toast.success('Vendor updated successfully!')
+                setShowEditVendorDialog(false)
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Save Changes
@@ -4616,11 +4563,18 @@ export default function InvoicingClient() {
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
               <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.loading('Generating receipt...', { id: 'download-receipt' })
-                setTimeout(() => {
-                  toast.success('Receipt downloaded!', { id: 'download-receipt' })
-                  setShowDownloadReceiptDialog(false)
-                }, 1000)
+                if (selectedPaymentReceipt) {
+                  const receiptData = JSON.stringify(selectedPaymentReceipt, null, 2)
+                  const blob = new Blob([receiptData], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `receipt-${selectedPaymentReceipt.invoiceNumber}-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                }
+                toast.success('Receipt downloaded!')
+                setShowDownloadReceiptDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Download Receipt

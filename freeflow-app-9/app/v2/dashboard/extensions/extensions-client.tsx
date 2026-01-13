@@ -566,33 +566,21 @@ export default function ExtensionsClient() {
 
   // Handlers
   const handleInstallExtension = (extensionName: string) => {
-    toast.loading(`Installing ${extensionName}...`, { id: `install-${extensionName}` })
-    setTimeout(() => {
-      toast.success(`${extensionName} installed successfully`, { id: `install-${extensionName}` })
-    }, 1500)
+    toast.success(`${extensionName} installed successfully`)
   }
 
   const handleUninstallExtension = (extensionName: string) => {
     if (confirm(`Are you sure you want to uninstall ${extensionName}? This action cannot be undone.`)) {
-      toast.loading(`Uninstalling ${extensionName}...`, { id: `uninstall-${extensionName}` })
-      setTimeout(() => {
-        toast.success(`${extensionName} uninstalled successfully`, { id: `uninstall-${extensionName}` })
-      }, 1000)
+      toast.success(`${extensionName} uninstalled successfully`)
     }
   }
 
   const handleEnableExtension = (extensionName: string) => {
-    toast.loading(`Enabling ${extensionName}...`, { id: `enable-${extensionName}` })
-    setTimeout(() => {
-      toast.success(`${extensionName} enabled successfully`, { id: `enable-${extensionName}` })
-    }, 1000)
+    toast.success(`${extensionName} enabled successfully`)
   }
 
   const handleDisableExtension = (extensionName: string) => {
-    toast.loading(`Disabling ${extensionName}...`, { id: `disable-${extensionName}` })
-    setTimeout(() => {
-      toast.success(`${extensionName} disabled successfully`, { id: `disable-${extensionName}` })
-    }, 1000)
+    toast.success(`${extensionName} disabled successfully`)
   }
 
   const handleConfigureExtension = (extensionName: string) => {
@@ -610,21 +598,14 @@ export default function ExtensionsClient() {
 
   // Check updates handlers
   const handleCheckUpdates = () => {
-    setIsCheckingUpdates(true)
-    setUpdateResults([])
-    setSelectedUpdates([])
-
-    // Simulate checking for updates
-    setTimeout(() => {
-      const results = installedExtensions.map(ext => ({
-        name: ext.name,
-        currentVersion: ext.version,
-        newVersion: Math.random() > 0.5 ? `${parseInt(ext.version.split('.')[0]) + 1}.0.0` : ext.version,
-        hasUpdate: Math.random() > 0.5
-      }))
-      setUpdateResults(results)
-      setIsCheckingUpdates(false)
-    }, 2000)
+    const results = installedExtensions.map(ext => ({
+      name: ext.name,
+      currentVersion: ext.version,
+      newVersion: Math.random() > 0.5 ? `${parseInt(ext.version.split('.')[0]) + 1}.0.0` : ext.version,
+      hasUpdate: Math.random() > 0.5
+    }))
+    setUpdateResults(results)
+    toast.success('Update check complete', { description: `Found ${results.filter(r => r.hasUpdate).length} updates available` })
   }
 
   const handleInstallUpdates = () => {
@@ -635,14 +616,7 @@ export default function ExtensionsClient() {
       return
     }
 
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: `Installing ${selectedUpdates.length} update(s)...`,
-        success: `Successfully updated ${selectedUpdates.length} extension(s)`,
-        error: 'Failed to install updates'
-      }
-    )
+    toast.success(`Successfully updated ${selectedUpdates.length} extension(s)`)
     setCheckUpdatesDialogOpen(false)
     setSelectedUpdates([])
   }
@@ -662,17 +636,9 @@ export default function ExtensionsClient() {
       return
     }
 
-    const actionText = manageAction === 'enable' ? 'Enabling' : manageAction === 'disable' ? 'Disabling' : 'Uninstalling'
     const successText = manageAction === 'enable' ? 'enabled' : manageAction === 'disable' ? 'disabled' : 'uninstalled'
 
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
-      {
-        loading: `${actionText} ${selectedManagedExtensions.length} extension(s)...`,
-        success: `Successfully ${successText} ${selectedManagedExtensions.length} extension(s)`,
-        error: `Failed to ${manageAction} extensions`
-      }
-    )
+    toast.success(`Successfully ${successText} ${selectedManagedExtensions.length} extension(s)`)
     setManageDialogOpen(false)
     setSelectedManagedExtensions([])
     setManageAction(null)
@@ -692,14 +658,7 @@ export default function ExtensionsClient() {
       })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'Submitting extension for review...',
-        success: `${submitExtensionName} has been submitted for review`,
-        error: 'Failed to submit extension'
-      }
-    )
+    toast.success(`${submitExtensionName} has been submitted for review`)
     setSubmitExtensionDialogOpen(false)
     setSubmitExtensionName('')
     setSubmitExtensionDescription('')
@@ -710,50 +669,26 @@ export default function ExtensionsClient() {
 
   // Create extension handler
   const handleCreateExtension = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating extension project...',
-        success: 'Extension project created successfully',
-        error: 'Failed to create extension'
-      }
-    )
+    toast.success('Extension project created successfully')
     setCreateExtensionDialogOpen(false)
   }
 
   // Clear cache handler
   const handleClearCache = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Clearing extension cache...',
-        success: 'Extension cache cleared (156 MB freed)',
-        error: 'Failed to clear cache'
-      }
-    )
+    toast.success('Extension cache cleared (156 MB freed)')
     setClearCacheDialogOpen(false)
   }
 
   // Export data handler
   const handleExportData = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Exporting extension data...',
-        success: 'Extension data exported to extensions-data.json',
-        error: 'Failed to export data'
-      }
-    )
+    toast.success('Extension data exported to extensions-data.json')
     setExportDataDialogOpen(false)
   }
 
   // Select folder handler
   const handleSelectFolder = () => {
-    toast.loading('Loading extension from folder...', { id: 'load-extension-folder' })
-    setTimeout(() => {
-      toast.success('Extension loaded successfully', { id: 'load-extension-folder' })
-      setSelectFolderDialogOpen(false)
-    }, 1500)
+    toast.success('Extension loaded successfully')
+    setSelectFolderDialogOpen(false)
   }
 
   // Pack extension handler
@@ -764,14 +699,7 @@ export default function ExtensionsClient() {
       })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'Packing extension...',
-        success: 'Extension packed to my-extension.crx',
-        error: 'Failed to pack extension'
-      }
-    )
+    toast.success('Extension packed to my-extension.crx')
     setPackExtensionDialogOpen(false)
     setPackSourceDir('')
     setPackPrivateKey('')
@@ -779,14 +707,7 @@ export default function ExtensionsClient() {
 
   // Regenerate API key handler
   const handleRegenerateKey = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Regenerating API key...',
-        success: 'New API key generated successfully',
-        error: 'Failed to regenerate key'
-      }
-    )
+    toast.success('New API key generated successfully')
     setRegenerateKeyDialogOpen(false)
   }
 
@@ -807,14 +728,7 @@ export default function ExtensionsClient() {
 
   // Export settings handler
   const handleExportSettings = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Exporting settings...',
-        success: 'Settings exported to extension-settings.json',
-        error: 'Failed to export settings'
-      }
-    )
+    toast.success('Settings exported to extension-settings.json')
     setExportSettingsDialogOpen(false)
   }
 
@@ -826,14 +740,7 @@ export default function ExtensionsClient() {
       })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Importing settings...',
-        success: 'Settings imported successfully',
-        error: 'Failed to import settings'
-      }
-    )
+    toast.success('Settings imported successfully')
     setImportSettingsDialogOpen(false)
     setImportFile(null)
   }
@@ -845,62 +752,31 @@ export default function ExtensionsClient() {
 
   // Disable all extensions handler
   const handleDisableAll = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Disabling all extensions...',
-        success: `All ${installedExtensions.length} extensions have been disabled`,
-        error: 'Failed to disable extensions'
-      }
-    )
+    toast.success(`All ${installedExtensions.length} extensions have been disabled`)
     setDisableAllDialogOpen(false)
   }
 
   // Remove all extensions handler
   const handleRemoveAll = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: 'Removing all extensions...',
-        success: `All ${installedExtensions.length} extensions have been removed`,
-        error: 'Failed to remove extensions'
-      }
-    )
+    toast.success(`All ${installedExtensions.length} extensions have been removed`)
     setRemoveAllDialogOpen(false)
   }
 
   // Reset to defaults handler
   const handleResetDefaults = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Resetting to defaults...',
-        success: 'All extension settings have been reset to defaults',
-        error: 'Failed to reset settings'
-      }
-    )
+    toast.success('All extension settings have been reset to defaults')
     setResetDefaultsDialogOpen(false)
   }
 
   // Extension options save handler
   const handleSaveExtensionOptions = () => {
-    toast.loading('Saving extension options...', { id: 'save-extension-options' })
-    setTimeout(() => {
-      toast.success('Extension options saved successfully', { id: 'save-extension-options' })
-      setExtensionOptionsDialogOpen(false)
-    }, 1000)
+    toast.success('Extension options saved successfully')
+    setExtensionOptionsDialogOpen(false)
   }
 
   // Remove single extension handler
   const handleRemoveExtension = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: `Removing ${selectedExtension?.name}...`,
-        success: `${selectedExtension?.name} has been removed`,
-        error: 'Failed to remove extension'
-      }
-    )
+    toast.success(`${selectedExtension?.name} has been removed`)
     setRemoveExtensionDialogOpen(false)
     setSelectedExtension(null)
   }
@@ -923,14 +799,7 @@ export default function ExtensionsClient() {
       })
       return
     }
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Submitting report...',
-        success: 'Report submitted. We will review this extension.',
-        error: 'Failed to submit report'
-      }
-    )
+    toast.success('Report submitted. We will review this extension.')
     setReportExtensionDialogOpen(false)
     setReportReason('')
     setReportDetails('')
@@ -944,14 +813,7 @@ export default function ExtensionsClient() {
 
   const confirmDeleteExtension = () => {
     if (extensionToDelete) {
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 1500)),
-        {
-          loading: `Removing ${extensionToDelete.name}...`,
-          success: `${extensionToDelete.name} has been removed`,
-          error: 'Failed to remove extension'
-        }
-      )
+      toast.success(`${extensionToDelete.name} has been removed`)
     }
     setConfirmDeleteDialogOpen(false)
     setExtensionToDelete(null)

@@ -814,11 +814,7 @@ export default function ApiClient() {
   }
 
   const handleTestEndpoint = (endpointName: string) => {
-    toast.info('Testing endpoint', { description: `Running tests on "${endpointName}"...` })
-    // Simulate test
-    setTimeout(() => {
-      toast.success('Test complete', { description: `"${endpointName}" responded with 200 OK` })
-    }, 1500)
+    toast.success('Test complete', { description: `"${endpointName}" responded with 200 OK` })
   }
 
   const handleExportApiDocs = () => {
@@ -3341,30 +3337,12 @@ export default function ApiClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSendRequestDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-                  const startTime = Date.now();
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 800 + Math.random() * 700)),
-                    {
-                      loading: 'Sending request...',
-                      success: () => {
-                        const duration = Date.now() - startTime;
-                        const statusCodes = [200, 201, 204];
-                        const status = statusCodes[Math.floor(Math.random() * statusCodes.length)];
-                        setShowSendRequestDialog(false);
-                        return `Response: ${status} OK (${duration}ms)`;
-                      },
-                      error: 'Request failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  toast.success('Response: 200 OK (145ms)')
+                  setShowSendRequestDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Sending...' : 'Send Request'}
+                <Send className="w-4 h-4 mr-2" />
+                Send Request
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3557,27 +3535,13 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateCollectionDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Creating collection...',
-                      success: () => {
-                        const collectionId = 'col_' + Math.random().toString(36).substring(2, 10);
-                        setShowCreateCollectionDialog(false);
-                        return `Collection created: ${collectionId}`;
-                      },
-                      error: 'Failed to create collection'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const collectionId = 'col_' + Math.random().toString(36).substring(2, 10)
+                  toast.success(`Collection created: ${collectionId}`)
+                  setShowCreateCollectionDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FolderPlus className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Creating...' : 'Create Collection'}
+                <FolderPlus className="w-4 h-4 mr-2" />
+                Create Collection
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3614,26 +3578,12 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportCollectionDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1500)),
-                    {
-                      loading: 'Importing collection...',
-                      success: () => {
-                        setShowImportCollectionDialog(false);
-                        return 'Collection imported: 12 requests, 3 folders detected';
-                      },
-                      error: 'Import failed - invalid file format'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  toast.success('Collection imported: 12 requests, 3 folders detected')
+                  setShowImportCollectionDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Importing...' : 'Import'}
+                <Upload className="w-4 h-4 mr-2" />
+                Import
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3821,44 +3771,30 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGenerateSdkDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 2500)),
-                    {
-                      loading: 'Generating SDK from OpenAPI spec...',
-                      success: () => {
-                        // Generate a mock SDK package download
-                        const sdkPackage = {
-                          name: '@mycompany/api-client',
-                          version: '1.0.0',
-                          main: 'dist/index.js',
-                          types: 'dist/index.d.ts',
-                          endpoints: endpoints.length,
-                          generatedAt: new Date().toISOString()
-                        };
-                        const blob = new Blob([JSON.stringify(sdkPackage, null, 2)], { type: 'application/json' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'api-client-sdk-config.json';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        setShowGenerateSdkDialog(false);
-                        return `SDK generated: ${endpoints.length} endpoints, TypeScript definitions included`;
-                      },
-                      error: 'SDK generation failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  // Generate SDK package download
+                  const sdkPackage = {
+                    name: '@mycompany/api-client',
+                    version: '1.0.0',
+                    main: 'dist/index.js',
+                    types: 'dist/index.d.ts',
+                    endpoints: endpoints.length,
+                    generatedAt: new Date().toISOString()
+                  }
+                  const blob = new Blob([JSON.stringify(sdkPackage, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'api-client-sdk-config.json'
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+                  toast.success(`SDK generated: ${endpoints.length} endpoints, TypeScript definitions included`)
+                  setShowGenerateSdkDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileCode className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Generating...' : 'Generate'}
+                <FileCode className="w-4 h-4 mr-2" />
+                Generate
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3901,29 +3837,14 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRunAllCollectionsDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-                  setShowRunAllCollectionsDialog(false);
-
-                  const totalRequests = collections.reduce((sum, c) => sum + c.requests, 0);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 3500)),
-                    {
-                      loading: `Running ${totalRequests} requests across ${collections.length} collections...`,
-                      success: () => {
-                        const successRate = Math.floor(95 + Math.random() * 5);
-                        return `Collection run complete: ${successRate}% success rate (${totalRequests} requests)`;
-                      },
-                      error: 'Collection run failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const totalRequests = collections.reduce((sum, c) => sum + c.requests, 0)
+                  const successRate = Math.floor(95 + Math.random() * 5)
+                  toast.success(`Collection run complete: ${successRate}% success rate (${totalRequests} requests)`)
+                  setShowRunAllCollectionsDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Running...' : 'Run All'}
+                <PlayCircle className="w-4 h-4 mr-2" />
+                Run All
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -3954,26 +3875,12 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowArchiveCollectionDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Archiving selected collections...',
-                      success: () => {
-                        setShowArchiveCollectionDialog(false);
-                        return 'Selected collections archived successfully';
-                      },
-                      error: 'Archive operation failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  toast.success('Selected collections archived successfully')
+                  setShowArchiveCollectionDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Archive className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Archiving...' : 'Archive'}
+                <Archive className="w-4 h-4 mr-2" />
+                Archive
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4375,27 +4282,13 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewMonitorDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1200)),
-                    {
-                      loading: 'Creating uptime monitor...',
-                      success: () => {
-                        const monitorId = 'mon_' + Math.random().toString(36).substring(2, 10);
-                        setShowNewMonitorDialog(false);
-                        return `Monitor created: ${monitorId} - First check scheduled`;
-                      },
-                      error: 'Failed to create monitor'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const monitorId = 'mon_' + Math.random().toString(36).substring(2, 10)
+                  toast.success(`Monitor created: ${monitorId} - First check scheduled`)
+                  setShowNewMonitorDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Creating...' : 'Create Monitor'}
+                <Plus className="w-4 h-4 mr-2" />
+                Create Monitor
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4732,27 +4625,13 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewWebhookDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Creating webhook...',
-                      success: () => {
-                        const webhookId = 'whk_' + Math.random().toString(36).substring(2, 10);
-                        setShowNewWebhookDialog(false);
-                        return `Webhook created: ${webhookId}`;
-                      },
-                      error: 'Failed to create webhook'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const webhookId = 'whk_' + Math.random().toString(36).substring(2, 10)
+                  toast.success(`Webhook created: ${webhookId}`)
+                  setShowNewWebhookDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Creating...' : 'Create Webhook'}
+                <Plus className="w-4 h-4 mr-2" />
+                Create Webhook
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4798,35 +4677,12 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve, reject) => {
-                      setTimeout(() => {
-                        // Simulate 95% success rate
-                        if (Math.random() > 0.05) {
-                          resolve(true);
-                        } else {
-                          reject(new Error('Connection timeout'));
-                        }
-                      }, 1200);
-                    }),
-                    {
-                      loading: 'Sending test webhook...',
-                      success: () => {
-                        setShowTestWebhookDialog(false);
-                        return 'Webhook delivered successfully (200 OK, 145ms)';
-                      },
-                      error: 'Webhook delivery failed - check endpoint URL'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  toast.success('Webhook delivered successfully (200 OK, 145ms)')
+                  setShowTestWebhookDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Webhook className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Sending...' : 'Send Test'}
+                <Webhook className="w-4 h-4 mr-2" />
+                Send Test
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -4863,26 +4719,12 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRetryWebhooksDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Retrying failed webhook deliveries...',
-                      success: () => {
-                        setShowRetryWebhooksDialog(false);
-                        return '3 webhook deliveries retried - 2 successful, 1 queued for retry';
-                      },
-                      error: 'Retry operation failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  toast.success('3 webhook deliveries retried - 2 successful, 1 queued for retry')
+                  setShowRetryWebhooksDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Retrying...' : 'Retry Selected'}
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry Selected
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5175,31 +5017,16 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRunAllTestsDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-                  setShowRunAllTestsDialog(false);
-
-                  const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0);
-                  const duration = Math.ceil(testSuites.reduce((sum, s) => sum + s.duration, 0) / 1000);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 3000)),
-                    {
-                      loading: `Running ${totalTests} tests across ${testSuites.length} suites...`,
-                      success: () => {
-                        const passedTests = Math.floor(totalTests * 0.92);
-                        const failedTests = totalTests - passedTests;
-                        return `Test run complete: ${passedTests} passed, ${failedTests} failed (${duration}s)`;
-                      },
-                      error: 'Test execution failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0)
+                  const duration = Math.ceil(testSuites.reduce((sum, s) => sum + s.duration, 0) / 1000)
+                  const passedTests = Math.floor(totalTests * 0.92)
+                  const failedTests = totalTests - passedTests
+                  toast.success(`Test run complete: ${passedTests} passed, ${failedTests} failed (${duration}s)`)
+                  setShowRunAllTestsDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Running...' : 'Run Tests'}
+                <PlayCircle className="w-4 h-4 mr-2" />
+                Run Tests
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5250,27 +5077,13 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewTestSuiteDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Creating test suite...',
-                      success: () => {
-                        const suiteId = 'suite_' + Math.random().toString(36).substring(2, 10);
-                        setShowNewTestSuiteDialog(false);
-                        return `Test suite created: ${suiteId}`;
-                      },
-                      error: 'Failed to create test suite'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const suiteId = 'suite_' + Math.random().toString(36).substring(2, 10)
+                  toast.success(`Test suite created: ${suiteId}`)
+                  setShowNewTestSuiteDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Creating...' : 'Create Suite'}
+                <Plus className="w-4 h-4 mr-2" />
+                Create Suite
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5656,29 +5469,14 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRerunFailedDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-                  setShowRerunFailedDialog(false);
-
-                  const failedCount = stats.totalTests - stats.passedTests;
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 2500)),
-                    {
-                      loading: `Rerunning ${failedCount} failed tests...`,
-                      success: () => {
-                        const fixed = Math.floor(failedCount * 0.7);
-                        return `Rerun complete: ${fixed} tests now passing, ${failedCount - fixed} still failing`;
-                      },
-                      error: 'Test rerun failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const failedCount = stats.totalTests - stats.passedTests
+                  const fixed = Math.floor(failedCount * 0.7)
+                  toast.success(`Rerun complete: ${fixed} tests now passing, ${failedCount - fixed} still failing`)
+                  setShowRerunFailedDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Repeat className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Rerunning...' : 'Rerun Selected'}
+                <Repeat className="w-4 h-4 mr-2" />
+                Rerun Selected
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -5973,55 +5771,41 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowGenerateDocsDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Generating API documentation...',
-                      success: () => {
-                        // Generate and download OpenAPI spec
-                        const openApiSpec = {
-                          openapi: '3.0.0',
-                          info: {
-                            title: 'My API Documentation',
-                            version: '1.0.0',
-                            description: 'Auto-generated API documentation'
-                          },
-                          servers: [{ url: 'https://api.example.com/v1' }],
-                          paths: Object.fromEntries(
-                            endpoints.map(e => [e.path, {
-                              [e.method.toLowerCase()]: {
-                                summary: e.name,
-                                description: e.description,
-                                tags: e.tags,
-                                responses: { 200: { description: 'Success' } }
-                              }
-                            }])
-                          )
-                        };
-                        const blob = new Blob([JSON.stringify(openApiSpec, null, 2)], { type: 'application/json' });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'openapi-spec.json';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        setShowGenerateDocsDialog(false);
-                        return `Documentation generated: ${endpoints.length} endpoints documented`;
-                      },
-                      error: 'Documentation generation failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  // Generate and download OpenAPI spec
+                  const openApiSpec = {
+                    openapi: '3.0.0',
+                    info: {
+                      title: 'My API Documentation',
+                      version: '1.0.0',
+                      description: 'Auto-generated API documentation'
+                    },
+                    servers: [{ url: 'https://api.example.com/v1' }],
+                    paths: Object.fromEntries(
+                      endpoints.map(e => [e.path, {
+                        [e.method.toLowerCase()]: {
+                          summary: e.name,
+                          description: e.description,
+                          tags: e.tags,
+                          responses: { 200: { description: 'Success' } }
+                        }
+                      }])
+                    )
+                  }
+                  const blob = new Blob([JSON.stringify(openApiSpec, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'openapi-spec.json'
+                  document.body.appendChild(a)
+                  a.click()
+                  document.body.removeChild(a)
+                  URL.revokeObjectURL(url)
+                  toast.success(`Documentation generated: ${endpoints.length} endpoints documented`)
+                  setShowGenerateDocsDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Generating...' : 'Generate'}
+                <FileText className="w-4 h-4 mr-2" />
+                Generate
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -6057,16 +5841,10 @@ echo $response;
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTryEndpointDialog(false)}>Close</Button>
-              <Button onClick={async () => {
-                  setIsSubmitting(true);
-                  toast.loading('Sending request...', { id: 'send-request' });
-                  // Simulate API request
-                  await new Promise(resolve => setTimeout(resolve, 1500));
-                  setIsSubmitting(false);
-                  toast.dismiss('send-request');
+              <Button onClick={() => {
                   toast.success('Request completed', {
                     description: `${selectedEndpoint?.method} ${selectedEndpoint?.path} - 200 OK (145ms)`
-                  });
+                  })
                 }}>
                 <Send className="w-4 h-4 mr-2" /> Send
               </Button>
@@ -6210,28 +5988,14 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRunTestSuiteDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-                  setShowRunTestSuiteDialog(false);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 2000)),
-                    {
-                      loading: `Running ${selectedTestSuite?.tests || 0} tests in ${selectedTestSuite?.name}...`,
-                      success: () => {
-                        const passed = selectedTestSuite?.passed || 0;
-                        const failed = selectedTestSuite?.failed || 0;
-                        return `Test suite complete: ${passed} passed, ${failed} failed`;
-                      },
-                      error: 'Test suite execution failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  const passed = selectedTestSuite?.passed || 0
+                  const failed = selectedTestSuite?.failed || 0
+                  toast.success(`Test suite complete: ${passed} passed, ${failed} failed`)
+                  setShowRunTestSuiteDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Running...' : 'Run Suite'}
+                <PlayCircle className="w-4 h-4 mr-2" />
+                Run Suite
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -6261,26 +6025,12 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRerunFailedTestsDialog(false)}>Cancel</Button>
               <Button
-                disabled={isSubmitting}
-                onClick={async () => {
-                  setIsSubmitting(true);
-                  setShowRerunFailedTestsDialog(false);
-
-                  await toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1800)),
-                    {
-                      loading: `Rerunning ${selectedTestSuite?.failed || 0} failed tests with verbose logging...`,
-                      success: () => {
-                        return `Rerun complete: Most tests now passing`;
-                      },
-                      error: 'Test rerun failed'
-                    }
-                  );
-
-                  setIsSubmitting(false);
+                onClick={() => {
+                  toast.success('Rerun complete: Most tests now passing')
+                  setShowRerunFailedTestsDialog(false)
                 }}>
-                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Repeat className="w-4 h-4 mr-2" />}
-                {isSubmitting ? 'Rerunning...' : 'Rerun Failed'}
+                <Repeat className="w-4 h-4 mr-2" />
+                Rerun Failed
               </Button>
             </DialogFooter>
           </DialogContent>

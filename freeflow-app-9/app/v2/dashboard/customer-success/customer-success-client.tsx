@@ -497,229 +497,133 @@ export default function CustomerSuccessClient() {
   ]
 
   // Handler functions
-  const handleCreatePlaybook = async () => {
+  const handleCreatePlaybook = () => {
     if (!newPlaybookData.name || !newPlaybookData.trigger) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Playbook created successfully', {
-        description: `"${newPlaybookData.name}" is now active and ready to use.`
-      })
-      setShowNewPlaybookDialog(false)
-      setNewPlaybookData({ name: '', trigger: '', description: '' })
-    } catch {
-      toast.error('Failed to create playbook')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Playbook created successfully', {
+      description: `"${newPlaybookData.name}" is now active and ready to use.`
+    })
+    setShowNewPlaybookDialog(false)
+    setNewPlaybookData({ name: '', trigger: '', description: '' })
   }
 
-  const handleGenerateHealthReport = async () => {
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Health report generated', {
-        description: `Report for ${healthReportData.period.replace('_', ' ')} has been created in ${healthReportData.format.toUpperCase()} format.`
-      })
-      setShowHealthReportDialog(false)
-    } catch {
-      toast.error('Failed to generate health report')
-    } finally {
-      setIsProcessing(false)
-    }
+  const handleGenerateHealthReport = () => {
+    toast.success('Health report generated', {
+      description: `Report for ${healthReportData.period.replace('_', ' ')} has been created in ${healthReportData.format.toUpperCase()} format.`
+    })
+    setShowHealthReportDialog(false)
   }
 
-  const handleExportData = async () => {
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Data exported successfully', {
-        description: `Customer success data exported as ${exportDataData.format.toUpperCase()} file.`
-      })
-      setShowExportDataDialog(false)
-    } catch {
-      toast.error('Failed to export data')
-    } finally {
-      setIsProcessing(false)
-    }
+  const handleExportData = () => {
+    toast.success('Data exported successfully', {
+      description: `Customer success data exported as ${exportDataData.format.toUpperCase()} file.`
+    })
+    setShowExportDataDialog(false)
   }
 
-  const handleAddCustomer = async () => {
+  const handleAddCustomer = () => {
     if (!newCustomerData.name || !newCustomerData.industry) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Customer added successfully', {
-        description: `${newCustomerData.name} has been added to your portfolio.`
-      })
-      setShowAddCustomerDialog(false)
-      setNewCustomerData({ name: '', industry: '', tier: 'starter', csm: '' })
-    } catch {
-      toast.error('Failed to add customer')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Customer added successfully', {
+      description: `${newCustomerData.name} has been added to your portfolio.`
+    })
+    setShowAddCustomerDialog(false)
+    setNewCustomerData({ name: '', industry: '', tier: 'starter', csm: '' })
   }
 
-  const handleScheduleCall = async () => {
+  const handleScheduleCall = () => {
     if (!scheduleCallData.customer || !scheduleCallData.date || !scheduleCallData.time) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Call scheduled', {
-        description: `Call with ${scheduleCallData.customer} scheduled for ${scheduleCallData.date} at ${scheduleCallData.time}.`
-      })
-      setShowScheduleCallDialog(false)
-      setScheduleCallData({ customer: '', date: '', time: '', purpose: '' })
-    } catch {
-      toast.error('Failed to schedule call')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Call scheduled', {
+      description: `Call with ${scheduleCallData.customer} scheduled for ${scheduleCallData.date} at ${scheduleCallData.time}.`
+    })
+    setShowScheduleCallDialog(false)
+    setScheduleCallData({ customer: '', date: '', time: '', purpose: '' })
   }
 
-  const handleSendCampaign = async () => {
+  const handleSendCampaign = () => {
     if (!campaignData.subject || !campaignData.template) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Campaign sent', {
-        description: `Email campaign "${campaignData.subject}" has been sent to ${campaignData.recipients} customers.`
-      })
-      setShowSendCampaignDialog(false)
-      setCampaignData({ subject: '', template: '', recipients: 'all' })
-    } catch {
-      toast.error('Failed to send campaign')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Campaign sent', {
+      description: `Email campaign "${campaignData.subject}" has been sent to ${campaignData.recipients} customers.`
+    })
+    setShowSendCampaignDialog(false)
+    setCampaignData({ subject: '', template: '', recipients: 'all' })
   }
 
-  const handleSetGoals = async () => {
+  const handleSetGoals = () => {
     if (!goalsData.metric || !goalsData.target) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Goals set successfully', {
-        description: `Target for ${goalsData.metric}: ${goalsData.target}`
-      })
-      setShowSetGoalsDialog(false)
-      setGoalsData({ metric: '', target: '', deadline: '' })
-    } catch {
-      toast.error('Failed to set goals')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Goals set successfully', {
+      description: `Target for ${goalsData.metric}: ${goalsData.target}`
+    })
+    setShowSetGoalsDialog(false)
+    setGoalsData({ metric: '', target: '', deadline: '' })
   }
 
-  const handleRecognize = async () => {
+  const handleRecognize = () => {
     if (!recognizeData.customer || !recognizeData.achievement) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Recognition sent', {
-        description: `Customer win for ${recognizeData.customer} has been recorded and shared.`
-      })
-      setShowRecognizeDialog(false)
-      setRecognizeData({ customer: '', achievement: '', message: '' })
-    } catch {
-      toast.error('Failed to send recognition')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Recognition sent', {
+      description: `Customer win for ${recognizeData.customer} has been recorded and shared.`
+    })
+    setShowRecognizeDialog(false)
+    setRecognizeData({ customer: '', achievement: '', message: '' })
   }
 
-  const handleSendGift = async () => {
+  const handleSendGift = () => {
     if (!giftData.customer || !giftData.giftType) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Gift sent', {
-        description: `${giftData.giftType} gift has been sent to ${giftData.customer}.`
-      })
-      setShowSendGiftDialog(false)
-      setGiftData({ customer: '', giftType: '', message: '' })
-    } catch {
-      toast.error('Failed to send gift')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Gift sent', {
+      description: `${giftData.giftType} gift has been sent to ${giftData.customer}.`
+    })
+    setShowSendGiftDialog(false)
+    setGiftData({ customer: '', giftType: '', message: '' })
   }
 
-  const handleGenerateReport = async () => {
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Report generated', {
-        description: `${reportData.type} report for ${reportData.period} period has been created.`
-      })
-      setShowGenerateReportDialog(false)
-    } catch {
-      toast.error('Failed to generate report')
-    } finally {
-      setIsProcessing(false)
-    }
+  const handleGenerateReport = () => {
+    toast.success('Report generated', {
+      description: `${reportData.type} report for ${reportData.period} period has been created.`
+    })
+    setShowGenerateReportDialog(false)
   }
 
-  const handleIntroduce = async () => {
+  const handleIntroduce = () => {
     if (!introduceData.from || !introduceData.to) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Introduction sent', {
-        description: `Introduction email sent between ${introduceData.from} and ${introduceData.to}.`
-      })
-      setShowIntroduceDialog(false)
-      setIntroduceData({ from: '', to: '', context: '' })
-    } catch {
-      toast.error('Failed to send introduction')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('Introduction sent', {
+      description: `Introduction email sent between ${introduceData.from} and ${introduceData.to}.`
+    })
+    setShowIntroduceDialog(false)
+    setIntroduceData({ from: '', to: '', context: '' })
   }
 
-  const handleAddCSM = async () => {
+  const handleAddCSM = () => {
     if (!newCSMData.name || !newCSMData.email) {
       toast.error('Please fill in all required fields')
       return
     }
-    setIsProcessing(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('CSM added', {
-        description: `${newCSMData.name} has been added to the team.`
-      })
-      setShowAddCSMDialog(false)
-      setNewCSMData({ name: '', email: '', capacity: '' })
-    } catch {
-      toast.error('Failed to add CSM')
-    } finally {
-      setIsProcessing(false)
-    }
+    toast.success('CSM added', {
+      description: `${newCSMData.name} has been added to the team.`
+    })
+    setShowAddCSMDialog(false)
+    setNewCSMData({ name: '', email: '', capacity: '' })
   }
 
   // Filtered customers

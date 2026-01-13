@@ -719,14 +719,7 @@ export default function ComplianceClient() {
   }
 
   const handleResolveIssue = (id: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: `Resolving issue #${id}...`,
-        success: `Issue #${id} has been resolved and logged.`,
-        error: `Failed to resolve issue #${id}. Please try again.`
-      }
-    )
+    toast.success(`Issue #${id} has been resolved and logged.`)
   }
 
   const handleExport = () => {
@@ -837,38 +830,17 @@ export default function ComplianceClient() {
   }
 
   const handleRunAssessment = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 3000)),
-      {
-        loading: 'Running automated control tests...',
-        success: 'Assessment complete. 94% passed, 6% require attention.',
-        error: 'Assessment failed. Please try again.'
-      }
-    )
+    toast.success('Assessment complete. 94% passed, 6% require attention.')
     setShowAssessmentDialog(false)
   }
 
   const handleGenerateReportSubmit = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: `Generating ${reportType} report...`,
-        success: 'Report generated! Download will begin shortly.',
-        error: 'Failed to generate report.'
-      }
-    )
+    toast.success('Report generated! Download will begin shortly.')
     setShowReportDialog(false)
   }
 
   const handleExportSubmit = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
-      {
-        loading: `Exporting as ${exportFormat.toUpperCase()}...`,
-        success: 'Export complete! File downloaded.',
-        error: 'Export failed.'
-      }
-    )
+    toast.success('Export complete! File downloaded.')
     setShowExportDialog(false)
   }
 
@@ -880,10 +852,7 @@ export default function ComplianceClient() {
       'Reports': handleGenerateReport,
       'Gaps': () => setShowGapAnalysisDialog(true),
       'Export': handleExport,
-      'Sync': () => toast.promise(
-        new Promise(resolve => setTimeout(resolve, 2000)),
-        { loading: 'Syncing with connected services...', success: 'All integrations synced successfully.', error: 'Sync failed.' }
-      ),
+      'Sync': () => toast.success('All integrations synced successfully.'),
       'Settings': () => setActiveTab('settings'),
       'Add Control': handleAddControl,
       'Test All': handleTestAllControls,
@@ -926,14 +895,7 @@ export default function ComplianceClient() {
   }
 
   const handleTestWebhook = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Testing webhook connection...',
-        success: 'Webhook test successful! Connection verified.',
-        error: 'Webhook test failed. Check URL and try again.'
-      }
-    )
+    toast.success('Webhook test successful! Connection verified.')
   }
 
   const handleConnectService = (serviceName: string, isConnected: boolean) => {
@@ -941,14 +903,7 @@ export default function ComplianceClient() {
       setSelectedService({ name: serviceName, connected: isConnected })
       setShowServiceConfigDialog(true)
     } else {
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 2000)),
-        {
-          loading: `Connecting to ${serviceName}...`,
-          success: `${serviceName} connected successfully!`,
-          error: `Failed to connect to ${serviceName}.`
-        }
-      )
+      toast.success(`${serviceName} connected successfully!`)
     }
   }
 
@@ -976,36 +931,15 @@ export default function ComplianceClient() {
   }
 
   const handleRegenerateToken = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Regenerating API token...',
-        success: 'New API token generated. Previous token invalidated.',
-        error: 'Failed to regenerate token.'
-      }
-    )
+    toast.success('New API token generated. Previous token invalidated.')
   }
 
   const handleResetControls = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2500)),
-      {
-        loading: 'Resetting all control statuses...',
-        success: 'All controls reset to pending state.',
-        error: 'Failed to reset controls.'
-      }
-    )
+    toast.success('All controls reset to pending state.')
   }
 
   const handleDeleteEvidence = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 3000)),
-      {
-        loading: 'Deleting all evidence permanently...',
-        success: 'All evidence has been permanently deleted.',
-        error: 'Failed to delete evidence.'
-      }
-    )
+    toast.success('All evidence has been permanently deleted.')
   }
 
   return (
@@ -2325,10 +2259,7 @@ export default function ComplianceClient() {
             <AIInsightsPanel
               insights={mockComplianceAIInsights}
               title="Compliance Intelligence"
-              onInsightAction={(_insight) => toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
-              )}
+              onInsightAction={(insight) => toast.success(`${insight.title} action completed`)}
             />
           </div>
           <div className="space-y-6">
@@ -3114,14 +3045,7 @@ export default function ComplianceClient() {
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0]
                   if (file) {
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 2000)),
-                      {
-                        loading: `Importing ${file.name}...`,
-                        success: `Successfully imported controls from ${file.name}`,
-                        error: 'Import failed. Please check the file format.'
-                      }
-                    )
+                    toast.success(`Successfully imported controls from ${file.name}`)
                     setShowImportDialog(false)
                   }
                 }
@@ -3733,32 +3657,11 @@ export default function ComplianceClient() {
               if (!detailItem) return
               // Perform action based on item type
               if (detailItem.type === 'control') {
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  {
-                    loading: `Running test on ${detailItem.name}...`,
-                    success: `${detailItem.name} test completed - Passed`,
-                    error: `Failed to test ${detailItem.name}`
-                  }
-                )
+                toast.success(`${detailItem.name} test completed - Passed`)
               } else if (detailItem.type === 'policy') {
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  {
-                    loading: `Sending ${detailItem.name} for review...`,
-                    success: `${detailItem.name} sent for review`,
-                    error: `Failed to send ${detailItem.name}`
-                  }
-                )
+                toast.success(`${detailItem.name} sent for review`)
               } else if (detailItem.type === 'audit') {
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  {
-                    loading: `Updating ${detailItem.name} status...`,
-                    success: `${detailItem.name} status updated`,
-                    error: `Failed to update ${detailItem.name}`
-                  }
-                )
+                toast.success(`${detailItem.name} status updated`)
               } else {
                 toast.success(`${detailItem.name} action completed`)
               }
@@ -3906,14 +3809,7 @@ export default function ComplianceClient() {
                   delete updated[selectedService.name]
                   return updated
                 })
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  {
-                    loading: `Disconnecting ${selectedService.name}...`,
-                    success: `${selectedService.name} disconnected successfully`,
-                    error: `Failed to disconnect ${selectedService.name}`
-                  }
-                )
+                toast.success(`${selectedService.name} disconnected successfully`)
               }
               setShowServiceConfigDialog(false)
             }}>
@@ -4194,30 +4090,22 @@ export default function ComplianceClient() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowVersionViewDialog(false)}>Close</Button>
-            <Button variant="outline" onClick={async () => {
-              toast.loading('Preparing download...', { id: 'download-version' })
-              try {
-                await new Promise(r => setTimeout(r, 1000))
-                const blob = new Blob([`Version ${selectedVersionForView?.version} content`], { type: 'text/plain' })
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = `policy-v${selectedVersionForView?.version}.txt`
-                a.click()
-                URL.revokeObjectURL(url)
-                toast.success(`Downloaded version ${selectedVersionForView?.version}`, { id: 'download-version' })
-              } catch { toast.error('Download failed', { id: 'download-version' }) }
+            <Button variant="outline" onClick={() => {
+              const blob = new Blob([`Version ${selectedVersionForView?.version} content`], { type: 'text/plain' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `policy-v${selectedVersionForView?.version}.txt`
+              a.click()
+              URL.revokeObjectURL(url)
+              toast.success(`Downloaded version ${selectedVersionForView?.version}`)
             }}>
               <Download className="w-4 h-4 mr-2" />
               Download
             </Button>
-            <Button onClick={async () => {
-              toast.loading('Restoring version...', { id: 'restore-version' })
-              try {
-                await new Promise(r => setTimeout(r, 1500))
-                toast.success(`Restored to version ${selectedVersionForView?.version}`, { id: 'restore-version' })
-                setShowVersionViewDialog(false)
-              } catch { toast.error('Restore failed', { id: 'restore-version' }) }
+            <Button onClick={() => {
+              toast.success(`Restored to version ${selectedVersionForView?.version}`)
+              setShowVersionViewDialog(false)
             }}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Restore This Version

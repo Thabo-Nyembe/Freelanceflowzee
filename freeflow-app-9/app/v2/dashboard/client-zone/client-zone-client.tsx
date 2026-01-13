@@ -537,65 +537,41 @@ export default function ClientZoneClient() {
       userId
     })
 
-    try {
-      // Simulate API call - in production this would call the appropriate endpoint
-      await new Promise(resolve => setTimeout(resolve, 800))
+    toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} created successfully!`, {
+      description: `"${newItemName}" has been added to your ${newItemType === 'project' ? 'projects' : newItemType === 'task' ? 'tasks' : 'notes'}`
+    })
 
-      toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} created successfully!`, {
-        description: `"${newItemName}" has been added to your ${newItemType === 'project' ? 'projects' : newItemType === 'task' ? 'tasks' : 'notes'}`
-      })
+    setShowNewItemDialog(false)
+    setNewItemName('')
+    setNewItemDescription('')
 
-      setShowNewItemDialog(false)
-      setNewItemName('')
-      setNewItemDescription('')
-
-      // Reload dashboard data
-      const data = await getClientZoneDashboard()
-      setDashboardData(data)
-      setProjects(data.recentProjects)
-    } catch (error: any) {
-      logger.error('Failed to create item', { error, type: newItemType, userId })
-      toast.error('Failed to create item', {
-        description: error.message || 'Please try again later'
-      })
-    }
+    // Reload dashboard data
+    const data = await getClientZoneDashboard()
+    setDashboardData(data)
+    setProjects(data.recentProjects)
   }
 
   // Handler: Export Data
-  const handleExportData = async () => {
-    setIsExporting(true)
-
+  const handleExportData = () => {
     logger.info('Exporting data', {
       format: exportFormat,
       dateRange: exportDateRange,
       userId
     })
 
-    try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1500))
+    toast.success('Export completed!', {
+      description: `Your ${exportFormat.toUpperCase()} file is ready for download`
+    })
 
-      toast.success('Export completed!', {
-        description: `Your ${exportFormat.toUpperCase()} file is ready for download`
-      })
+    // In production, this would trigger a file download
+    const filename = `client-zone-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+    logger.info('Export file ready', { filename, userId })
 
-      // In production, this would trigger a file download
-      const filename = `client-zone-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`
-      logger.info('Export file ready', { filename, userId })
-
-      setShowExportDialog(false)
-    } catch (error: any) {
-      logger.error('Failed to export data', { error, format: exportFormat, userId })
-      toast.error('Export failed', {
-        description: error.message || 'Please try again later'
-      })
-    } finally {
-      setIsExporting(false)
-    }
+    setShowExportDialog(false)
   }
 
   // Handler: Save Settings
-  const handleSaveSettings = async () => {
+  const handleSaveSettings = () => {
     logger.info('Saving client zone settings', {
       notifyProjectUpdates,
       notifyMessages,
@@ -604,21 +580,11 @@ export default function ClientZoneClient() {
       userId
     })
 
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600))
+    toast.success('Settings saved!', {
+      description: 'Your notification preferences have been updated'
+    })
 
-      toast.success('Settings saved!', {
-        description: 'Your notification preferences have been updated'
-      })
-
-      setShowSettingsDialog(false)
-    } catch (error: any) {
-      logger.error('Failed to save settings', { error, userId })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again later'
-      })
-    }
+    setShowSettingsDialog(false)
   }
 
   // Handler: Open Timeline Dialog
@@ -638,7 +604,7 @@ export default function ClientZoneClient() {
   }
 
   // Handler: Create Reminder
-  const handleCreateReminder = async () => {
+  const handleCreateReminder = () => {
     if (!reminderDate) {
       toast.error('Please select a date for the reminder')
       return
@@ -651,23 +617,13 @@ export default function ClientZoneClient() {
       userId
     })
 
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600))
+    toast.success('Reminder created!', {
+      description: `You will be reminded on ${new Date(reminderDate).toLocaleDateString()}`
+    })
 
-      toast.success('Reminder created!', {
-        description: `You will be reminded on ${new Date(reminderDate).toLocaleDateString()}`
-      })
-
-      setShowRemindersDialog(false)
-      setReminderDate('')
-      setReminderNote('')
-    } catch (error: any) {
-      logger.error('Failed to create reminder', { error, userId })
-      toast.error('Failed to create reminder', {
-        description: error.message || 'Please try again later'
-      })
-    }
+    setShowRemindersDialog(false)
+    setReminderDate('')
+    setReminderNote('')
   }
 
   // A+++ LOAD CLIENT ZONE DATA FROM DATABASE
@@ -1018,26 +974,15 @@ export default function ClientZoneClient() {
     }
 
     // In production, integrate with payment gateway (Stripe, PayPal, etc.)
-    const paymentPromise = (async () => {
-      // Simulate payment gateway redirect
-      await new Promise(resolve => setTimeout(resolve, 1000))
+    // Mark invoice as paid
+    await markInvoiceAsPaid(invoice.id, 'credit_card', `TXN-${Date.now()}`)
 
-      // Mark invoice as paid
-      await markInvoiceAsPaid(invoice.id, 'credit_card', `TXN-${Date.now()}`)
+    // Reload invoices
+    const dashData = await getClientZoneDashboard()
+    setInvoices(dashData.pendingInvoices)
+    setDashboardData(dashData)
 
-      // Reload invoices
-      const dashData = await getClientZoneDashboard()
-      setInvoices(dashData.pendingInvoices)
-      setDashboardData(dashData)
-
-      return { invoiceNumber, amount }
-    })()
-
-    toast.promise(paymentPromise, {
-      loading: 'Processing payment...',
-      success: (result) => `Payment of ${formatCurrency(result.amount)} for ${result.invoiceNumber} completed!`,
-      error: 'Payment failed. Please try again.'
-    })
+    toast.success(`Payment of ${formatCurrency(amount)} for ${invoiceNumber} completed!`)
   }
 
   // ============================================================================
@@ -1731,7 +1676,7 @@ export default function ClientZoneClient() {
   // ============================================================================
   // HANDLER 28: UPLOAD DELIVERABLE
   // ============================================================================
-  const handleUploadDeliverable = async () => {
+  const handleUploadDeliverable = () => {
     if (!deliverableTitle.trim()) {
       toast.error('Please enter a deliverable title')
       return
@@ -1741,30 +1686,20 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsUploadingDeliverable(true)
     logger.info('Uploading deliverable', { title: deliverableTitle, project: deliverableProject, userId })
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Deliverable uploaded successfully!', {
-        description: `"${deliverableTitle}" has been added to the project`
-      })
-      setShowUploadDeliverableDialog(false)
-      setDeliverableTitle('')
-      setDeliverableProject('')
-      setDeliverableNotes('')
-    } catch (error: any) {
-      logger.error('Failed to upload deliverable', { error, userId })
-      toast.error('Failed to upload deliverable', { description: error.message || 'Please try again' })
-    } finally {
-      setIsUploadingDeliverable(false)
-    }
+    toast.success('Deliverable uploaded successfully!', {
+      description: `"${deliverableTitle}" has been added to the project`
+    })
+    setShowUploadDeliverableDialog(false)
+    setDeliverableTitle('')
+    setDeliverableProject('')
+    setDeliverableNotes('')
   }
 
   // ============================================================================
   // HANDLER 29: MESSAGE CLIENT
   // ============================================================================
-  const handleMessageClient = async () => {
+  const handleMessageClient = () => {
     if (!messageClientId) {
       toast.error('Please select a client')
       return
@@ -1774,24 +1709,15 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsSendingMessage(true)
     logger.info('Sending message to client', { clientId: messageClientId, subject: messageSubject, userId })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800))
-      toast.success('Message sent successfully!', {
-        description: 'Your client will be notified'
-      })
-      setShowMessageClientDialog(false)
-      setMessageClientId('')
-      setMessageSubject('')
-      setMessageContent('')
-    } catch (error: any) {
-      logger.error('Failed to send message', { error, userId })
-      toast.error('Failed to send message', { description: error.message || 'Please try again' })
-    } finally {
-      setIsSendingMessage(false)
-    }
+    toast.success('Message sent successfully!', {
+      description: 'Your client will be notified'
+    })
+    setShowMessageClientDialog(false)
+    setMessageClientId('')
+    setMessageSubject('')
+    setMessageContent('')
   }
 
   // ============================================================================
@@ -1851,7 +1777,7 @@ export default function ClientZoneClient() {
   // ============================================================================
   // HANDLER 31: AI REVIEW & APPROVE
   // ============================================================================
-  const handleAIReviewApprove = async () => {
+  const handleAIReviewApprove = () => {
     if (aiReviewSelection === null) {
       toast.error('Please select a design option')
       return
@@ -1859,42 +1785,30 @@ export default function ClientZoneClient() {
 
     logger.info('AI design approved', { selection: aiReviewSelection, feedback: aiReviewFeedback, userId })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800))
-      toast.success('Design approved!', {
-        description: `Option ${aiReviewSelection + 1} has been selected and approved`
-      })
-      setShowAIReviewDialog(false)
-      setAiReviewSelection(null)
-      setAiReviewFeedback('')
-    } catch (error: any) {
-      logger.error('Failed to approve AI design', { error, userId })
-      toast.error('Failed to approve design', { description: error.message || 'Please try again' })
-    }
+    toast.success('Design approved!', {
+      description: `Option ${aiReviewSelection + 1} has been selected and approved`
+    })
+    setShowAIReviewDialog(false)
+    setAiReviewSelection(null)
+    setAiReviewFeedback('')
   }
 
   // ============================================================================
   // HANDLER 32: UPDATE PREFERENCES
   // ============================================================================
-  const handleUpdatePreferences = async () => {
+  const handleUpdatePreferences = () => {
     logger.info('Updating preferences', { style: prefStyle, colors: prefColors, industry: prefIndustry, userId })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 600))
-      toast.success('Preferences updated!', {
-        description: 'Your style preferences have been saved'
-      })
-      setShowPreferencesDialog(false)
-    } catch (error: any) {
-      logger.error('Failed to update preferences', { error, userId })
-      toast.error('Failed to update preferences', { description: error.message || 'Please try again' })
-    }
+    toast.success('Preferences updated!', {
+      description: 'Your style preferences have been saved'
+    })
+    setShowPreferencesDialog(false)
   }
 
   // ============================================================================
   // HANDLER 33: UPDATE CONTACT INFO
   // ============================================================================
-  const handleUpdateContactInfo = async () => {
+  const handleUpdateContactInfo = () => {
     if (!contactEmail.trim()) {
       toast.error('Please enter an email address')
       return
@@ -1902,22 +1816,16 @@ export default function ClientZoneClient() {
 
     logger.info('Updating contact info', { email: contactEmail, phone: contactPhone, userId })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 700))
-      toast.success('Contact info updated!', {
-        description: 'Your contact information has been saved'
-      })
-      setShowContactInfoDialog(false)
-    } catch (error: any) {
-      logger.error('Failed to update contact info', { error, userId })
-      toast.error('Failed to update contact info', { description: error.message || 'Please try again' })
-    }
+    toast.success('Contact info updated!', {
+      description: 'Your contact information has been saved'
+    })
+    setShowContactInfoDialog(false)
   }
 
   // ============================================================================
   // HANDLER 34: CHANGE PASSWORD
   // ============================================================================
-  const handleChangePassword = async () => {
+  const handleChangePassword = () => {
     if (!currentPassword) {
       toast.error('Please enter your current password')
       return
@@ -1931,45 +1839,27 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsChangingPassword(true)
     logger.info('Changing password', { userId })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Password changed successfully!', {
-        description: 'Your password has been updated'
-      })
-      setShowPasswordDialog(false)
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-    } catch (error: any) {
-      logger.error('Failed to change password', { error, userId })
-      toast.error('Failed to change password', { description: error.message || 'Please try again' })
-    } finally {
-      setIsChangingPassword(false)
-    }
+    toast.success('Password changed successfully!', {
+      description: 'Your password has been updated'
+    })
+    setShowPasswordDialog(false)
+    setCurrentPassword('')
+    setNewPassword('')
+    setConfirmPassword('')
   }
 
   // ============================================================================
   // HANDLER 35: EXPORT DATA (Settings)
   // ============================================================================
-  const handleExportDataSettings = async () => {
-    setIsExportingData(true)
+  const handleExportDataSettings = () => {
     logger.info('Exporting data from settings', { type: dataExportType, userId })
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Data export ready!', {
-        description: `Your ${dataExportType} data has been exported`
-      })
-      setShowDataExportDialog(false)
-    } catch (error: any) {
-      logger.error('Failed to export data', { error, userId })
-      toast.error('Failed to export data', { description: error.message || 'Please try again' })
-    } finally {
-      setIsExportingData(false)
-    }
+    toast.success('Data export ready!', {
+      description: `Your ${dataExportType} data has been exported`
+    })
+    setShowDataExportDialog(false)
   }
 
   // A+++ LOADING STATE

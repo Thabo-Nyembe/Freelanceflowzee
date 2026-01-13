@@ -578,14 +578,7 @@ export default function NotificationsClient() {
               <Input placeholder="Search notifications..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
             <Button variant="outline" onClick={() => {
-              toast.promise(
-                new Promise((resolve) => setTimeout(resolve, 500)),
-                {
-                  loading: 'Opening filters...',
-                  success: 'Filters panel opened',
-                  error: 'Failed to open filters'
-                }
-              )
+              toast.success('Filters panel opened')
             }}><Filter className="h-4 w-4 mr-2" />Filters</Button>
             <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => setShowCreateCampaign(true)}>
               <Plus className="h-4 w-4 mr-2" />New Campaign
@@ -675,14 +668,7 @@ export default function NotificationsClient() {
                         </div>
                         <Button variant="ghost" size="icon" onClick={(e) => {
                           e.stopPropagation()
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 500)),
-                            {
-                              loading: 'Loading options...',
-                              success: 'Options menu opened',
-                              error: 'Failed to load options'
-                            }
-                          )
+                          toast.success('Options menu opened')
                         }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     )
@@ -717,44 +703,17 @@ export default function NotificationsClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             {campaign.status === 'draft' && <Button size="sm" onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 1500)),
-                                {
-                                  loading: `Sending campaign "${campaign.name}"...`,
-                                  success: `Campaign "${campaign.name}" sent successfully`,
-                                  error: 'Failed to send campaign'
-                                }
-                              )
+                              toast.success(`Campaign "${campaign.name}" sent successfully`)
                             }}><Send className="h-4 w-4 mr-1" />Send</Button>}
                             {campaign.status === 'sending' && <Button size="sm" variant="outline" onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
-                                {
-                                  loading: `Pausing campaign "${campaign.name}"...`,
-                                  success: `Campaign "${campaign.name}" paused`,
-                                  error: 'Failed to pause campaign'
-                                }
-                              )
+                              toast.success(`Campaign "${campaign.name}" paused`)
                             }}><Pause className="h-4 w-4 mr-1" />Pause</Button>}
                             <Button size="sm" variant="ghost" onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 600)),
-                                {
-                                  loading: 'Copying campaign...',
-                                  success: `Campaign "${campaign.name}" copied to clipboard`,
-                                  error: 'Failed to copy campaign'
-                                }
-                              )
+                              navigator.clipboard.writeText(campaign.name)
+                              toast.success(`Campaign "${campaign.name}" copied to clipboard`)
                             }}><Copy className="h-4 w-4" /></Button>
                             <Button size="sm" variant="ghost" onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
-                                {
-                                  loading: 'Loading campaign analytics...',
-                                  success: `Analytics for "${campaign.name}" loaded`,
-                                  error: 'Failed to load analytics'
-                                }
-                              )
+                              toast.success(`Analytics for "${campaign.name}" loaded`)
                             }}><BarChart3 className="h-4 w-4" /></Button>
                           </div>
                         </div>
@@ -861,24 +820,10 @@ export default function NotificationsClient() {
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(automation.status)}>{automation.status}</Badge>
                         {automation.status === 'active' && <Button size="sm" variant="outline" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 800)),
-                            {
-                              loading: `Pausing automation "${automation.name}"...`,
-                              success: `Automation "${automation.name}" paused`,
-                              error: 'Failed to pause automation'
-                            }
-                          )
+                          toast.success(`Automation "${automation.name}" paused`)
                         }}><Pause className="h-4 w-4 mr-1" />Pause</Button>}
                         {automation.status === 'paused' && <Button size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 800)),
-                            {
-                              loading: `Resuming automation "${automation.name}"...`,
-                              success: `Automation "${automation.name}" resumed`,
-                              error: 'Failed to resume automation'
-                            }
-                          )
+                          toast.success(`Automation "${automation.name}" resumed`)
                         }}><Play className="h-4 w-4 mr-1" />Resume</Button>}
                       </div>
                     </div>
@@ -952,14 +897,7 @@ export default function NotificationsClient() {
             <div className="flex justify-end mb-4">
               <Button onClick={() => {
                 setShowWebhookDialog(true)
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 500)),
-                  {
-                    loading: 'Opening webhook form...',
-                    success: 'Ready to add new webhook',
-                    error: 'Failed to open webhook form'
-                  }
-                )
+                toast.success('Ready to add new webhook')
               }}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button>
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
@@ -983,14 +921,7 @@ export default function NotificationsClient() {
                         <p className="text-xs text-gray-500">Success rate</p>
                       </div>
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 500)),
-                          {
-                            loading: 'Loading webhook options...',
-                            success: `Options for "${webhook.name}" opened`,
-                            error: 'Failed to load options'
-                          }
-                        )
+                        toast.success(`Options for "${webhook.name}" opened`)
                       }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
@@ -1116,14 +1047,16 @@ export default function NotificationsClient() {
                             <div className="flex items-center gap-2">
                               <Input placeholder="Upload certificate" disabled />
                               <Button variant="outline" size="sm" onClick={() => {
-                                toast.promise(
-                                  new Promise((resolve) => setTimeout(resolve, 800)),
-                                  {
-                                    loading: 'Opening file picker...',
-                                    success: 'Ready to upload iOS certificate',
-                                    error: 'Failed to open file picker'
+                                const input = document.createElement('input')
+                                input.type = 'file'
+                                input.accept = '.p12,.pem'
+                                input.onchange = (e) => {
+                                  const file = (e.target as HTMLInputElement).files?.[0]
+                                  if (file) {
+                                    toast.success(`Ready to upload: ${file.name}`)
                                   }
-                                )
+                                }
+                                input.click()
                               }}>
                                 <Upload className="h-4 w-4" />
                               </Button>
@@ -1942,14 +1875,7 @@ export default function NotificationsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.promise(
-                                  new Promise((resolve) => setTimeout(resolve, 500)),
-                                  {
-                                    loading: `Loading "${category.name}" settings...`,
-                                    success: `Category "${category.name}" settings opened`,
-                                    error: 'Failed to load category settings'
-                                  }
-                                )
+                                toast.success(`Category "${category.name}" settings opened`)
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -1958,14 +1884,7 @@ export default function NotificationsClient() {
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 600)),
-                            {
-                              loading: 'Opening category form...',
-                              success: 'Ready to add new notification category',
-                              error: 'Failed to open category form'
-                            }
-                          )
+                          toast.success('Ready to add new notification category')
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Category
@@ -2005,14 +1924,7 @@ export default function NotificationsClient() {
                             </div>
                             <Button variant={platform.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
                               const action = platform.status === 'connected' ? 'configure' : 'connect'
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
-                                {
-                                  loading: action === 'connect' ? `Connecting to ${platform.name}...` : `Opening ${platform.name} settings...`,
-                                  success: action === 'connect' ? `${platform.name} connected successfully` : `${platform.name} settings opened`,
-                                  error: `Failed to ${action} ${platform.name}`
-                                }
-                              )
+                              toast.success(action === 'connect' ? `${platform.name} connected successfully` : `${platform.name} settings opened`)
                             }}>
                               {platform.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
@@ -2047,14 +1959,7 @@ export default function NotificationsClient() {
                             </div>
                             <Button variant={crm.status === 'connected' ? 'outline' : 'default'} size="sm" onClick={() => {
                               const action = crm.status === 'connected' ? 'manage' : 'connect'
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
-                                {
-                                  loading: action === 'connect' ? `Connecting to ${crm.name}...` : `Opening ${crm.name} settings...`,
-                                  success: action === 'connect' ? `${crm.name} connected successfully` : `${crm.name} management panel opened`,
-                                  error: `Failed to ${action} ${crm.name}`
-                                }
-                              )
+                              toast.success(action === 'connect' ? `${crm.name} connected successfully` : `${crm.name} management panel opened`)
                             }}>
                               {crm.status === 'connected' ? 'Manage' : 'Connect'}
                             </Button>
@@ -2101,14 +2006,7 @@ export default function NotificationsClient() {
                           <Switch defaultChecked />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 1200)),
-                            {
-                              loading: 'Regenerating API key...',
-                              success: 'New API key generated successfully. Previous key revoked.',
-                              error: 'Failed to regenerate API key'
-                            }
-                          )
+                          toast.success('New API key generated successfully. Previous key revoked.')
                         }}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate API Key
@@ -2133,26 +2031,12 @@ export default function NotificationsClient() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.promise(
-                                  new Promise((resolve) => setTimeout(resolve, 500)),
-                                  {
-                                    loading: 'Loading webhook settings...',
-                                    success: `Editing webhook: ${webhook.url}`,
-                                    error: 'Failed to load webhook settings'
-                                  }
-                                )
+                                toast.success(`Editing webhook: ${webhook.url}`)
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
-                                toast.promise(
-                                  new Promise((resolve) => setTimeout(resolve, 800)),
-                                  {
-                                    loading: 'Deleting webhook...',
-                                    success: `Webhook "${webhook.url}" deleted`,
-                                    error: 'Failed to delete webhook'
-                                  }
-                                )
+                                toast.success(`Webhook "${webhook.url}" deleted`)
                               }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -2205,14 +2089,7 @@ export default function NotificationsClient() {
                           </div>
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 1500)),
-                            {
-                              loading: 'Sending test notification...',
-                              success: 'Test notification sent to configured test recipients',
-                              error: 'Failed to send test notification'
-                            }
-                          )
+                          toast.success('Test notification sent to configured test recipients')
                         }}>
                           <TestTube className="h-4 w-4 mr-2" />
                           Send Test Notification
@@ -2364,14 +2241,7 @@ export default function NotificationsClient() {
                           </div>
                           <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
                             if (confirm('Are you sure you want to purge all notification history? This action cannot be undone.')) {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 2000)),
-                                {
-                                  loading: 'Purging notification history...',
-                                  success: 'All notification history has been purged',
-                                  error: 'Failed to purge notification history'
-                                }
-                              )
+                              toast.success('All notification history has been purged')
                             }
                           }}>
                             Purge History
@@ -2384,14 +2254,7 @@ export default function NotificationsClient() {
                           </div>
                           <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => {
                             if (confirm('Are you sure you want to clear all segments? This action cannot be undone.')) {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 1500)),
-                                {
-                                  loading: 'Clearing all segments...',
-                                  success: 'All user segments have been cleared',
-                                  error: 'Failed to clear segments'
-                                }
-                              )
+                              toast.success('All user segments have been cleared')
                             }
                           }}>
                             Clear Segments
@@ -2404,14 +2267,7 @@ export default function NotificationsClient() {
                           </div>
                           <Button variant="destructive" onClick={() => {
                             if (confirm('Are you sure you want to reset all settings to their defaults? This action cannot be undone.')) {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 2000)),
-                                {
-                                  loading: 'Resetting all settings...',
-                                  success: 'All settings have been reset to defaults',
-                                  error: 'Failed to reset settings'
-                                }
-                              )
+                              toast.success('All settings have been reset to defaults')
                             }
                           }}>
                             Reset Settings

@@ -2068,14 +2068,7 @@ export default function SalesClient() {
                             </div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              {
-                                loading: 'Connecting to HubSpot...',
-                                success: 'HubSpot OAuth window opened! Complete authorization.',
-                                error: 'Failed to initialize HubSpot connection'
-                              }
-                            )
+                            toast.success('HubSpot OAuth window opened! Complete authorization.')
                           }}>Connect</Button>
                         </div>
                       </CardContent>
@@ -2096,23 +2089,11 @@ export default function SalesClient() {
                             <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => {
                               navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx')
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 800)),
-                                {
-                                  loading: 'Copying to clipboard...',
-                                  success: 'API key copied to clipboard!',
-                                  error: 'Failed to copy API key'
-                                }
-                              )
+                              toast.success('API key copied to clipboard!')
                             }}>Copy</Button>
-                            <Button variant="outline" onClick={() => toast.promise(
-                              new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
-                              {
-                                loading: 'Verifying permissions...',
-                                success: 'Key regenerated',
-                                error: 'This will invalidate your current API key. Contact support to regenerate.'
-                              }
-                            )}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => {
+                              toast.error('This will invalidate your current API key. Contact support to regenerate.')
+                            }}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2125,14 +2106,7 @@ export default function SalesClient() {
                             <div className="text-sm text-gray-500">deal.created, deal.won, deal.lost</div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 800)),
-                              {
-                                loading: 'Loading webhook settings...',
-                                success: 'Webhook configuration panel opened!',
-                                error: 'Failed to load webhook settings'
-                              }
-                            )
+                            toast.success('Webhook configuration panel opened!')
                           }}>Configure</Button>
                         </div>
                       </CardContent>
@@ -2225,14 +2199,9 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Pipeline</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all deals</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
-                            {
-                              loading: 'Checking permissions...',
-                              success: 'Pipeline cleared',
-                              error: 'Action blocked. Contact support to clear all deals.'
-                            }
-                          )}>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            toast.error('Action blocked. Contact support to clear all deals.')
+                          }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -2242,14 +2211,9 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Reset CRM</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all CRM settings and data</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
-                            {
-                              loading: 'Checking permissions...',
-                              success: 'CRM reset',
-                              error: 'Action blocked. Contact support to reset CRM data.'
-                            }
-                          )}>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            toast.error('Action blocked. Contact support to reset CRM data.')
+                          }}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2463,35 +2427,14 @@ export default function SalesClient() {
 
               <div className="flex gap-2">
                 <Button className="flex-1" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
-                    {
-                      loading: 'Sending quote to customer...',
-                      success: `Quote ${selectedQuote.quoteNumber} sent successfully!`,
-                      error: 'Failed to send quote'
-                    }
-                  )
+                  toast.success(`Quote ${selectedQuote.quoteNumber} sent successfully!`)
                 }}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
                 <Button variant="outline" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Generating PDF document...',
-                      success: 'PDF generated! Starting download...',
-                      error: 'Failed to generate PDF'
-                    }
-                  )
+                  toast.success('PDF generated! Starting download...')
                 }}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
                 <Button variant="outline" onClick={() => {
                   navigator.clipboard.writeText(selectedQuote.quoteNumber)
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Copying...',
-                      success: `Quote number ${selectedQuote.quoteNumber} copied!`,
-                      error: 'Failed to copy'
-                    }
-                  )
+                  toast.success(`Quote number ${selectedQuote.quoteNumber} copied!`)
                 }}><Copy className="w-4 h-4" /></Button>
               </div>
             </div>
@@ -3080,10 +3023,7 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailComposerDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.loading('Saving draft...', { id: 'save-email-draft' })
-              setTimeout(() => {
-                toast.success('Draft saved successfully!', { id: 'save-email-draft', description: 'Email saved to drafts folder' })
-              }, 1000)
+              toast.success('Draft saved successfully!', { description: 'Email saved to drafts folder' })
             }}>Save Draft</Button>
             <Button onClick={() => {
               toast.success('Email sent successfully')
@@ -3370,10 +3310,7 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowQuoteBuilderDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.loading('Saving quote draft...', { id: 'save-quote-draft' })
-              setTimeout(() => {
-                toast.success('Quote draft saved!', { id: 'save-quote-draft', description: 'Quote saved to drafts' })
-              }, 1000)
+              toast.success('Quote draft saved!', { description: 'Quote saved to drafts' })
             }}>Save Draft</Button>
             <Button onClick={() => {
               toast.success('Quote created successfully')
@@ -3430,19 +3367,13 @@ export default function SalesClient() {
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.loading('Preparing CSV template...', { id: 'csv-template' })
-                  setTimeout(() => {
-                    toast.success('CSV template downloaded!', { id: 'csv-template', description: 'Check your downloads folder' })
-                  }, 1000)
+                  toast.success('CSV template downloaded!', { description: 'Check your downloads folder' })
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   CSV Template
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.loading('Preparing Excel template...', { id: 'excel-template' })
-                  setTimeout(() => {
-                    toast.success('Excel template downloaded!', { id: 'excel-template', description: 'Check your downloads folder' })
-                  }, 1000)
+                  toast.success('Excel template downloaded!', { description: 'Check your downloads folder' })
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Excel Template
@@ -3470,14 +3401,7 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportWizardDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 2000)),
-                {
-                  loading: 'Importing data...',
-                  success: 'Import completed! 0 records imported.',
-                  error: 'Import failed'
-                }
-              )
+              toast.success('Import completed! 0 records imported.')
               setShowImportWizardDialog(false)
             }}>
               <Upload className="w-4 h-4 mr-2" />
@@ -3543,14 +3467,7 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowContractDialog(false)}>Cancel</Button>
             <Button variant="outline" onClick={() => {
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 1500)),
-                {
-                  loading: 'Generating PDF...',
-                  success: 'Contract PDF downloaded',
-                  error: 'Failed to generate PDF'
-                }
-              )
+              toast.success('Contract PDF downloaded')
             }}>
               <Download className="w-4 h-4 mr-2" />
               Download PDF

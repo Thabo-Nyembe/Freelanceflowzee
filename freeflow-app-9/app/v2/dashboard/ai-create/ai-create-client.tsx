@@ -2244,9 +2244,15 @@ export default function AICreateClient() {
               </Button>
               <Button
                 className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-                onClick={() => {
-                  /* TODO: Implement AI creation API call with prompt and settings */
-                  toast.success('Creation started', { description: 'Your AI creation is being generated' })
+                onClick={async () => {
+                  toast.promise(
+                    fetch('/api/ai/create', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ prompt: newCreationPrompt, type: selectedCreationType, settings: generatorSettings })
+                    }),
+                    { loading: 'Creating with AI...', success: 'AI creation started', error: 'Failed to start creation' }
+                  )
                   setShowNewCreationDialog(false)
                 }}
               >
@@ -2278,7 +2284,8 @@ export default function AICreateClient() {
                       key={template.id}
                       className="cursor-pointer hover:shadow-md transition-shadow hover:ring-2 hover:ring-purple-500"
                       onClick={() => {
-                        /* TODO: Apply template settings to generator (prompt, style, etc.) */
+                        setGeneratorSettings(prev => ({ ...prev, style: template.style, quality: template.quality || prev.quality }))
+                        setNewCreationPrompt(template.prompt || '')
                         toast.success('Template loaded', { description: `"${template.name}" template applied to generator` })
                         setShowTemplateDialog(false)
                       }}
@@ -2411,9 +2418,11 @@ export default function AICreateClient() {
               </Button>
               <Button
                 className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-                onClick={() => {
-                  /* TODO: Redirect to payment gateway or subscription management */
-                  toast.success('Upgrade initiated', { description: 'Redirecting to payment...' })
+                onClick={async () => {
+                  const res = await fetch('/api/billing/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: 'pro' }) })
+                  const data = await res.json()
+                  if (data.url) window.location.href = data.url
+                  else toast.error('Failed to create checkout session')
                   setShowUpgradeDialog(false)
                 }}
               >
@@ -2459,9 +2468,15 @@ export default function AICreateClient() {
               </Button>
               <Button
                 className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                onClick={() => {
-                  /* TODO: Save template to database with name, description, prompt, and style */
-                  toast.success('Template created', { description: 'Your template has been saved' })
+                onClick={async () => {
+                  toast.promise(
+                    fetch('/api/ai/templates', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ name: 'New Template', prompt: newCreationPrompt, style: generatorSettings.style })
+                    }),
+                    { loading: 'Saving template...', success: 'Template created', error: 'Failed to save template' }
+                  )
                   setShowCreateTemplateDialog(false)
                 }}
               >
@@ -2531,10 +2546,12 @@ export default function AICreateClient() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
+                      onClick={async () => {
                         if (confirm(`Are you sure you want to remove ${model.name}? This action cannot be undone.`)) {
-                          /* TODO: Implement model removal API call */
-                          toast.success('Model removed', { description: `${model.name} has been deleted` })
+                          toast.promise(
+                            fetch(`/api/ai/models/${model.id}`, { method: 'DELETE' }),
+                            { loading: 'Removing model...', success: `${model.name} has been deleted`, error: 'Failed to remove model' }
+                          )
                         }
                       }}
                     >

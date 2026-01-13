@@ -2740,13 +2740,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRunNewDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Starting workflow...', { id: 'run-workflow' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Workflow started', { id: 'run-workflow', description: 'Build pipeline is now running' })
-                    setShowRunNewDialog(false)
-                  } catch { toast.error('Failed to start workflow', { id: 'run-workflow' }) }
+                <Button onClick={() => {
+                  toast.success('Workflow started', { description: 'Build pipeline is now running' })
+                  setShowRunNewDialog(false)
                 }}>Run Workflow</Button>
               </div>
             </div>
@@ -2773,14 +2769,10 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRerunAllDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
+                <Button onClick={() => {
                   const failedCount = mockRuns.filter(r => r.conclusion === 'failure').length
-                  toast.loading(`Re-running ${failedCount} failed workflow(s)...`, { id: 'rerun-all' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    toast.success('Re-run triggered', { id: 'rerun-all', description: `${failedCount} workflow(s) queued for re-run` })
-                    setShowRerunAllDialog(false)
-                  } catch { toast.error('Failed to re-run workflows', { id: 'rerun-all' }) }
+                  toast.success('Re-run triggered', { description: `${failedCount} workflow(s) queued for re-run` })
+                  setShowRerunAllDialog(false)
                 }}>Re-run All</Button>
               </div>
             </div>
@@ -2807,14 +2799,10 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowCancelAllDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
+                <Button variant="destructive" onClick={() => {
                   const runningCount = mockRuns.filter(r => r.status === 'in_progress').length
-                  toast.loading(`Cancelling ${runningCount} workflow(s)...`, { id: 'cancel-all' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('All workflows cancelled', { id: 'cancel-all', description: `${runningCount} running workflow(s) stopped` })
-                    setShowCancelAllDialog(false)
-                  } catch { toast.error('Failed to cancel workflows', { id: 'cancel-all' }) }
+                  toast.success('All workflows cancelled', { description: `${runningCount} running workflow(s) stopped` })
+                  setShowCancelAllDialog(false)
                 }}>Cancel All</Button>
               </div>
             </div>
@@ -2864,13 +2852,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Reset</Button>
-                <Button onClick={async () => {
-                  toast.loading('Applying filters...', { id: 'apply-filters' })
-                  try {
-                    await new Promise(r => setTimeout(r, 800))
-                    toast.success('Filters applied', { id: 'apply-filters', description: 'Showing filtered workflow runs' })
-                    setShowFilterDialog(false)
-                  } catch { toast.error('Failed to apply filters', { id: 'apply-filters' }) }
+                <Button onClick={() => {
+                  toast.success('Filters applied', { description: 'Showing filtered workflow runs' })
+                  setShowFilterDialog(false)
                 }}>Apply Filters</Button>
               </div>
             </div>
@@ -2979,13 +2963,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowUploadArtifactDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Uploading artifact...', { id: 'upload-artifact' })
-                  try {
-                    await new Promise(r => setTimeout(r, 3000))
-                    toast.success('Artifact uploaded', { id: 'upload-artifact', description: 'Build artifact saved successfully' })
-                    setShowUploadArtifactDialog(false)
-                  } catch { toast.error('Upload failed', { id: 'upload-artifact' }) }
+                <Button onClick={() => {
+                  toast.success('Artifact uploaded', { description: 'Build artifact saved successfully' })
+                  setShowUploadArtifactDialog(false)
                 }}>Upload</Button>
               </div>
             </div>
@@ -3015,21 +2995,17 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDownloadAllDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
+                <Button onClick={() => {
                   const totalSize = mockArtifacts.reduce((sum, a) => sum + a.size, 0)
-                  toast.loading('Preparing download...', { id: 'download-all' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    const blob = new Blob([JSON.stringify({ artifacts: mockArtifacts, downloadedAt: new Date().toISOString() }, null, 2)], { type: 'application/zip' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `all-artifacts-${new Date().toISOString().split('T')[0]}.zip`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Download started', { id: 'download-all', description: `Downloading ${mockArtifacts.length} artifacts (${formatBytes(totalSize)})` })
-                    setShowDownloadAllDialog(false)
-                  } catch { toast.error('Download failed', { id: 'download-all' }) }
+                  const blob = new Blob([JSON.stringify({ artifacts: mockArtifacts, downloadedAt: new Date().toISOString() }, null, 2)], { type: 'application/zip' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `all-artifacts-${new Date().toISOString().split('T')[0]}.zip`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Download started', { description: `Downloading ${mockArtifacts.length} artifacts (${formatBytes(totalSize)})` })
+                  setShowDownloadAllDialog(false)
                 }}>Download All</Button>
               </div>
             </div>
@@ -3060,13 +3036,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Archiving artifacts...', { id: 'archive-artifacts' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Artifacts archived', { id: 'archive-artifacts', description: 'Old artifacts moved to cold storage' })
-                    setShowArchiveDialog(false)
-                  } catch { toast.error('Archive failed', { id: 'archive-artifacts' }) }
+                <Button onClick={() => {
+                  toast.success('Artifacts archived', { description: 'Old artifacts moved to cold storage' })
+                  setShowArchiveDialog(false)
                 }}>Archive</Button>
               </div>
             </div>
@@ -3102,13 +3074,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowCleanUpDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
-                  toast.loading('Cleaning up artifacts...', { id: 'cleanup-artifacts' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Cleanup complete', { id: 'cleanup-artifacts', description: 'Expired artifacts have been removed' })
-                    setShowCleanUpDialog(false)
-                  } catch { toast.error('Cleanup failed', { id: 'cleanup-artifacts' }) }
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Cleanup complete', { description: 'Expired artifacts have been removed' })
+                  setShowCleanUpDialog(false)
                 }}>Clean Up</Button>
               </div>
             </div>
@@ -3143,13 +3111,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowArtifactFilterDialog(false)}>Reset</Button>
-                <Button onClick={async () => {
-                  toast.loading('Filtering artifacts...', { id: 'filter-artifacts' })
-                  try {
-                    await new Promise(r => setTimeout(r, 800))
-                    toast.success('Filters applied', { id: 'filter-artifacts', description: 'Showing filtered artifacts' })
-                    setShowArtifactFilterDialog(false)
-                  } catch { toast.error('Filter failed', { id: 'filter-artifacts' }) }
+                <Button onClick={() => {
+                  toast.success('Filters applied', { description: 'Showing filtered artifacts' })
+                  setShowArtifactFilterDialog(false)
                 }}>Apply</Button>
               </div>
             </div>
@@ -3248,13 +3212,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowNewEnvDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Creating environment...', { id: 'create-env' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Environment created', { id: 'create-env', description: 'New environment is ready for deployments' })
-                    setShowNewEnvDialog(false)
-                  } catch { toast.error('Failed to create environment', { id: 'create-env' }) }
+                <Button onClick={() => {
+                  toast.success('Environment created', { description: 'New environment is ready for deployments' })
+                  setShowNewEnvDialog(false)
                 }}>Create</Button>
               </div>
             </div>
@@ -3289,13 +3249,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowAddSecretDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Adding secret...', { id: 'add-secret' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Secret added', { id: 'add-secret', description: 'Secret is now available for workflows' })
-                    setShowAddSecretDialog(false)
-                  } catch { toast.error('Failed to add secret', { id: 'add-secret' }) }
+                <Button onClick={() => {
+                  toast.success('Secret added', { description: 'Secret is now available for workflows' })
+                  setShowAddSecretDialog(false)
                 }}>Add Secret</Button>
               </div>
             </div>
@@ -3330,13 +3286,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowVariablesDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Adding variable...', { id: 'add-variable' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Variable added', { id: 'add-variable', description: 'Environment variable saved' })
-                    setShowVariablesDialog(false)
-                  } catch { toast.error('Failed to add variable', { id: 'add-variable' }) }
+                <Button onClick={() => {
+                  toast.success('Variable added', { description: 'Environment variable saved' })
+                  setShowVariablesDialog(false)
                 }}>Add Variable</Button>
               </div>
             </div>
@@ -3379,13 +3331,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowProtectionDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Saving protection settings...', { id: 'save-protection' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Protection updated', { id: 'save-protection', description: 'Environment protection rules saved' })
-                    setShowProtectionDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'save-protection' }) }
+                <Button onClick={() => {
+                  toast.success('Protection updated', { description: 'Environment protection rules saved' })
+                  setShowProtectionDialog(false)
                 }}>Save</Button>
               </div>
             </div>
@@ -3415,10 +3363,7 @@ export default function CiCdClient() {
                 <div className="flex gap-2">
                   <Input placeholder="Username or email" />
                   <Button onClick={() => {
-                    toast.loading('Adding reviewer...', { id: 'add-reviewer' })
-                    setTimeout(() => {
-                      toast.success('Reviewer added!', { id: 'add-reviewer' })
-                    }, 800)
+                    toast.success('Reviewer added!')
                   }}>Add</Button>
                 </div>
               </div>
@@ -3430,10 +3375,7 @@ export default function CiCdClient() {
                       <span className="text-sm">{name}</span>
                       <Button variant="ghost" size="sm" onClick={() => {
                         if (confirm(`Remove ${name} from reviewers?`)) {
-                          toast.loading('Removing reviewer...', { id: 'remove-reviewer' })
-                          setTimeout(() => {
-                            toast.success('Reviewer removed!', { id: 'remove-reviewer' })
-                          }, 800)
+                          toast.success('Reviewer removed!')
                         }
                       }}><Trash2 className="w-4 h-4" /></Button>
                     </div>
@@ -3476,13 +3418,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDeployDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Initiating deployment...', { id: 'deploy' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    toast.success('Deployment started', { id: 'deploy', description: 'Deployment pipeline is now running' })
-                    setShowDeployDialog(false)
-                  } catch { toast.error('Deployment failed', { id: 'deploy' }) }
+                <Button onClick={() => {
+                  toast.success('Deployment started', { description: 'Deployment pipeline is now running' })
+                  setShowDeployDialog(false)
                 }}>Deploy</Button>
               </div>
             </div>
@@ -3517,20 +3455,16 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowEnvExportDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Exporting configuration...', { id: 'export-config' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    const blob = new Blob([JSON.stringify({ environments: mockEnvironments, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `environments-config-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Configuration exported', { id: 'export-config', description: 'Environment config downloaded' })
-                    setShowEnvExportDialog(false)
-                  } catch { toast.error('Export failed', { id: 'export-config' }) }
+                <Button onClick={() => {
+                  const blob = new Blob([JSON.stringify({ environments: mockEnvironments, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `environments-config-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Configuration exported', { description: 'Environment config downloaded' })
+                  setShowEnvExportDialog(false)
                 }}>Export</Button>
               </div>
             </div>
@@ -3568,13 +3502,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowEnvSyncDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Syncing environments...', { id: 'sync-env' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Sync complete', { id: 'sync-env', description: 'Variables and settings synchronized' })
-                    setShowEnvSyncDialog(false)
-                  } catch { toast.error('Sync failed', { id: 'sync-env' }) }
+                <Button onClick={() => {
+                  toast.success('Sync complete', { description: 'Variables and settings synchronized' })
+                  setShowEnvSyncDialog(false)
                 }}>Sync</Button>
               </div>
             </div>
@@ -3611,13 +3541,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowEnvSettingsDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Saving settings...', { id: 'save-env-settings' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Settings saved', { id: 'save-env-settings', description: 'Environment settings updated' })
-                    setShowEnvSettingsDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'save-env-settings' }) }
+                <Button onClick={() => {
+                  toast.success('Settings saved', { description: 'Environment settings updated' })
+                  setShowEnvSettingsDialog(false)
                 }}>Save</Button>
               </div>
             </div>
@@ -3644,13 +3570,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowSecretSettingsDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Updating secret...', { id: 'update-secret' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Secret updated', { id: 'update-secret', description: 'Secret value has been changed' })
-                    setShowSecretSettingsDialog(false)
-                  } catch { toast.error('Failed to update secret', { id: 'update-secret' }) }
+                <Button onClick={() => {
+                  toast.success('Secret updated', { description: 'Secret value has been changed' })
+                  setShowSecretSettingsDialog(false)
                 }}>Update</Button>
               </div>
             </div>
@@ -3677,13 +3599,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDeleteSecretDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
-                  toast.loading('Deleting secret...', { id: 'delete-secret' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Secret deleted', { id: 'delete-secret', description: `${selectedSecret?.name} has been removed` })
-                    setShowDeleteSecretDialog(false)
-                  } catch { toast.error('Failed to delete secret', { id: 'delete-secret' }) }
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Secret deleted', { description: `${selectedSecret?.name} has been removed` })
+                  setShowDeleteSecretDialog(false)
                 }}>Delete</Button>
               </div>
             </div>
@@ -3722,13 +3640,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowAddRunnerDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Registering runner...', { id: 'add-runner' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    toast.success('Runner added', { id: 'add-runner', description: 'Runner registered and waiting for connection' })
-                    setShowAddRunnerDialog(false)
-                  } catch { toast.error('Failed to add runner', { id: 'add-runner' }) }
+                <Button onClick={() => {
+                  toast.success('Runner added', { description: 'Runner registered and waiting for connection' })
+                  setShowAddRunnerDialog(false)
                 }}>Add Runner</Button>
               </div>
             </div>
@@ -3766,13 +3680,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowConfigureRunnerDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Saving configuration...', { id: 'save-runner-config' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Configuration saved', { id: 'save-runner-config', description: 'Runner settings updated' })
-                    setShowConfigureRunnerDialog(false)
-                  } catch { toast.error('Failed to save configuration', { id: 'save-runner-config' }) }
+                <Button onClick={() => {
+                  toast.success('Configuration saved', { description: 'Runner settings updated' })
+                  setShowConfigureRunnerDialog(false)
                 }}>Save</Button>
               </div>
             </div>
@@ -3794,10 +3704,7 @@ export default function CiCdClient() {
                 <div className="flex gap-2">
                   <Input placeholder="e.g., docker, gpu" />
                   <Button onClick={() => {
-                    toast.loading('Adding label...', { id: 'add-label' })
-                    setTimeout(() => {
-                      toast.success('Label added!', { id: 'add-label' })
-                    }, 800)
+                    toast.success('Label added!')
                   }}>Add</Button>
                 </div>
               </div>
@@ -3809,10 +3716,7 @@ export default function CiCdClient() {
                       {label}
                       <button className="ml-1 hover:text-red-500" onClick={() => {
                           if (confirm(`Remove label "${label}"?`)) {
-                            toast.loading('Removing label...', { id: 'remove-label' })
-                            setTimeout(() => {
-                              toast.success('Label removed!', { id: 'remove-label' })
-                            }, 800)
+                            toast.success('Label removed!')
                           }
                         }}>x</button>
                     </Badge>
@@ -3846,14 +3750,10 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRestartAllDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
+                <Button onClick={() => {
                   const runnerCount = mockRunners.filter(r => r.status !== 'offline').length
-                  toast.loading(`Restarting ${runnerCount} runner(s)...`, { id: 'restart-runners' })
-                  try {
-                    await new Promise(r => setTimeout(r, 3000))
-                    toast.success('Runners restarting', { id: 'restart-runners', description: 'All runners are restarting' })
-                    setShowRestartAllDialog(false)
-                  } catch { toast.error('Failed to restart runners', { id: 'restart-runners' }) }
+                  toast.success('Runners restarting', { description: `${runnerCount} runner(s) are restarting` })
+                  setShowRestartAllDialog(false)
                 }}>Restart All</Button>
               </div>
             </div>
@@ -3875,13 +3775,9 @@ export default function CiCdClient() {
               </p>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowPauseAllDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Pausing runners...', { id: 'pause-runners' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Runners paused', { id: 'pause-runners', description: 'No new jobs will be accepted' })
-                    setShowPauseAllDialog(false)
-                  } catch { toast.error('Failed to pause runners', { id: 'pause-runners' }) }
+                <Button onClick={() => {
+                  toast.success('Runners paused', { description: 'No new jobs will be accepted' })
+                  setShowPauseAllDialog(false)
                 }}>Pause All</Button>
               </div>
             </div>
@@ -3942,20 +3838,16 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRunnerExportDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Exporting runner config...', { id: 'export-runner' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    const blob = new Blob([JSON.stringify({ runners: mockRunners, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `runner-config-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Configuration exported', { id: 'export-runner', description: 'Runner config downloaded' })
-                    setShowRunnerExportDialog(false)
-                  } catch { toast.error('Export failed', { id: 'export-runner' }) }
+                <Button onClick={() => {
+                  const blob = new Blob([JSON.stringify({ runners: mockRunners, exportedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `runner-config-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Configuration exported', { description: 'Runner config downloaded' })
+                  setShowRunnerExportDialog(false)
                 }}>Export</Button>
               </div>
             </div>
@@ -3982,14 +3874,10 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRunnerCleanUpDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
+                <Button variant="destructive" onClick={() => {
                   const offlineCount = mockRunners.filter(r => r.status === 'offline').length
-                  toast.loading(`Removing ${offlineCount} offline runner(s)...`, { id: 'cleanup-runners' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Runners cleaned up', { id: 'cleanup-runners', description: 'Offline runners have been removed' })
-                    setShowRunnerCleanUpDialog(false)
-                  } catch { toast.error('Cleanup failed', { id: 'cleanup-runners' }) }
+                  toast.success('Runners cleaned up', { description: `${offlineCount} offline runner(s) have been removed` })
+                  setShowRunnerCleanUpDialog(false)
                 }}>Clean Up</Button>
               </div>
             </div>
@@ -4023,13 +3911,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowRunnerSettingsDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Saving runner settings...', { id: 'save-runner' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Settings saved', { id: 'save-runner', description: `${selectedRunner?.name} settings updated` })
-                    setShowRunnerSettingsDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'save-runner' }) }
+                <Button onClick={() => {
+                  toast.success('Settings saved', { description: `${selectedRunner?.name} settings updated` })
+                  setShowRunnerSettingsDialog(false)
                 }}>Save</Button>
               </div>
             </div>
@@ -4092,13 +3976,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowArchiveOldRunsDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Archiving old runs...', { id: 'archive-runs' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    toast.success('Runs archived', { id: 'archive-runs', description: 'Old workflow runs moved to archive' })
-                    setShowArchiveOldRunsDialog(false)
-                  } catch { toast.error('Archive failed', { id: 'archive-runs' }) }
+                <Button onClick={() => {
+                  toast.success('Runs archived', { description: 'Old workflow runs moved to archive' })
+                  setShowArchiveOldRunsDialog(false)
                 }}>Archive</Button>
               </div>
             </div>
@@ -4125,13 +4005,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowResetStatsDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
-                  toast.loading('Resetting statistics...', { id: 'reset-stats' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Statistics reset', { id: 'reset-stats', description: 'All metrics have been cleared' })
-                    setShowResetStatsDialog(false)
-                  } catch { toast.error('Reset failed', { id: 'reset-stats' }) }
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Statistics reset', { description: 'All metrics have been cleared' })
+                  setShowResetStatsDialog(false)
                 }}>Reset</Button>
               </div>
             </div>
@@ -4158,14 +4034,10 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowPurgeArtifactsDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
+                <Button variant="destructive" onClick={() => {
                   const totalSize = mockArtifacts.reduce((sum, a) => sum + a.size, 0)
-                  toast.loading('Purging all artifacts...', { id: 'purge-artifacts' })
-                  try {
-                    await new Promise(r => setTimeout(r, 3000))
-                    toast.success('Artifacts purged', { id: 'purge-artifacts', description: `${formatBytes(totalSize)} of storage freed` })
-                    setShowPurgeArtifactsDialog(false)
-                  } catch { toast.error('Purge failed', { id: 'purge-artifacts' }) }
+                  toast.success('Artifacts purged', { description: `${formatBytes(totalSize)} of storage freed` })
+                  setShowPurgeArtifactsDialog(false)
                 }}>Purge All</Button>
               </div>
             </div>
@@ -4192,13 +4064,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDisableWorkflowsDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
-                  toast.loading('Disabling workflows...', { id: 'disable-workflows' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Workflows disabled', { id: 'disable-workflows', description: `${mockWorkflows.length} workflow(s) paused` })
-                    setShowDisableWorkflowsDialog(false)
-                  } catch { toast.error('Failed to disable workflows', { id: 'disable-workflows' }) }
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Workflows disabled', { description: `${mockWorkflows.length} workflow(s) paused` })
+                  setShowDisableWorkflowsDialog(false)
                 }}>Disable All</Button>
               </div>
             </div>
@@ -4225,15 +4093,11 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDeleteAllArtifactsDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
+                <Button variant="destructive" onClick={() => {
                   const count = mockArtifacts.length
                   const totalSize = mockArtifacts.reduce((sum, a) => sum + a.size, 0)
-                  toast.loading(`Deleting ${count} artifact(s)...`, { id: 'delete-all-artifacts' })
-                  try {
-                    await new Promise(r => setTimeout(r, 3000))
-                    toast.success('All artifacts deleted', { id: 'delete-all-artifacts', description: `${formatBytes(totalSize)} of storage freed` })
-                    setShowDeleteAllArtifactsDialog(false)
-                  } catch { toast.error('Delete failed', { id: 'delete-all-artifacts' }) }
+                  toast.success('All artifacts deleted', { description: `${formatBytes(totalSize)} of storage freed (${count} artifacts)` })
+                  setShowDeleteAllArtifactsDialog(false)
                 }}>Delete All</Button>
               </div>
             </div>
@@ -4260,13 +4124,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowClearCachesDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
-                  toast.loading('Clearing caches...', { id: 'clear-caches' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    toast.success('Caches cleared', { id: 'clear-caches', description: '4.2GB of cache data has been removed' })
-                    setShowClearCachesDialog(false)
-                  } catch { toast.error('Failed to clear caches', { id: 'clear-caches' }) }
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Caches cleared', { description: '4.2GB of cache data has been removed' })
+                  setShowClearCachesDialog(false)
                 }}>Clear All</Button>
               </div>
             </div>
@@ -4296,13 +4156,9 @@ export default function CiCdClient() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowTestWebhookDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Sending test webhook...', { id: 'test-webhook' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Webhook test successful', { id: 'test-webhook', description: 'Received 200 OK response' })
-                    setShowTestWebhookDialog(false)
-                  } catch { toast.error('Webhook test failed', { id: 'test-webhook' }) }
+                <Button onClick={() => {
+                  toast.success('Webhook test successful', { description: 'Received 200 OK response' })
+                  setShowTestWebhookDialog(false)
                 }}>Send Test</Button>
               </div>
             </div>
@@ -4335,13 +4191,9 @@ export default function CiCdClient() {
                 <Download className="w-4 h-4" />
                 Export History
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-2 text-red-600" onClick={async () => {
-                toast.loading('Disabling workflow...', { id: 'disable-workflow' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Workflow disabled', { id: 'disable-workflow', description: 'Workflow will no longer run automatically' })
-                  setShowMoreOptionsDialog(false)
-                } catch { toast.error('Failed to disable workflow', { id: 'disable-workflow' }) }
+              <Button variant="ghost" className="w-full justify-start gap-2 text-red-600" onClick={() => {
+                toast.success('Workflow disabled', { description: 'Workflow will no longer run automatically' })
+                setShowMoreOptionsDialog(false)
               }}>
                 <StopCircle className="w-4 h-4" />
                 Disable Workflow
@@ -4456,13 +4308,9 @@ jobs:
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowWorkflowSettingsDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading('Saving workflow settings...', { id: 'save-workflow' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Settings saved', { id: 'save-workflow', description: `${selectedWorkflow?.name} settings updated` })
-                    setShowWorkflowSettingsDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'save-workflow' }) }
+                <Button onClick={() => {
+                  toast.success('Settings saved', { description: `${selectedWorkflow?.name} settings updated` })
+                  setShowWorkflowSettingsDialog(false)
                 }}>Save</Button>
               </div>
             </div>
@@ -4486,20 +4334,16 @@ jobs:
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDownloadArtifactDialog(false)}>Cancel</Button>
-                <Button onClick={async () => {
-                  toast.loading(`Downloading ${selectedArtifact?.name}...`, { id: 'download-artifact' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    const blob = new Blob([JSON.stringify({ artifact: selectedArtifact, downloadedAt: new Date().toISOString() }, null, 2)], { type: 'application/octet-stream' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = selectedArtifact?.name || 'artifact.zip'
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Download complete', { id: 'download-artifact', description: `${selectedArtifact?.name} downloaded` })
-                    setShowDownloadArtifactDialog(false)
-                  } catch { toast.error('Download failed', { id: 'download-artifact' }) }
+                <Button onClick={() => {
+                  const blob = new Blob([JSON.stringify({ artifact: selectedArtifact, downloadedAt: new Date().toISOString() }, null, 2)], { type: 'application/octet-stream' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = selectedArtifact?.name || 'artifact.zip'
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Download complete', { description: `${selectedArtifact?.name} downloaded` })
+                  setShowDownloadArtifactDialog(false)
                 }}>Download</Button>
               </div>
             </div>
@@ -4521,13 +4365,9 @@ jobs:
               </p>
               <div className="flex justify-end gap-3 pt-4">
                 <Button variant="outline" onClick={() => setShowDeleteArtifactDialog(false)}>Cancel</Button>
-                <Button variant="destructive" onClick={async () => {
-                  toast.loading(`Deleting ${selectedArtifact?.name}...`, { id: 'delete-artifact' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Artifact deleted', { id: 'delete-artifact', description: `${selectedArtifact?.name} has been removed` })
-                    setShowDeleteArtifactDialog(false)
-                  } catch { toast.error('Failed to delete artifact', { id: 'delete-artifact' }) }
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Artifact deleted', { description: `${selectedArtifact?.name} has been removed` })
+                  setShowDeleteArtifactDialog(false)
                 }}>Delete</Button>
               </div>
             </div>

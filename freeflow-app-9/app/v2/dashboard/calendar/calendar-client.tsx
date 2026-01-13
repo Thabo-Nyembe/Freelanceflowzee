@@ -1642,23 +1642,9 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                           </div>
                           <Button variant={cal.connected ? 'outline' : 'default'} size="sm" onClick={() => {
                             if (cal.connected) {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1000)),
-                                {
-                                  loading: `Disconnecting ${cal.name}...`,
-                                  success: `${cal.name} disconnected successfully`,
-                                  error: `Failed to disconnect ${cal.name}`
-                                }
-                              )
+                              toast.success(`${cal.name} disconnected successfully`)
                             } else {
-                              toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1500)),
-                                {
-                                  loading: `Connecting to ${cal.name}...`,
-                                  success: `${cal.name} connected successfully`,
-                                  error: `Failed to connect to ${cal.name}`
-                                }
-                              )
+                              toast.success(`${cal.name} connected successfully`)
                             }
                           }}>
                             {cal.connected ? 'Disconnect' : 'Connect'}
@@ -2057,14 +2043,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowQuickAddDialog(false)}>Cancel</Button>
                 <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Creating event...',
-                      success: 'Event added to calendar',
-                      error: 'Failed to create event'
-                    }
-                  )
+                  toast.success('Event added to calendar')
                   setShowQuickAddDialog(false)
                 }}>Add Event</Button>
               </div>
@@ -2147,14 +2126,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowBookRoomDialog(false)}>Cancel</Button>
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
-                    {
-                      loading: 'Booking room...',
-                      success: 'Room booked successfully! Calendar invitation sent.',
-                      error: 'Failed to book room'
-                    }
-                  )
+                  toast.success('Room booked successfully! Calendar invitation sent.')
                   setShowBookRoomDialog(false)
                 }}>Book Room</Button>
               </div>
@@ -2196,14 +2168,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowFindTimeDialog(false)}>Cancel</Button>
                 <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Finding available times...',
-                      success: 'Found 5 available time slots this week',
-                      error: 'Failed to find available times'
-                    }
-                  )
+                  toast.success('Found 5 available time slots this week')
                   setShowFindTimeDialog(false)
                 }}>Find Times</Button>
               </div>
@@ -2248,14 +2213,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
                 <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Scheduling event...',
-                      success: 'Event scheduled successfully',
-                      error: 'Failed to schedule event'
-                    }
-                  )
+                  toast.success('Event scheduled successfully')
                   setShowScheduleDialog(false)
                 }}>Schedule</Button>
               </div>
@@ -2298,14 +2256,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowReminderDialog(false)}>Cancel</Button>
                 <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Creating reminder...',
-                      success: 'Reminder created successfully',
-                      error: 'Failed to create reminder'
-                    }
-                  )
+                  toast.success('Reminder created successfully')
                   setShowReminderDialog(false)
                 }}>Create Reminder</Button>
               </div>
@@ -2349,14 +2300,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
                 <Button onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Sharing calendar...',
-                      success: 'Calendar shared successfully! Invitation sent.',
-                      error: 'Failed to share calendar'
-                    }
-                  )
+                  toast.success('Calendar shared successfully! Invitation sent.')
                   setShowShareDialog(false)
                 }}>Share</Button>
               </div>
@@ -2455,23 +2399,9 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     </div>
                     <Button variant={cal.connected ? 'outline' : 'default'} size="sm" onClick={() => {
                       if (cal.connected) {
-                        toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1000)),
-                          {
-                            loading: `Disconnecting ${cal.name}...`,
-                            success: `${cal.name} disconnected`,
-                            error: `Failed to disconnect ${cal.name}`
-                          }
-                        )
+                        toast.success(`${cal.name} disconnected`)
                       } else {
-                        toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1500)),
-                          {
-                            loading: `Connecting to ${cal.name}...`,
-                            success: `${cal.name} connected successfully`,
-                            error: `Failed to connect to ${cal.name}`
-                          }
-                        )
+                        toast.success(`${cal.name} connected successfully`)
                       }
                     }}>
                       {cal.connected ? 'Disconnect' : 'Connect'}
@@ -2482,14 +2412,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowSyncDialog(false)}>Close</Button>
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Syncing calendars...',
-                      success: 'All calendars synced successfully',
-                      error: 'Failed to sync calendars'
-                    }
-                  )
+                  toast.success('All calendars synced successfully')
                   setShowSyncDialog(false)
                 }}>Sync Now</Button>
               </div>
@@ -2518,14 +2441,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-6">
                 <Button variant="outline" onClick={() => { setShowDeleteReminderDialog(false); setReminderToDelete(null); }}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Deleting reminder...',
-                      success: `Reminder "${reminderToDelete?.title}" deleted`,
-                      error: 'Failed to delete reminder'
-                    }
-                  )
+                  toast.success(`Reminder "${reminderToDelete?.title}" deleted`)
                   setShowDeleteReminderDialog(false)
                   setReminderToDelete(null)
                 }}>Delete</Button>
@@ -2583,14 +2499,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   const linkId = `link-${Date.now()}`
                   const linkUrl = `https://cal.com/user/${linkId}`
                   navigator.clipboard.writeText(linkUrl)
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Creating scheduling link...',
-                      success: 'Scheduling link created! URL copied to clipboard.',
-                      error: 'Failed to create scheduling link'
-                    }
-                  )
+                  toast.success('Scheduling link created! URL copied to clipboard.')
                   setShowCreateLinkDialog(false)
                 }}>Create Link</Button>
               </div>
@@ -2642,14 +2551,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowAddReminderDialog(false)}>Cancel</Button>
                 <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Adding reminder...',
-                      success: 'Reminder added successfully',
-                      error: 'Failed to add reminder'
-                    }
-                  )
+                  toast.success('Reminder added successfully')
                   setShowAddReminderDialog(false)
                 }}>Add Reminder</Button>
               </div>
@@ -2691,14 +2593,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowAddCalendarDialog(false)}>Cancel</Button>
                 <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Adding calendar...',
-                      success: 'Calendar added successfully',
-                      error: 'Failed to add calendar'
-                    }
-                  )
+                  toast.success('Calendar added successfully')
                   setShowAddCalendarDialog(false)
                 }}>Add Calendar</Button>
               </div>
@@ -2725,14 +2620,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-6">
                 <Button variant="outline" onClick={() => setShowClearEventsDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
-                    {
-                      loading: 'Clearing all events...',
-                      success: 'All events cleared successfully',
-                      error: 'Failed to clear events'
-                    }
-                  )
+                  toast.success('All events cleared successfully')
                   setShowClearEventsDialog(false)
                 }}>Clear All Events</Button>
               </div>
@@ -2759,14 +2647,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div className="flex justify-end gap-2 pt-6">
                 <Button variant="outline" onClick={() => setShowDeleteCalendarDialog(false)}>Cancel</Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Deleting calendar...',
-                      success: 'Calendar deleted successfully',
-                      error: 'Failed to delete calendar'
-                    }
-                  )
+                  toast.success('Calendar deleted successfully')
                   setShowDeleteCalendarDialog(false)
                 }}>Delete Calendar</Button>
               </div>

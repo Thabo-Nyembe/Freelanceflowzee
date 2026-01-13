@@ -364,80 +364,47 @@ const mockCollabActivities = [
 const mockCollabQuickActions = [
   { id: '1', label: 'New Board', icon: 'plus', action: () => {
     const boardName = `Board_${new Date().toLocaleTimeString()}`;
-    toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          const newBoard: Board = {
-            id: `b${Date.now()}`,
-            name: boardName,
-            description: 'New collaboration board',
-            type: 'whiteboard',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            createdBy: mockMembers[0],
-            members: [mockMembers[0]],
-            isStarred: false,
-            isLocked: false,
-            isPublic: false,
-            viewCount: 0,
-            commentCount: 0,
-            elementCount: 0,
-            version: 1,
-            tags: ['new'],
-          };
-          mockBoards.push(newBoard);
-          resolve();
-        }, 800);
-      }),
-      {
-        loading: 'Creating new collaboration board...',
-        success: 'Board created successfully',
-        error: 'Failed to create board'
-      }
-    );
+    const newBoard: Board = {
+      id: `b${Date.now()}`,
+      name: boardName,
+      description: 'New collaboration board',
+      type: 'whiteboard',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: mockMembers[0],
+      members: [mockMembers[0]],
+      isStarred: false,
+      isLocked: false,
+      isPublic: false,
+      viewCount: 0,
+      commentCount: 0,
+      elementCount: 0,
+      version: 1,
+      tags: ['new'],
+    };
+    mockBoards.push(newBoard);
+    toast.success('Board created successfully');
   }, variant: 'default' as const },
   { id: '2', label: 'Schedule Meeting', icon: 'calendar', action: () => {
-    toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          const newMeeting: Meeting = {
-            id: `mt${Date.now()}`,
-            title: 'New Meeting',
-            status: 'scheduled',
-            startTime: new Date(Date.now() + 3600000).toISOString(),
-            duration: 60,
-            organizer: mockMembers[0],
-            participants: mockMembers.slice(0, 2),
-            isRecurring: false,
-            hasRecording: false,
-            meetingUrl: 'https://meet.example.com/new-meeting'
-          };
-          mockMeetings.push(newMeeting);
-          resolve();
-        }, 800);
-      }),
-      {
-        loading: 'Opening meeting scheduler...',
-        success: 'Meeting scheduler ready',
-        error: 'Failed to open scheduler'
-      }
-    );
+    const newMeeting: Meeting = {
+      id: `mt${Date.now()}`,
+      title: 'New Meeting',
+      status: 'scheduled',
+      startTime: new Date(Date.now() + 3600000).toISOString(),
+      duration: 60,
+      organizer: mockMembers[0],
+      participants: mockMembers.slice(0, 2),
+      isRecurring: false,
+      hasRecording: false,
+      meetingUrl: 'https://meet.example.com/new-meeting'
+    };
+    mockMeetings.push(newMeeting);
+    toast.success('Meeting scheduler ready');
   }, variant: 'default' as const },
   { id: '3', label: 'Start Call', icon: 'video', action: () => {
-    toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          window.open('https://meet.example.com/instant-call', '_blank');
-          resolve();
-        }, 1000);
-      }),
-      {
-        loading: 'Starting video call...',
-        success: 'Call started',
-        error: 'Failed to start call'
-      }
-    );
+    window.open('https://meet.example.com/instant-call', '_blank');
+    toast.success('Call started');
   }, variant: 'outline' as const },
 ]
 
@@ -680,29 +647,15 @@ export default function CollaborationClient() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.promise(
-                    new Promise<void>((resolve) => {
-                      setTimeout(() => {
-                        window.open('https://meet.example.com/instant-meeting', '_blank');
-                        resolve();
-                      }, 800);
-                    }),
-                    { loading: 'Starting instant meeting...', success: 'Meeting started! Joining now...', error: 'Failed to start meeting' }
-                  );
+                  window.open('https://meet.example.com/instant-meeting', '_blank');
+                  toast.success('Meeting started! Joining now...');
                 }}><Video className="h-4 w-4 mr-2" />Start Meeting</Button>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.promise(
-                    new Promise<void>((resolve) => {
-                      setTimeout(() => {
-                        navigator.mediaDevices.getDisplayMedia({ video: true }).then(() => {
-                          resolve();
-                        }).catch(() => {
-                          toast.error('Screen sharing was cancelled');
-                        });
-                      }, 300);
-                    }),
-                    { loading: 'Preparing screen share...', success: 'Screen sharing started', error: 'Failed to start screen share' }
-                  );
+                  navigator.mediaDevices.getDisplayMedia({ video: true }).then(() => {
+                    toast.success('Screen sharing started');
+                  }).catch(() => {
+                    toast.error('Screen sharing was cancelled');
+                  });
                 }}><ScreenShare className="h-4 w-4 mr-2" />Share Screen</Button>
               </div>
             </div>
@@ -900,19 +853,8 @@ export default function CollaborationClient() {
                         }
                       }}><Pin className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.promise(
-                          new Promise<void>((resolve) => {
-                            setTimeout(() => {
-                              document.getElementById('search-input')?.focus();
-                              resolve();
-                            }, 300);
-                          }),
-                          {
-                            loading: 'Opening search...',
-                            success: 'Search opened',
-                            error: 'Failed to open search'
-                          }
-                        );
+                        document.getElementById('search-input')?.focus();
+                        toast.success('Search opened');
                       }}><Search className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => {
                         setShowChannelOptionsDialog(true);
@@ -976,20 +918,12 @@ export default function CollaborationClient() {
                 <div className="p-4 border-t">
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" onClick={() => {
-                      toast.promise(
-                        new Promise<void>((resolve) => {
-                          setTimeout(() => {
-                            const input = document.createElement('input');
-                            input.type = 'file';
-                            input.onchange = () => {
-                              toast.success('File attached successfully');
-                              resolve();
-                            };
-                            input.click();
-                          }, 200);
-                        }),
-                        { loading: 'Opening file picker...', success: 'File picker opened', error: 'Failed to open file picker' }
-                      );
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.onchange = () => {
+                        toast.success('File attached successfully');
+                      };
+                      input.click();
                     }}><Paperclip className="h-4 w-4" /></Button>
                     <Input placeholder="Type a message..." className="flex-1" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} />
                     <Button variant="ghost" size="icon" onClick={() => {
@@ -998,27 +932,20 @@ export default function CollaborationClient() {
                     }}><Smile className="h-4 w-4" /></Button>
                     <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
                       if (messageInput.trim()) {
-                        toast.promise(
-                          new Promise<void>((resolve) => {
-                            setTimeout(() => {
-                              mockMessages.push({
-                                id: `m${Date.now()}`,
-                                channelId: selectedChannel?.id || 'c1',
-                                author: mockMembers[0],
-                                content: messageInput,
-                                timestamp: new Date().toISOString(),
-                                isEdited: false,
-                                isPinned: false,
-                                reactions: [],
-                                attachments: [],
-                                mentions: []
-                              });
-                              setMessageInput('');
-                              resolve();
-                            }, 500);
-                          }),
-                          { loading: 'Sending message...', success: 'Message sent successfully', error: 'Failed to send message' }
-                        );
+                        mockMessages.push({
+                          id: `m${Date.now()}`,
+                          channelId: selectedChannel?.id || 'c1',
+                          author: mockMembers[0],
+                          content: messageInput,
+                          timestamp: new Date().toISOString(),
+                          isEdited: false,
+                          isPinned: false,
+                          reactions: [],
+                          attachments: [],
+                          mentions: []
+                        });
+                        setMessageInput('');
+                        toast.success('Message sent successfully');
                       } else {
                         toast.error('Cannot send empty message');
                       }
@@ -1126,44 +1053,23 @@ export default function CollaborationClient() {
                       </div>
                       <div className="flex gap-2">
                         {meeting.hasRecording && <Button variant="outline" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise<void>((resolve) => {
-                              setTimeout(() => {
-                                window.open(meeting.recordingUrl || '#', '_blank');
-                                resolve();
-                              }, 500);
-                            }),
-                            { loading: 'Loading recording...', success: 'Recording opened', error: 'Failed to load recording' }
-                          );
+                          window.open(meeting.recordingUrl || '#', '_blank');
+                          toast.success('Recording opened');
                         }}><Play className="h-4 w-4 mr-1" />Recording</Button>}
                         {meeting.status === 'live' && <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                          toast.promise(
-                            new Promise<void>((resolve) => {
-                              setTimeout(() => {
-                                window.open(meeting.meetingUrl, '_blank');
-                                resolve();
-                              }, 500);
-                            }),
-                            { loading: 'Joining meeting...', success: 'Joined meeting successfully', error: 'Failed to join meeting' }
-                          );
+                          window.open(meeting.meetingUrl, '_blank');
+                          toast.success('Joined meeting successfully');
                         }}><Video className="h-4 w-4 mr-2" />Join</Button>}
                         {meeting.status === 'scheduled' && <Button variant="outline" onClick={() => {
-                          toast.promise(
-                            new Promise<void>((resolve) => {
-                              setTimeout(() => {
-                                const event = {
-                                  title: meeting.title,
-                                  start: new Date(meeting.startTime),
-                                  end: new Date(new Date(meeting.startTime).getTime() + meeting.duration * 60000),
-                                  description: meeting.description || ''
-                                };
-                                const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${event.end.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(event.description)}`;
-                                window.open(googleCalendarUrl, '_blank');
-                                resolve();
-                              }, 500);
-                            }),
-                            { loading: 'Adding to calendar...', success: 'Added to calendar', error: 'Failed to add to calendar' }
-                          );
+                          const event = {
+                            title: meeting.title,
+                            start: new Date(meeting.startTime),
+                            end: new Date(new Date(meeting.startTime).getTime() + meeting.duration * 60000),
+                            description: meeting.description || ''
+                          };
+                          const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${event.start.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${event.end.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(event.description)}`;
+                          window.open(googleCalendarUrl, '_blank');
+                          toast.success('Added to calendar');
                         }}><Calendar className="h-4 w-4 mr-2" />Add to Calendar</Button>}
                       </div>
                     </div>
@@ -1260,32 +1166,20 @@ export default function CollaborationClient() {
                         </div>
                         <div className="flex gap-2">
                           <Button variant="ghost" size="icon" onClick={() => {
-                            toast.promise(
-                              new Promise<void>((resolve) => {
-                                setTimeout(() => {
-                                  const link = document.createElement('a');
-                                  link.href = '#';
-                                  link.download = file.name;
-                                  link.click();
-                                  file.downloadCount++;
-                                  resolve();
-                                }, 1000);
-                              }),
-                              { loading: 'Downloading file...', success: 'File downloaded successfully', error: 'Failed to download file' }
-                            );
+                            const blob = new Blob([`File: ${file.name}\nSize: ${file.size} bytes\nVersion: ${file.version}`], { type: 'application/octet-stream' });
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = file.name;
+                            link.click();
+                            URL.revokeObjectURL(url);
+                            file.downloadCount++;
+                            toast.success('File downloaded successfully');
                           }}><Download className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => {
-                            toast.promise(
-                              new Promise<void>((resolve) => {
-                                setTimeout(() => {
-                                  const shareUrl = `https://app.example.com/share/${file.id}`;
-                                  navigator.clipboard.writeText(shareUrl).then(() => {
-                                    resolve();
-                                  });
-                                }, 400);
-                              }),
-                              { loading: 'Preparing share link...', success: 'Share link copied to clipboard', error: 'Failed to create share link' }
-                            );
+                            const shareUrl = `https://app.example.com/share/${file.id}`;
+                            navigator.clipboard.writeText(shareUrl);
+                            toast.success('Share link copied to clipboard');
                           }}><Share2 className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => {
                             setSelectedFile(file);
@@ -1579,15 +1473,8 @@ export default function CollaborationClient() {
                           <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.timestamp)}</p>
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          toast.promise(
-                            new Promise<void>((resolve) => {
-                              setTimeout(() => {
-                                window.open(`#/${activity.resourceId}`, '_blank');
-                                resolve();
-                              }, 300);
-                            }),
-                            { loading: 'Opening resource...', success: 'Resource opened', error: 'Failed to open' }
-                          );
+                          window.open(`#/${activity.resourceId}`, '_blank');
+                          toast.success('Resource opened');
                         }}><ExternalLink className="h-4 w-4" /></Button>
                       </div>
                     ))}
@@ -1859,37 +1746,16 @@ export default function CollaborationClient() {
                             <Button variant="outline" size="sm" onClick={() => {
                               if (integration.status === 'connected') {
                                 setSelectedIntegration(integration);
-                                toast.promise(
-                                  new Promise<void>((resolve) => {
-                                    setTimeout(() => {
-                                      resolve();
-                                    }, 500);
-                                  }),
-                                  { loading: 'Opening configuration...', success: `${integration.name} settings opened`, error: 'Failed to open settings' }
-                                );
+                                toast.success(`${integration.name} settings opened`);
                               } else {
-                                toast.promise(
-                                  new Promise<void>((resolve) => {
-                                    setTimeout(() => {
-                                      integration.status = 'connected';
-                                      integration.lastSync = new Date().toISOString();
-                                      resolve();
-                                    }, 1500);
-                                  }),
-                                  { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully`, error: 'Connection failed' }
-                                );
+                                integration.status = 'connected';
+                                integration.lastSync = new Date().toISOString();
+                                toast.success(`${integration.name} connected successfully`);
                               }
                             }}>{integration.status === 'connected' ? 'Configure' : 'Connect'}</Button>
                             {integration.status === 'connected' && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
-                              toast.promise(
-                                new Promise<void>((resolve) => {
-                                  setTimeout(() => {
-                                    integration.status = 'disconnected';
-                                    resolve();
-                                  }, 800);
-                                }),
-                                { loading: `Disconnecting ${integration.name}...`, success: `${integration.name} disconnected`, error: 'Failed to disconnect' }
-                              );
+                              integration.status = 'disconnected';
+                              toast.success(`${integration.name} disconnected`);
                             }}>Disconnect</Button>}
                           </div>
                         </div>
@@ -1973,30 +1839,23 @@ export default function CollaborationClient() {
                       <div className="flex items-center justify-between"><div><p className="font-medium">Two-Factor Auth</p><p className="text-sm text-gray-500">Require 2FA for login</p></div><Switch defaultChecked /></div>
                       <div className="flex items-center justify-between"><div><p className="font-medium">Session Timeout</p><p className="text-sm text-gray-500">Auto-logout after inactivity</p></div><Switch /></div>
                       <Button variant="outline" className="w-full" onClick={() => {
-                        toast.promise(
-                          new Promise<void>((resolve) => {
-                            setTimeout(() => {
-                              const data = {
-                                user: mockMembers[0],
-                                boards: mockBoards,
-                                channels: mockChannels,
-                                meetings: mockMeetings,
-                                files: mockFiles,
-                                activities: mockActivities,
-                                exportDate: new Date().toISOString()
-                              };
-                              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = url;
-                              a.download = `collaboration-data-export-${new Date().toISOString().split('T')[0]}.json`;
-                              a.click();
-                              URL.revokeObjectURL(url);
-                              resolve();
-                            }, 1500);
-                          }),
-                          { loading: 'Preparing your data export...', success: 'Data exported successfully', error: 'Failed to export data' }
-                        );
+                        const data = {
+                          user: mockMembers[0],
+                          boards: mockBoards,
+                          channels: mockChannels,
+                          meetings: mockMeetings,
+                          files: mockFiles,
+                          activities: mockActivities,
+                          exportDate: new Date().toISOString()
+                        };
+                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `collaboration-data-export-${new Date().toISOString().split('T')[0]}.json`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success('Data exported successfully');
                       }}><Download className="h-4 w-4 mr-2" />Export My Data</Button>
                     </CardContent>
                   </Card>
@@ -2114,29 +1973,22 @@ export default function CollaborationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewMeeting(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      const newMeeting: Meeting = {
-                        id: `mt${Date.now()}`,
-                        title: 'New Scheduled Meeting',
-                        description: 'Meeting scheduled via dialog',
-                        status: 'scheduled',
-                        startTime: new Date(Date.now() + 86400000).toISOString(),
-                        duration: 60,
-                        organizer: mockMembers[0],
-                        participants: mockMembers.slice(0, 3),
-                        isRecurring: false,
-                        hasRecording: false,
-                        meetingUrl: `https://meet.example.com/meeting-${Date.now()}`
-                      };
-                      mockMeetings.push(newMeeting);
-                      setShowNewMeeting(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Scheduling meeting...', success: 'Meeting scheduled successfully', error: 'Failed to schedule meeting' }
-                );
+                const newMeeting: Meeting = {
+                  id: `mt${Date.now()}`,
+                  title: 'New Scheduled Meeting',
+                  description: 'Meeting scheduled via dialog',
+                  status: 'scheduled',
+                  startTime: new Date(Date.now() + 86400000).toISOString(),
+                  duration: 60,
+                  organizer: mockMembers[0],
+                  participants: mockMembers.slice(0, 3),
+                  isRecurring: false,
+                  hasRecording: false,
+                  meetingUrl: `https://meet.example.com/meeting-${Date.now()}`
+                };
+                mockMeetings.push(newMeeting);
+                setShowNewMeeting(false);
+                toast.success('Meeting scheduled successfully');
               }}>Schedule Meeting</Button>
             </DialogFooter>
           </DialogContent>
@@ -2172,26 +2024,19 @@ export default function CollaborationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      const newTemplate: Template = {
-                        id: `tmp${Date.now()}`,
-                        name: 'My Custom Template',
-                        description: 'Custom template created via dialog',
-                        category: 'project',
-                        preview: '/templates/custom.png',
-                        usageCount: 0,
-                        createdBy: 'You',
-                        isOfficial: false
-                      };
-                      mockTemplates.push(newTemplate);
-                      setShowTemplateDialog(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Creating template...', success: 'Template created successfully', error: 'Failed to create template' }
-                );
+                const newTemplate: Template = {
+                  id: `tmp${Date.now()}`,
+                  name: 'My Custom Template',
+                  description: 'Custom template created via dialog',
+                  category: 'project',
+                  preview: '/templates/custom.png',
+                  usageCount: 0,
+                  createdBy: 'You',
+                  isOfficial: false
+                };
+                mockTemplates.push(newTemplate);
+                setShowTemplateDialog(false);
+                toast.success('Template created successfully');
               }}>Create Template</Button>
             </DialogFooter>
           </DialogContent>
@@ -2215,24 +2060,17 @@ export default function CollaborationClient() {
                   { name: 'Zoom', type: 'communication', description: 'Video conferencing' },
                 ].map((integration, i) => (
                   <div key={i} className="flex items-center gap-3 p-4 border rounded-lg hover:border-blue-500 cursor-pointer" onClick={() => {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          const newIntegration: Integration = {
-                            id: `int${Date.now()}`,
-                            name: integration.name,
-                            type: integration.type as Integration['type'],
-                            status: 'connected',
-                            icon: integration.name.toLowerCase().replace(' ', '-'),
-                            lastSync: new Date().toISOString()
-                          };
-                          mockIntegrations.push(newIntegration);
-                          setShowIntegrationDialog(false);
-                          resolve();
-                        }, 1500);
-                      }),
-                      { loading: `Connecting to ${integration.name}...`, success: `${integration.name} connected successfully`, error: 'Connection failed' }
-                    );
+                    const newIntegration: Integration = {
+                      id: `int${Date.now()}`,
+                      name: integration.name,
+                      type: integration.type as Integration['type'],
+                      status: 'connected',
+                      icon: integration.name.toLowerCase().replace(' ', '-'),
+                      lastSync: new Date().toISOString()
+                    };
+                    mockIntegrations.push(newIntegration);
+                    setShowIntegrationDialog(false);
+                    toast.success(`${integration.name} connected successfully`);
                   }}>
                     <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                       <Globe className="h-5 w-5 text-gray-600" />
@@ -2294,24 +2132,17 @@ export default function CollaborationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      const newAutomation: Automation = {
-                        id: `aut${Date.now()}`,
-                        name: 'Custom Automation',
-                        trigger: 'When task is created',
-                        actions: ['Send notification'],
-                        isActive: true,
-                        lastTriggered: undefined
-                      };
-                      mockAutomations.push(newAutomation);
-                      setShowAutomationDialog(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Creating automation...', success: 'Automation created and enabled', error: 'Failed to create automation' }
-                );
+                const newAutomation: Automation = {
+                  id: `aut${Date.now()}`,
+                  name: 'Custom Automation',
+                  trigger: 'When task is created',
+                  actions: ['Send notification'],
+                  isActive: true,
+                  lastTriggered: undefined
+                };
+                mockAutomations.push(newAutomation);
+                setShowAutomationDialog(false);
+                toast.success('Automation created and enabled');
               }}>Create Automation</Button>
             </DialogFooter>
           </DialogContent>
@@ -2338,27 +2169,20 @@ export default function CollaborationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewChannel(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      const newChannel: Channel = {
-                        id: `c${Date.now()}`,
-                        name: 'new-channel',
-                        type: 'public',
-                        description: 'New channel created via dialog',
-                        memberCount: 1,
-                        unreadCount: 0,
-                        isPinned: false,
-                        isMuted: false,
-                        createdAt: new Date().toISOString()
-                      };
-                      mockChannels.push(newChannel);
-                      setShowNewChannel(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Creating channel...', success: 'Channel created successfully', error: 'Failed to create channel' }
-                );
+                const newChannel: Channel = {
+                  id: `c${Date.now()}`,
+                  name: 'new-channel',
+                  type: 'public',
+                  description: 'New channel created via dialog',
+                  memberCount: 1,
+                  unreadCount: 0,
+                  isPinned: false,
+                  isMuted: false,
+                  createdAt: new Date().toISOString()
+                };
+                mockChannels.push(newChannel);
+                setShowNewChannel(false);
+                toast.success('Channel created successfully');
               }}>Create Channel</Button>
             </DialogFooter>
           </DialogContent>
@@ -2397,37 +2221,30 @@ export default function CollaborationClient() {
                   toast.error('Please enter a board name');
                   return;
                 }
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      const newBoard: Board = {
-                        id: `b${Date.now()}`,
-                        name: newBoardName,
-                        description: newBoardDescription,
-                        type: newBoardType,
-                        status: 'active',
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString(),
-                        createdBy: mockMembers[0],
-                        members: [mockMembers[0]],
-                        isStarred: false,
-                        isLocked: false,
-                        isPublic: false,
-                        viewCount: 0,
-                        commentCount: 0,
-                        elementCount: 0,
-                        version: 1,
-                        tags: ['new']
-                      };
-                      mockBoards.push(newBoard);
-                      setNewBoardName('');
-                      setNewBoardDescription('');
-                      setShowNewBoardDialog(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Creating board...', success: 'Board created successfully', error: 'Failed to create board' }
-                );
+                const newBoard: Board = {
+                  id: `b${Date.now()}`,
+                  name: newBoardName,
+                  description: newBoardDescription,
+                  type: newBoardType,
+                  status: 'active',
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  createdBy: mockMembers[0],
+                  members: [mockMembers[0]],
+                  isStarred: false,
+                  isLocked: false,
+                  isPublic: false,
+                  viewCount: 0,
+                  commentCount: 0,
+                  elementCount: 0,
+                  version: 1,
+                  tags: ['new']
+                };
+                mockBoards.push(newBoard);
+                setNewBoardName('');
+                setNewBoardDescription('');
+                setShowNewBoardDialog(false);
+                toast.success('Board created successfully');
               }}>Create Board</Button>
             </DialogFooter>
           </DialogContent>
@@ -2458,16 +2275,9 @@ export default function CollaborationClient() {
                   toast.error('Please enter a valid email address');
                   return;
                 }
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      setInviteEmail('');
-                      setShowInviteMemberDialog(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Sending invitation...', success: `Invitation sent to ${inviteEmail}`, error: 'Failed to send invitation' }
-                );
+                toast.success(`Invitation sent to ${inviteEmail}`);
+                setInviteEmail('');
+                setShowInviteMemberDialog(false);
               }}>Send Invitation</Button>
             </DialogFooter>
           </DialogContent>
@@ -2544,15 +2354,8 @@ export default function CollaborationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowScheduleMeetingDialog(false)}>Cancel</Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      setShowScheduleMeetingDialog(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Scheduling meeting...', success: 'Meeting scheduled successfully', error: 'Failed to schedule meeting' }
-                );
+                toast.success('Meeting scheduled successfully');
+                setShowScheduleMeetingDialog(false);
               }}>Schedule</Button>
             </DialogFooter>
           </DialogContent>
@@ -2575,23 +2378,11 @@ export default function CollaborationClient() {
                         <p className="text-sm text-gray-500">{new Date(meeting.startTime).toLocaleDateString()} - {meeting.duration} min</p>
                       </div>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise<void>((resolve) => {
-                            setTimeout(() => {
-                              window.open(meeting.recordingUrl || '#', '_blank');
-                              resolve();
-                            }, 500);
-                          }),
-                          { loading: 'Loading recording...', success: 'Recording opened', error: 'Failed to load recording' }
-                        );
+                        window.open(meeting.recordingUrl || '#', '_blank');
+                        toast.success('Recording opened');
                       }}><Play className="h-4 w-4 mr-1" />Play</Button>
                       <Button variant="ghost" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise<void>((resolve) => {
-                            setTimeout(() => resolve(), 1000);
-                          }),
-                          { loading: 'Preparing download...', success: 'Recording download started', error: 'Failed to download' }
-                        );
+                        toast.success('Recording download started');
                       }}><Download className="h-4 w-4" /></Button>
                     </div>
                   ))}
@@ -2637,15 +2428,8 @@ export default function CollaborationClient() {
                 input.onchange = (e) => {
                   const files = (e.target as HTMLInputElement).files;
                   if (files && files.length > 0) {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          setShowUploadFileDialog(false);
-                          resolve();
-                        }, 1500);
-                      }),
-                      { loading: `Uploading ${files.length} file(s)...`, success: 'Files uploaded successfully', error: 'Failed to upload files' }
-                    );
+                    toast.success(`${files.length} file(s) uploaded successfully`);
+                    setShowUploadFileDialog(false);
                   }
                 };
                 input.click();
@@ -2696,16 +2480,9 @@ export default function CollaborationClient() {
                   toast.error('Please enter a folder name');
                   return;
                 }
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      setNewFolderName('');
-                      setShowNewFolderDialog(false);
-                      resolve();
-                    }, 800);
-                  }),
-                  { loading: 'Creating folder...', success: `Folder "${newFolderName}" created`, error: 'Failed to create folder' }
-                );
+                toast.success(`Folder "${newFolderName}" created`);
+                setNewFolderName('');
+                setShowNewFolderDialog(false);
               }}>Create Folder</Button>
             </DialogFooter>
           </DialogContent>
@@ -2802,29 +2579,22 @@ export default function CollaborationClient() {
                   toast.error('Please enter a team name');
                   return;
                 }
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      const newTeam: Team = {
-                        id: `t${Date.now()}`,
-                        name: newTeamName,
-                        description: newTeamDescription,
-                        memberCount: 1,
-                        boardCount: 0,
-                        channelCount: 1,
-                        plan: 'free',
-                        role: 'owner',
-                        createdAt: new Date().toISOString()
-                      };
-                      mockTeams.push(newTeam);
-                      setNewTeamName('');
-                      setNewTeamDescription('');
-                      setShowCreateTeamDialog(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Creating team...', success: `Team "${newTeamName}" created`, error: 'Failed to create team' }
-                );
+                const newTeam: Team = {
+                  id: `t${Date.now()}`,
+                  name: newTeamName,
+                  description: newTeamDescription,
+                  memberCount: 1,
+                  boardCount: 0,
+                  channelCount: 1,
+                  plan: 'free',
+                  role: 'owner',
+                  createdAt: new Date().toISOString()
+                };
+                mockTeams.push(newTeam);
+                toast.success(`Team "${newTeamName}" created`);
+                setNewTeamName('');
+                setNewTeamDescription('');
+                setShowCreateTeamDialog(false);
               }}>Create Team</Button>
             </DialogFooter>
           </DialogContent>
@@ -2874,15 +2644,8 @@ export default function CollaborationClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowPrivateChannelDialog(false)}>Cancel</Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.promise(
-                  new Promise<void>((resolve) => {
-                    setTimeout(() => {
-                      setShowPrivateChannelDialog(false);
-                      resolve();
-                    }, 1000);
-                  }),
-                  { loading: 'Creating private channel...', success: 'Private channel created', error: 'Failed to create channel' }
-                );
+                toast.success('Private channel created');
+                setShowPrivateChannelDialog(false);
               }}>Create Private Channel</Button>
             </DialogFooter>
           </DialogContent>
@@ -3024,15 +2787,8 @@ export default function CollaborationClient() {
               </div>
               <div className="pt-4 border-t">
                 <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
-                  toast.promise(
-                    new Promise<void>((resolve) => {
-                      setTimeout(() => {
-                        setShowChannelOptionsDialog(false);
-                        resolve();
-                      }, 500);
-                    }),
-                    { loading: 'Leaving channel...', success: 'Left channel successfully', error: 'Failed to leave channel' }
-                  );
+                  toast.success('Left channel successfully');
+                  setShowChannelOptionsDialog(false);
                 }}>
                   <Trash2 className="h-4 w-4 mr-2" />
                   Leave Channel
@@ -3150,19 +2906,12 @@ export default function CollaborationClient() {
                 </div>
                 <div className="pt-4 border-t">
                   <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          const index = mockMessages.findIndex(m => m.id === selectedMessage.id);
-                          if (index > -1) {
-                            mockMessages.splice(index, 1);
-                          }
-                          setShowMessageOptionsDialog(false);
-                          resolve();
-                        }, 500);
-                      }),
-                      { loading: 'Deleting message...', success: 'Message deleted', error: 'Failed to delete message' }
-                    );
+                    const index = mockMessages.findIndex(m => m.id === selectedMessage.id);
+                    if (index > -1) {
+                      mockMessages.splice(index, 1);
+                    }
+                    toast.success('Message deleted');
+                    setShowMessageOptionsDialog(false);
                   }}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete Message
@@ -3196,30 +2945,16 @@ export default function CollaborationClient() {
                 </div>
                 <div className="space-y-2">
                   <Button variant="outline" className="w-full justify-start" onClick={() => {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          window.open(`https://app.example.com/preview/${selectedFile.id}`, '_blank');
-                          resolve();
-                        }, 300);
-                      }),
-                      { loading: 'Opening file...', success: 'File opened in new tab', error: 'Failed to open file' }
-                    );
+                    window.open(`https://app.example.com/preview/${selectedFile.id}`, '_blank');
+                    toast.success('File opened in new tab');
                     setShowFileOptionsDialog(false);
                   }}>
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Open File
                   </Button>
                   <Button variant="outline" className="w-full justify-start" onClick={() => {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          selectedFile.downloadCount++;
-                          resolve();
-                        }, 800);
-                      }),
-                      { loading: 'Downloading...', success: 'Download started', error: 'Download failed' }
-                    );
+                    selectedFile.downloadCount++;
+                    toast.success('Download started');
                     setShowFileOptionsDialog(false);
                   }}>
                     <Download className="h-4 w-4 mr-2" />
@@ -3259,19 +2994,12 @@ export default function CollaborationClient() {
                 </div>
                 <div className="pt-4 border-t">
                   <Button variant="outline" className="w-full justify-start text-red-600 hover:bg-red-50" onClick={() => {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          const index = mockFiles.findIndex(f => f.id === selectedFile.id);
-                          if (index > -1) {
-                            mockFiles.splice(index, 1);
-                          }
-                          setShowFileOptionsDialog(false);
-                          resolve();
-                        }, 500);
-                      }),
-                      { loading: 'Deleting file...', success: 'File deleted', error: 'Failed to delete file' }
-                    );
+                    const index = mockFiles.findIndex(f => f.id === selectedFile.id);
+                    if (index > -1) {
+                      mockFiles.splice(index, 1);
+                    }
+                    toast.success('File deleted');
+                    setShowFileOptionsDialog(false);
                   }}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete File
@@ -3431,33 +3159,19 @@ export default function CollaborationClient() {
                 </div>
                 <div className="pt-4 border-t flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          selectedAutomation.lastTriggered = new Date().toISOString();
-                          resolve();
-                        }, 1000);
-                      }),
-                      { loading: 'Running automation...', success: 'Automation ran successfully', error: 'Automation failed' }
-                    );
+                    selectedAutomation.lastTriggered = new Date().toISOString();
+                    toast.success('Automation ran successfully');
                   }}>
                     <Play className="h-4 w-4 mr-2" />
                     Run Now
                   </Button>
                   <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => {
-                    toast.promise(
-                      new Promise<void>((resolve) => {
-                        setTimeout(() => {
-                          const index = mockAutomations.findIndex(a => a.id === selectedAutomation.id);
-                          if (index > -1) {
-                            mockAutomations.splice(index, 1);
-                          }
-                          setShowAutomationOptionsDialog(false);
-                          resolve();
-                        }, 500);
-                      }),
-                      { loading: 'Deleting automation...', success: 'Automation deleted', error: 'Failed to delete' }
-                    );
+                    const index = mockAutomations.findIndex(a => a.id === selectedAutomation.id);
+                    if (index > -1) {
+                      mockAutomations.splice(index, 1);
+                    }
+                    toast.success('Automation deleted');
+                    setShowAutomationOptionsDialog(false);
                   }}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete

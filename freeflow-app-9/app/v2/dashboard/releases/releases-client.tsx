@@ -2392,9 +2392,12 @@ export default function ReleasesClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
                             <p className="text-sm text-red-600">This will reset all release configurations</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => {
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={async () => {
                               if (confirm('Are you sure you want to reset all settings? This action cannot be undone.')) {
-                                /* TODO: Implement reset settings functionality */
+                                toast.promise(
+                                  fetch('/api/releases/settings/reset', { method: 'POST' }),
+                                  { loading: 'Resetting settings...', success: 'All release settings have been reset', error: 'Failed to reset settings' }
+                                )
                               }
                             }}>
                             Reset
@@ -2608,7 +2611,9 @@ export default function ReleasesClient() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      /* TODO: Implement view on Git functionality - open repository URL in new tab */
+                      const repoUrl = selectedRelease?.repository || 'https://github.com/freeflow/app'
+                      window.open(`${repoUrl}/releases/tag/${selectedRelease?.version || 'latest'}`, '_blank')
+                      toast.success('Opening repository in new tab')
                     }}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
@@ -3153,7 +3158,17 @@ export default function ReleasesClient() {
             </Button>
             <Button
               onClick={() => {
-                /* TODO: Implement changelog export functionality - generate and download markdown file */
+                const markdown = releases.map(r => `## ${r.version} (${new Date(r.release_date || '').toLocaleDateString()})\n\n${r.description || 'No description'}\n\n**Status:** ${r.status}\n\n---\n`).join('\n')
+                const blob = new Blob([`# Changelog\n\n${markdown}`], { type: 'text/markdown' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = 'CHANGELOG.md'
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+                toast.success('Changelog exported successfully')
                 setShowExportChangelogDialog(false)
               }}
               className="bg-indigo-600 text-white hover:bg-indigo-700"

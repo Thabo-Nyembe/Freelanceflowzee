@@ -278,6 +278,25 @@ export function useSettings(options: UseSettingsOptions = {}) {
     }
   }, [])
 
+  // Fetch API Keys
+  const fetchApiKeys = useCallback(async () => {
+    try {
+      const response = await fetch('/api/settings?category=api-keys')
+      const result = await response.json()
+
+      if (result.success && result.apiKeys) {
+        setApiKeys(result.apiKeys)
+        return result.apiKeys
+      }
+      setApiKeys([])
+      return []
+    } catch (err) {
+      console.error('Error fetching API keys:', err)
+      setApiKeys([])
+      return []
+    }
+  }, [])
+
   // Transform helpers
   const transformNotifications = (data: any): NotificationSettings => ({
     emailNotifications: data.email_notifications ?? data.emailNotifications ?? true,

@@ -538,24 +538,21 @@ export default function MessagesClient() {
     }
     sessionStorage.setItem('active_call', JSON.stringify(callData))
 
-    // Simulate connection delay
-    setTimeout(() => {
-      // Update call status to connected
-      sessionStorage.setItem('active_call', JSON.stringify({
-        ...callData,
-        status: 'connected',
-        connected_at: new Date().toISOString()
-      }))
+    // Update call status to connected
+    sessionStorage.setItem('active_call', JSON.stringify({
+      ...callData,
+      status: 'connected',
+      connected_at: new Date().toISOString()
+    }))
 
-      toast.success(`${type === 'video' ? 'Video' : 'Audio'} call started with ${contactName}`, {
-        id: 'call',
-        description: type === 'video' ? 'Connecting to video stream...' : 'Connecting to audio...',
-        action: {
-          label: 'End Call',
-          onClick: () => handleEndCall()
-        }
-      })
-    }, 1500)
+    toast.success(`${type === 'video' ? 'Video' : 'Audio'} call started with ${contactName}`, {
+      id: 'call',
+      description: type === 'video' ? 'Connecting to video stream...' : 'Connecting to audio...',
+      action: {
+        label: 'End Call',
+        onClick: () => handleEndCall()
+      }
+    })
   }
 
   const handleEndCall = () => {
@@ -577,30 +574,29 @@ export default function MessagesClient() {
     const isMuted = mutedChannels.has(channelName)
     const newMutedChannels = new Set(mutedChannels)
 
-    setTimeout(() => {
-      if (isMuted) {
-        // Unmute the channel
-        newMutedChannels.delete(channelName)
-        setMutedChannels(newMutedChannels)
+    if (isMuted) {
+      // Unmute the channel
+      newMutedChannels.delete(channelName)
+      setMutedChannels(newMutedChannels)
 
-        // Store in session
-        sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
+      // Store in session
+      sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
 
-        toast.success(`${channelName} unmuted`, {
-          id: 'mute',
-          description: 'You will now receive notifications from this channel',
-          action: {
-            label: 'Undo',
-            onClick: () => handleMuteChannel(channelName)
-          }
-        })
-      } else {
-        // Mute the channel
-        newMutedChannels.add(channelName)
-        setMutedChannels(newMutedChannels)
+      toast.success(`${channelName} unmuted`, {
+        id: 'mute',
+        description: 'You will now receive notifications from this channel',
+        action: {
+          label: 'Undo',
+          onClick: () => handleMuteChannel(channelName)
+        }
+      })
+    } else {
+      // Mute the channel
+      newMutedChannels.add(channelName)
+      setMutedChannels(newMutedChannels)
 
-        // Store in session
-        sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
+      // Store in session
+      sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
 
         toast.success(`${channelName} muted`, {
           id: 'mute',
@@ -631,27 +627,17 @@ export default function MessagesClient() {
   }
 
   const handleOpenMarketplace = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Simulate loading marketplace data
-      const marketplaceData = {
-        apps: [
-          { id: 1, name: 'Zoom Integration', category: 'video' },
-          { id: 2, name: 'GitHub', category: 'development' },
-          { id: 3, name: 'Google Drive', category: 'storage' }
-        ],
-        timestamp: new Date().toISOString()
-      }
-      sessionStorage.setItem('marketplace_data', JSON.stringify(marketplaceData))
-      setTimeout(() => {
-        resolve()
-      }, 600)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Loading app marketplace...',
-      success: 'App marketplace opened - browse integrations',
-      error: 'Failed to load marketplace'
-    })
+    // Load marketplace data
+    const marketplaceData = {
+      apps: [
+        { id: 1, name: 'Zoom Integration', category: 'video' },
+        { id: 2, name: 'GitHub', category: 'development' },
+        { id: 3, name: 'Google Drive', category: 'storage' }
+      ],
+      timestamp: new Date().toISOString()
+    }
+    sessionStorage.setItem('marketplace_data', JSON.stringify(marketplaceData))
+    toast.success('App marketplace opened - browse integrations')
   }
 
   const handleCreateWorkflow = () => {
@@ -674,43 +660,30 @@ export default function MessagesClient() {
     setShowWorkflowBuilderDialog(false)
   }
 
-  const handleViewPinnedMessages = async () => {
-    // Show loading state
-    toast.loading('Loading pinned messages...', { id: 'pinned' })
+  const handleViewPinnedMessages = () => {
+    // Filter and load pinned messages from both mock and Supabase
+    const supabasePinned = supabaseMessages?.filter(m => m.is_pinned) || []
+    const mockPinned = mockMessages.filter(m => m.isPinned)
 
-    const promise = new Promise<{ count: number }>((resolve) => {
-      setTimeout(() => {
-        // Filter and load pinned messages from both mock and Supabase
-        const supabasePinned = supabaseMessages?.filter(m => m.is_pinned) || []
-        const mockPinned = mockMessages.filter(m => m.isPinned)
+    // Combine and dedupe
+    const allPinned = [...supabasePinned, ...mockPinned]
 
-        // Combine and dedupe
-        const allPinned = [...supabasePinned, ...mockPinned]
+    // Store in session with metadata
+    sessionStorage.setItem('pinned_messages_view', JSON.stringify({
+      messages: allPinned,
+      count: allPinned.length,
+      channel: selectedChannel?.name || 'all',
+      loaded_at: new Date().toISOString()
+    }))
 
-        // Store in session with metadata
-        sessionStorage.setItem('pinned_messages_view', JSON.stringify({
-          messages: allPinned,
-          count: allPinned.length,
-          channel: selectedChannel?.name || 'all',
-          loaded_at: new Date().toISOString()
-        }))
-
-        resolve({ count: allPinned.length })
-      }, 400)
-    })
-
-    const result = await promise
-
-    if (result.count === 0) {
+    if (allPinned.length === 0) {
       toast.info('No pinned messages', {
-        id: 'pinned',
         description: selectedChannel
           ? `No messages are pinned in #${selectedChannel.name}`
           : 'No pinned messages found'
       })
     } else {
-      toast.success(`${result.count} pinned message${result.count === 1 ? '' : 's'} found`, {
-        id: 'pinned',
+      toast.success(`${allPinned.length} pinned message${allPinned.length === 1 ? '' : 's'} found`, {
         description: selectedChannel
           ? `Viewing pinned messages in #${selectedChannel.name}`
           : 'Viewing all pinned messages',
@@ -725,32 +698,21 @@ export default function MessagesClient() {
     }
   }
 
-  const handleArchiveChannel = async (channelName: string) => {
+  const handleArchiveChannel = (channelName: string) => {
     // Check if already archived (to toggle)
     const isArchived = archivedChannels.has(channelName)
 
     if (isArchived) {
       // Unarchive the channel
-      toast.loading('Restoring channel...', { id: 'archive' })
+      const newArchivedChannels = new Set(archivedChannels)
+      newArchivedChannels.delete(channelName)
+      setArchivedChannels(newArchivedChannels)
 
-      const promise = new Promise<void>((resolve) => {
-        setTimeout(() => {
-          const newArchivedChannels = new Set(archivedChannels)
-          newArchivedChannels.delete(channelName)
-          setArchivedChannels(newArchivedChannels)
-
-          // Update session storage
-          sessionStorage.removeItem(`channel_${channelName}_archived`)
-          sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
-
-          resolve()
-        }, 600)
-      })
-
-      await promise
+      // Update session storage
+      sessionStorage.removeItem(`channel_${channelName}_archived`)
+      sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
 
       toast.success(`#${channelName} restored`, {
-        id: 'archive',
         description: 'Channel is now visible in your sidebar',
         action: {
           label: 'Undo',
@@ -759,35 +721,24 @@ export default function MessagesClient() {
       })
     } else {
       // Archive the channel
-      toast.loading('Archiving channel...', { id: 'archive' })
+      const newArchivedChannels = new Set(archivedChannels)
+      newArchivedChannels.add(channelName)
+      setArchivedChannels(newArchivedChannels)
 
-      const promise = new Promise<void>((resolve) => {
-        setTimeout(() => {
-          const newArchivedChannels = new Set(archivedChannels)
-          newArchivedChannels.add(channelName)
-          setArchivedChannels(newArchivedChannels)
+      // Store archive data with timestamp
+      sessionStorage.setItem(`channel_${channelName}_archived`, JSON.stringify({
+        archived_at: new Date().toISOString(),
+        archived_by: 'current_user',
+        visible: false
+      }))
+      sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
 
-          // Store archive data with timestamp
-          sessionStorage.setItem(`channel_${channelName}_archived`, JSON.stringify({
-            archived_at: new Date().toISOString(),
-            archived_by: 'current_user',
-            visible: false
-          }))
-          sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
-
-          // If the archived channel is selected, clear selection
-          if (selectedChannel?.name === channelName) {
-            setSelectedChannel(null)
-          }
-
-          resolve()
-        }, 800)
-      })
-
-      await promise
+      // If the archived channel is selected, clear selection
+      if (selectedChannel?.name === channelName) {
+        setSelectedChannel(null)
+      }
 
       toast.success(`#${channelName} archived`, {
-        id: 'archive',
         description: 'Channel hidden from sidebar. You can restore it from archived channels.',
         action: {
           label: 'Undo',
@@ -797,23 +748,13 @@ export default function MessagesClient() {
     }
   }
 
-  const handleViewCallDetails = async (callDate: string) => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Load and cache call details
-      sessionStorage.setItem('current_call_details', JSON.stringify({
-        date: callDate,
-        loaded_at: new Date().toISOString()
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 500)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Loading call details...',
-      success: `Call scheduled for ${callDate}`,
-      error: 'Failed to load call details'
-    })
+  const handleViewCallDetails = (callDate: string) => {
+    // Load and cache call details
+    sessionStorage.setItem('current_call_details', JSON.stringify({
+      date: callDate,
+      loaded_at: new Date().toISOString()
+    }))
+    toast.success(`Call scheduled for ${callDate}`)
   }
 
   const handleUploadFile = () => {
@@ -836,30 +777,19 @@ export default function MessagesClient() {
     setShowFileUploadDialog(false)
   }
 
-  const handleDownloadFile = async (fileName: string) => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Simulate file download
-      const mockFile = new Blob(['mock file content'], { type: 'text/plain' })
-      const url = window.URL.createObjectURL(mockFile)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = fileName
-      link.style.display = 'none'
-      document.body.appendChild(link)
-
-      setTimeout(() => {
-        link.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(link)
-        resolve()
-      }, 800)
-    })
-
-    await toast.promise(promise, {
-      loading: `Downloading ${fileName}...`,
-      success: `${fileName} downloaded successfully`,
-      error: 'Download failed'
-    })
+  const handleDownloadFile = (fileName: string) => {
+    // Download file
+    const mockFile = new Blob(['mock file content'], { type: 'text/plain' })
+    const url = window.URL.createObjectURL(mockFile)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    link.style.display = 'none'
+    document.body.appendChild(link)
+    link.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(link)
+    toast.success(`${fileName} downloaded successfully`)
   }
 
   const handleManageActiveSessions = () => {
@@ -875,23 +805,13 @@ export default function MessagesClient() {
     setShowSessionManagementDialog(false)
   }
 
-  const handleConnectZoom = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Initiate Zoom OAuth flow or connection
-      sessionStorage.setItem('zoom_connection', JSON.stringify({
-        status: 'connected',
-        connected_at: new Date().toISOString()
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 900)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Connecting to Zoom...',
-      success: 'Zoom connected successfully - video calls enabled',
-      error: 'Failed to connect Zoom'
-    })
+  const handleConnectZoom = () => {
+    // Initiate Zoom OAuth flow or connection
+    sessionStorage.setItem('zoom_connection', JSON.stringify({
+      status: 'connected',
+      connected_at: new Date().toISOString()
+    }))
+    toast.success('Zoom connected successfully - video calls enabled')
   }
 
   const handleManageWorkflows = () => {
@@ -938,104 +858,53 @@ export default function MessagesClient() {
     setShowExportDialog(false)
   }
 
-  const handleClearCache = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Clear local cache/sessionStorage
-      const keysToRemove = []
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && key.startsWith('messages_cache_')) {
-          keysToRemove.push(key)
-        }
+  const handleClearCache = () => {
+    // Clear local cache/sessionStorage
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith('messages_cache_')) {
+        keysToRemove.push(key)
       }
-      keysToRemove.forEach(key => localStorage.removeItem(key))
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key))
 
-      // Also clear sessionStorage
-      sessionStorage.clear()
-
-      setTimeout(() => {
-        resolve()
-      }, 500)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Clearing local cache...',
-      success: 'Cache cleared successfully',
-      error: 'Failed to clear cache'
-    })
+    // Also clear sessionStorage
+    sessionStorage.clear()
+    toast.success('Cache cleared successfully')
   }
 
-  const handleOpenDocumentation = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        window.open('https://docs.example.com/messages', '_blank')
-        resolve()
-      }, 300)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Loading documentation...',
-      success: 'Documentation opened in new tab',
-      error: 'Failed to load documentation'
-    })
+  const handleOpenDocumentation = () => {
+    window.open('https://docs.example.com/messages', '_blank')
+    toast.success('Documentation opened in new tab')
   }
 
-  const handleContactSupport = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Open support chat widget
-      sessionStorage.setItem('support_chat_active', JSON.stringify({
-        opened_at: new Date().toISOString(),
-        session_id: Math.random().toString(36).substring(7)
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 800)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Connecting to support...',
-      success: 'Support chat opened - an agent will respond shortly',
-      error: 'Failed to connect to support'
-    })
+  const handleContactSupport = () => {
+    // Open support chat widget
+    sessionStorage.setItem('support_chat_active', JSON.stringify({
+      opened_at: new Date().toISOString(),
+      session_id: Math.random().toString(36).substring(7)
+    }))
+    toast.success('Support chat opened - an agent will respond shortly')
   }
 
-  const handleShowKeyboardShortcuts = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Load and display keyboard shortcuts
-      sessionStorage.setItem('shortcuts_modal_open', JSON.stringify({
-        opened_at: new Date().toISOString()
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 300)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Loading shortcuts...',
-      success: 'Press Ctrl+/ anytime to view all keyboard shortcuts',
-      error: 'Failed to load shortcuts'
-    })
+  const handleShowKeyboardShortcuts = () => {
+    // Load and display keyboard shortcuts
+    sessionStorage.setItem('shortcuts_modal_open', JSON.stringify({
+      opened_at: new Date().toISOString()
+    }))
+    toast.success('Press Ctrl+/ anytime to view all keyboard shortcuts')
   }
 
-  const handleCheckForUpdates = async () => {
-    const promise = new Promise<void>((resolve, reject) => {
-      // Check for updates from API
-      const currentVersion = '2.1.0'
-      sessionStorage.setItem('version_check', JSON.stringify({
-        current: currentVersion,
-        checked_at: new Date().toISOString(),
-        is_latest: true
-      }))
-      setTimeout(() => {
-        resolve()
-      }, 1000)
-    })
-
-    await toast.promise(promise, {
-      loading: 'Checking for updates...',
-      success: 'You are running the latest version',
-      error: 'Failed to check for updates'
-    })
+  const handleCheckForUpdates = () => {
+    // Check for updates from API
+    const currentVersion = '2.1.0'
+    sessionStorage.setItem('version_check', JSON.stringify({
+      current: currentVersion,
+      checked_at: new Date().toISOString(),
+      is_latest: true
+    }))
+    toast.success('You are running the latest version')
   }
 
   const handleOpenFilterDialog = () => {
@@ -1387,26 +1256,22 @@ export default function MessagesClient() {
 
   // Start huddle handler
   const handleStartHuddle = () => {
-    toast.loading('Starting huddle...', { id: 'huddle' })
-    setTimeout(() => {
-      const huddleData = {
-        type: 'huddle',
-        started_at: new Date().toISOString(),
-        channel: selectedChannel?.name || 'Quick Huddle'
-      }
-      sessionStorage.setItem('active_huddle', JSON.stringify(huddleData))
-      toast.success('Huddle Started', {
-        id: 'huddle',
-        description: `Quick huddle in ${selectedChannel?.name || 'new channel'}`,
-        action: {
-          label: 'End Huddle',
-          onClick: () => {
-            sessionStorage.removeItem('active_huddle')
-            toast.info('Huddle ended')
-          }
+    const huddleData = {
+      type: 'huddle',
+      started_at: new Date().toISOString(),
+      channel: selectedChannel?.name || 'Quick Huddle'
+    }
+    sessionStorage.setItem('active_huddle', JSON.stringify(huddleData))
+    toast.success('Huddle Started', {
+      description: `Quick huddle in ${selectedChannel?.name || 'new channel'}`,
+      action: {
+        label: 'End Huddle',
+        onClick: () => {
+          sessionStorage.removeItem('active_huddle')
+          toast.info('Huddle ended')
         }
-      })
-    }, 800)
+      }
+    })
   }
 
   // Screen share handler
@@ -1485,12 +1350,9 @@ export default function MessagesClient() {
   }
 
   const handleConfirmLeaveWorkspace = () => {
-    toast.loading('Leaving workspace...', { id: 'leave' })
-    setTimeout(() => {
-      sessionStorage.clear()
-      toast.success('Left Workspace', { id: 'leave', description: 'You have left the workspace. Redirecting...' })
-      setShowLeaveWorkspaceDialog(false)
-    }, 1000)
+    sessionStorage.clear()
+    toast.success('Left Workspace', { description: 'You have left the workspace. Redirecting...' })
+    setShowLeaveWorkspaceDialog(false)
   }
 
   // AI Insight action handler

@@ -489,52 +489,27 @@ export default function EmployeesClient() {
   }
 
   // Handle document upload
-  const handleUploadDocument = async () => {
-    toast.loading('Uploading document...', { id: 'doc-upload' })
-    try {
-      // Simulate document upload - in production, this would upload to storage
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Document uploaded successfully!', { id: 'doc-upload' })
-      setShowDocumentDialog(false)
-    } catch (error) {
-      toast.error('Failed to upload document', { id: 'doc-upload' })
-    }
+  const handleUploadDocument = () => {
+    toast.success('Document uploaded successfully!')
+    setShowDocumentDialog(false)
   }
 
   // Handle goal creation
-  const handleCreateGoal = async () => {
-    toast.loading('Creating goal...', { id: 'goal-create' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Goal created successfully!', { id: 'goal-create' })
-      setShowGoalDialog(false)
-    } catch (error) {
-      toast.error('Failed to create goal', { id: 'goal-create' })
-    }
+  const handleCreateGoal = () => {
+    toast.success('Goal created successfully!')
+    setShowGoalDialog(false)
   }
 
   // Handle survey creation
-  const handleCreateSurvey = async () => {
-    toast.loading('Creating survey...', { id: 'survey-create' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Survey created and invitations sent!', { id: 'survey-create' })
-      setShowSurveyDialog(false)
-    } catch (error) {
-      toast.error('Failed to create survey', { id: 'survey-create' })
-    }
+  const handleCreateSurvey = () => {
+    toast.success('Survey created and invitations sent!')
+    setShowSurveyDialog(false)
   }
 
   // Handle performance review start
-  const handleStartReview = async () => {
-    toast.loading('Initiating review cycle...', { id: 'review-start' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Performance review started! Notifications sent to participants.', { id: 'review-start' })
-      setShowReviewDialog(false)
-    } catch (error) {
-      toast.error('Failed to start review', { id: 'review-start' })
-    }
+  const handleStartReview = () => {
+    toast.success('Performance review started! Notifications sent to participants.')
+    setShowReviewDialog(false)
   }
 
   // Handle employee data export
@@ -567,15 +542,9 @@ export default function EmployeesClient() {
   }
 
   // Handle time off request submission
-  const handleSubmitTimeOff = async () => {
-    toast.loading('Submitting time off request...', { id: 'timeoff-submit' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Time off request submitted for approval!', { id: 'timeoff-submit' })
-      setShowTimeOffRequestDialog(false)
-    } catch (error) {
-      toast.error('Failed to submit request', { id: 'timeoff-submit' })
-    }
+  const handleSubmitTimeOff = () => {
+    toast.success('Time off request submitted for approval!')
+    setShowTimeOffRequestDialog(false)
   }
 
   // Handle compensation report generation
@@ -608,53 +577,29 @@ export default function EmployeesClient() {
   }
 
   // Handle integration connection
-  const handleConnectIntegration = async () => {
-    toast.loading('Connecting integration...', { id: 'integration-connect' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1800))
-      toast.success('Integration connected successfully!', { id: 'integration-connect' })
-      setShowAddIntegrationDialog(false)
-    } catch (error) {
-      toast.error('Failed to connect integration', { id: 'integration-connect' })
-    }
+  const handleConnectIntegration = () => {
+    toast.success('Integration connected successfully!')
+    setShowAddIntegrationDialog(false)
   }
 
   // Handle integration disconnection
-  const handleDisconnectIntegration = async () => {
+  const handleDisconnectIntegration = () => {
     if (!confirm('Are you sure you want to disconnect this integration?')) return
-    toast.loading('Disconnecting integration...', { id: 'integration-disconnect' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Integration disconnected', { id: 'integration-disconnect' })
-      setShowConfigureIntegrationDialog(false)
-    } catch (error) {
-      toast.error('Failed to disconnect integration', { id: 'integration-disconnect' })
-    }
+    toast.success('Integration disconnected')
+    setShowConfigureIntegrationDialog(false)
   }
 
   // Handle integration settings save
-  const handleSaveIntegrationSettings = async () => {
-    toast.loading('Saving integration settings...', { id: 'integration-save' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Integration settings saved!', { id: 'integration-save' })
-      setShowConfigureIntegrationDialog(false)
-    } catch (error) {
-      toast.error('Failed to save settings', { id: 'integration-save' })
-    }
+  const handleSaveIntegrationSettings = () => {
+    toast.success('Integration settings saved!')
+    setShowConfigureIntegrationDialog(false)
   }
 
   // Handle API key regeneration
-  const handleRegenerateApiKey = async () => {
+  const handleRegenerateApiKey = () => {
     if (!confirm('Are you sure? This will invalidate your current API key.')) return
-    toast.loading('Regenerating API key...', { id: 'api-regen' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('New API key generated! Please update your applications.', { id: 'api-regen' })
-      setShowRegenerateKeyDialog(false)
-    } catch (error) {
-      toast.error('Failed to regenerate API key', { id: 'api-regen' })
-    }
+    toast.success('New API key generated! Please update your applications.')
+    setShowRegenerateKeyDialog(false)
   }
 
   // Handle full HR data export
@@ -687,16 +632,10 @@ export default function EmployeesClient() {
   }
 
   // Handle HR data import
-  const handleImportHRData = async () => {
-    toast.loading('Importing HR data...', { id: 'hr-import' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('HR data imported successfully!', { id: 'hr-import' })
-      setShowImportDataDialog(false)
-      refetch()
-    } catch (error) {
-      toast.error('Failed to import data', { id: 'hr-import' })
-    }
+  const handleImportHRData = () => {
+    toast.success('HR data imported successfully!')
+    setShowImportDataDialog(false)
+    refetch()
   }
 
   // Handle compliance report generation
@@ -729,96 +668,59 @@ export default function EmployeesClient() {
   }
 
   // Handle archiving terminated employees
-  const handleArchiveTerminated = async () => {
+  const handleArchiveTerminated = () => {
     if (!confirm('Are you sure you want to archive all terminated employees?')) return
-    toast.loading('Archiving terminated employees...', { id: 'archive-terminated' })
-    try {
-      const terminatedCount = mockEmployees.filter(e => e.status === 'terminated').length
-      await new Promise(resolve => setTimeout(resolve, 1800))
-      toast.success(`Archived ${terminatedCount} terminated employees successfully!`, { id: 'archive-terminated' })
-      setShowArchiveDialog(false)
-    } catch (error) {
-      toast.error('Failed to archive employees', { id: 'archive-terminated' })
-    }
+    const terminatedCount = mockEmployees.filter(e => e.status === 'terminated').length
+    toast.success(`Archived ${terminatedCount} terminated employees successfully!`)
+    setShowArchiveDialog(false)
   }
 
   // Handle deleting all HR data
-  const handleDeleteAllData = async () => {
+  const handleDeleteAllData = () => {
     if (!confirm('FINAL WARNING: This will permanently delete ALL HR data. This action cannot be undone. Are you absolutely sure?')) return
-    toast.loading('Deleting all HR data...', { id: 'delete-all' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2500))
-      toast.success('All HR data has been deleted', { id: 'delete-all' })
-      setShowDeleteAllDialog(false)
-    } catch (error) {
-      toast.error('Failed to delete data', { id: 'delete-all' })
-    }
+    toast.success('All HR data has been deleted')
+    setShowDeleteAllDialog(false)
   }
 
   // Handle resetting settings
-  const handleResetSettings = async () => {
+  const handleResetSettings = () => {
     if (!confirm('Are you sure you want to reset all settings to their default values?')) return
-    toast.loading('Resetting settings...', { id: 'reset-settings' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Settings reset to defaults!', { id: 'reset-settings' })
-      setShowResetSettingsDialog(false)
-    } catch (error) {
-      toast.error('Failed to reset settings', { id: 'reset-settings' })
-    }
+    toast.success('Settings reset to defaults!')
+    setShowResetSettingsDialog(false)
   }
 
   // Handle updating mock employee profile
-  const handleUpdateMockProfile = async () => {
-    toast.loading('Updating employee profile...', { id: 'profile-update' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Employee profile updated successfully!', { id: 'profile-update' })
-      setShowEditProfileDialog(false)
-    } catch (error) {
-      toast.error('Failed to update profile', { id: 'profile-update' })
-    }
+  const handleUpdateMockProfile = () => {
+    toast.success('Employee profile updated successfully!')
+    setShowEditProfileDialog(false)
   }
 
   // Handle document download
-  const handleDownloadDocument = async () => {
+  const handleDownloadDocument = () => {
     if (!selectedDocument) return
-    toast.loading('Preparing download...', { id: 'doc-download' })
-    try {
-      // Simulate document download preparation
-      await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Create a sample document blob for download
-      const content = `Document: ${selectedDocument.name}\nType: ${selectedDocument.type}\nUploaded: ${selectedDocument.uploadedAt}\nSize: ${selectedDocument.size}`
-      const blob = new Blob([content], { type: 'text/plain' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = selectedDocument.name
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+    // Create a sample document blob for download
+    const content = `Document: ${selectedDocument.name}\nType: ${selectedDocument.type}\nUploaded: ${selectedDocument.uploadedAt}\nSize: ${selectedDocument.size}`
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = selectedDocument.name
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
 
-      toast.success('Download started!', { id: 'doc-download' })
-      setShowDownloadDocDialog(false)
-    } catch (error) {
-      toast.error('Failed to download document', { id: 'doc-download' })
-    }
+    toast.success('Download started!')
+    setShowDownloadDocDialog(false)
   }
 
   // Handle document deletion
-  const handleDeleteDocument = async () => {
+  const handleDeleteDocument = () => {
     if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) return
-    toast.loading('Deleting document...', { id: 'doc-delete' })
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      toast.success('Document deleted successfully', { id: 'doc-delete' })
-      setShowDeleteDocDialog(false)
-      setSelectedDocument(null)
-    } catch (error) {
-      toast.error('Failed to delete document', { id: 'doc-delete' })
-    }
+    toast.success('Document deleted successfully')
+    setShowDeleteDocDialog(false)
+    setSelectedDocument(null)
   }
 
   const filteredEmployees = useMemo(() => {
@@ -2810,9 +2712,8 @@ export default function EmployeesClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCourseDialog(false)}>Close</Button>
               <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => {
-                const action = selectedCourse?.status === 'completed' ? 'Opening course materials...' : selectedCourse?.status === 'in_progress' ? 'Resuming course...' : 'Starting course...';
                 const successMsg = selectedCourse?.status === 'completed' ? 'Course materials opened!' : selectedCourse?.status === 'in_progress' ? 'Course resumed!' : 'Course started!';
-                toast.loading(action, { id: 'course-action' }); setTimeout(() => { toast.success(successMsg, { id: 'course-action' }); setShowCourseDialog(false) }, 1000)
+                toast.success(successMsg); setShowCourseDialog(false)
               }}>
                 {selectedCourse?.status === 'completed' ? 'View Materials' : selectedCourse?.status === 'in_progress' ? 'Continue' : 'Start Course'}
               </Button>
@@ -3099,7 +3000,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to archive all terminated employees?')) { toast.loading('Archiving terminated employees...', { id: 'archive-terminated' }); setTimeout(() => { toast.success('Terminated employees archived successfully!', { id: 'archive-terminated' }); setShowArchiveDialog(false) }, 1800) } }}>
+              <Button variant="destructive" onClick={handleArchiveTerminated}>
                 Archive All
               </Button>
             </DialogFooter>
@@ -3131,7 +3032,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteAllDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { if (confirm('FINAL WARNING: This will permanently delete ALL HR data. This action cannot be undone. Are you absolutely sure?')) { toast.loading('Deleting all HR data...', { id: 'delete-all' }); setTimeout(() => { toast.success('All HR data has been deleted', { id: 'delete-all' }); setShowDeleteAllDialog(false) }, 2500) } }}>
+              <Button variant="destructive" onClick={handleDeleteAllData}>
                 Delete All Data
               </Button>
             </DialogFooter>
@@ -3160,7 +3061,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetSettingsDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to reset all settings to their default values?')) { toast.loading('Resetting settings...', { id: 'reset-settings' }); setTimeout(() => { toast.success('Settings reset to defaults!', { id: 'reset-settings' }); setShowResetSettingsDialog(false) }, 1200) } }}>
+              <Button variant="destructive" onClick={handleResetSettings}>
                 Reset Settings
               </Button>
             </DialogFooter>
@@ -3234,7 +3135,7 @@ export default function EmployeesClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditProfileDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Updating employee profile...', { id: 'profile-update' }); setTimeout(() => { toast.success('Employee profile updated successfully!', { id: 'profile-update' }); setShowEditProfileDialog(false) }, 1200) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleUpdateMockProfile}>
                 Save Changes
               </Button>
             </DialogFooter>
@@ -3272,7 +3173,7 @@ export default function EmployeesClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDownloadDocDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => { toast.loading('Preparing download...', { id: 'doc-download' }); setTimeout(() => { toast.success('Download started!', { id: 'doc-download' }); setShowDownloadDocDialog(false) }, 1000) }}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleDownloadDocument}>
                 <Download className="h-4 w-4 mr-2" />
                 Download
               </Button>
@@ -3294,7 +3195,7 @@ export default function EmployeesClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowDeleteDocDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => { if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) { toast.loading('Deleting document...', { id: 'doc-delete' }); setTimeout(() => { toast.success('Document deleted successfully', { id: 'doc-delete' }); setShowDeleteDocDialog(false) }, 1200) } }}>
+              <Button variant="destructive" onClick={handleDeleteDocument}>
                 Delete Document
               </Button>
             </DialogFooter>

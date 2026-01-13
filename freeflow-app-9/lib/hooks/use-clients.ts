@@ -17,7 +17,7 @@ export interface Client {
   address: string | null
   city: string | null
   country: string | null
-  status: 'active' | 'inactive' | 'prospect' | 'archived'
+  status: 'active' | 'inactive' | 'prospect' | 'lead' | 'churned'
   type: 'individual' | 'business' | 'enterprise'
   industry: string | null
   notes: string | null
@@ -45,7 +45,7 @@ export function useClients(initialClients: Client[] = []) {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .neq('status', 'archived')
+        .neq('status', 'churned')
         .order('name', { ascending: true })
 
       if (error) throw error
@@ -110,7 +110,7 @@ export function useClients(initialClients: Client[] = []) {
 
   const archiveClient = async (id: string) => {
     try {
-      const result = await updateClient(id, { status: 'archived' })
+      const result = await updateClient(id, { status: 'churned' })
       toast.success('Client archived')
       return result
     } catch (err) {

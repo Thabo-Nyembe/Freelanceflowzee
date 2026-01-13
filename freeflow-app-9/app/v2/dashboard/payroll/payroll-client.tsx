@@ -1254,14 +1254,7 @@ export default function PayrollClient() {
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Loading approval queue...',
-                      success: 'Select a pay run to approve from the list below',
-                      error: 'Failed to load approval queue'
-                    }
-                  )
+                  toast.info('Select a pay run to approve from the list below')
                 }}
               >
                 <CheckCircle className="w-5 h-5" />
@@ -1287,17 +1280,8 @@ export default function PayrollClient() {
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
                 onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => {
-                      setActiveTab('analytics')
-                      setTimeout(resolve, 600)
-                    }),
-                    {
-                      loading: 'Loading payroll analytics...',
-                      success: 'Payroll analytics loaded',
-                      error: 'Failed to load analytics'
-                    }
-                  )
+                  setActiveTab('analytics')
+                  toast.success('Payroll analytics loaded')
                 }}
               >
                 <BarChart3 className="w-5 h-5" />
@@ -2505,23 +2489,14 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Preparing payroll export...',
-                        success: () => {
-                          const blob = new Blob(['Payroll Export Data\nPeriod,Pay Date,Status,Total,Employees\n' + mockPayRuns.map(r => `${r.period},${r.payDate},${r.status},${r.totalGross},${r.employeeCount}`).join('\n')], { type: 'text/csv' })
-                          const url = URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = `payroll-export-${new Date().toISOString().split('T')[0]}.csv`
-                          a.click()
-                          URL.revokeObjectURL(url)
-                          return 'Payroll data exported successfully!'
-                        },
-                        error: 'Failed to export payroll data'
-                      }
-                    )
+                    const blob = new Blob(['Payroll Export Data\nPeriod,Pay Date,Status,Total,Employees\n' + mockPayRuns.map(r => `${r.period},${r.payDate},${r.status},${r.totalGross},${r.employeeCount}`).join('\n')], { type: 'text/csv' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `payroll-export-${new Date().toISOString().split('T')[0]}.csv`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Payroll data exported successfully!')
                     setShowExportDialog(false)
                   }}>
                   <Download className="w-4 h-4 mr-2" />
@@ -2566,14 +2541,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 2000)),
-                      {
-                        loading: 'Importing payroll data...',
-                        success: 'Payroll data imported successfully! Records have been updated.',
-                        error: 'Failed to import payroll data'
-                      }
-                    )
+                    toast.success('Payroll data imported successfully! Records have been updated.')
                     setShowImportDialog(false)
                   }}>
                   <Upload className="w-4 h-4 mr-2" />
@@ -2687,14 +2655,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowAddEmployeeDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Adding new employee...',
-                        success: 'Employee added successfully! They will receive onboarding email.',
-                        error: 'Failed to add employee'
-                      }
-                    )
+                    toast.success('Employee added successfully! They will receive onboarding email.')
                     setShowAddEmployeeDialog(false)
                   }}>
                   <UserPlus className="w-4 h-4 mr-2" />
@@ -2745,14 +2706,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowEmployeeImportDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 2000)),
-                      {
-                        loading: 'Importing employees...',
-                        success: 'Employees imported successfully! 15 new records added.',
-                        error: 'Failed to import employees'
-                      }
-                    )
+                    toast.success('Employees imported successfully! 15 new records added.')
                     setShowEmployeeImportDialog(false)
                   }}>Import</Button>
               </div>
@@ -2795,23 +2749,14 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowEmployeeExportDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Preparing employee export...',
-                        success: () => {
-                          const blob = new Blob(['Employee Data Export\nName,Email,Department,Role,Salary,Status\n' + mockEmployees.map(e => `${e.name},${e.email},${e.department},${e.role},${e.salary},${e.status}`).join('\n')], { type: 'text/csv' })
-                          const url = URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = `employees-export-${new Date().toISOString().split('T')[0]}.csv`
-                          a.click()
-                          URL.revokeObjectURL(url)
-                          return 'Employee data exported successfully!'
-                        },
-                        error: 'Failed to export employee data'
-                      }
-                    )
+                    const blob = new Blob(['Employee Data Export\nName,Email,Department,Role,Salary,Status\n' + mockEmployees.map(e => `${e.name},${e.email},${e.department},${e.role},${e.salary},${e.status}`).join('\n')], { type: 'text/csv' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `employees-export-${new Date().toISOString().split('T')[0]}.csv`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Employee data exported successfully!')
                     setShowEmployeeExportDialog(false)
                   }}>Export</Button>
               </div>
@@ -2845,14 +2790,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowPaymentDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1200)),
-                      {
-                        loading: 'Saving payment settings...',
-                        success: 'Payment settings updated successfully!',
-                        error: 'Failed to save payment settings'
-                      }
-                    )
+                    toast.success('Payment settings updated successfully!')
                     setShowPaymentDialog(false)
                   }}>Save</Button>
               </div>
@@ -2884,14 +2822,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowTaxFormsDialog(false)}>Close</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Preparing all tax forms...',
-                        success: 'All tax forms downloaded as ZIP archive',
-                        error: 'Failed to download forms'
-                      }
-                    )
+                    toast.success('All tax forms downloaded as ZIP archive')
                     setShowTaxFormsDialog(false)
                   }}>Download All</Button>
               </div>
@@ -2930,14 +2861,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowNotifyAllDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 2000)),
-                      {
-                        loading: 'Sending notification to all employees...',
-                        success: `Notification sent to ${mockEmployees.length} employees successfully!`,
-                        error: 'Failed to send notification'
-                      }
-                    )
+                    toast.success(`Notification sent to ${mockEmployees.length} employees successfully!`)
                     setShowNotifyAllDialog(false)
                   }}>
                   <Send className="w-4 h-4 mr-2" />
@@ -2963,14 +2887,7 @@ export default function PayrollClient() {
                       <span className="font-medium">{report}</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1500)),
-                          {
-                            loading: `Generating ${report}...`,
-                            success: `${report} generated successfully!`,
-                            error: `Failed to generate ${report}`
-                          }
-                        )
+                        toast.success(`${report} generated successfully!`)
                       }}>Generate</Button>
                   </div>
                 ))}
@@ -3050,14 +2967,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowFileTaxesDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 3000)),
-                      {
-                        loading: 'Initiating tax filing with IRS...',
-                        success: 'Tax filing submitted successfully! Confirmation number: IRS-2024-Q4-' + Math.random().toString(36).substring(7).toUpperCase(),
-                        error: 'Failed to submit tax filing'
-                      }
-                    )
+                    toast.success('Tax filing submitted successfully! Confirmation number: IRS-2024-Q4-' + Math.random().toString(36).substring(7).toUpperCase())
                     setShowFileTaxesDialog(false)
                   }}>File Now</Button>
               </div>
@@ -3244,14 +3154,7 @@ export default function PayrollClient() {
                       <span className="font-medium">{report}</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1500)),
-                          {
-                            loading: `Generating ${report}...`,
-                            success: `${report} generated and ready for download!`,
-                            error: `Failed to generate ${report}`
-                          }
-                        )
+                        toast.success(`${report} generated and ready for download!`)
                       }}>Generate</Button>
                   </div>
                 ))}
@@ -3336,23 +3239,14 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowDownloadTaxReportsDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Generating tax report...',
-                        success: () => {
-                          const blob = new Blob(['Tax Report - YTD Summary\n\nFederal Income Tax: $1,872,000\nSocial Security: $725,000\nMedicare: $169,000\nState Income Tax: $744,000\nState Disability: $128,000\n\nTotal: $3,638,000'], { type: 'text/plain' })
-                          const url = URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = `tax-report-${new Date().toISOString().split('T')[0]}.txt`
-                          a.click()
-                          URL.revokeObjectURL(url)
-                          return 'Tax report downloaded successfully!'
-                        },
-                        error: 'Failed to download tax report'
-                      }
-                    )
+                    const blob = new Blob(['Tax Report - YTD Summary\n\nFederal Income Tax: $1,872,000\nSocial Security: $725,000\nMedicare: $169,000\nState Income Tax: $744,000\nState Disability: $128,000\n\nTotal: $3,638,000'], { type: 'text/plain' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `tax-report-${new Date().toISOString().split('T')[0]}.txt`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Tax report downloaded successfully!')
                     setShowDownloadTaxReportsDialog(false)
                   }}>
                   <Download className="w-4 h-4 mr-2" />
@@ -3390,14 +3284,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowGenerateW2Dialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 3000)),
-                      {
-                        loading: 'Generating W-2 forms for 156 employees...',
-                        success: 'W-2 forms generated successfully! Available in Documents section.',
-                        error: 'Failed to generate W-2 forms'
-                      }
-                    )
+                    toast.success('W-2 forms generated successfully! Available in Documents section.')
                     setShowGenerateW2Dialog(false)
                   }}>Generate W-2s</Button>
               </div>
@@ -3432,14 +3319,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowGenerate1099Dialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 2500)),
-                      {
-                        loading: 'Generating 1099 forms for contractors...',
-                        success: '1099 forms generated for 12 contractors! Available in Documents section.',
-                        error: 'Failed to generate 1099 forms'
-                      }
-                    )
+                    toast.success('1099 forms generated for 12 contractors! Available in Documents section.')
                     setShowGenerate1099Dialog(false)
                   }}>Generate 1099s</Button>
               </div>
@@ -3478,14 +3358,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowFileQuarterlyTaxesDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 3000)),
-                      {
-                        loading: 'Filing quarterly taxes with federal and state agencies...',
-                        success: 'Quarterly taxes filed successfully! Total: $337,300. Confirmation sent to your email.',
-                        error: 'Failed to file quarterly taxes'
-                      }
-                    )
+                    toast.success('Quarterly taxes filed successfully! Total: $337,300. Confirmation sent to your email.')
                     setShowFileQuarterlyTaxesDialog(false)
                   }}>
                   <Send className="w-4 h-4 mr-2" />
@@ -3535,14 +3408,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowAddBenefitPlanDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Creating benefit plan...',
-                        success: 'Benefit plan created successfully! Employees can now enroll.',
-                        error: 'Failed to create benefit plan'
-                      }
-                    )
+                    toast.success('Benefit plan created successfully! Employees can now enroll.')
                     setShowAddBenefitPlanDialog(false)
                   }}>Add Plan</Button>
               </div>
@@ -3684,14 +3550,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowEnrollmentDialog(false)}>Close</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Sending enrollment reminders...',
-                        success: 'Enrollment reminders sent to 12 employees with pending enrollment!',
-                        error: 'Failed to send reminders'
-                      }
-                    )
+                    toast.success('Enrollment reminders sent to 12 employees with pending enrollment!')
                     setShowEnrollmentDialog(false)
                   }}>Send Reminders</Button>
               </div>
@@ -3741,14 +3600,7 @@ export default function PayrollClient() {
                       <span className="font-medium">{report}</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1500)),
-                          {
-                            loading: `Generating ${report}...`,
-                            success: `${report} generated successfully!`,
-                            error: `Failed to generate ${report}`
-                          }
-                        )
+                        toast.success(`${report} generated successfully!`)
                       }}>Generate</Button>
                   </div>
                 ))}
@@ -3838,14 +3690,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowNewTimeEntryDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Creating time entry...',
-                        success: 'Time entry created successfully!',
-                        error: 'Failed to create time entry'
-                      }
-                    )
+                    toast.success('Time entry created successfully!')
                     setShowNewTimeEntryDialog(false)
                   }}>Create Entry</Button>
               </div>
@@ -4045,23 +3890,14 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowTimeExportDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Exporting time data...',
-                        success: () => {
-                          const blob = new Blob(['Time & Attendance Export\nEmployee,Date,Regular,Overtime,PTO,Total,Status\n' + mockTimeEntries.map(t => `${t.employeeName},${t.date},${t.regularHours},${t.overtimeHours},${t.ptoHours},${t.totalHours},${t.status}`).join('\n')], { type: 'text/csv' })
-                          const url = URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = `time-export-${new Date().toISOString().split('T')[0]}.csv`
-                          a.click()
-                          URL.revokeObjectURL(url)
-                          return 'Time data exported successfully!'
-                        },
-                        error: 'Failed to export time data'
-                      }
-                    )
+                    const blob = new Blob(['Time & Attendance Export\nEmployee,Date,Regular,Overtime,PTO,Total,Status\n' + mockTimeEntries.map(t => `${t.employeeName},${t.date},${t.regularHours},${t.overtimeHours},${t.ptoHours},${t.totalHours},${t.status}`).join('\n')], { type: 'text/csv' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `time-export-${new Date().toISOString().split('T')[0]}.csv`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Time data exported successfully!')
                     setShowTimeExportDialog(false)
                   }}>
                   <Download className="w-4 h-4 mr-2" />
@@ -4087,14 +3923,7 @@ export default function PayrollClient() {
                       <span className="font-medium">{report}</span>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1500)),
-                          {
-                            loading: `Generating ${report}...`,
-                            success: `${report} generated successfully!`,
-                            error: `Failed to generate ${report}`
-                          }
-                        )
+                        toast.success(`${report} generated successfully!`)
                       }}>Generate</Button>
                   </div>
                 ))}
@@ -4255,14 +4084,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowBankAccountDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 2000)),
-                      {
-                        loading: 'Verifying bank account details...',
-                        success: 'Bank account updated successfully! Micro-deposits will be sent for verification.',
-                        error: 'Failed to update bank account'
-                      }
-                    )
+                    toast.success('Bank account updated successfully! Micro-deposits will be sent for verification.')
                     setShowBankAccountDialog(false)
                   }}>Save</Button>
               </div>
@@ -4410,14 +4232,7 @@ export default function PayrollClient() {
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" className="flex-1" onClick={() => setShowPayStubsDialog(false)}>Close</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Preparing pay stubs download...',
-                        success: 'All pay stubs downloaded as ZIP archive!',
-                        error: 'Failed to download pay stubs'
-                      }
-                    )
+                    toast.success('All pay stubs downloaded as ZIP archive!')
                     setShowPayStubsDialog(false)
                   }}>Download All</Button>
               </div>
@@ -4470,14 +4285,7 @@ export default function PayrollClient() {
                 <div className="flex gap-2 pt-4">
                   <Button variant="outline" className="flex-1" onClick={() => setShowEditEmployeeDetailsDialog(false)}>Cancel</Button>
                   <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 1200)),
-                        {
-                          loading: 'Saving employee details...',
-                          success: `${selectedEmployee?.name}'s details updated successfully!`,
-                          error: 'Failed to update employee details'
-                        }
-                      )
+                      toast.success(`${selectedEmployee?.name}'s details updated successfully!`)
                       setShowEditEmployeeDetailsDialog(false)
                     }}>Save Changes</Button>
                 </div>

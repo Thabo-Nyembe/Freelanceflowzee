@@ -258,99 +258,46 @@ export default function EnhancedClient() {
       return
     }
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Creating item...',
-        success: () => {
-          setNewItemDialogOpen(false)
-          setNewItemForm({ name: '', description: '', type: 'task', priority: 'medium' })
-          announce(`New ${newItemForm.type} "${newItemForm.name}" created successfully`)
-          return `${newItemForm.type.charAt(0).toUpperCase() + newItemForm.type.slice(1)} "${newItemForm.name}" created successfully`
-        },
-        error: 'Failed to create item',
-      }
-    )
+    const itemType = newItemForm.type.charAt(0).toUpperCase() + newItemForm.type.slice(1)
+    toast.success(`${itemType} "${newItemForm.name}" created successfully`)
+    announce(`New ${newItemForm.type} "${newItemForm.name}" created successfully`)
+    setNewItemDialogOpen(false)
+    setNewItemForm({ name: '', description: '', type: 'task', priority: 'medium' })
   }
 
   // Handle export
   const handleExport = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: `Exporting data as ${exportForm.format.toUpperCase()}...`,
-        success: () => {
-          setExportDialogOpen(false)
-          announce(`Data exported as ${exportForm.format.toUpperCase()}`)
-          return `Data exported successfully as ${exportForm.format.toUpperCase()}`
-        },
-        error: 'Export failed',
-      }
-    )
+    toast.success(`Data exported successfully as ${exportForm.format.toUpperCase()}`)
+    announce(`Data exported as ${exportForm.format.toUpperCase()}`)
+    setExportDialogOpen(false)
   }
 
   // Handle settings save
   const handleSaveSettings = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
-      {
-        loading: 'Saving settings...',
-        success: () => {
-          setSettingsDialogOpen(false)
-          announce('Settings saved successfully')
-          return 'Settings saved successfully'
-        },
-        error: 'Failed to save settings',
-      }
-    )
+    toast.success('Settings saved successfully')
+    announce('Settings saved successfully')
+    setSettingsDialogOpen(false)
   }
 
   // Handle AI settings save
   const handleSaveAiSettings = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Updating AI configuration...',
-        success: () => {
-          setAiSettingsDialogOpen(false)
-          announce('AI settings updated successfully')
-          return 'AI settings updated successfully'
-        },
-        error: 'Failed to update AI settings',
-      }
-    )
+    toast.success('AI settings updated successfully')
+    announce('AI settings updated successfully')
+    setAiSettingsDialogOpen(false)
   }
 
   // Handle analytics config save
   const handleSaveAnalyticsConfig = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
-      {
-        loading: 'Saving analytics configuration...',
-        success: () => {
-          setAnalyticsConfigDialogOpen(false)
-          announce('Analytics configuration saved')
-          return 'Analytics configuration saved'
-        },
-        error: 'Failed to save analytics configuration',
-      }
-    )
+    toast.success('Analytics configuration saved')
+    announce('Analytics configuration saved')
+    setAnalyticsConfigDialogOpen(false)
   }
 
   // Handle collaboration settings save
   const handleSaveCollaborationSettings = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
-      {
-        loading: 'Updating collaboration settings...',
-        success: () => {
-          setCollaborationDialogOpen(false)
-          announce('Collaboration settings updated')
-          return 'Collaboration settings updated'
-        },
-        error: 'Failed to update collaboration settings',
-      }
-    )
+    toast.success('Collaboration settings updated')
+    announce('Collaboration settings updated')
+    setCollaborationDialogOpen(false)
   }
 
   // Handle send message
@@ -360,20 +307,11 @@ export default function EnhancedClient() {
       return
     }
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Sending message...',
-        success: () => {
-          setMessageDialogOpen(false)
-          setMessageContent('')
-          setSelectedRecipient('')
-          announce(`Message sent to ${selectedRecipient}`)
-          return `Message sent to ${selectedRecipient}`
-        },
-        error: 'Failed to send message',
-      }
-    )
+    toast.success(`Message sent to ${selectedRecipient}`)
+    announce(`Message sent to ${selectedRecipient}`)
+    setMessageDialogOpen(false)
+    setMessageContent('')
+    setSelectedRecipient('')
   }
 
   // Handle start call
@@ -383,74 +321,38 @@ export default function EnhancedClient() {
       return
     }
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Starting ${callType} call...`,
-        success: () => {
-          setCallDialogOpen(false)
-          setSelectedRecipient('')
-          announce(`${callType.charAt(0).toUpperCase() + callType.slice(1)} call started with ${selectedRecipient}`)
-          return `${callType.charAt(0).toUpperCase() + callType.slice(1)} call started with ${selectedRecipient}`
-        },
-        error: 'Failed to start call',
-      }
-    )
+    const callTypeDisplay = callType.charAt(0).toUpperCase() + callType.slice(1)
+    toast.success(`${callTypeDisplay} call started with ${selectedRecipient}`)
+    announce(`${callTypeDisplay} call started with ${selectedRecipient}`)
+    setCallDialogOpen(false)
+    setSelectedRecipient('')
   }
 
   // Handle share
   const handleShare = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Generating share link...',
-        success: () => {
-          setShareDialogOpen(false)
-          announce('Share link created and copied to clipboard')
-          return 'Share link created and copied to clipboard'
-        },
-        error: 'Failed to create share link',
-      }
-    )
+    toast.success('Share link created and copied to clipboard')
+    announce('Share link created and copied to clipboard')
+    setShareDialogOpen(false)
   }
 
   // Handle save notification preferences
   const handleSaveNotificationPrefs = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
-      {
-        loading: 'Saving notification preferences...',
-        success: () => {
-          setNotificationsDialogOpen(false)
-          announce('Notification preferences updated')
-          return 'Notification preferences updated'
-        },
-        error: 'Failed to save notification preferences',
-      }
-    )
+    toast.success('Notification preferences updated')
+    announce('Notification preferences updated')
+    setNotificationsDialogOpen(false)
   }
 
   // Handle refresh data
   const handleRefreshData = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Refreshing all data sources...',
-        success: () => {
-          setRefreshDialogOpen(false)
-          announce('All data sources refreshed')
-          return 'All data sources refreshed successfully'
-        },
-        error: 'Failed to refresh data',
-      }
-    )
+    toast.success('All data sources refreshed successfully')
+    announce('All data sources refreshed')
+    setRefreshDialogOpen(false)
   }
 
   // Handle AI query
-  const handleAIQuery = useCallback(async (query: string): Promise<string> => {
-    await new Promise(resolve => setTimeout(resolve, 1500))
+  const handleAIQuery = useCallback((query: string): Promise<string> => {
     announce(`AI query processed: ${query}`)
-    return `Based on your query "${query}", I've analyzed your data and found several relevant insights. Your current metrics show positive trends across key performance indicators.`
+    return Promise.resolve(`Based on your query "${query}", I've analyzed your data and found several relevant insights. Your current metrics show positive trends across key performance indicators.`)
   }, [announce])
 
   // Handle mark activity read
@@ -483,14 +385,7 @@ export default function EnhancedClient() {
 
   // Handle refresh predictions
   const handleRefreshPredictions = useCallback(() => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Refreshing predictions...',
-        success: 'Predictions refreshed with latest data',
-        error: 'Failed to refresh predictions',
-      }
-    )
+    toast.success('Predictions refreshed with latest data')
   }, [])
 
   // Quick actions with real dialog triggers

@@ -585,40 +585,36 @@ export default function CodeRepositoryClient() {
       toast.error('Repository name is required')
       return
     }
-    setIsLoading(true)
-    setTimeout(() => {
-      const newRepo: Repository = {
-        id: String(repositories.length + 1),
-        name: newRepoName,
-        description: newRepoDescription,
-        language: 'TypeScript',
-        visibility: newRepoVisibility as 'public' | 'private' | 'internal',
-        defaultBranch: 'main',
-        stars: 0,
-        forks: 0,
-        watchers: 0,
-        openIssues: 0,
-        openPRs: 0,
-        lastCommit: {
-          message: 'Initial commit',
-          author: 'You',
-          date: new Date().toISOString(),
-          hash: 'init001'
-        },
-        size: 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        isArchived: false,
-        topics: []
-      }
-      setRepositories([newRepo, ...repositories])
-      setCreateRepoDialogOpen(false)
-      setNewRepoName('')
-      setNewRepoDescription('')
-      setNewRepoVisibility('private')
-      setIsLoading(false)
-      toast.success(`Repository "${newRepoName}" created successfully`)
-    }, 1000)
+    const newRepo: Repository = {
+      id: String(repositories.length + 1),
+      name: newRepoName,
+      description: newRepoDescription,
+      language: 'TypeScript',
+      visibility: newRepoVisibility as 'public' | 'private' | 'internal',
+      defaultBranch: 'main',
+      stars: 0,
+      forks: 0,
+      watchers: 0,
+      openIssues: 0,
+      openPRs: 0,
+      lastCommit: {
+        message: 'Initial commit',
+        author: 'You',
+        date: new Date().toISOString(),
+        hash: 'init001'
+      },
+      size: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isArchived: false,
+      topics: []
+    }
+    setRepositories([newRepo, ...repositories])
+    setCreateRepoDialogOpen(false)
+    setNewRepoName('')
+    setNewRepoDescription('')
+    setNewRepoVisibility('private')
+    toast.success(`Repository "${newRepoName}" created successfully`)
   }
 
   const handleCloneRepository = () => {
@@ -635,13 +631,9 @@ export default function CodeRepositoryClient() {
       toast.error('Repository URL is required')
       return
     }
-    setIsLoading(true)
-    setTimeout(() => {
-      toast.success('Repository import started')
-      setImportRepoDialogOpen(false)
-      setImportUrl('')
-      setIsLoading(false)
-    }, 1500)
+    toast.success('Repository import started')
+    setImportRepoDialogOpen(false)
+    setImportUrl('')
   }
 
   const handleCreateBranch = () => {
@@ -649,27 +641,23 @@ export default function CodeRepositoryClient() {
       toast.error('Branch name is required')
       return
     }
-    setIsLoading(true)
-    setTimeout(() => {
-      const newBranch: Branch = {
-        id: String(branches.length + 1),
-        name: newBranchName,
-        isDefault: false,
-        isProtected: false,
-        lastCommit: {
-          message: 'Branch created',
-          author: 'You',
-          date: new Date().toISOString(),
-          hash: 'new' + String(branches.length + 1)
-        },
-        aheadBehind: { ahead: 0, behind: 0 }
-      }
-      setBranches([...branches, newBranch])
-      setCreateBranchDialogOpen(false)
-      setNewBranchName('')
-      setIsLoading(false)
-      toast.success(`Branch "${newBranchName}" created from ${newBranchSource}`)
-    }, 1000)
+    const newBranch: Branch = {
+      id: String(branches.length + 1),
+      name: newBranchName,
+      isDefault: false,
+      isProtected: false,
+      lastCommit: {
+        message: 'Branch created',
+        author: 'You',
+        date: new Date().toISOString(),
+        hash: 'new' + String(branches.length + 1)
+      },
+      aheadBehind: { ahead: 0, behind: 0 }
+    }
+    setBranches([...branches, newBranch])
+    setCreateBranchDialogOpen(false)
+    setNewBranchName('')
+    toast.success(`Branch "${newBranchName}" created from ${newBranchSource}`)
   }
 
   const handleDeleteBranch = () => {
@@ -678,14 +666,10 @@ export default function CodeRepositoryClient() {
         toast.error('Cannot delete a protected branch')
         return
       }
-      setIsLoading(true)
-      setTimeout(() => {
-        setBranches(branches.filter(b => b.id !== selectedBranch.id))
-        setDeleteBranchDialogOpen(false)
-        setSelectedBranch(null)
-        setIsLoading(false)
-        toast.success(`Branch "${selectedBranch.name}" deleted`)
-      }, 1000)
+      setBranches(branches.filter(b => b.id !== selectedBranch.id))
+      setDeleteBranchDialogOpen(false)
+      toast.success(`Branch "${selectedBranch.name}" deleted`)
+      setSelectedBranch(null)
     }
   }
 
@@ -694,95 +678,72 @@ export default function CodeRepositoryClient() {
       toast.error('Pull request title is required')
       return
     }
-    setIsLoading(true)
-    setTimeout(() => {
-      const newPR: PullRequest = {
-        id: String(pullRequests.length + 1),
-        number: 237,
-        title: prTitle,
-        description: prDescription,
-        status: 'open',
-        author: { name: 'You', avatar: '' },
-        sourceBranch: prSourceBranch || 'feature/new-feature',
-        targetBranch: prTargetBranch,
-        commits: 1,
-        additions: 0,
-        deletions: 0,
-        reviewers: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      setPullRequests([newPR, ...pullRequests])
-      setCreatePRDialogOpen(false)
-      setPRTitle('')
-      setPRDescription('')
-      setPRSourceBranch('')
-      setIsLoading(false)
-      toast.success(`Pull request #${newPR.number} created`)
-    }, 1000)
+    const newPR: PullRequest = {
+      id: String(pullRequests.length + 1),
+      number: 237,
+      title: prTitle,
+      description: prDescription,
+      status: 'open',
+      author: { name: 'You', avatar: '' },
+      sourceBranch: prSourceBranch || 'feature/new-feature',
+      targetBranch: prTargetBranch,
+      commits: 1,
+      additions: 0,
+      deletions: 0,
+      reviewers: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    setPullRequests([newPR, ...pullRequests])
+    setCreatePRDialogOpen(false)
+    setPRTitle('')
+    setPRDescription('')
+    setPRSourceBranch('')
+    toast.success(`Pull request #${newPR.number} created`)
   }
 
   const handleMergePullRequest = () => {
     if (selectedPR) {
-      setIsLoading(true)
-      setTimeout(() => {
-        setPullRequests(pullRequests.map(pr =>
-          pr.id === selectedPR.id ? { ...pr, status: 'merged' as const } : pr
-        ))
-        setMergePRDialogOpen(false)
-        setIsLoading(false)
-        toast.success(`Pull request #${selectedPR.number} merged successfully`)
-      }, 1500)
+      setPullRequests(pullRequests.map(pr =>
+        pr.id === selectedPR.id ? { ...pr, status: 'merged' as const } : pr
+      ))
+      setMergePRDialogOpen(false)
+      toast.success(`Pull request #${selectedPR.number} merged successfully`)
     }
   }
 
   const handleArchiveRepository = () => {
     if (selectedRepo) {
-      setIsLoading(true)
-      setTimeout(() => {
-        setRepositories(repositories.map(r =>
-          r.id === selectedRepo.id ? { ...r, isArchived: true } : r
-        ))
-        setArchiveRepoDialogOpen(false)
-        setIsLoading(false)
-        toast.success(`Repository "${selectedRepo.name}" archived`)
-      }, 1000)
+      setRepositories(repositories.map(r =>
+        r.id === selectedRepo.id ? { ...r, isArchived: true } : r
+      ))
+      setArchiveRepoDialogOpen(false)
+      toast.success(`Repository "${selectedRepo.name}" archived`)
     }
   }
 
   const handleDeleteRepository = () => {
     if (selectedRepo) {
-      setIsLoading(true)
-      setTimeout(() => {
-        setRepositories(repositories.filter(r => r.id !== selectedRepo.id))
-        setDeleteRepoDialogOpen(false)
-        setSelectedRepo(null)
-        setIsLoading(false)
-        toast.success(`Repository deleted`)
-      }, 1000)
+      setRepositories(repositories.filter(r => r.id !== selectedRepo.id))
+      setDeleteRepoDialogOpen(false)
+      toast.success(`Repository deleted`)
+      setSelectedRepo(null)
     }
   }
 
   const handleToggleBranchProtection = () => {
     if (selectedBranch) {
-      setIsLoading(true)
-      setTimeout(() => {
-        setBranches(branches.map(b =>
-          b.id === selectedBranch.id ? { ...b, isProtected: !b.isProtected } : b
-        ))
-        setBranchProtectionDialogOpen(false)
-        setIsLoading(false)
-        toast.success(`Branch protection ${selectedBranch.isProtected ? 'disabled' : 'enabled'} for "${selectedBranch.name}"`)
-      }, 1000)
+      const wasProtected = selectedBranch.isProtected
+      setBranches(branches.map(b =>
+        b.id === selectedBranch.id ? { ...b, isProtected: !b.isProtected } : b
+      ))
+      setBranchProtectionDialogOpen(false)
+      toast.success(`Branch protection ${wasProtected ? 'disabled' : 'enabled'} for "${selectedBranch.name}"`)
     }
   }
 
   const handleRefreshData = () => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      toast.success('Data refreshed')
-    }, 1000)
+    toast.success('Data refreshed')
   }
 
   const handleCopyCommitHash = (hash: string) => {
@@ -792,10 +753,7 @@ export default function CodeRepositoryClient() {
 
   const handleDownloadSource = () => {
     if (selectedRepo) {
-      toast.loading('Preparing download...', { id: 'download-source' })
-      setTimeout(() => {
-        toast.success('Download started!', { id: 'download-source', description: `${selectedRepo.name}.zip is downloading` })
-      }, 1500)
+      toast.success('Download started!', { description: `${selectedRepo.name}.zip is downloading` })
     }
   }
 
@@ -807,13 +765,10 @@ export default function CodeRepositoryClient() {
   }
 
   const handleForkRepository = (repo: Repository) => {
-    toast.loading('Forking repository...', { id: 'fork-repo' })
-    setTimeout(() => {
-      setRepositories(prev => prev.map(r =>
-        r.id === repo.id ? { ...r, forks: r.forks + 1 } : r
-      ))
-      toast.success('Repository forked!', { id: 'fork-repo', description: `${repo.name} has been forked to your account` })
-    }, 1500)
+    setRepositories(prev => prev.map(r =>
+      r.id === repo.id ? { ...r, forks: r.forks + 1 } : r
+    ))
+    toast.success('Repository forked!', { description: `${repo.name} has been forked to your account` })
   }
 
   const handleWatchRepository = (repo: Repository) => {
@@ -825,38 +780,29 @@ export default function CodeRepositoryClient() {
 
   const handleAddReviewer = () => {
     if (selectedPR) {
-      toast.loading('Adding reviewer...', { id: 'add-reviewer' })
-      setTimeout(() => {
-        toast.success('Reviewer added!', { id: 'add-reviewer', description: `Reviewer has been added to PR #${selectedPR.number}` })
-        setAddReviewerDialogOpen(false)
-      }, 1000)
+      toast.success('Reviewer added!', { description: `Reviewer has been added to PR #${selectedPR.number}` })
+      setAddReviewerDialogOpen(false)
     }
   }
 
   const handleApprovePR = (pr: PullRequest) => {
-    toast.loading('Submitting approval...', { id: 'approve-pr' })
-    setTimeout(() => {
-      setPullRequests(pullRequests.map(p =>
-        p.id === pr.id ? {
-          ...p,
-          reviewers: p.reviewers.map(r => ({ ...r, status: 'approved' as const }))
-        } : p
-      ))
-      toast.success('PR approved!', { id: 'approve-pr', description: `You approved PR #${pr.number}` })
-    }, 1000)
+    setPullRequests(pullRequests.map(p =>
+      p.id === pr.id ? {
+        ...p,
+        reviewers: p.reviewers.map(r => ({ ...r, status: 'approved' as const }))
+      } : p
+    ))
+    toast.success('PR approved!', { description: `You approved PR #${pr.number}` })
   }
 
   const handleRequestChanges = (pr: PullRequest) => {
-    toast.loading('Submitting review...', { id: 'request-changes' })
-    setTimeout(() => {
-      setPullRequests(pullRequests.map(p =>
-        p.id === pr.id ? {
-          ...p,
-          reviewers: p.reviewers.map(r => ({ ...r, status: 'changes_requested' as const }))
-        } : p
-      ))
-      toast.success('Changes requested', { id: 'request-changes', description: `Review submitted for PR #${pr.number}` })
-    }, 1000)
+    setPullRequests(pullRequests.map(p =>
+      p.id === pr.id ? {
+        ...p,
+        reviewers: p.reviewers.map(r => ({ ...r, status: 'changes_requested' as const }))
+      } : p
+    ))
+    toast.success('Changes requested', { description: `Review submitted for PR #${pr.number}` })
   }
 
   const handleClosePR = (pr: PullRequest) => {
@@ -868,26 +814,17 @@ export default function CodeRepositoryClient() {
 
   const handleRevertCommit = (commit: Commit) => {
     if (confirm(`Are you sure you want to revert commit ${commit.hash.substring(0, 7)}? This will create a new commit that undoes the changes.`)) {
-      toast.loading('Reverting commit...', { id: 'revert-commit' })
-      setTimeout(() => {
-        toast.success('Commit reverted!', { id: 'revert-commit', description: `Created revert commit for ${commit.hash.substring(0, 7)}` })
-      }, 1500)
+      toast.success('Commit reverted!', { description: `Created revert commit for ${commit.hash.substring(0, 7)}` })
     }
   }
 
   const handleCherryPick = (commit: Commit) => {
-    toast.loading('Cherry-picking commit...', { id: 'cherry-pick' })
-    setTimeout(() => {
-      toast.success('Cherry-pick successful!', { id: 'cherry-pick', description: `Commit ${commit.hash.substring(0, 7)} applied to current branch` })
-    }, 1500)
+    toast.success('Cherry-pick successful!', { description: `Commit ${commit.hash.substring(0, 7)} applied to current branch` })
   }
 
   const handleCompare = () => {
-    toast.loading('Comparing branches...', { id: 'compare' })
-    setTimeout(() => {
-      toast.success('Comparison complete!', { id: 'compare', description: 'Branch diff is ready to view' })
-      setCompareDialogOpen(false)
-    }, 1000)
+    toast.success('Comparison complete!', { description: 'Branch diff is ready to view' })
+    setCompareDialogOpen(false)
   }
 
   // Stats
@@ -1402,13 +1339,10 @@ export default function CodeRepositoryClient() {
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.loading('Updating PR status...', { id: 'ready-review' })
-                            setTimeout(() => {
-                              setPullRequests(pullRequests.map(p =>
-                                p.id === pr.id ? { ...p, status: 'open' as const } : p
-                              ))
-                              toast.success('Ready for review!', { id: 'ready-review', description: `PR #${pr.number} is now open for review` })
-                            }, 1000)
+                            setPullRequests(pullRequests.map(p =>
+                              p.id === pr.id ? { ...p, status: 'open' as const } : p
+                            ))
+                            toast.success('Ready for review!', { description: `PR #${pr.number} is now open for review` })
                           }}
                         >
                           Ready for Review
@@ -1738,11 +1672,8 @@ export default function CodeRepositoryClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setRepoSettingsDialogOpen(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Saving settings...', { id: 'save-settings' })
-              setTimeout(() => {
-                toast.success('Settings saved!', { id: 'save-settings', description: 'Repository settings updated successfully' })
-                setRepoSettingsDialogOpen(false)
-              }, 1000)
+              toast.success('Settings saved!', { description: 'Repository settings updated successfully' })
+              setRepoSettingsDialogOpen(false)
             }}>
               Save Changes
             </Button>
@@ -2073,30 +2004,21 @@ export default function CodeRepositoryClient() {
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.loading('Loading file...', { id: 'view-readme' })
-                    setTimeout(() => {
-                      toast.success('File loaded', { id: 'view-readme', description: 'README.md is ready to view' })
-                    }, 500)
+                    toast.success('File loaded', { description: 'README.md is ready to view' })
                   }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>README.md</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.loading('Loading file...', { id: 'view-package' })
-                    setTimeout(() => {
-                      toast.success('File loaded', { id: 'view-package', description: 'package.json is ready to view' })
-                    }, 500)
+                    toast.success('File loaded', { description: 'package.json is ready to view' })
                   }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>package.json</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 hover:bg-muted rounded cursor-pointer"
                   onClick={() => {
-                    toast.loading('Loading file...', { id: 'view-tsconfig' })
-                    setTimeout(() => {
-                      toast.success('File loaded', { id: 'view-tsconfig', description: 'tsconfig.json is ready to view' })
-                    }, 500)
+                    toast.success('File loaded', { description: 'tsconfig.json is ready to view' })
                   }}>
                   <FileCode className="w-5 h-5 text-muted-foreground" />
                   <span>tsconfig.json</span>

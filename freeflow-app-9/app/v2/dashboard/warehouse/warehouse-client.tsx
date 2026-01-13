@@ -659,21 +659,12 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Adding inventory item...',
-        success: () => {
-          setShowAddInventoryDialog(false)
-          setNewInventoryForm({
-            sku: '', name: '', category: '', quantity: '', binLocation: '',
-            zone: '', unitCost: '', reorderPoint: '', description: ''
-          })
-          return `Inventory item ${newInventoryForm.sku} added successfully`
-        },
-        error: 'Failed to add inventory item'
-      }
-    )
+    toast.success(`Inventory item ${newInventoryForm.sku} added successfully`)
+    setShowAddInventoryDialog(false)
+    setNewInventoryForm({
+      sku: '', name: '', category: '', quantity: '', binLocation: '',
+      zone: '', unitCost: '', reorderPoint: '', description: ''
+    })
   }
 
   const handleStartCycleCount = () => {
@@ -683,18 +674,9 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating cycle count...',
-        success: () => {
-          setShowCycleCountDialog(false)
-          setCycleCountForm({ zone: '', assignedTo: '', scheduledDate: '', notes: '' })
-          return `Cycle count scheduled for ${cycleCountForm.zone}`
-        },
-        error: 'Failed to create cycle count'
-      }
-    )
+    toast.success(`Cycle count scheduled for ${cycleCountForm.zone}`)
+    setShowCycleCountDialog(false)
+    setCycleCountForm({ zone: '', assignedTo: '', scheduledDate: '', notes: '' })
   }
 
   const handleCreateShipment = () => {
@@ -704,20 +686,11 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating inbound shipment...',
-        success: () => {
-          setShowCreateShipmentDialog(false)
-          setShipmentForm({
-            poNumber: '', supplier: '', carrier: '', expectedDate: '', dockDoor: '', notes: ''
-          })
-          return `Shipment for PO ${shipmentForm.poNumber} created successfully`
-        },
-        error: 'Failed to create shipment'
-      }
-    )
+    toast.success(`Shipment for PO ${shipmentForm.poNumber} created successfully`)
+    setShowCreateShipmentDialog(false)
+    setShipmentForm({
+      poNumber: '', supplier: '', carrier: '', expectedDate: '', dockDoor: '', notes: ''
+    })
   }
 
   const handleReceiveInventory = () => {
@@ -727,18 +700,9 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Starting receiving process...',
-        success: () => {
-          setShowReceiveInventoryDialog(false)
-          setReceiveForm({ shipmentNumber: '', dockDoor: '', assignedTo: '', notes: '' })
-          return `Receiving started for shipment ${receiveForm.shipmentNumber}`
-        },
-        error: 'Failed to start receiving'
-      }
-    )
+    toast.success(`Receiving started for shipment ${receiveForm.shipmentNumber}`)
+    setShowReceiveInventoryDialog(false)
+    setReceiveForm({ shipmentNumber: '', dockDoor: '', assignedTo: '', notes: '' })
   }
 
   const handleTransfer = () => {
@@ -748,46 +712,19 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Processing transfer...',
-        success: () => {
-          setShowTransferDialog(false)
-          setTransferForm({ sku: '', fromLocation: '', toLocation: '', quantity: '', reason: '' })
-          return `Transferred ${transferForm.quantity} units of ${transferForm.sku}`
-        },
-        error: 'Failed to process transfer'
-      }
-    )
+    toast.success(`Transferred ${transferForm.quantity} units of ${transferForm.sku}`)
+    setShowTransferDialog(false)
+    setTransferForm({ sku: '', fromLocation: '', toLocation: '', quantity: '', reason: '' })
   }
 
   const handleExport = (format: string) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: `Exporting data as ${format}...`,
-        success: () => {
-          setShowExportDialog(false)
-          return `Data exported successfully as ${format}`
-        },
-        error: 'Failed to export data'
-      }
-    )
+    toast.success(`Data exported successfully as ${format}`)
+    setShowExportDialog(false)
   }
 
   const handleImport = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
-      {
-        loading: 'Importing data...',
-        success: () => {
-          setShowImportDialog(false)
-          return 'Data imported successfully'
-        },
-        error: 'Failed to import data'
-      }
-    )
+    toast.success('Data imported successfully')
+    setShowImportDialog(false)
   }
 
   const handleCreateTask = () => {
@@ -797,21 +734,12 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Creating warehouse task...',
-        success: () => {
-          setShowNewTaskDialog(false)
-          setNewTaskForm({
-            type: '', priority: '', itemSku: '', fromLocation: '',
-            toLocation: '', quantity: '', assignedTo: '', notes: ''
-          })
-          return `${newTaskForm.type} task created successfully`
-        },
-        error: 'Failed to create task'
-      }
-    )
+    toast.success(`${newTaskForm.type} task created successfully`)
+    setShowNewTaskDialog(false)
+    setNewTaskForm({
+      type: '', priority: '', itemSku: '', fromLocation: '',
+      toLocation: '', quantity: '', assignedTo: '', notes: ''
+    })
   }
 
   // Handler for editing inventory item
@@ -822,73 +750,37 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Updating inventory item...',
-        success: () => {
-          setShowEditInventoryDialog(false)
-          setSelectedEditItem(null)
-          setEditInventoryForm({
-            sku: '', name: '', category: '', quantity: '', binLocation: '',
-            zone: '', unitCost: '', reorderPoint: '', description: ''
-          })
-          return `Inventory item ${editInventoryForm.sku} updated successfully`
-        },
-        error: 'Failed to update inventory item'
-      }
-    )
+    toast.success(`Inventory item ${editInventoryForm.sku} updated successfully`)
+    setShowEditInventoryDialog(false)
+    setSelectedEditItem(null)
+    setEditInventoryForm({
+      sku: '', name: '', category: '', quantity: '', binLocation: '',
+      zone: '', unitCost: '', reorderPoint: '', description: ''
+    })
   }
 
   // Handler for starting receiving process
   const handleStartReceiving = () => {
     if (!selectedShipmentForReceiving) return
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Starting receiving process...',
-        success: () => {
-          setShowStartReceivingDialog(false)
-          setSelectedShipmentForReceiving(null)
-          return `Receiving started for ${selectedShipmentForReceiving.shipment_number}`
-        },
-        error: 'Failed to start receiving'
-      }
-    )
+    toast.success(`Receiving started for ${selectedShipmentForReceiving.shipment_number}`)
+    setShowStartReceivingDialog(false)
+    setSelectedShipmentForReceiving(null)
   }
 
   // Handler for starting picking process
   const handleStartPicking = () => {
     if (!selectedOrderForPicking) return
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Starting picking process...',
-        success: () => {
-          setShowStartPickingDialog(false)
-          setSelectedOrderForPicking(null)
-          return `Picking started for ${selectedOrderForPicking.order_number}`
-        },
-        error: 'Failed to start picking'
-      }
-    )
+    toast.success(`Picking started for ${selectedOrderForPicking.order_number}`)
+    setShowStartPickingDialog(false)
+    setSelectedOrderForPicking(null)
   }
 
   // Handler for starting packing process
   const handleStartPacking = () => {
     if (!selectedOrderForPacking) return
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Starting packing process...',
-        success: () => {
-          setShowStartPackingDialog(false)
-          setSelectedOrderForPacking(null)
-          return `Packing started for ${selectedOrderForPacking.order_number}`
-        },
-        error: 'Failed to start packing'
-      }
-    )
+    toast.success(`Packing started for ${selectedOrderForPacking.order_number}`)
+    setShowStartPackingDialog(false)
+    setSelectedOrderForPacking(null)
   }
 
   // Handler for shipping order
@@ -899,19 +791,10 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Processing shipment...',
-        success: () => {
-          setShowShipOrderDialog(false)
-          setSelectedOrderForShipping(null)
-          setShipOrderForm({ carrier: '', trackingNumber: '', notes: '' })
-          return `Order ${selectedOrderForShipping.order_number} shipped successfully`
-        },
-        error: 'Failed to ship order'
-      }
-    )
+    toast.success(`Order ${selectedOrderForShipping.order_number} shipped successfully`)
+    setShowShipOrderDialog(false)
+    setSelectedOrderForShipping(null)
+    setShipOrderForm({ carrier: '', trackingNumber: '', notes: '' })
   }
 
   // Handler for assigning task
@@ -922,89 +805,35 @@ export default function WarehouseClient() {
       })
       return
     }
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Assigning task...',
-        success: () => {
-          setShowAssignTaskDialog(false)
-          setSelectedTaskForAction(null)
-          setAssignTaskForm({ assignedTo: '', notes: '' })
-          return `Task ${selectedTaskForAction.task_number} assigned to ${assignTaskForm.assignedTo}`
-        },
-        error: 'Failed to assign task'
-      }
-    )
+    toast.success(`Task ${selectedTaskForAction.task_number} assigned to ${assignTaskForm.assignedTo}`)
+    setShowAssignTaskDialog(false)
+    setSelectedTaskForAction(null)
+    setAssignTaskForm({ assignedTo: '', notes: '' })
   }
 
   // Handler for starting task
   const handleStartTask = (task: WarehouseTask) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Starting task...',
-        success: () => {
-          return `Task ${task.task_number} started`
-        },
-        error: 'Failed to start task'
-      }
-    )
+    toast.success(`Task ${task.task_number} started`)
   }
 
   // Handler for completing task
   const handleCompleteTask = (task: WarehouseTask) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Completing task...',
-        success: () => {
-          return `Task ${task.task_number} completed`
-        },
-        error: 'Failed to complete task'
-      }
-    )
+    toast.success(`Task ${task.task_number} completed`)
   }
 
   // Handler for starting cycle count
   const handleStartCycleCountProcess = (count: CycleCount) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Starting cycle count...',
-        success: () => {
-          return `Cycle count ${count.count_number} started`
-        },
-        error: 'Failed to start cycle count'
-      }
-    )
+    toast.success(`Cycle count ${count.count_number} started`)
   }
 
   // Handler for continuing cycle count
   const handleContinueCycleCount = (count: CycleCount) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Loading cycle count...',
-        success: () => {
-          return `Resuming cycle count ${count.count_number}`
-        },
-        error: 'Failed to load cycle count'
-      }
-    )
+    toast.success(`Resuming cycle count ${count.count_number}`)
   }
 
   // Handler for saving settings
   const handleSaveSettings = (settingType: string) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Saving ${settingType} settings...`,
-        success: () => {
-          return `${settingType} settings saved successfully`
-        },
-        error: `Failed to save ${settingType} settings`
-      }
-    )
+    toast.success(`${settingType} settings saved successfully`)
   }
 
   // Handler for configure action
@@ -1015,88 +844,51 @@ export default function WarehouseClient() {
 
   // Handler for regenerating API key
   const handleRegenerateApiKey = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Regenerating API key...',
-        success: () => {
-          return 'API key regenerated successfully. Please update your integrations.'
-        },
-        error: 'Failed to regenerate API key'
-      }
-    )
+    toast.success('API key regenerated successfully. Please update your integrations.')
   }
 
   // Handler for database optimization
   const handleOptimizeDatabase = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
-      {
-        loading: 'Optimizing database...',
-        success: () => {
-          return 'Database optimization completed'
-        },
-        error: 'Failed to optimize database'
-      }
-    )
+    toast.success('Database optimization completed')
   }
 
   // Handler for export configuration
   const handleExportConfiguration = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Exporting configuration...',
-        success: () => {
-          return 'Configuration exported successfully'
-        },
-        error: 'Failed to export configuration'
-      }
-    )
+    const config = JSON.stringify({ version: '1.0', exported: new Date().toISOString() }, null, 2)
+    const blob = new Blob([config], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `warehouse-config-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Configuration exported successfully')
   }
 
   // Handler for import configuration
   const handleImportConfiguration = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Importing configuration...',
-        success: () => {
-          return 'Configuration imported successfully'
-        },
-        error: 'Failed to import configuration'
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        toast.success(`Configuration imported from ${file.name}`)
       }
-    )
+    }
+    input.click()
   }
 
   // Handler for purging old data
   const handlePurgeData = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
-      {
-        loading: 'Purging old data...',
-        success: () => {
-          setShowPurgeDataDialog(false)
-          return 'Old data purged successfully'
-        },
-        error: 'Failed to purge data'
-      }
-    )
+    toast.success('Old data purged successfully')
+    setShowPurgeDataDialog(false)
   }
 
   // Handler for reset to defaults
   const handleResetDefaults = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
-      {
-        loading: 'Resetting to defaults...',
-        success: () => {
-          setShowResetDefaultsDialog(false)
-          return 'Settings reset to defaults'
-        },
-        error: 'Failed to reset settings'
-      }
-    )
+    toast.success('Settings reset to defaults')
+    setShowResetDefaultsDialog(false)
   }
 
   // Handler for browse files

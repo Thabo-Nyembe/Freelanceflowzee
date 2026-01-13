@@ -755,13 +755,8 @@ export default function SurveysClient() {
   }
 
   // Handler: Export Data
-  const handleExportData = async () => {
-    setIsExporting(true)
-    try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
-      // Generate mock export data
+  const handleExportData = () => {
+    // Generate mock export data
       const exportData = {
         surveys: combinedSurveys.map(s => ({
           id: s.id,
@@ -809,31 +804,18 @@ export default function SurveysClient() {
 
       toast.success(`Survey data exported as ${exportFormat.toUpperCase()}`)
       setShowExportDialog(false)
-    } catch (error) {
-      toast.error('Failed to export data')
-    } finally {
-      setIsExporting(false)
-    }
   }
 
   // Handler: Import Surveys
-  const handleImportSurveys = async () => {
+  const handleImportSurveys = () => {
     if (!importFile) {
       toast.error('Please select a file to import')
       return
     }
-    setIsImporting(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success(`Successfully imported surveys from ${importFile.name}`)
-      setShowImportDialog(false)
-      setImportFile(null)
-      refetch()
-    } catch (error) {
-      toast.error('Failed to import surveys')
-    } finally {
-      setIsImporting(false)
-    }
+    toast.success(`Successfully imported surveys from ${importFile.name}`)
+    setShowImportDialog(false)
+    setImportFile(null)
+    refetch()
   }
 
   // Handler: Open Edit Dialog
@@ -872,21 +854,16 @@ export default function SurveysClient() {
   }
 
   // Handler: Create Template
-  const handleCreateTemplate = async () => {
+  const handleCreateTemplate = () => {
     if (!newTemplateName.trim()) {
       toast.error('Please enter a template name')
       return
     }
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success(`Template "${newTemplateName}" created successfully!`)
-      setShowCreateTemplateDialog(false)
-      setNewTemplateName('')
-      setNewTemplateDescription('')
-      setNewTemplateCategory('Customer Feedback')
-    } catch (error) {
-      toast.error('Failed to create template')
-    }
+    toast.success(`Template "${newTemplateName}" created successfully!`)
+    setShowCreateTemplateDialog(false)
+    setNewTemplateName('')
+    setNewTemplateDescription('')
+    setNewTemplateCategory('Customer Feedback')
   }
 
   // Handler: Use Template
@@ -917,41 +894,28 @@ export default function SurveysClient() {
   }
 
   // Handler: Upload Logo
-  const handleUploadLogo = async () => {
+  const handleUploadLogo = () => {
     if (!logoFile) {
       toast.error('Please select a logo file')
       return
     }
-    setIsUploadingLogo(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('Logo uploaded successfully!')
-      setShowUploadLogoDialog(false)
-      setLogoFile(null)
-    } catch (error) {
-      toast.error('Failed to upload logo')
-    } finally {
-      setIsUploadingLogo(false)
-    }
+    toast.success('Logo uploaded successfully!')
+    setShowUploadLogoDialog(false)
+    setLogoFile(null)
   }
 
   // Handler: Integration Action
-  const handleIntegrationAction = async (action: 'connect' | 'disconnect' | 'manage') => {
+  const handleIntegrationAction = (action: 'connect' | 'disconnect' | 'manage') => {
     if (!selectedIntegration) return
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      if (action === 'connect') {
-        toast.success(`Connected to ${selectedIntegration.name}!`)
-      } else if (action === 'disconnect') {
-        toast.success(`Disconnected from ${selectedIntegration.name}`)
-      } else {
-        toast.success(`${selectedIntegration.name} settings updated`)
-      }
-      setShowIntegrationDialog(false)
-      setSelectedIntegration(null)
-    } catch (error) {
-      toast.error(`Failed to ${action} ${selectedIntegration.name}`)
+    if (action === 'connect') {
+      toast.success(`Connected to ${selectedIntegration.name}!`)
+    } else if (action === 'disconnect') {
+      toast.success(`Disconnected from ${selectedIntegration.name}`)
+    } else {
+      toast.success(`${selectedIntegration.name} settings updated`)
     }
+    setShowIntegrationDialog(false)
+    setSelectedIntegration(null)
   }
 
   // Handler: Copy to Clipboard
@@ -964,52 +928,34 @@ export default function SurveysClient() {
   }
 
   // Handler: Delete All Responses
-  const handleDeleteAllResponses = async () => {
-    setIsDeletingResponses(true)
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('All responses deleted successfully')
-      setShowDeleteResponsesDialog(false)
-      refetch()
-    } catch (error) {
-      toast.error('Failed to delete responses')
-    } finally {
-      setIsDeletingResponses(false)
-    }
+  const handleDeleteAllResponses = () => {
+    toast.success('All responses deleted successfully')
+    setShowDeleteResponsesDialog(false)
+    refetch()
   }
 
   // Handler: Delete Account
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (deleteAccountConfirm !== 'DELETE') {
       toast.error('Please type DELETE to confirm')
       return
     }
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success('Account deletion initiated. You will be logged out.')
-      setShowDeleteAccountDialog(false)
-      setDeleteAccountConfirm('')
-    } catch (error) {
-      toast.error('Failed to delete account')
-    }
+    toast.success('Account deletion initiated. You will be logged out.')
+    setShowDeleteAccountDialog(false)
+    setDeleteAccountConfirm('')
   }
 
   // Handler: Send Email Share
-  const handleSendEmailShare = async () => {
+  const handleSendEmailShare = () => {
     if (!shareEmails.trim()) {
       toast.error('Please enter at least one email address')
       return
     }
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      const emailCount = shareEmails.split(',').filter(e => e.trim()).length
-      toast.success(`Survey shared with ${emailCount} recipient(s)!`)
-      setShowEmailShareDialog(false)
-      setShareEmails('')
-      setShareMessage('')
-    } catch (error) {
-      toast.error('Failed to send share emails')
-    }
+    const emailCount = shareEmails.split(',').filter(e => e.trim()).length
+    toast.success(`Survey shared with ${emailCount} recipient(s)!`)
+    setShowEmailShareDialog(false)
+    setShareEmails('')
+    setShareMessage('')
   }
 
   // Handler: Preview Survey
@@ -3277,10 +3223,7 @@ export default function SurveysClient() {
                       <span className="font-semibold">{invoice.amount}</span>
                       <Badge className="bg-green-100 text-green-700">{invoice.status}</Badge>
                       <Button variant="ghost" size="sm" onClick={() => {
-                        toast.loading('Downloading invoice...', { id: 'download-invoice' })
-                        setTimeout(() => {
-                          toast.success('Invoice downloaded!', { id: 'download-invoice' })
-                        }, 1000)
+                        toast.success('Invoice downloaded!', { id: 'download-invoice' })
                       }}>
                         <Download className="w-4 h-4" />
                       </Button>
@@ -3341,11 +3284,8 @@ export default function SurveysClient() {
                     <li>API access</li>
                   </ul>
                   <Button className="w-full mt-4" onClick={() => {
-                    toast.loading('Processing upgrade...', { id: 'plan-upgrade' })
-                    setTimeout(() => {
-                      toast.success('Plan upgraded successfully!', { id: 'plan-upgrade' })
-                      setShowUpgradeDialog(false)
-                    }, 1500)
+                    toast.success('Plan upgraded successfully!', { id: 'plan-upgrade' })
+                    setShowUpgradeDialog(false)
                   }}>
                     Upgrade
                   </Button>
@@ -3509,10 +3449,7 @@ export default function SurveysClient() {
               </p>
               <div className="flex gap-2 justify-center">
                 <Button variant="outline" onClick={() => {
-                  toast.loading('Generating PNG...', { id: 'download-qr' })
-                  setTimeout(() => {
-                    toast.success('QR code PNG downloaded!', { id: 'download-qr' })
-                  }, 1000)
+                  toast.success('QR code PNG downloaded!', { id: 'download-qr' })
                 }}>
                   <Download className="w-4 h-4 mr-2" />
                   Download PNG

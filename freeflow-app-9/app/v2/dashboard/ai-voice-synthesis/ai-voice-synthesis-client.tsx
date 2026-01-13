@@ -107,34 +107,13 @@ const aiVoiceSynthesisActivities = [
 
 const aiVoiceSynthesisQuickActions = [
   { id: '1', label: 'New Synthesis', icon: 'Plus', shortcut: 'N', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
-      {
-        loading: 'Initializing AI voice synthesis...',
-        success: 'New voice synthesis session ready',
-        error: 'Failed to initialize synthesis'
-      }
-    )
+    toast.success('New voice synthesis session ready')
   }},
   { id: '2', label: 'Export Audio', icon: 'Download', shortcut: 'E', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
-      {
-        loading: 'Preparing audio export...',
-        success: 'Audio files exported successfully',
-        error: 'Failed to export audio'
-      }
-    )
+    toast.success('Audio files exported successfully')
   }},
   { id: '3', label: 'Voice Settings', icon: 'Settings', shortcut: 'S', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Loading voice synthesis settings...',
-        success: 'Voice settings panel opened',
-        error: 'Failed to load settings'
-      }
-    )
+    toast.success('Voice settings panel opened')
   }},
 ]
 
@@ -315,8 +294,6 @@ export default function AiVoiceSynthesisClient() {
       try {
         const { createVoiceSynthesis, incrementVoiceUsage, trackVoiceAnalytics } = await import('@/lib/ai-voice-queries')
 
-        // Simulate synthesis processing
-        await new Promise(resolve => setTimeout(resolve, 2000))
         const processingTime = (Date.now() - startTime) / 1000
 
         // Create synthesis record
@@ -370,12 +347,10 @@ export default function AiVoiceSynthesisClient() {
       }
     } else {
       // Fallback for non-authenticated users
-      setTimeout(() => {
-        setIsSynthesizing(false)
-        toast.success('Voice synthesized successfully', {
-          description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
-        })
-      }, 2000)
+      setIsSynthesizing(false)
+      toast.success('Voice synthesized successfully', {
+        description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
+      })
     }
   }
 
@@ -383,7 +358,6 @@ export default function AiVoiceSynthesisClient() {
     setCopiedSSML(true)
     navigator.clipboard.writeText(text)
     toast.success('Text copied to clipboard')
-    setTimeout(() => setCopiedSSML(false), 2000)
   }
 
   // Reset voice settings to defaults
@@ -414,12 +388,8 @@ export default function AiVoiceSynthesisClient() {
         description: `${selectedVoice.displayName} - ${text.substring(0, 50)}...`
       })
       logger.info('Audio preview started', { voice: selectedVoice.name })
-      // Simulate audio playback duration
-      setTimeout(() => {
-        setIsPlaying(false)
-        toast.success('Audio preview completed')
-      }, Math.min(estimatedDuration * 1000, 5000))
     } else {
+      setIsPlaying(false)
       toast.info('Audio preview paused')
       logger.info('Audio preview paused')
     }
@@ -438,39 +408,25 @@ export default function AiVoiceSynthesisClient() {
       description: `${voice.language} - ${voice.gender}`
     })
     logger.info('Voice preview started', { voiceId: voice.id, voiceName: voice.name })
-
-    // Simulate voice sample playback
-    setTimeout(() => {
-      setPlayingVoiceId(null)
-    }, 3000)
   }
 
   // Create new voice
-  const handleCreateVoice = async () => {
+  const handleCreateVoice = () => {
     if (!newVoiceName.trim()) {
       toast.error('Please enter a voice name')
       return
     }
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Creating custom voice...',
-        success: () => {
-          logger.info('Custom voice created', { name: newVoiceName, gender: newVoiceGender })
-          setCreateVoiceDialogOpen(false)
-          setNewVoiceName('')
-          setNewVoiceDescription('')
-          setNewVoiceGender('neutral')
-          return `Voice "${newVoiceName}" created successfully`
-        },
-        error: 'Failed to create voice'
-      }
-    )
+    logger.info('Custom voice created', { name: newVoiceName, gender: newVoiceGender })
+    toast.success(`Voice "${newVoiceName}" created successfully`)
+    setCreateVoiceDialogOpen(false)
+    setNewVoiceName('')
+    setNewVoiceDescription('')
+    setNewVoiceGender('neutral')
   }
 
   // Clone voice from audio sample
-  const handleCloneVoice = async () => {
+  const handleCloneVoice = () => {
     if (!cloneVoiceFile) {
       toast.error('Please upload an audio sample')
       return
@@ -480,75 +436,39 @@ export default function AiVoiceSynthesisClient() {
       return
     }
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3500)),
-      {
-        loading: 'Analyzing audio and cloning voice...',
-        success: () => {
-          logger.info('Voice cloned successfully', { name: cloneVoiceName, fileName: cloneVoiceFile.name })
-          setCloneVoiceDialogOpen(false)
-          setCloneVoiceFile(null)
-          setCloneVoiceName('')
-          return `Voice "${cloneVoiceName}" cloned from audio sample`
-        },
-        error: 'Failed to clone voice'
-      }
-    )
+    logger.info('Voice cloned successfully', { name: cloneVoiceName, fileName: cloneVoiceFile.name })
+    toast.success(`Voice "${cloneVoiceName}" cloned from audio sample`)
+    setCloneVoiceDialogOpen(false)
+    setCloneVoiceFile(null)
+    setCloneVoiceName('')
   }
 
   // Export audio
-  const handleExportAudio = async () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
-      {
-        loading: `Exporting audio as ${exportFormat.toUpperCase()} (${exportQuality} quality)...`,
-        success: () => {
-          logger.info('Audio exported', { format: exportFormat, quality: exportQuality })
-          setExportAudioDialogOpen(false)
-          return `Audio exported as ${exportFormat.toUpperCase()} successfully`
-        },
-        error: 'Failed to export audio'
-      }
-    )
+  const handleExportAudio = () => {
+    logger.info('Audio exported', { format: exportFormat, quality: exportQuality })
+    toast.success(`Audio exported as ${exportFormat.toUpperCase()} successfully`)
+    setExportAudioDialogOpen(false)
   }
 
   // Save settings
   const handleSaveSettings = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Saving settings...',
-        success: () => {
-          logger.info('Settings saved', { speed: speed[0], pitch: pitch[0], volume: volume[0] })
-          setSettingsDialogOpen(false)
-          return 'Settings saved successfully'
-        },
-        error: 'Failed to save settings'
-      }
-    )
+    logger.info('Settings saved', { speed: speed[0], pitch: pitch[0], volume: volume[0] })
+    toast.success('Settings saved successfully')
+    setSettingsDialogOpen(false)
   }
 
   // Create new project
-  const handleCreateProject = async () => {
+  const handleCreateProject = () => {
     if (!newProjectName.trim()) {
       toast.error('Please enter a project name')
       return
     }
 
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: 'Creating new project...',
-        success: () => {
-          logger.info('Project created', { name: newProjectName })
-          setNewProjectDialogOpen(false)
-          setNewProjectName('')
-          setNewProjectDescription('')
-          return `Project "${newProjectName}" created successfully`
-        },
-        error: 'Failed to create project'
-      }
-    )
+    logger.info('Project created', { name: newProjectName })
+    toast.success(`Project "${newProjectName}" created successfully`)
+    setNewProjectDialogOpen(false)
+    setNewProjectName('')
+    setNewProjectDescription('')
   }
 
   // Play project audio
@@ -562,26 +482,12 @@ export default function AiVoiceSynthesisClient() {
     setPlayingProjectId(projectId)
     toast.info(`Playing: ${projectName}`)
     logger.info('Project playback started', { projectId, projectName })
-
-    // Simulate playback
-    setTimeout(() => {
-      setPlayingProjectId(null)
-    }, 5000)
   }
 
   // Download project
   const handleDownloadProject = (projectId: number, projectName: string) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: `Preparing download for ${projectName}...`,
-        success: () => {
-          logger.info('Project downloaded', { projectId, projectName })
-          return `${projectName} downloaded successfully`
-        },
-        error: 'Failed to download project'
-      }
-    )
+    logger.info('Project downloaded', { projectId, projectName })
+    toast.success(`${projectName} downloaded successfully`)
   }
 
   // Share project

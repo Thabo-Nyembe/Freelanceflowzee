@@ -648,7 +648,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         phone: editContactForm.phone || null,
         company: editContactForm.company || null,
         notes: editContactForm.notes || null,
-        status: editContactForm.status as 'active' | 'inactive' | 'prospect' | 'archived',
+        status: editContactForm.status as 'active' | 'inactive' | 'prospect' | 'lead' | 'churned',
         metadata: {
           ...((editingCustomer as any).metadata || {}),
           first_name: editContactForm.firstName,
@@ -695,8 +695,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const handleStatusChange = async (customerId: string, newStatus: CustomerStatus) => {
     try {
       // Map CustomerStatus to Client status
-      const clientStatus = ['active', 'inactive', 'prospect', 'archived'].includes(newStatus)
-        ? newStatus as 'active' | 'inactive' | 'prospect' | 'archived'
+      const clientStatus = ['active', 'inactive', 'prospect', 'lead', 'churned'].includes(newStatus)
+        ? newStatus as 'active' | 'inactive' | 'prospect' | 'lead' | 'churned'
         : 'active'
       const result = await updateCustomer(customerId, { status: clientStatus })
       if (result) {
@@ -712,12 +712,12 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const handleSegmentChange = async (customerId: string, newSegment: CustomerSegment) => {
     try {
       // Map segment to client status (clients table uses status field)
-      const statusMap: Record<CustomerSegment, 'active' | 'inactive' | 'prospect' | 'archived'> = {
+      const statusMap: Record<CustomerSegment, 'active' | 'inactive' | 'prospect' | 'lead' | 'churned'> = {
         'vip': 'active',
         'active': 'active',
-        'new': 'active',
+        'new': 'lead',
         'inactive': 'inactive',
-        'churned': 'archived',
+        'churned': 'churned',
         'at_risk': 'active',
         'prospect': 'prospect'
       }

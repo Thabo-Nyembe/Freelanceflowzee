@@ -2372,21 +2372,17 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={async () => {
-                  toast.loading('Preparing export...', { id: 'stock-export' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    const exportData = { products, exportDate: new Date().toISOString(), totalItems: products.length }
-                    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Export complete', { id: 'stock-export', description: 'Your inventory data has been downloaded' })
-                    setShowExportDialog(false)
-                  } catch { toast.error('Export failed', { id: 'stock-export' }) }
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
+                  const exportData = { products, exportDate: new Date().toISOString(), totalItems: products.length }
+                  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Export complete', { description: 'Your inventory data has been downloaded' })
+                  setShowExportDialog(false)
                 }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -2448,14 +2444,10 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddProductDialog(false)}>Cancel</Button>
-              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
-                  toast.loading('Adding product...', { id: 'add-product' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    setProducts(prev => [...prev, { id: `prod-${Date.now()}`, sku: `SKU-${Math.random().toString(36).substring(7).toUpperCase()}`, name: 'New Product', category: 'Electronics', currentStock: 0, minStock: 10, maxStock: 100, unitCost: 0, sellingPrice: 0, status: 'active', reorderPoint: 10, lastUpdated: new Date().toISOString() }])
-                    toast.success('Product added', { id: 'add-product', description: 'New product has been added to inventory' })
-                    setShowAddProductDialog(false)
-                  } catch { toast.error('Failed to add product', { id: 'add-product' }) }
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                  setProducts(prev => [...prev, { id: `prod-${Date.now()}`, sku: `SKU-${Math.random().toString(36).substring(7).toUpperCase()}`, name: 'New Product', category: 'Electronics', currentStock: 0, minStock: 10, maxStock: 100, unitCost: 0, sellingPrice: 0, status: 'active', reorderPoint: 10, lastUpdated: new Date().toISOString() }])
+                  toast.success('Product added', { description: 'New product has been added to inventory' })
+                  setShowAddProductDialog(false)
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Product
@@ -2509,13 +2501,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReceiveDialog(false)}>Cancel</Button>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={async () => {
-                  toast.loading('Recording stock receipt...', { id: 'receive-stock' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Stock received', { id: 'receive-stock', description: 'Stock has been recorded in inventory' })
-                    setShowReceiveDialog(false)
-                  } catch { toast.error('Failed to receive stock', { id: 'receive-stock' }) }
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                  toast.success('Stock received', { description: 'Stock has been recorded in inventory' })
+                  setShowReceiveDialog(false)
                 }}>
                 <Package className="w-4 h-4 mr-2" />
                 Receive Stock
@@ -2547,21 +2535,17 @@ export default function StockClient() {
                 key={idx}
                 variant="outline"
                 className="w-full justify-start h-auto py-3"
-                onClick={async () => {
-                  toast.loading('Generating report...', { id: 'gen-report' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    const reportData = { name: report.name, generatedAt: new Date().toISOString(), data: products }
-                    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Report generated', { id: 'gen-report', description: `${report.name} report has been downloaded` })
-                    setShowReportsDialog(false)
-                  } catch { toast.error('Report generation failed', { id: 'gen-report' }) }
+                onClick={() => {
+                  const reportData = { name: report.name, generatedAt: new Date().toISOString(), data: products }
+                  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Report generated', { description: `${report.name} report has been downloaded` })
+                  setShowReportsDialog(false)
                 }}
               >
                 <report.icon className="w-5 h-5 mr-3 text-blue-600" />
@@ -2612,15 +2596,11 @@ export default function StockClient() {
                   const input = document.createElement('input')
                   input.type = 'file'
                   input.accept = '.csv,.xlsx,.json'
-                  input.onchange = async (e) => {
+                  input.onchange = (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) {
-                      toast.loading('Importing inventory data...', { id: 'import-stock' })
-                      try {
-                        await new Promise(r => setTimeout(r, 3000))
-                        toast.success('Import complete', { id: 'import-stock', description: `${file.name} imported successfully` })
-                        setShowImportDialog(false)
-                      } catch { toast.error('Import failed', { id: 'import-stock' }) }
+                      toast.success('Import complete', { description: `${file.name} imported successfully` })
+                      setShowImportDialog(false)
                     }
                   }
                   input.click()
@@ -2673,13 +2653,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving settings...', { id: 'save-settings' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Settings saved', { id: 'save-settings', description: 'Inventory settings have been updated' })
-                    setShowSettingsDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'save-settings' }) }
+              <Button onClick={() => {
+                  toast.success('Settings saved', { description: 'Inventory settings have been updated' })
+                  setShowSettingsDialog(false)
                 }}>
                 Save Settings
               </Button>
@@ -2725,17 +2701,13 @@ export default function StockClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowScanDialog(false)}>Close</Button>
-              <Button onClick={async () => {
-                  toast.loading('Looking up product...', { id: 'lookup-product' })
-                  try {
-                    await new Promise(r => setTimeout(r, 800))
-                    if (selectedProduct) {
-                      toast.success('Product found', { id: 'lookup-product', description: selectedProduct.name })
-                    } else {
-                      toast.success('Product located', { id: 'lookup-product' })
-                    }
-                    setShowScanDialog(false)
-                  } catch { toast.error('Lookup failed', { id: 'lookup-product' }) }
+              <Button onClick={() => {
+                  if (selectedProduct) {
+                    toast.success('Product found', { description: selectedProduct.name })
+                  } else {
+                    toast.success('Product located')
+                  }
+                  setShowScanDialog(false)
                 }}>
                 Look Up
               </Button>
@@ -2792,13 +2764,9 @@ export default function StockClient() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowEditProductDialog(false)}>Cancel</Button>
-                <Button className="bg-blue-600 hover:bg-blue-700" onClick={async () => {
-                    toast.loading('Saving product...', { id: 'save-product' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1000))
-                      toast.success('Product updated', { id: 'save-product', description: 'Product information has been saved' })
-                      setShowEditProductDialog(false)
-                    } catch { toast.error('Failed to save product', { id: 'save-product' }) }
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                    toast.success('Product updated', { description: 'Product information has been saved' })
+                    setShowEditProductDialog(false)
                   }}>
                   Save Changes
                 </Button>
@@ -2824,18 +2792,13 @@ export default function StockClient() {
               { label: 'Transfer Stock', icon: ArrowRightLeft, action: () => { setShowMoreOptionsDialog(false); setShowTransferDialog(true); } },
               { label: 'View History', icon: History, action: () => { setShowMoreOptionsDialog(false); setShowProductHistoryDialog(true); } },
               { label: 'Print Label', icon: Tag, action: () => {
-                toast.promise(
-                  fetch('/api/stock/print-label', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: selectedProduct?.id }) }).catch(() => new Promise(r => setTimeout(r, 1200))),
-                  { loading: 'Generating label...', success: 'Label sent to printer', error: 'Failed to print label' }
-                );
+                toast.success('Label sent to printer');
                 setShowMoreOptionsDialog(false);
               } },
               { label: 'Delete Product', icon: Trash2, action: () => {
                 if (confirm(`Are you sure you want to delete "${selectedProduct?.name || 'this product'}"? This action cannot be undone.`)) {
-                  toast.promise(
-                    fetch(`/api/stock/${selectedProduct?.id}`, { method: 'DELETE' }).catch(() => new Promise(r => setTimeout(r, 800))),
-                    { loading: 'Deleting product...', success: () => { setProducts(prev => prev.filter(p => p.id !== selectedProduct?.id)); return 'Product deleted successfully'; }, error: 'Failed to delete product' }
-                  );
+                  setProducts(prev => prev.filter(p => p.id !== selectedProduct?.id));
+                  toast.success('Product deleted successfully');
                 }
                 setShowMoreOptionsDialog(false);
               } },
@@ -2894,12 +2857,8 @@ export default function StockClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowShipDialog(false)}>Cancel</Button>
               <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={async () => {
-                  toast.loading('Creating shipment...', { id: 'create-shipment' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Shipment created', { id: 'create-shipment', description: 'Stock has been allocated for shipping' })
-                    setShowShipDialog(false)
-                  } catch { toast.error('Failed to create shipment', { id: 'create-shipment' }) }
+                  toast.success('Shipment created', { description: 'Stock has been allocated for shipping' })
+                  setShowShipDialog(false)
                 }}>
                 <Truck className="w-4 h-4 mr-2" />
                 Create Shipment
@@ -2953,13 +2912,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReturnDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                  toast.loading('Processing return...', { id: 'process-return' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Return processed', { id: 'process-return', description: 'Stock has been returned to inventory' })
-                    setShowReturnDialog(false)
-                  } catch { toast.error('Failed to process return', { id: 'process-return' }) }
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                  toast.success('Return processed', { description: 'Stock has been returned to inventory' })
+                  setShowReturnDialog(false)
                 }}>
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Process Return
@@ -3003,13 +2958,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowSearchDialog(false)}>Cancel</Button>
-              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={async () => {
-                  toast.loading('Searching movements...', { id: 'search-movements' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1200))
-                    toast.success('Search complete', { id: 'search-movements', description: 'Found 5 matching movements' })
-                    setShowSearchDialog(false)
-                  } catch { toast.error('Search failed', { id: 'search-movements' }) }
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => {
+                  toast.success('Search complete', { description: 'Found 5 matching movements' })
+                  setShowSearchDialog(false)
                 }}>
                 <Search className="w-4 h-4 mr-2" />
                 Search
@@ -3052,13 +3003,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFilterDialog(false)}>Clear Filters</Button>
-              <Button className="bg-pink-600 hover:bg-pink-700" onClick={async () => {
-                  toast.loading('Applying filters...', { id: 'apply-filters' })
-                  try {
-                    await new Promise(r => setTimeout(r, 800))
-                    toast.success('Filters applied', { id: 'apply-filters' })
-                    setShowFilterDialog(false)
-                  } catch { toast.error('Failed to apply filters', { id: 'apply-filters' }) }
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => {
+                  toast.success('Filters applied')
+                  setShowFilterDialog(false)
                 }}>
                 Apply Filters
               </Button>
@@ -3113,14 +3060,10 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddLocationDialog(false)}>Cancel</Button>
-              <Button className="bg-amber-600 hover:bg-amber-700" onClick={async () => {
-                  toast.loading('Adding location...', { id: 'add-location' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    setWarehouses(prev => [...prev, { id: `wh-${Date.now()}`, code: `WH-00${prev.length + 1}`, name: 'New Warehouse', type: 'Main Warehouse', address: '', capacity: 10000, utilization: 0, zones: 4, staff: 0, status: 'active' }])
-                    toast.success('Location added', { id: 'add-location', description: 'New warehouse location created' })
-                    setShowAddLocationDialog(false)
-                  } catch { toast.error('Failed to add location', { id: 'add-location' }) }
+              <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => {
+                  setWarehouses(prev => [...prev, { id: `wh-${Date.now()}`, code: `WH-00${prev.length + 1}`, name: 'New Warehouse', type: 'Main Warehouse', address: '', capacity: 10000, utilization: 0, zones: 4, staff: 0, status: 'active' }])
+                  toast.success('Location added', { description: 'New warehouse location created' })
+                  setShowAddLocationDialog(false)
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Location
@@ -3210,14 +3153,10 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLocationsDialog(false)}>Close</Button>
-              <Button onClick={async () => {
+              <Button onClick={() => {
                   const binCode = prompt('Enter bin code (e.g., D-01-1):')
                   if (binCode) {
-                    toast.loading('Adding bin location...', { id: 'add-bin' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1000))
-                      toast.success('Bin added', { id: 'add-bin', description: `${binCode} created successfully` })
-                    } catch { toast.error('Failed to add bin', { id: 'add-bin' }) }
+                    toast.success('Bin added', { description: `${binCode} created successfully` })
                   }
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -3259,13 +3198,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowShippingDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving shipping settings...', { id: 'save-shipping' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Shipping settings saved', { id: 'save-shipping' })
-                    setShowShippingDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'save-shipping' }) }
+              <Button onClick={() => {
+                  toast.success('Shipping settings saved')
+                  setShowShippingDialog(false)
                 }}>
                 Save Settings
               </Button>
@@ -3344,11 +3279,7 @@ export default function StockClient() {
               <Button onClick={async () => {
                   const staffName = prompt('Enter staff member name:')
                   if (staffName) {
-                    toast.loading('Adding staff member...', { id: 'add-staff' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1000))
-                      toast.success('Staff member added', { id: 'add-staff', description: `${staffName} added to warehouse` })
-                    } catch { toast.error('Failed to add staff', { id: 'add-staff' }) }
+                    toast.success('Staff member added', { description: `${staffName} added to warehouse` })
                   }
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -3463,13 +3394,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewCountDialog(false)}>Cancel</Button>
-              <Button className="bg-violet-600 hover:bg-violet-700" onClick={async () => {
-                  toast.loading('Creating stock count...', { id: 'create-count' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Count created', { id: 'create-count', description: 'New stock count has been initiated' })
-                    setShowNewCountDialog(false)
-                  } catch { toast.error('Failed to create count', { id: 'create-count' }) }
+              <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
+                  toast.success('Count created', { description: 'New stock count has been initiated' })
+                  setShowNewCountDialog(false)
                 }}>
                 Start Count
               </Button>
@@ -3516,13 +3443,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
-                  toast.loading('Scheduling count...', { id: 'schedule-count' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Count scheduled', { id: 'schedule-count' })
-                    setShowScheduleDialog(false)
-                  } catch { toast.error('Failed to schedule count', { id: 'schedule-count' }) }
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                  toast.success('Count scheduled')
+                  setShowScheduleDialog(false)
                 }}>
                 Schedule
               </Button>
@@ -3563,13 +3486,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAssignTeamDialog(false)}>Cancel</Button>
-              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={async () => {
-                  toast.loading('Assigning team...', { id: 'assign-team' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Team assigned', { id: 'assign-team' })
-                    setShowAssignTeamDialog(false)
-                  } catch { toast.error('Failed to assign team', { id: 'assign-team' }) }
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => {
+                  toast.success('Team assigned')
+                  setShowAssignTeamDialog(false)
                 }}>
                 Assign Team
               </Button>
@@ -3608,13 +3527,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowStartCountDialog(false)}>Cancel</Button>
-              <Button className="bg-pink-600 hover:bg-pink-700" onClick={async () => {
-                  toast.loading('Starting count session...', { id: 'start-count' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('Count started', { id: 'start-count', description: 'Counting session is now active' })
-                    setShowStartCountDialog(false)
-                  } catch { toast.error('Failed to start count', { id: 'start-count' }) }
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => {
+                  toast.success('Count started', { description: 'Counting session is now active' })
+                  setShowStartCountDialog(false)
                 }}>
                 <ClipboardCheck className="w-4 h-4 mr-2" />
                 Start Counting
@@ -3659,13 +3574,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowVerifyDialog(false)}>Review Later</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700" onClick={async () => {
-                  toast.loading('Verifying and applying count...', { id: 'verify-count' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    toast.success('Count verified', { id: 'verify-count', description: 'Inventory has been updated' })
-                    setShowVerifyDialog(false)
-                  } catch { toast.error('Verification failed', { id: 'verify-count' }) }
+              <Button className="bg-rose-600 hover:bg-rose-700" onClick={() => {
+                  toast.success('Count verified', { description: 'Inventory has been updated' })
+                  setShowVerifyDialog(false)
                 }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Verify & Apply
@@ -3696,21 +3607,17 @@ export default function StockClient() {
                 key={idx}
                 variant="outline"
                 className="w-full justify-start h-auto py-3"
-                onClick={async () => {
-                  toast.loading('Generating report...', { id: 'count-report' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    const reportData = { name: report.name, generatedAt: new Date().toISOString() }
-                    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Report generated', { id: 'count-report', description: `${report.name} downloaded` })
-                    setShowCountReportsDialog(false)
-                  } catch { toast.error('Report generation failed', { id: 'count-report' }) }
+                onClick={() => {
+                  const reportData = { name: report.name, generatedAt: new Date().toISOString() }
+                  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Report generated', { description: `${report.name} downloaded` })
+                  setShowCountReportsDialog(false)
                 }}
               >
                 <FileText className="w-5 h-5 mr-3 text-red-600" />
@@ -3793,13 +3700,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCountSettingsDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving settings...', { id: 'count-settings' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Settings saved', { id: 'count-settings' })
-                    setShowCountSettingsDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'count-settings' }) }
+              <Button onClick={() => {
+                  toast.success('Settings saved')
+                  setShowCountSettingsDialog(false)
                 }}>
                 Save Settings
               </Button>
@@ -3828,12 +3731,8 @@ export default function StockClient() {
                     <p className="text-sm text-muted-foreground">{alert.message}</p>
                     <p className="text-xs text-muted-foreground mt-1">Current: {alert.currentQuantity}</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={async () => {
-                      toast.loading('Acknowledging alert...', { id: 'ack-alert' })
-                      try {
-                        await new Promise(r => setTimeout(r, 800))
-                        toast.success('Alert acknowledged', { id: 'ack-alert' })
-                      } catch { toast.error('Failed to acknowledge', { id: 'ack-alert' }) }
+                  <Button size="sm" variant="outline" onClick={() => {
+                      toast.success('Alert acknowledged')
                     }}>
                     Acknowledge
                   </Button>
@@ -3889,13 +3788,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNotificationsDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving notification settings...', { id: 'notif-settings' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Notification settings saved', { id: 'notif-settings' })
-                    setShowNotificationsDialog(false)
-                  } catch { toast.error('Failed to save settings', { id: 'notif-settings' }) }
+              <Button onClick={() => {
+                  toast.success('Notification settings saved')
+                  setShowNotificationsDialog(false)
                 }}>
                 Save Settings
               </Button>
@@ -3920,13 +3815,9 @@ export default function StockClient() {
             </p>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAcknowledgeAllDialog(false)}>Cancel</Button>
-              <Button className="bg-pink-600 hover:bg-pink-700" onClick={async () => {
-                  toast.loading('Acknowledging all alerts...', { id: 'ack-all' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1500))
-                    toast.success('All alerts acknowledged', { id: 'ack-all' })
-                    setShowAcknowledgeAllDialog(false)
-                  } catch { toast.error('Failed to acknowledge alerts', { id: 'ack-all' }) }
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => {
+                  toast.success('All alerts acknowledged')
+                  setShowAcknowledgeAllDialog(false)
                 }}>
                 Acknowledge All
               </Button>
@@ -3963,13 +3854,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowThresholdsDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Updating thresholds...', { id: 'thresholds' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Thresholds updated', { id: 'thresholds' })
-                    setShowThresholdsDialog(false)
-                  } catch { toast.error('Failed to update thresholds', { id: 'thresholds' }) }
+              <Button onClick={() => {
+                  toast.success('Thresholds updated')
+                  setShowThresholdsDialog(false)
                 }}>
                 Save Thresholds
               </Button>
@@ -4012,13 +3899,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEmailRulesDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving email rules...', { id: 'email-rules' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Email rules saved', { id: 'email-rules' })
-                    setShowEmailRulesDialog(false)
-                  } catch { toast.error('Failed to save rules', { id: 'email-rules' }) }
+              <Button onClick={() => {
+                  toast.success('Email rules saved')
+                  setShowEmailRulesDialog(false)
                 }}>
                 Save Rules
               </Button>
@@ -4063,13 +3946,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAlertSchedulesDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving schedule...', { id: 'alert-schedule' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Schedule saved', { id: 'alert-schedule' })
-                    setShowAlertSchedulesDialog(false)
-                  } catch { toast.error('Failed to save schedule', { id: 'alert-schedule' }) }
+              <Button onClick={() => {
+                  toast.success('Schedule saved')
+                  setShowAlertSchedulesDialog(false)
                 }}>
                 Save Schedule
               </Button>
@@ -4099,21 +3978,17 @@ export default function StockClient() {
                 key={idx}
                 variant="outline"
                 className="w-full justify-start h-auto py-3"
-                onClick={async () => {
-                  toast.loading('Generating report...', { id: 'alert-report' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    const reportData = { name: report.name, generatedAt: new Date().toISOString() }
-                    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Report generated', { id: 'alert-report', description: `${report.name} downloaded` })
-                    setShowAlertReportsDialog(false)
-                  } catch { toast.error('Report generation failed', { id: 'alert-report' }) }
+                onClick={() => {
+                  const reportData = { name: report.name, generatedAt: new Date().toISOString() }
+                  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Report generated', { description: `${report.name} downloaded` })
+                  setShowAlertReportsDialog(false)
                 }}
               >
                 <FileText className="w-5 h-5 mr-3 text-indigo-600" />
@@ -4158,13 +4033,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAutomationsDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving automations...', { id: 'automations' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Automations saved', { id: 'automations' })
-                    setShowAutomationsDialog(false)
-                  } catch { toast.error('Failed to save automations', { id: 'automations' }) }
+              <Button onClick={() => {
+                  toast.success('Automations saved')
+                  setShowAutomationsDialog(false)
                 }}>
                 Save Settings
               </Button>
@@ -4194,13 +4065,9 @@ export default function StockClient() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowAcknowledgeAlertDialog(false)}>Cancel</Button>
-                <Button className="bg-green-600 hover:bg-green-700" onClick={async () => {
-                    toast.loading('Acknowledging alert...', { id: 'ack-single' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1000))
-                      toast.success('Alert acknowledged', { id: 'ack-single', description: selectedAlert.productName })
-                      setShowAcknowledgeAlertDialog(false)
-                    } catch { toast.error('Failed to acknowledge', { id: 'ack-single' }) }
+                <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                    toast.success('Alert acknowledged', { description: selectedAlert.productName })
+                    setShowAcknowledgeAlertDialog(false)
                   }}>
                   Acknowledge
                 </Button>
@@ -4281,21 +4148,17 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button>
-              <Button onClick={async () => {
-                  toast.loading('Exporting trend data...', { id: 'export-trends' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    const trendData = { exportDate: new Date().toISOString(), inboundGrowth: '+12.5%', outboundGrowth: '+8.3%' }
-                    const blob = new Blob([JSON.stringify(trendData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `inventory-trends-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Trend data exported', { id: 'export-trends' })
-                    setShowTrendsDialog(false)
-                  } catch { toast.error('Export failed', { id: 'export-trends' }) }
+              <Button onClick={() => {
+                  const trendData = { exportDate: new Date().toISOString(), inboundGrowth: '+12.5%', outboundGrowth: '+8.3%' }
+                  const blob = new Blob([JSON.stringify(trendData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `inventory-trends-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Trend data exported')
+                  setShowTrendsDialog(false)
                 }}>
                 Export Data
               </Button>
@@ -4377,21 +4240,17 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowForecastsDialog(false)}>Close</Button>
-              <Button onClick={async () => {
-                  toast.loading('Generating detailed forecast...', { id: 'forecast-report' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    const forecastData = { generatedAt: new Date().toISOString(), forecasts: [{ product: 'Wireless Earbuds Pro', forecast: '+250 units' }] }
-                    const blob = new Blob([JSON.stringify(forecastData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `demand-forecast-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Forecast generated', { id: 'forecast-report', description: 'Report downloaded' })
-                    setShowForecastsDialog(false)
-                  } catch { toast.error('Forecast generation failed', { id: 'forecast-report' }) }
+              <Button onClick={() => {
+                  const forecastData = { generatedAt: new Date().toISOString(), forecasts: [{ product: 'Wireless Earbuds Pro', forecast: '+250 units' }] }
+                  const blob = new Blob([JSON.stringify(forecastData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `demand-forecast-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Forecast generated', { description: 'Report downloaded' })
+                  setShowForecastsDialog(false)
                 }}>
                 Full Report
               </Button>
@@ -4422,21 +4281,17 @@ export default function StockClient() {
                 key={idx}
                 variant="outline"
                 className="w-full justify-start h-auto py-3"
-                onClick={async () => {
-                  toast.loading('Generating report...', { id: 'analytics-report' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2000))
-                    const reportData = { name: report.name, generatedAt: new Date().toISOString() }
-                    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Report generated', { id: 'analytics-report', description: `${report.name} downloaded` })
-                    setShowAnalyticsReportsDialog(false)
-                  } catch { toast.error('Report generation failed', { id: 'analytics-report' }) }
+                onClick={() => {
+                  const reportData = { name: report.name, generatedAt: new Date().toISOString() }
+                  const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Report generated', { description: `${report.name} downloaded` })
+                  setShowAnalyticsReportsDialog(false)
                 }}
               >
                 <FileText className="w-5 h-5 mr-3 text-purple-600" />
@@ -4492,21 +4347,17 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAnalyticsExportDialog(false)}>Cancel</Button>
-              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={async () => {
-                  toast.loading('Preparing export...', { id: 'analytics-export' })
-                  try {
-                    await new Promise(r => setTimeout(r, 2500))
-                    const exportData = { analytics, exportDate: new Date().toISOString() }
-                    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-                    const url = URL.createObjectURL(blob)
-                    const a = document.createElement('a')
-                    a.href = url
-                    a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.json`
-                    a.click()
-                    URL.revokeObjectURL(url)
-                    toast.success('Export complete', { id: 'analytics-export', description: 'File downloaded' })
-                    setShowAnalyticsExportDialog(false)
-                  } catch { toast.error('Export failed', { id: 'analytics-export' }) }
+              <Button className="bg-fuchsia-600 hover:bg-fuchsia-700" onClick={() => {
+                  const exportData = { analytics, exportDate: new Date().toISOString() }
+                  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Export complete', { description: 'File downloaded' })
+                  setShowAnalyticsExportDialog(false)
                 }}>
                 Export
               </Button>
@@ -4545,13 +4396,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAnalyticsScheduleDialog(false)}>Cancel</Button>
-              <Button className="bg-pink-600 hover:bg-pink-700" onClick={async () => {
-                  toast.loading('Scheduling report...', { id: 'schedule-analytics' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Report scheduled', { id: 'schedule-analytics' })
-                    setShowAnalyticsScheduleDialog(false)
-                  } catch { toast.error('Failed to schedule', { id: 'schedule-analytics' }) }
+              <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => {
+                  toast.success('Report scheduled')
+                  setShowAnalyticsScheduleDialog(false)
                 }}>
                 Schedule
               </Button>
@@ -4601,13 +4448,9 @@ export default function StockClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConfigureDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                  toast.loading('Saving configuration...', { id: 'config-analytics' })
-                  try {
-                    await new Promise(r => setTimeout(r, 1000))
-                    toast.success('Configuration saved', { id: 'config-analytics' })
-                    setShowConfigureDialog(false)
-                  } catch { toast.error('Failed to save configuration', { id: 'config-analytics' }) }
+              <Button onClick={() => {
+                  toast.success('Configuration saved')
+                  setShowConfigureDialog(false)
                 }}>
                 Save Settings
               </Button>
@@ -4699,13 +4542,9 @@ export default function StockClient() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowEditSelectedProductDialog(false)}>Cancel</Button>
-                <Button className="bg-blue-600 hover:bg-blue-700" onClick={async () => {
-                    toast.loading('Updating product...', { id: 'edit-selected' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1000))
-                      toast.success('Product updated', { id: 'edit-selected' })
-                      setShowEditSelectedProductDialog(false)
-                    } catch { toast.error('Failed to update', { id: 'edit-selected' }) }
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                    toast.success('Product updated')
+                    setShowEditSelectedProductDialog(false)
                   }}>
                   Save Changes
                 </Button>
@@ -4749,13 +4588,9 @@ export default function StockClient() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowAddStockToProductDialog(false)}>Cancel</Button>
-                <Button className="bg-green-600 hover:bg-green-700" onClick={async () => {
-                    toast.loading('Adding stock...', { id: 'add-stock-product' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1500))
-                      toast.success('Stock added', { id: 'add-stock-product', description: `Stock added to ${selectedProduct.name}` })
-                      setShowAddStockToProductDialog(false)
-                    } catch { toast.error('Failed to add stock', { id: 'add-stock-product' }) }
+                <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                    toast.success('Stock added', { description: `Stock added to ${selectedProduct.name}` })
+                    setShowAddStockToProductDialog(false)
                   }}>
                   Add Stock
                 </Button>
@@ -4805,13 +4640,9 @@ export default function StockClient() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowTransferProductDialog(false)}>Cancel</Button>
-                <Button className="bg-blue-600 hover:bg-blue-700" onClick={async () => {
-                    toast.loading('Initiating transfer...', { id: 'transfer-product' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1500))
-                      toast.success('Transfer initiated', { id: 'transfer-product', description: `Transferring ${selectedProduct.name}` })
-                      setShowTransferProductDialog(false)
-                    } catch { toast.error('Transfer failed', { id: 'transfer-product' }) }
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                    toast.success('Transfer initiated', { description: `Transferring ${selectedProduct.name}` })
+                    setShowTransferProductDialog(false)
                   }}>
                   Transfer
                 </Button>
