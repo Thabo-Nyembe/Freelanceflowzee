@@ -571,9 +571,6 @@ export default function OperationsClient() {
       setIsCreatingItem(true)
       logger.info('Creating new item', { userId, itemData: newItemData })
 
-      // Simulate API call - in production this would create a task/item in the database
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
       // For tasks, we can use projects or tasks API
       if (newItemData.type === 'task') {
         const response = await fetch('/api/tasks', {

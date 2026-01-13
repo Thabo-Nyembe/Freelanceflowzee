@@ -229,19 +229,36 @@ export default function MicroFeaturesShowcaseClient() {
     }
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
-      toast.success('New item created successfully', {
-        description: `${newItemName} (${newItemType}) has been added to your showcase`
-      })
+      await toast.promise(
+        fetch('/api/micro-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create_item',
+            name: newItemName,
+            type: newItemType,
+            description: newItemDescription,
+            priority: newItemPriority
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Failed to create item')
+          return res.json()
+        }),
+        {
+          loading: 'Creating new item...',
+          success: `${newItemName} (${newItemType}) has been added to your showcase`,
+          error: 'Failed to create item'
+        }
+      )
       setShowNewItemDialog(false)
       setNewItemName('')
       setNewItemDescription('')
       setNewItemType('component')
       setNewItemPriority('medium')
     } catch {
-      toast.error('Failed to create item')
+      // Error handled by toast.promise
     }
-  }, [newItemName, newItemType])
+  }, [newItemName, newItemType, newItemDescription, newItemPriority])
 
   // Handler for export
   const handleExport = useCallback(async () => {
@@ -256,68 +273,151 @@ export default function MicroFeaturesShowcaseClient() {
     }
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Export completed successfully', {
-        description: `Exported ${selectedFeatures.join(', ')} in ${exportFormat.toUpperCase()} format`
-      })
+      await toast.promise(
+        fetch(`/api/micro-features?action=export&format=${exportFormat}&includeAnimations=${exportIncludeAnimations}&includeTooltips=${exportIncludeTooltips}&includeButtons=${exportIncludeButtons}`)
+          .then(res => {
+            if (!res.ok) throw new Error('Export failed')
+            if (exportFormat === 'csv') {
+              return res.blob().then(blob => {
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `micro-features-${Date.now()}.csv`
+                a.click()
+                URL.revokeObjectURL(url)
+              })
+            }
+            return res.json()
+          }),
+        {
+          loading: 'Exporting micro features...',
+          success: `Exported ${selectedFeatures.join(', ')} in ${exportFormat.toUpperCase()} format`,
+          error: 'Failed to export data'
+        }
+      )
       setShowExportDialog(false)
     } catch {
-      toast.error('Failed to export data')
+      // Error handled by toast.promise
     }
   }, [exportFormat, exportIncludeAnimations, exportIncludeTooltips, exportIncludeButtons])
 
   // Handler for saving settings
   const handleSaveSettings = useCallback(async () => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Settings saved successfully', {
-        description: `Animation: ${settingsAnimationsEnabled ? 'On' : 'Off'}, Speed: ${settingsAnimationSpeed}, Theme: ${settingsTheme}`
-      })
+      await toast.promise(
+        fetch('/api/micro-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_settings',
+            settings: {
+              animationsEnabled: settingsAnimationsEnabled,
+              animationSpeed: settingsAnimationSpeed,
+              tooltipDelay: parseInt(settingsTooltipDelay),
+              autoSave: settingsAutoSave,
+              theme: settingsTheme
+            }
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Failed to save settings')
+          return res.json()
+        }),
+        {
+          loading: 'Saving settings...',
+          success: `Settings saved: Animation ${settingsAnimationsEnabled ? 'On' : 'Off'}, Speed: ${settingsAnimationSpeed}`,
+          error: 'Failed to save settings'
+        }
+      )
       setShowSettingsDialog(false)
     } catch {
-      toast.error('Failed to save settings')
+      // Error handled by toast.promise
     }
-  }, [settingsAnimationsEnabled, settingsAnimationSpeed, settingsTheme])
+  }, [settingsAnimationsEnabled, settingsAnimationSpeed, settingsTooltipDelay, settingsAutoSave, settingsTheme])
 
   // Handler for animation demo
   const handleRunAnimationDemo = useCallback(async () => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 600))
-      toast.success('Animation Demo Complete', {
-        description: `Ran ${selectedAnimationType} animation with ${animationDuration}ms duration using ${animationEasing} easing`
-      })
+      await toast.promise(
+        fetch('/api/micro-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'run_demo',
+            demoType: 'animation',
+            config: { type: selectedAnimationType, duration: animationDuration, easing: animationEasing }
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Demo failed')
+          return res.json()
+        }),
+        {
+          loading: 'Running animation demo...',
+          success: `Ran ${selectedAnimationType} animation with ${animationDuration}ms duration using ${animationEasing} easing`,
+          error: 'Failed to run animation demo'
+        }
+      )
       logger.info('Animation demo executed', { type: selectedAnimationType, duration: animationDuration, easing: animationEasing })
       setShowAnimationDemoDialog(false)
     } catch {
-      toast.error('Failed to run animation demo')
+      // Error handled by toast.promise
     }
   }, [selectedAnimationType, animationDuration, animationEasing])
 
   // Handler for button demo
   const handleRunButtonDemo = useCallback(async () => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      toast.success('Button Demo Activated', {
-        description: `Demonstrated ${selectedButtonStyle} button style with ${buttonColor} color (${buttonSize} size)`
-      })
+      await toast.promise(
+        fetch('/api/micro-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'run_demo',
+            demoType: 'button',
+            config: { style: selectedButtonStyle, color: buttonColor, size: buttonSize }
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Demo failed')
+          return res.json()
+        }),
+        {
+          loading: 'Running button demo...',
+          success: `Demonstrated ${selectedButtonStyle} button style with ${buttonColor} color (${buttonSize} size)`,
+          error: 'Failed to run button demo'
+        }
+      )
       logger.info('Button demo executed', { style: selectedButtonStyle, color: buttonColor, size: buttonSize })
       setShowButtonDemoDialog(false)
     } catch {
-      toast.error('Failed to run button demo')
+      // Error handled by toast.promise
     }
   }, [selectedButtonStyle, buttonColor, buttonSize])
 
   // Handler for tooltip demo
   const handleRunTooltipDemo = useCallback(async () => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 400))
-      toast.success('Tooltip Demo Complete', {
-        description: `Tooltip displayed at ${tooltipPosition} position with ${tooltipTrigger} trigger`
-      })
+      await toast.promise(
+        fetch('/api/micro-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'run_demo',
+            demoType: 'tooltip',
+            config: { position: tooltipPosition, trigger: tooltipTrigger }
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Demo failed')
+          return res.json()
+        }),
+        {
+          loading: 'Running tooltip demo...',
+          success: `Tooltip displayed at ${tooltipPosition} position with ${tooltipTrigger} trigger`,
+          error: 'Failed to run tooltip demo'
+        }
+      )
       logger.info('Tooltip demo executed', { position: tooltipPosition, trigger: tooltipTrigger })
       setShowTooltipDemoDialog(false)
     } catch {
-      toast.error('Failed to run tooltip demo')
+      // Error handled by toast.promise
     }
   }, [tooltipPosition, tooltipTrigger])
 
@@ -328,36 +428,75 @@ export default function MicroFeaturesShowcaseClient() {
       return
     }
     try {
-      await new Promise(resolve => setTimeout(resolve, 600))
-      toast.success('Configuration Saved', {
-        description: `"${configName}" saved with ${configGlobalAnimations ? 'animations enabled' : 'animations disabled'}${configReducedMotion ? ', reduced motion' : ''}${configHapticFeedback ? ', haptic feedback' : ''}`
-      })
+      await toast.promise(
+        fetch('/api/micro-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_configuration',
+            name: configName,
+            description: configDescription,
+            globalAnimations: configGlobalAnimations,
+            reducedMotion: configReducedMotion,
+            hapticFeedback: configHapticFeedback
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Failed to save configuration')
+          return res.json()
+        }),
+        {
+          loading: 'Saving configuration...',
+          success: `"${configName}" saved with ${configGlobalAnimations ? 'animations enabled' : 'animations disabled'}`,
+          error: 'Failed to save configuration'
+        }
+      )
       logger.info('Configuration saved', { name: configName, globalAnimations: configGlobalAnimations, reducedMotion: configReducedMotion })
       setShowConfigureDialog(false)
     } catch {
-      toast.error('Failed to save configuration')
+      // Error handled by toast.promise
     }
-  }, [configName, configGlobalAnimations, configReducedMotion, configHapticFeedback])
+  }, [configName, configDescription, configGlobalAnimations, configReducedMotion, configHapticFeedback])
 
   // Handler for saving feature toggles
   const handleSaveFeatureToggles = useCallback(async () => {
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      const enabledFeatures = []
-      if (featureMagneticButtons) enabledFeatures.push('Magnetic Buttons')
-      if (featureRippleEffect) enabledFeatures.push('Ripple Effect')
-      if (featureNeonGlow) enabledFeatures.push('Neon Glow')
-      if (featureContextualTooltips) enabledFeatures.push('Contextual Tooltips')
-      if (featureMicroAnimations) enabledFeatures.push('Micro Animations')
-      if (featureFormValidation) enabledFeatures.push('Form Validation')
+    const enabledFeatures = []
+    if (featureMagneticButtons) enabledFeatures.push('Magnetic Buttons')
+    if (featureRippleEffect) enabledFeatures.push('Ripple Effect')
+    if (featureNeonGlow) enabledFeatures.push('Neon Glow')
+    if (featureContextualTooltips) enabledFeatures.push('Contextual Tooltips')
+    if (featureMicroAnimations) enabledFeatures.push('Micro Animations')
+    if (featureFormValidation) enabledFeatures.push('Form Validation')
 
-      toast.success('Feature Toggles Updated', {
-        description: `${enabledFeatures.length} features enabled: ${enabledFeatures.slice(0, 3).join(', ')}${enabledFeatures.length > 3 ? '...' : ''}`
-      })
+    try {
+      await toast.promise(
+        fetch('/api/micro-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save_feature_toggles',
+            toggles: {
+              magneticButtons: featureMagneticButtons,
+              rippleEffect: featureRippleEffect,
+              neonGlow: featureNeonGlow,
+              contextualTooltips: featureContextualTooltips,
+              microAnimations: featureMicroAnimations,
+              formValidation: featureFormValidation
+            }
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Failed to save toggles')
+          return res.json()
+        }),
+        {
+          loading: 'Saving feature toggles...',
+          success: `${enabledFeatures.length} features enabled: ${enabledFeatures.slice(0, 3).join(', ')}${enabledFeatures.length > 3 ? '...' : ''}`,
+          error: 'Failed to update feature toggles'
+        }
+      )
       logger.info('Feature toggles updated', { enabledCount: enabledFeatures.length, features: enabledFeatures })
       setShowFeatureToggleDialog(false)
     } catch {
-      toast.error('Failed to update feature toggles')
+      // Error handled by toast.promise
     }
   }, [featureMagneticButtons, featureRippleEffect, featureNeonGlow, featureContextualTooltips, featureMicroAnimations, featureFormValidation])
 

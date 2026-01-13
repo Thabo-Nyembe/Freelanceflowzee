@@ -688,8 +688,20 @@ export default function ReportsPage() {
 
       dispatch({ type: 'UPDATE_REPORT', report: updatedReport })
 
+      const generatePromise = fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate',
+          reportId
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to generate report')
+        return res.json()
+      })
+
       toast.promise(
-        new Promise(resolve => setTimeout(resolve, 2500)),
+        generatePromise,
         {
           loading: `Generating ${report?.name}...`,
           success: `Report ${report?.name} generation started`,
@@ -697,16 +709,7 @@ export default function ReportsPage() {
         }
       )
 
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'generate',
-          reportId
-        })
-      })
-
-      const result = await response.json()
+      const result = await generatePromise
       logger.debug('Generate API response received', { success: result.success })
 
       if (result.success) {
@@ -1003,8 +1006,15 @@ export default function ReportsPage() {
       dispatch({ type: 'SELECT_REPORT', report })
       setIsCreateModalOpen(true)
 
+      // Fetch fresh report data from API
       toast.promise(
-        new Promise(resolve => setTimeout(resolve, 600)),
+        fetch(`/api/reports/${report.id}`).then(res => {
+          if (!res.ok) throw new Error('Failed to load report')
+          return res.json()
+        }).then(data => {
+          if (data.report) dispatch({ type: 'SELECT_REPORT', report: data.report })
+          return data
+        }),
         {
           loading: 'Opening editor...',
           success: `Editing ${report.name}`,

@@ -640,25 +640,33 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
       toast.info('Retrying payment', {
         description: `Attempting to charge for invoice ${invoice.number || invoice.id}`
       })
-      // In a real app, this would trigger a payment processor
-      // For now, we just update the status and show a toast
-      setTimeout(async () => {
-        // Simulate payment success/failure (50% chance)
-        const success = Math.random() > 0.5
-        await updateInvoice(invoice.id, {
-          status: success ? 'paid' : 'open',
-          paid_at: success ? new Date().toISOString() : null
+      // Call billing API to retry payment
+      const response = await fetch('/api/billing-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'retry_payment',
+          invoice_id: invoice.id
         })
-        if (success) {
-          toast.success('Payment successful', {
-            description: `Invoice ${invoice.number || invoice.id} has been paid`
-          })
-        } else {
-          toast.error('Payment failed', {
-            description: 'The payment could not be processed. Please try again.'
-          })
-        }
-      }, 2000)
+      })
+      const result = await response.json()
+      if (response.ok && result.success) {
+        await updateInvoice(invoice.id, {
+          status: 'paid',
+          paid_at: new Date().toISOString()
+        })
+        toast.success('Payment successful', {
+          description: `Invoice ${invoice.number || invoice.id} has been paid`
+        })
+      } else {
+        await updateInvoice(invoice.id, {
+          status: 'open',
+          paid_at: null
+        })
+        toast.error('Payment failed', {
+          description: result.error || 'The payment could not be processed. Please try again.'
+        })
+      }
     } catch (error) {
       console.error('Failed to retry payment:', error)
       toast.error('Failed to retry payment')
@@ -2649,7 +2657,12 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button onClick={async () => {
               toast.loading('Uploading logo...', { id: 'upload-logo' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
+                const response = await fetch('/api/billing-settings', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'upload_logo' })
+                })
+                if (!response.ok) throw new Error('Upload failed')
                 toast.success('Logo uploaded successfully', { id: 'upload-logo' })
                 setShowUploadLogoDialog(false)
               } catch { toast.error('Upload failed', { id: 'upload-logo' }) }
@@ -2695,7 +2708,12 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button onClick={async () => {
               toast.loading('Creating webhook endpoint...', { id: 'create-webhook' })
               try {
-                await new Promise(r => setTimeout(r, 1200))
+                const response = await fetch('/api/billing-settings', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'create_webhook' })
+                })
+                if (!response.ok) throw new Error('Failed to create endpoint')
                 toast.success('Webhook endpoint created', { id: 'create-webhook' })
                 setShowAddWebhookDialog(false)
               } catch { toast.error('Failed to create endpoint', { id: 'create-webhook' }) }
@@ -2757,7 +2775,12 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button onClick={async () => {
               toast.loading('Creating tax rate...', { id: 'create-tax' })
               try {
-                await new Promise(r => setTimeout(r, 1000))
+                const response = await fetch('/api/billing-settings', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'create_tax_rate' })
+                })
+                if (!response.ok) throw new Error('Failed to create tax rate')
                 toast.success('Tax rate created successfully', { id: 'create-tax' })
                 setShowAddTaxRateDialog(false)
               } catch { toast.error('Failed to create tax rate', { id: 'create-tax' }) }
@@ -2796,7 +2819,12 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button onClick={async () => {
               toast.loading(`Connecting to ${selectedIntegration}...`, { id: 'connect-int' })
               try {
-                await new Promise(r => setTimeout(r, 2000))
+                const response = await fetch('/api/billing-settings', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'connect_integration', integration: selectedIntegration })
+                })
+                if (!response.ok) throw new Error('Failed to connect')
                 toast.success(`${selectedIntegration} connected successfully`, { id: 'connect-int' })
                 setShowConnectIntegrationDialog(false)
               } catch { toast.error('Failed to connect', { id: 'connect-int' }) }
@@ -2847,7 +2875,8 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button variant="outline" onClick={async () => {
               toast.loading('Exporting audit log...', { id: 'export-log' })
               try {
-                await new Promise(r => setTimeout(r, 1500))
+                const response = await fetch('/api/billing-settings?action=export_audit_log')
+                if (!response.ok) throw new Error('Export failed')
                 toast.success('Audit log exported', { id: 'export-log' })
               } catch { toast.error('Export failed', { id: 'export-log' }) }
             }}>Export Log</Button>
@@ -2886,8 +2915,13 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button variant="destructive" onClick={async () => {
               toast.loading('Canceling all subscriptions...', { id: 'cancel-all' })
               try {
-                await new Promise(r => setTimeout(r, 3000))
-                toast.error('All subscriptions have been canceled', { id: 'cancel-all' })
+                const response = await fetch('/api/billing-settings', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'cancel_all_subscriptions' })
+                })
+                if (!response.ok) throw new Error('Failed to cancel subscriptions')
+                toast.warning('All subscriptions have been canceled', { id: 'cancel-all' })
                 setShowConfirmCancelAllDialog(false)
               } catch { toast.error('Failed to cancel subscriptions', { id: 'cancel-all' }) }
             }}>
@@ -2923,7 +2957,12 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button variant="destructive" onClick={async () => {
               toast.loading('Deleting test data...', { id: 'delete-test' })
               try {
-                await new Promise(r => setTimeout(r, 2000))
+                const response = await fetch('/api/billing-settings', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'delete_test_data' })
+                })
+                if (!response.ok) throw new Error('Failed to delete test data')
                 toast.success('Test data deleted successfully', { id: 'delete-test' })
                 setShowConfirmDeleteTestDataDialog(false)
               } catch { toast.error('Failed to delete test data', { id: 'delete-test' }) }
@@ -2964,7 +3003,12 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button variant="destructive" onClick={async () => {
               toast.loading('Disabling billing module...', { id: 'disable-billing' })
               try {
-                await new Promise(r => setTimeout(r, 2000))
+                const response = await fetch('/api/billing-settings', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'disable_billing' })
+                })
+                if (!response.ok) throw new Error('Failed to disable billing')
                 toast.warning('Billing module has been disabled', { id: 'disable-billing' })
                 setShowConfirmDisableBillingDialog(false)
               } catch { toast.error('Failed to disable billing', { id: 'disable-billing' }) }
@@ -3242,12 +3286,20 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button variant="outline" onClick={() => setShowRotateApiKeysDialog(false)}>Cancel</Button>
             <Button
               className="bg-gradient-to-r from-orange-600 to-amber-600"
-              onClick={() => {
+              onClick={async () => {
                 toast.info('Rotating API keys...')
-                setTimeout(() => {
+                try {
+                  const response = await fetch('/api/billing-settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'rotate_api_keys' })
+                  })
+                  if (!response.ok) throw new Error('Failed to rotate API keys')
                   toast.success('API keys rotated successfully. Check your email for the new keys.')
                   setShowRotateApiKeysDialog(false)
-                }, 1500)
+                } catch {
+                  toast.error('Failed to rotate API keys')
+                }
               }}
             >
               <RefreshCw className="h-4 w-4 mr-2" />
@@ -3342,48 +3394,44 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGenerateTaxReportDialog(false)}>Cancel</Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 toast.info('Generating tax report...')
-                setTimeout(() => {
-                  // Create a sample tax report
-                  const reportData = {
-                    report_type: 'Tax Summary',
-                    period: {
-                      start: taxReportForm.startDate || '2024-01-01',
-                      end: taxReportForm.endDate || new Date().toISOString().split('T')[0]
-                    },
-                    generated_at: new Date().toISOString(),
-                    summary: {
-                      total_revenue: 125000,
-                      taxable_revenue: 100000,
-                      tax_collected: 8250,
-                      jurisdictions: [
-                        { name: 'California', rate: 8.25, collected: 6187.5 },
-                        { name: 'European Union', rate: 20, collected: 2062.5 }
-                      ]
-                    }
-                  }
+                try {
+                  const response = await fetch('/api/billing-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'generate_tax_report',
+                      startDate: taxReportForm.startDate,
+                      endDate: taxReportForm.endDate,
+                      format: taxReportForm.format,
+                      includeDetails: taxReportForm.includeDetails
+                    })
+                  })
+                  if (!response.ok) throw new Error('Failed to generate report')
+                  const reportData = await response.json()
 
                   if (taxReportForm.format === 'json') {
                     const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
-                    a.download = `tax-report-${reportData.period.start}-to-${reportData.period.end}.json`
+                    a.download = `tax-report-${reportData.period?.start || 'start'}-to-${reportData.period?.end || 'end'}.json`
                     document.body.appendChild(a)
                     a.click()
                     document.body.removeChild(a)
                     URL.revokeObjectURL(url)
                   } else if (taxReportForm.format === 'csv') {
+                    const jurisdictions = reportData.summary?.jurisdictions || []
                     const csv = [
                       'Jurisdiction,Tax Rate,Tax Collected',
-                      ...reportData.summary.jurisdictions.map(j => `${j.name},${j.rate}%,$${j.collected}`)
+                      ...jurisdictions.map((j: { name: string; rate: number; collected: number }) => `${j.name},${j.rate}%,$${j.collected}`)
                     ].join('\n')
                     const blob = new Blob([csv], { type: 'text/csv' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
-                    a.download = `tax-report-${reportData.period.start}-to-${reportData.period.end}.csv`
+                    a.download = `tax-report-${reportData.period?.start || 'start'}-to-${reportData.period?.end || 'end'}.csv`
                     document.body.appendChild(a)
                     a.click()
                     document.body.removeChild(a)
@@ -3398,7 +3446,9 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                     format: 'csv',
                     includeDetails: true
                   })
-                }, 2000)
+                } catch {
+                  toast.error('Failed to generate tax report')
+                }
               }}
             >
               <Download className="h-4 w-4 mr-2" />

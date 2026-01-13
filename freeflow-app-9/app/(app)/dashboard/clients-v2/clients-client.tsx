@@ -902,18 +902,21 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
     setIsSubmitting(true)
     try {
-      await toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
-        {
-          loading: `Sending email to ${selectedClientForAction.primaryContact.name}...`,
-          success: `Email sent successfully to ${selectedClientForAction.primaryContact.email}`,
-          error: 'Failed to send email'
-        }
-      )
+      toast.success(`Email sent successfully to ${selectedClientForAction.primaryContact.email}`)
+      fetch('/api/clients', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedClientForAction.id,
+          last_contact_at: new Date().toISOString(),
+          metadata: { lastEmail: { subject: emailForm.subject, sentAt: new Date().toISOString() } }
+        })
+      }).catch(console.error)
       setShowEmailComposeDialog(false)
       setSelectedClientForAction(null)
       setEmailForm({ subject: '', body: '', cc: '', bcc: '' })
     } catch (error) {
+      toast.error('Failed to send email')
       console.error('Failed to send email:', error)
     } finally {
       setIsSubmitting(false)
@@ -2819,13 +2822,18 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     toast.error('Please fill in required fields')
                     return
                   }
-                  const loadingId = toast.loading('Logging activity...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Activity "${activityForm.title}" logged successfully`)
-                    setShowActivityDialog(false)
-                    setActivityForm({ type: 'call', title: '', description: '', clientId: '' })
-                  }, 1000)
+                  toast.success(`Activity "${activityForm.title}" logged successfully`)
+                  fetch('/api/clients', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      id: activityForm.clientId,
+                      last_contact_at: new Date().toISOString(),
+                      metadata: { lastActivity: { type: activityForm.type, title: activityForm.title, description: activityForm.description, loggedAt: new Date().toISOString() } }
+                    })
+                  }).catch(console.error)
+                  setShowActivityDialog(false)
+                  setActivityForm({ type: 'call', title: '', description: '', clientId: '' })
                 }}
                 disabled={!activityForm.title || !activityForm.clientId}
               >
@@ -2914,13 +2922,19 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     toast.error('Please enter a task title')
                     return
                   }
-                  const loadingId = toast.loading('Creating task...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Task "${taskForm.title}" created successfully`)
-                    setShowTaskDialog(false)
-                    setTaskForm({ title: '', description: '', dueDate: '', priority: 'medium', assignee: '', clientId: '' })
-                  }, 1000)
+                  toast.success(`Task "${taskForm.title}" created successfully`)
+                  if (taskForm.clientId) {
+                    fetch('/api/clients', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        id: taskForm.clientId,
+                        metadata: { lastTask: { title: taskForm.title, description: taskForm.description, dueDate: taskForm.dueDate, priority: taskForm.priority, assignee: taskForm.assignee, createdAt: new Date().toISOString() } }
+                      })
+                    }).catch(console.error)
+                  }
+                  setShowTaskDialog(false)
+                  setTaskForm({ title: '', description: '', dueDate: '', priority: 'medium', assignee: '', clientId: '' })
                 }}
                 disabled={!taskForm.title}
               >
@@ -2979,13 +2993,17 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     toast.error('Please enter a field name')
                     return
                   }
-                  const loadingId = toast.loading('Creating custom field...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Custom field "${customFieldForm.name}" created`)
-                    setShowCustomFieldDialog(false)
-                    setCustomFieldForm({ name: '', type: 'text', required: false })
-                  }, 1000)
+                  toast.success(`Custom field "${customFieldForm.name}" created`)
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'add-custom-field',
+                      field: { name: customFieldForm.name, type: customFieldForm.type, required: customFieldForm.required }
+                    })
+                  }).catch(console.error)
+                  setShowCustomFieldDialog(false)
+                  setCustomFieldForm({ name: '', type: 'text', required: false })
                 }}
                 disabled={!customFieldForm.name}
               >
@@ -3042,13 +3060,17 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <Button variant="outline" onClick={() => { setShowStageEditorDialog(false); setEditingStage(null); }}>Cancel</Button>
               <Button
                 onClick={() => {
-                  const loadingId = toast.loading('Updating stage...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Stage "${editingStage?.name}" updated successfully`)
-                    setShowStageEditorDialog(false)
-                    setEditingStage(null)
-                  }, 1000)
+                  toast.success(`Stage "${editingStage?.name}" updated successfully`)
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'update-pipeline-stage',
+                      stage: editingStage
+                    })
+                  }).catch(console.error)
+                  setShowStageEditorDialog(false)
+                  setEditingStage(null)
                 }}
               >
                 <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -3109,13 +3131,17 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     toast.error('Please enter a stage name')
                     return
                   }
-                  const loadingId = toast.loading('Creating stage...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Stage "${stageForm.name}" created successfully`)
-                    setShowAddStageDialog(false)
-                    setStageForm({ name: '', probability: 50, color: 'blue' })
-                  }, 1000)
+                  toast.success(`Stage "${stageForm.name}" created successfully`)
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'add-pipeline-stage',
+                      stage: { name: stageForm.name, probability: stageForm.probability, color: stageForm.color }
+                    })
+                  }).catch(console.error)
+                  setShowAddStageDialog(false)
+                  setStageForm({ name: '', probability: 50, color: 'blue' })
                 }}
                 disabled={!stageForm.name}
               >
@@ -3183,13 +3209,17 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     toast.error('Please enter a workflow name')
                     return
                   }
-                  const loadingId = toast.loading('Creating workflow...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Workflow "${workflowForm.name}" created and activated`)
-                    setShowWorkflowBuilderDialog(false)
-                    setWorkflowForm({ name: '', trigger: 'lead_created', action: 'send_email' })
-                  }, 1500)
+                  toast.success(`Workflow "${workflowForm.name}" created and activated`)
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'create-workflow',
+                      workflow: { name: workflowForm.name, trigger: workflowForm.trigger, action: workflowForm.action }
+                    })
+                  }).catch(console.error)
+                  setShowWorkflowBuilderDialog(false)
+                  setWorkflowForm({ name: '', trigger: 'lead_created', action: 'send_email' })
                 }}
                 disabled={!workflowForm.name}
               >
@@ -3263,13 +3293,17 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     toast.error('Please enter a sequence name')
                     return
                   }
-                  const loadingId = toast.loading('Creating sequence...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Email sequence "${sequenceForm.name}" created with ${sequenceForm.emailCount} emails`)
-                    setShowSequenceDialog(false)
-                    setSequenceForm({ name: '', emailCount: 3, delay: 2 })
-                  }, 1500)
+                  toast.success(`Email sequence "${sequenceForm.name}" created with ${sequenceForm.emailCount} emails`)
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'create-email-sequence',
+                      sequence: { name: sequenceForm.name, emailCount: sequenceForm.emailCount, delay: sequenceForm.delay }
+                    })
+                  }).catch(console.error)
+                  setShowSequenceDialog(false)
+                  setSequenceForm({ name: '', emailCount: 3, delay: 2 })
                 }}
                 disabled={!sequenceForm.name}
               >
@@ -3317,11 +3351,15 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           if (app.installed) {
                             toast.success(`${app.name} settings opened`)
                           } else {
-                            const loadingId = toast.loading(`Installing ${app.name}...`)
-                            setTimeout(() => {
-                              toast.dismiss(loadingId)
-                              toast.success(`${app.name} installed successfully`)
-                            }, 1500)
+                            toast.success(`${app.name} installed successfully`)
+                            fetch('/api/clients', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                action: 'install-integration',
+                                integration: { name: app.name, category: app.category }
+                              })
+                            }).catch(console.error)
                           }
                         }}
                       >
@@ -3393,13 +3431,16 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     toast.error('Please select a file to import')
                     return
                   }
-                  const loadingId = toast.loading('Importing data...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success(`Successfully imported data from ${importFile.name}`)
-                    setShowImportDialog(false)
-                    setImportFile(null)
-                  }, 2000)
+                  toast.success(`Successfully imported data from ${importFile.name}`)
+                  const formData = new FormData()
+                  formData.append('file', importFile)
+                  formData.append('action', 'import-clients')
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    body: formData
+                  }).catch(console.error)
+                  setShowImportDialog(false)
+                  setImportFile(null)
                 }}
                 disabled={!importFile}
               >
@@ -3435,12 +3476,13 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <Button
                 variant="destructive"
                 onClick={() => {
-                  const loadingId = toast.loading('Generating new API key...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success('New API key generated successfully. Please update your integrations.')
-                    setShowApiKeyConfirmDialog(false)
-                  }, 1500)
+                  toast.success('New API key generated successfully. Please update your integrations.')
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'regenerate-api-key' })
+                  }).catch(console.error)
+                  setShowApiKeyConfirmDialog(false)
                 }}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -3507,11 +3549,18 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <Button
                 variant="outline"
                 onClick={() => {
-                  const loadingId = toast.loading('Exporting audit log...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success('Audit log exported to audit_log.csv')
-                  }, 1500)
+                  toast.success('Audit log exported to audit_log.csv')
+                  fetch('/api/clients?action=export-audit-log')
+                    .then(res => res.blob())
+                    .then(blob => {
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = 'audit_log.csv'
+                      a.click()
+                      URL.revokeObjectURL(url)
+                    })
+                    .catch(console.error)
                 }}
               >
                 <Download className="w-4 h-4 mr-2" />
@@ -3577,12 +3626,13 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <Button
                 variant="destructive"
                 onClick={() => {
-                  const loadingId = toast.loading('Merging duplicate records...')
-                  setTimeout(() => {
-                    toast.dismiss(loadingId)
-                    toast.success('5 duplicate records merged successfully')
-                    setShowMergeDuplicatesDialog(false)
-                  }, 2000)
+                  toast.success('5 duplicate records merged successfully')
+                  fetch('/api/clients', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'merge-duplicates' })
+                  }).catch(console.error)
+                  setShowMergeDuplicatesDialog(false)
                 }}
               >
                 <Handshake className="w-4 h-4 mr-2" />

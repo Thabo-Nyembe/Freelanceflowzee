@@ -608,49 +608,67 @@ export default function ComplianceClient() {
 
   // Handlers with real functionality
   const handleRunAudit = () => {
-    toast.promise(
-      (async () => {
-        // Simulate running audit by updating control statuses
-        await new Promise(r => setTimeout(r, 1000))
-        // In a real app, this would call an API
+    toast.success('Running compliance audit...')
+    fetch('/api/compliance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'run_audit' })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Audit failed')
+        return res.json()
+      })
+      .then(() => {
         setControls(prev => prev.map(c => ({
           ...c,
           lastTested: new Date().toISOString().split('T')[0]
         })))
-        return { message: 'Audit completed' }
-      })(),
-      { loading: 'Running compliance audit...', success: 'Audit completed successfully! Controls updated.', error: 'Audit failed' }
-    )
+        toast.success('Audit completed successfully! Controls updated.')
+      })
+      .catch(err => toast.error(err.message || 'Audit failed'))
   }
 
   const handleGenerateReport = () => {
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 500))
+    toast.success('Generating report...')
+    fetch('/api/compliance?action=generate_report')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to generate report')
+        return res.json()
+      })
+      .then(() => {
         const report = generateComplianceReport()
         downloadAsJson(report, `compliance-report-${new Date().toISOString().split('T')[0]}.json`)
-        return report
-      })(),
-      { loading: 'Generating report...', success: 'Report generated and downloaded!', error: 'Failed to generate report' }
-    )
+        toast.success('Report generated and downloaded!')
+      })
+      .catch(err => toast.error(err.message || 'Failed to generate report'))
   }
 
   const handleResolveIssue = (id: string) => {
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 300))
-        // Update risk status to mitigated
+    toast.success('Resolving issue...')
+    fetch('/api/compliance', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resolve_issue', issueId: id })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to resolve')
+        return res.json()
+      })
+      .then(() => {
         setRisks(prev => prev.map(r => r.id === id ? { ...r, status: 'mitigated' as const } : r))
-        return { id }
-      })(),
-      { loading: 'Resolving issue...', success: `Issue #${id} resolved and status updated`, error: 'Failed to resolve' }
-    )
+        toast.success(`Issue #${id} resolved and status updated`)
+      })
+      .catch(err => toast.error(err.message || 'Failed to resolve'))
   }
 
   const handleExport = () => {
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 300))
+    toast.success('Exporting data...')
+    fetch('/api/compliance?action=export')
+      .then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.json()
+      })
+      .then(() => {
         const exportData = {
           exportedAt: new Date().toISOString(),
           frameworks: frameworks,
@@ -660,10 +678,9 @@ export default function ComplianceClient() {
           policies: policies
         }
         downloadAsJson(exportData, `compliance-export-${new Date().toISOString().split('T')[0]}.json`)
-        return exportData
-      })(),
-      { loading: 'Exporting data...', success: 'Export downloaded!', error: 'Export failed' }
-    )
+        toast.success('Export downloaded!')
+      })
+      .catch(err => toast.error(err.message || 'Export failed'))
   }
 
   const handleCopyApiToken = () => {
@@ -675,69 +692,95 @@ export default function ComplianceClient() {
   }
 
   const handleRegenerateToken = () => {
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 500))
-        // In real app, this would call API to regenerate token
+    toast.success('Regenerating API token...')
+    fetch('/api/compliance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'regenerate_token' })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to regenerate')
+        return res.json()
+      })
+      .then(async () => {
         const newToken = 'grc_' + Math.random().toString(36).substring(2, 34)
         await copyToClipboard(newToken)
-        return { token: newToken }
-      })(),
-      { loading: 'Regenerating API token...', success: 'New token generated and copied!', error: 'Failed to regenerate' }
-    )
+        toast.success('New token generated and copied!')
+      })
+      .catch(err => toast.error(err.message || 'Failed to regenerate'))
   }
 
   const handleTestWebhook = (url?: string) => {
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 800))
-        // In real app, this would send a test request to the webhook URL
-        if (!url) throw new Error('No webhook URL provided')
-        return { url, status: 'success' }
-      })(),
-      { loading: 'Testing webhook connection...', success: 'Webhook test successful!', error: 'Webhook test failed' }
-    )
+    if (!url) {
+      toast.error('No webhook URL provided')
+      return
+    }
+    toast.success('Testing webhook connection...')
+    fetch('/api/compliance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'test_webhook', webhookUrl: url })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Webhook test failed')
+        return res.json()
+      })
+      .then(() => toast.success('Webhook test successful!'))
+      .catch(err => toast.error(err.message || 'Webhook test failed'))
   }
 
   const handleResetControls = () => {
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 500))
+    toast.success('Resetting all controls...')
+    fetch('/api/compliance', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reset_controls' })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Reset failed')
+        return res.json()
+      })
+      .then(() => {
         setControls(mockControls.map(c => ({ ...c, status: 'pending' as const })))
-        return { reset: true }
-      })(),
-      { loading: 'Resetting all controls...', success: 'Controls reset successfully', error: 'Reset failed' }
-    )
+        toast.success('Controls reset successfully')
+      })
+      .catch(err => toast.error(err.message || 'Reset failed'))
   }
 
   const handleDeleteEvidence = () => {
     if (!confirm('Are you sure you want to delete all evidence? This action cannot be undone.')) {
       return
     }
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 500))
-        // Clear evidence from all controls
+    toast.success('Deleting all evidence...')
+    fetch('/api/compliance', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete_evidence' })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Delete failed')
+        return res.json()
+      })
+      .then(() => {
         setControls(prev => prev.map(c => ({ ...c, evidence: [] })))
-        return { deleted: true }
-      })(),
-      { loading: 'Deleting all evidence...', success: 'Evidence deleted', error: 'Delete failed' }
-    )
+        toast.success('Evidence deleted')
+      })
+      .catch(err => toast.error(err.message || 'Delete failed'))
   }
 
   const handleConnectService = (serviceName: string, connected: boolean) => {
-    toast.promise(
-      (async () => {
-        await new Promise(r => setTimeout(r, 800))
-        // In real app, would open OAuth flow or configuration
-        return { service: serviceName, action: connected ? 'configured' : 'connected' }
-      })(),
-      {
-        loading: `${connected ? 'Configuring' : 'Connecting'} ${serviceName}...`,
-        success: `${serviceName} ${connected ? 'configured' : 'connected'}!`,
-        error: `Failed to ${connected ? 'configure' : 'connect'}`
-      }
-    )
+    toast.success(`${connected ? 'Configuring' : 'Connecting'} ${serviceName}...`)
+    fetch('/api/compliance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'connect_service', serviceName, connected })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to ${connected ? 'configure' : 'connect'}`)
+        return res.json()
+      })
+      .then(() => toast.success(`${serviceName} ${connected ? 'configured' : 'connected'}!`))
+      .catch(err => toast.error(err.message || `Failed to ${connected ? 'configure' : 'connect'}`))
   }
 
   // Quick actions with real handlers for the QuickActionsToolbar
@@ -745,9 +788,17 @@ export default function ComplianceClient() {
     ...action,
     action: action.label === 'New Control'
       ? () => {
-          toast.promise(
-            (async () => {
-              await new Promise(r => setTimeout(r, 300))
+          toast.success('Creating compliance control...')
+          fetch('/api/compliance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'create_control' })
+          })
+            .then(res => {
+              if (!res.ok) throw new Error('Failed to create control')
+              return res.json()
+            })
+            .then(() => {
               setControls(prev => [...prev, {
                 id: `ctrl${prev.length + 1}`,
                 controlId: `NEW.${prev.length + 1}`,
@@ -763,10 +814,9 @@ export default function ComplianceClient() {
                 evidence: [],
                 findings: 0
               }])
-              return { created: true }
-            })(),
-            { loading: 'Creating compliance control...', success: 'New control created! Configure requirements and evidence', error: 'Failed to create control' }
-          )
+              toast.success('New control created! Configure requirements and evidence')
+            })
+            .catch(err => toast.error(err.message || 'Failed to create control'))
         }
       : action.label === 'Assess'
       ? () => handleRunAudit()
@@ -781,13 +831,18 @@ export default function ComplianceClient() {
       case 'Add Risk':
       case 'New Audit':
       case 'New Policy':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 300))
-            return { action: actionLabel }
-          })(),
-          { loading: `Creating ${actionLabel.replace('Add ', '').replace('New ', '')}...`, success: `${actionLabel.replace('Add ', '').replace('New ', '')} created successfully`, error: 'Action failed' }
-        )
+        toast.success(`Creating ${actionLabel.replace('Add ', '').replace('New ', '')}...`)
+        fetch('/api/compliance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'create_item', itemType: actionLabel })
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Action failed')
+            return res.json()
+          })
+          .then(() => toast.success(`${actionLabel.replace('Add ', '').replace('New ', '')} created successfully`))
+          .catch(err => toast.error(err.message || 'Action failed'))
         break
       case 'Audit':
       case 'Test All':
@@ -802,15 +857,18 @@ export default function ComplianceClient() {
         break
       case 'Sync':
       case 'Refresh':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 500))
+        toast.success('Syncing data...')
+        fetch('/api/compliance')
+          .then(res => {
+            if (!res.ok) throw new Error('Sync failed')
+            return res.json()
+          })
+          .then(() => {
             setControls([...mockControls])
             setRisks([...mockRisks])
-            return { synced: true }
-          })(),
-          { loading: 'Syncing data...', success: 'Data synced successfully', error: 'Sync failed' }
-        )
+            toast.success('Data synced successfully')
+          })
+          .catch(err => toast.error(err.message || 'Sync failed'))
         break
       case 'Settings':
         setActiveTab('settings')
@@ -824,25 +882,32 @@ export default function ComplianceClient() {
       case 'Gaps':
       case 'Failures':
       case 'Critical':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 300))
+        toast.success(`Finding ${actionLabel.toLowerCase()}...`)
+        fetch('/api/compliance?action=find_issues&type=' + actionLabel.toLowerCase())
+          .then(res => {
+            if (!res.ok) throw new Error('Action failed')
+            return res.json()
+          })
+          .then(() => {
             const failedControls = controls.filter(c => c.status === 'failed')
             if (failedControls.length > 0) {
               downloadAsJson(failedControls, `${actionLabel.toLowerCase()}-report.json`)
             }
-            return { count: failedControls.length }
-          })(),
-          { loading: `Finding ${actionLabel.toLowerCase()}...`, success: (data) => `Found ${data.count} items - report downloaded`, error: 'Action failed' }
-        )
+            toast.success(`Found ${failedControls.length} items - report downloaded`)
+          })
+          .catch(err => toast.error(err.message || 'Action failed'))
         break
       case 'Import':
         setShowImportDialog(true)
         break
       case 'Matrix':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 300))
+        toast.success('Generating risk matrix...')
+        fetch('/api/compliance?action=generate_matrix')
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to generate matrix')
+            return res.json()
+          })
+          .then(() => {
             const matrix = risks.map(r => ({
               name: r.name,
               likelihood: r.likelihood,
@@ -851,34 +916,43 @@ export default function ComplianceClient() {
               residualRisk: r.residualRisk
             }))
             downloadAsJson(matrix, 'risk-matrix.json')
-            return matrix
-          })(),
-          { loading: 'Generating risk matrix...', success: 'Risk matrix downloaded', error: 'Failed to generate matrix' }
-        )
+            toast.success('Risk matrix downloaded')
+          })
+          .catch(err => toast.error(err.message || 'Failed to generate matrix'))
         break
       case 'Mitigate':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 300))
+        toast.success('Mitigating open risks...')
+        fetch('/api/compliance', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'mitigate_risks' })
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to mitigate')
+            return res.json()
+          })
+          .then(() => {
             setRisks(prev => prev.map(r => r.status === 'open' ? { ...r, status: 'mitigated' as const } : r))
-            return { mitigated: true }
-          })(),
-          { loading: 'Mitigating open risks...', success: 'All open risks marked as mitigated', error: 'Failed to mitigate' }
-        )
+            toast.success('All open risks marked as mitigated')
+          })
+          .catch(err => toast.error(err.message || 'Failed to mitigate'))
         break
       case 'Schedule':
         setShowScheduleDialog(true)
         break
       case 'Findings':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 300))
+        toast.success('Compiling findings...')
+        fetch('/api/compliance?action=compile_findings')
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to compile findings')
+            return res.json()
+          })
+          .then(() => {
             const findings = audits.flatMap(a => ({ audit: a.name, findings: a.findings, critical: a.criticalFindings }))
             downloadAsJson(findings, 'audit-findings.json')
-            return findings
-          })(),
-          { loading: 'Compiling findings...', success: 'Findings report downloaded', error: 'Failed to compile findings' }
-        )
+            toast.success('Findings report downloaded')
+          })
+          .catch(err => toast.error(err.message || 'Failed to compile findings'))
         break
       case 'Assign':
         setShowAssignDialog(true)
@@ -887,14 +961,21 @@ export default function ComplianceClient() {
         toast.info('Opening policy templates library browser')
         break
       case 'Approve':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 300))
+        toast.success('Approving policies...')
+        fetch('/api/compliance', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'approve_policies' })
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Failed to approve')
+            return res.json()
+          })
+          .then(() => {
             setPolicies(prev => prev.map(p => p.status === 'review' ? { ...p, status: 'approved' as const } : p))
-            return { approved: true }
-          })(),
-          { loading: 'Approving policies...', success: 'All policies in review approved', error: 'Failed to approve' }
-        )
+            toast.success('All policies in review approved')
+          })
+          .catch(err => toast.error(err.message || 'Failed to approve'))
         break
       case 'Versions':
         toast.info('Opening version history viewer')
@@ -903,13 +984,21 @@ export default function ComplianceClient() {
         toast.info('Opening attestation tracking dashboard')
         break
       case 'Distribute':
-        toast.promise(
-          (async () => {
-            await new Promise(r => setTimeout(r, 300))
-            return { distributed: policies.filter(p => p.status === 'published').length }
-          })(),
-          { loading: 'Distributing policies...', success: (data) => `${data.distributed} policies distributed to employees`, error: 'Distribution failed' }
-        )
+        toast.success('Distributing policies...')
+        fetch('/api/compliance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'distribute_policies' })
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Distribution failed')
+            return res.json()
+          })
+          .then(() => {
+            const distributed = policies.filter(p => p.status === 'published').length
+            toast.success(`${distributed} policies distributed to employees`)
+          })
+          .catch(err => toast.error(err.message || 'Distribution failed'))
         break
       default:
         toast.info(`${actionLabel} action initiated`)
@@ -1331,27 +1420,36 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Risk Register</h2>
-              <Button onClick={() => toast.promise(
-                (async () => {
-                  await new Promise(r => setTimeout(r, 300))
-                  setRisks(prev => [...prev, {
-                    id: `risk${prev.length + 1}`,
-                    name: 'New Risk',
-                    description: 'New risk - configure details',
-                    category: 'operational' as const,
-                    inherentRisk: 50,
-                    residualRisk: 50,
-                    likelihood: 'possible' as const,
-                    impact: 'moderate' as const,
-                    status: 'open' as const,
-                    owner: 'Current User',
-                    controls: [],
-                    lastReview: new Date().toISOString().split('T')[0]
-                  }])
-                  return { created: true }
-                })(),
-                { loading: 'Creating risk...', success: 'Risk created - configure details', error: 'Failed to create' }
-              )}>
+              <Button onClick={() => {
+                toast.success('Creating risk...')
+                fetch('/api/compliance', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'create_risk' })
+                })
+                  .then(res => {
+                    if (!res.ok) throw new Error('Failed to create')
+                    return res.json()
+                  })
+                  .then(() => {
+                    setRisks(prev => [...prev, {
+                      id: `risk${prev.length + 1}`,
+                      name: 'New Risk',
+                      description: 'New risk - configure details',
+                      category: 'operational' as const,
+                      inherentRisk: 50,
+                      residualRisk: 50,
+                      likelihood: 'possible' as const,
+                      impact: 'moderate' as const,
+                      status: 'open' as const,
+                      owner: 'Current User',
+                      controls: [],
+                      lastReview: new Date().toISOString().split('T')[0]
+                    }])
+                    toast.success('Risk created - configure details')
+                  })
+                  .catch(err => toast.error(err.message || 'Failed to create'))
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Risk
               </Button>
@@ -1465,27 +1563,36 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Audit Management</h2>
-              <Button onClick={() => toast.promise(
-                (async () => {
-                  await new Promise(r => setTimeout(r, 300))
-                  const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                  setAudits(prev => [...prev, {
-                    id: `audit${prev.length + 1}`,
-                    name: 'New Scheduled Audit',
-                    type: 'internal' as const,
-                    framework: 'Custom',
-                    status: 'planned' as const,
-                    startDate: nextMonth.toISOString().split('T')[0],
-                    endDate: new Date(nextMonth.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    auditor: 'Internal Audit Team',
-                    findings: 0,
-                    criticalFindings: 0,
-                    progress: 0
-                  }])
-                  return { scheduled: true }
-                })(),
-                { loading: 'Scheduling audit...', success: 'Audit scheduled for next month', error: 'Failed to schedule' }
-              )}>
+              <Button onClick={() => {
+                toast.success('Scheduling audit...')
+                fetch('/api/compliance', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'schedule_audit' })
+                })
+                  .then(res => {
+                    if (!res.ok) throw new Error('Failed to schedule')
+                    return res.json()
+                  })
+                  .then(() => {
+                    const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                    setAudits(prev => [...prev, {
+                      id: `audit${prev.length + 1}`,
+                      name: 'New Scheduled Audit',
+                      type: 'internal' as const,
+                      framework: 'Custom',
+                      status: 'planned' as const,
+                      startDate: nextMonth.toISOString().split('T')[0],
+                      endDate: new Date(nextMonth.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                      auditor: 'Internal Audit Team',
+                      findings: 0,
+                      criticalFindings: 0,
+                      progress: 0
+                    }])
+                    toast.success('Audit scheduled for next month')
+                  })
+                  .catch(err => toast.error(err.message || 'Failed to schedule'))
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Schedule Audit
               </Button>
@@ -1545,22 +1652,29 @@ export default function ComplianceClient() {
 
                   <div className="flex items-center gap-2 pt-4 border-t">
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.promise(
-                        (async () => {
-                          await new Promise(r => setTimeout(r, 200))
+                      toast.success('Loading audit details...')
+                      fetch(`/api/compliance?action=get_audit&auditId=${audit.id}`)
+                        .then(res => {
+                          if (!res.ok) throw new Error('Failed to load')
+                          return res.json()
+                        })
+                        .then(() => {
                           downloadAsJson(audit, `audit-${audit.id}-details.json`)
-                          return audit
-                        })(),
-                        { loading: 'Loading audit details...', success: `Viewing ${audit.name} - details downloaded`, error: 'Failed to load' }
-                      )
+                          toast.success(`Viewing ${audit.name} - details downloaded`)
+                        })
+                        .catch(err => toast.error(err.message || 'Failed to load'))
                     }}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.promise(
-                        (async () => {
-                          await new Promise(r => setTimeout(r, 200))
+                      toast.success('Generating findings report...')
+                      fetch(`/api/compliance?action=get_findings&auditId=${audit.id}`)
+                        .then(res => {
+                          if (!res.ok) throw new Error('Failed to generate')
+                          return res.json()
+                        })
+                        .then(() => {
                           const findingsReport = {
                             audit: audit.name,
                             findings: audit.findings,
@@ -1569,10 +1683,9 @@ export default function ComplianceClient() {
                             generatedAt: new Date().toISOString()
                           }
                           downloadAsJson(findingsReport, `audit-${audit.id}-findings.json`)
-                          return findingsReport
-                        })(),
-                        { loading: 'Generating findings report...', success: 'Findings report downloaded', error: 'Failed to generate' }
-                      )
+                          toast.success('Findings report downloaded')
+                        })
+                        .catch(err => toast.error(err.message || 'Failed to generate'))
                     }}>
                       <FileText className="w-4 h-4 mr-2" />
                       Findings
@@ -1635,25 +1748,34 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Policy Management</h2>
-              <Button onClick={() => toast.promise(
-                (async () => {
-                  await new Promise(r => setTimeout(r, 300))
-                  setPolicies(prev => [...prev, {
-                    id: `pol${prev.length + 1}`,
-                    name: 'New Policy',
-                    version: '1.0',
-                    status: 'draft' as const,
-                    category: 'General',
-                    owner: 'Current User',
-                    lastUpdated: new Date().toISOString().split('T')[0],
-                    nextReview: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                    acknowledgements: 0,
-                    totalEmployees: 250
-                  }])
-                  return { created: true }
-                })(),
-                { loading: 'Creating policy...', success: 'Policy created as draft', error: 'Failed to create' }
-              )}>
+              <Button onClick={() => {
+                toast.success('Creating policy...')
+                fetch('/api/compliance', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'create_policy' })
+                })
+                  .then(res => {
+                    if (!res.ok) throw new Error('Failed to create')
+                    return res.json()
+                  })
+                  .then(() => {
+                    setPolicies(prev => [...prev, {
+                      id: `pol${prev.length + 1}`,
+                      name: 'New Policy',
+                      version: '1.0',
+                      status: 'draft' as const,
+                      category: 'General',
+                      owner: 'Current User',
+                      lastUpdated: new Date().toISOString().split('T')[0],
+                      nextReview: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                      acknowledgements: 0,
+                      totalEmployees: 250
+                    }])
+                    toast.success('Policy created as draft')
+                  })
+                  .catch(err => toast.error(err.message || 'Failed to create'))
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Policy
               </Button>
@@ -1867,10 +1989,18 @@ export default function ComplianceClient() {
                             <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Inc.</p>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                            toast.loading('Opening editor...', { id: 'org-edit' })
-                            setTimeout(() => {
-                              toast.success('Organization name editor opened', { id: 'org-edit' })
-                            }, 500)
+                            toast.success('Opening editor...')
+                            fetch('/api/compliance', {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ action: 'edit_organization' })
+                            })
+                              .then(res => {
+                                if (!res.ok) throw new Error('Failed to open editor')
+                                return res.json()
+                              })
+                              .then(() => toast.success('Organization name editor opened'))
+                              .catch(err => toast.error(err.message || 'Failed to open editor'))
                           }}>Edit</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2479,14 +2609,23 @@ export default function ComplianceClient() {
                 disabled={!importFile}
                 onClick={() => {
                   if (importFile) {
-                    toast.promise(
-                      (async () => {
-                        await new Promise(r => setTimeout(r, 1500))
-                        // Simulate parsing and importing
+                    toast.success(`Importing ${importFile.name}...`)
+                    const formData = new FormData()
+                    formData.append('file', importFile)
+                    formData.append('action', 'import_data')
+
+                    fetch('/api/compliance', {
+                      method: 'POST',
+                      body: formData
+                    })
+                      .then(res => {
+                        if (!res.ok) throw new Error('Failed to import file')
+                        return res.json()
+                      })
+                      .then(() => {
                         const reader = new FileReader()
                         reader.onload = () => {
                           try {
-                            // Attempt to parse JSON files
                             if (importFile.name.endsWith('.json')) {
                               const data = JSON.parse(reader.result as string)
                               if (data.controls) {
@@ -2497,22 +2636,15 @@ export default function ComplianceClient() {
                               }
                             }
                           } catch {
-                            // If parsing fails, just show success anyway for demo
+                            // If parsing fails, continue
                           }
                         }
                         reader.readAsText(importFile)
-                        return { filename: importFile.name }
-                      })(),
-                      {
-                        loading: `Importing ${importFile.name}...`,
-                        success: (data) => {
-                          setShowImportDialog(false)
-                          setImportFile(null)
-                          return `Successfully imported data from ${data.filename}`
-                        },
-                        error: 'Failed to import file'
-                      }
-                    )
+                        setShowImportDialog(false)
+                        setImportFile(null)
+                        toast.success(`Successfully imported data from ${importFile.name}`)
+                      })
+                      .catch(err => toast.error(err.message || 'Failed to import file'))
                   }
                 }}
               >
@@ -2642,9 +2774,20 @@ export default function ComplianceClient() {
                 className="flex-1"
                 disabled={!scheduleForm.name || !scheduleForm.startDate || !scheduleForm.endDate}
                 onClick={() => {
-                  toast.promise(
-                    (async () => {
-                      await new Promise(r => setTimeout(r, 800))
+                  toast.success('Scheduling audit...')
+                  fetch('/api/compliance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'schedule_audit',
+                      ...scheduleForm
+                    })
+                  })
+                    .then(res => {
+                      if (!res.ok) throw new Error('Failed to schedule audit')
+                      return res.json()
+                    })
+                    .then(() => {
                       const newAudit: Audit = {
                         id: `audit${audits.length + 1}`,
                         name: scheduleForm.name,
@@ -2659,25 +2802,18 @@ export default function ComplianceClient() {
                         progress: 0
                       }
                       setAudits(prev => [...prev, newAudit])
-                      return newAudit
-                    })(),
-                    {
-                      loading: 'Scheduling audit...',
-                      success: (audit) => {
-                        setShowScheduleDialog(false)
-                        setScheduleForm({
-                          name: '',
-                          framework: 'SOC 2',
-                          type: 'internal',
-                          startDate: '',
-                          endDate: '',
-                          auditor: ''
-                        })
-                        return `Audit "${audit.name}" scheduled for ${new Date(audit.startDate).toLocaleDateString()}`
-                      },
-                      error: 'Failed to schedule audit'
-                    }
-                  )
+                      setShowScheduleDialog(false)
+                      setScheduleForm({
+                        name: '',
+                        framework: 'SOC 2',
+                        type: 'internal',
+                        startDate: '',
+                        endDate: '',
+                        auditor: ''
+                      })
+                      toast.success(`Audit "${newAudit.name}" scheduled for ${new Date(newAudit.startDate).toLocaleDateString()}`)
+                    })
+                    .catch(err => toast.error(err.message || 'Failed to schedule audit'))
                 }}
               >
                 <Calendar className="w-4 h-4 mr-2" />
@@ -2826,25 +2962,31 @@ export default function ComplianceClient() {
                   }
                   const memberName = memberNames[assignForm.selectedMember] || 'Team Member'
 
-                  toast.promise(
-                    (async () => {
-                      await new Promise(r => setTimeout(r, 600))
-                      return { audit: selectedAuditData?.name, member: memberName, role: assignForm.role }
-                    })(),
-                    {
-                      loading: 'Assigning team member...',
-                      success: (data) => {
-                        setShowAssignDialog(false)
-                        setAssignForm({
-                          selectedAudit: '',
-                          selectedMember: '',
-                          role: 'auditor'
-                        })
-                        return `${data.member} assigned as ${data.role} to "${data.audit}"`
-                      },
-                      error: 'Failed to assign team member'
-                    }
-                  )
+                  toast.success('Assigning team member...')
+                  fetch('/api/compliance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'assign_member',
+                      auditId: assignForm.selectedAudit,
+                      memberId: assignForm.selectedMember,
+                      role: assignForm.role
+                    })
+                  })
+                    .then(res => {
+                      if (!res.ok) throw new Error('Failed to assign team member')
+                      return res.json()
+                    })
+                    .then(() => {
+                      setShowAssignDialog(false)
+                      setAssignForm({
+                        selectedAudit: '',
+                        selectedMember: '',
+                        role: 'auditor'
+                      })
+                      toast.success(`${memberName} assigned as ${assignForm.role} to "${selectedAuditData?.name}"`)
+                    })
+                    .catch(err => toast.error(err.message || 'Failed to assign team member'))
                 }}
               >
                 <Users className="w-4 h-4 mr-2" />

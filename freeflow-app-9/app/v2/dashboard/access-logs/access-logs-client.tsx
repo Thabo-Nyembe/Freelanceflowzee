@@ -926,16 +926,15 @@ export default function AccessLogsClient() {
     setIsAuditing(true)
     setAuditResults(null)
     try {
-      // Simulate audit based on scope and depth
-      const auditDuration = auditDepth === 'quick' ? 1500 : auditDepth === 'standard' ? 3000 : 5000
-
-      await new Promise(resolve => setTimeout(resolve, auditDuration))
-
-      // Generate realistic audit results based on current stats
-      const issues = Math.floor(Math.random() * 5) + (auditScope === 'security' ? 2 : 0)
-      const warnings = Math.floor(Math.random() * 10) + (auditScope === 'performance' ? 3 : 0)
-      const passed = Math.floor(Math.random() * 50) + 30
-      const score = Math.max(0, Math.min(100, 100 - (issues * 5) - (warnings * 2)))
+      // Call API to run audit
+      const res = await fetch('/api/access-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run-audit', scope: auditScope, depth: auditDepth })
+      })
+      if (!res.ok) throw new Error('Audit failed')
+      const data = await res.json()
+      const { score, issues, warnings, passed } = data.results
 
       setAuditResults({ score, issues, warnings, passed })
 
@@ -1135,8 +1134,21 @@ export default function AccessLogsClient() {
   const handleAnalyticsQuickAction = (label: string) => {
     switch (label) {
       case 'Status Report':
-        toast.info('Generating status report...', { description: 'This may take a moment' })
-        setTimeout(() => toast.success('Status report ready'), 1500)
+        toast.promise(
+          fetch('/api/access-logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'status-report' })
+          }).then(res => {
+            if (!res.ok) throw new Error('Failed')
+            return res.json()
+          }),
+          {
+            loading: 'Generating status report...',
+            success: 'Status report ready',
+            error: 'Failed to generate report'
+          }
+        )
         break
       case 'Geo Analysis':
         toast.info('Loading geographic analysis...')
@@ -1151,8 +1163,21 @@ export default function AccessLogsClient() {
         toast.info('Loading traffic flow visualization...')
         break
       case 'Risk Score':
-        toast.info('Calculating risk score...', { description: 'Analyzing security metrics' })
-        setTimeout(() => toast.success('Risk score: 85/100 (Low risk)'), 2000)
+        toast.promise(
+          fetch('/api/access-logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'risk-score' })
+          }).then(res => {
+            if (!res.ok) throw new Error('Failed')
+            return res.json()
+          }).then(data => data.message),
+          {
+            loading: 'Calculating risk score... Analyzing security metrics',
+            success: (msg) => msg || 'Risk score calculated',
+            error: 'Failed to calculate risk score'
+          }
+        )
         break
       case 'Export Data':
         setShowExportDialog(true)
@@ -2957,11 +2982,25 @@ export default function AccessLogsClient() {
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={handleClearFilters}>Clear All</Button>
             <Button onClick={() => {
-              toast.loading('Applying filters...', { id: 'apply-filters' })
-              setTimeout(() => {
-                toast.success('Filters applied successfully!', { id: 'apply-filters' })
-                setShowFilterDialog(false)
-              }, 800)
+              toast.promise(
+                fetch('/api/access-logs', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: 'apply-filters',
+                    filters: { status: selectedStatus, level: selectedLevel, type: selectedType }
+                  })
+                }).then(res => {
+                  if (!res.ok) throw new Error('Failed')
+                  setShowFilterDialog(false)
+                  return res.json()
+                }),
+                {
+                  loading: 'Applying filters...',
+                  success: 'Filters applied successfully!',
+                  error: 'Failed to apply filters'
+                }
+              )
             }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
               Apply Filters
             </Button>
@@ -3088,10 +3127,21 @@ export default function AccessLogsClient() {
               ))}
             </div>
             <Button variant="outline" className="w-full" onClick={() => {
-              toast.loading('Adding custom field...', { id: 'add-field' })
-              setTimeout(() => {
-                toast.success('Custom field added!', { id: 'add-field' })
-              }, 800)
+              toast.promise(
+                fetch('/api/access-logs', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'add-custom-field', fieldName: 'new_field', fieldType: 'string' })
+                }).then(res => {
+                  if (!res.ok) throw new Error('Failed')
+                  return res.json()
+                }),
+                {
+                  loading: 'Adding custom field...',
+                  success: 'Custom field added!',
+                  error: 'Failed to add field'
+                }
+              )
             }}>
               <Tag className="w-4 h-4 mr-2" />
               Add Custom Field
@@ -3100,11 +3150,22 @@ export default function AccessLogsClient() {
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button variant="outline" onClick={() => setShowCustomFieldsDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.loading('Saving custom fields...', { id: 'save-fields' })
-              setTimeout(() => {
-                toast.success('Custom fields saved!', { id: 'save-fields' })
-                setShowCustomFieldsDialog(false)
-              }, 1000)
+              toast.promise(
+                fetch('/api/access-logs', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'save-custom-fields', fields: [] })
+                }).then(res => {
+                  if (!res.ok) throw new Error('Failed')
+                  setShowCustomFieldsDialog(false)
+                  return res.json()
+                }),
+                {
+                  loading: 'Saving custom fields...',
+                  success: 'Custom fields saved!',
+                  error: 'Failed to save fields'
+                }
+              )
             }} className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
               Save Changes
             </Button>

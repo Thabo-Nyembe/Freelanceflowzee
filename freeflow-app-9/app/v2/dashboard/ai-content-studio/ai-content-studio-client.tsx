@@ -143,8 +143,17 @@ export default function AiContentStudioClient() {
     }
     setIsCreatingContent(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/ai-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          title: newContentTitle,
+          type: newContentType,
+          description: newContentDescription
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create content')
       toast.success(`New ${newContentType.replace('-', ' ')} "${newContentTitle}" created successfully`)
       logger.info('Content created', { title: newContentTitle, type: newContentType })
       setShowNewContentDialog(false)
@@ -161,24 +170,31 @@ export default function AiContentStudioClient() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      const exportData = {
-        format: exportFormat,
-        includeMetadata: exportIncludeMetadata,
-        dateRange: exportDateRange,
-        exportedAt: new Date().toISOString()
+      const res = await fetch(`/api/ai-content?action=export&format=${exportFormat}&includeMetadata=${exportIncludeMetadata}&dateRange=${exportDateRange}`)
+      if (!res.ok) throw new Error('Export failed')
+
+      if (exportFormat === 'csv') {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `ai-content-export-${Date.now()}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else {
+        const { data } = await res.json()
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `ai-content-export-${Date.now()}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
       }
-      // Create and download file
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `ai-content-export-${Date.now()}.${exportFormat}`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
       toast.success(`Content exported as ${exportFormat.toUpperCase()} successfully`)
       logger.info('Content exported', { format: exportFormat, dateRange: exportDateRange })
       setShowExportDialog(false)
@@ -193,14 +209,18 @@ export default function AiContentStudioClient() {
   const handleSaveSettings = async () => {
     setIsSavingSettings(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800))
       const settings = {
         aiModel,
         autoSaveEnabled,
         defaultTone,
         maxTokens: parseInt(maxTokens)
       }
+      const res = await fetch('/api/ai-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save_settings', ...settings })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
       localStorage.setItem('aiContentStudioSettings', JSON.stringify(settings))
       toast.success('AI Content Studio settings saved successfully')
       logger.info('Settings saved', settings)
@@ -224,7 +244,17 @@ export default function AiContentStudioClient() {
     }
     setIsSharing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/ai-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share',
+          email: shareEmail,
+          message: shareMessage,
+          permission: sharePermission
+        })
+      })
+      if (!res.ok) throw new Error('Failed to share')
       toast.success(`Content shared with ${shareEmail} successfully`)
       logger.info('Content shared', { email: shareEmail, permission: sharePermission })
       setShowShareDialog(false)
@@ -245,7 +275,17 @@ export default function AiContentStudioClient() {
     }
     setIsScheduling(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/ai-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'schedule',
+          date: scheduleDate,
+          time: scheduleTime,
+          platform: schedulePlatform
+        })
+      })
+      if (!res.ok) throw new Error('Failed to schedule')
       const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`)
       toast.success(`Content scheduled for ${scheduledDateTime.toLocaleString()} on ${schedulePlatform}`)
       logger.info('Content scheduled', { date: scheduleDate, time: scheduleTime, platform: schedulePlatform })
@@ -267,7 +307,17 @@ export default function AiContentStudioClient() {
     }
     setIsSavingTemplate(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const res = await fetch('/api/ai-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_template',
+          name: templateName,
+          category: templateCategory
+        })
+      })
+      if (!res.ok) throw new Error('Failed to save template')
+      // Also save to localStorage for quick access
       const templates = JSON.parse(localStorage.getItem('aiContentTemplates') || '[]')
       templates.push({
         id: Date.now().toString(),

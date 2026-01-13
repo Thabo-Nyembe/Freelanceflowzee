@@ -48,7 +48,14 @@ const aiImageGeneratorActivities = [
 const aiImageGeneratorQuickActions = [
   { id: '1', label: 'New Image', icon: 'Plus', shortcut: 'N', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
+      fetch('/api/ai/image-generation-enhanced', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'initialize' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to initialize')
+        return res.json()
+      }),
       {
         loading: 'Initializing AI image generator...',
         success: 'New AI image generation ready',
@@ -58,7 +65,19 @@ const aiImageGeneratorQuickActions = [
   }},
   { id: '2', label: 'Export Images', icon: 'Download', shortcut: 'E', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
+      fetch('/api/ai/image-generation-enhanced?action=export').then(async res => {
+        if (!res.ok) throw new Error('Export failed')
+        const blob = await res.blob().catch(() => null)
+        if (blob && blob.size > 0) {
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `ai-images-${Date.now()}.zip`
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }
+        return true
+      }),
       {
         loading: 'Preparing AI-generated images for export...',
         success: 'Images exported successfully',
@@ -68,7 +87,10 @@ const aiImageGeneratorQuickActions = [
   }},
   { id: '3', label: 'AI Settings', icon: 'Settings', shortcut: 'S', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/ai/image-generation-enhanced?action=settings').then(res => {
+        if (!res.ok) throw new Error('Failed to load settings')
+        return res.json()
+      }),
       {
         loading: 'Loading AI image generation settings...',
         success: 'AI settings panel opened',

@@ -937,44 +937,119 @@ export default function ApiKeysClient() {
   }, [searchQuery])
 
   // Handlers
-  const handleCreateApiKey = () => {
-    // Generate a new API key format
-    const newKeyPrefix = 'ffa_' + Math.random().toString(36).substring(2, 10)
-    const newKeyCode = Math.random().toString(36).substring(2, 18) + Math.random().toString(36).substring(2, 18)
-    const fullKey = `${newKeyPrefix}_${newKeyCode}`
+  const handleCreateApiKey = async () => {
+    try {
+      const response = await fetch('/api/user/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: newKeyName || 'New API Key',
+          description: newKeyDescription,
+          environment: newKeyEnvironment,
+          keyType: newKeyType,
+          scopes: selectedScopes
+        })
+      })
 
-    toast.promise(
-      navigator.clipboard.writeText(fullKey),
-      {
-        loading: 'Generating API key...',
-        success: `New API key created: ${newKeyPrefix}_****. Key copied to clipboard - save it now, it won't be shown again!`,
-        error: 'Failed to create API key'
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create API key')
       }
-    )
+
+      // Copy the full key to clipboard
+      if (data.data?.fullKey) {
+        await navigator.clipboard.writeText(data.data.fullKey)
+        toast.success('API key created successfully!', {
+          description: `Key copied to clipboard - save it now, it won't be shown again!`
+        })
+      } else {
+        toast.success('API key created successfully!')
+      }
+    } catch (error: any) {
+      toast.error('Failed to create API key', {
+        description: error.message || 'An unexpected error occurred'
+      })
+    }
   }
 
-  const handleRevokeKey = (keyName: string) => {
-    toast.promise(
-      Promise.resolve({ success: true, keyName }),
-      {
-        loading: `Revoking ${keyName}...`,
-        success: `${keyName} has been revoked successfully`,
-        error: `Failed to revoke ${keyName}`
+  const handleRevokeKey = async (keyName: string, keyId?: string) => {
+    try {
+      const response = await fetch('/api/user/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'revoke',
+          keyId: keyId || keyToAction?.id
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to revoke API key')
       }
-    )
+
+      toast.success(`${keyName} has been revoked successfully`)
+    } catch (error: any) {
+      toast.error(`Failed to revoke ${keyName}`, {
+        description: error.message || 'An unexpected error occurred'
+      })
+    }
   }
 
-  const handleRegenerateKey = (keyName: string) => {
-    const newKeyCode = Math.random().toString(36).substring(2, 18) + Math.random().toString(36).substring(2, 18)
+  const handleRegenerateKey = async (keyName: string, keyId?: string) => {
+    try {
+      const response = await fetch('/api/user/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'regenerate',
+          keyId: keyId || keyToAction?.id
+        })
+      })
 
-    toast.promise(
-      navigator.clipboard.writeText(newKeyCode),
-      {
-        loading: `Regenerating key for ${keyName}...`,
-        success: `New key created for ${keyName} - copied to clipboard`,
-        error: `Failed to regenerate key for ${keyName}`
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to regenerate API key')
       }
-    )
+
+      // Copy the new key to clipboard
+      if (data.data?.fullKey) {
+        await navigator.clipboard.writeText(data.data.fullKey)
+        toast.success(`New key created for ${keyName}`, {
+          description: 'Key copied to clipboard - save it now!'
+        })
+      } else {
+        toast.success(`Key regenerated for ${keyName}`)
+      }
+    } catch (error: any) {
+      toast.error(`Failed to regenerate key for ${keyName}`, {
+        description: error.message || 'An unexpected error occurred'
+      })
+    }
+  }
+
+  const handleDeleteKey = async (keyName: string, keyId: string) => {
+    try {
+      const response = await fetch(`/api/user/api-keys?keyId=${keyId}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete API key')
+      }
+
+      toast.success(`${keyName} has been deleted successfully`)
+    } catch (error: any) {
+      toast.error(`Failed to delete ${keyName}`, {
+        description: error.message || 'An unexpected error occurred'
+      })
+    }
   }
 
   const handleCopyKey = async (key: string) => {
@@ -2248,14 +2323,36 @@ export default function ApiKeysClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setSetExpiryDialogOpen(false)}>Cancel</Button>
               <Button onClick={async () => {
+                if (!keyToAction) {
+                  toast.error('Please select an API key')
+                  return
+                }
                 toast.loading('Setting expiration...', { id: 'set-expiry' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  toast.success(`Expiration set to ${expiryDays} days`, { id: 'set-expiry', description: keyToAction?.name || 'selected key' })
+                  const expiresAt = expiryDays === 'never'
+                    ? null
+                    : new Date(Date.now() + parseInt(expiryDays) * 24 * 60 * 60 * 1000).toISOString()
+
+                  const response = await fetch('/api/user/api-keys', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      keyId: keyToAction.id,
+                      updates: { expiresAt }
+                    })
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to set expiration')
+                  }
+
+                  toast.success(`Expiration set to ${expiryDays === 'never' ? 'never expire' : expiryDays + ' days'}`, { id: 'set-expiry', description: keyToAction?.name || 'selected key' })
                   setSetExpiryDialogOpen(false)
                   setKeyToAction(null)
-                } catch {
-                  toast.error('Failed to set expiration', { id: 'set-expiry' })
+                } catch (error: any) {
+                  toast.error('Failed to set expiration', { id: 'set-expiry', description: error.message })
                 }
               }}>Set Expiration</Button>
             </DialogFooter>
@@ -2296,14 +2393,41 @@ export default function ApiKeysClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setPermissionsDialogOpen(false)}>Cancel</Button>
               <Button onClick={async () => {
+                if (!keyToAction) {
+                  toast.error('Please select an API key')
+                  return
+                }
                 toast.loading('Updating permissions...', { id: 'update-permissions' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  // Collect selected scopes from checkboxes
+                  const selectedScopes: string[] = []
+                  mockScopes.forEach(scope => {
+                    const checkbox = document.getElementById(`perm-${scope.id}`) as HTMLInputElement
+                    if (checkbox?.checked) {
+                      selectedScopes.push(scope.name)
+                    }
+                  })
+
+                  const response = await fetch('/api/user/api-keys', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      keyId: keyToAction.id,
+                      updates: { scopes: selectedScopes }
+                    })
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to update permissions')
+                  }
+
                   toast.success('Permissions updated successfully', { id: 'update-permissions', description: keyToAction?.name })
                   setPermissionsDialogOpen(false)
                   setKeyToAction(null)
-                } catch {
-                  toast.error('Failed to update permissions', { id: 'update-permissions' })
+                } catch (error: any) {
+                  toast.error('Failed to update permissions', { id: 'update-permissions', description: error.message })
                 }
               }}>Save Permissions</Button>
             </DialogFooter>
@@ -2482,13 +2606,30 @@ export default function ApiKeysClient() {
                 }
                 toast.loading('Creating application...', { id: 'create-app' })
                 try {
-                  await new Promise(r => setTimeout(r, 1200))
+                  const response = await fetch('/api/user/api-keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'create',
+                      name: newAppName,
+                      description: newAppDescription,
+                      keyType: newAppType,
+                      environment: 'production'
+                    })
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create application')
+                  }
+
                   toast.success(`Application "${newAppName}" created`, { id: 'create-app', description: `Type: ${newAppType}` })
                   setCreateAppDialogOpen(false)
                   setNewAppName('')
                   setNewAppDescription('')
-                } catch {
-                  toast.error('Failed to create application', { id: 'create-app' })
+                } catch (error: any) {
+                  toast.error('Failed to create application', { id: 'create-app', description: error.message })
                 }
               }}>Create Application</Button>
             </DialogFooter>
@@ -2541,13 +2682,36 @@ export default function ApiKeysClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setAppSettingsDialogOpen(false)}>Cancel</Button>
               <Button onClick={async () => {
+                if (!selectedApp) {
+                  toast.error('No application selected')
+                  return
+                }
                 toast.loading('Saving settings...', { id: 'app-settings' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  const response = await fetch('/api/user/api-keys', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      keyId: selectedApp.client_id,
+                      updates: {
+                        callback_urls: selectedApp.callback_urls,
+                        logout_urls: selectedApp.logout_urls,
+                        access_token_expiration: selectedApp.access_token_expiration,
+                        refresh_token_expiration: selectedApp.refresh_token_expiration
+                      }
+                    })
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to save settings')
+                  }
+
                   toast.success('Application settings saved', { id: 'app-settings', description: selectedApp?.name })
                   setAppSettingsDialogOpen(false)
-                } catch {
-                  toast.error('Failed to save settings', { id: 'app-settings' })
+                } catch (error: any) {
+                  toast.error('Failed to save settings', { id: 'app-settings', description: error.message })
                 }
               }}>Save Settings</Button>
             </DialogFooter>
@@ -2641,12 +2805,19 @@ console.log(user);`}</code>
               <Button onClick={async () => {
                 toast.loading('Preparing export...', { id: 'export-logs' })
                 try {
-                  await new Promise(r => setTimeout(r, 2000))
+                  const response = await fetch('/api/user/api-keys')
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fetch logs')
+                  }
+
                   const logsData = {
                     exportDate: new Date().toISOString(),
-                    totalRequests: 15420,
+                    totalRequests: data.count || 0,
                     avgLatency: '45ms',
-                    period: 'Last 30 days'
+                    period: 'Last 30 days',
+                    keys: data.data || []
                   }
                   const blob = new Blob([JSON.stringify(logsData, null, 2)], { type: 'application/json' })
                   const url = URL.createObjectURL(blob)
@@ -2657,8 +2828,8 @@ console.log(user);`}</code>
                   URL.revokeObjectURL(url)
                   toast.success('Logs exported', { id: 'export-logs', description: 'File downloaded successfully' })
                   setExportLogsDialogOpen(false)
-                } catch {
-                  toast.error('Export failed', { id: 'export-logs' })
+                } catch (error: any) {
+                  toast.error('Export failed', { id: 'export-logs', description: error.message })
                 }
               }}>Export Logs</Button>
             </DialogFooter>
@@ -2705,14 +2876,31 @@ console.log(user);`}</code>
                 }
                 toast.loading('Creating webhook...', { id: 'create-webhook' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  const response = await fetch('/api/user/api-keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'create',
+                      name: newWebhookName,
+                      keyType: 'webhook',
+                      configId: 'webhook',
+                      environment: 'production'
+                    })
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to create webhook')
+                  }
+
                   toast.success(`Webhook "${newWebhookName}" created`, { id: 'create-webhook', description: newWebhookUrl.substring(0, 40) + '...' })
                   setAddWebhookDialogOpen(false)
                   setNewWebhookName('')
                   setNewWebhookUrl('')
                   setNewWebhookEvents([])
-                } catch {
-                  toast.error('Failed to create webhook', { id: 'create-webhook' })
+                } catch (error: any) {
+                  toast.error('Failed to create webhook', { id: 'create-webhook', description: error.message })
                 }
               }}>Create Webhook</Button>
             </DialogFooter>
@@ -2746,13 +2934,34 @@ console.log(user);`}</code>
             <DialogFooter>
               <Button variant="outline" onClick={() => setTestWebhookDialogOpen(false)}>Cancel</Button>
               <Button onClick={async () => {
+                if (!selectedWebhook) {
+                  toast.error('No webhook selected')
+                  return
+                }
                 toast.loading('Sending test webhook...', { id: 'test-webhook' })
                 try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Test webhook sent successfully!', { id: 'test-webhook', description: 'Status: 200 OK - Response time: 89ms' })
+                  const startTime = Date.now()
+                  const response = await fetch('/api/user/api-keys/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      configId: 'webhook',
+                      keyValue: selectedWebhook.secret,
+                      environment: 'production'
+                    })
+                  })
+
+                  const data = await response.json()
+                  const responseTime = Date.now() - startTime
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Webhook test failed')
+                  }
+
+                  toast.success('Test webhook sent successfully!', { id: 'test-webhook', description: `Status: 200 OK - Response time: ${responseTime}ms` })
                   setTestWebhookDialogOpen(false)
-                } catch {
-                  toast.error('Failed to send webhook', { id: 'test-webhook' })
+                } catch (error: any) {
+                  toast.error('Failed to send webhook', { id: 'test-webhook', description: error.message })
                 }
               }}>Send Test Event</Button>
             </DialogFooter>
@@ -2809,13 +3018,36 @@ console.log(user);`}</code>
             <DialogFooter>
               <Button variant="outline" onClick={() => setWebhookSettingsDialogOpen(false)}>Cancel</Button>
               <Button onClick={async () => {
+                if (!selectedWebhook) {
+                  toast.error('No webhook selected')
+                  return
+                }
                 toast.loading('Saving webhook settings...', { id: 'webhook-settings' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  const response = await fetch('/api/user/api-keys', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      keyId: selectedWebhook.id,
+                      updates: {
+                        url: selectedWebhook.url,
+                        retry_policy: selectedWebhook.retry_policy,
+                        max_retries: selectedWebhook.max_retries,
+                        timeout_seconds: selectedWebhook.timeout_seconds
+                      }
+                    })
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to save settings')
+                  }
+
                   toast.success('Webhook settings saved', { id: 'webhook-settings' })
                   setWebhookSettingsDialogOpen(false)
-                } catch {
-                  toast.error('Failed to save settings', { id: 'webhook-settings' })
+                } catch (error: any) {
+                  toast.error('Failed to save settings', { id: 'webhook-settings', description: error.message })
                 }
               }}>Save Settings</Button>
             </DialogFooter>
@@ -3025,11 +3257,29 @@ console.log(user);`}</code>
               <Button onClick={async () => {
                 toast.loading('Saving settings...', { id: 'quick-settings' })
                 try {
-                  await new Promise(r => setTimeout(r, 800))
+                  const response = await fetch('/api/user/api-keys', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      keyId: 'settings',
+                      updates: {
+                        autoKeyRotation: true,
+                        rateLimitAlerts: true,
+                        securityNotifications: true
+                      }
+                    })
+                  })
+
+                  const data = await response.json()
+
+                  if (!response.ok) {
+                    throw new Error(data.error || 'Failed to save settings')
+                  }
+
                   toast.success('Settings saved', { id: 'quick-settings' })
                   setSettingsDialogOpen(false)
-                } catch {
-                  toast.error('Failed to save settings', { id: 'quick-settings' })
+                } catch (error: any) {
+                  toast.error('Failed to save settings', { id: 'quick-settings', description: error.message })
                 }
               }}>Save</Button>
             </DialogFooter>

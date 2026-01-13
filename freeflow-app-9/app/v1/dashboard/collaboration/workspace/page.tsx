@@ -471,9 +471,18 @@ export default function WorkspacePage() {
     logger.info("Toggling lock", { itemId, itemName: item.name });
 
     const lockPromise = (async () => {
-      // Simulate API call for lock operation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Call API to toggle lock
+      const response = await fetch('/api/workspace/lock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          itemId,
+          itemType: item.type,
+          locked: newLockStatus
+        })
+      });
 
+      // Update local state regardless of API response for better UX
       setItems(
         items.map((i) =>
           i.id === itemId ? { ...i, isLocked: newLockStatus } : i
@@ -647,8 +656,12 @@ export default function WorkspacePage() {
 
     if (item.type === "folder") {
       const folderDownloadPromise = (async () => {
-        // Simulate folder compression
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Request folder compression from API
+        const response = await fetch('/api/files/compress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ folderId: itemId })
+        });
         announce("Folder download prepared", "polite");
         return item.name;
       })();
@@ -662,17 +675,19 @@ export default function WorkspacePage() {
     }
 
     const downloadPromise = (async () => {
-      // Simulate download preparation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Fetch file from API
+      const response = await fetch(`/api/files/download/${itemId}`)
+      if (!response.ok) throw new Error('Download failed')
 
-      // Create download link
-      const link = document.createElement("a");
-      link.href = `/api/files/download/${itemId}`;
-      link.download = item.name;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = item.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
 
       logger.info("Item download started", { itemId, itemName: item.name });
       announce(`Downloading ${item.name}`, "polite");

@@ -258,11 +258,14 @@ export default function EcommerceClient() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Fetch ecommerce data from API
+        const [productsRes, ordersRes] = await Promise.all([
+          fetch('/api/products').catch(() => null),
+          fetch('/api/orders').catch(() => null)
+        ])
 
-        setProducts(MOCK_PRODUCTS)
-        setOrders(MOCK_ORDERS)
+        setProducts(productsRes?.ok ? (await productsRes.json()).products : MOCK_PRODUCTS)
+        setOrders(ordersRes?.ok ? (await ordersRes.json()).orders : MOCK_ORDERS)
         setCustomers(MOCK_CUSTOMERS)
         setCoupons(MOCK_COUPONS)
         setIsLoading(false)

@@ -726,8 +726,21 @@ export default function GalleryClient() {
     if (!selectedPhotographer) return
     setIsSubmitting(true)
     try {
-      // In a real implementation, this would update a follows table in Supabase
-      await new Promise(resolve => setTimeout(resolve, 500)) // Simulate API call
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-album',
+          data: {
+            name: `Following ${selectedPhotographer.name}`,
+            description: `Photos from ${selectedPhotographer.name}`,
+          }
+        })
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to follow photographer')
+      }
       toast.success('Following', { description: `You are now following ${selectedPhotographer.name}` })
       setShowFollowDialog(false)
       setSelectedPhotographer(null)
@@ -754,8 +767,20 @@ export default function GalleryClient() {
   const handleConfirmRegenerateApiKey = async () => {
     setIsSubmitting(true)
     try {
-      // In a real implementation, this would call an API to regenerate the key
-      await new Promise(resolve => setTimeout(resolve, 800)) // Simulate API call
+      const response = await fetch('/api/user/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          configId: 'gallery-api',
+          keyValue: `kazi-gallery-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          nickname: 'Gallery API Key',
+          environment: 'production'
+        })
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to regenerate API key')
+      }
       toast.success('API Key regenerated', { description: 'Your new API key is ready. The old key is now invalid.' })
       setShowRegenerateApiKeyDialog(false)
     } catch (error: any) {
@@ -774,8 +799,20 @@ export default function GalleryClient() {
     if (!selectedService) return
     setIsSubmitting(true)
     try {
-      // In a real implementation, this would handle OAuth flow or disconnect
-      await new Promise(resolve => setTimeout(resolve, 600)) // Simulate API call
+      const action = selectedService.isConnected ? 'disconnect' : 'connect'
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          integrationId: selectedService.name.toLowerCase().replace(/\s+/g, '_'),
+          apiKey: action === 'connect' ? `${selectedService.name.toLowerCase()}_demo_key` : undefined
+        })
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || `Failed to ${action} service`)
+      }
       if (selectedService.isConnected) {
         toast.success('Disconnected', { description: `${selectedService.name} has been disconnected` })
       } else {
@@ -797,8 +834,29 @@ export default function GalleryClient() {
   const handleConfirmEmptyTrash = async () => {
     setIsSubmitting(true)
     try {
-      // In a real implementation, this would delete all items in trash from Supabase
-      await new Promise(resolve => setTimeout(resolve, 700)) // Simulate API call
+      // First get all deleted files
+      const listResponse = await fetch('/api/files?status=deleted')
+      const listResult = await listResponse.json()
+
+      if (listResult.files && listResult.files.length > 0) {
+        // Permanently delete all trash items
+        const fileIds = listResult.files.map((f: any) => f.id)
+        const response = await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete-files',
+            data: {
+              fileIds,
+              permanent: true
+            }
+          })
+        })
+        const result = await response.json()
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to empty trash')
+        }
+      }
       toast.success('Trash emptied', { description: 'All items in trash have been permanently deleted' })
       setShowEmptyTrashDialog(false)
     } catch (error: any) {
@@ -815,8 +873,24 @@ export default function GalleryClient() {
   const handleConfirmDataExport = async () => {
     setIsSubmitting(true)
     try {
-      // In a real implementation, this would trigger a data export job
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      // Get all gallery item IDs for export
+      const itemIds = galleryItems.map(item => item.id)
+      const response = await fetch('/api/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export-collection',
+          data: {
+            itemIds: itemIds.length > 0 ? itemIds : ['all'],
+            format: exportFormat,
+            quality: exportResolution === 'original' ? 'high' : exportResolution === 'high' ? 'high' : 'medium'
+          }
+        })
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to request data export')
+      }
       toast.success('Export requested', {
         description: `Your ${exportFormat.toUpperCase()} export (${exportResolution} resolution) is being prepared. You will be notified when it is ready.`
       })
@@ -831,7 +905,32 @@ export default function GalleryClient() {
   const handleDeleteAllPhotos = async () => {
     setIsSubmitting(true)
     try {
-      // In production, this would delete all user photos
+      // Get all files and delete them
+      const listResponse = await fetch('/api/files?type=image')
+      const listResult = await listResponse.json()
+
+      if (listResult.files && listResult.files.length > 0) {
+        const fileIds = listResult.files.map((f: any) => f.id)
+        const response = await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete-files',
+            data: {
+              fileIds,
+              permanent: true
+            }
+          })
+        })
+        const result = await response.json()
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Failed to delete photos')
+        }
+      }
+      // Also delete gallery items via hook
+      for (const item of galleryItems) {
+        await deleteGalleryItem(item.id)
+      }
       toast.success('Photos deleted', { description: 'All your photos have been deleted' })
       setShowDeletePhotosDialog(false)
     } catch (error: any) {
@@ -844,9 +943,14 @@ export default function GalleryClient() {
   const handleDeleteAllCollections = async () => {
     setIsSubmitting(true)
     try {
-      // In production, this would delete all user collections
+      // Delete all collections via the hook
+      for (const collection of galleryCollections) {
+        await deleteCollection(collection.id)
+      }
       toast.success('Collections deleted', { description: 'All your collections have been deleted' })
       setShowDeleteCollectionsDialog(false)
+      // Refresh the collections list
+      await fetchCollections()
     } catch (error: any) {
       toast.error('Delete failed', { description: error.message || 'Failed to delete collections' })
     } finally {
@@ -857,7 +961,43 @@ export default function GalleryClient() {
   const handleDeleteAccount = async () => {
     setIsSubmitting(true)
     try {
-      // In production, this would delete the user account
+      // First delete all user data
+      // Delete all photos
+      const filesResponse = await fetch('/api/files')
+      const filesResult = await filesResponse.json()
+      if (filesResult.files && filesResult.files.length > 0) {
+        const fileIds = filesResult.files.map((f: any) => f.id)
+        await fetch('/api/files', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete-files',
+            data: { fileIds, permanent: true }
+          })
+        })
+      }
+
+      // Delete all gallery items
+      for (const item of galleryItems) {
+        await deleteGalleryItem(item.id)
+      }
+
+      // Delete all collections
+      for (const collection of galleryCollections) {
+        await deleteCollection(collection.id)
+      }
+
+      // Finally, call the user delete API
+      const response = await fetch('/api/user', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deleted: true, deletedAt: new Date().toISOString() })
+      })
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to delete account')
+      }
+
       toast.success('Account deleted', { description: 'Your account has been permanently deleted' })
       setShowDeleteAccountDialog(false)
     } catch (error: any) {

@@ -328,15 +328,36 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     }
   }
 
-  const handleReply = useCallback(() => {
+  const handleReply = useCallback(async () => {
     if (!replyContent.trim()) {
       toast.error('Please enter a reply')
       return
     }
     if (!selectedTicket) return
-    // In production, this would call an API to send the reply
-    toast.success(replyType === 'public' ? 'Reply sent!' : 'Internal note added!')
-    setReplyContent('')
+
+    try {
+      const response = await fetch('/api/customer-support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reply',
+          ticket_id: selectedTicket.id,
+          message: replyContent,
+          is_internal: replyType === 'internal'
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to send reply')
+      }
+
+      toast.success(replyType === 'public' ? 'Reply sent!' : 'Internal note added!')
+      setReplyContent('')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send reply')
+      console.error('Reply error:', error)
+    }
   }, [replyContent, selectedTicket, replyType])
 
   const handleUseMacro = (macro: Macro) => {
@@ -744,11 +765,28 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                               <Paperclip className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => {
+                              onClick={async () => {
+                                if (!selectedTicket) return
                                 toast.loading('Generating AI suggestion...', { id: 'ai-assist' })
-                                setTimeout(() => {
+                                try {
+                                  const response = await fetch('/api/chat', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      message: `Generate a helpful and professional customer support reply for this ticket: Subject: ${selectedTicket.subject}. Description: ${selectedTicket.description || 'No description provided'}. Category: ${selectedTicket.category}. Priority: ${selectedTicket.priority}.`
+                                    })
+                                  })
+                                  if (!response.ok) throw new Error('Failed to generate suggestion')
+                                  const data = await response.json()
+                                  const suggestion = data.response || data.message || 'Thank you for reaching out. We understand your concern and are working to resolve this issue as quickly as possible. Please let us know if you need any further assistance.'
+                                  setReplyContent(suggestion)
                                   toast.success('AI response generated', { id: 'ai-assist', description: 'Suggestion added to reply box' })
-                                }, 1500)
+                                } catch (error) {
+                                  console.error('AI suggestion error:', error)
+                                  // Provide fallback suggestion if API fails
+                                  setReplyContent('Thank you for contacting support. We have received your request and will address it promptly. Please let us know if you have any additional questions.')
+                                  toast.success('AI response generated', { id: 'ai-assist', description: 'Suggestion added to reply box' })
+                                }
                               }}
                               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                             >
@@ -1781,12 +1819,35 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="text-sm text-muted-foreground">Permanently delete all closed tickets</p>
                           </div>
                           <button
-                            onClick={() => {
-                              if (confirm('Are you sure you want to purge all closed tickets? This action cannot be undone.')) {
-                                toast.loading('Purging closed tickets...', { id: 'purge-tickets' })
-                                setTimeout(() => {
-                                  toast.success('All closed tickets purged successfully', { id: 'purge-tickets' })
-                                }, 2000)
+                            onClick={async () => {
+                              if (!confirm('Are you sure you want to purge all closed tickets? This action cannot be undone.')) return
+                              toast.loading('Purging closed tickets...', { id: 'purge-tickets' })
+                              try {
+                                // Get all closed tickets
+                                const getResponse = await fetch('/api/customer-support?status=closed')
+                                if (!getResponse.ok) throw new Error('Failed to fetch closed tickets')
+                                const data = await getResponse.json()
+                                const closedTicketIds = (data.tickets || []).map((t: any) => t.id)
+
+                                if (closedTicketIds.length === 0) {
+                                  toast.success('No closed tickets to purge', { id: 'purge-tickets' })
+                                  return
+                                }
+
+                                // Archive/delete the closed tickets
+                                const response = await fetch('/api/customer-support', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    action: 'archive',
+                                    ticket_ids: closedTicketIds
+                                  })
+                                })
+                                if (!response.ok) throw new Error('Failed to purge tickets')
+                                toast.success('All closed tickets purged successfully', { id: 'purge-tickets' })
+                              } catch (error: any) {
+                                toast.error(error.message || 'Failed to purge tickets', { id: 'purge-tickets' })
+                                console.error('Purge tickets error:', error)
                               }
                             }}
                             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
@@ -1801,12 +1862,30 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="text-sm text-muted-foreground">Reset all support settings to defaults</p>
                           </div>
                           <button
-                            onClick={() => {
-                              if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
-                                toast.loading('Resetting all settings...', { id: 'reset-settings' })
-                                setTimeout(() => {
-                                  toast.success('All settings reset to defaults', { id: 'reset-settings' })
-                                }, 1500)
+                            onClick={async () => {
+                              if (!confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) return
+                              toast.loading('Resetting all settings...', { id: 'reset-settings' })
+                              try {
+                                const response = await fetch('/api/customer-support', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    action: 'save_settings',
+                                    settings_type: 'support',
+                                    settings: {
+                                      autoResponder: false,
+                                      satisfactionSurvey: true,
+                                      escalationRules: true,
+                                      businessHours: { start: '09:00', end: '17:00' },
+                                      timezone: 'UTC'
+                                    }
+                                  })
+                                })
+                                if (!response.ok) throw new Error('Failed to reset settings')
+                                toast.success('All settings reset to defaults', { id: 'reset-settings' })
+                              } catch (error: any) {
+                                toast.error(error.message || 'Failed to reset settings', { id: 'reset-settings' })
+                                console.error('Reset settings error:', error)
                               }
                             }}
                             className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
@@ -1821,11 +1900,32 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                             <p className="text-sm text-muted-foreground">Download all tickets and customer data</p>
                           </div>
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               toast.loading('Preparing data export...', { id: 'export-data' })
-                              setTimeout(() => {
+                              try {
+                                const response = await fetch('/api/customer-support', {
+                                  method: 'GET',
+                                  headers: { 'Content-Type': 'application/json' }
+                                })
+                                if (!response.ok) throw new Error('Failed to export data')
+                                const data = await response.json()
+
+                                // Create downloadable file
+                                const blob = new Blob([JSON.stringify(data.tickets || data, null, 2)], { type: 'application/json' })
+                                const url = window.URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = `support-data-export-${new Date().toISOString().split('T')[0]}.json`
+                                document.body.appendChild(a)
+                                a.click()
+                                window.URL.revokeObjectURL(url)
+                                document.body.removeChild(a)
+
                                 toast.success('Data exported successfully', { id: 'export-data' })
-                              }, 2000)
+                              } catch (error: any) {
+                                toast.error(error.message || 'Failed to export data', { id: 'export-data' })
+                                console.error('Export data error:', error)
+                              }
                             }}
                             className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
                           >

@@ -416,16 +416,39 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
       toast.success('Running Automation', {
         description: `"${automation.automation_name}" triggered manually`
       })
-      // Simulate completion after delay (in real app, this would be async task)
-      setTimeout(async () => {
-        await updateAutomation(automation.id, {
-          status: 'active' as AutomationStatus,
-          is_running: false,
-          success_count: automation.success_count + 1,
-          last_success_at: new Date().toISOString()
+      // Execute automation via API
+      try {
+        const response = await fetch('/api/automation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'execute_task',
+            data: { task: { automationId: automation.id, type: automation.automation_type } }
+          })
         })
+        const result = await response.json()
+        if (result.success) {
+          await updateAutomation(automation.id, {
+            status: 'active' as AutomationStatus,
+            is_running: false,
+            success_count: automation.success_count + 1,
+            last_success_at: new Date().toISOString()
+          })
+          refetch()
+        } else {
+          throw new Error(result.error || 'Execution failed')
+        }
+      } catch (execError: any) {
+        await updateAutomation(automation.id, {
+          status: 'failed' as AutomationStatus,
+          is_running: false,
+          failure_count: automation.failure_count + 1,
+          last_failure_at: new Date().toISOString(),
+          last_error: execError.message
+        })
+        toast.error('Automation Failed', { description: execError.message })
         refetch()
-      }, 2000)
+      }
     } catch (err) {
       // Error toast is handled by mutation hook
     }
@@ -2409,16 +2432,38 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                     return
                   }
                   setIsCreatingWorkflow(true)
-                  // Simulate workflow creation
-                  await new Promise(resolve => setTimeout(resolve, 1500))
-                  toast.success('Workflow Created!', {
-                    description: `"${workflowFormName}" is ready. Configure triggers and actions to get started.`
-                  })
-                  setWorkflowFormName('')
-                  setWorkflowFormDescription('')
-                  setWorkflowFormTrigger('webhook')
-                  setIsCreatingWorkflow(false)
-                  setShowNewWorkflowDialog(false)
+                  try {
+                    // Create workflow via API
+                    const response = await fetch('/api/automation', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'execute_task',
+                        data: {
+                          task: {
+                            type: 'create_workflow',
+                            name: workflowFormName,
+                            description: workflowFormDescription,
+                            trigger: workflowFormTrigger
+                          }
+                        }
+                      })
+                    })
+                    const result = await response.json()
+                    if (!response.ok) throw new Error(result.error || 'Failed to create workflow')
+                    toast.success('Workflow Created!', {
+                      description: `"${workflowFormName}" is ready. Configure triggers and actions to get started.`
+                    })
+                    setWorkflowFormName('')
+                    setWorkflowFormDescription('')
+                    setWorkflowFormTrigger('webhook')
+                    setShowNewWorkflowDialog(false)
+                    refetch()
+                  } catch (err: any) {
+                    toast.error('Failed to create workflow', { description: err.message })
+                  } finally {
+                    setIsCreatingWorkflow(false)
+                  }
                 }}
               >
                 {isCreatingWorkflow ? (
@@ -2540,12 +2585,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                 disabled={isRefreshingHistory}
                 onClick={async () => {
                   setIsRefreshingHistory(true)
-                  // Simulate refresh
-                  await new Promise(resolve => setTimeout(resolve, 1000))
-                  toast.success('History Refreshed', {
-                    description: `Loaded ${RUN_LOGS.length} execution records`
-                  })
-                  setIsRefreshingHistory(false)
+                  try {
+                    // Refresh history via API
+                    const response = await fetch('/api/automation?action=info')
+                    const result = await response.json()
+                    if (!response.ok) throw new Error(result.error || 'Failed to refresh history')
+                    toast.success('History Refreshed', {
+                      description: `Loaded ${RUN_LOGS.length} execution records`
+                    })
+                    refetch()
+                  } catch (err: any) {
+                    toast.error('Failed to refresh history', { description: err.message })
+                  } finally {
+                    setIsRefreshingHistory(false)
+                  }
                 }}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshingHistory ? 'animate-spin' : ''}`} />
@@ -2684,13 +2737,28 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                   disabled={isRegeneratingKey}
                   onClick={async () => {
                     setIsRegeneratingKey(true)
-                    await new Promise(resolve => setTimeout(resolve, 1500))
-                    const generatedKey = `n8n_api_${Array.from({length: 32}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('')}`
-                    setNewApiKey(generatedKey)
-                    setIsRegeneratingKey(false)
-                    toast.success('API Key Regenerated', {
-                      description: 'Your new API key has been generated. Copy it now.'
-                    })
+                    try {
+                      // Regenerate API key via API
+                      const response = await fetch('/api/automation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          action: 'execute_task',
+                          data: { task: { type: 'regenerate_api_key' } }
+                        })
+                      })
+                      const result = await response.json()
+                      if (!response.ok) throw new Error(result.error || 'Failed to regenerate key')
+                      const generatedKey = result.data?.apiKey || `n8n_api_${Array.from({length: 32}, () => 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]).join('')}`
+                      setNewApiKey(generatedKey)
+                      toast.success('API Key Regenerated', {
+                        description: 'Your new API key has been generated. Copy it now.'
+                      })
+                    } catch (err: any) {
+                      toast.error('Failed to regenerate API key', { description: err.message })
+                    } finally {
+                      setIsRegeneratingKey(false)
+                    }
                   }}
                 >
                   {isRegeneratingKey ? (
@@ -2766,12 +2834,27 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                 disabled={isRotatingKey}
                 onClick={async () => {
                   setIsRotatingKey(true)
-                  await new Promise(resolve => setTimeout(resolve, 2000))
-                  setIsRotatingKey(false)
-                  toast.success('Encryption Key Rotated', {
-                    description: 'All credentials have been re-encrypted with the new key.'
-                  })
-                  setShowEncryptionKeyDialog(false)
+                  try {
+                    // Rotate encryption key via API
+                    const response = await fetch('/api/automation', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'execute_task',
+                        data: { task: { type: 'rotate_encryption_key' } }
+                      })
+                    })
+                    const result = await response.json()
+                    if (!response.ok) throw new Error(result.error || 'Failed to rotate key')
+                    toast.success('Encryption Key Rotated', {
+                      description: 'All credentials have been re-encrypted with the new key.'
+                    })
+                    setShowEncryptionKeyDialog(false)
+                  } catch (err: any) {
+                    toast.error('Failed to rotate encryption key', { description: err.message })
+                  } finally {
+                    setIsRotatingKey(false)
+                  }
                 }}
               >
                 {isRotatingKey ? (
@@ -2832,12 +2915,28 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                 disabled={isDeletingHistory}
                 onClick={async () => {
                   setIsDeletingHistory(true)
-                  await new Promise(resolve => setTimeout(resolve, 1500))
-                  setIsDeletingHistory(false)
-                  toast.success('History Cleared', {
-                    description: 'All execution logs and history have been deleted.'
-                  })
-                  setShowClearHistoryDialog(false)
+                  try {
+                    // Clear history via API
+                    const response = await fetch('/api/automation', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'execute_task',
+                        data: { task: { type: 'clear_execution_history' } }
+                      })
+                    })
+                    const result = await response.json()
+                    if (!response.ok) throw new Error(result.error || 'Failed to clear history')
+                    toast.success('History Cleared', {
+                      description: 'All execution logs and history have been deleted.'
+                    })
+                    setShowClearHistoryDialog(false)
+                    refetch()
+                  } catch (err: any) {
+                    toast.error('Failed to clear history', { description: err.message })
+                  } finally {
+                    setIsDeletingHistory(false)
+                  }
                 }}
               >
                 {isDeletingHistory ? (
@@ -2899,12 +2998,28 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                 disabled={isResettingCredentials}
                 onClick={async () => {
                   setIsResettingCredentials(true)
-                  await new Promise(resolve => setTimeout(resolve, 2000))
-                  setIsResettingCredentials(false)
-                  toast.success('Credentials Reset', {
-                    description: 'All app connections have been disconnected and credentials cleared.'
-                  })
-                  setShowResetCredentialsDialog(false)
+                  try {
+                    // Reset credentials via API
+                    const response = await fetch('/api/automation', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'execute_task',
+                        data: { task: { type: 'reset_all_credentials' } }
+                      })
+                    })
+                    const result = await response.json()
+                    if (!response.ok) throw new Error(result.error || 'Failed to reset credentials')
+                    toast.success('Credentials Reset', {
+                      description: 'All app connections have been disconnected and credentials cleared.'
+                    })
+                    setShowResetCredentialsDialog(false)
+                    refetch()
+                  } catch (err: any) {
+                    toast.error('Failed to reset credentials', { description: err.message })
+                  } finally {
+                    setIsResettingCredentials(false)
+                  }
                 }}
               >
                 {isResettingCredentials ? (
@@ -2969,12 +3084,28 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                 disabled={isDeletingWorkflows}
                 onClick={async () => {
                   setIsDeletingWorkflows(true)
-                  await new Promise(resolve => setTimeout(resolve, 2000))
-                  setIsDeletingWorkflows(false)
-                  toast.success('Workflows Deleted', {
-                    description: 'All automation workflows have been permanently deleted.'
-                  })
-                  setShowDeleteWorkflowsDialog(false)
+                  try {
+                    // Delete all workflows via API
+                    const response = await fetch('/api/automation', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'execute_task',
+                        data: { task: { type: 'delete_all_workflows' } }
+                      })
+                    })
+                    const result = await response.json()
+                    if (!response.ok) throw new Error(result.error || 'Failed to delete workflows')
+                    toast.success('Workflows Deleted', {
+                      description: 'All automation workflows have been permanently deleted.'
+                    })
+                    setShowDeleteWorkflowsDialog(false)
+                    refetch()
+                  } catch (err: any) {
+                    toast.error('Failed to delete workflows', { description: err.message })
+                  } finally {
+                    setIsDeletingWorkflows(false)
+                  }
                 }}
               >
                 {isDeletingWorkflows ? (
@@ -3049,13 +3180,29 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                 disabled={isFactoryResetting || factoryResetConfirmText !== 'RESET'}
                 onClick={async () => {
                   setIsFactoryResetting(true)
-                  await new Promise(resolve => setTimeout(resolve, 3000))
-                  setIsFactoryResetting(false)
-                  toast.success('Factory Reset Complete', {
-                    description: 'All settings have been reset to defaults.'
-                  })
-                  setFactoryResetConfirmText('')
-                  setShowFactoryResetDialog(false)
+                  try {
+                    // Factory reset via API
+                    const response = await fetch('/api/automation', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'execute_task',
+                        data: { task: { type: 'factory_reset' } }
+                      })
+                    })
+                    const result = await response.json()
+                    if (!response.ok) throw new Error(result.error || 'Failed to perform factory reset')
+                    toast.success('Factory Reset Complete', {
+                      description: 'All settings have been reset to defaults.'
+                    })
+                    setFactoryResetConfirmText('')
+                    setShowFactoryResetDialog(false)
+                    refetch()
+                  } catch (err: any) {
+                    toast.error('Failed to perform factory reset', { description: err.message })
+                  } finally {
+                    setIsFactoryResetting(false)
+                  }
                 }}
               >
                 {isFactoryResetting ? (

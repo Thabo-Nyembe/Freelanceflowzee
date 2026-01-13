@@ -2065,7 +2065,18 @@ export default function ThreeDModelingClient() {
               </Button>
               <Button className="flex-1 gap-2" onClick={async () => {
                 toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 800)),
+                  fetch('/api/3d-modeling/models', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      name: 'New Model',
+                      description: '',
+                      template: 'empty'
+                    })
+                  }).then(res => {
+                    if (!res.ok) throw new Error('Failed to create model')
+                    return res.json()
+                  }),
                   { loading: 'Creating model...', success: 'Model created successfully!', error: 'Failed to create model' }
                 )
                 setShowNewModelDialog(false)

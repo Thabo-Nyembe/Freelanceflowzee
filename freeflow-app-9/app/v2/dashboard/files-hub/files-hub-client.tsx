@@ -1033,8 +1033,24 @@ export default function FilesHubClient() {
                           <p className="text-sm text-gray-500">Modified {formatDate(file.modifiedAt)} at {formatTime(file.modifiedAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => {
-                            toast.success(`${file.name} downloaded successfully!`)
+                          <Button variant="ghost" size="sm" onClick={async () => {
+                            toast.success(`Downloading ${file.name}...`)
+                            try {
+                              const response = await fetch(`/api/files-hub?id=${file.id}&action=download`)
+                              if (!response.ok) throw new Error('Download failed')
+                              const blob = await response.blob()
+                              const url = window.URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = file.name
+                              document.body.appendChild(a)
+                              a.click()
+                              window.URL.revokeObjectURL(url)
+                              document.body.removeChild(a)
+                              toast.success(`${file.name} downloaded successfully!`)
+                            } catch (error) {
+                              toast.error('Download failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                            }
                           }}>
                             <Download className="w-4 h-4" />
                           </Button>
@@ -1249,14 +1265,37 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => {
-                        toast.success('Local cache cleared successfully!')
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        toast.success('Clearing local cache...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'clear-cache' })
+                          })
+                          if (!response.ok) throw new Error('Failed to clear cache')
+                          toast.success('Local cache cleared successfully!')
+                        } catch (error) {
+                          toast.error('Failed to clear cache', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Clear Local Cache
                       </Button>
-                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600" onClick={() => {
+                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600" onClick={async () => {
                         toast.success('Redirecting to upgrade page...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'get-upgrade-url' })
+                          })
+                          if (!response.ok) throw new Error('Failed to get upgrade URL')
+                          const data = await response.json()
+                          if (data.url) window.location.href = data.url
+                        } catch (error) {
+                          toast.error('Failed to redirect', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       }}>
                         Upgrade Storage Plan
                       </Button>
@@ -1321,8 +1360,19 @@ export default function FilesHubClient() {
                               <p className="text-xs text-gray-500">{device.type} • Last sync: {device.lastSync}</p>
                             </div>
                           </div>
-                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm(`Unlink ${device.name}?`)) {
-                            toast.success(`${device.name} has been unlinked`)
+                          <Button variant="ghost" size="sm" className="text-red-600" onClick={async () => { if (confirm(`Unlink ${device.name}?`)) {
+                            toast.success(`Unlinking ${device.name}...`)
+                            try {
+                              const response = await fetch('/api/files-hub', {
+                                method: 'DELETE',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'unlink-device', deviceName: device.name })
+                              })
+                              if (!response.ok) throw new Error('Failed to unlink device')
+                              toast.success(`${device.name} has been unlinked`)
+                            } catch (error) {
+                              toast.error('Failed to unlink device', { description: error instanceof Error ? error.message : 'Unknown error' })
+                            }
                           } }}>Unlink</Button>
                         </div>
                       ))}
@@ -1454,8 +1504,18 @@ export default function FilesHubClient() {
                                 navigator.clipboard.writeText(`https://files.freeflowkazi.com/shared/${link.id}`)
                                 toast.success('Share link copied to clipboard!')
                               }}><Copy className="w-4 h-4" /></Button>
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => { if (confirm('Remove this link?')) {
-                                toast.success('Share link removed successfully!')
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={async () => { if (confirm('Remove this link?')) {
+                                toast.success('Removing share link...')
+                                try {
+                                  const response = await fetch(`/api/files-hub?id=${link.id}&action=remove-share-link`, {
+                                    method: 'DELETE'
+                                  })
+                                  if (!response.ok) throw new Error('Failed to remove share link')
+                                  toast.success('Share link removed successfully!')
+                                  fetchData()
+                                } catch (error) {
+                                  toast.error('Failed to remove share link', { description: error instanceof Error ? error.message : 'Unknown error' })
+                                }
                               } }}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                           </div>
@@ -1667,8 +1727,19 @@ export default function FilesHubClient() {
                             {app.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm" onClick={() => {
-                                toast.success(`${app.name} connected successfully!`)
+                              <Button variant="outline" size="sm" onClick={async () => {
+                                toast.success(`Connecting ${app.name}...`)
+                                try {
+                                  const response = await fetch('/api/files-hub', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'connect-app', appName: app.name })
+                                  })
+                                  if (!response.ok) throw new Error('Failed to connect app')
+                                  toast.success(`${app.name} connected successfully!`)
+                                } catch (error) {
+                                  toast.error('Failed to connect app', { description: error instanceof Error ? error.message : 'Unknown error' })
+                                }
                               }}>Connect</Button>
                             )}
                           </div>
@@ -1738,8 +1809,19 @@ export default function FilesHubClient() {
                           Keep your API key secure. Never share it in public repositories.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => { if (confirm('Regenerate API key? Existing integrations will stop working.')) {
-                        toast.success('New API key generated! Update your integrations.')
+                      <Button variant="outline" className="w-full" onClick={async () => { if (confirm('Regenerate API key? Existing integrations will stop working.')) {
+                        toast.success('Regenerating API key...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'regenerate-api-key' })
+                          })
+                          if (!response.ok) throw new Error('Failed to regenerate API key')
+                          toast.success('New API key generated! Update your integrations.')
+                        } catch (error) {
+                          toast.error('Failed to regenerate API key', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Regenerate API Key
@@ -1883,14 +1965,37 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => {
-                        toast.success('Audit log exported to audit-log.csv')
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        toast.success('Exporting audit log...')
+                        try {
+                          const response = await fetch('/api/files-hub?action=export-audit-log')
+                          if (!response.ok) throw new Error('Failed to export audit log')
+                          const blob = await response.blob()
+                          const url = window.URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = 'audit-log.csv'
+                          document.body.appendChild(a)
+                          a.click()
+                          window.URL.revokeObjectURL(url)
+                          document.body.removeChild(a)
+                          toast.success('Audit log exported to audit-log.csv')
+                        } catch (error) {
+                          toast.error('Failed to export audit log', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       }}>
                         <Download className="w-4 h-4 mr-2" />
                         Export Audit Log
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => {
-                        toast.success('Audit log loaded', { description: 'Displaying all activity records' })
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        toast.success('Loading audit log...')
+                        try {
+                          const response = await fetch('/api/files-hub?action=get-audit-log')
+                          if (!response.ok) throw new Error('Failed to load audit log')
+                          toast.success('Audit log loaded', { description: 'Displaying all activity records' })
+                        } catch (error) {
+                          toast.error('Failed to load audit log', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Full Audit Log
@@ -1982,14 +2087,42 @@ export default function FilesHubClient() {
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => {
-                        toast.success('Data export ready for download!')
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        toast.success('Preparing data export...')
+                        try {
+                          const response = await fetch('/api/files-hub?action=export-all-data')
+                          if (!response.ok) throw new Error('Failed to export data')
+                          const blob = await response.blob()
+                          const url = window.URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = 'files-hub-data-export.zip'
+                          document.body.appendChild(a)
+                          a.click()
+                          window.URL.revokeObjectURL(url)
+                          document.body.removeChild(a)
+                          toast.success('Data export ready for download!')
+                        } catch (error) {
+                          toast.error('Failed to export data', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       }}>
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => { if (confirm('Empty trash? All deleted files will be permanently removed.')) {
-                        toast.success('Trash emptied successfully!')
+                      <Button variant="outline" className="w-full" onClick={async () => { if (confirm('Empty trash? All deleted files will be permanently removed.')) {
+                        toast.success('Emptying trash...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'empty-trash' })
+                          })
+                          if (!response.ok) throw new Error('Failed to empty trash')
+                          toast.success('Trash emptied successfully!')
+                          fetchData()
+                        } catch (error) {
+                          toast.error('Failed to empty trash', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Empty Trash Now
@@ -2030,8 +2163,19 @@ export default function FilesHubClient() {
                           Last backup: Today at 3:00 AM
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => {
-                        toast.success('Backup created successfully!')
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        toast.success('Creating backup...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'create-backup' })
+                          })
+                          if (!response.ok) throw new Error('Failed to create backup')
+                          toast.success('Backup created successfully!')
+                        } catch (error) {
+                          toast.error('Failed to create backup', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       }}>
                         <Download className="w-4 h-4 mr-2" />
                         Create Backup Now
@@ -2103,26 +2247,72 @@ export default function FilesHubClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('DELETE ALL FILES? This action cannot be undone!')) {
-                        toast.success('All files have been deleted permanently')
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={async () => { if (confirm('DELETE ALL FILES? This action cannot be undone!')) {
+                        toast.success('Deleting all files...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'delete-all-files' })
+                          })
+                          if (!response.ok) throw new Error('Failed to delete all files')
+                          toast.success('All files have been deleted permanently')
+                          fetchData()
+                        } catch (error) {
+                          toast.error('Failed to delete all files', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       } }}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete All Files
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Revoke all shared links? This will break all active shared links immediately.')) {
-                        toast.success('All shared links have been revoked')
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={async () => { if (confirm('Revoke all shared links? This will break all active shared links immediately.')) {
+                        toast.success('Revoking all shared links...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'revoke-all-share-links' })
+                          })
+                          if (!response.ok) throw new Error('Failed to revoke shared links')
+                          toast.success('All shared links have been revoked')
+                          fetchData()
+                        } catch (error) {
+                          toast.error('Failed to revoke shared links', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       } }}>
                         <Link2 className="w-4 h-4 mr-2" />
                         Revoke All Shared Links
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Reset all settings to defaults?')) {
-                        toast.success('All settings have been reset to defaults')
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={async () => { if (confirm('Reset all settings to defaults?')) {
+                        toast.success('Resetting all settings...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'reset-settings' })
+                          })
+                          if (!response.ok) throw new Error('Failed to reset settings')
+                          toast.success('All settings have been reset to defaults')
+                        } catch (error) {
+                          toast.error('Failed to reset settings', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       } }}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reset All Settings
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => { if (confirm('Disable Files Hub? You can re-enable it from account settings.')) {
-                        toast.success('Files Hub has been disabled')
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={async () => { if (confirm('Disable Files Hub? You can re-enable it from account settings.')) {
+                        toast.success('Disabling Files Hub...')
+                        try {
+                          const response = await fetch('/api/files-hub', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'disable-files-hub' })
+                          })
+                          if (!response.ok) throw new Error('Failed to disable Files Hub')
+                          toast.success('Files Hub has been disabled')
+                        } catch (error) {
+                          toast.error('Failed to disable Files Hub', { description: error instanceof Error ? error.message : 'Unknown error' })
+                        }
                       } }}>
                         <Lock className="w-4 h-4 mr-2" />
                         Disable Files Hub
@@ -2219,9 +2409,25 @@ export default function FilesHubClient() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => {
-                    toast.success(`${selectedFile.name} downloaded successfully!`)
-                    setShowFileDialog(false)
+                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={async () => {
+                    toast.success(`Downloading ${selectedFile.name}...`)
+                    try {
+                      const response = await fetch(`/api/files-hub?id=${selectedFile.id}&action=download`)
+                      if (!response.ok) throw new Error('Download failed')
+                      const blob = await response.blob()
+                      const url = window.URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = selectedFile.name
+                      document.body.appendChild(a)
+                      a.click()
+                      window.URL.revokeObjectURL(url)
+                      document.body.removeChild(a)
+                      toast.success(`${selectedFile.name} downloaded successfully!`)
+                      setShowFileDialog(false)
+                    } catch (error) {
+                      toast.error('Download failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                    }
                   }}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
@@ -2299,13 +2505,27 @@ export default function FilesHubClient() {
                 onClick={() => document.getElementById('file-upload-input')?.click()}
                 onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20') }}
                 onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20') }}
-                onDrop={(e) => {
+                onDrop={async (e) => {
                   e.preventDefault()
                   e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20')
                   const droppedFiles = Array.from(e.dataTransfer.files)
                   if (droppedFiles.length > 0) {
-                    toast.success(`${droppedFiles.length} file(s) uploaded successfully`)
-                    setShowUploadDialog(false)
+                    toast.success(`Uploading ${droppedFiles.length} file(s)...`)
+                    try {
+                      const formData = new FormData()
+                      droppedFiles.forEach(file => formData.append('files', file))
+                      if (currentFolderId) formData.append('folderId', currentFolderId)
+                      const response = await fetch('/api/files-hub', {
+                        method: 'POST',
+                        body: formData
+                      })
+                      if (!response.ok) throw new Error('Upload failed')
+                      toast.success(`${droppedFiles.length} file(s) uploaded successfully`)
+                      setShowUploadDialog(false)
+                      fetchData()
+                    } catch (error) {
+                      toast.error('Upload failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                    }
                   }
                 }}
               >
@@ -2314,11 +2534,25 @@ export default function FilesHubClient() {
                   type="file"
                   multiple
                   className="hidden"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const selectedFiles = Array.from(e.target.files || [])
                     if (selectedFiles.length > 0) {
-                      toast.success(`${selectedFiles.length} file(s) uploaded successfully`)
-                      setShowUploadDialog(false)
+                      toast.success(`Uploading ${selectedFiles.length} file(s)...`)
+                      try {
+                        const formData = new FormData()
+                        selectedFiles.forEach(file => formData.append('files', file))
+                        if (currentFolderId) formData.append('folderId', currentFolderId)
+                        const response = await fetch('/api/files-hub', {
+                          method: 'POST',
+                          body: formData
+                        })
+                        if (!response.ok) throw new Error('Upload failed')
+                        toast.success(`${selectedFiles.length} file(s) uploaded successfully`)
+                        setShowUploadDialog(false)
+                        fetchData()
+                      } catch (error) {
+                        toast.error('Upload failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+                      }
                     }
                   }}
                 />
@@ -2434,9 +2668,23 @@ export default function FilesHubClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
               <Button
-                onClick={() => {
-                  toast.success('Share link created successfully')
-                  setShowShareDialog(false)
+                onClick={async () => {
+                  toast.success('Creating share link...')
+                  try {
+                    const response = await fetch('/api/files-hub', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'create-share-link' })
+                    })
+                    if (!response.ok) throw new Error('Failed to create share link')
+                    const data = await response.json()
+                    if (data.link) setShareLink(data.link)
+                    toast.success('Share link created successfully')
+                    setShowShareDialog(false)
+                    fetchData()
+                  } catch (error) {
+                    toast.error('Failed to create share link', { description: error instanceof Error ? error.message : 'Unknown error' })
+                  }
                 }}
                 className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
               >

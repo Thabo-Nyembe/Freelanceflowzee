@@ -204,8 +204,13 @@ export default function EmailAgentClient() {
 
     setCreatingItem(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create item via API
+      const res = await fetch('/api/email-agent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create-item', name: newItemName, type: newItemType, priority: newItemPriority, description: newItemDescription })
+      });
+      if (!res.ok) throw new Error('Failed to create item');
 
       toast({
         title: 'Item Created',
@@ -236,10 +241,21 @@ export default function EmailAgentClient() {
   const handleExportData = async () => {
     setExporting(true);
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Call export API
+      const response = await fetch('/api/email-agent/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          format: exportFormat,
+          dateRange: exportDateRange,
+          includeAnalysis: exportIncludeAnalysis,
+          includeResponses: exportIncludeResponses
+        })
+      }).catch(() => null);
 
-      const exportData = {
+      // Use API data if available, otherwise fallback to local data
+      const apiData = response?.ok ? await response.json().catch(() => null) : null;
+      const exportData = apiData || {
         format: exportFormat,
         dateRange: exportDateRange,
         includeAnalysis: exportIncludeAnalysis,
@@ -281,8 +297,13 @@ export default function EmailAgentClient() {
   const handleSaveQuickSettings = async () => {
     setSavingQuickSettings(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Save settings via API
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', section: 'email-agent', settings: { quickSettingsEnabled: true } })
+      });
+      if (!res.ok) throw new Error('Failed to save settings');
 
       toast({
         title: 'Settings Saved',

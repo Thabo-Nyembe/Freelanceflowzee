@@ -20,7 +20,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useCourses as useCoursesExtended } from '@/lib/hooks/use-courses-extended'
-import { useCreateCourse, useUpdateCourse, useDeleteCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
+import { type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -586,9 +586,6 @@ export default function CoursesClient() {
     category: categoryFilter !== 'all' ? categoryFilter : undefined,
     search: searchQuery || undefined
   })
-  const createCourseMutation = useCreateCourse()
-  const updateCourseMutation = useUpdateCourse()
-  const deleteCourseMutation = useDeleteCourse()
 
   // Course form state
   const [courseForm, setCourseForm] = useState({
@@ -750,82 +747,44 @@ export default function CoursesClient() {
     }
 
     setIsSubmitting(true)
+    toast.success('Creating course...', { description: `Setting up "${courseForm.course_name}"` })
+
     try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const response = await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_name: courseForm.course_name,
+          description: courseForm.description || undefined,
+          course_category: courseForm.course_category,
+          level: courseForm.level,
+          status: courseForm.status,
+          instructor_name: courseForm.instructor_name || undefined,
+          instructor_email: courseForm.instructor_email || undefined,
+          instructor_bio: courseForm.instructor_bio || undefined,
+          price: courseForm.price,
+          original_price: courseForm.original_price || undefined,
+          discount_percentage: courseForm.discount_percentage,
+          currency: courseForm.currency,
+          language: courseForm.language,
+          has_certificates: courseForm.has_certificates,
+          has_downloadable_resources: courseForm.has_downloadable_resources,
+          has_lifetime_access: courseForm.has_lifetime_access,
+          has_mobile_access: courseForm.has_mobile_access,
+          requirements: courseForm.requirements,
+          learning_outcomes: courseForm.learning_outcomes,
+          target_audience: courseForm.target_audience || undefined,
+          meta_title: courseForm.meta_title || undefined,
+          meta_description: courseForm.meta_description || undefined,
+          keywords: courseForm.keywords
+        })
+      })
 
-      if (!user) {
-        toast.error('You must be logged in to create a course')
-        return
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create course')
       }
-
-      await createCourseMutation.mutateAsync({
-        user_id: user.id,
-        course_name: courseForm.course_name,
-        description: courseForm.description || undefined,
-        course_category: courseForm.course_category,
-        level: courseForm.level,
-        status: courseForm.status,
-        instructor_name: courseForm.instructor_name || undefined,
-        instructor_email: courseForm.instructor_email || undefined,
-        instructor_bio: courseForm.instructor_bio || undefined,
-        price: courseForm.price,
-        original_price: courseForm.original_price || undefined,
-        discount_percentage: courseForm.discount_percentage,
-        currency: courseForm.currency,
-        language: courseForm.language,
-        has_certificates: courseForm.has_certificates,
-        has_downloadable_resources: courseForm.has_downloadable_resources,
-        has_lifetime_access: courseForm.has_lifetime_access,
-        has_mobile_access: courseForm.has_mobile_access,
-        requirements: courseForm.requirements,
-        learning_outcomes: courseForm.learning_outcomes,
-        target_audience: courseForm.target_audience || undefined,
-        meta_title: courseForm.meta_title || undefined,
-        meta_description: courseForm.meta_description || undefined,
-        keywords: courseForm.keywords,
-        lecture_count: 0,
-        module_count: 0,
-        quiz_count: 0,
-        assignment_count: 0,
-        total_duration_hours: 0,
-        student_count: 0,
-        enrolled_count: 0,
-        active_students: 0,
-        completed_students: 0,
-        dropped_students: 0,
-        rating: 0,
-        review_count: 0,
-        five_star_count: 0,
-        four_star_count: 0,
-        three_star_count: 0,
-        two_star_count: 0,
-        one_star_count: 0,
-        completion_rate: 0,
-        engagement_score: 0,
-        video_watch_rate: 0,
-        quiz_pass_rate: 0,
-        assignment_submission_rate: 0,
-        total_revenue: 0,
-        avg_revenue_per_student: 0,
-        is_published: false,
-        is_featured: false,
-        is_bestseller: false,
-        access_type: 'public',
-        certification_pass_percentage: 70,
-        testimonial_count: 0,
-        share_count: 0,
-        bookmark_count: 0,
-        page_views: 0,
-        unique_visitors: 0,
-        conversion_rate: 0,
-        avg_time_on_page_seconds: 0,
-        has_discussion_forum: true,
-        has_qa_support: true,
-        has_live_sessions: false,
-        drm_enabled: false,
-        watermark_enabled: false
-      } as any)
 
       toast.success('Course created successfully', {
         description: `Created "${courseForm.course_name}"`
@@ -879,33 +838,45 @@ export default function CoursesClient() {
     }
 
     setIsSubmitting(true)
+    toast.success('Updating course...', { description: `Saving changes to "${courseForm.course_name}"` })
+
     try {
-      await updateCourseMutation.mutateAsync({
-        id: selectedCourse.id,
-        course_name: courseForm.course_name,
-        description: courseForm.description || undefined,
-        course_category: courseForm.course_category,
-        level: courseForm.level,
-        status: courseForm.status,
-        instructor_name: courseForm.instructor_name || undefined,
-        instructor_email: courseForm.instructor_email || undefined,
-        instructor_bio: courseForm.instructor_bio || undefined,
-        price: courseForm.price,
-        original_price: courseForm.original_price || undefined,
-        discount_percentage: courseForm.discount_percentage,
-        currency: courseForm.currency,
-        language: courseForm.language,
-        has_certificates: courseForm.has_certificates,
-        has_downloadable_resources: courseForm.has_downloadable_resources,
-        has_lifetime_access: courseForm.has_lifetime_access,
-        has_mobile_access: courseForm.has_mobile_access,
-        requirements: courseForm.requirements,
-        learning_outcomes: courseForm.learning_outcomes,
-        target_audience: courseForm.target_audience || undefined,
-        meta_title: courseForm.meta_title || undefined,
-        meta_description: courseForm.meta_description || undefined,
-        keywords: courseForm.keywords
-      } as any)
+      const response = await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedCourse.id,
+          course_name: courseForm.course_name,
+          description: courseForm.description || undefined,
+          course_category: courseForm.course_category,
+          level: courseForm.level,
+          status: courseForm.status,
+          instructor_name: courseForm.instructor_name || undefined,
+          instructor_email: courseForm.instructor_email || undefined,
+          instructor_bio: courseForm.instructor_bio || undefined,
+          price: courseForm.price,
+          original_price: courseForm.original_price || undefined,
+          discount_percentage: courseForm.discount_percentage,
+          currency: courseForm.currency,
+          language: courseForm.language,
+          has_certificates: courseForm.has_certificates,
+          has_downloadable_resources: courseForm.has_downloadable_resources,
+          has_lifetime_access: courseForm.has_lifetime_access,
+          has_mobile_access: courseForm.has_mobile_access,
+          requirements: courseForm.requirements,
+          learning_outcomes: courseForm.learning_outcomes,
+          target_audience: courseForm.target_audience || undefined,
+          meta_title: courseForm.meta_title || undefined,
+          meta_description: courseForm.meta_description || undefined,
+          keywords: courseForm.keywords
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update course')
+      }
 
       toast.success('Course updated successfully', {
         description: `Updated "${courseForm.course_name}"`
@@ -927,8 +898,18 @@ export default function CoursesClient() {
     if (!courseToDelete) return
 
     setIsSubmitting(true)
+    toast.success('Deleting course...', { description: `Removing "${courseToDelete.title}"` })
+
     try {
-      await deleteCourseMutation.mutateAsync({ id: courseToDelete.id } as any)
+      const response = await fetch(`/api/courses?id=${courseToDelete.id}`, {
+        method: 'DELETE'
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete course')
+      }
 
       toast.success('Course deleted', {
         description: `Deleted "${courseToDelete.title}"`
@@ -952,13 +933,25 @@ export default function CoursesClient() {
 
   const handlePublishCourse = async (course: Course) => {
     setIsSubmitting(true)
+    toast.success('Publishing course...', { description: `Making "${course.title}" live` })
+
     try {
-      await updateCourseMutation.mutateAsync({
-        id: course.id,
-        status: 'published',
-        is_published: true,
-        publish_date: new Date().toISOString()
-      } as any)
+      const response = await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: course.id,
+          status: 'published',
+          is_published: true,
+          publish_date: new Date().toISOString()
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to publish course')
+      }
 
       toast.success('Course published', {
         description: `"${course.title}" is now live`
@@ -975,12 +968,24 @@ export default function CoursesClient() {
 
   const handleArchiveCourse = async (course: Course) => {
     setIsSubmitting(true)
+    toast.success('Archiving course...', { description: `Archiving "${course.title}"` })
+
     try {
-      await updateCourseMutation.mutateAsync({
-        id: course.id,
-        status: 'archived',
-        is_published: false
-      } as any)
+      const response = await fetch('/api/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: course.id,
+          status: 'archived',
+          is_published: false
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to archive course')
+      }
 
       toast.success('Course archived', {
         description: `"${course.title}" has been archived`

@@ -220,7 +220,14 @@ const cvPortfolioActivities = [
 const cvPortfolioQuickActions = [
   { id: '1', label: 'New Portfolio', icon: 'Plus', shortcut: 'N', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
+      fetch('/api/cv-portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'ai-enhance', section: 'all', content: {} })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to create portfolio')
+        return res.json()
+      }),
       {
         loading: 'Creating new portfolio with AI...',
         success: 'New portfolio template ready',
@@ -230,7 +237,17 @@ const cvPortfolioQuickActions = [
   }},
   { id: '2', label: 'Export CV', icon: 'Download', shortcut: 'E', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
+      fetch('/api/cv-portfolio?format=pdf').then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob().then(blob => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `cv-portfolio-${Date.now()}.pdf`
+          a.click()
+          URL.revokeObjectURL(url)
+        })
+      }),
       {
         loading: 'Generating CV export with AI formatting...',
         success: 'CV exported successfully',
@@ -240,7 +257,10 @@ const cvPortfolioQuickActions = [
   }},
   { id: '3', label: 'Portfolio Settings', icon: 'Settings', shortcut: 'S', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/cv-portfolio').then(res => {
+        if (!res.ok) throw new Error('Failed to load settings')
+        return res.json()
+      }),
       {
         loading: 'Loading portfolio settings...',
         success: 'Portfolio settings panel opened',

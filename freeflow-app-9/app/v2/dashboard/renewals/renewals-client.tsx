@@ -719,7 +719,17 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     }
 
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/renewals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-renewal',
+          customerName: newRenewalData.customerName,
+          contractValue: parseFloat(newRenewalData.currentARR) || 0,
+          renewalDate: newRenewalData.renewalDate,
+          notes: newRenewalData.notes
+        })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Creating renewal...',
         success: () => {
@@ -752,7 +762,15 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     const renewal = renewals.find(r => r.id === playbookTargetRenewal)
 
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      fetch('/api/renewals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'run-playbook',
+          renewalId: playbookTargetRenewal,
+          playbookId: selectedPlaybook
+        })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: `Running ${playbook?.name} for ${renewal?.customerName}...`,
         success: () => {
@@ -772,7 +790,15 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     const rangeLabels = { all: 'all time', '30days': 'last 30 days', '90days': 'last 90 days', year: 'last year' }
 
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      fetch('/api/renewals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export-pipeline',
+          format: exportFormat,
+          dateRange: exportDateRange
+        })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: `Generating ${formatLabels[exportFormat]} export...`,
         success: () => {

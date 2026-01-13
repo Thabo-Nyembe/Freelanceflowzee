@@ -2338,10 +2338,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </Button>
                   <Button variant="outline" className="flex-1" onClick={() => {
                     toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 500)),
+                      fetch('/api/qa', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'edit_test_case', testCaseId: selectedTestCase?.id })
+                      }).then(res => res.json()),
                       {
                         loading: 'Preparing edit mode...',
-                        success: 'Edit mode - Test case editing coming soon',
+                        success: 'Edit mode - Test case editing ready',
                         error: 'Failed to enter edit mode'
                       }
                     )
@@ -2809,10 +2813,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
-                  toast.loading('Generating test coverage report...', { id: 'test-coverage-report' })
-                  setTimeout(() => {
-                    toast.success('Test coverage report generated!', { id: 'test-coverage-report', description: 'Report ready for download' })
-                  }, 1500)
+                  toast.promise(
+                    fetch('/api/qa?action=test_coverage_report').then(res => res.json()),
+                    { loading: 'Generating test coverage report...', success: 'Test coverage report generated!', error: 'Failed to generate report' }
+                  )
                 }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -2825,10 +2829,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </CardContent>
                 </Card>
                 <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
-                  toast.loading('Generating execution summary...', { id: 'execution-summary' })
-                  setTimeout(() => {
-                    toast.success('Execution summary generated!', { id: 'execution-summary', description: 'Summary ready for download' })
-                  }, 1500)
+                  toast.promise(
+                    fetch('/api/qa?action=execution_summary').then(res => res.json()),
+                    { loading: 'Generating execution summary...', success: 'Execution summary generated!', error: 'Failed to generate summary' }
+                  )
                 }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -2841,10 +2845,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </CardContent>
                 </Card>
                 <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
-                  toast.loading('Generating defect report...', { id: 'defect-report' })
-                  setTimeout(() => {
-                    toast.success('Defect report generated!', { id: 'defect-report', description: 'Report ready for download' })
-                  }, 1500)
+                  toast.promise(
+                    fetch('/api/qa?action=defect_report').then(res => res.json()),
+                    { loading: 'Generating defect report...', success: 'Defect report generated!', error: 'Failed to generate report' }
+                  )
                 }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
@@ -2857,10 +2861,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </CardContent>
                 </Card>
                 <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => {
-                  toast.loading('Generating trend analysis...', { id: 'trend-analysis' })
-                  setTimeout(() => {
-                    toast.success('Trend analysis generated!', { id: 'trend-analysis', description: 'Analysis ready for download' })
-                  }, 1500)
+                  toast.promise(
+                    fetch('/api/qa?action=trend_analysis').then(res => res.json()),
+                    { loading: 'Generating trend analysis...', success: 'Trend analysis generated!', error: 'Failed to generate analysis' }
+                  )
                 }}>
                   <CardContent className="p-4 flex items-center gap-3">
                     <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
@@ -2898,11 +2902,21 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.loading('Exporting all reports...', { id: 'export-all-reports' })
-                setTimeout(() => {
-                  toast.success('All reports exported!', { id: 'export-all-reports', description: 'Download started' })
-                  setShowReportsDialog(false)
-                }, 2000)
+                toast.promise(
+                  fetch('/api/qa?action=export_all')
+                    .then(res => res.json())
+                    .then(data => {
+                      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = 'qa-reports-export.json'
+                      a.click()
+                      URL.revokeObjectURL(url)
+                      setShowReportsDialog(false)
+                    }),
+                  { loading: 'Exporting all reports...', success: 'All reports exported!', error: 'Export failed' }
+                )
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Export All

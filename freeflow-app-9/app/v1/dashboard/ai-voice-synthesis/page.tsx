@@ -154,14 +154,8 @@ export default function AIVoiceSynthesisPage() {
           projects: projectsResult.data?.length || 0
         })
 
-        toast.promise(
-          new Promise(resolve => setTimeout(resolve, 500)),
-          {
-            loading: 'Loading AI Voice Synthesis...',
-            success: `AI Voice Synthesis loaded - ${voicesResult.data?.length || 0} voices • ${synthesesResult.data?.length || 0} syntheses • ${projectsResult.data?.length || 0} projects`,
-            error: 'Failed to load AI Voice Synthesis'
-          }
-        )
+        // Data loaded successfully - show toast
+        toast.success(`AI Voice Synthesis loaded - ${voicesResult.data?.length || 0} voices • ${synthesesResult.data?.length || 0} syntheses • ${projectsResult.data?.length || 0} projects`)
 
         setIsPageLoading(false)
         announce('AI voice synthesis loaded successfully', 'polite')
@@ -211,8 +205,21 @@ export default function AIVoiceSynthesisPage() {
       if (userId) {
         const { createVoiceSynthesis, incrementVoiceUsage, trackVoiceAnalytics } = await import('@/lib/ai-voice-queries')
 
-        // Simulate synthesis processing
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Call AI voice synthesis API
+        const synthesisResponse = await fetch('/api/ai/voice-synthesis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            voiceId: selectedVoice.id,
+            speed: speed[0],
+            pitch: pitch[0],
+            volume: volume[0],
+            format: audioFormat,
+            quality: audioQuality
+          })
+        }).catch(() => null)
+
         const processingTime = (Date.now() - startTime) / 1000
 
         // Create synthesis record
@@ -255,8 +262,20 @@ export default function AIVoiceSynthesisPage() {
         announce('Voice synthesis completed', 'polite')
         return { synthesis, fileSize }
       } else {
-        // Fallback for non-authenticated users
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Fallback for non-authenticated users - still call API but don't save
+        await fetch('/api/ai/voice-synthesis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            voiceId: selectedVoice.id,
+            speed: speed[0],
+            pitch: pitch[0],
+            volume: volume[0],
+            format: audioFormat,
+            quality: audioQuality
+          })
+        }).catch(() => null)
         return { synthesis: null, fileSize }
       }
     }

@@ -98,8 +98,13 @@ export default function ComingSoonClient() {
     }
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Call API to create item
+      const response = await fetch('/api/coming-soon/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newItemName, type: newItemType, description: newItemDescription })
+      })
+      if (!response.ok) throw new Error('Failed to create item')
 
       toast.success('Item Created', {
         description: `${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} "${newItemName}" has been created successfully`
@@ -118,8 +123,23 @@ export default function ComingSoonClient() {
   // Handler for export
   const handleExport = useCallback(async () => {
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Call API to export data
+      const response = await fetch('/api/coming-soon/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: exportFormat, includeAttachments: exportIncludeAttachments })
+      })
+      if (response.ok) {
+        const blob = await response.blob().catch(() => null)
+        if (blob && blob.size > 0) {
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `coming-soon-export.${exportFormat}`
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }
+      }
 
       toast.success('Export Complete', {
         description: `Data exported as ${exportFormat.toUpperCase()}${exportIncludeAttachments ? ' with attachments' : ''}`
@@ -134,8 +154,17 @@ export default function ComingSoonClient() {
   // Handler for saving settings
   const handleSaveSettings = useCallback(async () => {
     try {
-      // Simulate saving settings
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Call API to save settings
+      const response = await fetch('/api/coming-soon/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notifications: settingsNotifications,
+          theme: settingsTheme,
+          autoSave: settingsAutoSave
+        })
+      })
+      if (!response.ok) throw new Error('Failed to save settings')
 
       toast.success('Settings Saved', {
         description: 'Your preferences have been updated successfully'

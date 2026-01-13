@@ -93,12 +93,14 @@ export default function MyDayTodayPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch my day data from API
+        const response = await fetch('/api/my-day').catch(() => null)
+        if (response?.ok) {
+          const data = await response.json()
+          if (data.tasks) {
+            data.tasks.forEach((task: any) => dispatch({ type: 'ADD_TASK', task }))
+          }
+        }
 
         setIsLoading(false)
         announce('My Day dashboard loaded successfully', 'polite')

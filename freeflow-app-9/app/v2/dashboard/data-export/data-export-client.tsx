@@ -798,25 +798,44 @@ export default function DataExportClient() {
   const handleRunAllSyncs = async () => {
     setIsSyncing(true)
     setSyncProgress(0)
+    toast.success('Starting sync for all pipelines...')
 
-    // Simulate sync progress
-    const interval = setInterval(() => {
-      setSyncProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setIsSyncing(false)
-          toast.success('All syncs completed successfully', {
-            description: `${mockPipelines.length} pipelines synced`
-          })
-          setTimeout(() => {
-            setShowRunAllSyncsDialog(false)
-            setSyncProgress(0)
-          }, 1000)
-          return 100
+    try {
+      // Fetch all pipelines
+      const pipelinesRes = await fetch('/api/data-export?action=pipelines')
+      if (!pipelinesRes.ok) throw new Error('Failed to fetch pipelines')
+      const pipelinesData = await pipelinesRes.json()
+      const pipelines = pipelinesData.pipelines || mockPipelines
+
+      // Run each pipeline
+      const totalPipelines = pipelines.length
+      let completed = 0
+
+      for (const pipeline of pipelines) {
+        const runRes = await fetch('/api/data-export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'run-pipeline', pipelineId: pipeline.id })
+        })
+        if (!runRes.ok) {
+          console.error(`Failed to run pipeline ${pipeline.name}`)
         }
-        return prev + Math.random() * 15
+        completed++
+        setSyncProgress(Math.round((completed / totalPipelines) * 100))
+      }
+
+      setIsSyncing(false)
+      setSyncProgress(100)
+      toast.success('All syncs completed successfully', {
+        description: `${totalPipelines} pipelines synced`
       })
-    }, 500)
+      setShowRunAllSyncsDialog(false)
+      setSyncProgress(0)
+    } catch (error: any) {
+      setIsSyncing(false)
+      setSyncProgress(0)
+      toast.error('Failed to run all syncs', { description: error.message })
+    }
   }
 
   // Pipeline Action Handlers
@@ -1159,7 +1178,7 @@ export default function DataExportClient() {
         return 'Job logs cleared (2.4 GB freed)'
       },
       error: 'Failed to clear logs'
-    }
+    })
   }
 
   const handlePurgeCache = async () => {
@@ -1251,8 +1270,27 @@ export default function DataExportClient() {
   }
 
   // Monitoring Handlers
-  const handleRefreshMonitoring = () => {
-    toast.success('Monitoring data refreshed')
+  const handleRefreshMonitoring = async () => {
+    toast.promise(
+      Promise.all([
+        fetch('/api/data-export?action=pipelines'),
+        fetch('/api/data-export?action=exports'),
+        fetch('/api/data-export?action=sources'),
+        fetch('/api/data-export?action=destinations')
+      ]).then(async (responses) => {
+        for (const res of responses) {
+          if (!res.ok) throw new Error('Failed to refresh monitoring data')
+        }
+        // Trigger data refetch
+        fetchDataExports()
+        return { success: true }
+      }),
+      {
+        loading: 'Refreshing monitoring data...',
+        success: 'Monitoring data refreshed',
+        error: 'Failed to refresh monitoring data'
+      }
+    )
   }
 
   const handleExportMonitoringReport = async () => {
@@ -1345,7 +1383,10 @@ export default function DataExportClient() {
       body: JSON.stringify({
         action: 'update-pipeline',
         pipelineId: selectedPipelineForAction.id,
-        config: selectedPipelineForAction.config
+        name: selectedPipelineForAction.name,
+        description: selectedPipelineForAction.description,
+        schedule: selectedPipelineForAction.schedule,
+        transforms: selectedPipelineForAction.transforms
       })
     }).then(async (res) => {
       if (!res.ok) throw new Error('Failed to save configuration')
@@ -1445,44 +1486,92 @@ export default function DataExportClient() {
 
   // Save Source Configuration Handler
   const handleSaveSourceConfig = async () => {
-    // Save source config to localStorage (would be API in production)
-    const configKey = `source_config_${selectedSourceForAction?.id || 'default'}`
-    localStorage.setItem(configKey, JSON.stringify({
-      updatedAt: new Date().toISOString(),
-      sourceId: selectedSourceForAction?.id
-    }))
-    setShowSourceConfigureDialog(false)
-    toast.success('Source configuration saved')
+    if (!selectedSourceForAction) {
+      toast.error('No source selected')
+      return
+    }
+
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-source',
+          sourceId: selectedSourceForAction.id,
+          config: {
+            updatedAt: new Date().toISOString(),
+            name: selectedSourceForAction.name,
+            type: selectedSourceForAction.type,
+            host: selectedSourceForAction.host
+          }
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to save source configuration')
+        return res.json()
+      }),
+      {
+        loading: 'Saving source configuration...',
+        success: () => {
+          setShowSourceConfigureDialog(false)
+          return 'Source configuration saved'
+        },
+        error: 'Failed to save source configuration'
+      }
+    )
   }
 
   // Create Transform Handler
   const handleCreateTransform = async () => {
-    // Store transform config locally (would be API in production)
-    const transforms = JSON.parse(localStorage.getItem('data_transforms') || '[]')
-    transforms.push({
-      id: `transform_${Date.now()}`,
-      name: `Transform ${transforms.length + 1}`,
-      type: 'field_mapping',
-      createdAt: new Date().toISOString()
-    })
-    localStorage.setItem('data_transforms', JSON.stringify(transforms))
-    setShowCreateTransformDialog(false)
-    toast.success('Transform created successfully')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-transform',
+          name: `Transform ${Date.now()}`,
+          type: 'field_mapping',
+          config: {}
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to create transform')
+        return res.json()
+      }),
+      {
+        loading: 'Creating transform...',
+        success: () => {
+          setShowCreateTransformDialog(false)
+          return 'Transform created successfully'
+        },
+        error: 'Failed to create transform'
+      }
+    )
   }
 
   // Add Column Mapping Handler
   const handleAddColumnMapping = async () => {
-    // Store mapping locally
-    const mappings = JSON.parse(localStorage.getItem('column_mappings') || '[]')
-    mappings.push({
-      id: `mapping_${Date.now()}`,
-      sourceColumn: 'source_field',
-      destColumn: 'dest_field',
-      createdAt: new Date().toISOString()
-    })
-    localStorage.setItem('column_mappings', JSON.stringify(mappings))
-    setShowAddMappingDialog(false)
-    toast.success('Column mapping added successfully')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-mapping',
+          sourceColumn: 'source_field',
+          destColumn: 'dest_field',
+          transformation: null
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to add column mapping')
+        return res.json()
+      }),
+      {
+        loading: 'Adding column mapping...',
+        success: () => {
+          setShowAddMappingDialog(false)
+          return 'Column mapping added successfully'
+        },
+        error: 'Failed to add column mapping'
+      }
+    )
   }
 
   // Add Destination Handler
@@ -1514,36 +1603,99 @@ export default function DataExportClient() {
 
   // Save Destination Configuration Handler
   const handleSaveDestinationConfig = async () => {
-    // Save destination config locally
-    const configKey = `dest_config_${selectedDestinationForAction?.id || 'default'}`
-    localStorage.setItem(configKey, JSON.stringify({
-      updatedAt: new Date().toISOString(),
-      destId: selectedDestinationForAction?.id
-    }))
-    setShowDestConfigureDialog(false)
-    toast.success('Destination configuration saved')
+    if (!selectedDestinationForAction) {
+      toast.error('No destination selected')
+      return
+    }
+
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-destination',
+          destinationId: selectedDestinationForAction.id,
+          config: {
+            updatedAt: new Date().toISOString(),
+            name: selectedDestinationForAction.name,
+            type: selectedDestinationForAction.type,
+            platform: selectedDestinationForAction.platform,
+            host: selectedDestinationForAction.host
+          }
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to save destination configuration')
+        return res.json()
+      }),
+      {
+        loading: 'Saving destination configuration...',
+        success: () => {
+          setShowDestConfigureDialog(false)
+          return 'Destination configuration saved'
+        },
+        error: 'Failed to save destination configuration'
+      }
+    )
   }
 
   // IP Allowlist Handler
   const handleUpdateIpAllowlist = async () => {
-    // Store IP allowlist locally
-    localStorage.setItem('ip_allowlist', JSON.stringify({
-      updatedAt: new Date().toISOString(),
-      ips: [] // Would be populated from dialog form
-    }))
-    setShowIpAllowlistDialog(false)
-    toast.success('IP allowlist updated successfully')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-settings',
+          settingType: 'ip_allowlist',
+          config: {
+            updatedAt: new Date().toISOString(),
+            ips: [] // Would be populated from dialog form
+          }
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to update IP allowlist')
+        return res.json()
+      }),
+      {
+        loading: 'Updating IP allowlist...',
+        success: () => {
+          setShowIpAllowlistDialog(false)
+          return 'IP allowlist updated successfully'
+        },
+        error: 'Failed to update IP allowlist'
+      }
+    )
   }
 
   // Webhook Configuration Handler
   const handleSaveWebhookConfig = async () => {
-    // Save webhook config locally
-    localStorage.setItem('webhook_config', JSON.stringify({
-      updatedAt: new Date().toISOString(),
-      enabled: true
-    }))
-    setShowWebhookConfigureDialog(false)
-    toast.success('Webhook configuration saved')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-settings',
+          settingType: 'webhook',
+          config: {
+            updatedAt: new Date().toISOString(),
+            enabled: true,
+            url: '',
+            events: ['export.completed', 'pipeline.error']
+          }
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to save webhook configuration')
+        return res.json()
+      }),
+      {
+        loading: 'Saving webhook configuration...',
+        success: () => {
+          setShowWebhookConfigureDialog(false)
+          return 'Webhook configuration saved'
+        },
+        error: 'Failed to save webhook configuration'
+      }
+    )
   }
 
   // Archive File Download Handler
@@ -1570,11 +1722,19 @@ export default function DataExportClient() {
 
   // Archive Delete Handler
   const handleDeleteArchive = async (fileName: string) => {
-    // Remove from local archives list
-    const archives = JSON.parse(localStorage.getItem('data_archives') || '[]')
-    const filtered = archives.filter((a: { name: string }) => a.name !== fileName)
-    localStorage.setItem('data_archives', JSON.stringify(filtered))
-    toast.success(`${fileName} deleted successfully`)
+    toast.promise(
+      fetch(`/api/data-export?type=archive&name=${encodeURIComponent(fileName)}`, {
+        method: 'DELETE'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to delete archive')
+        return res.json()
+      }),
+      {
+        loading: `Deleting ${fileName}...`,
+        success: `${fileName} deleted successfully`,
+        error: 'Failed to delete archive'
+      }
+    )
   }
 
   // Credential Configuration Handler
@@ -1691,61 +1851,119 @@ export default function DataExportClient() {
 
   // Create Filter Transform Handler
   const handleCreateFilterTransform = async () => {
-    // Store filter transform locally
-    const transforms = JSON.parse(localStorage.getItem('filter_transforms') || '[]')
-    transforms.push({
-      id: `filter_${Date.now()}`,
-      type: 'filter',
-      createdAt: new Date().toISOString()
-    })
-    localStorage.setItem('filter_transforms', JSON.stringify(transforms))
-    setShowFilterTransformDialog(false)
-    toast.success('Filter transform created')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-transform',
+          name: `Filter ${Date.now()}`,
+          type: 'filter',
+          config: {
+            condition: '',
+            operator: 'equals'
+          }
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to create filter transform')
+        return res.json()
+      }),
+      {
+        loading: 'Creating filter transform...',
+        success: () => {
+          setShowFilterTransformDialog(false)
+          return 'Filter transform created'
+        },
+        error: 'Failed to create filter transform'
+      }
+    )
   }
 
   // Create SQL Transform Handler
   const handleCreateSqlTransform = async () => {
-    // Store SQL transform locally
-    const transforms = JSON.parse(localStorage.getItem('sql_transforms') || '[]')
-    transforms.push({
-      id: `sql_${Date.now()}`,
-      type: 'sql',
-      query: '',
-      createdAt: new Date().toISOString()
-    })
-    localStorage.setItem('sql_transforms', JSON.stringify(transforms))
-    setShowCustomSqlDialog(false)
-    toast.success('SQL transform created')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-transform',
+          name: `SQL Transform ${Date.now()}`,
+          type: 'custom',
+          config: {
+            query: '',
+            language: 'sql'
+          }
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to create SQL transform')
+        return res.json()
+      }),
+      {
+        loading: 'Creating SQL transform...',
+        success: () => {
+          setShowCustomSqlDialog(false)
+          return 'SQL transform created'
+        },
+        error: 'Failed to create SQL transform'
+      }
+    )
   }
 
   // Add Column Handler
   const handleAddColumn = async () => {
-    // Store column definition locally
-    const columns = JSON.parse(localStorage.getItem('schema_columns') || '[]')
-    columns.push({
-      id: `col_${Date.now()}`,
-      name: `column_${columns.length + 1}`,
-      type: 'string',
-      createdAt: new Date().toISOString()
-    })
-    localStorage.setItem('schema_columns', JSON.stringify(columns))
-    setShowAddColumnDialog(false)
-    toast.success('Column added to schema')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add-schema-column',
+          column: {
+            name: `column_${Date.now()}`,
+            type: 'string',
+            nullable: true,
+            isPrimaryKey: false
+          }
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to add column')
+        return res.json()
+      }),
+      {
+        loading: 'Adding column to schema...',
+        success: () => {
+          setShowAddColumnDialog(false)
+          return 'Column added to schema'
+        },
+        error: 'Failed to add column'
+      }
+    )
   }
 
   // Map All Columns Handler
   const handleMapAllColumns = async () => {
-    // Auto-map all columns
-    const sourceCols = JSON.parse(localStorage.getItem('schema_columns') || '[]')
-    const mappings = sourceCols.map((col: { name: string }, i: number) => ({
-      id: `mapping_${Date.now()}_${i}`,
-      sourceColumn: col.name,
-      destColumn: col.name,
-      autoMapped: true
-    }))
-    localStorage.setItem('column_mappings', JSON.stringify(mappings))
-    setShowMapAllDialog(false)
-    toast.success('All columns mapped successfully')
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'auto-map-columns',
+          sourceId: selectedSourceForAction?.id,
+          destinationId: selectedDestinationForAction?.id,
+          mappingStrategy: 'name_match'
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to map columns')
+        return res.json()
+      }),
+      {
+        loading: 'Auto-mapping all columns...',
+        success: () => {
+          setShowMapAllDialog(false)
+          return 'All columns mapped successfully'
+        },
+        error: 'Failed to map columns'
+      }
+    )
   }
 
   // Export Schema Handler
@@ -1775,14 +1993,34 @@ export default function DataExportClient() {
 
   // Update Mapping Handler
   const handleUpdateMapping = async () => {
-    // Update mapping in localStorage
-    const mappings = JSON.parse(localStorage.getItem('column_mappings') || '[]')
-    if (mappings.length > 0) {
-      mappings[0].updatedAt = new Date().toISOString()
-      localStorage.setItem('column_mappings', JSON.stringify(mappings))
+    if (selectedMappingIndex === null) {
+      toast.error('No mapping selected')
+      return
     }
-    setShowEditMappingDialog(false)
-    toast.success('Mapping updated successfully')
+
+    toast.promise(
+      fetch('/api/data-export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-mapping',
+          mappingIndex: selectedMappingIndex,
+          mapping: mockSchemaMappings[selectedMappingIndex],
+          updatedAt: new Date().toISOString()
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to update mapping')
+        return res.json()
+      }),
+      {
+        loading: 'Updating mapping...',
+        success: () => {
+          setShowEditMappingDialog(false)
+          return 'Mapping updated successfully'
+        },
+        error: 'Failed to update mapping'
+      }
+    )
   }
 
   // Test Destination Connection Handler

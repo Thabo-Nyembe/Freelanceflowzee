@@ -1487,9 +1487,14 @@ Best regards,
                         <Button variant="outline" onClick={async () => {
                           toast.loading('Sending test webhook...', { id: 'test-webhook' })
                           try {
-                            await new Promise(r => setTimeout(r, 1500))
+                            const response = await fetch('/api/invoices', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ action: 'test-webhook', event: 'invoice.test' })
+                            })
+                            if (!response.ok) throw new Error('Webhook test failed')
                             toast.success('Webhook test sent', { id: 'test-webhook', description: 'A test event was sent to your webhook URL. Check your endpoint for the response.' })
-                          } catch { toast.error('Webhook test failed', { id: 'test-webhook' }) }
+                          } catch (error) { toast.error('Webhook test failed', { id: 'test-webhook', description: error instanceof Error ? error.message : 'Unknown error' }) }
                         }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
@@ -1574,8 +1579,15 @@ Best regards,
                           <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={async () => {
                             toast.loading(`Exporting ${stats.total} invoices...`, { id: 'export-csv' })
                             try {
-                              await new Promise(r => setTimeout(r, 1500))
-                              const csvData = 'Invoice ID,Date,Client,Amount,Status\nINV-001,2024-01-15,Client A,$1500,Paid\nINV-002,2024-01-16,Client B,$2500,Pending'
+                              const response = await fetch('/api/invoices')
+                              if (!response.ok) throw new Error('Failed to fetch invoices')
+                              const result = await response.json()
+                              const invoicesData = result.data?.invoices || []
+                              const csvHeaders = 'Invoice ID,Date,Client,Amount,Status'
+                              const csvRows = invoicesData.map((inv: { id: string; dueDate: string; client: string; amount: number; status: string }) =>
+                                `${inv.id},${inv.dueDate || 'N/A'},${inv.client},$${inv.amount},${inv.status}`
+                              ).join('\n')
+                              const csvData = `${csvHeaders}\n${csvRows}`
                               const blob = new Blob([csvData], { type: 'text/csv' })
                               const url = URL.createObjectURL(blob)
                               const a = document.createElement('a')
@@ -1583,8 +1595,8 @@ Best regards,
                               a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
                               a.click()
                               URL.revokeObjectURL(url)
-                              toast.success('Export complete', { id: 'export-csv', description: 'invoices-export.csv has been downloaded' })
-                            } catch { toast.error('Export failed', { id: 'export-csv' }) }
+                              toast.success('Export complete', { id: 'export-csv', description: `${invoicesData.length} invoices exported to CSV` })
+                            } catch (error) { toast.error('Export failed', { id: 'export-csv', description: error instanceof Error ? error.message : 'Unknown error' }) }
                           }}>
                             <Download className="w-5 h-5 text-blue-600" />
                             <span>Export All Invoices</span>
@@ -1593,8 +1605,21 @@ Best regards,
                           <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={async () => {
                             toast.loading('Generating Excel report...', { id: 'export-excel' })
                             try {
-                              await new Promise(r => setTimeout(r, 2000))
-                              const excelData = JSON.stringify({ invoices: stats.total, paid: stats.paid, pending: stats.pending })
+                              const response = await fetch('/api/invoices')
+                              if (!response.ok) throw new Error('Failed to fetch invoices')
+                              const result = await response.json()
+                              const invoicesData = result.data?.invoices || []
+                              const statsData = result.data?.stats || {}
+                              const excelData = JSON.stringify({
+                                generatedAt: new Date().toISOString(),
+                                summary: {
+                                  totalInvoices: invoicesData.length,
+                                  totalOutstanding: statsData.totalOutstanding,
+                                  paidThisMonth: statsData.paidThisMonth,
+                                  overdueAmount: statsData.overdueAmount
+                                },
+                                invoices: invoicesData
+                              }, null, 2)
                               const blob = new Blob([excelData], { type: 'application/json' })
                               const url = URL.createObjectURL(blob)
                               const a = document.createElement('a')
@@ -1602,8 +1627,8 @@ Best regards,
                               a.download = `invoice-report-${new Date().toISOString().split('T')[0]}.json`
                               a.click()
                               URL.revokeObjectURL(url)
-                              toast.success('Report ready', { id: 'export-excel', description: 'invoice-report has been downloaded' })
-                            } catch { toast.error('Report generation failed', { id: 'export-excel' }) }
+                              toast.success('Report ready', { id: 'export-excel', description: `Report with ${invoicesData.length} invoices downloaded` })
+                            } catch (error) { toast.error('Report generation failed', { id: 'export-excel', description: error instanceof Error ? error.message : 'Unknown error' }) }
                           }}>
                             <FileSpreadsheet className="w-5 h-5 text-green-600" />
                             <span>Export Report</span>
@@ -2976,7 +3001,7 @@ Best regards,
                     <Switch />
                   </div>
                 </div>
-                <Button variant="outline" className="w-full" disabled={isSyncing} onClick={async () => { setIsSyncing(true); toast.loading('Syncing with ' + selectedAccountingApp?.name + '...', { id: 'sync-progress' }); await new Promise(r => setTimeout(r, 2000)); setIsSyncing(false); toast.success('Sync completed', { id: 'sync-progress', description: `${Math.floor(Math.random() * 10) + 5} invoices synced with ${selectedAccountingApp?.name}` }) }}>
+                <Button variant="outline" className="w-full" disabled={isSyncing} onClick={async () => { setIsSyncing(true); toast.loading('Syncing with ' + selectedAccountingApp?.name + '...', { id: 'sync-progress' }); try { const response = await fetch('/api/invoices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'sync', provider: selectedAccountingApp?.id }) }); if (!response.ok) throw new Error('Sync failed'); const result = await response.json(); setIsSyncing(false); toast.success('Sync completed', { id: 'sync-progress', description: `Invoices synced with ${selectedAccountingApp?.name}` }); } catch (error) { setIsSyncing(false); toast.error('Sync failed', { id: 'sync-progress', description: error instanceof Error ? error.message : 'Unknown error' }); } }}>
                   <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
                   {isSyncing ? 'Syncing...' : 'Sync Now'}
                 </Button>

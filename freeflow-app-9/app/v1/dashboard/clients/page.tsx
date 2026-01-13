@@ -1268,49 +1268,109 @@ export default function ClientsPage() {
     setIsHistoryModalOpen(true)
     setIsLoadingHistory(true)
 
-    // Generate mock history based on client data
-    const history = [
-      {
-        id: `hist-${Date.now()}-1`,
-        action: 'Client Created',
-        description: `Client profile created for ${client.name}`,
-        timestamp: client.createdAt,
-        user: 'System'
-      },
-      ...(client.lastContact ? [{
-        id: `hist-${Date.now()}-2`,
-        action: 'Last Contact',
-        description: `Last contacted via email or phone`,
-        timestamp: client.lastContact,
-        user: client.assignedTo || 'Team Member'
-      }] : []),
-      {
-        id: `hist-${Date.now()}-3`,
-        action: 'Profile Updated',
-        description: `Client information was last updated`,
-        timestamp: client.updatedAt,
-        user: 'System'
-      },
-      ...(client.status === 'vip' ? [{
-        id: `hist-${Date.now()}-4`,
-        action: 'Status Changed',
-        description: `Client upgraded to VIP status`,
-        timestamp: client.updatedAt,
-        user: 'Account Manager'
-      }] : []),
-      ...(client.projects > 0 ? [{
-        id: `hist-${Date.now()}-5`,
-        action: 'Projects Completed',
-        description: `${client.projects} project(s) associated with this client`,
-        timestamp: client.updatedAt,
-        user: 'Project Team'
-      }] : [])
-    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    try {
+      // Fetch client interactions from API
+      const response = await fetch(`/api/clients?id=${client.id}&include_interactions=true`)
 
-    // Simulate loading
-    await new Promise(resolve => setTimeout(resolve, 500))
-    setClientHistory(history)
-    setIsLoadingHistory(false)
+      if (!response.ok) {
+        throw new Error('Failed to fetch client history')
+      }
+
+      const data = await response.json()
+
+      // Transform API interactions to history format
+      const apiHistory = (data.client?.recent_interactions || []).map((interaction: any) => ({
+        id: interaction.id,
+        action: interaction.type === 'call' ? 'Phone Call' :
+                interaction.type === 'email' ? 'Email Sent' :
+                interaction.type === 'meeting' ? 'Meeting' :
+                interaction.type === 'note' ? 'Note Added' :
+                interaction.type === 'task' ? 'Task Completed' : 'Activity',
+        description: interaction.subject || interaction.description || 'No description',
+        timestamp: interaction.completed_at || interaction.created_at,
+        user: interaction.user?.name || 'Team Member'
+      }))
+
+      // Add base history entries from client data
+      const baseHistory = [
+        {
+          id: `hist-${Date.now()}-1`,
+          action: 'Client Created',
+          description: `Client profile created for ${client.name}`,
+          timestamp: client.createdAt,
+          user: 'System'
+        },
+        ...(client.lastContact ? [{
+          id: `hist-${Date.now()}-2`,
+          action: 'Last Contact',
+          description: `Last contacted via email or phone`,
+          timestamp: client.lastContact,
+          user: client.assignedTo || 'Team Member'
+        }] : []),
+        {
+          id: `hist-${Date.now()}-3`,
+          action: 'Profile Updated',
+          description: `Client information was last updated`,
+          timestamp: client.updatedAt,
+          user: 'System'
+        },
+        ...(client.status === 'vip' ? [{
+          id: `hist-${Date.now()}-4`,
+          action: 'Status Changed',
+          description: `Client upgraded to VIP status`,
+          timestamp: client.updatedAt,
+          user: 'Account Manager'
+        }] : []),
+        ...(client.projects > 0 ? [{
+          id: `hist-${Date.now()}-5`,
+          action: 'Projects Completed',
+          description: `${client.projects} project(s) associated with this client`,
+          timestamp: client.updatedAt,
+          user: 'Project Team'
+        }] : [])
+      ]
+
+      // Combine and sort all history entries
+      const combinedHistory = [...apiHistory, ...baseHistory]
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+      setClientHistory(combinedHistory)
+      toast.success('History loaded')
+    } catch (error: any) {
+      logger.error('Failed to fetch client history', { error, clientId: client.id })
+
+      // Fallback to local history data on error
+      const fallbackHistory = [
+        {
+          id: `hist-${Date.now()}-1`,
+          action: 'Client Created',
+          description: `Client profile created for ${client.name}`,
+          timestamp: client.createdAt,
+          user: 'System'
+        },
+        ...(client.lastContact ? [{
+          id: `hist-${Date.now()}-2`,
+          action: 'Last Contact',
+          description: `Last contacted via email or phone`,
+          timestamp: client.lastContact,
+          user: client.assignedTo || 'Team Member'
+        }] : []),
+        {
+          id: `hist-${Date.now()}-3`,
+          action: 'Profile Updated',
+          description: `Client information was last updated`,
+          timestamp: client.updatedAt,
+          user: 'System'
+        }
+      ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+
+      setClientHistory(fallbackHistory)
+      toast.error('Failed to load full history', {
+        description: 'Showing basic history instead'
+      })
+    } finally {
+      setIsLoadingHistory(false)
+    }
   }
 
   // Handler: Send Email with Dialog

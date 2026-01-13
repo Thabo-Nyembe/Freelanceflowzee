@@ -185,8 +185,20 @@ export default function BookingClient() {
 
     setIsCreatingBooking(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Call API to create booking
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-booking',
+          title: bookingTitle,
+          date: bookingDate,
+          time: bookingTime,
+          duration: parseInt(bookingDuration),
+          notes: bookingNotes
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create booking')
 
       logger.info('Booking created successfully', {
         title: bookingTitle,
@@ -232,8 +244,19 @@ export default function BookingClient() {
   const handleSaveSettings = async () => {
     setIsSavingSettings(true)
     try {
-      // Simulate saving settings
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Call API to save settings
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save-settings',
+          autoConfirm,
+          bufferTime,
+          maxBookingsPerDay,
+          workingHours: `${workingHoursStart}-${workingHoursEnd}`
+        })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
 
       logger.info('Settings saved successfully', {
         autoConfirm,
@@ -266,10 +289,16 @@ export default function BookingClient() {
   const handleGenerateReport = async () => {
     setIsGeneratingReport(true)
     try {
-      // Simulate report generation
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Call API to generate report
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generate-report', period: reportPeriod, type: reportType })
+      })
+      if (!res.ok) throw new Error('Failed to generate report')
+      const apiData = await res.json()
 
-      const reportData = {
+      const reportData = apiData.report?.summary || {
         totalBookings: 143,
         thisMonth: 38,
         pendingBookings: 12,
@@ -331,8 +360,13 @@ export default function BookingClient() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      // Simulate export
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Call API to export
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export', format: exportFormat })
+      })
+      if (!res.ok) throw new Error('Failed to export')
 
       const bookingsData = [
         { id: 1, title: 'Consultation', date: '2024-01-15', client: 'John Doe', status: 'completed' },

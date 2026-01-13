@@ -48,7 +48,14 @@ const aiMusicStudioActivities = [
 const aiMusicStudioQuickActions = [
   { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
+      fetch('/api/music', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', name: 'New Track', genre: 'electronic', tempo: 120 })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to create track')
+        return res.json()
+      }),
       {
         loading: 'Creating new music track...',
         success: 'New music track created successfully',
@@ -58,7 +65,10 @@ const aiMusicStudioQuickActions = [
   }},
   { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1200)),
+      fetch('/api/music?action=export').then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.json()
+      }),
       {
         loading: 'Exporting audio files...',
         success: 'Audio files exported successfully',
@@ -68,7 +78,10 @@ const aiMusicStudioQuickActions = [
   }},
   { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 500)),
+      fetch('/api/music?action=settings').then(res => {
+        if (!res.ok) throw new Error('Failed to load settings')
+        return res.json()
+      }),
       {
         loading: 'Loading music studio settings...',
         success: 'Settings loaded',

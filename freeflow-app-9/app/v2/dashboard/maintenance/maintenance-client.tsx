@@ -969,8 +969,12 @@ export default function MaintenanceClient() {
   const handleClearCache = async () => {
     setIsSubmitting(true)
     try {
-      // Simulate cache clearing
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_cache' })
+      })
+      if (!res.ok) throw new Error('Failed to clear cache')
       toast.success('Cache cleared successfully')
       setShowClearCacheDialog(false)
     } catch (error) {
@@ -1007,8 +1011,12 @@ export default function MaintenanceClient() {
     }
     setIsSubmitting(true)
     try {
-      // In a real app, this would save to database
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add_part', ...newPartForm })
+      })
+      if (!res.ok) throw new Error('Failed to add part')
       toast.success(`Part "${newPartForm.name}" added successfully`)
       setShowAddPartDialog(false)
       setNewPartForm({
@@ -1039,8 +1047,12 @@ export default function MaintenanceClient() {
     }
     setIsSubmitting(true)
     try {
-      // In a real app, this would save to database
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add_technician', ...newTechnicianForm })
+      })
+      if (!res.ok) throw new Error('Failed to add technician')
       toast.success(`Technician "${newTechnicianForm.name}" added successfully`)
       setShowAddTechnicianDialog(false)
       setNewTechnicianForm({
@@ -1064,7 +1076,12 @@ export default function MaintenanceClient() {
     if (!selectedPart) return
     setIsSubmitting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reorder_part', partId: selectedPart.id, partName: selectedPart.name, quantity: 1 })
+      })
+      if (!res.ok) throw new Error('Failed to place reorder')
       toast.success(`Reorder placed for ${selectedPart.name}`)
       setShowReorderPartDialog(false)
       setSelectedPart(null)
@@ -1079,7 +1096,12 @@ export default function MaintenanceClient() {
   const handleResetSettings = async () => {
     setIsSubmitting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset_settings' })
+      })
+      if (!res.ok) throw new Error('Failed to reset settings')
       toast.success('Settings reset to defaults')
       setShowResetSettingsDialog(false)
     } catch (error) {
@@ -1177,38 +1199,60 @@ export default function MaintenanceClient() {
   }
 
   // Connect/Disconnect integration handler
-  const handleToggleIntegration = (serviceName: string, connected: boolean) => {
+  const handleToggleIntegration = async (serviceName: string, connected: boolean) => {
     if (connected) {
-      toast.success(`Disconnected from ${serviceName}`)
+      toast.promise(
+        fetch('/api/maintenance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'disconnect_integration', serviceName })
+        }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+        { loading: `Disconnecting from ${serviceName}...`, success: `Disconnected from ${serviceName}`, error: 'Failed to disconnect' }
+      )
     } else {
-      toast.info(`Connecting to ${serviceName}...`)
-      setTimeout(() => {
-        toast.success(`Connected to ${serviceName}`)
-      }, 1500)
+      toast.promise(
+        fetch('/api/maintenance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'connect_integration', serviceName })
+        }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+        { loading: `Connecting to ${serviceName}...`, success: `Connected to ${serviceName}`, error: 'Failed to connect' }
+      )
     }
   }
 
   // Export archive handler
   const handleExportArchive = () => {
-    toast.info('Preparing archive export...')
-    setTimeout(() => {
-      const blob = new Blob(['Work Order Archive Export'], { type: 'text/plain' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `work-order-archive-${new Date().toISOString().split('T')[0]}.txt`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('Archive exported')
-    }, 1000)
+    toast.promise(
+      fetch('/api/maintenance?action=export-archive').then(async res => {
+        if (!res.ok) throw new Error('Failed')
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `work-order-archive-${new Date().toISOString().split('T')[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+        return true
+      }),
+      { loading: 'Preparing archive export...', success: 'Archive exported', error: 'Failed to export archive' }
+    )
   }
 
   // Manage storage handler
   const handleManageStorage = () => {
-    toast.info('Opening storage manager...')
-    setTimeout(() => {
-      toast.success('Storage cleanup completed - 500MB freed')
-    }, 2000)
+    toast.promise(
+      fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'manage_storage' })
+      }).then(async res => {
+        if (!res.ok) throw new Error('Failed')
+        const data = await res.json()
+        return data
+      }),
+      { loading: 'Running storage cleanup...', success: (data) => `Storage cleanup completed - ${data.freedMB}MB freed`, error: 'Failed to manage storage' }
+    )
   }
 
   // Save settings handler

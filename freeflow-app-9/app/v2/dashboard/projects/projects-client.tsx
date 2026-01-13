@@ -554,17 +554,45 @@ export default function ProjectsClient() {
     if (shareEmail.trim()) {
       try {
         setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+        toast.success('Sharing project...')
         logger.info('Sharing project via email', { projectId: shareProjectId, email: shareEmail, permission: sharePermission })
 
-        // Simulate API call for sharing
-        await new Promise(resolve => setTimeout(resolve, 1000))
-
-        toast.success('Project shared!', {
-          description: `Invitation sent to ${shareEmail} with ${sharePermission} access`
+        // Call API to share project
+        const response = await fetch('/api/projects', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: shareProjectId,
+            metadata: {
+              shared_with: [
+                ...(project.metadata?.shared_with || []),
+                {
+                  email: shareEmail.trim(),
+                  permission: sharePermission,
+                  shared_at: new Date().toISOString()
+                }
+              ]
+            }
+          })
         })
-        setShareDialogOpen(false)
-        setShareEmail('')
-        setSharePermission('view')
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to share project')
+        }
+
+        const result = await response.json()
+        if (result.success) {
+          toast.success('Project shared!', {
+            description: `Invitation sent to ${shareEmail} with ${sharePermission} access`
+          })
+          setShareDialogOpen(false)
+          setShareEmail('')
+          setSharePermission('view')
+          await fetchProjects()
+        } else {
+          throw new Error(result.error || 'Failed to share project')
+        }
       } catch (err: any) {
         logger.error('Share project failed', { error: err })
         toast.error('Failed to share project', { description: err.message })

@@ -904,8 +904,13 @@ export default function MlInsightsClient() {
     try {
       setIsSaving(true)
 
-      // Simulate API call to save settings
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Save settings via API
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', section: 'ml-insights', settings: { autoRefreshEnabled, refreshInterval, notificationsEnabled, criticalAlertsOnly, defaultConfidenceThreshold, modelAutoRetrain } })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
 
       logger.info('Settings saved successfully', {
         autoRefreshEnabled,

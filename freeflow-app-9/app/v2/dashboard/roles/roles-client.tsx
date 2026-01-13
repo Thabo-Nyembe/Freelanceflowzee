@@ -436,7 +436,14 @@ const mockRolesActivities = [
 const mockRolesQuickActions = [
   { id: '1', label: 'New Role', icon: 'plus', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
+      fetch('/api/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', name: 'New Role', description: 'Custom role' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to create role')
+        return res.json()
+      }),
       {
         loading: 'Creating new role...',
         success: 'New role created successfully',
@@ -446,7 +453,10 @@ const mockRolesQuickActions = [
   }, variant: 'default' as const },
   { id: '2', label: 'Audit Permissions', icon: 'shield', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/roles?action=audit').then(res => {
+        if (!res.ok) throw new Error('Audit failed')
+        return res.json()
+      }),
       {
         loading: 'Auditing permissions...',
         success: 'Permission audit completed - All roles verified',
@@ -456,7 +466,17 @@ const mockRolesQuickActions = [
   }, variant: 'default' as const },
   { id: '3', label: 'Export Report', icon: 'download', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1200)),
+      fetch('/api/roles?action=export&format=csv').then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.blob().then(blob => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `roles-report-${Date.now()}.csv`
+          a.click()
+          URL.revokeObjectURL(url)
+        })
+      }),
       {
         loading: 'Generating roles report...',
         success: 'Roles report exported successfully',

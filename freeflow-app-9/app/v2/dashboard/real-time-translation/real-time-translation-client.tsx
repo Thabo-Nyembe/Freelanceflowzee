@@ -187,8 +187,18 @@ export default function RealTimeTranslationClient() {
 
     setIsCreatingTranslation(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/translation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: newTranslationName,
+          sourceText: newTranslationSource,
+          sourceLang: newTranslationSourceLang,
+          targetLang: newTranslationTargetLang
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create translation')
 
       toast.success('Translation Created', {
         description: `"${newTranslationName}" has been created and queued for translation`
@@ -214,8 +224,18 @@ export default function RealTimeTranslationClient() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const res = await fetch(`/api/translation?action=export&format=${exportFormat}`)
+      if (!res.ok) throw new Error('Export failed')
+
+      if (exportFormat === 'csv') {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `translations-${Date.now()}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      }
 
       toast.success('Export Complete', {
         description: `Translation history exported as ${exportFormat.toUpperCase()}`
@@ -235,8 +255,15 @@ export default function RealTimeTranslationClient() {
   const handleSaveSettings = async () => {
     setIsSavingSettings(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/translation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_settings',
+          settings: { sourceLanguage, targetLanguage, selectedEngine, selectedQuality }
+        })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
 
       toast.success('Settings Saved', {
         description: 'Your translation preferences have been updated'
@@ -287,7 +314,19 @@ export default function RealTimeTranslationClient() {
 
     setIsCreatingSession(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/translation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_session',
+          name: newSessionName,
+          participants: newSessionParticipants,
+          sourceLang: newSessionLanguages[0],
+          targetLang: newSessionLanguages[1]
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create session')
+
       toast.success('Session Created', {
         description: `"${newSessionName}" is now active and ready for participants`
       })
@@ -306,7 +345,13 @@ export default function RealTimeTranslationClient() {
   const handlePauseSession = async () => {
     setIsPausingSession(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/translation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'pause_session', sessionId: 'current' })
+      })
+      if (!res.ok) throw new Error('Failed to pause session')
+
       toast.success('Session Paused', {
         description: 'The live translation session has been paused'
       })
@@ -322,7 +367,23 @@ export default function RealTimeTranslationClient() {
   const handleExportSession = async () => {
     setIsExportingSession(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const res = await fetch('/api/translation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export_session', sessionId: 'current' })
+      })
+      if (!res.ok) throw new Error('Export failed')
+      const data = await res.json()
+
+      // Download as JSON
+      const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `session-transcript-${Date.now()}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
       toast.success('Session Exported', {
         description: 'Session transcript and data have been exported'
       })
@@ -338,7 +399,18 @@ export default function RealTimeTranslationClient() {
   const handleDownloadDocument = async () => {
     setIsDownloadingDocument(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/translation?action=export&format=json')
+      if (!res.ok) throw new Error('Download failed')
+      const data = await res.json()
+
+      const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `translated-document-${Date.now()}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
       toast.success('Download Started', {
         description: 'Your translated document is being downloaded'
       })
@@ -367,7 +439,17 @@ export default function RealTimeTranslationClient() {
 
     setIsSavingTranslation(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/translation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_translation',
+          name: saveTranslationName,
+          folder: saveTranslationFolder
+        })
+      })
+      if (!res.ok) throw new Error('Failed to save')
+
       toast.success('Translation Saved', {
         description: `"${saveTranslationName}" has been saved to your favorites`
       })
@@ -466,14 +548,28 @@ export default function RealTimeTranslationClient() {
     loadTranslationData()
   }, [userId, announce])
 
-  const handleTranslate = () => {
+  const handleTranslate = async () => {
     setIsTranslating(true)
 
-    // Simulate translation
-    setTimeout(() => {
-      setTranslatedText('Esta es una traducción de ejemplo. En producción, esto se conectaría a la API de traducción en tiempo real.')
+    try {
+      const res = await fetch('/api/translation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'translate',
+          text: sourceText,
+          sourceLang: sourceLanguage,
+          targetLang: targetLanguage
+        })
+      })
+      if (!res.ok) throw new Error('Translation failed')
+      const data = await res.json()
+      setTranslatedText(data.data?.translated || 'Translation completed')
+    } catch (error) {
+      toast.error('Translation failed', { description: 'Please try again' })
+    } finally {
       setIsTranslating(false)
-    }, 1500)
+    }
   }
 
   const handleSwapLanguages = () => {

@@ -132,7 +132,14 @@ const canvasCollaborationActivities = [
 const canvasCollaborationQuickActions = [
   { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 600)),
+      fetch('/api/canvas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', name: 'New Canvas', width: 1920, height: 1080 })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to create canvas')
+        return res.json()
+      }),
       {
         loading: 'Creating new canvas element...',
         success: 'New element added to canvas',
@@ -142,7 +149,10 @@ const canvasCollaborationQuickActions = [
   }},
   { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1200)),
+      fetch('/api/canvas?action=export&format=png').then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return res.json()
+      }),
       {
         loading: 'Exporting canvas design...',
         success: 'Canvas exported as PNG successfully',
@@ -152,7 +162,10 @@ const canvasCollaborationQuickActions = [
   }},
   { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 500)),
+      fetch('/api/canvas?action=settings').then(res => {
+        if (!res.ok) throw new Error('Failed to load settings')
+        return res.json()
+      }),
       {
         loading: 'Loading canvas settings...',
         success: 'Canvas settings panel opened',

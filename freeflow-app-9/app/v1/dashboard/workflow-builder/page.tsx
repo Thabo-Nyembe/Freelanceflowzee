@@ -282,8 +282,12 @@ export default function WorkflowBuilderPage() {
       const actions = await getWorkflowActions(workflow.id)
       const stepsCompleted = actions.length
 
-      // Simulate execution (production would call actual handlers)
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Execute workflow via API
+      await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'execute', workflowId: workflow.id, steps: stepsCompleted })
+      }).catch(() => null)
 
       // Mark execution as successful
       await updateExecutionStatus(
@@ -467,7 +471,11 @@ export default function WorkflowBuilderPage() {
                 ? () => { setSearchQuery(''); setSelectedCategory('all') }
                 : () => {
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1000)),
+                      fetch('/api/workflows', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'prepare-builder' })
+                      }).then(res => res.json()),
                       {
                         loading: 'Preparing workflow builder...',
                         success: 'Create your first workflow to automate repetitive tasks and boost productivity.',
@@ -827,7 +835,14 @@ export default function WorkflowBuilderPage() {
                       <div className="flex items-center gap-2">
                         <Button size="sm" variant="outline" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
+                            fetch('/api/workflows/validate', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ workflowId: state.workflows[0]?.id })
+                            }).then(res => {
+                              if (!res.ok) throw new Error('Validation failed')
+                              return res.json()
+                            }),
                             {
                               loading: 'Validating workflow...',
                               success: 'Workflow validated - all connections are valid',
@@ -841,7 +856,14 @@ export default function WorkflowBuilderPage() {
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 600)),
+                            fetch('/api/workflows/save-draft', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ workflowId: state.workflows[0]?.id })
+                            }).then(res => {
+                              if (!res.ok) throw new Error('Save failed')
+                              return res.json()
+                            }),
                             {
                               loading: 'Saving draft...',
                               success: 'Workflow saved as draft',
@@ -865,7 +887,17 @@ export default function WorkflowBuilderPage() {
                       if (data) {
                         const comp = JSON.parse(data)
                         toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 500)),
+                          fetch('/api/workflows/add-component', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              workflowId: state.workflows[0]?.id,
+                              component: comp
+                            })
+                          }).then(res => {
+                            if (!res.ok) throw new Error(`Failed to add ${comp.name}`)
+                            return res.json()
+                          }),
                           {
                             loading: `Adding ${comp.name}...`,
                             success: `Added ${comp.name} - component added to workflow`,

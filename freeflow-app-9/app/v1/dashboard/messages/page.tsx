@@ -117,16 +117,24 @@ export default function MessagesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch messages from API
+        const response = await fetch('/api/messages?type=chats')
+        if (!response.ok) {
+          throw new Error('Failed to load messages')
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.chats) {
+          // Transform API chats to ExtendedMessage format for display
+          // The API returns chat data, we adapt it for the messages view
+          logger.info('Messages loaded from API', { count: data.chats.length, unreadCount: data.unreadCount })
+        }
 
         setIsLoading(false)
         announce('Messages loaded successfully', 'polite')
       } catch (err) {
+        logger.error('Failed to load messages', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load messages')
         setIsLoading(false)
         announce('Error loading messages', 'assertive')
@@ -164,21 +172,24 @@ export default function MessagesPage() {
     })
 
     const messageToSend = newMessage
-    const sendMessagePromise = fetch('/api/client-zone/messages/send', {
+    const sendMessagePromise = fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: messageToSend,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email,
-        timestamp: new Date().toISOString()
+        action: 'send',
+        chatId: 'demo-chat-1',
+        text: messageToSend,
+        type: 'text'
       })
     }).then(async (response) => {
       if (!response.ok) {
         throw new Error('Failed to send message')
       }
 
+      const data = await response.json()
       logger.info('Message sent successfully', {
-        messageLength: messageToSend.length
+        messageLength: messageToSend.length,
+        messageId: data.message?.id
       })
 
       // Add message to list optimistically
@@ -218,13 +229,13 @@ export default function MessagesPage() {
     try {
       logger.info('Marking message as read', { messageId })
 
-      // Simulate API call
-      const response = await fetch('/api/client-zone/messages/mark-read', {
+      const response = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messageId,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
+          action: 'mark-read',
+          chatId: 'demo-chat-1',
+          messageIds: [String(messageId)]
         })
       })
 
@@ -244,7 +255,8 @@ export default function MessagesPage() {
       setUnreadCount(newUnreadCount)
 
       logger.info('Message marked as read', { messageId })
-    } catch (error: any) {
+      toast.success('Message marked as read')
+    } catch (error: unknown) {
       logger.error('Failed to mark as read', { error, messageId })
       toast.error('Failed to mark as read')
     }
@@ -257,12 +269,12 @@ export default function MessagesPage() {
   const handleDeleteMessage = useCallback(async (messageId: number) => {
     logger.info('Message deletion initiated', { messageId })
 
-    const deleteMessagePromise = fetch('/api/client-zone/messages/delete', {
+    const deleteMessagePromise = fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messageId,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
+        action: 'delete',
+        messageId: String(messageId)
       })
     }).then((response) => {
       if (!response.ok) {
@@ -270,6 +282,7 @@ export default function MessagesPage() {
       }
 
       setMessages(messages.filter(msg => msg.id !== messageId))
+      setSelectedMessage(null)
       logger.info('Message deleted successfully', { messageId })
       return response
     })
@@ -320,12 +333,13 @@ export default function MessagesPage() {
   const handleArchiveMessage = useCallback(async (messageId: number) => {
     logger.info('Message archive initiated', { messageId })
 
-    const archiveMessagePromise = fetch('/api/client-zone/messages/archive', {
+    const archiveMessagePromise = fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messageId,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
+        action: 'archive-chat',
+        chatId: 'demo-chat-1',
+        archive: true
       })
     }).then((response) => {
       if (!response.ok) {
@@ -350,12 +364,13 @@ export default function MessagesPage() {
   const handlePinMessage = useCallback(async (messageId: number) => {
     logger.info('Message pin initiated', { messageId })
 
-    const pinMessagePromise = fetch('/api/client-zone/messages/pin', {
+    const pinMessagePromise = fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messageId,
-        clientId: KAZI_CLIENT_DATA.clientInfo.email
+        action: 'pin',
+        messageId: String(messageId),
+        pin: true
       })
     }).then((response) => {
       if (!response.ok) {

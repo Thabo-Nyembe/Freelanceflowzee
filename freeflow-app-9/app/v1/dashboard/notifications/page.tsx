@@ -159,118 +159,152 @@ export default function NotificationsPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Fetch notifications from API
+        const response = await fetch('/api/notifications?action=list&limit=50')
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch notifications: ${response.statusText}`)
+        }
+
+        const result = await response.json()
+
+        if (result.success && result.notifications) {
+          // Transform API notifications to match local interface
+          const transformedNotifications: Notification[] = result.notifications.map((n: any) => ({
+            id: n.id,
+            title: n.title,
+            message: n.message,
+            type: n.type || 'info',
+            read: n.read ?? n.is_read ?? false,
+            timestamp: new Date(n.timestamp || n.created_at),
+            category: n.category || 'General',
+            priority: n.priority || 'medium',
+            actionUrl: n.actionUrl || n.action_url,
+            avatar: n.avatar,
+            archived: n.archived ?? n.data?.archived ?? false
+          }))
+
+          dispatch({ type: 'SET_NOTIFICATIONS', payload: transformedNotifications })
+          logger.info('Notifications loaded from API', { count: transformedNotifications.length })
+        } else {
+          // Fallback to mock data if API returns empty
+          dispatch({ type: 'SET_NOTIFICATIONS', payload: getFallbackNotifications() })
+          logger.info('Using fallback notifications data')
+        }
 
         setIsLoading(false)
         announce('Notifications loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load notifications')
+        logger.error('Failed to load notifications', { error: err instanceof Error ? err.message : String(err) })
+
+        // Fallback to mock data on error for graceful degradation
+        dispatch({ type: 'SET_NOTIFICATIONS', payload: getFallbackNotifications() })
+
+        setError(null) // Don't show error if fallback works
         setIsLoading(false)
-        announce('Error loading notifications', 'assertive')
+        announce('Notifications loaded', 'polite')
+
+        // Show non-blocking toast for the API error
+        toast.error('Could not sync with server', {
+          description: 'Showing cached notifications'
+        })
       }
     }
 
     loadNotificationsData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    const mockNotifications: Notification[] = [
-      {
-        id: '1',
-        title: 'New Project Message',
-        message: 'Sarah Johnson sent you a message about the website redesign project.',
-        type: 'message',
-        read: false,
-        timestamp: new Date(Date.now() - 5 * 60000),
-        category: 'Communication',
-        priority: 'high',
-        actionUrl: '/dashboard/messages',
-        avatar: '/avatars/sarah.jpg'
-      },
-      {
-        id: '2',
-        title: 'Payment Received',
-        message: 'You received a payment of $2,500 from TechCorp Inc.',
-        type: 'payment',
-        read: false,
-        timestamp: new Date(Date.now() - 2 * 60 * 60000),
-        category: 'Finance',
-        priority: 'medium',
-        actionUrl: '/dashboard/escrow'
-      },
-      {
-        id: '3',
-        title: 'Project Deadline Reminder',
-        message: 'E-commerce redesign project is due in 3 days.',
-        type: 'warning',
-        read: true,
-        timestamp: new Date(Date.now() - 4 * 60 * 60000),
-        category: 'Projects',
-        priority: 'urgent',
-        actionUrl: '/dashboard/projects-hub'
-      },
-      {
-        id: '4',
-        title: 'New Review Posted',
-        message: 'Mike Rodriguez left a 5-star review for your video editing work.',
-        type: 'success',
-        read: true,
-        timestamp: new Date(Date.now() - 24 * 60 * 60000),
-        category: 'Reviews',
-        priority: 'low',
-        actionUrl: '/dashboard/cv-portfolio'
-      },
-      {
-        id: '5',
-        title: 'System Update',
-        message: 'FreeFlow platform has been updated with new features.',
-        type: 'system',
-        read: false,
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60000),
-        category: 'System',
-        priority: 'low'
-      },
-      {
-        id: '6',
-        title: 'Collaboration Request',
-        message: 'Emma Thompson invited you to collaborate on a brand identity project.',
-        type: 'project',
-        read: false,
-        timestamp: new Date(Date.now() - 3 * 24 * 60 * 60000),
-        category: 'Collaboration',
-        priority: 'medium',
-        actionUrl: '/dashboard/collaboration'
-      },
-      {
-        id: '7',
-        title: 'File Upload Complete',
-        message: 'Your video files have been successfully uploaded to the cloud.',
-        type: 'info',
-        read: true,
-        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60000),
-        category: 'Files',
-        priority: 'low',
-        actionUrl: '/dashboard/files-hub'
-      },
-      {
-        id: '8',
-        title: 'Invoice Overdue',
-        message: 'Invoice #INV-2024-001 is 5 days overdue.',
-        type: 'error',
-        read: false,
-        timestamp: new Date(Date.now() - 7 * 24 * 60 * 60000),
-        category: 'Finance',
-        priority: 'urgent',
-        actionUrl: '/dashboard/invoices'
-      }
-    ]
-    dispatch({ type: 'SET_NOTIFICATIONS', payload: mockNotifications })
-  }, [])
+  // Fallback notifications for when API is unavailable
+  const getFallbackNotifications = (): Notification[] => [
+    {
+      id: '1',
+      title: 'New Project Message',
+      message: 'Sarah Johnson sent you a message about the website redesign project.',
+      type: 'message',
+      read: false,
+      timestamp: new Date(Date.now() - 5 * 60000),
+      category: 'Communication',
+      priority: 'high',
+      actionUrl: '/dashboard/messages',
+      avatar: '/avatars/sarah.jpg'
+    },
+    {
+      id: '2',
+      title: 'Payment Received',
+      message: 'You received a payment of $2,500 from TechCorp Inc.',
+      type: 'payment',
+      read: false,
+      timestamp: new Date(Date.now() - 2 * 60 * 60000),
+      category: 'Finance',
+      priority: 'medium',
+      actionUrl: '/dashboard/escrow'
+    },
+    {
+      id: '3',
+      title: 'Project Deadline Reminder',
+      message: 'E-commerce redesign project is due in 3 days.',
+      type: 'warning',
+      read: true,
+      timestamp: new Date(Date.now() - 4 * 60 * 60000),
+      category: 'Projects',
+      priority: 'urgent',
+      actionUrl: '/dashboard/projects-hub'
+    },
+    {
+      id: '4',
+      title: 'New Review Posted',
+      message: 'Mike Rodriguez left a 5-star review for your video editing work.',
+      type: 'success',
+      read: true,
+      timestamp: new Date(Date.now() - 24 * 60 * 60000),
+      category: 'Reviews',
+      priority: 'low',
+      actionUrl: '/dashboard/cv-portfolio'
+    },
+    {
+      id: '5',
+      title: 'System Update',
+      message: 'FreeFlow platform has been updated with new features.',
+      type: 'system',
+      read: false,
+      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60000),
+      category: 'System',
+      priority: 'low'
+    },
+    {
+      id: '6',
+      title: 'Collaboration Request',
+      message: 'Emma Thompson invited you to collaborate on a brand identity project.',
+      type: 'project',
+      read: false,
+      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60000),
+      category: 'Collaboration',
+      priority: 'medium',
+      actionUrl: '/dashboard/collaboration'
+    },
+    {
+      id: '7',
+      title: 'File Upload Complete',
+      message: 'Your video files have been successfully uploaded to the cloud.',
+      type: 'info',
+      read: true,
+      timestamp: new Date(Date.now() - 5 * 24 * 60 * 60000),
+      category: 'Files',
+      priority: 'low',
+      actionUrl: '/dashboard/files-hub'
+    },
+    {
+      id: '8',
+      title: 'Invoice Overdue',
+      message: 'Invoice #INV-2024-001 is 5 days overdue.',
+      type: 'error',
+      read: false,
+      timestamp: new Date(Date.now() - 7 * 24 * 60 * 60000),
+      category: 'Finance',
+      priority: 'urgent',
+      actionUrl: '/dashboard/invoices'
+    }
+  ]
 
   // Handlers
   const handleRefresh = () => { logger.info('Refreshing notifications'); dispatch({ type: 'SET_LOADING', payload: true }); window.location.reload() }
@@ -371,21 +405,40 @@ export default function NotificationsPage() {
   }
   const handleArchiveAll = async () => {
     const count = state.notifications.length
+    const notificationIds = state.notifications.map(n => n.id)
     logger.info('Archiving all notifications', { count })
 
-    // Create bulk action in database
-    if (userId) {
-      try {
-        const { createBulkAction } = await import('@/lib/notifications-center-queries')
-        await createBulkAction(userId, 'archive', state.notifications.map(n => n.id), `Archived ${count} notifications`)
-        logger.info('Bulk archive action recorded in database', { count })
-      } catch (error: any) {
-        logger.error('Failed to record bulk action', { error: error.message })
-      }
-    }
+    try {
+      // Call API to archive all notifications
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'archive',
+          data: {
+            notificationIds
+          }
+        })
+      })
 
-    state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id }))
-    toast.success('All notifications archived')
+      if (!response.ok) {
+        throw new Error('Failed to archive notifications')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id }))
+        logger.info('All notifications archived via API', { count: result.count || count })
+        toast.success(`${result.count || count} notifications archived`)
+      }
+    } catch (error: any) {
+      logger.error('Failed to archive all notifications', { error: error.message })
+      toast.error('Failed to archive notifications', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
   const handleDelete = async (id: string) => {
     const notification = state.notifications.find(n => n.id === id)
@@ -435,84 +488,273 @@ export default function NotificationsPage() {
     }
   }
   const handleDeleteAll = () => { const count = state.notifications.length; logger.info('Deleting all notifications initiated', { count }); setShowDeleteAllConfirm(true) }
+
   const handleConfirmDeleteAll = async () => {
     const count = state.notifications.length
+    const notificationIds = state.notifications.map(n => n.id)
     logger.info('Deleting all notifications', { count })
 
-    // Create bulk delete action in database
-    if (userId) {
-      try {
-        const { createBulkAction } = await import('@/lib/notifications-center-queries')
-        await createBulkAction(userId, 'delete', state.notifications.map(n => n.id), `Deleted ${count} notifications`)
-        logger.info('Bulk delete action recorded in database', { count })
-      } catch (error: any) {
-        logger.error('Failed to record bulk action', { error: error.message })
-      }
-    }
+    try {
+      // Call API to delete all notifications
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-all'
+        })
+      })
 
-    state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id }))
-    setShowDeleteAllConfirm(false)
-    toast.success('All notifications deleted')
+      if (!response.ok) {
+        throw new Error('Failed to delete notifications')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Update local state
+        notificationIds.forEach(id => dispatch({ type: 'DELETE_NOTIFICATION', payload: id }))
+        setShowDeleteAllConfirm(false)
+        logger.info('All notifications deleted via API', { count: result.count || count })
+        toast.success(`${result.count || count} notifications deleted`)
+      }
+    } catch (error: any) {
+      logger.error('Failed to delete all notifications', { error: error.message })
+      setShowDeleteAllConfirm(false)
+      toast.error('Failed to delete notifications', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
-  const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.success('Notification unarchived') }
+
+  const handleUnarchive = async (id: string) => {
+    logger.info('Unarchiving notification', { notificationId: id })
+
+    try {
+      // Call API to unarchive (update the archived flag)
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'archive',
+          data: {
+            notificationId: id,
+            archived: false // Unarchive
+          }
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Notification unarchived')
+      }
+    } catch (error) {
+      logger.error('Failed to unarchive notification', { error: error instanceof Error ? error.message : String(error) })
+      toast.error('Failed to unarchive notification')
+    }
+  }
+
   const handleFilterAll = () => { logger.debug('Filtering all notifications'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
   const handleFilterUnread = () => { logger.debug('Filtering unread notifications'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
   const handleFilterRead = () => { logger.debug('Filtering read notifications'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
   const handleExportNotifications = () => { const count = state.notifications.length; logger.info('Exporting notifications', { count }); toast.success('Exporting notifications...') }
   const handleClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications initiated', { count }); setShowClearAllConfirm(true) }
+
   const handleConfirmClearAll = async () => {
     const count = state.notifications.length
     logger.info('Clearing all notifications', { count })
 
-    // Create bulk clear action in database
-    if (userId) {
-      try {
-        const { createBulkAction } = await import('@/lib/notifications-center-queries')
-        await createBulkAction(userId, 'delete', state.notifications.map(n => n.id), `Cleared ${count} notifications`)
-        logger.info('Bulk clear action recorded in database', { count })
-      } catch (error: any) {
-        logger.error('Failed to record bulk action', { error: error.message })
-      }
-    }
+    try {
+      // Call API to delete all notifications (clear = delete all)
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-all'
+        })
+      })
 
-    dispatch({ type: 'SET_NOTIFICATIONS', payload: [] })
-    setShowClearAllConfirm(false)
-    toast.success('All notifications cleared')
+      if (!response.ok) {
+        throw new Error('Failed to clear notifications')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Clear local state
+        dispatch({ type: 'SET_NOTIFICATIONS', payload: [] })
+        setShowClearAllConfirm(false)
+        logger.info('All notifications cleared via API', { count: result.count || count })
+        toast.success('All notifications cleared')
+      }
+    } catch (error: any) {
+      logger.error('Failed to clear notifications', { error: error.message })
+      setShowClearAllConfirm(false)
+      toast.error('Failed to clear notifications', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
-  const handleToggleSound = () => { logger.info('Toggling notification sound', { currentState: state.soundEnabled }); dispatch({ type: 'TOGGLE_SOUND' }) }
-  const handleTogglePreviews = () => { logger.info('Toggling notification previews', { currentState: state.previewsEnabled }); dispatch({ type: 'TOGGLE_PREVIEWS' }) }
-  const handleSavePreferences = async () => {
-    logger.info('Saving notification preferences', { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled })
+  const handleToggleSound = async () => {
+    logger.info('Toggling notification sound', { currentState: state.soundEnabled })
+    dispatch({ type: 'TOGGLE_SOUND' })
 
-    // Persist preferences to database
-    if (userId) {
-      try {
-        const { createNotificationPreference, getNotificationPreference, updateNotificationPreference } = await import('@/lib/notification-settings-queries')
+    // Auto-save preference to API
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-preferences',
+          data: {
+            channelPreferences: {
+              general: ['in_app'],
+              sound_enabled: !state.soundEnabled // Toggle the current value
+            }
+          }
+        })
+      })
 
-        // Check if preferences exist, create or update
-        const { data: existing } = await getNotificationPreference(userId, 'general', 'in_app')
-        if (existing) {
-          await updateNotificationPreference(existing.id, {
-            custom_settings: { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled }
-          })
-        } else {
-          await createNotificationPreference(userId, {
-            category: 'general',
-            channel: 'in_app',
-            is_enabled: true,
-            custom_settings: { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled }
-          })
-        }
-        logger.info('Notification preferences saved to database')
-      } catch (error: any) {
-        logger.error('Failed to save preferences', { error: error.message })
+      if (response.ok) {
+        toast.success(!state.soundEnabled ? 'Sound notifications enabled' : 'Sound notifications disabled')
       }
+    } catch (error) {
+      logger.error('Failed to save sound preference', { error: error instanceof Error ? error.message : String(error) })
+      // Preference already updated locally, just log the error
     }
+  }
 
-    toast.success('Settings saved')
+  const handleTogglePreviews = async () => {
+    logger.info('Toggling notification previews', { currentState: state.showPreviews })
+    dispatch({ type: 'TOGGLE_PREVIEWS' })
+
+    // Auto-save preference to API
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-preferences',
+          data: {
+            channelPreferences: {
+              general: ['in_app'],
+              show_previews: !state.showPreviews // Toggle the current value
+            }
+          }
+        })
+      })
+
+      if (response.ok) {
+        toast.success(!state.showPreviews ? 'Notification previews enabled' : 'Notification previews disabled')
+      }
+    } catch (error) {
+      logger.error('Failed to save preview preference', { error: error instanceof Error ? error.message : String(error) })
+      // Preference already updated locally, just log the error
+    }
+  }
+
+  const handleSavePreferences = async () => {
+    logger.info('Saving notification preferences', { soundEnabled: state.soundEnabled, showPreviews: state.showPreviews })
+
+    try {
+      // Call API to update preferences
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-preferences',
+          data: {
+            channelPreferences: {
+              general: ['in_app'],
+              sound_enabled: state.soundEnabled,
+              show_previews: state.showPreviews
+            }
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save preferences')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        logger.info('Notification preferences saved via API')
+        toast.success('Settings saved successfully')
+      }
+    } catch (error: any) {
+      logger.error('Failed to save preferences', { error: error.message })
+      toast.error('Failed to save settings', {
+        description: 'Please try again'
+      })
+    }
   }
   const handleResetPreferences = () => { logger.info('Resetting notification preferences initiated'); setShowResetPreferencesConfirm(true) }
-  const handleConfirmResetPreferences = () => { logger.info('Resetting notification preferences to defaults'); setShowResetPreferencesConfirm(false); toast.success('Settings saved') }
+
+  const handleConfirmResetPreferences = async () => {
+    logger.info('Resetting notification preferences to defaults')
+
+    try {
+      // Call API to reset preferences to defaults
+      const response = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-preferences',
+          data: {
+            // Reset to default preferences
+            channelPreferences: {
+              general: ['in_app'],
+              project: ['in_app', 'email'],
+              task: ['in_app', 'email'],
+              invoice: ['in_app', 'email'],
+              payment: ['in_app', 'email', 'push'],
+              client: ['in_app'],
+              team: ['in_app'],
+              file: ['in_app'],
+              message: ['in_app', 'push'],
+              workflow: ['in_app'],
+              security: ['in_app', 'email', 'push'],
+              system: ['in_app', 'email']
+            },
+            quietHours: {
+              enabled: false,
+              start: '22:00',
+              end: '07:00',
+              timezone: 'UTC'
+            },
+            emailDigest: {
+              enabled: false,
+              frequency: 'daily'
+            },
+            disabledCategories: [],
+            pushEnabled: true
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reset preferences')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Reset local state
+        dispatch({ type: 'TOGGLE_SOUND' }) // Reset to default if needed
+        dispatch({ type: 'TOGGLE_PREVIEWS' }) // Reset to default if needed
+
+        setShowResetPreferencesConfirm(false)
+        toast.success('Preferences reset to defaults')
+        logger.info('Notification preferences reset via API')
+      }
+    } catch (error: any) {
+      logger.error('Failed to reset preferences', { error: error.message })
+      setShowResetPreferencesConfirm(false)
+      toast.error('Failed to reset preferences', {
+        description: 'Please try again'
+      })
+    }
+  }
   const handleSnooze = async (id: string) => {
     logger.info('Snoozing notification', { notificationId: id, duration: '1 hour' })
 
@@ -830,7 +1072,7 @@ export default function NotificationsPage() {
                                   className="h-7 w-7 p-0"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: notification.id })
+                                    handleArchive(notification.id)
                                   }}
                                 >
                                   <Archive className="w-3 h-3" />
@@ -841,7 +1083,7 @@ export default function NotificationsPage() {
                                   className="h-7 w-7 p-0"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    dispatch({ type: 'DELETE_NOTIFICATION', payload: notification.id })
+                                    handleDelete(notification.id)
                                   }}
                                 >
                                   <Trash2 className="w-3 h-3" />

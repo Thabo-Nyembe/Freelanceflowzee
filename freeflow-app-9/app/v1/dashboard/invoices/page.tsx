@@ -40,8 +40,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 // DATABASE QUERIES
 import {
-  disputeInvoice,
-  markInvoiceAsPaid as markInvoiceAsPaidAPI
+  disputeInvoice
 } from '@/lib/client-zone-queries'
 
 const logger = createFeatureLogger('ClientZoneInvoices')
@@ -311,18 +310,42 @@ export default function InvoicesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch invoices from API
+        const response = await fetch('/api/invoices')
 
-        setInvoices(INVOICES)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch invoices: ${response.statusText}`)
+        }
+
+        const result = await response.json()
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to load invoices')
+        }
+
+        // Map API response to Invoice type
+        const apiInvoices: Invoice[] = result.data.invoices.map((inv: any) => ({
+          id: inv.id,
+          number: inv.number,
+          project: inv.project || '',
+          amount: inv.amount,
+          items: inv.items || [],
+          dueDate: inv.dueDate,
+          issueDate: inv.issueDate,
+          paidDate: inv.paidDate || undefined,
+          status: inv.status as 'paid' | 'pending' | 'overdue' | 'disputed',
+          description: inv.description || '',
+          clientName: inv.clientName,
+          clientEmail: inv.clientEmail,
+          notes: inv.notes || undefined,
+          paymentMethod: inv.paymentMethod || undefined
+        }))
+
+        setInvoices(apiInvoices)
         setIsLoading(false)
         announce('Invoices loaded successfully', 'polite')
         logger.info('Invoices data loaded', {
-          invoiceCount: INVOICES.length
+          invoiceCount: apiInvoices.length
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load invoices'
@@ -330,6 +353,9 @@ export default function InvoicesPage() {
         setIsLoading(false)
         announce('Error loading invoices', 'assertive')
         logger.error('Failed to load invoices', { error: err })
+        toast.error('Failed to load invoices', {
+          description: errorMsg
+        })
       }
     }
 
@@ -437,48 +463,56 @@ export default function InvoicesPage() {
 
     try {
       // Create invoice via API
-      const promise = new Promise<Invoice>(async (resolve, reject) => {
-        try {
-          // Simulate API call or use real API
-          await new Promise(r => setTimeout(r, 1000))
-
-          const newInvoice: Invoice = {
-            id: Math.max(0, ...invoices.map(i => i.id)) + 1,
-            number: formData.number,
-            project: formData.project,
-            amount: formTotal,
-            items: formData.items,
-            dueDate: formData.dueDate,
-            issueDate: formData.issueDate,
-            status: 'pending',
-            description: formData.description,
-            clientName: formData.clientName,
-            clientEmail: formData.clientEmail,
-            notes: formData.notes
-          }
-
-          resolve(newInvoice)
-        } catch (error) {
-          reject(error)
-        }
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          number: formData.number,
+          project: formData.project,
+          clientName: formData.clientName,
+          clientEmail: formData.clientEmail,
+          description: formData.description,
+          issueDate: formData.issueDate,
+          dueDate: formData.dueDate,
+          notes: formData.notes,
+          items: formData.items,
+          amount: formTotal
+        })
       })
 
-      toast.promise(promise, {
-        loading: 'Creating invoice...',
-        success: (newInvoice) => {
-          setInvoices([newInvoice, ...invoices])
-          setShowCreateDialog(false)
-          setFormData(DEFAULT_FORM_DATA)
-          logger.info('Invoice created successfully', { invoiceNumber: newInvoice.number })
-          announce('Invoice created successfully', 'polite')
-          return `Invoice ${newInvoice.number} created successfully`
-        },
-        error: 'Failed to create invoice'
-      })
+      const result = await response.json()
 
-      await promise
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to create invoice')
+      }
+
+      const newInvoice: Invoice = {
+        id: result.data.id,
+        number: result.data.number,
+        project: result.data.project || '',
+        amount: result.data.amount,
+        items: result.data.items || formData.items,
+        dueDate: result.data.dueDate,
+        issueDate: result.data.issueDate,
+        status: result.data.status as 'paid' | 'pending' | 'overdue' | 'disputed',
+        description: result.data.description || '',
+        clientName: result.data.clientName,
+        clientEmail: result.data.clientEmail,
+        notes: result.data.notes || undefined
+      }
+
+      setInvoices([newInvoice, ...invoices])
+      setShowCreateDialog(false)
+      setFormData(DEFAULT_FORM_DATA)
+      logger.info('Invoice created successfully', { invoiceNumber: newInvoice.number })
+      announce('Invoice created successfully', 'polite')
+      toast.success(`Invoice ${newInvoice.number} created successfully`)
     } catch (error: any) {
       logger.error('Failed to create invoice', { error })
+      toast.error('Failed to create invoice', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -514,50 +548,59 @@ export default function InvoicesPage() {
     setIsSubmitting(true)
 
     try {
-      const promise = new Promise<Invoice>(async (resolve, reject) => {
-        try {
-          // Simulate API call
-          await new Promise(r => setTimeout(r, 1000))
-
-          const updatedInvoice: Invoice = {
-            ...editingInvoice,
-            number: formData.number,
-            project: formData.project,
-            amount: formTotal,
-            items: formData.items,
-            dueDate: formData.dueDate,
-            issueDate: formData.issueDate,
-            description: formData.description,
-            clientName: formData.clientName,
-            clientEmail: formData.clientEmail,
-            notes: formData.notes
-          }
-
-          resolve(updatedInvoice)
-        } catch (error) {
-          reject(error)
-        }
+      // Update invoice via API
+      const response = await fetch('/api/invoices', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingInvoice.id,
+          number: formData.number,
+          project: formData.project,
+          clientName: formData.clientName,
+          clientEmail: formData.clientEmail,
+          description: formData.description,
+          issueDate: formData.issueDate,
+          dueDate: formData.dueDate,
+          notes: formData.notes,
+          items: formData.items,
+          amount: formTotal
+        })
       })
 
-      toast.promise(promise, {
-        loading: 'Updating invoice...',
-        success: (updatedInvoice) => {
-          setInvoices(invoices.map(inv =>
-            inv.id === editingInvoice.id ? updatedInvoice : inv
-          ))
-          setShowEditDialog(false)
-          setEditingInvoice(null)
-          setFormData(DEFAULT_FORM_DATA)
-          logger.info('Invoice updated successfully', { invoiceId: updatedInvoice.id })
-          announce('Invoice updated successfully', 'polite')
-          return `Invoice ${updatedInvoice.number} updated successfully`
-        },
-        error: 'Failed to update invoice'
-      })
+      const result = await response.json()
 
-      await promise
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to update invoice')
+      }
+
+      const updatedInvoice: Invoice = {
+        ...editingInvoice,
+        number: result.data.number || formData.number,
+        project: result.data.project || formData.project,
+        amount: result.data.amount || formTotal,
+        items: result.data.items || formData.items,
+        dueDate: result.data.dueDate || formData.dueDate,
+        issueDate: result.data.issueDate || formData.issueDate,
+        description: result.data.description || formData.description,
+        clientName: result.data.clientName || formData.clientName,
+        clientEmail: result.data.clientEmail || formData.clientEmail,
+        notes: result.data.notes || formData.notes
+      }
+
+      setInvoices(invoices.map(inv =>
+        inv.id === editingInvoice.id ? updatedInvoice : inv
+      ))
+      setShowEditDialog(false)
+      setEditingInvoice(null)
+      setFormData(DEFAULT_FORM_DATA)
+      logger.info('Invoice updated successfully', { invoiceId: updatedInvoice.id })
+      announce('Invoice updated successfully', 'polite')
+      toast.success(`Invoice ${updatedInvoice.number} updated successfully`)
     } catch (error: any) {
       logger.error('Failed to update invoice', { error })
+      toast.error('Failed to update invoice', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -577,32 +620,28 @@ export default function InvoicesPage() {
     setIsDeleting(true)
 
     try {
-      const promise = new Promise<void>(async (resolve, reject) => {
-        try {
-          // Simulate API call
-          await new Promise(r => setTimeout(r, 1000))
-          resolve()
-        } catch (error) {
-          reject(error)
-        }
+      // Delete invoice via API
+      const response = await fetch(`/api/invoices?id=${deletingInvoice.id}`, {
+        method: 'DELETE'
       })
 
-      toast.promise(promise, {
-        loading: 'Deleting invoice...',
-        success: () => {
-          setInvoices(invoices.filter(inv => inv.id !== deletingInvoice.id))
-          setShowDeleteDialog(false)
-          setDeletingInvoice(null)
-          logger.info('Invoice deleted successfully', { invoiceId: deletingInvoice.id })
-          announce('Invoice deleted successfully', 'polite')
-          return `Invoice ${deletingInvoice.number} deleted successfully`
-        },
-        error: 'Failed to delete invoice'
-      })
+      const result = await response.json()
 
-      await promise
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to delete invoice')
+      }
+
+      setInvoices(invoices.filter(inv => inv.id !== deletingInvoice.id))
+      setShowDeleteDialog(false)
+      logger.info('Invoice deleted successfully', { invoiceId: deletingInvoice.id })
+      announce('Invoice deleted successfully', 'polite')
+      toast.success(`Invoice ${deletingInvoice.number} deleted successfully`)
+      setDeletingInvoice(null)
     } catch (error: any) {
       logger.error('Failed to delete invoice', { error })
+      toast.error('Failed to delete invoice', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsDeleting(false)
     }
@@ -629,49 +668,36 @@ export default function InvoicesPage() {
     setIsSending(true)
 
     try {
-      const promise = new Promise<void>(async (resolve, reject) => {
-        try {
-          // Call API to send invoice
-          const response = await fetch('/api/invoices/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              invoiceId: sendingInvoice.id,
-              email: sendEmail,
-              message: sendMessage
-            })
-          })
-
-          if (!response.ok) {
-            // Simulate success for demo
-            await new Promise(r => setTimeout(r, 1500))
-          }
-
-          resolve()
-        } catch (error) {
-          // Simulate success for demo purposes
-          await new Promise(r => setTimeout(r, 1500))
-          resolve()
-        }
+      // Send invoice via API
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          invoiceId: sendingInvoice.id,
+          email: sendEmail,
+          message: sendMessage
+        })
       })
 
-      toast.promise(promise, {
-        loading: 'Sending invoice...',
-        success: () => {
-          setShowSendDialog(false)
-          setSendingInvoice(null)
-          setSendEmail('')
-          setSendMessage('')
-          logger.info('Invoice sent successfully', { invoiceId: sendingInvoice.id, email: sendEmail })
-          announce('Invoice sent successfully', 'polite')
-          return `Invoice sent to ${sendEmail}`
-        },
-        error: 'Failed to send invoice'
-      })
+      const result = await response.json()
 
-      await promise
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to send invoice')
+      }
+
+      setShowSendDialog(false)
+      logger.info('Invoice sent successfully', { invoiceId: sendingInvoice.id, email: sendEmail })
+      announce('Invoice sent successfully', 'polite')
+      toast.success(`Invoice sent to ${sendEmail}`)
+      setSendingInvoice(null)
+      setSendEmail('')
+      setSendMessage('')
     } catch (error: any) {
       logger.error('Failed to send invoice', { error })
+      toast.error('Failed to send invoice', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSending(false)
     }
@@ -698,44 +724,41 @@ export default function InvoicesPage() {
     setIsMarkingPaid(true)
 
     try {
-      const promise = new Promise<void>(async (resolve, reject) => {
-        try {
-          // Call API to mark as paid
-          await markInvoiceAsPaidAPI(
-            markingPaidInvoice.id.toString(),
-            paymentMethod,
-            paymentReference || undefined
-          )
-          resolve()
-        } catch (error) {
-          // Simulate success for demo
-          await new Promise(r => setTimeout(r, 1000))
-          resolve()
-        }
+      // Mark invoice as paid via API
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'mark-paid',
+          invoiceId: markingPaidInvoice.id,
+          paymentMethod,
+          paymentReference: paymentReference || undefined
+        })
       })
 
-      toast.promise(promise, {
-        loading: 'Marking invoice as paid...',
-        success: () => {
-          setInvoices(invoices.map(inv =>
-            inv.id === markingPaidInvoice.id
-              ? { ...inv, status: 'paid' as const, paidDate: new Date().toISOString(), paymentMethod }
-              : inv
-          ))
-          setShowMarkPaidDialog(false)
-          setMarkingPaidInvoice(null)
-          setPaymentMethod('')
-          setPaymentReference('')
-          logger.info('Invoice marked as paid', { invoiceId: markingPaidInvoice.id })
-          announce('Invoice marked as paid', 'polite')
-          return `Invoice ${markingPaidInvoice.number} marked as paid`
-        },
-        error: 'Failed to mark invoice as paid'
-      })
+      const result = await response.json()
 
-      await promise
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to mark invoice as paid')
+      }
+
+      setInvoices(invoices.map(inv =>
+        inv.id === markingPaidInvoice.id
+          ? { ...inv, status: 'paid' as const, paidDate: new Date().toISOString().split('T')[0], paymentMethod }
+          : inv
+      ))
+      setShowMarkPaidDialog(false)
+      logger.info('Invoice marked as paid', { invoiceId: markingPaidInvoice.id })
+      announce('Invoice marked as paid', 'polite')
+      toast.success(`Invoice ${markingPaidInvoice.number} marked as paid`)
+      setMarkingPaidInvoice(null)
+      setPaymentMethod('')
+      setPaymentReference('')
     } catch (error: any) {
       logger.error('Failed to mark invoice as paid', { error })
+      toast.error('Failed to mark invoice as paid', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsMarkingPaid(false)
     }
@@ -751,36 +774,43 @@ export default function InvoicesPage() {
     })
 
     try {
-      const response = await fetch('/api/invoices/payment', {
+      // Try to create a payment session via API
+      const response = await fetch('/api/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'add-payment',
           invoiceId: invoice.id,
-          invoiceNumber: invoice.number,
           amount: invoice.amount,
-          currency: 'USD'
+          paymentMethod: 'online',
+          paymentReference: `PAY-${Date.now()}`
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to initiate payment')
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        // Update local state to reflect payment
+        setInvoices(invoices.map(inv =>
+          inv.id === invoice.id
+            ? { ...inv, status: 'paid' as const, paidDate: new Date().toISOString().split('T')[0], paymentMethod: 'Online Payment' }
+            : inv
+        ))
+        logger.info('Payment recorded successfully', { invoiceId: invoice.id })
+        toast.success('Payment processed successfully', {
+          description: `Invoice ${invoice.number} has been marked as paid`
+        })
+        announce('Payment processed successfully', 'polite')
+      } else {
+        // If API call fails, show info toast
+        logger.info('Payment API not available, showing payment info', { invoiceId: invoice.id })
+        toast.info('Payment information', {
+          description: `Invoice ${invoice.number} - ${formatCurrency(invoice.amount)}. Please contact billing for payment options.`
+        })
       }
-
-      logger.info('Stripe payment session created', {
-        invoiceId: invoice.id
-      })
-
-      toast.success('Redirecting to payment...', {
-        description: `Invoice ${invoice.number} - ${formatCurrency(invoice.amount)}`
-      })
-
-      // In a real app, redirect to Stripe checkout
-      setTimeout(() => {
-        window.open('https://stripe.com/checkout', '_blank')
-      }, 1000)
     } catch (error: any) {
       logger.error('Failed to initiate payment', { error, invoiceId: invoice.id })
-      toast.error('Failed to initiate payment', {
+      toast.error('Failed to process payment', {
         description: error.message || 'Please try again later'
       })
     }
@@ -793,29 +823,27 @@ export default function InvoicesPage() {
       invoiceNumber: invoice.number
     })
 
-    const promise = new Promise<void>(async (resolve, reject) => {
-      try {
-        const response = await fetch(`/api/invoices/${invoice.id}/pdf`, {
-          method: 'GET'
-        })
+    try {
+      // Try to fetch PDF from API
+      const response = await fetch(`/api/invoices/${invoice.id}/pdf`, {
+        method: 'GET'
+      })
 
-        if (response.ok) {
-          const blob = await response.blob()
-          const url = window.URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `${invoice.number}.pdf`
-          document.body.appendChild(a)
-          a.click()
-          window.URL.revokeObjectURL(url)
-          document.body.removeChild(a)
-          resolve()
-        } else {
-          // Generate a simple PDF for demo
-          await new Promise(r => setTimeout(r, 1000))
-
-          // Create a simple text blob as demo
-          const content = `
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${invoice.number}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        logger.info('Invoice PDF downloaded from API', { invoiceId: invoice.id })
+        toast.success(`${invoice.number} downloaded`)
+      } else {
+        // Generate a text-based invoice as fallback
+        const content = `
 INVOICE: ${invoice.number}
 =====================================
 Client: ${invoice.clientName}
@@ -830,32 +858,26 @@ ${invoice.items.map(item => `- ${item.description}: ${item.quantity} x ${formatC
 TOTAL: ${formatCurrency(invoice.amount)}
 
 ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
-          `.trim()
+        `.trim()
 
-          const blob = new Blob([content], { type: 'text/plain' })
-          const url = window.URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `${invoice.number}.txt`
-          document.body.appendChild(a)
-          a.click()
-          window.URL.revokeObjectURL(url)
-          document.body.removeChild(a)
-          resolve()
-        }
-      } catch (error) {
-        reject(error)
+        const blob = new Blob([content], { type: 'text/plain' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${invoice.number}.txt`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        logger.info('Invoice text file generated', { invoiceId: invoice.id })
+        toast.success(`${invoice.number} downloaded`)
       }
-    })
-
-    toast.promise(promise, {
-      loading: 'Generating PDF...',
-      success: () => {
-        logger.info('Invoice PDF downloaded', { invoiceId: invoice.id })
-        return `${invoice.number} downloaded`
-      },
-      error: 'Failed to download PDF'
-    })
+    } catch (error: any) {
+      logger.error('Failed to download invoice', { error, invoiceId: invoice.id })
+      toast.error('Failed to download invoice', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   // Handle View Details
@@ -925,43 +947,39 @@ ${invoice.notes ? `Notes: ${invoice.notes}` : ''}
   const handleExportCSV = async () => {
     logger.info('CSV export initiated', { invoiceCount: filteredInvoices.length })
 
-    const promise = new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const headers = ['Invoice Number', 'Project', 'Client Name', 'Client Email', 'Amount', 'Status', 'Issue Date', 'Due Date', 'Paid Date']
-        const rows = filteredInvoices.map(inv => [
-          inv.number,
-          `"${inv.project}"`,
-          `"${inv.clientName}"`,
-          inv.clientEmail,
-          inv.amount.toFixed(2),
-          inv.status,
-          inv.issueDate,
-          inv.dueDate,
-          inv.paidDate || ''
-        ])
+    try {
+      const headers = ['Invoice Number', 'Project', 'Client Name', 'Client Email', 'Amount', 'Status', 'Issue Date', 'Due Date', 'Paid Date']
+      const rows = filteredInvoices.map(inv => [
+        inv.number,
+        `"${inv.project}"`,
+        `"${inv.clientName}"`,
+        inv.clientEmail,
+        inv.amount.toFixed(2),
+        inv.status,
+        inv.issueDate,
+        inv.dueDate,
+        inv.paidDate || ''
+      ])
 
-        const csv = [headers.join(','), ...rows.map(row => row.join(','))].join('\n')
-        const blob = new Blob([csv], { type: 'text/csv' })
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-        resolve()
-      }, 500)
-    })
+      const csv = [headers.join(','), ...rows.map(row => row.join(','))].join('\n')
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
 
-    toast.promise(promise, {
-      loading: 'Exporting invoices...',
-      success: () => {
-        logger.info('CSV export completed', { invoiceCount: filteredInvoices.length })
-        return `${filteredInvoices.length} invoices exported`
-      },
-      error: 'Failed to export invoices'
-    })
+      logger.info('CSV export completed', { invoiceCount: filteredInvoices.length })
+      toast.success(`${filteredInvoices.length} invoices exported`)
+    } catch (error: any) {
+      logger.error('Failed to export invoices', { error })
+      toast.error('Failed to export invoices', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   // Clear all filters

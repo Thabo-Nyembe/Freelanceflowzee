@@ -892,8 +892,17 @@ export default function VoiceCollaborationClient() {
     setIsExporting(true)
 
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Call voice API to export recordings
+      const res = await fetch('/api/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export-recordings',
+          recordingIds: exportSelectedRecordings,
+          format: exportFormat
+        })
+      })
+      if (!res.ok) throw new Error('Failed to export')
 
       const selectedRecordingData = state.recordings.filter(r =>
         exportSelectedRecordings.includes(r.id)
@@ -954,11 +963,21 @@ export default function VoiceCollaborationClient() {
     })
 
     try {
-      // Simulate API call to save settings
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      // In production, this would save to user preferences in the database
-      // await updateUserVoiceSettings(userId, { ... })
+      // Call voice API to save settings
+      const res = await fetch('/api/voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save-settings',
+          inputDevice: voiceInputDevice,
+          outputDevice: voiceOutputDevice,
+          inputVolume: voiceInputVolume,
+          outputVolume: voiceOutputVolume,
+          pushToTalk: voicePushToTalk,
+          autoMute: voiceAutoMute
+        })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
 
       logger.info('Voice settings saved successfully', {
         inputDevice: voiceInputDevice,

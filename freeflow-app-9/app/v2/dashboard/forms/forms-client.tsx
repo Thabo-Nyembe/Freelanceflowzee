@@ -460,18 +460,20 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleExportData = async () => {
     setIsExporting(true)
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Fetch export data from API
+      const response = await fetch('/api/forms?action=export')
+      if (!response.ok) throw new Error('Export failed')
+      const apiData = await response.json()
 
-      // Generate mock export data
+      // Combine with local form data
       const exportData = {
-        forms: displayForms.map(form => ({
+        forms: (apiData.forms || displayForms).map((form: any) => ({
           id: form.id,
           title: form.title,
           status: form.status,
-          submissions: form.total_submissions,
-          views: form.total_views,
-          completionRate: form.completion_rate
+          submissions: form.total_submissions || form.submissions,
+          views: form.total_views || form.views,
+          completionRate: form.completion_rate || form.completionRate
         })),
         responses: mockResponses.map(response => ({
           id: response.id,
@@ -527,8 +529,15 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleRegenerateApiKey = async () => {
     setIsRegeneratingKey(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      toast.success('API Key Regenerated', { description: 'Your new API key has been generated. Remember to update your integrations.' })
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'regenerate_api_key' })
+      })
+      if (!response.ok) throw new Error('Failed to regenerate key')
+      const data = await response.json()
+      await navigator.clipboard.writeText(data.apiKey)
+      toast.success('API Key Regenerated', { description: 'Your new API key has been generated and copied to clipboard.' })
     } catch (err) {
       toast.error('Error', { description: 'Failed to regenerate API key' })
     } finally {
@@ -542,7 +551,17 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       return
     }
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_webhook',
+          url: newWebhookUrl,
+          events: newWebhookEvents,
+          formId: selectedForm?.id
+        })
+      })
+      if (!response.ok) throw new Error('Failed to add webhook')
       toast.success('Webhook Added', { description: `Webhook endpoint ${newWebhookUrl} has been configured` })
       setNewWebhookUrl('')
       setNewWebhookEvents(['submission.created'])
@@ -559,7 +578,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     }
     setIsVerifyingDomain(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify_domain', domain: customDomain })
+      })
+      if (!response.ok) throw new Error('Verification failed')
       toast.success('Domain Verified', { description: `${customDomain} has been verified and configured` })
       setShowVerifyDomainDialog(false)
     } catch (err) {
@@ -572,7 +596,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleDeleteAllResponses = async () => {
     setIsDeletingResponses(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_all_responses', formId: selectedForm?.id })
+      })
+      if (!response.ok) throw new Error('Delete failed')
       toast.success('Responses Deleted', { description: 'All form responses have been permanently deleted' })
       setShowDeleteAllResponsesDialog(false)
     } catch (err) {
@@ -585,7 +614,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleDeleteWorkspace = async () => {
     setIsDeletingWorkspace(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_workspace' })
+      })
+      if (!response.ok) throw new Error('Delete failed')
       toast.success('Workspace Deleted', { description: 'Your workspace and all data have been permanently deleted' })
       setShowDeleteWorkspaceDialog(false)
     } catch (err) {
@@ -597,7 +631,17 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
   const handleConnectIntegration = async (integration: Integration) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'connect_integration',
+          integrationId: integration.id,
+          formId: selectedForm?.id,
+          config: integration
+        })
+      })
+      if (!response.ok) throw new Error('Connection failed')
       toast.success('Integration Connected', { description: `${integration.name} has been connected successfully` })
       setShowIntegrationDialog(false)
     } catch (err) {
@@ -674,8 +718,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleApplyTheme = async (theme: FormTheme, context: 'settings' | 'form') => {
     try {
       if (context === 'settings') {
-        // Save theme as default preference
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Save theme as default preference via API
+        const response = await fetch('/api/forms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'apply_theme', themeId: theme.id })
+        })
+        if (!response.ok) throw new Error('Failed to save theme')
         toast.success('Theme Applied', { description: `"${theme.name}" is now your default theme for new forms` })
       } else if (context === 'form' && selectedForm) {
         // Apply theme to selected form
@@ -739,7 +788,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     if (!selectedWebhook) return
     setIsDeletingWebhook(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_webhook', formId: selectedForm?.id })
+      })
+      if (!response.ok) throw new Error('Delete failed')
       toast.success('Webhook Deleted', { description: `Webhook ${selectedWebhook.url} has been removed` })
       setShowWebhookOptionsDialog(false)
       setSelectedWebhook(null)
@@ -754,7 +808,16 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     if (!selectedIntegration) return
     setIsDisconnectingIntegration(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'disconnect_integration',
+          integrationId: selectedIntegration.id,
+          formId: selectedForm?.id
+        })
+      })
+      if (!response.ok) throw new Error('Disconnect failed')
       toast.success('Integration Disconnected', { description: `${selectedIntegration.name} has been disconnected` })
       setShowIntegrationDialog(false)
     } catch (err) {

@@ -1,0 +1,216 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
+
+// ============================================================================
+// BILLING ADDRESS API
+// ============================================================================
+// Manage customer billing information
+// - Get billing address
+// - Update billing address
+// ============================================================================
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
+  apiVersion: '2024-11-20.acacia',
+});
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+interface BillingAddress {
+  name: string;
+  email: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
+interface BillingRequest {
+  action: string;
+  address?: BillingAddress;
+}
+
+// ============================================================================
+// HELPER: Get user from auth header
+// ============================================================================
+async function getUserFromAuth(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const { data: { user } } = await supabase.auth.getUser(token);
+    return user;
+  }
+  return null;
+}
+
+// ============================================================================
+// POST HANDLER
+// ============================================================================
+export async function POST(request: NextRequest) {
+  try {
+    const body: BillingRequest = await request.json();
+    const { action } = body;
+
+    const user = await getUserFromAuth(request);
+    const userId = user?.id;
+
+    const isDemo = !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder');
+
+    switch (action) {
+      // ======================================================================
+      // GET BILLING ADDRESS
+      // ======================================================================
+      case 'get-billing-address': {
+        if (!userId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Authentication required',
+          }, { status: 401 });
+        }
+
+        if (isDemo) {
+          return NextResponse.json({
+            success: true,
+            demo: true,
+            data: {
+              address: {
+                name: 'Demo User',
+                email: 'demo@example.com',
+                address: '123 Demo Street',
+                city: 'San Francisco',
+                state: 'CA',
+                postalCode: '94102',
+                country: 'US',
+              },
+            },
+          });
+        }
+
+        // Get Stripe customer ID
+        const { data: userData } = await supabase
+          .from('users')
+          .select('stripe_customer_id')
+          .eq('id', userId)
+          .single();
+
+        if (!userData?.stripe_customer_id) {
+          return NextResponse.json({
+            success: true,
+            data: { address: null },
+          });
+        }
+
+        const customer = await stripe.customers.retrieve(userData.stripe_customer_id) as Stripe.Customer;
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            address: {
+              name: customer.name || '',
+              email: customer.email || '',
+              address: customer.address?.line1 || '',
+              city: customer.address?.city || '',
+              state: customer.address?.state || '',
+              postalCode: customer.address?.postal_code || '',
+              country: customer.address?.country || 'US',
+            },
+          },
+        });
+      }
+
+      // ======================================================================
+      // UPDATE BILLING ADDRESS
+      // ======================================================================
+      case 'update-billing-address': {
+        const { address } = body;
+
+        if (!userId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Authentication required',
+          }, { status: 401 });
+        }
+
+        if (!address) {
+          return NextResponse.json({
+            success: false,
+            error: 'Address data required',
+          }, { status: 400 });
+        }
+
+        if (isDemo) {
+          return NextResponse.json({
+            success: true,
+            demo: true,
+            data: {
+              message: 'Demo mode: Billing address would be updated',
+              address,
+            },
+          });
+        }
+
+        // Get Stripe customer ID
+        const { data: userData } = await supabase
+          .from('users')
+          .select('stripe_customer_id')
+          .eq('id', userId)
+          .single();
+
+        if (!userData?.stripe_customer_id) {
+          return NextResponse.json({
+            success: false,
+            error: 'No billing account found. Please add a payment method first.',
+          }, { status: 404 });
+        }
+
+        // Update Stripe customer
+        await stripe.customers.update(userData.stripe_customer_id, {
+          name: address.name,
+          email: address.email,
+          address: {
+            line1: address.address,
+            city: address.city,
+            state: address.state,
+            postal_code: address.postalCode,
+            country: address.country,
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            message: 'Billing address updated successfully',
+            address,
+          },
+        });
+      }
+
+      default:
+        return NextResponse.json({
+          success: false,
+          error: `Unknown action: ${action}`,
+          availableActions: ['get-billing-address', 'update-billing-address'],
+        }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('Billing API Error:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'An error occurred',
+    }, { status: 500 });
+  }
+}
+
+// ============================================================================
+// GET HANDLER
+// ============================================================================
+export async function GET(request: NextRequest) {
+  return POST(new NextRequest(request.url, {
+    method: 'POST',
+    headers: request.headers,
+    body: JSON.stringify({ action: 'get-billing-address' }),
+  }));
+}

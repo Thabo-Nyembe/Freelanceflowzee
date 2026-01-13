@@ -831,8 +831,18 @@ export default function BugsClient() {
   const handleRunTests = async () => {
     setIsRunningTests(true)
     try {
-      // Simulate test execution
-      await new Promise(resolve => setTimeout(resolve, 2500))
+      const res = await fetch('/api/bugs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'run_tests',
+          testType: testConfig.testType,
+          coverage: testConfig.coverage,
+          verbose: testConfig.verbose,
+          selectedModules: testConfig.selectedModules
+        })
+      })
+      if (!res.ok) throw new Error('Test execution failed')
       toast.success(`${testConfig.testType} tests completed successfully! ${testConfig.coverage ? 'Coverage report generated.' : ''}`)
       setShowRunTestsDialog(false)
       setTestConfig({ testType: 'unit', coverage: true, verbose: false, selectedModules: [] })
@@ -846,15 +856,27 @@ export default function BugsClient() {
   const handleExportReport = async () => {
     setIsExporting(true)
     try {
-      // Simulate export
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      const blob = new Blob([JSON.stringify(filteredBugs, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `bug-report-${new Date().toISOString().split('T')[0]}.${exportConfig.format}`
-      a.click()
-      URL.revokeObjectURL(url)
+      const res = await fetch(`/api/bugs?action=export&format=${exportConfig.format}`)
+      if (!res.ok) throw new Error('Export failed')
+
+      if (exportConfig.format === 'csv') {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `bug-report-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      } else {
+        const { data } = await res.json()
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `bug-report-${new Date().toISOString().split('T')[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+      }
       toast.success(`Bug report exported as ${exportConfig.format.toUpperCase()}`)
       setShowExportReportDialog(false)
     } catch (error) {
@@ -871,9 +893,29 @@ export default function BugsClient() {
     }
     setIsImporting(true)
     try {
-      // Simulate file processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      toast.success(`Successfully imported bugs from ${importFile.name}`)
+      const fileText = await importFile.text()
+      let bugs: any[]
+      if (importFile.name.endsWith('.json')) {
+        bugs = JSON.parse(fileText)
+      } else {
+        // Parse CSV
+        const rows = fileText.trim().split('\n')
+        const headers = rows[0].split(',')
+        bugs = rows.slice(1).map(row => {
+          const values = row.split(',')
+          const bug: any = {}
+          headers.forEach((h, i) => bug[h.trim()] = values[i]?.replace(/"/g, '').trim())
+          return bug
+        })
+      }
+      const res = await fetch('/api/bugs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'import', bugs, format: importFile.name.endsWith('.json') ? 'json' : 'csv' })
+      })
+      if (!res.ok) throw new Error('Import failed')
+      const { imported } = await res.json()
+      toast.success(`Successfully imported ${imported} bugs from ${importFile.name}`)
       setShowImportBugsDialog(false)
       setImportFile(null)
       fetchBugs()
@@ -890,8 +932,17 @@ export default function BugsClient() {
       return
     }
     try {
-      // Simulate linking
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/bugs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'link_pr',
+          bugId: linkPRConfig.bugId,
+          prUrl: linkPRConfig.prUrl,
+          linkType: linkPRConfig.linkType
+        })
+      })
+      if (!res.ok) throw new Error('Link failed')
       toast.success(`PR linked to bug ${linkPRConfig.bugId}`)
       setShowLinkPRsDialog(false)
       setLinkPRConfig({ prUrl: '', bugId: '', linkType: 'fixes' })
@@ -3384,7 +3435,12 @@ export default function BugsClient() {
                 if (!confirm(`Are you sure you want to disconnect ${selectedIntegration}?`)) return
                 toast.loading('Disconnecting...', { id: 'disconnect-integration' })
                 try {
-                  await new Promise(r => setTimeout(r, 1200))
+                  const res = await fetch('/api/bugs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'disconnect_integration', integrationName: selectedIntegration })
+                  })
+                  if (!res.ok) throw new Error('Disconnect failed')
                   toast.success(`${selectedIntegration} disconnected`, { id: 'disconnect-integration' })
                   setShowConfigureIntegrationDialog(false)
                 } catch { toast.error('Failed to disconnect', { id: 'disconnect-integration' }) }
@@ -3394,7 +3450,12 @@ export default function BugsClient() {
               <Button onClick={async () => {
                 toast.loading('Saving settings...', { id: 'save-integration' })
                 try {
-                  await new Promise(r => setTimeout(r, 1000))
+                  const res = await fetch('/api/bugs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'configure_integration', integrationName: selectedIntegration, config: {}, connected: true })
+                  })
+                  if (!res.ok) throw new Error('Save failed')
                   toast.success(`${selectedIntegration} settings saved`, { id: 'save-integration' })
                   setShowConfigureIntegrationDialog(false)
                 } catch { toast.error('Failed to save settings', { id: 'save-integration' }) }

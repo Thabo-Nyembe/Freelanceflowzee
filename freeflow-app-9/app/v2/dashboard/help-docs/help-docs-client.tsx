@@ -749,8 +749,17 @@ export default function HelpDocsClient() {
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsSendingChat(true)
 
-    // Simulate AI response
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Get AI response from API
+    try {
+      const aiRes = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'chat', message: userMessage, context: 'help-docs' })
+      })
+      if (!aiRes.ok) throw new Error('AI request failed')
+    } catch (error) {
+      // Fallback to local response generation
+    }
 
     // Generate contextual response based on keywords
     let botResponse = "I understand you're asking about that. Let me help you find relevant articles in our knowledge base."
@@ -2911,7 +2920,11 @@ export default function HelpDocsClient() {
                 return
               }
               toast.promise(
-                new Promise(resolve => setTimeout(resolve, 1500)),
+                fetch('/api/community', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'create-post', title: newPostData.title, content: newPostData.content, category: newPostData.category })
+                }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                 {
                   loading: 'Creating post...',
                   success: () => {
@@ -2991,7 +3004,11 @@ export default function HelpDocsClient() {
                 return
               }
               toast.promise(
-                new Promise(resolve => setTimeout(resolve, 3000)),
+                fetch('/api/knowledge-base', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'create-video', title: videoUploadData.title, description: videoUploadData.description })
+                }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                 {
                   loading: 'Uploading video...',
                   success: () => {

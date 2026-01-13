@@ -198,7 +198,12 @@ export default function ShadcnShowcaseClient() {
     }
     setIsCreatingItem(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export-data', format: 'json' })
+      })
+      if (!res.ok) throw new Error('Failed')
       logger.info('New item created', { name: newItemName, type: newItemType, description: newItemDescription })
       toast.success('Item created successfully', {
         description: `"${newItemName}" has been added to your collection`
@@ -218,7 +223,12 @@ export default function ShadcnShowcaseClient() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export-data', format: exportFormat })
+      })
+      if (!res.ok) throw new Error('Failed')
       const exportData = {
         format: exportFormat,
         scope: exportScope,
@@ -242,7 +252,16 @@ export default function ShadcnShowcaseClient() {
   const handleSaveSettings = async () => {
     setIsSavingSettings(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const res = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: 'appearance',
+          darkModeEnabled,
+          autoSaveEnabled
+        })
+      })
+      if (!res.ok) throw new Error('Failed')
       const settings = {
         notificationsEnabled,
         darkModeEnabled,

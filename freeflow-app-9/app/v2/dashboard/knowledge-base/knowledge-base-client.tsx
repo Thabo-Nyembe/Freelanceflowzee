@@ -1117,9 +1117,13 @@ export default function KnowledgeBaseClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      // In a real implementation, this would create a space in the database
-      // For now, we'll simulate the creation
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Create space via API
+      const res = await fetch('/api/knowledge-base', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create-space', name: newSpaceName, key: newSpaceKey, description: newSpaceDescription, type: newSpaceType })
+      })
+      if (!res.ok) throw new Error('Failed to create space')
 
       toast.success('Space created', { description: `"${newSpaceName}" has been created successfully` })
       setNewSpaceName('')
@@ -1146,8 +1150,13 @@ export default function KnowledgeBaseClient() {
     }
     setIsImporting(true)
     try {
-      // Simulate import process
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Import documents via API
+      const res = await fetch('/api/knowledge-base', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'import-docs', source: importSource, url: importUrl, fileCount: importFiles.length })
+      })
+      if (!res.ok) throw new Error('Import failed')
 
       const importCount = importSource === 'file' ? importFiles.length : 1
       toast.success('Documents imported', { description: `Successfully imported ${importCount} document(s)` })

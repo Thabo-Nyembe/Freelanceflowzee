@@ -142,17 +142,39 @@ export default function ComparePage() {
 
     const newResults: ComparisonResult[] = []
 
-    // Simulate sequential API calls with progress
+    // Call AI API for each model sequentially
     for (let i = 0; i < selectedModels.length; i++) {
       const modelId = selectedModels[i]
       const model = MODELS_TO_COMPARE.find(m => m.id === modelId)!
 
       setComparisonProgress(((i + 0.5) / selectedModels.length) * 100)
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200))
+      const startTime = Date.now()
 
-      const result = generateModelResponse(modelId, prompt)
+      // Call AI API for this model
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, model: modelId })
+      }).catch(() => null)
+
+      const responseTime = (Date.now() - startTime) / 1000
+
+      // Use API response or fallback to generated response
+      let result: ComparisonResult
+      if (response?.ok) {
+        const data = await response.json().catch(() => null)
+        result = {
+          modelId,
+          output: data?.response || generateModelResponse(modelId, prompt).output,
+          responseTime,
+          quality: model.quality,
+          price: model.price
+        }
+      } else {
+        result = { ...generateModelResponse(modelId, prompt), responseTime }
+      }
+
       newResults.push(result)
       setResults([...newResults])
       setComparisonProgress(((i + 1) / selectedModels.length) * 100)

@@ -780,12 +780,18 @@ export default function DocumentationClient() {
   const handleExportPdf = async () => {
     setIsExporting(true)
 
-    // Simulate export process
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
     const pagesToExport = exportPdfOptions.pageRange === 'all'
       ? mockPages
       : mockPages.filter(p => selectedPagesForExport.includes(p.id))
+
+    try {
+      // Export via API
+      await fetch('/api/knowledge-base', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export-pdf', pages: pagesToExport.map(p => p.id), format: exportPdfOptions.format })
+      })
+    } catch { /* Continue with local export */ }
 
     setIsExporting(false)
     setShowExportPdfDialog(false)

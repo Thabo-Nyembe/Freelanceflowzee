@@ -832,8 +832,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      // Simulate export process with detailed steps
-      await new Promise(resolve => setTimeout(resolve, 500))
       const reportTypeLabels = {
         conversion: 'Conversion Analytics',
         retention: 'Retention Analysis',
@@ -842,32 +840,32 @@ export default function GrowthHubClient() {
         all: 'Full Growth Report'
       }
       const formatLabels = { csv: 'CSV', xlsx: 'Excel', pdf: 'PDF', json: 'JSON' }
-      const dateLabels = { last7: 'Last 7 days', last30: 'Last 30 days', last90: 'Last 90 days', custom: 'Custom range' }
 
-      // Create a blob for download simulation
-      const reportData = {
-        type: reportTypeLabels[exportReportForm.reportType],
-        format: formatLabels[exportReportForm.format],
-        dateRange: dateLabels[exportReportForm.dateRange],
-        includeCharts: exportReportForm.includeCharts,
-        generatedAt: new Date().toISOString(),
-        metrics: {
-          avgConversion: stats.avgConversion,
-          totalCohortSize: stats.totalCohortSize,
-          activeExperiments: stats.activeExperiments,
-          avgRetention: stats.avgRetention
-        }
+      const res = await fetch(`/api/growth?action=export&reportType=${exportReportForm.reportType}&format=${exportReportForm.format}&dateRange=${exportReportForm.dateRange}`)
+      if (!res.ok) throw new Error('Export failed')
+
+      if (exportReportForm.format === 'csv') {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `growth-report-${exportReportForm.reportType}-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } else {
+        const data = await res.json()
+        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `growth-report-${exportReportForm.reportType}-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
       }
-
-      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `growth-report-${exportReportForm.reportType}-${new Date().toISOString().split('T')[0]}.${exportReportForm.format === 'xlsx' ? 'json' : exportReportForm.format}`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
 
       toast.success('Report exported successfully', {
         description: `${reportTypeLabels[exportReportForm.reportType]} exported as ${formatLabels[exportReportForm.format]}`
@@ -889,8 +887,18 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      // In production, this would save to supabase
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const res = await fetch('/api/growth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_dashboard',
+          name: dashboardForm.name,
+          description: dashboardForm.description,
+          widgets: dashboardForm.widgets
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create dashboard')
+
       toast.success('Dashboard created', {
         description: `"${dashboardForm.name}" has been created with ${dashboardForm.widgets.length || 0} widgets`
       })
@@ -941,7 +949,19 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const res = await fetch('/api/growth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_path',
+          name: pathAnalysisForm.name,
+          startEvent: pathAnalysisForm.startEvent,
+          endEvent: pathAnalysisForm.endEvent,
+          maxSteps: pathAnalysisForm.maxSteps
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create path analysis')
+
       toast.success('Path analysis created', {
         description: `"${pathAnalysisForm.name}" is now tracking user journeys from ${pathAnalysisForm.startEvent}`
       })
@@ -966,7 +986,17 @@ export default function GrowthHubClient() {
   const handleConfigureIntegration = async (integrationName: string) => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const res = await fetch('/api/growth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'configure_integration',
+          integrationName,
+          config: selectedIntegration
+        })
+      })
+      if (!res.ok) throw new Error('Configuration failed')
+
       toast.success('Integration configured', {
         description: `${integrationName} settings have been updated`
       })
@@ -983,15 +1013,13 @@ export default function GrowthHubClient() {
   const handleExportAllData = async () => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/growth?action=export&reportType=all&format=json')
+      if (!res.ok) throw new Error('Export failed')
+
+      const data = await res.json()
       const exportData = {
         exportedAt: new Date().toISOString(),
-        funnels: mockFunnels,
-        cohorts: mockCohorts,
-        experiments: mockExperiments,
-        retentionAnalyses: mockRetentionAnalyses,
-        userPaths: mockUserPaths,
-        dashboards: mockDashboards
+        ...data.data
       }
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -1014,7 +1042,13 @@ export default function GrowthHubClient() {
   const handleClearAllData = async () => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/growth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_data', dataType: 'all' })
+      })
+      if (!res.ok) throw new Error('Clear data failed')
+
       toast.success('All data cleared', {
         description: 'Analytics data has been permanently deleted. This action cannot be undone.'
       })
@@ -1031,7 +1065,13 @@ export default function GrowthHubClient() {
   const handleResetToDefaults = async () => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/growth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset_settings' })
+      })
+      if (!res.ok) throw new Error('Reset failed')
+
       toast.success('Settings reset', {
         description: 'All settings have been restored to their default values'
       })

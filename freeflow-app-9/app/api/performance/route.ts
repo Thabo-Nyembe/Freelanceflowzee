@@ -356,6 +356,69 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         })
       }
 
+      case 'export-report': {
+        const { format, url: testUrl, dateRange } = data
+
+        // Generate export data
+        const exportData = {
+          exportedAt: new Date().toISOString(),
+          url: testUrl || 'https://app.kazi.io',
+          dateRange: dateRange || '7d',
+          scores: mockPageTests[0].scores,
+          vitals: mockPageTests[0].vitals,
+          audits: mockAudits,
+          historical: mockHistorical
+        }
+
+        if (format === 'csv') {
+          // Generate CSV content
+          const csvLines = [
+            'Metric,Value,Rating,Target',
+            ...mockPageTests[0].vitals.map(v => `${v.name},${v.value}${v.unit},${v.rating},${v.target.good}`)
+          ]
+          return NextResponse.json({
+            success: true,
+            action: 'export-report',
+            format: 'csv',
+            filename: 'performance-report.csv',
+            content: csvLines.join('\n'),
+            message: 'CSV report generated successfully'
+          })
+        }
+
+        if (format === 'pdf') {
+          return NextResponse.json({
+            success: true,
+            action: 'export-report',
+            format: 'pdf',
+            filename: 'performance-report.pdf',
+            data: exportData,
+            message: 'PDF report generated successfully'
+          })
+        }
+
+        // Default JSON export
+        return NextResponse.json({
+          success: true,
+          action: 'export-report',
+          format: 'json',
+          filename: 'performance-report.json',
+          data: exportData,
+          message: 'JSON report generated successfully'
+        })
+      }
+
+      case 'delete-project': {
+        // This action is intentionally blocked for safety
+        // In production, only admins can delete projects
+        return NextResponse.json({
+          success: false,
+          action: 'delete-project',
+          blocked: true,
+          message: 'Action blocked. Contact support to delete project.'
+        }, { status: 403 })
+      }
+
       default:
         return NextResponse.json(
           { success: false, error: `Unknown action: ${action}` },

@@ -824,19 +824,35 @@ export default function CommunityClient() {
     if (!messageInput.trim()) return
 
     setIsSubmitting(true)
+    toast.success('Sending message...', { description: 'Your message is being posted' })
+
     try {
-      const { error } = await supabase.from('community_posts').insert({
-        user_id: userId,
-        community_id: communities?.[0]?.id,
-        channel_id: selectedChannel.id,
-        content: messageInput,
-        post_type: 'message',
-        is_pinned: false
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-post',
+          resourceId: selectedChannel.id,
+          userId,
+          data: {
+            content: messageInput,
+            authorId: userId,
+            communityId: communities?.[0]?.id,
+            channelId: selectedChannel.id,
+            type: 'message'
+          }
+        })
       })
 
-      if (error) throw error
+      const result = await response.json()
 
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to send message')
+      }
+
+      toast.success('Message sent!', { description: result.message || 'Your message has been posted' })
       setMessageInput('')
+      if (replyingTo) setReplyingTo(null)
       refreshPosts()
     } catch (error: any) {
       toast.error('Failed to send message', { description: error.message || 'An unexpected error occurred' })
@@ -1036,26 +1052,103 @@ export default function CommunityClient() {
     setShowRoleSettingsDialog(true)
   }
 
-  // Handle Send Friend Request
+  // Handle Send Friend Request / Connect
   const handleSendFriendRequest = async (memberId: string, memberName: string) => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to send friend requests' })
       return
     }
 
+    toast.success('Sending request...', { description: `Connecting with ${memberName}` })
+
     try {
-      const { error } = await supabase.from('friend_requests').insert({
-        sender_id: userId,
-        receiver_id: memberId,
-        status: 'pending',
-        created_at: new Date().toISOString()
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'connect',
+          resourceId: memberId,
+          userId
+        })
       })
 
-      if (error) throw error
-      toast.success('Friend request sent', { description: `Request sent to ${memberName}` })
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to send connection request')
+      }
+
+      toast.success('Connection request sent!', { description: result.message || `Request sent to ${memberName}` })
+      if (result.nextSteps && result.nextSteps.length > 0) {
+        toast.info('Next steps', { description: result.nextSteps[0] })
+      }
     } catch (error: any) {
-      // If table doesn't exist, still show success for demo
-      toast.success('Friend request sent', { description: `Request sent to ${memberName}` })
+      toast.error('Failed to send request', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Follow Member Handler
+  const handleFollowMember = async (memberId: string, memberName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to follow members' })
+      return
+    }
+
+    toast.success('Following...', { description: `Following ${memberName}` })
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'follow',
+          resourceId: memberId,
+          userId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to follow member')
+      }
+
+      toast.success('Following!', { description: result.message || `You are now following ${memberName}` })
+      if (result.achievement) {
+        toast.success(result.achievement.message, { description: `Badge: ${result.achievement.badge}` })
+      }
+    } catch (error: any) {
+      toast.error('Failed to follow', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Unfollow Member Handler
+  const handleUnfollowMember = async (memberId: string, memberName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in' })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'unfollow',
+          resourceId: memberId,
+          userId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to unfollow member')
+      }
+
+      toast.success('Unfollowed', { description: result.message || `You unfollowed ${memberName}` })
+    } catch (error: any) {
+      toast.error('Failed to unfollow', { description: error.message || 'An unexpected error occurred' })
     }
   }
 
@@ -1066,28 +1159,276 @@ export default function CommunityClient() {
       return
     }
 
-    try {
-      const { data: existing } = await supabase
-        .from('community_post_likes')
-        .select('id')
-        .eq('post_id', postId)
-        .eq('user_id', userId)
-        .eq('reaction_type', emoji)
-        .single()
+    toast.success('Adding reaction...', { description: `${emoji} reaction` })
 
-      if (existing) {
-        await supabase.from('community_post_likes').delete().eq('id', existing.id)
-      } else {
-        await supabase.from('community_post_likes').insert({
-          post_id: postId,
-          user_id: userId,
-          reaction_type: emoji
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'like',
+          resourceId: postId,
+          userId,
+          data: { emoji }
         })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to add reaction')
       }
 
+      toast.success('Reaction added!', { description: result.message || `${emoji} added to post` })
       refreshPosts()
     } catch (error: any) {
       toast.error('Failed to add reaction', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Like Post Handler
+  const handleLikePost = async (postId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to like posts' })
+      return
+    }
+
+    toast.success('Processing...', { description: 'Updating your reaction' })
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'like',
+          resourceId: postId,
+          userId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to like post')
+      }
+
+      toast.success('Post liked!', { description: result.message })
+      if (result.achievement) {
+        toast.success(result.achievement.message, { description: `Badge: ${result.achievement.badge}` })
+      }
+      refreshPosts()
+    } catch (error: any) {
+      toast.error('Failed to like post', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Unlike Post Handler
+  const handleUnlikePost = async (postId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in' })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'unlike',
+          resourceId: postId,
+          userId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to unlike post')
+      }
+
+      toast.success('Like removed', { description: result.message })
+      refreshPosts()
+    } catch (error: any) {
+      toast.error('Failed to unlike post', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Bookmark Post Handler
+  const handleBookmarkPost = async (postId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to bookmark posts' })
+      return
+    }
+
+    toast.success('Bookmarking...', { description: 'Saving post to your collection' })
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'bookmark',
+          resourceId: postId,
+          userId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to bookmark post')
+      }
+
+      toast.success('Post bookmarked!', { description: result.message })
+      if (result.tip) {
+        toast.info('Tip', { description: result.tip })
+      }
+    } catch (error: any) {
+      toast.error('Failed to bookmark post', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Remove Bookmark Handler
+  const handleRemoveBookmark = async (postId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in' })
+      return
+    }
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'unbookmark',
+          resourceId: postId,
+          userId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to remove bookmark')
+      }
+
+      toast.success('Bookmark removed', { description: result.message })
+    } catch (error: any) {
+      toast.error('Failed to remove bookmark', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Share Post Handler
+  const handleSharePost = async (postId: string, method: string = 'link') => {
+    toast.success('Preparing share link...', { description: 'Getting share options' })
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share',
+          resourceId: postId,
+          data: { method }
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to share post')
+      }
+
+      // Copy share URL to clipboard
+      if (result.shareUrl) {
+        await navigator.clipboard.writeText(result.shareUrl)
+      }
+
+      toast.success('Link copied!', { description: result.message || 'Share link copied to clipboard' })
+    } catch (error: any) {
+      toast.error('Failed to share post', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Report Content Handler
+  const handleReportContent = async (resourceId: string, resourceType: string, reason: string, details?: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to report content' })
+      return
+    }
+
+    toast.success('Submitting report...', { description: 'Your report is being processed' })
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'report',
+          resourceId,
+          data: {
+            type: resourceType,
+            reason,
+            details,
+            reporterId: userId
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to submit report')
+      }
+
+      toast.success('Report submitted', { description: result.message })
+      if (result.caseNumber) {
+        toast.info('Case number', { description: `Reference: ${result.caseNumber}` })
+      }
+    } catch (error: any) {
+      toast.error('Failed to submit report', { description: error.message || 'An unexpected error occurred' })
+    }
+  }
+
+  // Create Comment Handler
+  const handleCreateComment = async (postId: string, content: string, parentId?: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to comment' })
+      return
+    }
+
+    if (!content.trim()) {
+      toast.error('Validation error', { description: 'Comment cannot be empty' })
+      return
+    }
+
+    toast.success('Posting comment...', { description: 'Your comment is being added' })
+
+    try {
+      const response = await fetch('/api/community', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'comment',
+          resourceId: postId,
+          data: {
+            content,
+            authorId: userId,
+            parentId
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to post comment')
+      }
+
+      toast.success('Comment posted!', { description: result.message })
+      refreshPosts()
+    } catch (error: any) {
+      toast.error('Failed to post comment', { description: error.message || 'An unexpected error occurred' })
     }
   }
 

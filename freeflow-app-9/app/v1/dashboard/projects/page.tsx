@@ -84,6 +84,31 @@ import {
 
 const logger = createFeatureLogger('ClientZoneProjects')
 
+// Helper function to map API status to component ProjectStatus
+function mapApiStatusToProjectStatus(apiStatus: string): ProjectStatus {
+  const statusMap: Record<string, ProjectStatus> = {
+    'draft': 'pending',
+    'planning': 'pending',
+    'active': 'in-progress',
+    'on_hold': 'pending',
+    'completed': 'completed',
+    'cancelled': 'completed',
+    'archived': 'completed'
+  }
+  return statusMap[apiStatus] || 'pending'
+}
+
+// Helper function to map component ProjectStatus to API status
+function mapProjectStatusToApiStatus(status: ProjectStatus): string {
+  const statusMap: Record<ProjectStatus, string> = {
+    'pending': 'planning',
+    'in-progress': 'active',
+    'review': 'active',
+    'completed': 'completed'
+  }
+  return statusMap[status] || 'planning'
+}
+
 // Status options for the dropdown
 const PROJECT_STATUSES: { value: ProjectStatus; label: string }[] = [
   { value: 'pending', label: 'Pending' },
@@ -212,7 +237,7 @@ export default function ClientZoneProjectsPage() {
 
       logger.info('Fetching client projects')
 
-      const response = await fetch('/api/client-zone/projects', {
+      const response = await fetch('/api/projects', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -226,9 +251,24 @@ export default function ClientZoneProjectsPage() {
       const data = await response.json()
 
       if (data.success) {
-        setProjects(data.projects || [])
+        // Map API response to component's Project format
+        const mappedProjects = (data.projects || []).map((p: Record<string, unknown>) => ({
+          id: p.id,
+          name: p.name || '',
+          description: p.description || '',
+          status: mapApiStatusToProjectStatus(p.status as string),
+          phase: p.type || 'Planning',
+          dueDate: p.due_date || new Date().toISOString(),
+          budget: p.budget || 0,
+          spent: 0,
+          progress: p.progress || 0,
+          team: p.tags || [],
+          deliverables: [],
+          lastUpdate: p.updated_at || 'Just now'
+        }))
+        setProjects(mappedProjects)
         logger.info('Projects loaded successfully', {
-          count: data.projects?.length || 0
+          count: mappedProjects.length
         })
       } else {
         throw new Error(data.error || 'Failed to load projects')
@@ -268,15 +308,19 @@ export default function ClientZoneProjectsPage() {
 
     setCreateLoading(true)
 
-    const createPromise = fetch('/api/client-zone/projects', {
+    const createPromise = fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...createFormData,
-        deliverables: [],
-        progress: 0,
-        spent: 0,
-        lastUpdate: 'Just now'
+        name: createFormData.name,
+        description: createFormData.description,
+        status: mapProjectStatusToApiStatus(createFormData.status),
+        type: createFormData.phase,
+        due_date: createFormData.dueDate || null,
+        budget: createFormData.budget || null,
+        priority: 'medium',
+        tags: createFormData.team,
+        visibility: 'private'
       })
     }).then(async (response) => {
       if (!response.ok) {
@@ -343,10 +387,19 @@ export default function ClientZoneProjectsPage() {
 
     setEditLoading(true)
 
-    const editPromise = fetch(`/api/client-zone/projects/${editProjectId}`, {
+    const editPromise = fetch('/api/projects', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editFormData)
+      body: JSON.stringify({
+        id: editProjectId,
+        name: editFormData.name,
+        description: editFormData.description,
+        status: mapProjectStatusToApiStatus(editFormData.status),
+        type: editFormData.phase,
+        due_date: editFormData.dueDate || null,
+        budget: editFormData.budget || null,
+        tags: editFormData.team
+      })
     }).then(async (response) => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
@@ -398,7 +451,7 @@ export default function ClientZoneProjectsPage() {
     const project = projects.find((p) => p.id === deleteProjectId)
     setDeleteLoading(true)
 
-    const deletePromise = fetch(`/api/client-zone/projects/${deleteProjectId}`, {
+    const deletePromise = fetch(`/api/projects?id=${deleteProjectId}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' }
     }).then(async (response) => {
@@ -464,12 +517,15 @@ export default function ClientZoneProjectsPage() {
       (id) => AVAILABLE_TEAM_MEMBERS.find((m) => m.id === id)?.name || id
     )
 
-    const addMembersPromise = fetch(`/api/client-zone/projects/${teamMemberProjectId}/team`, {
-      method: 'POST',
+    // Combine existing team with new members
+    const updatedTeam = [...new Set([...(project?.team || []), ...memberNames])]
+
+    const addMembersPromise = fetch('/api/projects', {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        memberIds: selectedTeamMembers,
-        memberNames: memberNames
+        id: teamMemberProjectId,
+        tags: updatedTeam
       })
     }).then(async (response) => {
       if (!response.ok) {
@@ -532,10 +588,13 @@ export default function ClientZoneProjectsPage() {
     const actionKey = `status-${projectId}`
     setActionLoading((prev) => ({ ...prev, [actionKey]: true }))
 
-    const statusPromise = fetch(`/api/client-zone/projects/${projectId}/status`, {
-      method: 'PATCH',
+    const statusPromise = fetch('/api/projects', {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
+      body: JSON.stringify({
+        id: projectId,
+        status: mapProjectStatusToApiStatus(newStatus)
+      })
     }).then(async (response) => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
@@ -591,7 +650,7 @@ export default function ClientZoneProjectsPage() {
     try {
       logger.info('Exporting project data', { projectId, projectName: project.name })
 
-      const response = await fetch(`/api/client-zone/projects/${projectId}/export`, {
+      const response = await fetch(`/api/projects?id=${projectId}&include_stats=true&include_members=true`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -684,16 +743,28 @@ export default function ClientZoneProjectsPage() {
 
     setActionLoading((prev) => ({ ...prev, [actionKey]: true }))
 
-    const revisionPromise = fetch('/api/client-zone/projects/revision', {
-      method: 'POST',
+    // Get current project metadata
+    const currentProject = projects.find((p) => p.id === revisionProjectId)
+    const existingRevisions = (currentProject as unknown as { metadata?: { revisions?: unknown[] } })?.metadata?.revisions || []
+
+    const revisionPromise = fetch('/api/projects', {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        projectId: revisionProjectId,
-        projectName: project?.name,
-        revisionNotes: revisionNotes,
-        timestamp: new Date().toISOString()
+        id: revisionProjectId,
+        status: 'active', // Move back to active for revision
+        metadata: {
+          revisions: [
+            ...existingRevisions,
+            {
+              notes: revisionNotes,
+              timestamp: new Date().toISOString(),
+              status: 'pending'
+            }
+          ]
+        }
       })
     }).then(async (response) => {
       if (!response.ok) {
@@ -747,17 +818,18 @@ export default function ClientZoneProjectsPage() {
 
     setActionLoading((prev) => ({ ...prev, [actionKey]: true }))
 
-    const approvePromise = fetch('/api/client-zone/projects/approve', {
-      method: 'POST',
+    const approvePromise = fetch('/api/projects', {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        projectId,
-        projectName: project.name,
-        currentStatus: project.status,
-        deliverables: project.deliverables,
-        timestamp: new Date().toISOString()
+        id: projectId,
+        status: 'completed',
+        metadata: {
+          approved_at: new Date().toISOString(),
+          approved_deliverables: project.deliverables
+        }
       })
     }).then(async (response) => {
       if (!response.ok) {
@@ -829,27 +901,32 @@ export default function ClientZoneProjectsPage() {
         description: `Packaging files for "${project.name}"`
       })
 
-      const response = await fetch('/api/client-zone/projects/download', {
-        method: 'POST',
+      // Fetch full project data with stats
+      const response = await fetch(`/api/projects?id=${projectId}&include_stats=true&include_members=true`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          projectId,
-          projectName: project.name
-        })
+        }
       })
 
       if (!response.ok) {
         throw new Error('Failed to download files')
       }
 
-      // Get the blob data
-      const blob = await response.blob()
-      const contentDisposition = response.headers.get('Content-Disposition')
-      const filenameMatch = contentDisposition?.match(/filename="(.+)"/)
-      const filename =
-        filenameMatch?.[1] || `${project.name.replace(/\s+/g, '_')}_files.zip`
+      const data = await response.json()
+      const projectData = data.project || project
+
+      // Create downloadable JSON file with all project data
+      const exportContent = {
+        ...projectData,
+        deliverables: project.deliverables,
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(exportContent, null, 2)], {
+        type: 'application/json'
+      })
+      const filename = `${project.name.replace(/\s+/g, '_')}_files.json`
 
       // Create download link
       const url = window.URL.createObjectURL(blob)
@@ -869,7 +946,7 @@ export default function ClientZoneProjectsPage() {
       })
 
       toast.success(`Files downloaded for "${project.name}"`, {
-        description: `${filename} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`
+        description: `${filename} (${(blob.size / 1024).toFixed(2)} KB)`
       })
     } catch (err: any) {
       logger.error('Failed to download files', {

@@ -201,8 +201,20 @@ export default function ProjectTemplatesClient() {
 
     setIsCreatingTemplate(true)
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: newTemplateName,
+          description: newTemplateDescription,
+          category: newTemplateCategory,
+          type: newTemplateType,
+          duration: newTemplateDuration,
+          price: newTemplatePrice
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create template')
 
       toast.success(`Template "${newTemplateName}" created successfully`)
       setShowNewTemplateDialog(false)
@@ -223,8 +235,18 @@ export default function ProjectTemplatesClient() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const res = await fetch(`/api/templates?action=export&format=${exportFormat}&scope=${exportScope}`)
+      if (!res.ok) throw new Error('Export failed')
+
+      if (exportFormat === 'csv') {
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `templates-export-${Date.now()}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+      }
 
       const scopeText = exportScope === 'all' ? 'All templates' : 'Selected templates'
       toast.success(`${scopeText} exported as ${exportFormat.toUpperCase()}`)
@@ -239,8 +261,20 @@ export default function ProjectTemplatesClient() {
   const handleSaveSettings = async () => {
     setIsSavingSettings(true)
     try {
-      // Simulate saving settings
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_settings',
+          settings: {
+            defaultCategory,
+            autoSave,
+            notifyOnUse,
+            visibility: templateVisibility
+          }
+        })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
 
       toast.success('Template settings saved successfully')
       setShowSettingsDialog(false)
@@ -260,10 +294,33 @@ export default function ProjectTemplatesClient() {
 
     setIsImporting(true)
     try {
-      // Simulate import process
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const fileText = await importFile.text()
+      let templates: any[]
 
-      toast.success(`Successfully imported templates from ${importFile.name}`)
+      if (importFormat === 'json') {
+        templates = JSON.parse(fileText)
+      } else {
+        // Parse CSV
+        const rows = fileText.trim().split('\n')
+        const headers = rows[0].split(',')
+        templates = rows.slice(1).map(row => {
+          const values = row.split(',')
+          return headers.reduce((obj, header, i) => {
+            obj[header.trim()] = values[i]?.trim()
+            return obj
+          }, {} as any)
+        })
+      }
+
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'import', templates, format: importFormat })
+      })
+      if (!res.ok) throw new Error('Import failed')
+      const data = await res.json()
+
+      toast.success(`Successfully imported ${data.imported || 0} templates from ${importFile.name}`)
       setShowImportDialog(false)
       setImportFile(null)
     } catch (err) {
@@ -277,8 +334,16 @@ export default function ProjectTemplatesClient() {
   const handleUseTemplate = async (template: ProjectTemplate) => {
     setIsUsingTemplate(true)
     try {
-      // Simulate creating project from template
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'use_template',
+          templateId: template.id,
+          projectName: template.name
+        })
+      })
+      if (!res.ok) throw new Error('Failed to create project')
 
       toast.success(`Project created from "${template.name}" template`, {
         description: 'Redirecting to project dashboard...',
@@ -311,8 +376,16 @@ export default function ProjectTemplatesClient() {
 
     setIsDuplicating(true)
     try {
-      // Simulate duplicate process
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'duplicate',
+          templateId: selectedTemplate?.id,
+          newName: duplicateName
+        })
+      })
+      if (!res.ok) throw new Error('Duplication failed')
 
       toast.success(`Template duplicated as "${duplicateName}"`)
       setShowDuplicateDialog(false)
@@ -336,8 +409,15 @@ export default function ProjectTemplatesClient() {
 
     setIsDeleting(true)
     try {
-      // Simulate delete process
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const res = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          id: selectedTemplate.id
+        })
+      })
+      if (!res.ok) throw new Error('Delete failed')
 
       toast.success(`Template "${selectedTemplate.name}" deleted successfully`)
       setShowDeleteDialog(false)
@@ -406,12 +486,9 @@ export default function ProjectTemplatesClient() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Fetch templates from API
+        const res = await fetch('/api/templates?action=list')
+        if (!res.ok) throw new Error('Failed to load templates')
 
         setIsLoading(false)
         announce('Project templates loaded successfully', 'polite')

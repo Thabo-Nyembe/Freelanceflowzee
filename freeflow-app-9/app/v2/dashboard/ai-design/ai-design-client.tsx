@@ -648,10 +648,10 @@ export default function AIDesignClient() {
               History
             </Button>
             <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => {
-                toast.loading('Loading upgrade options...', { id: 'upgrade' })
-                setTimeout(() => {
-                  toast.success('Upgrade page ready!', { id: 'upgrade', description: 'Choose your plan to unlock premium features' })
-                }, 1000)
+                toast.promise(
+                  fetch('/api/billing?action=get_plans').then(res => res.json()),
+                  { loading: 'Loading upgrade options...', success: 'Upgrade page ready! Choose your plan to unlock premium features', error: 'Failed to load options' }
+                )
               }}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
@@ -1752,10 +1752,14 @@ export default function AIDesignClient() {
                           </div>
                         </div>
                         <Button variant="outline" size="sm" onClick={() => {
-                          toast.loading('Enabling Flux Pro...', { id: 'flux-pro' })
-                          setTimeout(() => {
-                            toast.success('Flux Pro enabled!', { id: 'flux-pro', description: 'Fast, high-quality generations now available' })
-                          }, 1000)
+                          toast.promise(
+                            fetch('/api/settings', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ action: 'enable_model', model: 'flux-pro' })
+                            }).then(res => res.json()),
+                            { loading: 'Enabling Flux Pro...', success: 'Flux Pro enabled! Fast, high-quality generations now available', error: 'Failed to enable' }
+                          )
                         }}>Enable</Button>
                       </div>
                     </CardContent>
@@ -1947,10 +1951,14 @@ export default function AIDesignClient() {
                           <span>Export All</span>
                         </Button>
                         <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => {
-                          toast.loading('Clearing cache...', { id: 'clear-cache' })
-                          setTimeout(() => {
-                            toast.success('Cache cleared!', { id: 'clear-cache', description: 'Temporary files have been removed' })
-                          }, 1000)
+                          toast.promise(
+                            fetch('/api/settings', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ action: 'clear_cache', type: 'ai-design' })
+                            }).then(res => res.json()),
+                            { loading: 'Clearing cache...', success: 'Cache cleared! Temporary files have been removed', error: 'Failed to clear cache' }
+                          )
                         }}>
                           <RefreshCw className="w-6 h-6" />
                           <span>Clear Cache</span>
@@ -2109,11 +2117,18 @@ export default function AIDesignClient() {
                       Download
                     </Button>
                     <Button variant="outline" className="flex-1" onClick={() => {
-                      toast.loading('Upscaling image...', { id: 'upscale' })
-                      setTimeout(() => {
-                        toast.success('Image upscaled to 4K!', { id: 'upscale', description: 'High resolution version is ready' })
-                        setShowGenerationDialog(false)
-                      }, 2000)
+                      toast.promise(
+                        fetch('/api/ai/upscale', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ imageId: selectedGeneration?.id, targetResolution: '4K' })
+                        }).then(res => {
+                          if (!res.ok) throw new Error('Upscale failed')
+                          setShowGenerationDialog(false)
+                          return res.json()
+                        }),
+                        { loading: 'Upscaling image...', success: 'Image upscaled to 4K! High resolution version is ready', error: 'Upscale failed' }
+                      )
                     }}>
                       <Maximize2 className="w-4 h-4 mr-2" />
                       Upscale

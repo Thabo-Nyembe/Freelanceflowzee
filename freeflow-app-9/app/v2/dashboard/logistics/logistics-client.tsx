@@ -995,9 +995,19 @@ export default function LogisticsClient() {
 
   const handleSyncCarriers = async () => {
     setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    toast.success('Carriers synced', { description: 'All carrier connections have been synchronized' })
+    try {
+      const res = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sync', type: 'carriers' })
+      })
+      if (!res.ok) throw new Error('Sync failed')
+      toast.success('Carriers synced', { description: 'All carrier connections have been synchronized' })
+    } catch {
+      toast.error('Sync failed', { description: 'Could not synchronize carrier connections' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleResetHistory = () => {

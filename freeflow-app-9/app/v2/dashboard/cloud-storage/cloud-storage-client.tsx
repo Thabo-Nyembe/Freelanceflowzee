@@ -1105,8 +1105,9 @@ export default function CloudStorageClient() {
   const handleGenerateReport = async () => {
     setIsGeneratingReport(true)
     try {
-      // Simulate report generation
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Fetch report data from API
+      const res = await fetch(`/api/files?type=storage-stats`)
+      if (!res.ok) throw new Error('Failed to generate report')
 
       // Create report data based on selected options
       const reportData = {

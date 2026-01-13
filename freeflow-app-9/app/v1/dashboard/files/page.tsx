@@ -31,7 +31,7 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { KAZI_CLIENT_DATA, File } from '@/lib/client-zone-utils'
+import { File } from '@/lib/client-zone-utils'
 
 // SECURE FILE DELIVERY INTEGRATION
 import { SecureFileUpload } from '@/components/secure-files/secure-file-upload'
@@ -41,6 +41,19 @@ import { EscrowReleaseDialog } from '@/components/secure-files/escrow-release-di
 import type { FileItem } from '@/components/secure-files/file-gallery'
 
 const logger = createFeatureLogger('ClientZoneFiles')
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+// Helper function to format file size
+const formatFileSize = (bytes: number): string => {
+  if (!bytes || bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
+}
 
 // ============================================================================
 // EXTENDED FILE DATA
@@ -161,14 +174,16 @@ const getFileColor = (type: string) => {
 
 export default function FilesPage() {
   // A+++ UTILITIES
-  const { userId, loading: userLoading } = useCurrentUser()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { userId: _userId, loading: _userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
-  const router = useRouter()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _router = useRouter()
 
   // FILE STATE
   const [files, setFiles] = useState<ExtendedFile[]>(EXTENDED_FILES)
@@ -192,16 +207,57 @@ export default function FilesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch files from API
+        const response = await fetch('/api/files')
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || `Failed to fetch files: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.files) {
+          // Transform API files to ExtendedFile format
+          interface ApiFile {
+            id: string | number
+            name?: string
+            original_name?: string
+            size?: number
+            uploaded_by?: string
+            uploaded_at?: string
+            created_at?: string
+            folder_id?: string
+            type?: string
+            downloads?: number
+            views?: number
+            is_shared?: boolean
+          }
+          const transformedFiles: ExtendedFile[] = data.files.map((file: ApiFile) => ({
+            id: file.id,
+            name: file.name || file.original_name || 'Untitled',
+            size: formatFileSize(file.size || 0),
+            uploadedBy: file.uploaded_by || 'Unknown',
+            uploadDate: file.uploaded_at || file.created_at || new Date().toISOString(),
+            project: file.folder_id ? 'Project Files' : 'Recent Upload',
+            type: (file.type as 'document' | 'archive' | 'image' | 'video') || 'document',
+            downloads: file.downloads || 0,
+            views: file.views || 0,
+            shared: file.is_shared || false,
+            sharedWith: []
+          }))
+
+          // Merge with existing demo files if API returns empty
+          if (transformedFiles.length > 0) {
+            setFiles(transformedFiles)
+          }
+          logger.info('Files loaded from API', { count: transformedFiles.length })
+        }
 
         setIsLoading(false)
         announce('Files loaded successfully', 'polite')
       } catch (err) {
+        logger.error('Failed to load files', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load files')
         setIsLoading(false)
         announce('Error loading files', 'assertive')
@@ -209,7 +265,7 @@ export default function FilesPage() {
     }
 
     loadFiles()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
 
   // Filter and sort files
   useEffect(() => {
@@ -257,149 +313,194 @@ export default function FilesPage() {
         project: file.project
       })
 
-      // Simulate API call
-      const response = await fetch('/api/client-zone/files/download', {
+      // Call download API
+      const response = await fetch('/api/files', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fileId: file.id,
-          fileName: file.name,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
+          action: 'download-file',
+          data: {
+            fileId: String(file.id)
+          }
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to download file')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to download file')
       }
 
       logger.info('File download completed', { fileName: file.name })
 
-      // Simulate download
-      const element = document.createElement('a')
-      element.setAttribute('href', '#')
-      element.setAttribute('download', file.name)
-      element.style.display = 'none'
-      document.body.appendChild(element)
-      element.click()
-      document.body.removeChild(element)
+      // Trigger download using the returned URL
+      if (result.downloadUrl) {
+        const element = document.createElement('a')
+        element.setAttribute('href', result.downloadUrl)
+        element.setAttribute('download', file.name)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+      }
 
-      // Update download count
-      setFiles(files.map(f =>
+      // Update download count locally
+      setFiles(prevFiles => prevFiles.map(f =>
         f.id === file.id
           ? { ...f, downloads: (f.downloads || 0) + 1 }
           : f
       ))
 
       toast.success(`Download started! ${file.name} is downloading`)
-    } catch (error: any) {
-      logger.error('Failed to download file', { error, fileName: file.name })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Failed to download file', { error: errorMessage, fileName: file.name })
       toast.error('Failed to download file', {
-        description: error.message || 'Please try again later'
+        description: errorMessage || 'Please try again later'
       })
     }
-  }, [files])
+  }, [])
 
   // ============================================================================
   // HANDLER 2: UPLOAD FILE
   // ============================================================================
 
   const handleUploadFile = useCallback(async () => {
-    try {
-      setIsUploading(true)
-      logger.info('File upload initiated')
+    setIsUploading(true)
+    logger.info('File upload initiated')
 
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.multiple = true
-      input.onchange = async (e: any) => {
-        const uploadedFiles = e.target.files
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const uploadedFiles = target.files
 
-        for (const file of uploadedFiles) {
-          try {
-            logger.info('Uploading file', {
-              fileName: file.name,
-              fileSize: file.size
-            })
+      if (!uploadedFiles || uploadedFiles.length === 0) {
+        setIsUploading(false)
+        return
+      }
 
-            // Simulate API call
-            const response = await fetch('/api/client-zone/files/upload', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                fileName: file.name,
-                fileSize: file.size,
-                clientId: KAZI_CLIENT_DATA.clientInfo.email
-              })
-            })
+      for (const file of Array.from(uploadedFiles)) {
+        try {
+          logger.info('Uploading file', {
+            fileName: file.name,
+            fileSize: file.size
+          })
 
-            if (!response.ok) {
-              throw new Error('Failed to upload file')
-            }
+          // First, upload to storage (using upload API)
+          const formData = new FormData()
+          formData.append('file', file)
 
-            // Add file to list
-            const newFile: ExtendedFile = {
-              id: files.length + 1,
-              name: file.name,
-              size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-              uploadedBy: KAZI_CLIENT_DATA.clientInfo.contactPerson,
-              uploadDate: new Date().toISOString().split('T')[0],
-              project: 'Recent Upload',
-              type: 'document',
-              downloads: 0,
-              views: 0,
-              shared: false,
-              sharedWith: []
-            }
+          const uploadResponse = await fetch('/api/files/upload', {
+            method: 'POST',
+            body: formData
+          })
 
-            setFiles([newFile, ...files])
+          let fileUrl = ''
+          let storagePath = ''
 
-            logger.info('File uploaded successfully', { fileName: file.name })
-            toast.success(`File uploaded! ${file.name}`)
-          } catch (error: any) {
-            logger.error('Failed to upload file', { error, fileName: file.name })
-            toast.error('Failed to upload file', {
-              description: `${file.name}: ${error.message}`
-            })
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json()
+            fileUrl = uploadResult.url || ''
+            storagePath = uploadResult.path || ''
           }
+
+          // Register file in the system
+          const response = await fetch('/api/files', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'upload-file',
+              data: {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                url: fileUrl,
+                storagePath: storagePath
+              }
+            })
+          })
+
+          const result = await response.json()
+
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Failed to upload file')
+          }
+
+          // Add file to list
+          const newFile: ExtendedFile = {
+            id: result.file?.id || Date.now(),
+            name: file.name,
+            size: formatFileSize(file.size),
+            uploadedBy: 'You',
+            uploadDate: new Date().toISOString().split('T')[0],
+            project: 'Recent Upload',
+            type: result.file?.type || 'document',
+            downloads: 0,
+            views: 0,
+            shared: false,
+            sharedWith: []
+          }
+
+          setFiles(prevFiles => [newFile, ...prevFiles])
+
+          logger.info('File uploaded successfully', { fileName: file.name })
+          toast.success(`File uploaded! ${file.name}`)
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+          logger.error('Failed to upload file', { error: errorMessage, fileName: file.name })
+          toast.error('Failed to upload file', {
+            description: `${file.name}: ${errorMessage}`
+          })
         }
       }
-      input.click()
-    } finally {
       setIsUploading(false)
     }
-  }, [files])
+    input.click()
+  }, [])
 
   // ============================================================================
   // HANDLER 3: DELETE FILE
   // ============================================================================
 
-  const handleDeleteFile = useCallback(async (fileId: number, fileName: string) => {
+  const handleDeleteFile = useCallback(async (fileId: number | string, fileName: string) => {
     try {
       logger.info('File deletion initiated', { fileId, fileName })
 
-      const response = await fetch('/api/client-zone/files/delete', {
+      const response = await fetch('/api/files', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fileId,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
+          action: 'delete-files',
+          data: {
+            fileIds: [String(fileId)],
+            permanent: false
+          }
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to delete file')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to delete file')
       }
 
-      setFiles(files.filter(f => f.id !== fileId))
+      setFiles(prevFiles => prevFiles.filter(f => f.id !== fileId))
       setSelectedFile(null)
 
       logger.info('File deleted successfully', { fileId, fileName })
-      toast.success(`File deleted: ${fileName}`)
-    } catch (error: any) {
-      logger.error('Failed to delete file', { error, fileId })
-      toast.error('Failed to delete file')
+      toast.success(`File deleted: ${fileName}`, {
+        description: result.undoAvailable ? 'File moved to trash' : undefined
+      })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Failed to delete file', { error: errorMessage, fileId })
+      toast.error('Failed to delete file', {
+        description: errorMessage
+      })
     }
-  }, [files])
+  }, [])
 
   // ============================================================================
   // HANDLER 4: SHARE FILE
@@ -409,21 +510,34 @@ export default function FilesPage() {
     try {
       logger.info('File share initiated', { fileId: file.id, fileName: file.name })
 
-      const response = await fetch('/api/client-zone/files/share', {
+      const response = await fetch('/api/files', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fileId: file.id,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
+          action: 'share-file',
+          data: {
+            fileIds: [String(file.id)],
+            permission: 'view',
+            expiresIn: '7 days'
+          }
         })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to share file')
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to share file')
       }
 
+      // Get the share URL from API response
+      const shareUrl = result.shareUrl || result.shareLinks?.direct || `https://kazi.app/share/${result.shareToken}`
+
+      // Update file's shared status locally
+      setFiles(prevFiles => prevFiles.map(f =>
+        f.id === file.id ? { ...f, shared: true } : f
+      ))
+
       // Try native share, fallback to copying link
-      const shareUrl = `https://files.kazi.io/${file.id}/${file.name}`
       if (navigator.share) {
         try {
           await navigator.share({
@@ -442,11 +556,16 @@ export default function FilesPage() {
       } else {
         await navigator.clipboard.writeText(shareUrl)
         logger.info('File link copied to clipboard', { fileId: file.id })
-        toast.success('Share link copied to clipboard!')
+        toast.success('Share link copied to clipboard!', {
+          description: result.expiresAt ? `Link expires: ${new Date(result.expiresAt).toLocaleDateString()}` : undefined
+        })
       }
-    } catch (error: any) {
-      logger.error('Failed to share file', { error, fileId: file.id })
-      toast.error('Failed to share file')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Failed to share file', { error: errorMessage, fileId: file.id })
+      toast.error('Failed to share file', {
+        description: errorMessage
+      })
     }
   }, [])
 
@@ -458,22 +577,39 @@ export default function FilesPage() {
     try {
       logger.info('File preview initiated', { fileId: file.id, fileName: file.name })
 
-      // Update view count
-      setFiles(files.map(f =>
+      // Update view count locally
+      setFiles(prevFiles => prevFiles.map(f =>
         f.id === file.id
           ? { ...f, views: (f.views || 0) + 1 }
           : f
       ))
 
+      // Get download URL for preview (reuse download endpoint)
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'download-file',
+          data: {
+            fileId: String(file.id)
+          }
+        })
+      })
+
+      const result = await response.json()
+
       // Open file preview in new window/tab
-      const previewUrl = `https://files.kazi.io/preview/${file.id}/${encodeURIComponent(file.name)}`
+      const previewUrl = result.downloadUrl || `https://files.kazi.io/preview/${file.id}/${encodeURIComponent(file.name)}`
       window.open(previewUrl, '_blank', 'noopener,noreferrer')
       toast.success(`File preview opened: ${file.name}`)
-    } catch (error: any) {
-      logger.error('Failed to open file preview', { error })
-      toast.error('Failed to open file preview')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Failed to open file preview', { error: errorMessage })
+      toast.error('Failed to open file preview', {
+        description: errorMessage
+      })
     }
-  }, [files])
+  }, [])
 
   // ============================================================================
   // HANDLER 6: COPY FILE LINK
@@ -481,13 +617,34 @@ export default function FilesPage() {
 
   const handleCopyLink = useCallback(async (file: ExtendedFile) => {
     try {
-      const link = `https://files.kazi.io/${file.id}/${file.name}`
+      // Generate a share link via API
+      const response = await fetch('/api/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate-link',
+          data: {
+            fileId: String(file.id),
+            permission: 'view',
+            expiresIn: '30 days'
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      const link = result.shareUrl || `https://kazi.app/f/${file.id}`
       await navigator.clipboard.writeText(link)
       logger.info('File link copied', { fileId: file.id })
-      toast.success('Link copied to clipboard!')
-    } catch (error: any) {
-      logger.error('Failed to copy link', { error })
-      toast.error('Failed to copy link')
+      toast.success('Link copied to clipboard!', {
+        description: result.expiresAt ? `Expires: ${new Date(result.expiresAt).toLocaleDateString()}` : undefined
+      })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Failed to copy link', { error: errorMessage })
+      toast.error('Failed to copy link', {
+        description: errorMessage
+      })
     }
   }, [])
 
@@ -495,28 +652,25 @@ export default function FilesPage() {
   // SECURE FILE DELIVERY HANDLERS
   // ============================================================================
 
-  const handleSecureFileClick = useCallback((file: FileItem) => {
-    setSelectedSecureFile(file)
-
-    // If file requires payment or password, show access dialog
-    if (file.requiresPayment || file.accessType === 'password') {
-      setShowAccessDialog(true)
-    } else {
-      // Direct download for public files
-      handleSecureFileDownload(file)
-    }
-  }, [])
-
   const handleSecureFileDownload = useCallback(async (file: FileItem) => {
     try {
       logger.info('Secure file download initiated', { fileName: file.fileName })
 
       const response = await fetch(`/api/files/delivery/${file.id}/download`)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Download failed: ${response.status}`)
+      }
+
       const data = await response.json()
 
       if (data.success && data.downloadUrl) {
         // Create a real download by fetching the file and creating a blob
         const fileResponse = await fetch(data.downloadUrl)
+        if (!fileResponse.ok) {
+          throw new Error('Failed to fetch file content')
+        }
         const blob = await fileResponse.blob()
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
@@ -530,15 +684,30 @@ export default function FilesPage() {
       } else {
         throw new Error(data.error || 'Download failed')
       }
-    } catch (error: any) {
-      logger.error('Failed to download secure file', { error, fileName: file.fileName })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      logger.error('Failed to download secure file', { error: errorMessage, fileName: file.fileName })
       toast.error('Failed to download file', {
-        description: error.message
+        description: errorMessage
       })
     }
   }, [])
 
-  const handleEscrowRelease = useCallback((deliveryId: string) => {
+  const handleSecureFileClick = useCallback((file: FileItem) => {
+    setSelectedSecureFile(file)
+
+    // If file requires payment or password, show access dialog
+    if (file.requiresPayment || file.accessType === 'password') {
+      setShowAccessDialog(true)
+    } else {
+      // Direct download for public files
+      handleSecureFileDownload(file)
+    }
+  }, [handleSecureFileDownload])
+
+  // Note: handleEscrowRelease is available for future escrow functionality
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleEscrowRelease = useCallback((deliveryId: string) => {
     setSelectedSecureFile({ id: deliveryId } as FileItem)
     setShowEscrowDialog(true)
   }, [])

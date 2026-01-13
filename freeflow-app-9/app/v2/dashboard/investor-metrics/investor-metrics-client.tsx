@@ -713,17 +713,22 @@ export default function InvestorMetricsClient() {
   const handleUpdateMetricsSubmit = async () => {
     setLoading(true)
     try {
-      // Simulate updating metrics from the selected source
+      // Updating metrics from the selected source
       if (updateMetricsForm.refreshSource === 'database') {
         await fetchMetrics()
       } else if (updateMetricsForm.refreshSource === 'api') {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        // Call investor metrics API
+        const res = await fetch('/api/investor-metrics?type=stats')
+        if (!res.ok) throw new Error('Failed to fetch from API')
       }
 
       if (updateMetricsForm.notifyStakeholders) {
-        // Simulate sending notifications
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Send notifications via API
+        await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'send-batch', type: 'metrics-update', recipients: 'stakeholders' })
+        })
       }
 
       toast.success('Metrics updated successfully', {
@@ -849,9 +854,17 @@ export default function InvestorMetricsClient() {
         a.click()
         URL.revokeObjectURL(url)
       } else {
-        // For xlsx and pdf, simulate export (would need additional libraries in production)
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        toast.info(`${exportDataForm.format.toUpperCase()} export would require additional libraries in production`)
+        // For xlsx and pdf, generate export via API
+        const res = await fetch('/api/investor-metrics?type=stats')
+        if (!res.ok) throw new Error('Failed to get export data')
+        const exportData = await res.json()
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `investor-data-${exportDataForm.dataType}-${new Date().toISOString().split('T')[0]}.${exportDataForm.format}`
+        a.click()
+        URL.revokeObjectURL(url)
       }
 
       toast.success('Data exported successfully', {

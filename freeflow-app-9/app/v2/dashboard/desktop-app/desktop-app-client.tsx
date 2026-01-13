@@ -1018,17 +1018,27 @@ export default function DesktopAppClient() {
   }
 
   // Execute download
-  const executeDownload = () => {
+  const executeDownload = async () => {
     if (selectedDownload) {
-      toast.success('Download started', {
-        description: `Downloading ${selectedDownload.version} for ${selectedDownload.platform}...`
-      })
-      // Simulate download
-      setTimeout(() => {
-        toast.success('Download complete', {
-          description: `${selectedDownload.version} has been downloaded successfully`
-        })
-      }, 2000)
+      toast.promise(
+        fetch('/api/desktop-app', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'download-app',
+            version: selectedDownload.version,
+            platform: selectedDownload.platform
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Download failed')
+          return res.json()
+        }),
+        {
+          loading: `Downloading ${selectedDownload.version} for ${selectedDownload.platform}...`,
+          success: `${selectedDownload.version} has been downloaded successfully`,
+          error: 'Download failed'
+        }
+      )
       setShowDownloadDialog(false)
       setSelectedDownload(null)
     }
@@ -1048,14 +1058,25 @@ export default function DesktopAppClient() {
 
   // Renew certificate
   const handleRenewCertificate = (cert: Certificate) => {
-    toast.info('Certificate renewal initiated', {
-      description: `Starting renewal process for ${cert.name}...`
-    })
-    setTimeout(() => {
-      toast.success('Renewal request sent', {
-        description: `Certificate renewal for ${cert.name} has been submitted`
-      })
-    }, 1500)
+    toast.promise(
+      fetch('/api/desktop-app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'renew-certificate',
+          certId: cert.id,
+          certName: cert.name
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Renewal failed')
+        return res.json()
+      }),
+      {
+        loading: `Starting renewal process for ${cert.name}...`,
+        success: `Certificate renewal for ${cert.name} has been submitted`,
+        error: 'Certificate renewal failed'
+      }
+    )
   }
 
   // Add new certificate
@@ -1079,14 +1100,21 @@ export default function DesktopAppClient() {
 
   // Rebuild native modules
   const handleRebuildNativeModules = () => {
-    toast.info('Rebuilding native modules...', {
-      description: 'This may take a few minutes'
-    })
-    setTimeout(() => {
-      toast.success('Native modules rebuilt', {
-        description: 'All native modules have been recompiled successfully'
-      })
-    }, 3000)
+    toast.promise(
+      fetch('/api/desktop-app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'rebuild-native-modules' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Rebuild failed')
+        return res.json()
+      }),
+      {
+        loading: 'Rebuilding native modules... This may take a few minutes',
+        success: 'All native modules have been recompiled successfully',
+        error: 'Failed to rebuild native modules'
+      }
+    )
   }
 
   // Configure CI/CD
@@ -1115,12 +1143,21 @@ export default function DesktopAppClient() {
       title: 'Clear Build Cache',
       description: 'This will remove all cached builds. This action cannot be undone.',
       action: async () => {
-        toast.info('Clearing build cache...')
-        setTimeout(() => {
-          toast.success('Build cache cleared', {
-            description: 'All cached builds have been removed'
-          })
-        }, 1500)
+        toast.promise(
+          fetch('/api/desktop-app', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'clear-build-cache' })
+          }).then(res => {
+            if (!res.ok) throw new Error('Failed to clear cache')
+            return res.json()
+          }),
+          {
+            loading: 'Clearing build cache...',
+            success: 'All cached builds have been removed',
+            error: 'Failed to clear build cache'
+          }
+        )
         setShowConfirmDialog(false)
         setConfirmAction(null)
       }
@@ -1134,12 +1171,21 @@ export default function DesktopAppClient() {
       title: 'Revoke Update Keys',
       description: 'This will force all users to re-download the full application. Are you sure?',
       action: async () => {
-        toast.info('Revoking update keys...')
-        setTimeout(() => {
-          toast.success('Update keys revoked', {
-            description: 'All update keys have been revoked. Users will need to download the full application.'
-          })
-        }, 1500)
+        toast.promise(
+          fetch('/api/desktop-app', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'revoke-update-keys' })
+          }).then(res => {
+            if (!res.ok) throw new Error('Failed to revoke keys')
+            return res.json()
+          }),
+          {
+            loading: 'Revoking update keys...',
+            success: 'All update keys have been revoked. Users will need to download the full application.',
+            error: 'Failed to revoke update keys'
+          }
+        )
         setShowConfirmDialog(false)
         setConfirmAction(null)
       }
@@ -1153,12 +1199,21 @@ export default function DesktopAppClient() {
       title: 'Delete All Crash Reports',
       description: 'This will permanently delete all crash report history. This action cannot be undone.',
       action: async () => {
-        toast.info('Deleting crash reports...')
-        setTimeout(() => {
-          toast.success('Crash reports deleted', {
-            description: 'All crash report history has been removed'
-          })
-        }, 1500)
+        toast.promise(
+          fetch('/api/desktop-app', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'delete-crash-reports' })
+          }).then(res => {
+            if (!res.ok) throw new Error('Failed to delete reports')
+            return res.json()
+          }),
+          {
+            loading: 'Deleting crash reports...',
+            success: 'All crash report history has been removed',
+            error: 'Failed to delete crash reports'
+          }
+        )
         setShowConfirmDialog(false)
         setConfirmAction(null)
       }

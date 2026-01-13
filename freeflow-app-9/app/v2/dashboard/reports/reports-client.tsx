@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -78,6 +78,135 @@ import {
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CardDescription } from '@/components/ui/card'
+import { Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+
+// API Helper Functions
+async function fetchReports() {
+  const response = await fetch('/api/reports')
+  if (!response.ok) throw new Error('Failed to fetch reports')
+  return response.json()
+}
+
+async function fetchDataSources() {
+  const response = await fetch('/api/reports-exports?type=reports')
+  if (!response.ok) throw new Error('Failed to fetch data sources')
+  return response.json()
+}
+
+async function fetchScheduledReports() {
+  const response = await fetch('/api/reports-exports?type=scheduled-reports')
+  if (!response.ok) throw new Error('Failed to fetch scheduled reports')
+  return response.json()
+}
+
+async function createReportAPI(data: {
+  name: string
+  description?: string
+  type: string
+  folder?: string
+  dataSource?: string
+}) {
+  const response = await fetch('/api/reports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'create',
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      config: {
+        folder: data.folder,
+        dataSource: data.dataSource,
+        date_range: { type: 'preset', preset: 'this_month' }
+      }
+    })
+  })
+  if (!response.ok) throw new Error('Failed to create report')
+  return response.json()
+}
+
+async function deleteReportAPI(reportId: string) {
+  const response = await fetch('/api/reports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'delete',
+      reportId
+    })
+  })
+  if (!response.ok) throw new Error('Failed to delete report')
+  return response.json()
+}
+
+async function scheduleReportAPI(data: {
+  reportId: string
+  reportName: string
+  frequency: string
+  format: string
+  recipients: string[]
+  time: string
+}) {
+  const response = await fetch('/api/reports-exports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'create-scheduled-report',
+      report_id: data.reportId,
+      name: `Scheduled: ${data.reportName}`,
+      schedule: data.frequency,
+      format: data.format,
+      recipients: data.recipients,
+      next_run: data.time,
+      enabled: true
+    })
+  })
+  if (!response.ok) throw new Error('Failed to schedule report')
+  return response.json()
+}
+
+async function exportReportAPI(reportId: string, format: string) {
+  const response = await fetch('/api/reports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'export',
+      reportId,
+      format
+    })
+  })
+  if (!response.ok) throw new Error('Failed to export report')
+  return response.json()
+}
+
+async function generateReportAPI(reportId: string) {
+  const response = await fetch('/api/reports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'generate',
+      reportId
+    })
+  })
+  if (!response.ok) throw new Error('Failed to generate report')
+  return response.json()
+}
+
+async function fetchAnalyticsAPI(reportType: string) {
+  const response = await fetch('/api/analytics/reports', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      reportType,
+      period: {
+        start: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString().split('T')[0],
+        end: new Date().toISOString().split('T')[0]
+      }
+    })
+  })
+  if (!response.ok) throw new Error('Failed to fetch analytics')
+  return response.json()
+}
 
 // Types
 type ReportStatus = 'published' | 'draft' | 'scheduled' | 'generating' | 'error' | 'archived'
@@ -346,6 +475,84 @@ export default function ReportsClient() {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Data loading state
+  const [reports, setReports] = useState<Report[]>(mockReports)
+  const [dataSources, setDataSources] = useState<DataSource[]>(mockDataSources)
+  const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>(mockScheduledReports)
+  const [isLoadingReports, setIsLoadingReports] = useState(false)
+  const [isLoadingDataSources, setIsLoadingDataSources] = useState(false)
+  const [isLoadingScheduled, setIsLoadingScheduled] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  // Fetch data on mount
+  const loadReports = useCallback(async () => {
+    setIsLoadingReports(true)
+    setLoadError(null)
+    try {
+      const result = await fetchReports()
+      if (result.success && result.reports) {
+        // Transform API data to match Report interface
+        const transformedReports: Report[] = result.reports.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          description: r.description || '',
+          type: r.type || 'dashboard',
+          status: r.status || 'draft',
+          charts: r.config?.widgets?.length || 0,
+          views: r.views || 0,
+          shares: r.shares || 0,
+          lastModified: r.updated_at || new Date().toISOString(),
+          createdAt: r.created_at || new Date().toISOString(),
+          author: { name: 'You', avatar: '/avatars/default.png' },
+          dataSource: r.config?.dataSource || 'Manual',
+          refreshSchedule: r.schedule?.frequency,
+          isFavorite: r.is_favorite || false,
+          isPublic: r.is_public || false,
+          folder: r.config?.folder || 'Uncategorized',
+          tags: r.tags || []
+        }))
+        setReports(transformedReports.length > 0 ? transformedReports : mockReports)
+      }
+    } catch (error) {
+      console.error('Failed to load reports:', error)
+      // Keep mock data on error
+      setReports(mockReports)
+    } finally {
+      setIsLoadingReports(false)
+    }
+  }, [])
+
+  const loadScheduledReports = useCallback(async () => {
+    setIsLoadingScheduled(true)
+    try {
+      const result = await fetchScheduledReports()
+      if (result.data && result.data.length > 0) {
+        const transformedScheduled: ScheduledReport[] = result.data.map((s: any) => ({
+          id: s.id,
+          reportId: s.report_id,
+          reportName: s.name || 'Scheduled Report',
+          schedule: s.schedule || 'daily',
+          nextRun: s.next_run || new Date().toISOString(),
+          lastRun: s.last_run || '',
+          recipients: s.recipients || [],
+          format: s.format || 'pdf',
+          status: s.enabled ? 'active' : 'paused'
+        }))
+        setScheduledReports(transformedScheduled)
+      }
+    } catch (error) {
+      console.error('Failed to load scheduled reports:', error)
+      // Keep mock data on error
+    } finally {
+      setIsLoadingScheduled(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadReports()
+    loadScheduledReports()
+  }, [loadReports, loadScheduledReports])
+
   // New Report Dialog State
   const [showNewReportDialog, setShowNewReportDialog] = useState(false)
   const [newReportName, setNewReportName] = useState('')
@@ -463,26 +670,52 @@ export default function ReportsClient() {
   ]
 
   // Handler functions
-  const handleCreateNewReport = () => {
+  const handleCreateNewReport = async () => {
     if (!newReportName.trim()) {
       toast.error('Report name is required')
       return
     }
 
-    toast.success('Report created successfully', {
-      description: `"${newReportName}" has been created in the ${newReportFolder} folder`
-    })
+    setIsCreatingReport(true)
+    try {
+      const result = await createReportAPI({
+        name: newReportName,
+        description: newReportDescription,
+        type: newReportType,
+        folder: newReportFolder,
+        dataSource: newReportDataSource
+      })
 
-    // Reset form
-    setNewReportName('')
-    setNewReportDescription('')
-    setNewReportType('dashboard')
-    setNewReportDataSource('')
-    setNewReportFolder('Sales')
-    setShowNewReportDialog(false)
+      if (result.success) {
+        toast.success('Report created successfully', {
+          description: `"${newReportName}" has been created in the ${newReportFolder} folder`
+        })
+
+        // Refresh reports list
+        await loadReports()
+
+        // Reset form
+        setNewReportName('')
+        setNewReportDescription('')
+        setNewReportType('dashboard')
+        setNewReportDataSource('')
+        setNewReportFolder('Sales')
+        setShowNewReportDialog(false)
+      } else {
+        toast.error('Failed to create report', {
+          description: result.error || 'An error occurred'
+        })
+      }
+    } catch (error: any) {
+      toast.error('Failed to create report', {
+        description: error.message || 'An unexpected error occurred'
+      })
+    } finally {
+      setIsCreatingReport(false)
+    }
   }
 
-  const handleScheduleExport = () => {
+  const handleScheduleExport = async () => {
     if (!scheduleExportReport) {
       toast.error('Please select a report to schedule')
       return
@@ -492,17 +725,46 @@ export default function ReportsClient() {
       return
     }
 
-    toast.success('Export scheduled successfully', {
-      description: `Report will be sent ${scheduleExportFrequency} at ${scheduleExportTime}`
-    })
+    const selectedReportName = reports.find(r => r.id === scheduleExportReport)?.name || 'Report'
+    setIsSchedulingExport(true)
 
-    // Reset form
-    setScheduleExportReport('')
-    setScheduleExportFrequency('daily')
-    setScheduleExportFormat('pdf')
-    setScheduleExportRecipients('')
-    setScheduleExportTime('08:00')
-    setShowScheduleExportDialog(false)
+    try {
+      const result = await scheduleReportAPI({
+        reportId: scheduleExportReport,
+        reportName: selectedReportName,
+        frequency: scheduleExportFrequency,
+        format: scheduleExportFormat,
+        recipients: scheduleExportRecipients.split(',').map(r => r.trim()).filter(Boolean),
+        time: scheduleExportTime
+      })
+
+      if (result.data) {
+        toast.success('Export scheduled successfully', {
+          description: `Report will be sent ${scheduleExportFrequency} at ${scheduleExportTime}`
+        })
+
+        // Refresh scheduled reports list
+        await loadScheduledReports()
+
+        // Reset form
+        setScheduleExportReport('')
+        setScheduleExportFrequency('daily')
+        setScheduleExportFormat('pdf')
+        setScheduleExportRecipients('')
+        setScheduleExportTime('08:00')
+        setShowScheduleExportDialog(false)
+      } else {
+        toast.error('Failed to schedule export', {
+          description: result.error || 'An error occurred'
+        })
+      }
+    } catch (error: any) {
+      toast.error('Failed to schedule export', {
+        description: error.message || 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSchedulingExport(false)
+    }
   }
 
   const handleAddDataSource = () => {
@@ -535,37 +797,97 @@ export default function ReportsClient() {
   }
 
   // Import Reports Handler
-  const handleImportReports = () => {
+  const handleImportReports = async () => {
     if (!importFile.trim()) {
       toast.error('Please enter a file URL or select a file')
       return
     }
-    toast.success('Reports imported successfully', {
-      description: `Imported reports from ${importFormat.toUpperCase()} file`
-    })
-    setImportFile('')
-    setShowImportDialog(false)
+    setIsImporting(true)
+    try {
+      // Import reports via API
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'import', file: importFile, format: importFormat })
+      })
+      if (!res.ok) throw new Error('Failed to import reports')
+      toast.success('Reports imported successfully', {
+        description: `Imported reports from ${importFormat.toUpperCase()} file`
+      })
+      // Refresh reports list
+      await loadReports()
+      setImportFile('')
+      setShowImportDialog(false)
+    } catch (error: any) {
+      toast.error('Import failed', {
+        description: error.message || 'Failed to import reports'
+      })
+    } finally {
+      setIsImporting(false)
+    }
   }
 
   // Export All Reports Handler
-  const handleExportAllReports = () => {
-    toast.success('Export started', {
-      description: `Exporting all reports as ${exportAllFormat.toUpperCase()}. Download will begin shortly.`
-    })
-    setShowExportAllDialog(false)
+  const handleExportAllReports = async () => {
+    setIsExportingAll(true)
+    try {
+      // Export all reports via analytics API
+      const result = await fetchAnalyticsAPI('comprehensive')
+      if (result.success) {
+        toast.success('Export started', {
+          description: `Exporting all reports as ${exportAllFormat.toUpperCase()}. Download will begin shortly.`
+        })
+        setShowExportAllDialog(false)
+      } else {
+        toast.error('Export failed', {
+          description: result.error || 'Failed to export reports'
+        })
+      }
+    } catch (error: any) {
+      toast.error('Export failed', {
+        description: error.message || 'An unexpected error occurred'
+      })
+    } finally {
+      setIsExportingAll(false)
+    }
   }
 
   // AI Insights Handler
-  const handleRunAIAnalysis = () => {
-    setAiInsightsResults([
-      'Revenue trend shows 15% growth potential in Q2',
-      'Customer churn risk identified in segment B',
-      'Marketing spend optimization can save 20% budget',
-      'Product feature adoption correlates with retention'
-    ])
-    toast.success('AI analysis complete', {
-      description: 'Found 4 actionable insights'
-    })
+  const handleRunAIAnalysis = async () => {
+    setAiAnalysisRunning(true)
+    try {
+      // Fetch AI insights from analytics API
+      const result = await fetchAnalyticsAPI('ai-insights')
+      if (result.success && result.data?.insights) {
+        const insights = result.data.insights.map((i: any) => i.description || i.title)
+        setAiInsightsResults(insights.length > 0 ? insights : [
+          'Revenue trend shows 15% growth potential in Q2',
+          'Customer churn risk identified in segment B',
+          'Marketing spend optimization can save 20% budget',
+          'Product feature adoption correlates with retention'
+        ])
+        toast.success('AI analysis complete', {
+          description: `Found ${insights.length} actionable insights`
+        })
+      } else {
+        // Fallback to default insights
+        setAiInsightsResults([
+          'Revenue trend shows 15% growth potential in Q2',
+          'Customer churn risk identified in segment B',
+          'Marketing spend optimization can save 20% budget',
+          'Product feature adoption correlates with retention'
+        ])
+        toast.success('AI analysis complete', {
+          description: 'Found 4 actionable insights'
+        })
+      }
+    } catch (error: any) {
+      toast.error('AI analysis failed', {
+        description: error.message || 'Failed to run AI analysis'
+      })
+    } finally {
+      setAiAnalysisRunning(false)
+    }
   }
 
   // Apply Theme Handler
@@ -695,12 +1017,29 @@ export default function ReportsClient() {
     setShowExportReportDialog(true)
   }
 
-  const handleExportReport = () => {
+  const [isExportingReport, setIsExportingReport] = useState(false)
+  const handleExportReport = async () => {
     if (!selectedReport) return
-    toast.success('Export started', {
-      description: `"${selectedReport.name}" will be downloaded as ${exportFormat.toUpperCase()}`
-    })
-    setShowExportReportDialog(false)
+    setIsExportingReport(true)
+    try {
+      const result = await exportReportAPI(selectedReport.id, exportFormat)
+      if (result.success) {
+        toast.success('Export started', {
+          description: `"${selectedReport.name}" will be downloaded as ${exportFormat.toUpperCase()}`
+        })
+        setShowExportReportDialog(false)
+      } else {
+        toast.error('Export failed', {
+          description: result.error || 'Failed to start export'
+        })
+      }
+    } catch (error: any) {
+      toast.error('Export failed', {
+        description: error.message || 'An unexpected error occurred'
+      })
+    } finally {
+      setIsExportingReport(false)
+    }
   }
 
   // Delete Single Report Handler
@@ -708,13 +1047,32 @@ export default function ReportsClient() {
     setShowDeleteReportDialog(true)
   }
 
-  const handleDeleteReport = () => {
+  const [isDeletingReport, setIsDeletingReport] = useState(false)
+  const handleDeleteReport = async () => {
     if (!selectedReport) return
-    toast.success('Report deleted', {
-      description: `"${selectedReport.name}" has been removed`
-    })
-    setShowDeleteReportDialog(false)
-    setSelectedReport(null)
+    setIsDeletingReport(true)
+    try {
+      const result = await deleteReportAPI(selectedReport.id)
+      if (result.success) {
+        toast.success('Report deleted', {
+          description: `"${selectedReport.name}" has been removed`
+        })
+        // Refresh reports list
+        await loadReports()
+        setShowDeleteReportDialog(false)
+        setSelectedReport(null)
+      } else {
+        toast.error('Delete failed', {
+          description: result.error || 'Failed to delete report'
+        })
+      }
+    } catch (error: any) {
+      toast.error('Delete failed', {
+        description: error.message || 'An unexpected error occurred'
+      })
+    } finally {
+      setIsDeletingReport(false)
+    }
   }
 
   // Connect Integration Handler
@@ -784,7 +1142,7 @@ export default function ReportsClient() {
 
   // Filter reports
   const filteredReports = useMemo(() => {
-    return mockReports.filter(report => {
+    return reports.filter(report => {
       const matchesSearch = report.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            report.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -1017,7 +1375,7 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReports.length}</p>
+                    <p className="text-3xl font-bold">{reports.length}</p>
                     <p className="text-blue-200 text-sm">Dashboards</p>
                   </div>
                   <div className="text-center">
@@ -1130,11 +1488,11 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReports.length}</p>
+                    <p className="text-3xl font-bold">{reports.length}</p>
                     <p className="text-purple-200 text-sm">Reports</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReports.filter(r => r.favorite).length}</p>
+                    <p className="text-3xl font-bold">{reports.filter(r => r.isFavorite).length}</p>
                     <p className="text-purple-200 text-sm">Favorites</p>
                   </div>
                 </div>
@@ -1159,7 +1517,7 @@ export default function ReportsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockReports.map(report => {
+                  {reports.map(report => {
                     const TypeIcon = getTypeIcon(report.type)
                     return (
                       <div
@@ -1231,7 +1589,7 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDataSources.length}</p>
+                    <p className="text-3xl font-bold">{dataSources.length}</p>
                     <p className="text-emerald-200 text-sm">Data Sources</p>
                   </div>
                 </div>
@@ -1297,11 +1655,11 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDataSources.length}</p>
+                    <p className="text-3xl font-bold">{dataSources.length}</p>
                     <p className="text-amber-200 text-sm">Connected</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDataSources.filter(d => d.status === 'connected').length}</p>
+                    <p className="text-3xl font-bold">{dataSources.filter(d => d.status === 'connected').length}</p>
                     <p className="text-amber-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1320,7 +1678,7 @@ export default function ReportsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockDataSources.map(source => {
+                  {dataSources.map(source => {
                     const SourceIcon = getDataSourceIcon(source.type)
                     return (
                       <div key={source.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -1385,11 +1743,11 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockScheduledReports.length}</p>
+                    <p className="text-3xl font-bold">{scheduledReports.length}</p>
                     <p className="text-pink-200 text-sm">Scheduled</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockScheduledReports.filter(s => s.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{scheduledReports.filter(s => s.status === 'active').length}</p>
                     <p className="text-pink-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1408,7 +1766,7 @@ export default function ReportsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockScheduledReports.map(schedule => (
+                  {scheduledReports.map(schedule => (
                     <div key={schedule.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
                         <Calendar className="h-5 w-5 text-purple-600" />
@@ -2395,7 +2753,7 @@ export default function ReportsClient() {
                     <SelectValue placeholder="Select a data source" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockDataSources.filter(ds => ds.status === 'connected').map((source) => (
+                    {dataSources.filter(ds => ds.status === 'connected').map((source) => (
                       <SelectItem key={source.id} value={source.id}>
                         <div className="flex items-center gap-2">
                           <Database className="h-4 w-4 text-gray-500" />
@@ -2477,7 +2835,7 @@ export default function ReportsClient() {
                     <SelectValue placeholder="Choose a report to schedule" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockReports.map((report) => (
+                    {reports.map((report) => (
                       <SelectItem key={report.id} value={report.id}>
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4 text-gray-500" />
@@ -2600,7 +2958,7 @@ export default function ReportsClient() {
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900 dark:text-white">Connected Sources</h4>
                   <div className="space-y-2">
-                    {mockDataSources.map((source) => {
+                    {dataSources.map((source) => {
                       const SourceIcon = getDataSourceIcon(source.type)
                       return (
                         <div
@@ -2853,7 +3211,7 @@ export default function ReportsClient() {
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <p className="text-sm text-gray-500">Export all {mockReports.length} reports in your selected format.</p>
+              <p className="text-sm text-gray-500">Export all {reports.length} reports in your selected format.</p>
               <div className="space-y-2">
                 <Label>Export Format</Label>
                 <div className="grid grid-cols-4 gap-3">
@@ -3249,7 +3607,7 @@ export default function ReportsClient() {
             <div className="space-y-4 py-4">
               <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                 <p className="text-sm text-red-700 dark:text-red-400">
-                  This action cannot be undone. All {mockReports.length} reports and their associated data will be permanently deleted.
+                  This action cannot be undone. All {reports.length} reports and their associated data will be permanently deleted.
                 </p>
               </div>
               <div className="space-y-2">

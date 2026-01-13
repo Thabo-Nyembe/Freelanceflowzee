@@ -2433,7 +2433,8 @@ export default function MilestonesClient() {
               <Button onClick={async () => {
                 toast.loading('Archiving milestones...', { id: 'archive-milestones' })
                 try {
-                  await new Promise(r => setTimeout(r, 1500))
+                  const res = await fetch('/api/milestones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'archive' }) })
+                  if (!res.ok) throw new Error('Archive failed')
                   toast.success('Milestones Archived', { id: 'archive-milestones', description: 'Old milestones archived successfully' })
                   setShowArchiveDialog(false)
                 } catch { toast.error('Archive failed', { id: 'archive-milestones' }) }
@@ -2475,7 +2476,8 @@ export default function MilestonesClient() {
               <Button variant="destructive" onClick={async () => {
                 toast.loading('Purging milestones...', { id: 'purge-milestones' })
                 try {
-                  await new Promise(r => setTimeout(r, 2000))
+                  const res = await fetch('/api/milestones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'purge-completed' }) })
+                  if (!res.ok) throw new Error('Purge failed')
                   toast.success('Milestones Purged', { id: 'purge-milestones', description: 'Completed milestones removed' })
                   setShowPurgeDialog(false)
                 } catch { toast.error('Purge failed', { id: 'purge-milestones' }) }

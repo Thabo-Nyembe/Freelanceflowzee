@@ -2044,7 +2044,16 @@ export default function ProfileClient() {
                           <Badge className="bg-green-100 text-green-700">{job.matchScore}% match</Badge>
                           {job.isEasyApply && <Badge variant="outline">Easy Apply</Badge>}
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => { toast.loading(job.isSaved ? 'Removing from saved...' : 'Saving job...', { id: `save-job-${job.id}` }); setTimeout(() => { toast.success(job.isSaved ? 'Job removed from saved' : 'Job saved successfully', { id: `save-job-${job.id}` }) }, 500) }}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              toast.promise(
+                                fetch('/api/jobs', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ action: 'save-job', jobId: job.id, unsave: job.isSaved })
+                                }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+                                { loading: job.isSaved ? 'Removing from saved...' : 'Saving job...', success: job.isSaved ? 'Job removed from saved' : 'Job saved successfully', error: 'Failed to save job' }
+                              )
+                            }}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
                             <Button size="sm" onClick={() => setShowJobApplyDialog(job)}>Apply</Button>
                           </div>
                         </div>
@@ -3007,7 +3016,7 @@ export default function ProfileClient() {
                   { icon: Download, label: 'Download as PDF', action: () => { setShowDownloadCVDialog(true); setShowMoreOptionsDialog(false); } },
                   { icon: Bell, label: 'Follow for Updates', action: () => {
                     toast.promise(
-                      fetch('/api/users/follow', { method: 'POST', body: JSON.stringify({ userId: 'profile-user-id' }) }).catch(() => new Promise(r => setTimeout(r, 800))),
+                      fetch('/api/users/follow', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: 'profile-user-id' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                       { loading: 'Following user...', success: 'Now following for updates', error: 'Failed to follow' }
                     );
                     setShowMoreOptionsDialog(false);
@@ -3016,7 +3025,7 @@ export default function ProfileClient() {
                     const reason = prompt('Please describe the issue with this profile:');
                     if (reason) {
                       toast.promise(
-                        fetch('/api/users/report', { method: 'POST', body: JSON.stringify({ userId: 'profile-user-id', reason }) }).catch(() => new Promise(r => setTimeout(r, 1000))),
+                        fetch('/api/users/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: 'profile-user-id', reason }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                         { loading: 'Submitting report...', success: 'Report submitted. Our team will review it.', error: 'Failed to submit report' }
                       );
                     }
@@ -3025,7 +3034,7 @@ export default function ProfileClient() {
                   { icon: Lock, label: 'Block User', action: () => {
                     if (confirm('Are you sure you want to block this user? They will not be able to view your profile or contact you.')) {
                       toast.promise(
-                        fetch('/api/users/block', { method: 'POST', body: JSON.stringify({ userId: 'profile-user-id' }) }).catch(() => new Promise(r => setTimeout(r, 800))),
+                        fetch('/api/users/block', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: 'profile-user-id' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                         { loading: 'Blocking user...', success: 'User has been blocked', error: 'Failed to block user' }
                       );
                     }

@@ -196,7 +196,11 @@ const aiCollaborateActivities = [
 const aiCollaborateQuickActions = [
   { id: '1', label: 'New AI Design', icon: 'Plus', shortcut: 'N', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
+      fetch('/api/ai-collaborate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create-session', name: 'New AI Design Session' })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Initializing AI design collaboration...',
         success: 'New AI design session created',
@@ -206,7 +210,11 @@ const aiCollaborateQuickActions = [
   }},
   { id: '2', label: 'Export Designs', icon: 'Download', shortcut: 'E', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 3000)),
+      fetch('/api/ai-collaborate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export-designs', designIds: [], format: 'zip' })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Preparing AI designs for export...',
         success: 'AI designs exported successfully',
@@ -216,7 +224,7 @@ const aiCollaborateQuickActions = [
   }},
   { id: '3', label: 'AI Settings', icon: 'Settings', shortcut: 'S', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/ai-collaborate?type=settings').then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Loading AI collaboration settings...',
         success: 'AI settings panel opened',

@@ -397,9 +397,11 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
         const file = e.target.files?.[0]
         if (file) {
           toast.promise(
-            new Promise((resolve) => {
-              setTimeout(() => resolve({ success: true }), 500)
-            }),
+            fetch('/api/themes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'upload-theme', name: file.name })
+            }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
             { loading: `Uploading ${file.name}...`, success: `${file.name} uploaded successfully`, error: 'Upload failed' }
           )
         }
@@ -603,11 +605,16 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
       return
     }
     toast.promise(
-      new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({ success: true })
-        }, 1500)
-      }),
+      fetch('/api/themes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'upload-theme',
+          name: uploadName,
+          description: uploadDescription,
+          price: uploadPrice
+        })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: `Uploading "${uploadName}"...`,
         success: () => {
@@ -653,9 +660,15 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const processInsightAction = () => {
     if (!selectedInsight) return
     toast.promise(
-      new Promise((resolve) => {
-        setTimeout(() => resolve({ success: true }), 1000)
-      }),
+      fetch('/api/themes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'process-insight',
+          insightId: selectedInsight.id,
+          apply: true
+        })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: `Processing "${selectedInsight.title}"...`,
         success: () => {

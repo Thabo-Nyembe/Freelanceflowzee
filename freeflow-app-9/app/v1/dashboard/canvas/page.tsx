@@ -939,7 +939,23 @@ export default function CanvasPage() {
     setShowExportModal(false)
 
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2500)),
+      fetch('/api/canvases/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ canvasId: state.selectedCanvas.id, format: exportFormat })
+      }).then(async res => {
+        if (!res.ok) throw new Error('Export failed')
+        const blob = await res.blob().catch(() => null)
+        if (blob && blob.size > 0) {
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `${canvasName}.${exportFormat}`
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }
+        return true
+      }),
       {
         loading: `Exporting ${canvasName} as ${exportFormat.toUpperCase()}...`,
         success: `Canvas exported - ${canvasName} ready for download`,
@@ -947,7 +963,6 @@ export default function CanvasPage() {
       }
     )
 
-    // Note: Using local state - in production, this would POST to /api/canvases/export
     logger.info('Export completed', { canvasName, format: exportFormat })
     announce('Canvas exported', 'polite')
   }

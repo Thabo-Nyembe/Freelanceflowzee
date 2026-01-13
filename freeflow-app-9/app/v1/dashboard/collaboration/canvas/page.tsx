@@ -295,9 +295,6 @@ export default function CanvasPage() {
       (async () => {
         logger.info("Creating new canvas project", { userId, projectName });
 
-        // Simulate network delay for better UX
-        await new Promise(r => setTimeout(r, 1200));
-
         const { data, error } = await createCanvasProjectDB(userId, {
           name: projectName,
         });
@@ -373,9 +370,6 @@ export default function CanvasPage() {
         if (canvas) {
           canvasData = canvas.toDataURL("image/png");
         }
-
-        // Simulate network delay for better UX
-        await new Promise(r => setTimeout(r, 1500));
 
         // Update in database
         const { error } = await updateCanvasProject(activeProject.id, {
@@ -717,9 +711,6 @@ export default function CanvasPage() {
       (async () => {
         logger.info("Sharing canvas", { projectId: activeProject.id });
 
-        // Simulate network delay for better UX
-        await new Promise(r => setTimeout(r, 1200));
-
         // Update share status in database
         const { error } = await updateCanvasProject(activeProject.id, {
           is_shared: true,
@@ -779,9 +770,6 @@ export default function CanvasPage() {
           canvasData = canvas.toDataURL("image/png");
         }
 
-        // Simulate network delay for better UX
-        await new Promise(r => setTimeout(r, 1800));
-
         // Create duplicate in database
         const { data, error } = await createCanvasProjectDB(userId, {
           name: `${activeProject.name} (Copy)`,
@@ -825,9 +813,6 @@ export default function CanvasPage() {
       (async () => {
         logger.info("Deleting project", { projectId, userId });
 
-        // Simulate network delay for better UX
-        await new Promise(r => setTimeout(r, 1200));
-
         // Delete from database
         const { error } = await deleteCanvasProject(projectId);
 
@@ -863,9 +848,6 @@ export default function CanvasPage() {
     toast.promise(
       (async () => {
         logger.info("Loading template", { templateName, userId });
-
-        // Simulate network delay for better UX
-        await new Promise(r => setTimeout(r, 1500));
 
         // Create a new project with the template
         const { data, error } = await createCanvasProjectDB(userId, {

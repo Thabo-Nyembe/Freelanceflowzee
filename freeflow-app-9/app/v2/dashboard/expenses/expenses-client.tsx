@@ -444,10 +444,31 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
   }
 
-  const handleExportExpenses = () => {
+  const handleExportExpenses = async () => {
     toast.success('Export started', {
       description: 'Your expense data is being exported'
     })
+    try {
+      const response = await fetch('/api/expenses?action=export', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to export expenses')
+      }
+
+      const data = await response.json()
+      toast.success('Export completed', {
+        description: 'Your expense data has been exported successfully'
+      })
+    } catch (error) {
+      console.error('Failed to export expenses:', error)
+      toast.error('Failed to export expenses', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleSubmitReport = async (expenseId: string, title: string) => {
@@ -478,16 +499,34 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       return
     }
     setScanReceiptProcessing(true)
+    toast.success('Scanning receipt...', { description: 'Processing your receipt' })
     try {
-      // Simulate OCR processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const formData = new FormData()
+      formData.append('file', scanReceiptFile)
+      formData.append('action', 'scan_receipt')
+
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to scan receipt')
+      }
+
+      const data = await response.json()
       toast.success('Receipt scanned successfully', {
         description: 'Expense data extracted and ready for review'
       })
       setScanReceiptFile(null)
       setShowScanReceiptDialog(false)
+      refetch()
     } catch (error) {
-      toast.error('Failed to scan receipt')
+      console.error('Failed to scan receipt:', error)
+      toast.error('Failed to scan receipt', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
     } finally {
       setScanReceiptProcessing(false)
     }
@@ -500,16 +539,35 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       return
     }
     setGeneratingReport(true)
+    toast.success('Generating report...', { description: 'Please wait' })
     try {
-      // Simulate report generation
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate_report',
+          startDate: reportDateRange.start,
+          endDate: reportDateRange.end,
+          format: reportFormat
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to generate report')
+      }
+
+      const data = await response.json()
       toast.success('Expense report generated', {
         description: `${reportFormat.toUpperCase()} report for ${reportDateRange.start} to ${reportDateRange.end}`
       })
       setReportDateRange({ start: '', end: '' })
       setShowGenerateReportDialog(false)
     } catch (error) {
-      toast.error('Failed to generate report')
+      console.error('Failed to generate report:', error)
+      toast.error('Failed to generate report', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
     } finally {
       setGeneratingReport(false)
     }
@@ -521,8 +579,30 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       toast.error('Please fill in all required fields')
       return
     }
+    toast.success('Adding mileage entry...', { description: 'Please wait' })
     try {
       const reimbursement = mileageForm.distance * 0.67
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_mileage',
+          expense_category: 'transport',
+          origin: mileageForm.origin,
+          destination: mileageForm.destination,
+          distance: mileageForm.distance,
+          rate: 0.67,
+          purpose: mileageForm.purpose,
+          date: mileageForm.date,
+          amount: reimbursement
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to add mileage entry')
+      }
+
       toast.success('Mileage entry added', {
         description: `${mileageForm.distance} miles - $${reimbursement.toFixed(2)} reimbursement`
       })
@@ -534,8 +614,12 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         date: new Date().toISOString().split('T')[0]
       })
       setShowAddMileageDialog(false)
+      refetch()
     } catch (error) {
-      toast.error('Failed to add mileage entry')
+      console.error('Failed to add mileage entry:', error)
+      toast.error('Failed to add mileage entry', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
     }
   }
 
@@ -545,10 +629,33 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       toast.error('Please fill in all required fields')
       return
     }
+    toast.success('Submitting per diem request...', { description: 'Please wait' })
     try {
       const days = Math.ceil((new Date(perDiemForm.endDate).getTime() - new Date(perDiemForm.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
       const dailyRate = 79 // Default GSA rate
       const totalAmount = days * dailyRate
+
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'request_per_diem',
+          expense_category: 'travel',
+          location: perDiemForm.location,
+          startDate: perDiemForm.startDate,
+          endDate: perDiemForm.endDate,
+          dailyRate,
+          totalAmount,
+          meals: perDiemForm.meals,
+          days
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to submit per diem request')
+      }
+
       toast.success('Per diem request submitted', {
         description: `${days} days in ${perDiemForm.location} - $${totalAmount} total`
       })
@@ -559,8 +666,12 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         meals: { breakfast: true, lunch: true, dinner: true }
       })
       setShowPerDiemDialog(false)
+      refetch()
     } catch (error) {
-      toast.error('Failed to submit per diem request')
+      console.error('Failed to submit per diem request:', error)
+      toast.error('Failed to submit per diem request', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
     }
   }
 
@@ -570,7 +681,24 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       toast.error('Please enter the last 4 digits of your card')
       return
     }
+    toast.success('Linking card...', { description: 'Please wait' })
     try {
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'link_card',
+          cardType: linkCardForm.cardType,
+          lastFour: linkCardForm.lastFour,
+          nickname: linkCardForm.nickname
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Failed to link card')
+      }
+
       toast.success('Card linked successfully', {
         description: `${linkCardForm.cardType.toUpperCase()} ending in ${linkCardForm.lastFour} connected`
       })
@@ -581,7 +709,10 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       })
       setShowLinkCardDialog(false)
     } catch (error) {
-      toast.error('Failed to link card')
+      console.error('Failed to link card:', error)
+      toast.error('Failed to link card', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
     }
   }
 

@@ -33,9 +33,10 @@ export default function ClientsPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call - in production, fetch from database
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setClients(mockBookings)
+        // Fetch clients from API
+        const res = await fetch('/api/bookings?type=clients').catch(() => null)
+        const data = res?.ok ? await res.json() : null
+        setClients(data?.clients || mockBookings)
 
         announce('Client directory loaded', 'polite')
       } catch (err) {

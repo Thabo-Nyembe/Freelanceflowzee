@@ -186,20 +186,16 @@ export default function WhiteLabelClient() {
   const handleExportBranding = async () => {
     setShowExportDialog(false)
 
-    const exportPromise = new Promise((resolve) => {
-      setTimeout(() => {
-        const exportData = {
-          format: exportFormat,
-          config: config,
-          timestamp: new Date().toISOString()
-        }
-
-        // Simulate file download
-        const blob = new Blob([
-          exportFormat === 'json'
-            ? JSON.stringify(exportData, null, 2)
-            : generateBrandingExportCss(config)
-        ], { type: 'text/plain' })
+    const exportPromise = fetch(`/api/white-label?action=export&format=${exportFormat}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Export failed')
+        return exportFormat === 'css' ? res.text() : res.json()
+      })
+      .then(data => {
+        const content = exportFormat === 'css' ? data : JSON.stringify(data, null, 2)
+        const blob = new Blob([content], {
+          type: exportFormat === 'css' ? 'text/css' : 'application/json'
+        })
 
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -210,9 +206,8 @@ export default function WhiteLabelClient() {
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
 
-        resolve(exportData)
-      }, 1500)
-    })
+        return data
+      })
 
     toast.promise(exportPromise, {
       loading: `Exporting branding as ${exportFormat.toUpperCase()}...`,
@@ -252,10 +247,13 @@ export default function WhiteLabelClient() {
   const handleLogoUploadSubmit = () => {
     setShowUploadLogoDialog(false)
 
-    const uploadPromise = new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true, logoType: currentLogoType })
-      }, 1500)
+    const uploadPromise = fetch('/api/white-label', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'upload_logo', logoType: currentLogoType })
+    }).then(res => {
+      if (!res.ok) throw new Error('Upload failed')
+      return res.json()
     })
 
     toast.promise(uploadPromise, {
@@ -276,25 +274,30 @@ export default function WhiteLabelClient() {
 
     setIsVerifyingDomain(true)
 
-    const verifyPromise = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Simulate domain verification
-        if (customDomain.includes('.')) {
-          setConfig(prev => ({
-            ...prev,
-            customDomain: {
-              domain: customDomain,
-              isVerified: false,
-              sslEnabled: false,
-              verificationToken: 'kazi-verify-' + Date.now()
-            }
-          }))
-          resolve({ domain: customDomain })
-        } else {
-          reject(new Error('Invalid domain format'))
-        }
-      }, 2000)
+    const verifyPromise = fetch('/api/white-label', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify_domain', domain: customDomain })
     })
+      .then(res => {
+        if (!res.ok) throw new Error('Verification failed')
+        return res.json()
+      })
+      .then(data => {
+        if (data.status === 'invalid') {
+          throw new Error('Invalid domain format')
+        }
+        setConfig(prev => ({
+          ...prev,
+          customDomain: {
+            domain: customDomain,
+            isVerified: false,
+            sslEnabled: false,
+            verificationToken: 'kazi-verify-' + Date.now()
+          }
+        }))
+        return data
+      })
 
     toast.promise(verifyPromise, {
       loading: 'Verifying domain...',
@@ -329,18 +332,25 @@ export default function WhiteLabelClient() {
 
     setShowApplyTemplateDialog(false)
 
-    const applyPromise = new Promise((resolve) => {
-      setTimeout(() => {
-        // Apply template settings
+    const applyPromise = fetch('/api/white-label', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'apply_template', template: selectedTemplateForApply })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Apply failed')
+        return res.json()
+      })
+      .then(() => {
+        // Apply template settings locally
         setConfig(prev => ({
           ...prev,
           brandName: selectedTemplateForApply.name,
           displayName: selectedTemplateForApply.name,
           description: selectedTemplateForApply.description
         }))
-        resolve({ template: selectedTemplateForApply.name })
-      }, 1500)
-    })
+        return { template: selectedTemplateForApply.name }
+      })
 
     toast.promise(applyPromise, {
       loading: `Applying ${selectedTemplateForApply.name} template...`,
@@ -422,12 +432,15 @@ export default function WhiteLabelClient() {
   const handleSaveChanges = async () => {
     setIsSaving(true)
 
-    const savePromise = new Promise((resolve) => {
-      setTimeout(() => {
-        // Simulate saving to backend
-        resolve({ success: true, timestamp: new Date().toISOString() })
-      }, 2000)
+    const savePromise = fetch('/api/white-label', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save', config })
     })
+      .then(res => {
+        if (!res.ok) throw new Error('Save failed')
+        return res.json()
+      })
 
     toast.promise(savePromise, {
       loading: 'Saving white-label configuration...',
@@ -459,16 +472,19 @@ export default function WhiteLabelClient() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load white label configuration'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load data from API
+        const res = await fetch('/api/white-label')
+        if (!res.ok) throw new Error('Failed to load configuration')
+
+        const { data } = await res.json()
+        if (data) {
+          setConfig(prev => ({
+            ...prev,
+            brandName: data.brand_name || prev.brandName,
+            displayName: data.display_name || prev.displayName,
+            description: data.description || prev.description
+          }))
+        }
 
         setIsLoading(false)
         announce('White label configuration loaded successfully', 'polite')

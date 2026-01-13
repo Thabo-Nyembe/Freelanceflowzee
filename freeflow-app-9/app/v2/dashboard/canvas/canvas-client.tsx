@@ -2893,7 +2893,8 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               <Button className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600" onClick={async () => {
                 toast.loading('Generating design with AI...', { id: 'ai-generate' })
                 try {
-                  await new Promise(r => setTimeout(r, 2500))
+                  const res = await fetch('/api/ai-assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'generate-design', prompt: aiPrompt, style: selectedStyle }) })
+                  if (!res.ok) throw new Error('AI generation failed')
                   toast.success('AI design generated!', { id: 'ai-generate', description: 'Design added to your canvas' })
                   setShowAIGenerateDialog(false)
                 } catch { toast.error('AI generation failed', { id: 'ai-generate' }) }

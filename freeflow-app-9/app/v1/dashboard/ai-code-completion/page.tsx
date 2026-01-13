@@ -671,7 +671,11 @@ export default function AICodeCompletionPage() {
     const bugsFixed = bugs.length
     if (bugsFixed === 0) {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 500)),
+        fetch('/api/ai/code-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: codeInput, action: 'check-bugs', language: selectedLanguage })
+        }).then(res => res.json()),
         {
           loading: 'Checking for bugs...',
           success: 'No bugs found - Run bug analysis first',
@@ -896,7 +900,11 @@ export default function AICodeCompletionPage() {
   const handleDiffCode = () => {
     if (!originalCode) {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 500)),
+        fetch('/api/ai/code-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: codeInput, action: 'check-diff', language: selectedLanguage })
+        }).then(res => res.json()),
         {
           loading: 'Checking for changes...',
           success: 'No changes - Make optimizations first to see diff',

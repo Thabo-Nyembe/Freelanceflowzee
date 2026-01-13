@@ -401,7 +401,12 @@ function VirtualScrollingDemo() {
     }
     setIsCreatingItem(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch('/api/advanced-features/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newItemName, type: newItemType, description: newItemDescription })
+      })
+      if (!response.ok) throw new Error('Failed to create item')
       toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} "${newItemName}" created successfully`)
       setNewItemDialogOpen(false)
       setNewItemName('')
@@ -418,8 +423,23 @@ function VirtualScrollingDemo() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
       const filename = `virtual-scroll-export-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+      const response = await fetch('/api/advanced-features/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: exportFormat })
+      })
+      if (response.ok) {
+        const blob = await response.blob().catch(() => null)
+        if (blob && blob.size > 0) {
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = filename
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }
+      }
       toast.success(`Data exported successfully as ${filename}`)
       setExportDialogOpen(false)
     } catch {
@@ -433,7 +453,17 @@ function VirtualScrollingDemo() {
   const handleSaveSettings = async () => {
     setIsSavingSettings(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 800))
+      const response = await fetch('/api/advanced-features/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          notificationsEnabled,
+          autoSaveEnabled,
+          darkModeEnabled,
+          privacyMode
+        })
+      })
+      if (!response.ok) throw new Error('Failed to save settings')
       toast.success('Settings saved successfully')
       setSettingsDialogOpen(false)
     } catch {

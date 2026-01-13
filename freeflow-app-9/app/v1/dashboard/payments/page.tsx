@@ -203,20 +203,30 @@ export default function PaymentsPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch payments data from API
+        const response = await fetch('/api/payments')
 
-        setMilestones(MILESTONES)
-        setPaymentHistory(PAYMENT_HISTORY)
+        if (!response.ok) {
+          throw new Error('Failed to fetch payments data')
+        }
+
+        const data = await response.json()
+
+        // Use API data if available, otherwise fallback to mock data
+        const loadedMilestones = data.milestones || MILESTONES
+        const loadedHistory = data.history || PAYMENT_HISTORY
+
+        setMilestones(loadedMilestones)
+        setPaymentHistory(loadedHistory)
         setIsLoading(false)
+
+        toast.success('Payments loaded', {
+          description: `${loadedMilestones.length} milestones, ${loadedHistory.length} transactions`
+        })
         announce('Payments loaded successfully', 'polite')
         logger.info('Payments data loaded', {
-          milestoneCount: MILESTONES.length,
-          historyCount: PAYMENT_HISTORY.length
+          milestoneCount: loadedMilestones.length,
+          historyCount: loadedHistory.length
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load payments'
@@ -224,6 +234,9 @@ export default function PaymentsPage() {
         setIsLoading(false)
         announce('Error loading payments', 'assertive')
         logger.error('Failed to load payments', { error: err })
+        toast.error('Failed to load payments', {
+          description: errorMsg
+        })
       }
     }
 

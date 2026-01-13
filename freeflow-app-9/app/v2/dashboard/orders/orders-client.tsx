@@ -785,7 +785,7 @@ export default function OrdersClient() {
 
   const handleRefreshOrders = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/orders').then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Refreshing orders...',
         success: 'Orders refreshed successfully',
@@ -847,7 +847,27 @@ export default function OrdersClient() {
     if (exportForm.includeItemDetails) dataPoints.push('item details')
 
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch(`/api/orders?action=export&format=${exportForm.format}`).then(async res => {
+        if (!res.ok) throw new Error('Export failed')
+        if (exportForm.format === 'csv') {
+          const blob = await res.blob()
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `orders-export-${Date.now()}.csv`
+          a.click()
+          URL.revokeObjectURL(url)
+        } else {
+          const { data } = await res.json()
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `orders-export-${Date.now()}.json`
+          a.click()
+          URL.revokeObjectURL(url)
+        }
+      }),
       {
         loading: `Exporting ${mockOrders.length} orders to ${exportForm.format.toUpperCase()}...`,
         success: `Export complete! Downloaded orders.${exportForm.format} with ${dataPoints.join(', ')}`,
@@ -1189,11 +1209,17 @@ export default function OrdersClient() {
                               <Package className="w-3 h-3 mr-1" />
                               Fulfill
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => {
+                            <Button variant="outline" size="sm" onClick={async () => {
                               toast.loading('Generating shipping label...', { id: 'print-label' })
-                              setTimeout(() => {
+                              try {
+                                const res = await fetch('/api/orders', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ action: 'generate_shipping_label', orderNumber: order.order_number })
+                                })
+                                if (!res.ok) throw new Error('Failed')
                                 toast.success('Shipping label sent to printer!', { id: 'print-label' })
-                              }, 1000)
+                              } catch { toast.error('Failed to generate label', { id: 'print-label' }) }
                             }}>
                               <Printer className="w-3 h-3 mr-1" />
                               Print Label
@@ -1320,20 +1346,32 @@ export default function OrdersClient() {
                       <div className="flex items-center gap-2 pt-3 border-t">
                         {ret.status === 'requested' && (
                           <>
-                            <Button size="sm" className="bg-green-600" onClick={() => {
+                            <Button size="sm" className="bg-green-600" onClick={async () => {
                               toast.loading('Processing return approval...', { id: 'approve-return' })
-                              setTimeout(() => {
+                              try {
+                                const res = await fetch('/api/orders', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ action: 'approve_return', returnId: ret.id, orderNumber: ret.order_number })
+                                })
+                                if (!res.ok) throw new Error('Failed')
                                 toast.success('Return request approved successfully!', { id: 'approve-return' })
-                              }, 1000)
+                              } catch { toast.error('Failed to approve return', { id: 'approve-return' }) }
                             }}>
                               <CheckCircle className="w-3 h-3 mr-1" />
                               Approve
                             </Button>
-                            <Button variant="outline" size="sm" className="text-red-600" onClick={() => { if (confirm(`Are you sure you want to reject the return for ${ret.order_number}?`)) {
+                            <Button variant="outline" size="sm" className="text-red-600" onClick={async () => { if (confirm(`Are you sure you want to reject the return for ${ret.order_number}?`)) {
                               toast.loading('Processing return rejection...', { id: 'reject-return' })
-                              setTimeout(() => {
+                              try {
+                                const res = await fetch('/api/orders', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ action: 'reject_return', returnId: ret.id, orderNumber: ret.order_number })
+                                })
+                                if (!res.ok) throw new Error('Failed')
                                 toast.success('Return request rejected!', { id: 'reject-return' })
-                              }, 1000)
+                              } catch { toast.error('Failed to reject return', { id: 'reject-return' }) }
                             } }}>
                               <XCircle className="w-3 h-3 mr-1" />
                               Reject
@@ -1341,11 +1379,17 @@ export default function OrdersClient() {
                           </>
                         )}
                         {ret.shipping_label && (
-                          <Button variant="outline" size="sm" onClick={() => {
+                          <Button variant="outline" size="sm" onClick={async () => {
                             toast.loading('Generating return label...', { id: 'print-return-label' })
-                            setTimeout(() => {
+                            try {
+                              const res = await fetch('/api/orders', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'generate_return_label', returnId: ret.id, orderNumber: ret.order_number })
+                              })
+                              if (!res.ok) throw new Error('Failed')
                               toast.success('Return shipping label sent to printer!', { id: 'print-return-label' })
-                            }, 1000)
+                            } catch { toast.error('Failed to generate label', { id: 'print-return-label' }) }
                           }}>
                             <Printer className="w-3 h-3 mr-1" />
                             Label
@@ -1875,11 +1919,18 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Archive Old Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Archive orders older than 1 year</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => { if (confirm('Are you sure you want to archive all orders older than 1 year? This action cannot be undone.')) {
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={async () => { if (confirm('Are you sure you want to archive all orders older than 1 year? This action cannot be undone.')) {
                             toast.loading('Archiving old orders...', { id: 'archive-orders' })
-                            setTimeout(() => {
-                              toast.success('Old orders archived successfully!', { id: 'archive-orders' })
-                            }, 1500)
+                            try {
+                              const res = await fetch('/api/orders', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'archive_old_orders' })
+                              })
+                              if (!res.ok) throw new Error('Failed')
+                              const { archived } = await res.json()
+                              toast.success(`${archived} old orders archived successfully!`, { id: 'archive-orders' })
+                            } catch { toast.error('Failed to archive orders', { id: 'archive-orders' }) }
                           } }}>
                             <History className="w-4 h-4 mr-2" />
                             Archive
@@ -1890,11 +1941,17 @@ export default function OrdersClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Test Orders</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Remove all test/sandbox orders</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => { if (confirm('Are you sure you want to delete all test/sandbox orders? This action cannot be undone.')) {
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={async () => { if (confirm('Are you sure you want to delete all test/sandbox orders? This action cannot be undone.')) {
                             toast.loading('Deleting test orders...', { id: 'delete-test-orders' })
-                            setTimeout(() => {
+                            try {
+                              const res = await fetch('/api/orders', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'delete_test_orders' })
+                              })
+                              if (!res.ok) throw new Error('Failed')
                               toast.success('Test orders deleted successfully!', { id: 'delete-test-orders' })
-                            }, 1500)
+                            } catch { toast.error('Failed to delete test orders', { id: 'delete-test-orders' }) }
                           } }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -2590,21 +2647,33 @@ export default function OrdersClient() {
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Order
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => {
+                    <Button variant="outline" className="flex-1" onClick={async () => {
                       toast.loading('Preparing order for print...', { id: 'print-order' })
-                      setTimeout(() => {
+                      try {
+                        const res = await fetch('/api/orders', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'print_order', orderNumber: selectedOrder?.order_number })
+                        })
+                        if (!res.ok) throw new Error('Failed')
                         toast.success('Order sent to printer!', { id: 'print-order' })
-                      }, 1000)
+                      } catch { toast.error('Failed to print order', { id: 'print-order' }) }
                     }}>
                       <Printer className="w-4 h-4 mr-2" />
                       Print
                     </Button>
-                    <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={() => {
+                    <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={async () => {
                       toast.loading('Sending status update...', { id: 'send-update' })
-                      setTimeout(() => {
+                      try {
+                        const res = await fetch('/api/orders', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'send_status_update', orderNumber: selectedOrder?.order_number, customerEmail: selectedOrder?.customer_email })
+                        })
+                        if (!res.ok) throw new Error('Failed')
                         toast.success('Status update sent to customer!', { id: 'send-update' })
                         setShowOrderDialog(false)
-                      }, 1000)
+                      } catch { toast.error('Failed to send update', { id: 'send-update' }) }
                     }}>
                       <Send className="w-4 h-4 mr-2" />
                       Send Update

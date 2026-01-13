@@ -1051,10 +1051,10 @@ export default function TemplatesClient() {
                 { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500', action: () => { setShowFavoritesOnly(!showFavoritesOnly); toast.success(showFavoritesOnly ? 'Showing all templates' : 'Showing favorites only') } },
                 { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500', action: () => { setCategoryFilter('all'); toast.success('Showing recent templates') } },
                 { icon: Upload, label: 'Import', desc: 'Upload file', color: 'text-green-500', action: () => setIsImportOpen(true) },
-                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => { if (selectedTemplate) { toast.promise(fetch(`/api/templates/${selectedTemplate.id}/duplicate`, { method: 'POST' }).catch(() => new Promise(r => setTimeout(r, 800))), { loading: 'Duplicating template...', success: `"${selectedTemplate.name}" copied successfully`, error: 'Failed to duplicate template' }); } else { toast.warning('Select a template to duplicate') } } },
+                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => { if (selectedTemplate) { toast.promise(fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'duplicate', templateId: selectedTemplate.id }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }), { loading: 'Duplicating template...', success: `"${selectedTemplate.name}" copied successfully`, error: 'Failed to duplicate template' }); } else { toast.warning('Select a template to duplicate') } } },
                 { icon: Download, label: 'Export All', desc: 'Download all', color: 'text-cyan-500', action: () => setIsExportOpen(true) },
-                { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500', action: () => { if (selectedTemplate) { const folder = prompt('Enter folder name:', 'My Templates'); if (folder) { toast.promise(fetch(`/api/templates/${selectedTemplate.id}/move`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ folder }) }).catch(() => new Promise(r => setTimeout(r, 600))), { loading: 'Moving template...', success: `"${selectedTemplate.name}" added to ${folder}`, error: 'Failed to organize template' }); } } else { toast.warning('Select a template to organize') } } },
-                { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500', action: () => { toast.promise(fetch('/api/templates/cleanup', { method: 'POST' }).catch(() => new Promise(r => setTimeout(r, 1500))), { loading: 'Scanning for unused templates...', success: 'Cleanup complete - removed unused templates', error: 'Failed to cleanup templates' }); } },
+                { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500', action: () => { if (selectedTemplate) { const folder = prompt('Enter folder name:', 'My Templates'); if (folder) { toast.promise(fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'move', templateId: selectedTemplate.id, folder }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }), { loading: 'Moving template...', success: `"${selectedTemplate.name}" added to ${folder}`, error: 'Failed to organize template' }); } } else { toast.warning('Select a template to organize') } } },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500', action: () => { toast.promise(fetch('/api/templates', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'cleanup' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }), { loading: 'Scanning for unused templates...', success: 'Cleanup complete - removed unused templates', error: 'Failed to cleanup templates' }); } },
               ].map((actionItem, i) => (
                 <Card
                   key={i}
@@ -2258,7 +2258,14 @@ export default function TemplatesClient() {
                       return
                     }
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 2000)),
+                      fetch('/api/templates', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'ai_generate', prompt: aiPrompt })
+                      }).then(res => {
+                        if (!res.ok) throw new Error('Failed to generate')
+                        return res.json()
+                      }),
                       {
                         loading: 'Generating template with AI...',
                         success: () => {
@@ -2299,20 +2306,37 @@ export default function TemplatesClient() {
                   const input = document.createElement('input')
                   input.type = 'file'
                   input.accept = '.json,.html,.psd,.ai,.sketch,.fig'
-                  input.onchange = (e) => {
+                  input.onchange = async (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) {
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1500)),
-                        {
-                          loading: `Importing ${file.name}...`,
-                          success: () => {
-                            setIsImportOpen(false)
-                            return `Template "${file.name}" imported successfully!`
-                          },
-                          error: 'Failed to import template'
+                      const reader = new FileReader()
+                      reader.onload = async (event) => {
+                        try {
+                          const content = event.target?.result as string
+                          const templates = file.name.endsWith('.json') ? JSON.parse(content) : [{ name: file.name, content }]
+                          toast.promise(
+                            fetch('/api/templates', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ action: 'import', templates: Array.isArray(templates) ? templates : [templates] })
+                            }).then(res => {
+                              if (!res.ok) throw new Error('Import failed')
+                              return res.json()
+                            }),
+                            {
+                              loading: `Importing ${file.name}...`,
+                              success: () => {
+                                setIsImportOpen(false)
+                                return `Template "${file.name}" imported successfully!`
+                              },
+                              error: 'Failed to import template'
+                            }
+                          )
+                        } catch {
+                          toast.error('Failed to parse template file')
                         }
-                      )
+                      }
+                      reader.readAsText(file)
                     }
                   }
                   input.click()
@@ -2332,12 +2356,31 @@ export default function TemplatesClient() {
                 </Button>
                 <Button
                   className="flex-1 gap-2 bg-green-600 hover:bg-green-700"
-                  onClick={() => {
-                    toast.loading('Fetching template from URL...', { id: 'url-import' })
-                    setTimeout(() => {
-                      toast.success('Template imported successfully', { id: 'url-import', description: 'Template added to your library' })
-                      setIsImportOpen(false)
-                    }, 2000)
+                  onClick={async () => {
+                    const urlInput = document.querySelector('input[placeholder*="example.com"]') as HTMLInputElement
+                    const url = urlInput?.value
+                    if (!url) {
+                      toast.error('Please enter a URL')
+                      return
+                    }
+                    toast.promise(
+                      fetch('/api/templates', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'import_url', url })
+                      }).then(res => {
+                        if (!res.ok) throw new Error('Import failed')
+                        return res.json()
+                      }),
+                      {
+                        loading: 'Fetching template from URL...',
+                        success: () => {
+                          setIsImportOpen(false)
+                          return 'Template imported successfully!'
+                        },
+                        error: 'Failed to import from URL'
+                      }
+                    )
                   }}
                 >
                   Import from URL
@@ -2372,7 +2415,23 @@ export default function TemplatesClient() {
                     className="p-4 border rounded-lg hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-950/20 transition-colors text-left"
                     onClick={() => {
                       toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1500)),
+                        fetch('/api/templates', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'export_format', format: format.toLowerCase() })
+                        }).then(async res => {
+                          if (!res.ok) throw new Error('Export failed')
+                          const data = await res.json()
+                          // Trigger download
+                          const blob = new Blob([data.content], { type: format === 'JSON' ? 'application/json' : 'text/plain' })
+                          const url = URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = `templates-export.${format.toLowerCase()}`
+                          a.click()
+                          URL.revokeObjectURL(url)
+                          return data
+                        }),
                         {
                           loading: `Exporting as ${format}...`,
                           success: () => {

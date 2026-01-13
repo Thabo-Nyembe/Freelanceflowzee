@@ -693,7 +693,10 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleRefresh = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/audit?action=list').then(res => {
+        if (!res.ok) throw new Error('Refresh failed')
+        return res.json()
+      }),
       {
         loading: 'Refreshing events...',
         success: 'Events refreshed successfully',
@@ -712,7 +715,10 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
       return
     }
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch(`/api/audit?action=search&query=${encodeURIComponent(searchQuery)}`).then(res => {
+        if (!res.ok) throw new Error('Search failed')
+        return res.json()
+      }),
       {
         loading: `Searching for "${searchQuery}"...`,
         success: `Found ${filteredEvents.length} matching events`,
@@ -794,7 +800,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
         break
       case 'Run Now':
         toast.promise(
-          new Promise(resolve => setTimeout(resolve, 2000)),
+          fetch('/api/audit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'run_report' })
+          }).then(res => {
+            if (!res.ok) throw new Error('Report failed')
+            return res.json()
+          }),
           {
             loading: 'Running report...',
             success: 'Report generated successfully',
@@ -854,7 +867,19 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleDownloadReport = (reportName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      fetch(`/api/audit?action=download&report=${encodeURIComponent(reportName)}`).then(async res => {
+        if (!res.ok) throw new Error('Download failed')
+        const blob = await res.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${reportName.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        a.remove()
+        return 'Downloaded'
+      }),
       {
         loading: `Downloading ${reportName}...`,
         success: `${reportName} downloaded successfully`,
@@ -865,7 +890,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleRunReport = (reportName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 3000)),
+      fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run_report', reportName })
+      }).then(res => {
+        if (!res.ok) throw new Error('Report generation failed')
+        return res.json()
+      }),
       {
         loading: `Generating ${reportName}...`,
         success: `${reportName} generated successfully`,
@@ -876,7 +908,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleSaveSettings = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save_settings' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Save failed')
+        return res.json()
+      }),
       {
         loading: 'Saving settings...',
         success: 'Settings saved successfully',
@@ -909,10 +948,21 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const handleConfirmRegenerateKey = () => {
     setShowRegenerateKeyDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'regenerate_api_key' })
+      }).then(async res => {
+        if (!res.ok) throw new Error('Regeneration failed')
+        const data = await res.json()
+        if (data.apiKey) {
+          navigator.clipboard.writeText(data.apiKey)
+        }
+        return data
+      }),
       {
         loading: 'Regenerating API key...',
-        success: 'New API key generated successfully',
+        success: 'New API key generated and copied to clipboard',
         error: 'Failed to regenerate key'
       }
     )
@@ -920,7 +970,19 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleExportAllData = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 3000)),
+      fetch('/api/audit?action=export_all').then(async res => {
+        if (!res.ok) throw new Error('Export failed')
+        const blob = await res.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `audit-data-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        a.remove()
+        return 'Export complete'
+      }),
       {
         loading: 'Preparing data export...',
         success: 'Data export ready for download',
@@ -936,7 +998,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const handleConfirmClearCache = () => {
     setShowConfirmClearCacheDialog(false)
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1000)),
+      fetch('/api/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_cache' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Clear cache failed')
+        return res.json()
+      }),
       {
         loading: 'Clearing cache...',
         success: 'Cache cleared successfully',

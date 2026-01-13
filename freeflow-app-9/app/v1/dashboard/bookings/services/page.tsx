@@ -40,9 +40,10 @@ export default function ServicesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call - in production, fetch from database
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setServices(mockServices)
+        // Fetch services from API
+        const res = await fetch('/api/bookings?type=services').catch(() => null)
+        const data = res?.ok ? await res.json() : null
+        setServices(data?.services || mockServices)
 
         announce('Services loaded', 'polite')
       } catch (err) {

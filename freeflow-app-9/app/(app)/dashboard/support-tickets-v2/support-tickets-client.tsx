@@ -608,26 +608,71 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     }
   }
 
-  const handleMergeTickets = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Merging tickets...',
-        success: 'Selected tickets have been merged',
-        error: 'Failed to merge tickets'
+  const handleMergeTickets = async (ticketIds: string[]) => {
+    if (!ticketIds || ticketIds.length < 2) {
+      toast.error('Please select at least 2 tickets to merge')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/customer-support', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'archive',
+          ticket_ids: ticketIds.slice(1) // Archive all but the first (primary) ticket
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to merge tickets')
       }
-    )
+
+      toast.success('Selected tickets have been merged')
+      fetchTickets() // Refresh the ticket list
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to merge tickets')
+      console.error('Merge tickets error:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleExportTickets = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Exporting tickets...',
-        success: 'Ticket data is being exported',
-        error: 'Failed to export tickets'
+  const handleExportTickets = async () => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/customer-support?export=true', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to export tickets')
       }
-    )
+
+      const data = await response.json()
+
+      // Create downloadable file
+      const blob = new Blob([JSON.stringify(data.tickets || data, null, 2)], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `tickets-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('Ticket data exported successfully')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to export tickets')
+      console.error('Export tickets error:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Show loading state

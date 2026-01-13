@@ -674,11 +674,13 @@ export default function PaymentsClient() {
       setIsLoading(true)
       logger.info('Refreshing payments data')
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Fetch payments data from API
+      const res = await fetch('/api/invoices?type=payments')
+      if (!res.ok) throw new Error('Failed to fetch payments')
+      const data = await res.json()
 
-      setMilestones(MILESTONES)
-      setPaymentHistory(PAYMENT_HISTORY)
+      setMilestones(data.milestones || MILESTONES)
+      setPaymentHistory(data.history || PAYMENT_HISTORY)
       setIsLoading(false)
 
       toast.success('Payments refreshed', {

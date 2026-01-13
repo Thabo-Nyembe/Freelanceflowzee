@@ -829,18 +829,19 @@ export default function ResourcesClient() {
 
   const handleSaveGeneralSettings = async () => {
     return toast.promise(
-      new Promise<void>((resolve) => {
-        // Simulate saving general settings
-        setTimeout(() => {
-          // In a real app, this would persist settings to localStorage or a database
-          localStorage.setItem('resourcesGeneralSettings', JSON.stringify({
-            defaultWorkingHours: 8,
-            workDays: 5,
-            timeZone: 'America/New_York',
-            fiscalYearStart: 'January'
-          }))
-          resolve()
-        }, 800)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_general_settings',
+          defaultWorkingHours: 8,
+          workDays: 5,
+          timeZone: 'America/New_York',
+          fiscalYearStart: 'January'
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save settings')
+        return res.json()
       }),
       {
         loading: 'Saving settings...',
@@ -852,18 +853,20 @@ export default function ResourcesClient() {
 
   const handleSaveCapacitySettings = async () => {
     return toast.promise(
-      new Promise<void>((resolve) => {
-        // Simulate saving capacity settings
-        setTimeout(() => {
-          localStorage.setItem('resourcesCapacitySettings', JSON.stringify({
-            defaultWeeklyCapacity: 40,
-            overallocationThreshold: 100,
-            warningThreshold: 90,
-            billableTarget: 75,
-            includeWeekends: false
-          }))
-          resolve()
-        }, 800)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_capacity_settings',
+          defaultWeeklyCapacity: 40,
+          overallocationThreshold: 100,
+          warningThreshold: 90,
+          billableTarget: 75,
+          includeWeekends: false
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save settings')
+        return res.json()
       }),
       {
         loading: 'Saving settings...',
@@ -875,18 +878,20 @@ export default function ResourcesClient() {
 
   const handleSaveNotificationSettings = async () => {
     return toast.promise(
-      new Promise<void>((resolve) => {
-        // Simulate saving notification settings
-        setTimeout(() => {
-          localStorage.setItem('resourcesNotificationSettings', JSON.stringify({
-            overallocationAlerts: true,
-            bookingConfirmations: true,
-            leaveRequestNotifications: true,
-            weeklyUtilizationReports: true,
-            skillExpiryReminders: false
-          }))
-          resolve()
-        }, 800)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_notification_settings',
+          overallocationAlerts: true,
+          bookingConfirmations: true,
+          leaveRequestNotifications: true,
+          weeklyUtilizationReports: true,
+          skillExpiryReminders: false
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save settings')
+        return res.json()
       }),
       {
         loading: 'Saving settings...',
@@ -898,17 +903,19 @@ export default function ResourcesClient() {
 
   const handleSaveSecuritySettings = async () => {
     return toast.promise(
-      new Promise<void>((resolve) => {
-        // Simulate saving security settings
-        setTimeout(() => {
-          localStorage.setItem('resourcesSecuritySettings', JSON.stringify({
-            twoFactorAuth: true,
-            sessionTimeout: 30,
-            auditLogging: true,
-            dataEncryption: true
-          }))
-          resolve()
-        }, 800)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_security_settings',
+          twoFactorAuth: true,
+          sessionTimeout: 30,
+          auditLogging: true,
+          dataEncryption: true
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save settings')
+        return res.json()
       }),
       {
         loading: 'Saving settings...',
@@ -920,12 +927,16 @@ export default function ResourcesClient() {
 
   const handleConfigureIntegration = async (integrationName: string) => {
     return toast.promise(
-      new Promise<void>((resolve) => {
-        // Simulate opening integration configuration
-        setTimeout(() => {
-          // Integration configuration modal would open here
-          resolve()
-        }, 600)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'configure_integration',
+          integrationName
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to configure integration')
+        return res.json()
       }),
       {
         loading: `Opening ${integrationName} settings...`,
@@ -937,13 +948,14 @@ export default function ResourcesClient() {
 
   const handleRegenerateAPIKey = async () => {
     return toast.promise(
-      new Promise<string>((resolve) => {
-        // Simulate regenerating API key
-        setTimeout(() => {
-          const newKey = `res_${Array.from({ length: 32 }, () => Math.random().toString(36)[2]).join('')}`.substring(0, 36)
-          localStorage.setItem('resourcesAPIKey', newKey)
-          resolve(newKey)
-        }, 1200)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'regenerate_api_key' })
+      }).then(async res => {
+        if (!res.ok) throw new Error('Failed to regenerate API key')
+        const data = await res.json()
+        return data.apiKey
       }),
       {
         loading: 'Regenerating API key...',
@@ -955,12 +967,13 @@ export default function ResourcesClient() {
 
   const handlePrepareImportWizard = async () => {
     return toast.promise(
-      new Promise<void>((resolve) => {
-        // Simulate initializing import wizard
-        setTimeout(() => {
-          // In a real app, this would open a dialog or navigate to import wizard
-          resolve()
-        }, 1000)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'prepare_import' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to initialize import wizard')
+        return res.json()
       }),
       {
         loading: 'Preparing import wizard...',
@@ -973,16 +986,13 @@ export default function ResourcesClient() {
   const handleClearAllData = async () => {
     if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
       return toast.promise(
-        new Promise<void>((resolve) => {
-          setTimeout(() => {
-            // Simulate clearing all data
-            localStorage.removeItem('resourcesGeneralSettings')
-            localStorage.removeItem('resourcesCapacitySettings')
-            localStorage.removeItem('resourcesNotificationSettings')
-            localStorage.removeItem('resourcesSecuritySettings')
-            localStorage.removeItem('resourcesAPIKey')
-            resolve()
-          }, 1200)
+        fetch('/api/resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'clear_all_data' })
+        }).then(res => {
+          if (!res.ok) throw new Error('Failed to clear data')
+          return res.json()
         }),
         {
           loading: 'Clearing data...',
@@ -997,15 +1007,13 @@ export default function ResourcesClient() {
 
   const handleResetToDefaults = async () => {
     return toast.promise(
-      new Promise<void>((resolve) => {
-        // Simulate resetting to defaults
-        setTimeout(() => {
-          localStorage.removeItem('resourcesGeneralSettings')
-          localStorage.removeItem('resourcesCapacitySettings')
-          localStorage.removeItem('resourcesNotificationSettings')
-          localStorage.removeItem('resourcesSecuritySettings')
-          resolve()
-        }, 1200)
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset_to_defaults' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to reset settings')
+        return res.json()
       }),
       {
         loading: 'Resetting to defaults...',

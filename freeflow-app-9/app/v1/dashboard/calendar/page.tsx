@@ -256,18 +256,43 @@ export default function CalendarPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch calendar events from API
+        const response = await fetch('/api/calendar')
+        if (!response.ok) {
+          throw new Error('Failed to fetch calendar data')
+        }
+        const data = await response.json()
 
-        setMeetings(INITIAL_MEETINGS)
+        // Map API events to Meeting format, fallback to initial data if no events
+        if (data.events && data.events.length > 0) {
+          const mappedMeetings: Meeting[] = data.events.map((event: any) => ({
+            id: event.id || Date.now(),
+            title: event.title || 'Untitled Event',
+            description: event.description || '',
+            date: event.start_time ? event.start_time.split('T')[0] : new Date().toISOString().split('T')[0],
+            time: event.start_time ? event.start_time.split('T')[1]?.substring(0, 5) || '09:00' : '09:00',
+            duration: event.end_time && event.start_time
+              ? Math.round((new Date(event.end_time).getTime() - new Date(event.start_time).getTime()) / 60000)
+              : 60,
+            meetingType: event.location_type === 'video' ? 'video-call' : event.location_type === 'phone' ? 'phone-call' : 'in-person',
+            attendees: event.attendees?.map((a: any) => a.name || a.email) || [],
+            location: event.location,
+            meetingUrl: event.video_url,
+            status: event.status || 'scheduled',
+            project: event.project?.name || 'General',
+            notes: event.notes,
+            calendarType: 'work'
+          }))
+          setMeetings(mappedMeetings)
+        } else {
+          // Use initial mock data if no events from API
+          setMeetings(INITIAL_MEETINGS)
+        }
+
         setIsLoading(false)
         announce('Calendar loaded successfully', 'polite')
         logger.info('Calendar data loaded', {
-          meetingCount: INITIAL_MEETINGS.length
+          meetingCount: data.events?.length || INITIAL_MEETINGS.length
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load calendar'
@@ -275,6 +300,9 @@ export default function CalendarPage() {
         setIsLoading(false)
         announce('Error loading calendar', 'assertive')
         logger.error('Failed to load calendar', { error: err })
+        toast.error('Failed to load calendar', {
+          description: errorMsg
+        })
       }
     }
 
@@ -338,30 +366,31 @@ export default function CalendarPage() {
     })
 
     try {
-      await toast.promise(
-        fetch('/api/meetings/join', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            meetingId: meeting.id,
-            meetingTitle: meeting.title,
-            participantName: 'Current User'
-          })
-        }).then(res => {
-          if (!res.ok) throw new Error('Failed to join meeting')
-          return res
-        }),
-        {
-          loading: `Connecting to ${meeting.title}...`,
-          success: `Joining ${meeting.title}`,
-          error: 'Failed to join meeting'
-        }
-      )
+      // Log join action via calendar API
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-event',
+          eventId: meeting.id,
+          status: 'in-progress'
+        })
+      })
+
+      if (!response.ok) {
+        // Even if API fails, allow joining the meeting
+        logger.warn('Failed to update meeting status, proceeding to join')
+      }
+
+      toast.success(`Joining ${meeting.title}`)
 
       // Open meeting URL
       window.open(meeting.meetingUrl, '_blank')
     } catch (error: any) {
       logger.error('Failed to join meeting', { error, meetingId: meeting.id })
+      // Still open the meeting even on error
+      window.open(meeting.meetingUrl, '_blank')
+      toast.success(`Opening ${meeting.title}`)
     }
   }
 
@@ -378,45 +407,63 @@ export default function CalendarPage() {
     logger.info('Create meeting initiated', { formData })
 
     try {
-      await toast.promise(
-        fetch('/api/meetings/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        }).then(async res => {
-          // Even if API fails, create locally for demo
-          const newMeeting: Meeting = {
-            id: Date.now(),
-            title: formData.title,
-            description: formData.description,
-            date: formData.date,
-            time: formData.time,
-            duration: formData.duration,
-            meetingType: formData.meetingType,
-            attendees: formData.attendees,
-            location: formData.location || undefined,
-            meetingUrl: formData.meetingUrl || undefined,
-            status: 'scheduled',
-            project: formData.project,
-            notes: formData.notes || undefined,
-            calendarType: formData.calendarType
-          }
+      // Calculate start and end times
+      const startTime = `${formData.date}T${formData.time}:00`
+      const endDate = new Date(startTime)
+      endDate.setMinutes(endDate.getMinutes() + formData.duration)
+      const endTime = endDate.toISOString()
 
-          setMeetings(prev => [...prev, newMeeting])
-          return newMeeting
-        }),
-        {
-          loading: 'Creating meeting...',
-          success: 'Meeting created successfully',
-          error: 'Failed to create meeting'
-        }
-      )
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-event',
+          title: formData.title,
+          description: formData.description,
+          startTime: startTime,
+          endTime: endTime,
+          location: formData.meetingType === 'in-person' ? formData.location : undefined,
+          locationType: formData.meetingType === 'video-call' ? 'video' : formData.meetingType === 'phone-call' ? 'phone' : 'in-person',
+          videoUrl: formData.meetingType === 'video-call' ? formData.meetingUrl : undefined,
+          attendees: formData.attendees.map(name => ({ name, email: '' })),
+        })
+      })
 
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create meeting')
+      }
+
+      const data = await response.json()
+      toast.success('Meeting created successfully')
+
+      // Add to local state
+      const newMeeting: Meeting = {
+        id: data.event?.id || Date.now(),
+        title: formData.title,
+        description: formData.description,
+        date: formData.date,
+        time: formData.time,
+        duration: formData.duration,
+        meetingType: formData.meetingType,
+        attendees: formData.attendees,
+        location: formData.location || undefined,
+        meetingUrl: formData.meetingUrl || undefined,
+        status: 'scheduled',
+        project: formData.project,
+        notes: formData.notes || undefined,
+        calendarType: formData.calendarType
+      }
+
+      setMeetings(prev => [...prev, newMeeting])
       setShowCreateDialog(false)
       resetFormData()
       announce('Meeting created successfully', 'polite')
     } catch (error: any) {
       logger.error('Failed to create meeting', { error })
+      toast.error('Failed to create meeting', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -453,45 +500,65 @@ export default function CalendarPage() {
     logger.info('Edit meeting initiated', { meetingId: editingMeetingId, formData })
 
     try {
-      await toast.promise(
-        fetch('/api/meetings/update', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ meetingId: editingMeetingId, ...formData })
-        }).then(async () => {
-          // Update locally
-          setMeetings(prev => prev.map(m =>
-            m.id === editingMeetingId
-              ? {
-                  ...m,
-                  title: formData.title,
-                  description: formData.description,
-                  date: formData.date,
-                  time: formData.time,
-                  duration: formData.duration,
-                  meetingType: formData.meetingType,
-                  attendees: formData.attendees,
-                  location: formData.location || undefined,
-                  meetingUrl: formData.meetingUrl || undefined,
-                  project: formData.project,
-                  notes: formData.notes || undefined,
-                  calendarType: formData.calendarType
-                }
-              : m
-          ))
-        }),
-        {
-          loading: 'Updating meeting...',
-          success: 'Meeting updated successfully',
-          error: 'Failed to update meeting'
-        }
-      )
+      // Calculate start and end times
+      const startTime = `${formData.date}T${formData.time}:00`
+      const endDate = new Date(startTime)
+      endDate.setMinutes(endDate.getMinutes() + formData.duration)
+      const endTime = endDate.toISOString()
+
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-event',
+          eventId: editingMeetingId,
+          title: formData.title,
+          description: formData.description,
+          start_time: startTime,
+          end_time: endTime,
+          location: formData.meetingType === 'in-person' ? formData.location : undefined,
+          location_type: formData.meetingType === 'video-call' ? 'video' : formData.meetingType === 'phone-call' ? 'phone' : 'in-person',
+          video_url: formData.meetingType === 'video-call' ? formData.meetingUrl : undefined,
+          attendees: formData.attendees.map(name => ({ name, email: '' })),
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update meeting')
+      }
+
+      toast.success('Meeting updated successfully')
+
+      // Update locally
+      setMeetings(prev => prev.map(m =>
+        m.id === editingMeetingId
+          ? {
+              ...m,
+              title: formData.title,
+              description: formData.description,
+              date: formData.date,
+              time: formData.time,
+              duration: formData.duration,
+              meetingType: formData.meetingType,
+              attendees: formData.attendees,
+              location: formData.location || undefined,
+              meetingUrl: formData.meetingUrl || undefined,
+              project: formData.project,
+              notes: formData.notes || undefined,
+              calendarType: formData.calendarType
+            }
+          : m
+      ))
 
       setShowEditDialog(false)
       resetFormData()
       announce('Meeting updated successfully', 'polite')
     } catch (error: any) {
       logger.error('Failed to update meeting', { error, meetingId: editingMeetingId })
+      toast.error('Failed to update meeting', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -511,31 +578,32 @@ export default function CalendarPage() {
     logger.info('Delete meeting initiated', { meetingId: deletingMeeting.id })
 
     try {
-      await toast.promise(
-        fetch('/api/meetings/delete', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ meetingId: deletingMeeting.id })
-        }).then(async () => {
-          // Update locally - mark as cancelled
-          setMeetings(prev => prev.map(m =>
-            m.id === deletingMeeting.id
-              ? { ...m, status: 'cancelled' as const }
-              : m
-          ))
-        }),
-        {
-          loading: `Cancelling ${deletingMeeting.title}...`,
-          success: `${deletingMeeting.title} has been cancelled`,
-          error: 'Failed to cancel meeting'
-        }
-      )
+      const response = await fetch(`/api/calendar/events?eventId=${deletingMeeting.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to cancel meeting')
+      }
+
+      toast.success(`${deletingMeeting.title} has been cancelled`)
+
+      // Update locally - mark as cancelled
+      setMeetings(prev => prev.map(m =>
+        m.id === deletingMeeting.id
+          ? { ...m, status: 'cancelled' as const }
+          : m
+      ))
 
       setShowDeleteDialog(false)
       setDeletingMeeting(null)
       announce('Meeting cancelled successfully', 'polite')
     } catch (error: any) {
       logger.error('Failed to delete meeting', { error, meetingId: deletingMeeting.id })
+      toast.error('Failed to cancel meeting', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -556,35 +624,38 @@ export default function CalendarPage() {
     logger.info('Set reminder initiated', { meetingId: reminderMeeting.id, minutes: reminderMinutes })
 
     try {
-      await toast.promise(
-        fetch('/api/meetings/reminder', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            meetingId: reminderMeeting.id,
-            meetingTitle: reminderMeeting.title,
-            minutesBefore: reminderMinutes
-          })
-        }).then(async () => {
-          // Update locally
-          setMeetings(prev => prev.map(m =>
-            m.id === reminderMeeting.id
-              ? { ...m, reminder: reminderMinutes }
-              : m
-          ))
-        }),
-        {
-          loading: 'Setting reminder...',
-          success: `Reminder set for ${reminderMinutes} minutes before`,
-          error: 'Failed to set reminder'
-        }
-      )
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-event',
+          eventId: reminderMeeting.id,
+          reminders: [{ minutes: reminderMinutes, type: 'notification' }]
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to set reminder')
+      }
+
+      toast.success(`Reminder set for ${reminderMinutes} minutes before`)
+
+      // Update locally
+      setMeetings(prev => prev.map(m =>
+        m.id === reminderMeeting.id
+          ? { ...m, reminder: reminderMinutes }
+          : m
+      ))
 
       setShowReminderDialog(false)
       setReminderMeeting(null)
       announce(`Reminder set for ${reminderMinutes} minutes before meeting`, 'polite')
     } catch (error: any) {
       logger.error('Failed to set reminder', { error, meetingId: reminderMeeting.id })
+      toast.error('Failed to set reminder', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -617,28 +688,32 @@ export default function CalendarPage() {
     logger.info('Invite attendees initiated', { meetingId: inviteMeeting.id, newAttendees })
 
     try {
-      await toast.promise(
-        fetch('/api/meetings/invite', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            meetingId: inviteMeeting.id,
-            attendees: newAttendees
-          })
-        }).then(async () => {
-          // Update locally
-          setMeetings(prev => prev.map(m =>
-            m.id === inviteMeeting.id
-              ? { ...m, attendees: [...new Set([...m.attendees, ...newAttendees])] }
-              : m
-          ))
-        }),
-        {
-          loading: 'Sending invitations...',
-          success: `${newAttendees.length} invitation(s) sent`,
-          error: 'Failed to send invitations'
-        }
-      )
+      // Get current attendees and add new ones
+      const allAttendees = [...new Set([...inviteMeeting.attendees, ...newAttendees])]
+
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-event',
+          eventId: inviteMeeting.id,
+          attendees: allAttendees.map(name => ({ name, email: '' }))
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send invitations')
+      }
+
+      toast.success(`${newAttendees.length} invitation(s) sent`)
+
+      // Update locally
+      setMeetings(prev => prev.map(m =>
+        m.id === inviteMeeting.id
+          ? { ...m, attendees: allAttendees }
+          : m
+      ))
 
       setShowInviteDialog(false)
       setInviteMeeting(null)
@@ -646,6 +721,9 @@ export default function CalendarPage() {
       announce(`Invitations sent to ${newAttendees.length} attendee(s)`, 'polite')
     } catch (error: any) {
       logger.error('Failed to send invites', { error, meetingId: inviteMeeting.id })
+      toast.error('Failed to send invitations', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -674,33 +752,43 @@ export default function CalendarPage() {
     })
 
     try {
-      await toast.promise(
-        fetch('/api/meetings/reschedule', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            meetingId: draggedMeeting.id,
-            newDate: targetDate,
-            newTime: draggedMeeting.time
-          })
-        }).then(async () => {
-          // Update locally
-          setMeetings(prev => prev.map(m =>
-            m.id === draggedMeeting.id
-              ? { ...m, date: targetDate }
-              : m
-          ))
-        }),
-        {
-          loading: `Rescheduling ${draggedMeeting.title}...`,
-          success: `${draggedMeeting.title} moved to ${new Date(targetDate).toLocaleDateString()}`,
-          error: 'Failed to reschedule meeting'
-        }
-      )
+      // Calculate new start and end times
+      const startTime = `${targetDate}T${draggedMeeting.time}:00`
+      const endDate = new Date(startTime)
+      endDate.setMinutes(endDate.getMinutes() + draggedMeeting.duration)
+      const endTime = endDate.toISOString()
+
+      const response = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reschedule',
+          eventId: draggedMeeting.id,
+          startTime: startTime,
+          endTime: endTime
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to reschedule meeting')
+      }
+
+      toast.success(`${draggedMeeting.title} moved to ${new Date(targetDate).toLocaleDateString()}`)
+
+      // Update locally
+      setMeetings(prev => prev.map(m =>
+        m.id === draggedMeeting.id
+          ? { ...m, date: targetDate }
+          : m
+      ))
 
       announce(`Meeting rescheduled to ${new Date(targetDate).toLocaleDateString()}`, 'polite')
     } catch (error: any) {
       logger.error('Failed to reschedule via drag-drop', { error, meetingId: draggedMeeting.id })
+      toast.error('Failed to reschedule meeting', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setDraggedMeeting(null)
     }
@@ -1144,17 +1232,19 @@ export default function CalendarPage() {
                   className="justify-start gap-2 h-auto py-3"
                   onClick={async () => {
                     logger.info('Project timeline view opened')
-                    await toast.promise(
-                      fetch('/api/calendar/timeline').then(res => {
-                        if (!res.ok) throw new Error('Failed to load timeline')
-                        return res.json()
-                      }),
-                      {
-                        loading: 'Loading project timeline...',
-                        success: 'Project timeline ready',
-                        error: 'Failed to load timeline'
-                      }
-                    )
+                    try {
+                      const response = await fetch('/api/calendar/events?action=upcoming&days=30')
+                      if (!response.ok) throw new Error('Failed to load timeline')
+                      const data = await response.json()
+                      toast.success('Project timeline ready', {
+                        description: `${data.total || 0} upcoming events loaded`
+                      })
+                    } catch (error: any) {
+                      logger.error('Failed to load timeline', { error })
+                      toast.error('Failed to load timeline', {
+                        description: error.message || 'Please try again'
+                      })
+                    }
                   }}
                 >
                   <Calendar className="h-5 w-5" />
@@ -1168,17 +1258,19 @@ export default function CalendarPage() {
                   className="justify-start gap-2 h-auto py-3"
                   onClick={async () => {
                     logger.info('Availability calendar opened')
-                    await toast.promise(
-                      fetch('/api/calendar/availability').then(res => {
-                        if (!res.ok) throw new Error('Failed to load availability')
-                        return res.json()
-                      }),
-                      {
-                        loading: 'Opening availability calendar...',
-                        success: 'Availability calendar ready',
-                        error: 'Failed to load availability'
-                      }
-                    )
+                    try {
+                      const response = await fetch('/api/calendar/events?action=availability')
+                      if (!response.ok) throw new Error('Failed to load availability')
+                      const data = await response.json()
+                      toast.success('Availability calendar ready', {
+                        description: `${data.schedules?.length || 0} availability schedule(s) loaded`
+                      })
+                    } catch (error: any) {
+                      logger.error('Failed to load availability', { error })
+                      toast.error('Failed to load availability', {
+                        description: error.message || 'Please try again'
+                      })
+                    }
                   }}
                 >
                   <Clock className="h-5 w-5" />

@@ -264,10 +264,15 @@ export default function AuditTrailClient() {
     try {
       logger.info('Saving audit settings', { settings: auditSettings })
 
-      // Simulate API call to save settings
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Save settings via API
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', section: 'audit-trail', settings: auditSettings })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
 
-      // In a real app, this would save to the database
+      // Also save to localStorage for quick access
       localStorage.setItem('auditTrailSettings', JSON.stringify(auditSettings))
 
       toast.success('Audit trail settings saved successfully')

@@ -434,15 +434,19 @@ export default function PerformanceAnalyticsClient() {
   }
 
   // Handlers with real functionality
-  const handleRefreshMetrics = () => {
+  const handleRefreshMetrics = async () => {
     setIsRefreshing(true)
-    // Simulate refresh operation
-    setTimeout(() => {
-      setIsRefreshing(false)
+    try {
+      const res = await fetch('/api/performance-analytics?type=stats')
+      if (!res.ok) throw new Error('Failed to refresh metrics')
       toast.success('Metrics Refreshed', {
         description: 'All performance data has been updated'
       })
-    }, 1500)
+    } catch (error) {
+      toast.error('Refresh Failed', { description: 'Could not refresh metrics. Please try again.' })
+    } finally {
+      setIsRefreshing(false)
+    }
   }
 
   const handleCreateAlert = () => {
@@ -467,7 +471,22 @@ export default function PerformanceAnalyticsClient() {
 
   const handleExportData = () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/performance-analytics?type=stats').then(async res => {
+        if (!res.ok) throw new Error('Export failed')
+        const data = await res.json()
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: exportForm.format === 'json' ? 'application/json' : 'text/csv'
+        })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `performance-metrics-${Date.now()}.${exportForm.format}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        return data
+      }),
       {
         loading: 'Preparing export...',
         success: `Data exported as ${exportForm.format.toUpperCase()}`,

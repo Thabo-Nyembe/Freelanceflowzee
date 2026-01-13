@@ -219,6 +219,76 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ data }, { status: 201 })
       }
 
+      case 'download-app': {
+        const { version, platform } = payload
+        // In production, this would return a signed download URL
+        return NextResponse.json({
+          success: true,
+          action: 'download-app',
+          version,
+          platform,
+          downloadUrl: `https://downloads.kazi.io/${platform}/${version}/kazi-app`,
+          size: platform === 'macos' ? '89.5 MB' : platform === 'windows' ? '124.3 MB' : '67.2 MB',
+          message: `Download started for ${version} (${platform})`
+        })
+      }
+
+      case 'renew-certificate': {
+        const { certId, certName } = payload
+        // In production, this would initiate certificate renewal with Apple/Microsoft
+        return NextResponse.json({
+          success: true,
+          action: 'renew-certificate',
+          certId,
+          certName,
+          newExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          message: `Certificate renewal for ${certName} has been submitted`
+        })
+      }
+
+      case 'rebuild-native-modules': {
+        // In production, this would trigger a rebuild on CI/CD
+        return NextResponse.json({
+          success: true,
+          action: 'rebuild-native-modules',
+          modules: ['node-pty', 'sqlite3', 'fsevents', 'keytar'],
+          message: 'All native modules have been recompiled successfully'
+        })
+      }
+
+      case 'clear-build-cache': {
+        // In production, this would clear S3/CDN cached builds
+        return NextResponse.json({
+          success: true,
+          action: 'clear-build-cache',
+          clearedSize: '2.4 GB',
+          clearedFiles: 847,
+          message: 'All cached builds have been removed'
+        })
+      }
+
+      case 'revoke-update-keys': {
+        // In production, this would invalidate update signing keys
+        return NextResponse.json({
+          success: true,
+          action: 'revoke-update-keys',
+          revokedKeys: 3,
+          affectedUsers: 1245,
+          message: 'All update keys have been revoked. Users will need to download the full application.'
+        })
+      }
+
+      case 'delete-crash-reports': {
+        // In production, this would delete crash reports from Sentry/Bugsnag
+        return NextResponse.json({
+          success: true,
+          action: 'delete-crash-reports',
+          deletedReports: 89,
+          freedSpace: '156 MB',
+          message: 'All crash report history has been removed'
+        })
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }

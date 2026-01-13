@@ -833,7 +833,14 @@ const mockApiKeysActivities = [
 const mockApiKeysQuickActions = [
   { id: '1', label: 'Create Key', icon: 'plus', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch('/api/user/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', name: 'New API Key', environment: 'production' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to create key')
+        return res.json()
+      }),
       {
         loading: 'Generating new API key...',
         success: 'API key created successfully - Copy your key before closing',
@@ -843,7 +850,10 @@ const mockApiKeysQuickActions = [
   }, variant: 'default' as const },
   { id: '2', label: 'View Usage', icon: 'chart', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
+      fetch('/api/user/api-keys?action=usage').then(res => {
+        if (!res.ok) throw new Error('Failed to load usage')
+        return res.json()
+      }),
       {
         loading: 'Loading API usage analytics...',
         success: 'Usage data loaded - View detailed metrics below',
@@ -853,7 +863,14 @@ const mockApiKeysQuickActions = [
   }, variant: 'default' as const },
   { id: '3', label: 'Rotate Keys', icon: 'refresh', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      fetch('/api/user/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'rotate' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to rotate keys')
+        return res.json()
+      }),
       {
         loading: 'Rotating API keys securely...',
         success: 'API keys rotated - Update your applications with new credentials',

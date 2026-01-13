@@ -1114,10 +1114,10 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     Feature Flags
                   </CardTitle>
                   <Button size="sm" className="bg-orange-600" onClick={() => toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
+                      fetch('/api/releases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'create-flag' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                       {
                         loading: 'Preparing feature flag configuration...',
-                        success: 'Feature flag management coming soon! We are working on this feature.',
+                        success: 'Feature flag created! You can configure it in the flags panel.',
                         error: 'Failed to load feature flag configuration'
                       }
                     )}>
@@ -3285,7 +3285,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
               toast.promise(
-                new Promise((resolve) => setTimeout(resolve, 2000)),
+                fetch('/api/releases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'generate-pdf' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                 {
                   loading: 'Generating PDF...',
                   success: 'PDF Generated! Download starting...',

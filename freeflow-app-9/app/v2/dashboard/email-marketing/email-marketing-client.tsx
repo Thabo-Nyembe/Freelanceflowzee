@@ -727,35 +727,60 @@ const mockEmailActivities = [
 ]
 
 const mockEmailQuickActions = [
-  { id: '1', label: 'New Campaign', icon: 'plus', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
-      {
-        loading: 'Creating new campaign...',
-        success: 'New campaign created successfully',
-        error: 'Failed to create campaign'
-      }
-    )
+  { id: '1', label: 'New Campaign', icon: 'plus', action: async () => {
+    toast.success('Opening campaign creator...')
+    try {
+      const response = await fetch('/api/email-marketing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-campaign',
+          name: `New Campaign ${new Date().toLocaleDateString()}`,
+          subject: 'Your email subject here',
+          type: 'newsletter'
+        })
+      })
+      if (!response.ok) throw new Error('Failed to create campaign')
+      const result = await response.json()
+      toast.success('Campaign created successfully', {
+        description: result.data?.name || 'New campaign draft ready'
+      })
+    } catch (error) {
+      toast.error('Failed to create campaign', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }, variant: 'default' as const },
-  { id: '2', label: 'View Analytics', icon: 'chart', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Loading email analytics...',
-        success: 'Analytics data loaded',
-        error: 'Failed to load analytics'
-      }
-    )
+  { id: '2', label: 'View Analytics', icon: 'chart', action: async () => {
+    toast.success('Loading analytics...')
+    try {
+      const response = await fetch('/api/email-marketing/analytics?type=overview')
+      if (!response.ok) throw new Error('Failed to load analytics')
+      const result = await response.json()
+      toast.success('Analytics loaded', {
+        description: `Showing overview metrics for your campaigns`
+      })
+    } catch (error) {
+      toast.error('Failed to load analytics', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }, variant: 'default' as const },
-  { id: '3', label: 'Manage Lists', icon: 'users', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 700)),
-      {
-        loading: 'Loading subscriber lists...',
-        success: 'Subscriber lists loaded',
-        error: 'Failed to load lists'
-      }
-    )
+  { id: '3', label: 'Manage Lists', icon: 'users', action: async () => {
+    toast.success('Loading subscriber lists...')
+    try {
+      const response = await fetch('/api/email-marketing?type=subscribers')
+      if (!response.ok) throw new Error('Failed to load lists')
+      const result = await response.json()
+      const count = result.data?.length || 0
+      toast.success('Subscriber lists loaded', {
+        description: `${count} subscribers found`
+      })
+    } catch (error) {
+      toast.error('Failed to load lists', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }, variant: 'outline' as const },
 ]
 

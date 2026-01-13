@@ -40,9 +40,10 @@ export default function HistoryPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call - in production, fetch from database
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setPastBookings(getPastBookings(mockBookings))
+        // Fetch booking history from API
+        const res = await fetch('/api/bookings?type=history').catch(() => null)
+        const data = res?.ok ? await res.json() : null
+        setPastBookings(data?.history || getPastBookings(mockBookings))
 
         announce('Booking history loaded', 'polite')
       } catch (err) {

@@ -1527,7 +1527,14 @@ export default function ReleasesClient() {
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   toast.promise(
-                                    new Promise(resolve => setTimeout(resolve, 1000)),
+                                    fetch('/api/releases', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ action: 'pause_deployment', deploymentId: release.id })
+                                    }).then(res => {
+                                      if (!res.ok) throw new Error('Failed')
+                                      return res.json()
+                                    }),
                                     { loading: 'Pausing deployment...', success: 'Deployment paused successfully!', error: 'Failed to pause deployment' }
                                   )
                                 }}
@@ -1858,7 +1865,11 @@ export default function ReleasesClient() {
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      fetch('/api/releases?action=download_all')
+                        .then(res => {
+                          if (!res.ok) throw new Error('Failed')
+                          return res.json()
+                        }),
                       { loading: 'Preparing download...', success: 'All assets downloaded successfully!', error: 'Download failed' }
                     )}>
                     <Download className="w-4 h-4 mr-2" />Download All
@@ -1870,10 +1881,17 @@ export default function ReleasesClient() {
                     input.onchange = (e) => {
                       const file = (e.target as HTMLInputElement).files?.[0]
                       if (file) {
-                        toast.loading('Uploading asset...', { id: 'upload-asset' })
-                        setTimeout(() => {
-                          toast.success(`Asset uploaded: ${file.name}`, { id: 'upload-asset' })
-                        }, 1500)
+                        toast.promise(
+                          fetch('/api/releases', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'upload_asset', fileName: file.name, fileSize: file.size, contentType: file.type })
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Failed')
+                            return res.json()
+                          }),
+                          { loading: 'Uploading asset...', success: `Asset uploaded: ${file.name}`, error: 'Upload failed' }
+                        )
                       }
                     }
                     input.click()
@@ -1932,7 +1950,19 @@ export default function ReleasesClient() {
                             <div className="flex items-center gap-3">
                               <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
                               <Button size="sm" variant="outline" onClick={() => toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1000)),
+                                  fetch(`/api/releases?action=download_asset&assetId=${asset.id}`)
+                                    .then(res => {
+                                      if (!res.ok) throw new Error('Failed')
+                                      return res.json()
+                                    })
+                                    .then(data => {
+                                      if (data.url) {
+                                        const a = document.createElement('a')
+                                        a.href = data.url
+                                        a.download = data.name || asset.name
+                                        a.click()
+                                      }
+                                    }),
                                   { loading: `Downloading ${asset.name}...`, success: 'Download started!', error: 'Download failed' }
                                 )}>
                                 <Download className="w-3 h-3 mr-1" />
@@ -1964,7 +1994,11 @@ export default function ReleasesClient() {
                   </Button>
                   <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={() => {
                       toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1000)),
+                        fetch('/api/releases?action=analytics')
+                          .then(res => {
+                            if (!res.ok) throw new Error('Failed')
+                            return res.json()
+                          }),
                         { loading: 'Refreshing analytics...', success: 'Analytics data refreshed!', error: 'Refresh failed' }
                       )
                     }}>
@@ -2237,10 +2271,17 @@ export default function ReleasesClient() {
                               {env === 'Production' ? 'Active' : 'Available'}
                             </Badge>
                             <Button size="sm" variant="outline" onClick={() => {
-                              toast.loading('Configuring environment...', { id: 'config-env' })
-                              setTimeout(() => {
-                                toast.success(`${env} environment configured successfully`, { id: 'config-env' })
-                              }, 1000)
+                              toast.promise(
+                                fetch('/api/releases', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ action: 'configure_environment', environment: env })
+                                }).then(res => {
+                                  if (!res.ok) throw new Error('Failed')
+                                  return res.json()
+                                }),
+                                { loading: 'Configuring environment...', success: `${env} environment configured successfully`, error: 'Configuration failed' }
+                              )
                             }}>Configure</Button>
                           </div>
                         </div>
@@ -2551,7 +2592,19 @@ export default function ReleasesClient() {
                             </div>
                             <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
                             <Button size="sm" variant="outline" onClick={() => toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                fetch(`/api/releases?action=download_asset&assetId=${asset.id}`)
+                                  .then(res => {
+                                    if (!res.ok) throw new Error('Failed')
+                                    return res.json()
+                                  })
+                                  .then(data => {
+                                    if (data.url) {
+                                      const a = document.createElement('a')
+                                      a.href = data.url
+                                      a.download = data.name || asset.name
+                                      a.click()
+                                    }
+                                  }),
                                 { loading: `Downloading ${asset.name}...`, success: 'Download started!', error: 'Download failed' }
                               )}>
                               <Download className="w-3 h-3" />

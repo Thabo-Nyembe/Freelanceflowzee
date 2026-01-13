@@ -1805,11 +1805,19 @@ export default function OnboardingClient() {
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <Button className="w-full" onClick={() => {
+                      <Button className="w-full" onClick={async () => {
                         toast.loading('Saving branding settings...', { id: 'save-branding' })
-                        setTimeout(() => {
+                        try {
+                          const res = await fetch('/api/settings', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'update-branding', settings: { brandingEnabled: true } })
+                          })
+                          if (!res.ok) throw new Error('Failed to save')
                           toast.success('Branding settings saved!', { id: 'save-branding' })
-                        }, 1000)
+                        } catch (error) {
+                          toast.error('Failed to save branding settings', { id: 'save-branding' })
+                        }
                       }}>Save Branding</Button>
                     </CardContent>
                   </Card>
@@ -1866,14 +1874,22 @@ export default function OnboardingClient() {
                             <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
                             <p className="text-sm text-gray-500">{integration.description}</p>
                           </div>
-                          <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => {
+                          <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={async () => {
                               if (integration.connected) {
                                 toast.info('Integration Settings', { description: `Managing ${integration.name} settings` })
                               } else {
                                 toast.loading(`Connecting to ${integration.name}...`, { id: 'connect-integration' })
-                                setTimeout(() => {
+                                try {
+                                  const res = await fetch('/api/integrations', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'connect', provider: integration.name.toLowerCase() })
+                                  })
+                                  if (!res.ok) throw new Error('Connection failed')
                                   toast.success(`${integration.name} connected successfully!`, { id: 'connect-integration' })
-                                }, 1000)
+                                } catch (error) {
+                                  toast.error(`Failed to connect ${integration.name}`, { id: 'connect-integration' })
+                                }
                               }
                             }}>
                             {integration.connected ? 'Connected' : 'Connect'}
@@ -1919,7 +1935,7 @@ export default function OnboardingClient() {
                         <Label>API Key</Label>
                         <div className="flex items-center gap-2 mt-2">
                           <Input type="password" value="ob_live_************************" readOnly className="font-mono dark:bg-gray-900" />
-                          <Button variant="outline" size="sm" onClick={() => { if (confirm('Are you sure you want to regenerate your API key? Your existing integrations will stop working until updated.')) { toast.loading('Regenerating API key...', { id: 'regen-api-key' }); setTimeout(() => { toast.success('API key regenerated successfully!', { id: 'regen-api-key' }) }, 1000) } }}>Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={async () => { if (confirm('Are you sure you want to regenerate your API key? Your existing integrations will stop working until updated.')) { toast.loading('Regenerating API key...', { id: 'regen-api-key' }); try { const res = await fetch('/api/user/api-keys', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'regenerate' }) }); if (!res.ok) throw new Error('Failed'); toast.success('API key regenerated successfully!', { id: 'regen-api-key' }) } catch (error) { toast.error('Failed to regenerate API key', { id: 'regen-api-key' }) } } }}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>

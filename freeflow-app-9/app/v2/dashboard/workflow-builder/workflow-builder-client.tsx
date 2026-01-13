@@ -3132,11 +3132,22 @@ export default function WorkflowBuilderClient() {
             <Button
               className="bg-violet-600 hover:bg-violet-700"
               onClick={() => {
-                toast.loading('Creating workflow...', { id: 'create-workflow' })
-                setTimeout(() => {
-                  toast.success('Workflow created successfully', { id: 'create-workflow' })
-                  setShowNewFlowDialog(false)
-                }, 1000)
+                toast.promise(
+                  fetch('/api/workflow-builder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'create-workflow', name: 'New Workflow' })
+                  }).then(res => {
+                    if (!res.ok) throw new Error('Failed to create workflow')
+                    setShowNewFlowDialog(false)
+                    return res.json()
+                  }),
+                  {
+                    loading: 'Creating workflow...',
+                    success: 'Workflow created successfully',
+                    error: 'Failed to create workflow'
+                  }
+                )
               }}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -3186,11 +3197,22 @@ export default function WorkflowBuilderClient() {
             <Button
               className="bg-green-600 hover:bg-green-700"
               onClick={() => {
-                toast.loading('Starting test execution...', { id: 'test-workflow' })
-                setTimeout(() => {
-                  toast.success('Test execution started', { id: 'test-workflow' })
-                  setShowTestWorkflowDialog(false)
-                }, 1000)
+                toast.promise(
+                  fetch('/api/workflow-builder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'test', workflow_id: 'wf1', test_input: {} })
+                  }).then(res => {
+                    if (!res.ok) throw new Error('Failed to start test')
+                    setShowTestWorkflowDialog(false)
+                    return res.json()
+                  }),
+                  {
+                    loading: 'Starting test execution...',
+                    success: 'Test execution started',
+                    error: 'Failed to start test'
+                  }
+                )
               }}
             >
               <Play className="w-4 h-4 mr-2" />
@@ -3265,10 +3287,29 @@ export default function WorkflowBuilderClient() {
             <Button
               variant="outline"
               onClick={() => {
-                toast.loading('Exporting logs...', { id: 'export-logs' })
-                setTimeout(() => {
-                  toast.success('Logs exported to file', { id: 'export-logs' })
-                }, 1000)
+                toast.promise(
+                  fetch('/api/workflow-builder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'export-logs' })
+                  }).then(async res => {
+                    if (!res.ok) throw new Error('Failed to export logs')
+                    const data = await res.json()
+                    const blob = new Blob([data.content], { type: 'text/plain' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = data.filename
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    return data
+                  }),
+                  {
+                    loading: 'Exporting logs...',
+                    success: 'Logs exported to file',
+                    error: 'Failed to export logs'
+                  }
+                )
               }}
             >
               <Download className="w-4 h-4 mr-2" />

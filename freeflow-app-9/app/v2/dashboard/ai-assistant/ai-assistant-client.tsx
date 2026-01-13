@@ -587,20 +587,43 @@ export default function AIAssistantClient() {
 
       // Send the message
       setIsTyping(true)
-      await sendMessage(inputMessage, 'user')
+      const userMessageContent = inputMessage
       setInputMessage('')
 
-      // Simulate AI response (in production, this would be an API call)
-      setTimeout(async () => {
-        await sendMessage(
-          'I understand your request. Let me help you with that...\n\nHere\'s a comprehensive solution based on your requirements.',
-          'assistant'
-        )
-        setIsTyping(false)
-      }, 1500)
-
       toast.success('Message sent', {
-        description: 'Your message has been sent'
+        description: 'Processing your request...'
+      })
+
+      // Call AI Assistant API to send message and get response
+      const response = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send-message',
+          conversationId: activeConversation?.id,
+          content: userMessageContent,
+          type: 'user'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send message')
+      }
+
+      const { data } = await response.json()
+
+      // Add user message to local state
+      await sendMessage(userMessageContent, 'user')
+
+      // Add assistant response to local state
+      if (data.assistantMessage) {
+        await sendMessage(data.assistantMessage.content, 'assistant')
+      }
+
+      setIsTyping(false)
+      toast.success('Response received', {
+        description: 'AI has responded to your message'
       })
     } catch (err) {
       console.error('Error sending message:', err)
@@ -881,15 +904,39 @@ export default function AIAssistantClient() {
         description: `${file.name} is being processed`
       })
 
-      // Simulate processing completion
-      setTimeout(() => {
-        setFiles(prev => prev.map(f =>
-          f.id === newFile.id ? { ...f, status: 'ready', chunks: Math.floor(file.size / 1000) } : f
-        ))
-        toast.success('File ready', {
-          description: `${file.name} has been processed and is ready to use`
+      // Call API to process file
+      try {
+        const processResponse = await fetch('/api/ai-assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'process-file',
+            fileId: data.id,
+            fileName: file.name,
+            fileSize: file.size
+          })
         })
-      }, 3000)
+
+        if (processResponse.ok) {
+          const { data: processedData } = await processResponse.json()
+          setFiles(prev => prev.map(f =>
+            f.id === newFile.id ? { ...f, status: 'ready', chunks: processedData.chunks } : f
+          ))
+          toast.success('File ready', {
+            description: `${file.name} has been processed and is ready to use`
+          })
+        } else {
+          throw new Error('File processing failed')
+        }
+      } catch (processErr) {
+        console.error('Error processing file:', processErr)
+        setFiles(prev => prev.map(f =>
+          f.id === newFile.id ? { ...f, status: 'error' } : f
+        ))
+        toast.error('File processing failed', {
+          description: 'The file could not be processed'
+        })
+      }
     } catch (err) {
       console.error('Error uploading file:', err)
       toast.error('Failed to upload file', {
@@ -1033,17 +1080,31 @@ export default function AIAssistantClient() {
         description: 'Please wait while we generate a new response'
       })
 
-      // Simulate regeneration (in production, this would be an API call)
-      setTimeout(async () => {
-        await sendMessage(
-          'Here is an alternative response to your request. Let me know if this better addresses your needs.',
-          'assistant'
-        )
-        setIsTyping(false)
-        toast.success('Response regenerated', {
-          description: 'A new response has been generated'
+      // Call API to regenerate response
+      const response = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'regenerate-response',
+          conversationId: activeConversation.id,
+          originalMessageId: messageId
         })
-      }, 1500)
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to regenerate response')
+      }
+
+      const { data } = await response.json()
+
+      // Add regenerated response to local state
+      await sendMessage(data.content, 'assistant')
+
+      setIsTyping(false)
+      toast.success('Response regenerated', {
+        description: 'A new response has been generated'
+      })
     } catch (err) {
       console.error('Error regenerating response:', err)
       toast.error('Failed to regenerate response', {
@@ -1094,17 +1155,39 @@ export default function AIAssistantClient() {
   }
 
   // Handle voice input
-  const handleStartVoiceInput = () => {
+  const handleStartVoiceInput = async () => {
     toast.info('Voice input started', {
-      description: 'Speak now... (Voice recognition simulated)'
+      description: 'Processing your voice...'
     })
-    setTimeout(() => {
-      setInputMessage(prev => prev + ' [Voice input: Hello, can you help me with...]')
+
+    try {
+      // Call API to transcribe voice
+      const response = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'voice-transcribe'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Voice transcription failed')
+      }
+
+      const { data } = await response.json()
+
+      setInputMessage(prev => prev + (prev ? ' ' : '') + data.text)
       toast.success('Voice input captured', {
-        description: 'Your voice has been transcribed'
+        description: `Transcribed with ${Math.round(data.confidence * 100)}% confidence`
       })
       setShowVoiceInputDialog(false)
-    }, 2000)
+    } catch (err) {
+      console.error('Error transcribing voice:', err)
+      toast.error('Voice transcription failed', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
   }
 
   // Handle file download from Files tab

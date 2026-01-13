@@ -210,11 +210,15 @@ export default function SetupClient() {
     }
 
     try {
-      // In a real implementation, this would call an API
       logger.info('Creating new item', newItemForm);
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Create item via API
+      const res = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', name: newItemForm.name, type: newItemForm.type, description: newItemForm.description })
+      });
+      if (!res.ok) throw new Error('Failed to create item');
 
       toast({
         title: 'Item Created',
@@ -280,10 +284,15 @@ export default function SetupClient() {
     try {
       logger.info('Saving settings', settingsForm);
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Save settings via API
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', section: 'setup', settings: settingsForm })
+      });
+      if (!res.ok) throw new Error('Failed to save settings');
 
-      // In a real implementation, persist to localStorage or API
+      // Also persist to localStorage for quick access
       localStorage.setItem('setupSettings', JSON.stringify(settingsForm));
 
       toast({

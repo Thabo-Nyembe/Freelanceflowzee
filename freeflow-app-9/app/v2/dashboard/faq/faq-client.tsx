@@ -415,7 +415,11 @@ const mockFAQActivities = [
 const mockFAQQuickActions = [
   { id: '1', label: 'New Article', icon: 'Plus', shortcut: 'N', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
+      fetch('/api/faq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create-article', title: 'New Article', content: '', category: 'General' })
+      }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Creating new article...',
         success: 'New article created successfully',
@@ -424,18 +428,25 @@ const mockFAQQuickActions = [
     )
   }},
   { id: '2', label: 'Search', icon: 'Search', shortcut: 'S', action: () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 500)),
-      {
-        loading: 'Searching FAQ database...',
-        success: 'Search results ready',
-        error: 'Search failed'
-      }
-    )
+    const searchQuery = prompt('Enter search query:')
+    if (searchQuery) {
+      toast.promise(
+        fetch('/api/faq', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'search', query: searchQuery })
+        }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+        {
+          loading: 'Searching FAQ database...',
+          success: (data) => `Found ${data.results?.length || 0} results`,
+          error: 'Search failed'
+        }
+      )
+    }
   }},
   { id: '3', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch('/api/faq?type=analytics').then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Loading FAQ analytics...',
         success: 'Analytics data loaded',
@@ -445,7 +456,7 @@ const mockFAQQuickActions = [
   }},
   { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 600)),
+      fetch('/api/faq?type=settings').then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
       {
         loading: 'Loading FAQ settings...',
         success: 'Settings loaded',

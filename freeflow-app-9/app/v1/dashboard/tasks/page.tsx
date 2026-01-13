@@ -275,16 +275,16 @@ export default function TasksPage() {
 
       logger.info('Fetching tasks')
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      const response = await fetch('/api/tasks')
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks')
+      }
+      const data = await response.json()
 
-      // In production, replace with actual API call:
-      // const response = await fetch('/api/tasks')
-      // const data = await response.json()
-      // setTasks(data.tasks)
-
-      setTasks(INITIAL_TASKS)
-      logger.info('Tasks loaded successfully', { count: INITIAL_TASKS.length })
+      // Use API data if available, otherwise fall back to initial tasks
+      const tasksData = data.tasks || data || INITIAL_TASKS
+      setTasks(Array.isArray(tasksData) ? tasksData : INITIAL_TASKS)
+      logger.info('Tasks loaded successfully', { count: tasksData.length })
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load tasks'
       setError(errorMessage)
@@ -317,10 +317,27 @@ export default function TasksPage() {
 
     const createPromise = new Promise<Task>(async (resolve, reject) => {
       try {
-        // Simulate API call
-        await new Promise((r) => setTimeout(r, 1000))
+        const taskData = {
+          title: formData.title,
+          description: formData.description,
+          status: formData.status,
+          priority: formData.priority,
+          dueDate: formData.dueDate?.toISOString() || null,
+          assigneeId: formData.assigneeId || null,
+        }
 
-        const newTask: Task = {
+        const response = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(taskData),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create task')
+        }
+
+        const data = await response.json()
+        const newTask: Task = data.task || {
           id: `task-${Date.now()}`,
           title: formData.title,
           description: formData.description,
@@ -334,13 +351,6 @@ export default function TasksPage() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }
-
-        // In production, replace with actual API call:
-        // const response = await fetch('/api/tasks', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(newTask),
-        // })
 
         setTasks((prev) => [newTask, ...prev])
         logger.info('Task created successfully', { taskId: newTask.id, title: newTask.title })
@@ -381,9 +391,28 @@ export default function TasksPage() {
 
     const updatePromise = new Promise<Task>(async (resolve, reject) => {
       try {
-        await new Promise((r) => setTimeout(r, 1000))
+        const taskData = {
+          id: selectedTask.id,
+          title: formData.title,
+          description: formData.description,
+          status: formData.status,
+          priority: formData.priority,
+          dueDate: formData.dueDate?.toISOString() || null,
+          assigneeId: formData.assigneeId || null,
+        }
 
-        const updatedTask: Task = {
+        const response = await fetch('/api/tasks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(taskData),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update task')
+        }
+
+        const data = await response.json()
+        const updatedTask: Task = data.task || {
           ...selectedTask,
           title: formData.title,
           description: formData.description,
@@ -395,13 +424,6 @@ export default function TasksPage() {
             : null,
           updatedAt: new Date().toISOString(),
         }
-
-        // In production, replace with actual API call:
-        // const response = await fetch(`/api/tasks/${selectedTask.id}`, {
-        //   method: 'PUT',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(updatedTask),
-        // })
 
         setTasks((prev) => prev.map((t) => (t.id === selectedTask.id ? updatedTask : t)))
         logger.info('Task updated successfully', { taskId: updatedTask.id })
@@ -440,10 +462,13 @@ export default function TasksPage() {
 
     const deletePromise = new Promise<void>(async (resolve, reject) => {
       try {
-        await new Promise((r) => setTimeout(r, 800))
+        const response = await fetch(`/api/tasks?id=${selectedTask.id}`, {
+          method: 'DELETE',
+        })
 
-        // In production, replace with actual API call:
-        // await fetch(`/api/tasks/${selectedTask.id}`, { method: 'DELETE' })
+        if (!response.ok) {
+          throw new Error('Failed to delete task')
+        }
 
         setTasks((prev) => prev.filter((t) => t.id !== selectedTask.id))
         logger.info('Task deleted successfully', { taskId: selectedTask.id })
@@ -482,14 +507,15 @@ export default function TasksPage() {
 
     const statusPromise = new Promise<void>(async (resolve, reject) => {
       try {
-        await new Promise((r) => setTimeout(r, 500))
+        const response = await fetch('/api/tasks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: taskId, status: newStatus }),
+        })
 
-        // In production, replace with actual API call:
-        // await fetch(`/api/tasks/${taskId}/status`, {
-        //   method: 'PATCH',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ status: newStatus }),
-        // })
+        if (!response.ok) {
+          throw new Error('Failed to update status')
+        }
 
         setTasks((prev) =>
           prev.map((t) =>
@@ -531,14 +557,15 @@ export default function TasksPage() {
 
     const assignPromise = new Promise<void>(async (resolve, reject) => {
       try {
-        await new Promise((r) => setTimeout(r, 500))
+        const response = await fetch('/api/tasks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: taskId, assigneeId: memberId || null }),
+        })
 
-        // In production, replace with actual API call:
-        // await fetch(`/api/tasks/${taskId}/assign`, {
-        //   method: 'PATCH',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ assigneeId: memberId }),
-        // })
+        if (!response.ok) {
+          throw new Error('Failed to assign task')
+        }
 
         setTasks((prev) =>
           prev.map((t) =>
@@ -579,14 +606,15 @@ export default function TasksPage() {
 
     const dueDatePromise = new Promise<void>(async (resolve, reject) => {
       try {
-        await new Promise((r) => setTimeout(r, 500))
+        const response = await fetch('/api/tasks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: taskId, dueDate: date?.toISOString() || null }),
+        })
 
-        // In production, replace with actual API call:
-        // await fetch(`/api/tasks/${taskId}/due-date`, {
-        //   method: 'PATCH',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ dueDate: date?.toISOString() || null }),
-        // })
+        if (!response.ok) {
+          throw new Error('Failed to update due date')
+        }
 
         setTasks((prev) =>
           prev.map((t) =>
@@ -629,20 +657,25 @@ export default function TasksPage() {
 
     const subtaskPromise = new Promise<Subtask>(async (resolve, reject) => {
       try {
-        await new Promise((r) => setTimeout(r, 500))
-
         const newSubtask: Subtask = {
           id: `subtask-${Date.now()}`,
           title: newSubtaskTitle,
           completed: false,
         }
 
-        // In production, replace with actual API call:
-        // const response = await fetch(`/api/tasks/${selectedTask.id}/subtasks`, {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(newSubtask),
-        // })
+        // Get current task to append subtask
+        const currentTask = tasks.find((t) => t.id === selectedTask.id)
+        const updatedSubtasks = currentTask ? [...currentTask.subtasks, newSubtask] : [newSubtask]
+
+        const response = await fetch('/api/tasks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: selectedTask.id, subtasks: updatedSubtasks }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to add subtask')
+        }
 
         setTasks((prev) =>
           prev.map((t) =>
@@ -684,7 +717,7 @@ export default function TasksPage() {
 
     const newCompleted = !subtask.completed
 
-    // In production, replace with actual API call
+    // Optimistically update UI
     setTasks((prev) =>
       prev.map((t) =>
         t.id === taskId
@@ -699,7 +732,38 @@ export default function TasksPage() {
       )
     )
 
-    toast.success(newCompleted ? 'Subtask completed' : 'Subtask marked incomplete')
+    try {
+      const updatedSubtasks = task.subtasks.map((s) =>
+        s.id === subtaskId ? { ...s, completed: newCompleted } : s
+      )
+
+      const response = await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: taskId, subtasks: updatedSubtasks }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update subtask')
+      }
+
+      toast.success(newCompleted ? 'Subtask completed' : 'Subtask marked incomplete')
+    } catch (err) {
+      // Revert on error
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                subtasks: t.subtasks.map((s) =>
+                  s.id === subtaskId ? { ...s, completed: !newCompleted } : s
+                ),
+              }
+            : t
+        )
+      )
+      toast.error('Failed to update subtask')
+    }
   }
 
   // ============================================================================

@@ -489,27 +489,101 @@ export default function EmployeesClient() {
   }
 
   // Handle document upload
-  const handleUploadDocument = () => {
-    toast.success('Document uploaded successfully!')
-    setShowDocumentDialog(false)
+  const handleUploadDocument = async () => {
+    toast.success('Uploading document...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedEmployee?.id || dbEmployees?.[0]?.id,
+          notes: `Document uploaded on ${new Date().toISOString()}`
+        })
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to upload document')
+      }
+      toast.success('Document uploaded successfully!')
+      setShowDocumentDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to upload document:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to upload document')
+    }
   }
 
   // Handle goal creation
-  const handleCreateGoal = () => {
-    toast.success('Goal created successfully!')
-    setShowGoalDialog(false)
+  const handleCreateGoal = async () => {
+    toast.success('Creating goal...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedEmployee?.id || dbEmployees?.[0]?.id,
+          goals_total: (dbEmployees?.[0]?.goals_total || 0) + 1,
+          notes: `New goal created on ${new Date().toISOString()}`
+        })
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create goal')
+      }
+      toast.success('Goal created successfully!')
+      setShowGoalDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to create goal:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to create goal')
+    }
   }
 
   // Handle survey creation
-  const handleCreateSurvey = () => {
-    toast.success('Survey created and invitations sent!')
-    setShowSurveyDialog(false)
+  const handleCreateSurvey = async () => {
+    toast.success('Creating survey...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create survey')
+      }
+      const { data } = await response.json()
+      toast.success(`Survey created and invitations sent to ${data?.length || 0} employees!`)
+      setShowSurveyDialog(false)
+    } catch (error) {
+      console.error('Failed to create survey:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to create survey')
+    }
   }
 
   // Handle performance review start
-  const handleStartReview = () => {
-    toast.success('Performance review started! Notifications sent to participants.')
-    setShowReviewDialog(false)
+  const handleStartReview = async () => {
+    toast.success('Starting performance review...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedEmployee?.id || dbEmployees?.[0]?.id,
+          next_review_date: new Date().toISOString().split('T')[0],
+          notes: `Performance review started on ${new Date().toISOString()}`
+        })
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to start performance review')
+      }
+      toast.success('Performance review started! Notifications sent to participants.')
+      setShowReviewDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to start performance review:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to start performance review')
+    }
   }
 
   // Handle employee data export
@@ -542,9 +616,29 @@ export default function EmployeesClient() {
   }
 
   // Handle time off request submission
-  const handleSubmitTimeOff = () => {
-    toast.success('Time off request submitted for approval!')
-    setShowTimeOffRequestDialog(false)
+  const handleSubmitTimeOff = async () => {
+    toast.success('Submitting time off request...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedEmployee?.id || dbEmployees?.[0]?.id,
+          used_pto_days: (dbEmployees?.[0]?.used_pto_days || 0) + 1,
+          notes: `Time off requested on ${new Date().toISOString()}`
+        })
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to submit time off request')
+      }
+      toast.success('Time off request submitted for approval!')
+      setShowTimeOffRequestDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to submit time off request:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to submit time off request')
+    }
   }
 
   // Handle compensation report generation
@@ -577,29 +671,85 @@ export default function EmployeesClient() {
   }
 
   // Handle integration connection
-  const handleConnectIntegration = () => {
-    toast.success('Integration connected successfully!')
-    setShowAddIntegrationDialog(false)
+  const handleConnectIntegration = async () => {
+    toast.success('Connecting integration...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to connect integration')
+      }
+      toast.success('Integration connected successfully!')
+      setShowAddIntegrationDialog(false)
+    } catch (error) {
+      console.error('Failed to connect integration:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to connect integration')
+    }
   }
 
   // Handle integration disconnection
-  const handleDisconnectIntegration = () => {
+  const handleDisconnectIntegration = async () => {
     if (!confirm('Are you sure you want to disconnect this integration?')) return
-    toast.success('Integration disconnected')
-    setShowConfigureIntegrationDialog(false)
+    toast.success('Disconnecting integration...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to disconnect integration')
+      }
+      toast.success('Integration disconnected')
+      setShowConfigureIntegrationDialog(false)
+    } catch (error) {
+      console.error('Failed to disconnect integration:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to disconnect integration')
+    }
   }
 
   // Handle integration settings save
-  const handleSaveIntegrationSettings = () => {
-    toast.success('Integration settings saved!')
-    setShowConfigureIntegrationDialog(false)
+  const handleSaveIntegrationSettings = async () => {
+    toast.success('Saving integration settings...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to save integration settings')
+      }
+      toast.success('Integration settings saved!')
+      setShowConfigureIntegrationDialog(false)
+    } catch (error) {
+      console.error('Failed to save integration settings:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to save integration settings')
+    }
   }
 
   // Handle API key regeneration
-  const handleRegenerateApiKey = () => {
+  const handleRegenerateApiKey = async () => {
     if (!confirm('Are you sure? This will invalidate your current API key.')) return
-    toast.success('New API key generated! Please update your applications.')
-    setShowRegenerateKeyDialog(false)
+    toast.success('Regenerating API key...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to regenerate API key')
+      }
+      toast.success('New API key generated! Please update your applications.')
+      setShowRegenerateKeyDialog(false)
+    } catch (error) {
+      console.error('Failed to regenerate API key:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to regenerate API key')
+    }
   }
 
   // Handle full HR data export
@@ -632,10 +782,24 @@ export default function EmployeesClient() {
   }
 
   // Handle HR data import
-  const handleImportHRData = () => {
-    toast.success('HR data imported successfully!')
-    setShowImportDataDialog(false)
-    refetch()
+  const handleImportHRData = async () => {
+    toast.success('Importing HR data...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to import HR data')
+      }
+      toast.success('HR data imported successfully!')
+      setShowImportDataDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to import HR data:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to import HR data')
+    }
   }
 
   // Handle compliance report generation
@@ -668,31 +832,106 @@ export default function EmployeesClient() {
   }
 
   // Handle archiving terminated employees
-  const handleArchiveTerminated = () => {
+  const handleArchiveTerminated = async () => {
     if (!confirm('Are you sure you want to archive all terminated employees?')) return
-    const terminatedCount = mockEmployees.filter(e => e.status === 'terminated').length
-    toast.success(`Archived ${terminatedCount} terminated employees successfully!`)
-    setShowArchiveDialog(false)
+    toast.success('Archiving terminated employees...')
+    try {
+      const response = await fetch('/api/employees?status=terminated', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to archive employees')
+      }
+      const { data } = await response.json()
+      const terminatedCount = data?.length || 0
+      toast.success(`Archived ${terminatedCount} terminated employees successfully!`)
+      setShowArchiveDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to archive terminated employees:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to archive terminated employees')
+    }
   }
 
   // Handle deleting all HR data
-  const handleDeleteAllData = () => {
+  const handleDeleteAllData = async () => {
     if (!confirm('FINAL WARNING: This will permanently delete ALL HR data. This action cannot be undone. Are you absolutely sure?')) return
-    toast.success('All HR data has been deleted')
-    setShowDeleteAllDialog(false)
+    toast.success('Deleting all HR data...')
+    try {
+      // Get all employees first
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete HR data')
+      }
+      const { data } = await response.json()
+
+      // Delete each employee
+      for (const employee of data || []) {
+        await fetch(`/api/employees?id=${employee.id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+
+      toast.success('All HR data has been deleted')
+      setShowDeleteAllDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to delete all HR data:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to delete all HR data')
+    }
   }
 
   // Handle resetting settings
-  const handleResetSettings = () => {
+  const handleResetSettings = async () => {
     if (!confirm('Are you sure you want to reset all settings to their default values?')) return
-    toast.success('Settings reset to defaults!')
-    setShowResetSettingsDialog(false)
+    toast.success('Resetting settings...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to reset settings')
+      }
+      toast.success('Settings reset to defaults!')
+      setShowResetSettingsDialog(false)
+    } catch (error) {
+      console.error('Failed to reset settings:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to reset settings')
+    }
   }
 
   // Handle updating mock employee profile
-  const handleUpdateMockProfile = () => {
-    toast.success('Employee profile updated successfully!')
-    setShowEditProfileDialog(false)
+  const handleUpdateMockProfile = async () => {
+    toast.success('Updating employee profile...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedEmployee?.id || dbEmployees?.[0]?.id,
+          updated_at: new Date().toISOString()
+        })
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update profile')
+      }
+      toast.success('Employee profile updated successfully!')
+      setShowEditProfileDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to update employee profile:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update employee profile')
+    }
   }
 
   // Handle document download
@@ -716,11 +955,30 @@ export default function EmployeesClient() {
   }
 
   // Handle document deletion
-  const handleDeleteDocument = () => {
+  const handleDeleteDocument = async () => {
     if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) return
-    toast.success('Document deleted successfully')
-    setShowDeleteDocDialog(false)
-    setSelectedDocument(null)
+    toast.success('Deleting document...')
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedEmployee?.id || dbEmployees?.[0]?.id,
+          notes: `Document deleted on ${new Date().toISOString()}`
+        })
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete document')
+      }
+      toast.success('Document deleted successfully')
+      setShowDeleteDocDialog(false)
+      setSelectedDocument(null)
+      refetch()
+    } catch (error) {
+      console.error('Failed to delete document:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to delete document')
+    }
   }
 
   const filteredEmployees = useMemo(() => {

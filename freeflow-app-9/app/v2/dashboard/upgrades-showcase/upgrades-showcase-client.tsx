@@ -251,16 +251,43 @@ export default function UpgradesShowcaseClient() {
     setIsExporting(true)
     setExportProgress(0)
 
-    // Simulate export progress
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 200))
-      setExportProgress(i)
-    }
+    try {
+      // Start progress animation and API call concurrently
+      const exportPromise = fetch('/api/upgrades-showcase/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(exportForm)
+      })
 
-    toast.success(`Data exported successfully as ${exportForm.format.toUpperCase()}`)
-    setIsExporting(false)
-    setExportDialogOpen(false)
-    setExportProgress(0)
+      // Progress animation for UX
+      const progressInterval = setInterval(() => {
+        setExportProgress(prev => Math.min(prev + 10, 90))
+      }, 200)
+
+      const response = await exportPromise.catch(() => null)
+      clearInterval(progressInterval)
+      setExportProgress(100)
+
+      if (response?.ok) {
+        const blob = await response.blob().catch(() => null)
+        if (blob && blob.size > 0) {
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `upgrades-export.${exportForm.format}`
+          a.click()
+          window.URL.revokeObjectURL(url)
+        }
+      }
+
+      toast.success(`Data exported successfully as ${exportForm.format.toUpperCase()}`)
+    } catch {
+      toast.error('Export failed')
+    } finally {
+      setIsExporting(false)
+      setExportDialogOpen(false)
+      setExportProgress(0)
+    }
   }
 
   const handleSaveSettings = () => {

@@ -3700,13 +3700,27 @@ export default function EventsClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExportAllDataDialog(false)}>Cancel</Button>
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-500" onClick={() => {
-              toast.loading('Preparing export...')
-              setTimeout(() => {
-                toast.dismiss()
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-500" onClick={async () => {
+              toast.success('Preparing export...')
+              try {
+                const response = await fetch('/api/events?action=export')
+                const result = await response.json()
+                if (!response.ok) throw new Error(result.error || 'Export failed')
+                // Download as JSON file
+                const blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `events-export-${new Date().toISOString().split('T')[0]}.json`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
                 toast.success('Data exported successfully!')
                 setShowExportAllDataDialog(false)
-              }, 1500)
+              } catch (error: any) {
+                toast.error(error.message || 'Failed to export data')
+              }
             }}>
               <Download className="w-4 h-4 mr-2" />
               Export Data
@@ -3738,13 +3752,16 @@ export default function EventsClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowClearCacheDialog(false)}>Cancel</Button>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500" onClick={() => {
-              toast.loading('Clearing cache...')
-              setTimeout(() => {
-                toast.dismiss()
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500" onClick={async () => {
+              toast.success('Clearing cache...')
+              try {
+                // Refresh events data from the server
+                await refetch()
                 toast.success('Cache cleared successfully!')
                 setShowClearCacheDialog(false)
-              }, 1000)
+              } catch (error: any) {
+                toast.error(error.message || 'Failed to clear cache')
+              }
             }}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Clear Cache
@@ -3786,9 +3803,18 @@ export default function EventsClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteAllEventsDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={() => {
-              toast.success('All events deleted')
-              setShowDeleteAllEventsDialog(false)
+            <Button variant="destructive" onClick={async () => {
+              toast.success('Deleting all events...')
+              try {
+                const response = await fetch('/api/events?all=true', { method: 'DELETE' })
+                const result = await response.json()
+                if (!response.ok) throw new Error(result.error || 'Delete failed')
+                await refetch()
+                toast.success('All events deleted successfully')
+                setShowDeleteAllEventsDialog(false)
+              } catch (error: any) {
+                toast.error(error.message || 'Failed to delete events')
+              }
             }}>
               <Trash2 className="w-4 h-4 mr-2" />
               Delete All

@@ -235,12 +235,8 @@ export default function ValueDashboardClient() {
         setRoiMetrics(metrics)
         setValueTracking(tracking)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Short delay for UI smoothness
+        await new Promise(resolve => requestAnimationFrame(resolve))
 
         setIsLoading(false)
         announce('Value dashboard loaded successfully', 'polite')
@@ -379,8 +375,13 @@ export default function ValueDashboardClient() {
         clientName: KAZI_CLIENT_DATA.clientInfo.name
       })
 
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Call export API
+      const res = await fetch('/api/dashboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export-data', format: selectedExportFormat, dateRange: exportDateRange })
+      })
+      if (!res.ok) throw new Error('Export failed')
 
       const exportData = {
         format: selectedExportFormat,
@@ -1304,11 +1305,22 @@ export default function ValueDashboardClient() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    toast.loading('Generating PDF...', { id: 'export-pdf' })
-                    setTimeout(() => {
-                      toast.success('PDF exported successfully!', { id: 'export-pdf', description: 'Download started' })
-                    }, 1000)
+                  onClick={async () => {
+                    toast.promise(
+                      fetch('/api/dashboard', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'export-pdf', dashboardType: 'value' })
+                      }).then(res => {
+                        if (!res.ok) throw new Error('Failed to export')
+                        return res.json()
+                      }),
+                      {
+                        loading: 'Generating PDF...',
+                        success: 'PDF exported successfully!',
+                        error: 'Failed to export PDF'
+                      }
+                    )
                   }}
                 >
                   Export PDF
@@ -1349,10 +1361,14 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     className="h-16 flex flex-col"
                     onClick={() => {
-                      toast.loading('Applying compact layout...', { id: 'layout' })
-                      setTimeout(() => {
-                        toast.success('Compact layout applied!', { id: 'layout', description: 'Dashboard is now more condensed' })
-                      }, 500)
+                      toast.promise(
+                        fetch('/api/dashboard', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'save-layout', layout: 'compact' })
+                        }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+                        { loading: 'Applying compact layout...', success: 'Compact layout applied!', error: 'Failed to apply layout' }
+                      )
                     }}
                   >
                     <Grid3X3 className="h-4 w-4 mb-1" />
@@ -1362,10 +1378,14 @@ export default function ValueDashboardClient() {
                     variant="default"
                     className="h-16 flex flex-col"
                     onClick={() => {
-                      toast.loading('Applying standard layout...', { id: 'layout' })
-                      setTimeout(() => {
-                        toast.success('Standard layout applied!', { id: 'layout', description: 'Default dashboard view restored' })
-                      }, 500)
+                      toast.promise(
+                        fetch('/api/dashboard', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'save-layout', layout: 'standard' })
+                        }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+                        { loading: 'Applying standard layout...', success: 'Standard layout applied!', error: 'Failed to apply layout' }
+                      )
                     }}
                   >
                     <Layout className="h-4 w-4 mb-1" />
@@ -1375,10 +1395,14 @@ export default function ValueDashboardClient() {
                     variant="outline"
                     className="h-16 flex flex-col"
                     onClick={() => {
-                      toast.loading('Applying expanded layout...', { id: 'layout' })
-                      setTimeout(() => {
-                        toast.success('Expanded layout applied!', { id: 'layout', description: 'Dashboard is now more spacious' })
-                      }, 500)
+                      toast.promise(
+                        fetch('/api/dashboard', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'save-layout', layout: 'expanded' })
+                        }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+                        { loading: 'Applying expanded layout...', success: 'Expanded layout applied!', error: 'Failed to apply layout' }
+                      )
                     }}
                   >
                     <BarChart3 className="h-4 w-4 mb-1" />

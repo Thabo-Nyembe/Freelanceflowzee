@@ -2660,7 +2660,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 onClick={() => {
                   setShowUpdateAllDialog(false)
                   toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 3000)),
+                    fetch('/api/dependencies', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'update-all' }) }).then(res => { if (!res.ok) throw new Error('Update failed'); return res.json() }),
                     { loading: 'Updating all dependencies...', success: 'All dependencies updated', error: 'Update failed' }
                   )
                 }}
@@ -2718,7 +2718,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 onClick={() => {
                   setShowLockFileDialog(false)
                   toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1000)),
+                    fetch('/api/dependencies', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'generate-lockfile' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                     { loading: 'Generating lock file...', success: 'Lock file generated', error: 'Failed to generate lock file' }
                   )
                 }}
@@ -2789,7 +2789,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 onClick={() => {
                   setShowReportDialog(false)
                   toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 1500)),
+                    fetch('/api/dependencies', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'generate-report' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                     { loading: 'Generating dependency report...', success: 'Report generated successfully', error: 'Failed to generate report' }
                   )
                 }}

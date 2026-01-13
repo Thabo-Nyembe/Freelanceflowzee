@@ -144,7 +144,21 @@ export default function AiBusinessAdvisorClient() {
   // Handle export
   const handleExport = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      fetch(`/api/ai-advisor?action=export&format=${exportData.format}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Export failed')
+          return exportData.format === 'csv' ? res.text() : res.json()
+        })
+        .then(data => {
+          const content = exportData.format === 'csv' ? data : JSON.stringify(data, null, 2)
+          const blob = new Blob([content], { type: exportData.format === 'csv' ? 'text/csv' : 'application/json' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `ai-insights.${exportData.format}`
+          a.click()
+          URL.revokeObjectURL(url)
+        }),
       {
         loading: `Generating ${exportData.format.toUpperCase()} report...`,
         success: `AI insights exported as ${exportData.format.toUpperCase()}`,
@@ -170,7 +184,14 @@ export default function AiBusinessAdvisorClient() {
 
   const handleImplementOpportunity = (title: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/ai-advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'implement_opportunity', title })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed')
+        return res.json()
+      }),
       {
         loading: 'Creating implementation plan...',
         success: `Implementation plan created for "${title}"`,
@@ -208,7 +229,14 @@ export default function AiBusinessAdvisorClient() {
       return
     }
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      fetch('/api/ai-advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'share_insight', ...shareData })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed')
+        return res.json()
+      }),
       {
         loading: 'Sending insight...',
         success: `Insight shared with ${shareData.email}`,
@@ -223,7 +251,14 @@ export default function AiBusinessAdvisorClient() {
   // Handle generate report
   const handleGenerateReport = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2500)),
+      fetch('/api/ai-advisor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generate_report', ...reportData })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed')
+        return res.json()
+      }),
       {
         loading: 'Generating AI report...',
         success: 'AI Business Report generated successfully',
@@ -237,7 +272,11 @@ export default function AiBusinessAdvisorClient() {
   // Handle refresh insights
   const handleRefreshInsights = () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 2000)),
+      fetch('/api/ai-advisor?action=insights')
+        .then(res => {
+          if (!res.ok) throw new Error('Failed')
+          return res.json()
+        }),
       {
         loading: 'Refreshing AI insights...',
         success: 'Insights updated with latest data',

@@ -1079,9 +1079,15 @@ export default function EscrowClient() {
   const handleRegenerateApiKey = async () => {
     setIsRegeneratingKey(true)
     try {
-      // Simulate API key regeneration
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      const newKey = `ek_live_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`
+      // Regenerate API key via API
+      const res = await fetch('/api/user/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'regenerate', type: 'escrow' })
+      })
+      if (!res.ok) throw new Error('Failed to regenerate API key')
+      const data = await res.json()
+      const newKey = data.key || `ek_live_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`
       setApiKey(newKey)
       toast.success('API key regenerated successfully', {
         description: 'Your previous key has been invalidated'
@@ -1164,8 +1170,13 @@ export default function EscrowClient() {
 
     setIsSubmitting(true)
     try {
-      // In a real app, this would submit to the disputes API
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Submit dispute response via API
+      const res = await fetch('/api/disputes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'respond', disputeId: selectedDisputeForResponse.id, response: disputeResponseForm.response, evidence: disputeResponseForm.evidence })
+      })
+      if (!res.ok) throw new Error('Failed to submit response')
 
       toast.success('Dispute response submitted', {
         description: `Response to dispute ${selectedDisputeForResponse.id} has been submitted for review`

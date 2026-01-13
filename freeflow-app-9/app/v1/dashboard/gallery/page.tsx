@@ -147,18 +147,15 @@ export default function GalleryPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch gallery items from API
+        const response = await fetch('/api/gallery/items').catch(() => null)
+        const data = response?.ok ? await response.json() : null
 
-        setGalleryItems(GALLERY_ITEMS)
+        setGalleryItems(data?.items || GALLERY_ITEMS)
         setIsLoading(false)
         announce('Gallery loaded successfully', 'polite')
         logger.info('Gallery data loaded', {
-          itemCount: GALLERY_ITEMS.length
+          itemCount: data?.items?.length || GALLERY_ITEMS.length
         })
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load gallery'
@@ -199,19 +196,30 @@ export default function GalleryPage() {
       fileSize: item.fileSize
     })
 
-    toast.promise(
-      new Promise((resolve) => {
-        setTimeout(() => {
-          logger.info('Gallery item downloaded successfully', { itemId: item.id })
-          resolve(true)
-        }, 1500)
-      }),
-      {
-        loading: `Preparing download for ${item.name}...`,
-        success: `${item.name} is downloading to your device`,
-        error: `Failed to download ${item.name}`
+    const downloadPromise = async () => {
+      const response = await fetch(`/api/gallery/download?itemId=${item.id}`)
+      if (!response.ok) throw new Error('Download failed')
+
+      // Try to get the file blob and trigger download
+      const blob = await response.blob().catch(() => null)
+      if (blob) {
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = item.name
+        a.click()
+        window.URL.revokeObjectURL(url)
       }
-    )
+
+      logger.info('Gallery item downloaded successfully', { itemId: item.id })
+      return true
+    }
+
+    toast.promise(downloadPromise(), {
+      loading: `Preparing download for ${item.name}...`,
+      success: `${item.name} is downloading to your device`,
+      error: `Failed to download ${item.name}`
+    })
   }
 
   // Handle Share
@@ -536,12 +544,15 @@ export default function GalleryPage() {
                           <Button
                             size="sm"
                             variant="secondary"
-                            onClick={() => {
+                            onClick={async () => {
                               logger.info('Gallery item preview opened', {
                                 itemId: item.id
                               })
                               toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                fetch(`/api/gallery/preview?itemId=${item.id}`).then(res => {
+                                  if (!res.ok) throw new Error('Preview failed')
+                                  return res.json()
+                                }),
                                 {
                                   loading: 'Opening preview...',
                                   success: `Preview loaded for ${item.name}`,

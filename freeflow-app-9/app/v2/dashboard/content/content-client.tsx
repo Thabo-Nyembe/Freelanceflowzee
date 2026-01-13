@@ -1013,17 +1013,46 @@ export default function ContentClient() {
   }
 
   // Create content type handler
-  const handleCreateContentType = () => {
+  const handleCreateContentType = async () => {
     if (!contentTypeForm.name.trim()) {
       toast.error('Name is required')
       return
     }
 
-    toast.success('Content Type Created', {
-      description: `"${contentTypeForm.name}" has been created. Configure fields in the builder.`
+    setIsSubmitting(true)
+    toast.success('Creating content type...', {
+      description: `Setting up "${contentTypeForm.name}"...`
     })
-    setContentTypeForm({ name: '', apiId: '', description: '' })
-    setIsCreateTypeDialogOpen(false)
+
+    try {
+      const response = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_content_type',
+          name: contentTypeForm.name,
+          apiId: contentTypeForm.apiId || contentTypeForm.name.toLowerCase().replace(/\s+/g, '_'),
+          description: contentTypeForm.description
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create content type')
+      }
+
+      toast.success('Content Type Created', {
+        description: `"${contentTypeForm.name}" has been created. Configure fields in the builder.`
+      })
+      setContentTypeForm({ name: '', apiId: '', description: '' })
+      setIsCreateTypeDialogOpen(false)
+    } catch (error) {
+      toast.error('Failed to create content type', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Configure content type handler
@@ -1033,17 +1062,46 @@ export default function ContentClient() {
   }
 
   // Add locale handler
-  const handleAddLocale = () => {
+  const handleAddLocale = async () => {
     if (!localeForm.code.trim() || !localeForm.name.trim()) {
       toast.error('Code and name are required')
       return
     }
 
-    toast.success('Locale Added', {
-      description: `"${localeForm.name}" (${localeForm.code}) has been added`
+    setIsSubmitting(true)
+    toast.success('Adding locale...', {
+      description: `Setting up "${localeForm.name}"...`
     })
-    setLocaleForm({ code: '', name: '', fallback: 'en-US' })
-    setIsAddLocaleDialogOpen(false)
+
+    try {
+      const response = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_locale',
+          code: localeForm.code,
+          name: localeForm.name,
+          fallback: localeForm.fallback
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add locale')
+      }
+
+      toast.success('Locale Added', {
+        description: `"${localeForm.name}" (${localeForm.code}) has been added`
+      })
+      setLocaleForm({ code: '', name: '', fallback: 'en-US' })
+      setIsAddLocaleDialogOpen(false)
+    } catch (error) {
+      toast.error('Failed to add locale', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Import content handler
@@ -1063,17 +1121,31 @@ export default function ContentClient() {
           description: `Importing ${data.entries?.length || 0} entries and ${data.assets?.length || 0} assets...`
         })
 
-        // In a real implementation, this would process the import
-        setTimeout(() => {
-          toast.success('Import Complete', {
-            description: 'Content has been successfully imported'
+        // Call the API to process the import
+        const response = await fetch('/api/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'import',
+            entries: data.entries || [],
+            assets: data.assets || []
           })
-          setIsImportDialogOpen(false)
-          refetchContent()
-        }, 2000)
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Import failed')
+        }
+
+        const result = await response.json()
+        toast.success('Import Complete', {
+          description: result.message || 'Content has been successfully imported'
+        })
+        setIsImportDialogOpen(false)
+        refetchContent()
       } catch (error) {
         toast.error('Import Failed', {
-          description: 'Invalid JSON file format'
+          description: error instanceof Error ? error.message : 'Invalid JSON file format'
         })
       }
     }
@@ -1081,11 +1153,37 @@ export default function ContentClient() {
   }
 
   // Regenerate API keys handler
-  const handleRegenerateKeys = () => {
-    toast.success('API Keys Regenerated', {
-      description: 'New API keys have been generated. Update your applications.'
+  const handleRegenerateKeys = async () => {
+    setIsSubmitting(true)
+    toast.success('Regenerating API keys...', {
+      description: 'Please wait...'
     })
-    setIsRegenerateKeysDialogOpen(false)
+
+    try {
+      const response = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'regenerate_keys'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to regenerate API keys')
+      }
+
+      toast.success('API Keys Regenerated', {
+        description: 'New API keys have been generated. Update your applications.'
+      })
+      setIsRegenerateKeysDialogOpen(false)
+    } catch (error) {
+      toast.error('Failed to regenerate API keys', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Quick actions for the toolbar
@@ -2262,12 +2360,43 @@ export default function ContentClient() {
             <div className="flex gap-3 pt-4">
               <Button
                 className="flex-1 bg-cyan-600 hover:bg-cyan-700"
-                onClick={() => {
-                  toast.success('Content Type Updated', { description: `"${selectedContentType?.name}" has been saved` })
-                  setIsConfigureTypeDialogOpen(false)
+                disabled={isSubmitting}
+                onClick={async () => {
+                  if (!selectedContentType) return
+                  setIsSubmitting(true)
+                  toast.success('Saving content type...', { description: 'Please wait...' })
+
+                  try {
+                    const response = await fetch('/api/content', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'update_content_type',
+                        id: selectedContentType.id,
+                        name: selectedContentType.name,
+                        apiId: selectedContentType.apiId,
+                        description: selectedContentType.description,
+                        fields: selectedContentType.fields
+                      })
+                    })
+
+                    if (!response.ok) {
+                      const errorData = await response.json()
+                      throw new Error(errorData.error || 'Failed to update content type')
+                    }
+
+                    toast.success('Content Type Updated', { description: `"${selectedContentType?.name}" has been saved` })
+                    setIsConfigureTypeDialogOpen(false)
+                  } catch (error) {
+                    toast.error('Failed to update content type', {
+                      description: error instanceof Error ? error.message : 'An error occurred'
+                    })
+                  } finally {
+                    setIsSubmitting(false)
+                  }
                 }}
               >
-                Save Changes
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button
                 variant="outline"

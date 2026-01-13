@@ -1341,12 +1341,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <Copy className="w-4 h-4" />
                                 Copy Key
                               </Button>
-                              <Button variant="outline" className="gap-2" onClick={() => {
+                              <Button variant="outline" className="gap-2" onClick={async () => {
                                 if (confirm('Are you sure you want to regenerate the API key? The current key will be invalidated.')) {
                                   toast.loading('Regenerating API key...', { id: 'regenerate-key' })
-                                  setTimeout(() => {
+                                  try {
+                                    const response = await fetch('/api/bookings', {
+                                      method: 'PUT',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({ action: 'regenerate-api-key' })
+                                    })
+                                    if (!response.ok) throw new Error('Failed to regenerate API key')
                                     toast.success('API key regenerated successfully', { id: 'regenerate-key' })
-                                  }, 1500)
+                                  } catch (error) {
+                                    toast.error('Failed to regenerate API key', { id: 'regenerate-key', description: error instanceof Error ? error.message : 'Unknown error' })
+                                  }
                                 }
                               }}>
                                 <RefreshCw className="w-4 h-4" />
@@ -1492,11 +1500,26 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <div className="font-medium text-gray-900 dark:text-white">Export All Data</div>
                                 <p className="text-sm text-gray-500">Download complete booking history</p>
                               </div>
-                              <Button variant="outline" className="gap-2" onClick={() => {
+                              <Button variant="outline" className="gap-2" onClick={async () => {
                                 toast.loading('Preparing export...', { id: 'export-data' })
-                                setTimeout(() => {
+                                try {
+                                  const response = await fetch('/api/bookings?export=true')
+                                  if (!response.ok) throw new Error('Failed to export data')
+                                  const data = await response.json()
+                                  // Trigger download
+                                  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+                                  const url = window.URL.createObjectURL(blob)
+                                  const a = document.createElement('a')
+                                  a.href = url
+                                  a.download = `bookings-export-${new Date().toISOString().split('T')[0]}.json`
+                                  document.body.appendChild(a)
+                                  a.click()
+                                  window.URL.revokeObjectURL(url)
+                                  document.body.removeChild(a)
                                   toast.success('Booking data exported successfully', { id: 'export-data' })
-                                }, 2000)
+                                } catch (error) {
+                                  toast.error('Failed to export data', { id: 'export-data', description: error instanceof Error ? error.message : 'Unknown error' })
+                                }
                               }}>
                                 <Download className="w-4 h-4" />
                                 Export
@@ -2574,12 +2597,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowAddServiceDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 toast.loading('Adding service...', { id: 'add-service' })
-                setTimeout(() => {
+                try {
+                  const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add-service', type: 'service' })
+                  })
+                  if (!response.ok) throw new Error('Failed to add service')
                   toast.success('Service added successfully', { id: 'add-service' })
                   setShowAddServiceDialog(false)
-                }, 1000)
+                } catch (error) {
+                  toast.error('Failed to add service', { id: 'add-service', description: error instanceof Error ? error.message : 'Unknown error' })
+                }
               }}>Add Service</Button>
             </DialogFooter>
           </DialogContent>
@@ -2613,12 +2644,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowEditServiceDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 toast.loading('Saving changes...', { id: 'update-service' })
-                setTimeout(() => {
+                try {
+                  const response = await fetch('/api/bookings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update-service', serviceId: selectedServiceId })
+                  })
+                  if (!response.ok) throw new Error('Failed to update service')
                   toast.success('Service updated successfully', { id: 'update-service' })
                   setShowEditServiceDialog(false)
-                }, 1000)
+                } catch (error) {
+                  toast.error('Failed to update service', { id: 'update-service', description: error instanceof Error ? error.message : 'Unknown error' })
+                }
               }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
@@ -2657,12 +2696,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowAddMemberDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 toast.loading('Adding team member...', { id: 'add-member' })
-                setTimeout(() => {
+                try {
+                  const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add-member', type: 'team-member' })
+                  })
+                  if (!response.ok) throw new Error('Failed to add team member')
                   toast.success('Team member added successfully', { id: 'add-member' })
                   setShowAddMemberDialog(false)
-                }, 1000)
+                } catch (error) {
+                  toast.error('Failed to add team member', { id: 'add-member', description: error instanceof Error ? error.message : 'Unknown error' })
+                }
               }}>Add Member</Button>
             </DialogFooter>
           </DialogContent>
@@ -2697,12 +2744,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowEditMemberDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 toast.loading('Saving changes...', { id: 'update-member' })
-                setTimeout(() => {
+                try {
+                  const response = await fetch('/api/bookings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update-member', memberId: selectedMemberId })
+                  })
+                  if (!response.ok) throw new Error('Failed to update team member')
                   toast.success('Team member updated successfully', { id: 'update-member' })
                   setShowEditMemberDialog(false)
-                }, 1000)
+                } catch (error) {
+                  toast.error('Failed to update team member', { id: 'update-member', description: error instanceof Error ? error.message : 'Unknown error' })
+                }
               }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
@@ -2739,21 +2794,37 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               </div>
             </div>
             <DialogFooter className="mt-6">
-              <Button variant="outline" className="text-red-600" onClick={() => {
+              <Button variant="outline" className="text-red-600" onClick={async () => {
                 if (confirm('Are you sure you want to disconnect this integration?')) {
                   toast.loading('Disconnecting integration...', { id: 'disconnect-integration' })
-                  setTimeout(() => {
+                  try {
+                    const response = await fetch('/api/bookings', {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'disconnect-integration', integration: selectedIntegration })
+                    })
+                    if (!response.ok) throw new Error('Failed to disconnect integration')
                     toast.success('Integration disconnected successfully', { id: 'disconnect-integration' })
                     setShowConfigureIntegrationDialog(false)
-                  }, 1000)
+                  } catch (error) {
+                    toast.error('Failed to disconnect integration', { id: 'disconnect-integration', description: error instanceof Error ? error.message : 'Unknown error' })
+                  }
                 }
               }}>Disconnect</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 toast.loading('Saving settings...', { id: 'save-integration' })
-                setTimeout(() => {
+                try {
+                  const response = await fetch('/api/bookings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'save-integration-settings', integration: selectedIntegration })
+                  })
+                  if (!response.ok) throw new Error('Failed to save integration settings')
                   toast.success('Integration settings saved', { id: 'save-integration' })
                   setShowConfigureIntegrationDialog(false)
-                }, 1000)
+                } catch (error) {
+                  toast.error('Failed to save integration settings', { id: 'save-integration', description: error instanceof Error ? error.message : 'Unknown error' })
+                }
               }}>Save Settings</Button>
             </DialogFooter>
           </DialogContent>
@@ -2769,12 +2840,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               <p className="text-sm text-gray-500">Connect your {selectedIntegration} account to enable integration features.</p>
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                 <p className="text-sm mb-4">Click the button below to authorize access to your {selectedIntegration} account.</p>
-                <Button className="w-full" onClick={() => {
+                <Button className="w-full" onClick={async () => {
                   toast.loading('Connecting to ' + selectedIntegration + '...', { id: 'connect-integration' })
-                  setTimeout(() => {
+                  try {
+                    const response = await fetch('/api/bookings', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'connect-integration', integration: selectedIntegration })
+                    })
+                    if (!response.ok) throw new Error('Failed to connect integration')
                     toast.success(selectedIntegration + ' connected successfully', { id: 'connect-integration' })
                     setShowConnectIntegrationDialog(false)
-                  }, 1500)
+                  } catch (error) {
+                    toast.error('Failed to connect ' + selectedIntegration, { id: 'connect-integration', description: error instanceof Error ? error.message : 'Unknown error' })
+                  }
                 }}>
                   Authorize {selectedIntegration}
                 </Button>
@@ -2818,12 +2897,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
             <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                 toast.loading('Adding webhook...', { id: 'add-webhook' })
-                setTimeout(() => {
+                try {
+                  const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add-webhook', type: 'webhook' })
+                  })
+                  if (!response.ok) throw new Error('Failed to add webhook')
                   toast.success('Webhook added successfully', { id: 'add-webhook' })
                   setShowAddWebhookDialog(false)
-                }, 1000)
+                } catch (error) {
+                  toast.error('Failed to add webhook', { id: 'add-webhook', description: error instanceof Error ? error.message : 'Unknown error' })
+                }
               }}>Add Webhook</Button>
             </DialogFooter>
           </DialogContent>

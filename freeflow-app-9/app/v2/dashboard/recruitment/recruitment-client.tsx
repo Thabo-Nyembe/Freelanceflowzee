@@ -1116,14 +1116,9 @@ export default function RecruitmentClient() {
   }
 
   const handleScheduleInterview = (candidateName: string) => {
-    toast.promise(
-      new Promise(r => setTimeout(r, 300)),
-      {
-        loading: `Opening scheduler for ${candidateName}...`,
-        success: `Scheduler ready for ${candidateName}`,
-        error: 'Failed to open scheduler'
-      }
-    )
+    toast.info(`Opening scheduler for ${candidateName}`, {
+      description: 'Select a date and time for the interview'
+    })
   }
 
   const handleExportCandidates = () => {
@@ -1141,14 +1136,9 @@ export default function RecruitmentClient() {
     if (resumeUrl) {
       window.open(resumeUrl, '_blank')
     } else {
-      toast.promise(
-        new Promise(r => setTimeout(r, 300)),
-        {
-          loading: 'Checking for resume...',
-          success: `No resume file available for ${candidateName}`,
-          error: 'Failed to check resume'
-        }
-      )
+      toast.info(`No resume file available for ${candidateName}`, {
+        description: 'Request the candidate to upload their resume'
+      })
     }
   }
 
@@ -1156,58 +1146,39 @@ export default function RecruitmentClient() {
     if (email) {
       window.location.href = `mailto:${email}`
     } else {
-      toast.promise(
-        new Promise(r => setTimeout(r, 300)),
-        {
-          loading: 'Checking email address...',
-          success: `No email address available for ${candidateName}`,
-          error: 'Failed to check email'
-        }
-      )
+      toast.info(`No email address available for ${candidateName}`, {
+        description: 'Contact information is missing'
+      })
     }
   }
 
   const handleViewOffer = (candidateName: string) => {
-    toast.promise(
-      new Promise(r => setTimeout(r, 300)),
-      {
-        loading: `Opening offer details for ${candidateName}...`,
-        success: `Offer details loaded for ${candidateName}`,
-        error: 'Failed to load offer details'
-      }
-    )
+    toast.info(`Offer details for ${candidateName}`, {
+      description: 'View and manage the offer in the dialog'
+    })
   }
 
   const handleEditOffer = (candidateName: string) => {
-    toast.promise(
-      new Promise(r => setTimeout(r, 300)),
-      {
-        loading: `Opening offer editor for ${candidateName}...`,
-        success: `Offer editor ready for ${candidateName}`,
-        error: 'Failed to open offer editor'
-      }
-    )
+    toast.info(`Editing offer for ${candidateName}`, {
+      description: 'Make changes and save when ready'
+    })
   }
 
   const handleSendOffer = async (candidateName: string, offerId?: string) => {
-    // Simulate sending offer via email API
     try {
       await toast.promise(
-        new Promise<void>((resolve, reject) => {
-          // Simulate API call for sending offer
-          setTimeout(() => {
-            // Simulate 95% success rate
-            if (Math.random() > 0.05) {
-              resolve()
-            } else {
-              reject(new Error('Email service temporarily unavailable'))
-            }
-          }, 1200)
+        fetch('/api/recruitment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'send_offer', candidateName, offerId })
+        }).then(res => {
+          if (!res.ok) throw new Error('Email service temporarily unavailable')
+          return res.json()
         }),
         {
           loading: `Sending offer to ${candidateName}...`,
           success: `Offer successfully sent to ${candidateName}! They will receive an email notification.`,
-          error: (err) => `Failed to send offer: ${err.message}`
+          error: (err) => `Failed to send offer: ${err instanceof Error ? err.message : 'Unknown error'}`
         }
       )
     } catch {
@@ -1216,48 +1187,36 @@ export default function RecruitmentClient() {
   }
 
   const handleFilterTalentPool = () => {
-    toast.promise(
-      new Promise(r => setTimeout(r, 300)),
-      {
-        loading: 'Opening filter options...',
-        success: 'Filter options ready',
-        error: 'Failed to open filter options'
-      }
-    )
+    toast.info('Filter options ready', {
+      description: 'Use the filters above to refine your talent pool search'
+    })
   }
 
   const handleImportCandidates = () => {
-    toast.promise(
-      new Promise(r => setTimeout(r, 300)),
-      {
-        loading: 'Opening import dialog...',
-        success: 'Import dialog ready',
-        error: 'Failed to open import dialog'
-      }
-    )
+    toast.info('Import dialog ready', {
+      description: 'Select a CSV or JSON file to import candidates'
+    })
   }
 
   const handleReachOut = (email: string | null, candidateName: string) => {
     if (email) {
       window.location.href = `mailto:${email}?subject=Opportunity at Our Company`
     } else {
-      toast.promise(
-        new Promise(r => setTimeout(r, 300)),
-        {
-          loading: 'Checking contact info...',
-          success: `No email address available for ${candidateName}`,
-          error: 'Failed to check contact info'
-        }
-      )
+      toast.info(`No email address available for ${candidateName}`, {
+        description: 'Contact information is missing'
+      })
     }
   }
 
   const handleMatchJobs = (candidateName: string) => {
     toast.promise(
-      new Promise(r => setTimeout(r, 300)),
+      fetch(`/api/recruitment?action=match_jobs&candidateName=${encodeURIComponent(candidateName)}`).then(res => {
+        if (!res.ok) throw new Error('Failed to find matches')
+        return res.json()
+      }),
       {
         loading: `Finding matching jobs for ${candidateName}...`,
-        success: `Found matching jobs for ${candidateName}`,
+        success: (data) => `Found ${data.data?.length || 0} matching jobs for ${candidateName}`,
         error: 'Failed to find matching jobs'
       }
     )

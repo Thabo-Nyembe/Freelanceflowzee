@@ -52,11 +52,25 @@ const collaborationDemoActivities = [
 
 const collaborationDemoQuickActions = [
   { id: '1', label: 'Start Call', icon: 'Video', shortcut: 'V', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
+    fetch('/api/collaboration/video-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'start' })
+    }).then(res => {
+      if (!res.ok) throw new Error('Failed to start call')
+      return res.json()
+    }),
     { loading: 'Initializing video call...', success: 'Video call started successfully', error: 'Failed to start call' }
   ) },
   { id: '2', label: 'Share Screen', icon: 'Monitor', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
+    fetch('/api/collaboration/screen-share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'start' })
+    }).then(res => {
+      if (!res.ok) throw new Error('Failed to share screen')
+      return res.json()
+    }),
     { loading: 'Preparing screen share...', success: 'Screen sharing enabled', error: 'Failed to share screen' }
   ) },
 ]

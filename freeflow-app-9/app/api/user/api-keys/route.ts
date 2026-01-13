@@ -54,11 +54,121 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { configId, keyValue, nickname, environment = 'production' } = body
+    const { action, keyId, configId, keyValue, nickname, environment = 'production', name, description, scopes, keyType, expiresAt } = body
 
     // In production, get userId from session/auth
     const userId = 'user_123'
 
+    // Handle action-based requests (create, regenerate, revoke)
+    if (action) {
+      switch (action) {
+        case 'create': {
+          logger.info('Creating new API key', { userId, name, keyType, environment })
+
+          // Generate a new API key
+          const keyPrefix = environment === 'production' ? 'pk_live_' : 'pk_test_'
+          const keyCode = Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14)
+          const fullKey = `${keyPrefix}${keyCode}`
+
+          const newKey: UserAPIKey = {
+            id: 'key_' + Math.random().toString(36).substr(2, 9),
+            userId,
+            configId: configId || 'custom',
+            keyValue: fullKey,
+            nickname: name || nickname,
+            environment,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            usageCount: 0,
+            estimatedCost: 0,
+            status: 'active'
+          }
+
+          userAPIKeys.push(newKey)
+
+          logger.info('API key created successfully', { userId, keyId: newKey.id })
+
+          return NextResponse.json({
+            success: true,
+            data: {
+              ...newKey,
+              fullKey // Only return full key on create - won't be shown again
+            },
+            message: 'API key created successfully'
+          })
+        }
+
+        case 'regenerate': {
+          if (!keyId) {
+            return NextResponse.json({ error: 'keyId is required for regeneration' }, { status: 400 })
+          }
+
+          logger.info('Regenerating API key', { userId, keyId })
+
+          const keyIndex = userAPIKeys.findIndex(k => k.id === keyId && k.userId === userId)
+
+          if (keyIndex === -1) {
+            return NextResponse.json({ error: 'API key not found' }, { status: 404 })
+          }
+
+          // Generate new key value
+          const env = userAPIKeys[keyIndex].environment
+          const newKeyPrefix = env === 'production' ? 'pk_live_' : 'pk_test_'
+          const newKeyCode = Math.random().toString(36).substring(2, 14) + Math.random().toString(36).substring(2, 14)
+          const newFullKey = `${newKeyPrefix}${newKeyCode}`
+
+          userAPIKeys[keyIndex] = {
+            ...userAPIKeys[keyIndex],
+            keyValue: newFullKey,
+            status: 'active'
+          }
+
+          logger.info('API key regenerated successfully', { userId, keyId })
+
+          return NextResponse.json({
+            success: true,
+            data: {
+              ...userAPIKeys[keyIndex],
+              fullKey: newFullKey
+            },
+            message: 'API key regenerated successfully'
+          })
+        }
+
+        case 'revoke': {
+          if (!keyId) {
+            return NextResponse.json({ error: 'keyId is required for revocation' }, { status: 400 })
+          }
+
+          logger.info('Revoking API key', { userId, keyId })
+
+          const keyIndex = userAPIKeys.findIndex(k => k.id === keyId && k.userId === userId)
+
+          if (keyIndex === -1) {
+            return NextResponse.json({ error: 'API key not found' }, { status: 404 })
+          }
+
+          userAPIKeys[keyIndex] = {
+            ...userAPIKeys[keyIndex],
+            isActive: false,
+            status: 'inactive'
+          }
+
+          logger.info('API key revoked successfully', { userId, keyId })
+
+          return NextResponse.json({
+            success: true,
+            data: userAPIKeys[keyIndex],
+            message: 'API key revoked successfully'
+          })
+        }
+
+        default:
+          return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 })
+      }
+    }
+
+    // Original flow: Adding external service API keys (BYOK)
     logger.info('Adding user API key', {
       userId,
       configId,
@@ -116,10 +226,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    logger.error('Failed to add API key', { error: error.message })
+    logger.error('Failed to process API key request', { error: error.message })
 
     return NextResponse.json(
-      { error: error.message || 'Failed to add API key' },
+      { error: error.message || 'Failed to process API key request' },
       { status: 500 }
     )
   }
@@ -165,6 +275,55 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(
       { error: error.message || 'Failed to update API key' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const keyId = searchParams.get('keyId')
+
+    // In production, get userId from session/auth
+    const userId = 'user_123'
+
+    logger.info('Deleting API key', { userId, keyId })
+
+    if (!keyId) {
+      return NextResponse.json(
+        { error: 'keyId is required' },
+        { status: 400 }
+      )
+    }
+
+    const keyIndex = userAPIKeys.findIndex(
+      k => k.id === keyId && k.userId === userId
+    )
+
+    if (keyIndex === -1) {
+      return NextResponse.json(
+        { error: 'API key not found' },
+        { status: 404 }
+      )
+    }
+
+    // Remove the key from the array
+    const deletedKey = userAPIKeys.splice(keyIndex, 1)[0]
+
+    logger.info('API key deleted successfully', { userId, keyId })
+
+    return NextResponse.json({
+      success: true,
+      data: deletedKey,
+      message: 'API key deleted successfully'
+    })
+
+  } catch (error: any) {
+    logger.error('Failed to delete API key', { error: error.message })
+
+    return NextResponse.json(
+      { error: error.message || 'Failed to delete API key' },
       { status: 500 }
     )
   }

@@ -3371,8 +3371,16 @@ export default function MotionGraphicsClient({
                 <input type="file" className="hidden" id="preset-import" accept=".json,.preset" onChange={(e) => {
                   const file = e.target.files?.[0]
                   if (file) {
+                    const formData = new FormData()
+                    formData.append('preset', file)
                     toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      fetch('/api/motion-graphics/presets/import', {
+                        method: 'POST',
+                        body: formData
+                      }).then(res => {
+                        if (!res.ok) throw new Error('Import failed')
+                        return res.json()
+                      }),
                       { loading: `Importing ${file.name}...`, success: `Preset "${file.name}" imported successfully`, error: 'Import failed' }
                     )
                     setShowImportPresetDialog(false)

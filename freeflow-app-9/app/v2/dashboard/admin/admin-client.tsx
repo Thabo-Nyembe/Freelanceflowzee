@@ -684,8 +684,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const handleClearCache = useCallback(async () => {
     setIsLoading(true)
     try {
-      // This would typically call an API endpoint that clears server-side caches
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const res = await fetch('/api/admin/operations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_cache' })
+      })
+      if (!res.ok) throw new Error('Failed to clear cache')
       toast.success('Cache cleared', { description: 'All cached data has been purged' })
     } catch (err) {
       toast.error('Failed to clear cache', { description: (err as Error).message })
@@ -717,12 +721,20 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   }, [])
 
   // Refresh system data
-  const handleRefreshSystem = useCallback(() => {
+  const handleRefreshSystem = useCallback(async () => {
     toast.info('Refreshing system data...')
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/admin/operations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'refresh_system' })
+      })
+      if (!res.ok) throw new Error('Failed to refresh')
       refetch()
       toast.success('System data refreshed')
-    }, 1000)
+    } catch {
+      toast.error('Failed to refresh system data')
+    }
   }, [refetch])
 
   // Open console (switches to database tab with SQL console)
@@ -752,8 +764,18 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   // Refresh resource handler
   const handleRefreshResource = useCallback(async (resource: SystemResource) => {
     toast.info(`Checking ${resource.name}...`)
-    await new Promise(resolve => setTimeout(resolve, 500))
-    toast.success(`${resource.name} is healthy`, { description: `Latency: ${resource.latency}ms` })
+    try {
+      const res = await fetch('/api/admin/operations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'refresh_resource', resourceId: resource.id, resourceName: resource.name })
+      })
+      if (!res.ok) throw new Error('Failed')
+      const data = await res.json()
+      toast.success(`${resource.name} is healthy`, { description: `Latency: ${data.resource?.latency || resource.latency}ms` })
+    } catch {
+      toast.error(`Failed to check ${resource.name}`)
+    }
   }, [])
 
   // View table schema handler
@@ -770,15 +792,33 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   // Stop job handler
   const handleStopJob = useCallback(async (job: ScheduledJob) => {
     toast.info(`Stopping ${job.name}...`)
-    await new Promise(resolve => setTimeout(resolve, 500))
-    toast.success(`${job.name} stopped`)
+    try {
+      const res = await fetch('/api/admin/operations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop_job', jobId: job.id, jobName: job.name })
+      })
+      if (!res.ok) throw new Error('Failed')
+      toast.success(`${job.name} stopped`)
+    } catch {
+      toast.error(`Failed to stop ${job.name}`)
+    }
   }, [])
 
   // Run job handler
   const handleRunJob = useCallback(async (job: ScheduledJob) => {
     toast.info(`Starting ${job.name}...`)
-    await new Promise(resolve => setTimeout(resolve, 500))
-    toast.success(`${job.name} started`, { description: 'Running in background' })
+    try {
+      const res = await fetch('/api/admin/operations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run_job', jobId: job.id, jobName: job.name })
+      })
+      if (!res.ok) throw new Error('Failed')
+      toast.success(`${job.name} started`, { description: 'Running in background' })
+    } catch {
+      toast.error(`Failed to start ${job.name}`)
+    }
   }, [])
 
   // View job history handler
@@ -822,8 +862,17 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const handleRollback = useCallback(async (deploy: Deployment) => {
     if (!confirm(`Rollback to ${deploy.version}?`)) return
     toast.info(`Rolling back to ${deploy.version}...`)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    toast.success('Rollback initiated', { description: `Rolling back to ${deploy.version}` })
+    try {
+      const res = await fetch('/api/admin/operations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'rollback', deployId: deploy.id, version: deploy.version })
+      })
+      if (!res.ok) throw new Error('Failed')
+      toast.success('Rollback initiated', { description: `Rolling back to ${deploy.version}` })
+    } catch {
+      toast.error('Rollback failed')
+    }
   }, [])
 
   // View deploy logs handler
@@ -846,11 +895,19 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   }, [sqlResults])
 
   // Refresh deploy commit handler
-  const handleRefreshCommit = useCallback(() => {
+  const handleRefreshCommit = useCallback(async () => {
     toast.info('Fetching latest commit...')
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/admin/operations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'refresh_commit' })
+      })
+      if (!res.ok) throw new Error('Failed')
       toast.success('Commit info updated')
-    }, 500)
+    } catch {
+      toast.error('Failed to fetch commit')
+    }
   }, [])
 
   // View all activity logs handler

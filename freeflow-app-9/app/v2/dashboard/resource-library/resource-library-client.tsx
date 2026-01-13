@@ -266,23 +266,28 @@ export default function ResourceLibraryClient() {
       }
 
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
+        fetch('/api/resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'create', ...newResourceData })
+        }).then(res => {
+          if (!res.ok) throw new Error('Create failed')
+          setShowNewResourceDialog(false)
+          setNewResourceData({
+            title: '',
+            description: '',
+            category: 'design',
+            type: 'template',
+            tags: '',
+            license: 'MIT',
+            price: '0',
+            isPremium: false
+          })
+          return res.json()
+        }),
         {
           loading: 'Creating resource...',
-          success: () => {
-            setShowNewResourceDialog(false)
-            setNewResourceData({
-              title: '',
-              description: '',
-              category: 'design',
-              type: 'template',
-              tags: '',
-              license: 'MIT',
-              price: '0',
-              isPremium: false
-            })
-            return `Resource "${newResourceData.title}" created successfully`
-          },
+          success: () => `Resource "${newResourceData.title}" created successfully`,
           error: 'Failed to create resource'
         }
       )
@@ -294,7 +299,30 @@ export default function ResourceLibraryClient() {
   const handleExport = async () => {
     try {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 2000)),
+        fetch(`/api/resources?action=export&format=${exportOptions.format}`)
+          .then(res => {
+            if (!res.ok) throw new Error('Export failed')
+            if (exportOptions.format === 'csv') {
+              return res.text().then(csv => {
+                const blob = new Blob([csv], { type: 'text/csv' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `resources-export.csv`
+                a.click()
+                URL.revokeObjectURL(url)
+              })
+            }
+            return res.json().then(data => {
+              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `resources-export.json`
+              a.click()
+              URL.revokeObjectURL(url)
+            })
+          }),
         {
           loading: `Exporting resources as ${exportOptions.format.toUpperCase()}...`,
           success: () => {
@@ -312,7 +340,14 @@ export default function ResourceLibraryClient() {
   const handleSaveSettings = async () => {
     try {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        fetch('/api/resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'save_settings', settings: librarySettingsData })
+        }).then(res => {
+          if (!res.ok) throw new Error('Save failed')
+          return res.json()
+        }),
         {
           loading: 'Saving library settings...',
           success: () => {
@@ -337,7 +372,19 @@ export default function ResourceLibraryClient() {
       }
 
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 2500)),
+        fetch('/api/resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upload',
+            title: uploadData.title,
+            description: uploadData.description,
+            category: uploadData.category
+          })
+        }).then(res => {
+          if (!res.ok) throw new Error('Upload failed')
+          return res.json()
+        }),
         {
           loading: 'Uploading resource files...',
           success: () => {
@@ -406,7 +453,14 @@ export default function ResourceLibraryClient() {
   const handleDownload = (resource: any) => {
     if (resource.isPremium && resource.price > 0) {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
+        fetch('/api/resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'purchase', resourceId: resource.id, price: resource.price })
+        }).then(res => {
+          if (!res.ok) throw new Error('Purchase failed')
+          return res.json()
+        }),
         {
           loading: 'Processing purchase...',
           success: () => `"${resource.title}" purchased for $${resource.price}. Download starting...`,
@@ -415,7 +469,19 @@ export default function ResourceLibraryClient() {
       )
     } else {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        fetch(`/api/resources?action=download&resourceId=${resource.id}`)
+          .then(res => {
+            if (!res.ok) throw new Error('Download failed')
+            return res.json()
+          })
+          .then(data => {
+            if (data.url) {
+              const a = document.createElement('a')
+              a.href = data.url
+              a.download = data.title || resource.title
+              a.click()
+            }
+          }),
         {
           loading: `Downloading "${resource.title}"...`,
           success: () => `"${resource.title}" downloaded successfully`,
@@ -437,12 +503,18 @@ export default function ResourceLibraryClient() {
 
     try {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        fetch(`/api/resources?action=share&resourceId=${selectedResource.id}`)
+          .then(res => {
+            if (!res.ok) throw new Error('Share failed')
+            return res.json()
+          })
+          .then(data => {
+            navigator.clipboard.writeText(data.shareUrl)
+            return data
+          }),
         {
           loading: 'Creating share link...',
           success: () => {
-            const shareUrl = `https://freeflow.app/resources/${selectedResource.id}`
-            navigator.clipboard.writeText(shareUrl)
             setShowShareDialog(false)
             return `Share link copied to clipboard! Expires in ${shareOptions.expiresIn} days.`
           },
@@ -470,16 +542,22 @@ export default function ResourceLibraryClient() {
   const handleConfirmDelete = async () => {
     if (!selectedResource) return
 
+    const resourceTitle = selectedResource.title
     try {
       toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
+        fetch(`/api/resources?resourceId=${selectedResource.id}`, {
+          method: 'DELETE'
+        }).then(res => {
+          if (!res.ok) throw new Error('Delete failed')
+          return res.json()
+        }),
         {
           loading: 'Deleting resource...',
           success: () => {
             setShowDeleteDialog(false)
             setShowResourceMenuDialog(false)
             setSelectedResource(null)
-            return `"${selectedResource.title}" has been deleted`
+            return `"${resourceTitle}" has been deleted`
           },
           error: 'Failed to delete resource'
         }
@@ -512,13 +590,21 @@ export default function ResourceLibraryClient() {
   const handleDuplicateResource = () => {
     if (!selectedResource) return
 
+    const resourceTitle = selectedResource.title
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'duplicate', resourceId: selectedResource.id })
+      }).then(res => {
+        if (!res.ok) throw new Error('Duplicate failed')
+        return res.json()
+      }),
       {
         loading: 'Duplicating resource...',
         success: () => {
           setShowResourceMenuDialog(false)
-          return `"${selectedResource.title}" has been duplicated`
+          return `"${resourceTitle}" has been duplicated`
         },
         error: 'Failed to duplicate resource'
       }
@@ -529,13 +615,21 @@ export default function ResourceLibraryClient() {
   const handleArchiveResource = () => {
     if (!selectedResource) return
 
+    const resourceTitle = selectedResource.title
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
+      fetch('/api/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'archive', resourceId: selectedResource.id })
+      }).then(res => {
+        if (!res.ok) throw new Error('Archive failed')
+        return res.json()
+      }),
       {
         loading: 'Archiving resource...',
         success: () => {
           setShowResourceMenuDialog(false)
-          return `"${selectedResource.title}" has been archived`
+          return `"${resourceTitle}" has been archived`
         },
         error: 'Failed to archive resource'
       }

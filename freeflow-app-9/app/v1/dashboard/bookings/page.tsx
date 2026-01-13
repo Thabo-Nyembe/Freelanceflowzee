@@ -131,7 +131,7 @@ export default function UpcomingBookingsPage() {
   })
   const [isSendingReminder, setIsSendingReminder] = useState<string | null>(null)
 
-  // Load bookings data from Supabase
+  // Load bookings data via API
   useEffect(() => {
     // Wait for auth to complete before loading data
     if (userLoading) return
@@ -146,33 +146,35 @@ export default function UpcomingBookingsPage() {
       try {
         setError(null)
 
-        logger.info('Loading bookings from Supabase', { userId })
+        logger.info('Loading bookings via API', { userId })
 
-        // Dynamic import for code splitting
-        const { getBookings } = await import('@/lib/bookings-queries')
+        const response = await fetch('/api/bookings/manage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'list' })
+        })
 
-        const { data: bookingsData, error: bookingsError } = await getBookings(
-          userId,
-          undefined, // no filters
-          { field: 'booking_date', ascending: true }, // sort by date
-          100 // limit
-        )
-
-        if (bookingsError) {
-          throw new Error(bookingsError.message || 'Failed to load bookings')
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to load bookings`)
         }
 
-        // Transform Supabase data to UI format
-        const transformedBookings: Booking[] = bookingsData.map((b) => ({
+        const result = await response.json()
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to load bookings')
+        }
+
+        // Transform API data to UI format
+        const transformedBookings: Booking[] = (result.bookings || []).map((b: any) => ({
           id: b.id,
           clientName: b.client_name,
           service: b.service,
           date: b.booking_date,
-          time: b.start_time,
-          duration: `${b.duration_minutes} min`,
+          time: b.booking_time || b.start_time,
+          duration: b.duration || `${b.duration_minutes || 60} min`,
           status: b.status as any,
-          payment: b.payment as any,
-          amount: b.amount,
+          payment: b.payment_status || b.payment as any,
+          amount: b.amount || 0,
           email: b.client_email || '',
           phone: b.client_phone || '',
           notes: b.notes || ''
@@ -182,18 +184,19 @@ export default function UpcomingBookingsPage() {
         setIsLoading(false)
         announce(`${transformedBookings.length} bookings loaded`, 'polite')
 
-        logger.info('Bookings loaded successfully from Supabase', {
+        logger.info('Bookings loaded successfully via API', {
           count: transformedBookings.length,
           userId
         })
 
-        toast.success(`${transformedBookings.length} bookings loaded from database`)
+        toast.success(`${transformedBookings.length} bookings loaded`)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load bookings'
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading bookings', 'assertive')
-        logger.error('Failed to load bookings from Supabase', { error: err, userId })
+        logger.error('Failed to load bookings via API', { error: err, userId })
+        toast.error('Failed to load bookings', { description: errorMessage })
       }
     }
 
@@ -215,19 +218,18 @@ export default function UpcomingBookingsPage() {
     }
 
     setIsCreating(true)
+    toast.success('Creating new booking...')
 
     try {
       const newBookingData = {
         clientName: 'New Client',
         service: 'Consultation',
         date: new Date().toISOString().split('T')[0],
-        time: '10:00:00',
-        duration: 60,
-        status: 'pending' as const,
-        payment: 'awaiting' as const,
+        time: '10:00',
+        duration: '60 min',
         amount: 150,
-        email: 'newclient@email.com',
-        phone: '+1 (555) 000-0000',
+        clientEmail: 'newclient@email.com',
+        clientPhone: '+1 (555) 000-0000',
         notes: 'New booking'
       }
 
@@ -243,56 +245,49 @@ export default function UpcomingBookingsPage() {
         return
       }
 
-      // Dynamic import
-      const { createBooking } = await import('@/lib/bookings-queries')
-
-      const { data, error } = await createBooking(userId, {
-        client_name: newBookingData.clientName,
-        client_email: newBookingData.email,
-        client_phone: newBookingData.phone,
-        service: newBookingData.service,
-        type: 'consultation',
-        booking_date: newBookingData.date,
-        start_time: newBookingData.time,
-        duration_minutes: newBookingData.duration,
-        status: newBookingData.status,
-        payment: newBookingData.payment,
-        amount: newBookingData.amount,
-        currency: 'USD',
-        notes: newBookingData.notes,
-        tags: [],
-        reminder_sent: false
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          data: newBookingData
+        })
       })
 
-      if (error || !data) {
-        throw new Error(error?.message || 'Failed to create booking')
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to create booking`)
+      }
+
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create booking')
       }
 
       // Transform and add to UI
+      const booking = result.booking
       const newBooking: Booking = {
-        id: data.id,
-        clientName: data.client_name,
-        service: data.service,
-        date: data.booking_date,
-        time: data.start_time,
-        duration: `${data.duration_minutes} min`,
-        status: data.status as any,
-        payment: data.payment as any,
-        amount: data.amount,
-        email: data.client_email || '',
-        phone: data.client_phone || '',
-        notes: data.notes || ''
+        id: booking.id,
+        clientName: booking.client_name,
+        service: booking.service,
+        date: booking.booking_date,
+        time: booking.booking_time || booking.start_time,
+        duration: booking.duration || '60 min',
+        status: booking.status as any,
+        payment: booking.payment_status || 'awaiting' as any,
+        amount: booking.amount || 0,
+        email: booking.client_email || '',
+        phone: booking.client_phone || '',
+        notes: booking.notes || ''
       }
 
       setBookings(prev => [...prev, newBooking])
 
-      logger.info('Booking created in Supabase successfully', {
-        bookingId: data.id,
-        clientName: data.client_name,
-        service: data.service,
-        date: data.booking_date,
-        time: data.start_time,
-        amount: data.amount,
+      logger.info('Booking created via API successfully', {
+        bookingId: booking.id,
+        clientName: booking.client_name,
+        service: booking.service,
+        date: booking.booking_date,
         userId
       })
 
@@ -301,7 +296,7 @@ export default function UpcomingBookingsPage() {
 
       announce(`New booking created for ${newBooking.clientName}`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to create booking', {
+      logger.error('Failed to create booking via API', {
         error: error.message,
         userId
       })
@@ -345,18 +340,36 @@ export default function UpcomingBookingsPage() {
     if (!editBooking || !userId) return
 
     setIsSaving(true)
-    try {
-      const { updateBooking } = await import('@/lib/bookings-queries')
+    toast.success('Saving booking changes...')
 
-      const { error } = await updateBooking(editBooking.id, {
-        client_name: editForm.clientName,
-        service: editForm.service,
-        booking_date: editForm.date,
-        start_time: editForm.time,
-        notes: editForm.notes
+    try {
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reschedule',
+          bookingId: editBooking.id,
+          data: {
+            clientName: editForm.clientName,
+            service: editForm.service,
+            newDate: editForm.date,
+            newTime: editForm.time,
+            oldDate: editBooking.date,
+            oldTime: editBooking.time,
+            notes: editForm.notes
+          }
+        })
       })
 
-      if (error) throw new Error(error.message)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to update booking`)
+      }
+
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update booking')
+      }
 
       // Update local state
       setBookings(prev =>
@@ -374,12 +387,12 @@ export default function UpcomingBookingsPage() {
         )
       )
 
-      logger.info('Booking updated successfully', { bookingId: editBooking.id })
+      logger.info('Booking updated via API successfully', { bookingId: editBooking.id })
       toast.success(`Booking updated: ${editForm.clientName} - ${editForm.service}`)
       setEditBooking(null)
-    } catch (error) {
-      logger.error('Failed to update booking', { error })
-      toast.error('Failed to update booking')
+    } catch (error: any) {
+      logger.error('Failed to update booking via API', { error: error.message })
+      toast.error('Failed to update booking', { description: error.message })
     } finally {
       setIsSaving(false)
     }
@@ -419,22 +432,29 @@ export default function UpcomingBookingsPage() {
     if (!booking) return
 
     setIsCancelling(true)
-    try {
-      // Dynamic import
-      const { updateBookingStatus, updatePaymentStatus } = await import('@/lib/bookings-queries')
+    toast.success('Cancelling booking...')
 
-      // Update booking status to cancelled
-      const { error: statusError } = await updateBookingStatus(bookingToCancel, 'cancelled')
-      if (statusError) {
-        throw new Error(statusError.message || 'Failed to cancel booking')
+    try {
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cancel',
+          bookingId: bookingToCancel,
+          data: {
+            notes: `Cancelled by user. Previous status: ${booking.status}`
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to cancel booking`)
       }
 
-      // Update payment status if needed
-      if (booking.payment === 'paid') {
-        const { error: paymentError } = await updatePaymentStatus(bookingToCancel, 'refunded')
-        if (paymentError) {
-          throw new Error(paymentError.message || 'Failed to process refund')
-        }
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to cancel booking')
       }
 
       // Optimistic UI update
@@ -451,7 +471,7 @@ export default function UpcomingBookingsPage() {
       )
 
       const refundAmount = booking.payment === 'paid' ? booking.amount : 0
-      logger.info('Booking cancelled in Supabase successfully', {
+      logger.info('Booking cancelled via API successfully', {
         bookingId: bookingToCancel,
         clientName: booking.clientName,
         refundAmount,
@@ -466,7 +486,7 @@ export default function UpcomingBookingsPage() {
 
       announce(`Booking cancelled for ${booking.clientName}`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to cancel booking', {
+      logger.error('Failed to cancel booking via API', {
         error: error.message,
         bookingId: bookingToCancel
       })
@@ -518,19 +538,30 @@ export default function UpcomingBookingsPage() {
     }
 
     setIsSendingReminder(id)
-    try {
-      // Dynamic import for code splitting
-      const { updateBooking } = await import('@/lib/bookings-queries')
+    toast.success('Sending reminder...')
 
-      // Mark reminder as sent in database
-      const { error } = await updateBooking(id, {
-        reminder_sent: true,
-        reminder_sent_at: new Date().toISOString()
+    try {
+      // Use confirm action to trigger reminder email
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'confirm',
+          bookingId: id
+        })
       })
 
-      if (error) throw new Error(error.message)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to send reminder`)
+      }
 
-      logger.info('Reminder sent', {
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send reminder')
+      }
+
+      logger.info('Reminder sent via API', {
         bookingId: id,
         clientName: booking.clientName,
         email: booking.email,
@@ -542,7 +573,7 @@ export default function UpcomingBookingsPage() {
 
       announce(`Reminder sent to ${booking.clientName}`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to send reminder', { error: error.message, bookingId: id })
+      logger.error('Failed to send reminder via API', { error: error.message, bookingId: id })
       toast.error('Failed to send reminder', {
         description: error.message || 'Please try again later'
       })
@@ -630,9 +661,32 @@ export default function UpcomingBookingsPage() {
       return
     }
 
+    toast.success('Saving booking settings...')
+
     try {
-      // In a real implementation, save to user preferences in database
-      logger.info('Booking settings saved', {
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: 'notifications',
+          deadlineReminders: true,
+          quietHoursEnabled: settingsForm.businessHours.start !== '09:00' || settingsForm.businessHours.end !== '17:00',
+          quietHoursStart: settingsForm.businessHours.end,
+          quietHoursEnd: settingsForm.businessHours.start
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to save settings`)
+      }
+
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to save settings')
+      }
+
+      logger.info('Booking settings saved via API', {
         businessHours: settingsForm.businessHours,
         timeZone: settingsForm.timeZone,
         reminderHours: settingsForm.reminderHours,
@@ -643,26 +697,67 @@ export default function UpcomingBookingsPage() {
       setShowSettingsModal(false)
       announce('Booking settings saved', 'polite')
     } catch (error: any) {
-      logger.error('Failed to save settings', { error: error.message })
-      toast.error('Failed to save settings')
+      logger.error('Failed to save settings via API', { error: error.message })
+      toast.error('Failed to save settings', { description: error.message })
     }
   }
 
-  const handleRefresh = () => {
-    const totalBookings = bookings.length
-    const revenue = calculateRevenue(bookings)
+  const handleRefresh = async () => {
+    toast.success('Refreshing bookings...')
 
-    logger.info('Bookings refreshed', {
-      totalBookings,
-      revenue,
-      pending: countByStatus(bookings, 'pending'),
-      confirmed: countByStatus(bookings, 'confirmed'),
-      completed: countByStatus(bookings, 'completed')
-    })
+    try {
+      const response = await fetch('/api/bookings/manage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'list' })
+      })
 
-    toast.success(`${totalBookings} bookings loaded. Revenue: $${revenue}. Status: ${countByStatus(bookings, 'confirmed')} confirmed, ${countByStatus(bookings, 'pending')} pending`)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to refresh bookings`)
+      }
 
-    announce('Bookings refreshed', 'polite')
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to refresh bookings')
+      }
+
+      // Transform API data to UI format
+      const transformedBookings: Booking[] = (result.bookings || []).map((b: any) => ({
+        id: b.id,
+        clientName: b.client_name,
+        service: b.service,
+        date: b.booking_date,
+        time: b.booking_time || b.start_time,
+        duration: b.duration || `${b.duration_minutes || 60} min`,
+        status: b.status as any,
+        payment: b.payment_status || b.payment as any,
+        amount: b.amount || 0,
+        email: b.client_email || '',
+        phone: b.client_phone || '',
+        notes: b.notes || ''
+      }))
+
+      setBookings(transformedBookings)
+
+      const totalBookings = transformedBookings.length
+      const revenue = calculateRevenue(transformedBookings)
+
+      logger.info('Bookings refreshed via API', {
+        totalBookings,
+        revenue,
+        pending: countByStatus(transformedBookings, 'pending'),
+        confirmed: countByStatus(transformedBookings, 'confirmed'),
+        completed: countByStatus(transformedBookings, 'completed')
+      })
+
+      toast.success(`${totalBookings} bookings refreshed. Revenue: $${revenue}. Status: ${countByStatus(transformedBookings, 'confirmed')} confirmed, ${countByStatus(transformedBookings, 'pending')} pending`)
+
+      announce('Bookings refreshed', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to refresh bookings via API', { error: error.message })
+      toast.error('Failed to refresh bookings', { description: error.message })
+    }
   }
 
   // Helper functions

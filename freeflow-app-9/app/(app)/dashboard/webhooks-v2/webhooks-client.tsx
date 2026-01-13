@@ -724,15 +724,35 @@ export default function WebhooksClient({
   // Install integration
   const handleInstallIntegration = async () => {
     if (!selectedIntegration) return
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: `Installing ${selectedIntegration.name}...`,
-        success: `${selectedIntegration.name} installed successfully!`,
-        error: `Failed to install ${selectedIntegration.name}`
+
+    try {
+      toast.loading(`Installing ${selectedIntegration.name}...`)
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'install_integration',
+          integrationId: selectedIntegration.id,
+          name: selectedIntegration.name,
+          events: selectedIntegration.eventsSupported
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to install ${selectedIntegration.name}`)
       }
-    )
-    setShowIntegrationDialog(false)
+
+      toast.success(`${selectedIntegration.name} installed successfully!`)
+      setShowIntegrationDialog(false)
+    } catch (error) {
+      toast.error(`Failed to install ${selectedIntegration.name}`, {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   // Use webhook template
@@ -796,31 +816,67 @@ export default function WebhooksClient({
     try {
       const text = await file.text()
       const config = JSON.parse(text)
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1000)),
-        {
-          loading: 'Importing configuration...',
-          success: `Imported ${Array.isArray(config) ? config.length : 1} webhook(s)`,
-          error: 'Failed to import configuration'
-        }
-      )
+      const webhooksToImport = Array.isArray(config) ? config : [config]
+
+      toast.loading('Importing configuration...')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'import',
+          webhooks: webhooksToImport
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to import configuration')
+      }
+
+      const data = await response.json()
+      toast.success(`Imported ${data.imported || webhooksToImport.length} webhook(s)`)
       setShowImportDialog(false)
     } catch (error) {
-      toast.error('Invalid configuration file')
+      if (error instanceof SyntaxError) {
+        toast.error('Invalid configuration file', { description: 'File must be valid JSON' })
+      } else {
+        toast.error('Failed to import configuration', {
+          description: error instanceof Error ? error.message : 'Unknown error'
+        })
+      }
     }
   }
 
   // Clear all logs
   const handleClearAllLogs = async () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Clearing delivery logs...',
-        success: 'All delivery logs cleared',
-        error: 'Failed to clear logs'
+    try {
+      toast.loading('Clearing delivery logs...')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'clear_logs'
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to clear logs')
       }
-    )
-    setShowClearLogsDialog(false)
+
+      toast.success('All delivery logs cleared')
+      setShowClearLogsDialog(false)
+    } catch (error) {
+      toast.error('Failed to clear logs', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   // Delete all webhooks
@@ -839,15 +895,31 @@ export default function WebhooksClient({
 
   // Reset configuration
   const handleResetConfiguration = async () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Resetting configuration...',
-        success: 'All settings reset to defaults',
-        error: 'Failed to reset configuration'
+    try {
+      toast.loading('Resetting configuration...')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reset_config'
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to reset configuration')
       }
-    )
-    setShowResetConfigDialog(false)
+
+      toast.success('All settings reset to defaults')
+      setShowResetConfigDialog(false)
+    } catch (error) {
+      toast.error('Failed to reset configuration', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   // Copy signing secret
@@ -864,15 +936,36 @@ export default function WebhooksClient({
 
   // Regenerate API key
   const handleRegenerateApiKey = async () => {
-    const newKey = `wh_api_${crypto.randomUUID().replace(/-/g, '').slice(0, 24)}`
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Regenerating API key...',
-        success: 'API key regenerated successfully',
-        error: 'Failed to regenerate API key'
+    try {
+      toast.loading('Regenerating API key...')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'regenerate_api_key'
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to regenerate API key')
       }
-    )
+
+      const data = await response.json()
+      if (data.apiKey) {
+        await navigator.clipboard.writeText(data.apiKey)
+        toast.success('API key regenerated and copied to clipboard')
+      } else {
+        toast.success('API key regenerated successfully')
+      }
+    } catch (error) {
+      toast.error('Failed to regenerate API key', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   // Open test webhook dialog with specific webhook
@@ -884,44 +977,98 @@ export default function WebhooksClient({
   // Send test webhook
   const handleSendTestWebhook = async () => {
     if (!webhookToTest) return
-    toast.promise(
-      (async () => {
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        return { success: true, statusCode: 200, responseTime: 234 }
-      })(),
-      {
-        loading: 'Sending test payload...',
-        success: (data) => `Test successful! Response: ${data.statusCode} (${data.responseTime}ms)`,
-        error: 'Test delivery failed'
+
+    try {
+      toast.loading('Sending test payload...')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'test',
+          webhookId: webhookToTest,
+          eventType: selectedTestEvent,
+          payload: JSON.parse(testPayload)
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Test delivery failed')
       }
-    )
-    setShowTestDialog(false)
-    setWebhookToTest(null)
+
+      const data = await response.json()
+      toast.success(`Test successful! Response: ${data.statusCode || 200} (${data.responseTime || 0}ms)`)
+      setShowTestDialog(false)
+      setWebhookToTest(null)
+    } catch (error) {
+      toast.error('Test delivery failed', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   // Retry single delivery
   const handleRetryDelivery = async (logId: string) => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Retrying delivery...',
-        success: 'Delivery retry queued',
-        error: 'Failed to retry delivery'
+    try {
+      toast.loading('Retrying delivery...')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'retry_delivery',
+          deliveryId: logId
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to retry delivery')
       }
-    )
-    setShowLogDialog(false)
+
+      toast.success('Delivery retry queued')
+      setShowLogDialog(false)
+    } catch (error) {
+      toast.error('Failed to retry delivery', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   // Save settings
   const handleSaveSettings = async () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1000)),
-      {
-        loading: 'Saving settings...',
-        success: 'Settings saved successfully',
-        error: 'Failed to save settings'
+    try {
+      toast.loading('Saving settings...')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_settings',
+          settings: {
+            // Add any settings form data here
+          }
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save settings')
       }
-    )
+
+      toast.success('Settings saved successfully')
+    } catch (error) {
+      toast.error('Failed to save settings', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 
   // Pause all webhooks

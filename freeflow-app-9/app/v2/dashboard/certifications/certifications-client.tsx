@@ -963,17 +963,23 @@ export default function CertificationsClient() {
     }
     setIsSubmitting(true)
     try {
-      // Simulate verification process
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Verify badge via API
+      const res = await fetch('/api/certifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', credentialId: verifyBadgeForm.credentialId, method: verifyBadgeForm.verificationMethod, verifier: verifyBadgeForm.verifierName })
+      })
+      if (!res.ok) throw new Error('Verification failed')
+      const data = await res.json()
 
       const credential = mockCredentials.find(c =>
         c.credentialId.toLowerCase().includes(verifyBadgeForm.credentialId.toLowerCase()) ||
         c.name.toLowerCase().includes(verifyBadgeForm.credentialId.toLowerCase())
       )
 
-      if (credential) {
+      if (credential || data.verified) {
         toast.success('Badge Verified Successfully', {
-          description: `${credential.name} is valid and verified via ${verifyBadgeForm.verificationMethod}`
+          description: `${credential?.name || verifyBadgeForm.credentialId} is valid and verified via ${verifyBadgeForm.verificationMethod}`
         })
       } else {
         toast.success('Verification Complete', {
@@ -1000,8 +1006,13 @@ export default function CertificationsClient() {
   const handleExportReport = async () => {
     setIsSubmitting(true)
     try {
-      // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Generate export via API
+      const res = await fetch('/api/certifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export', format: exportReportForm.format, type: exportReportForm.reportType })
+      })
+      if (!res.ok) throw new Error('Export failed')
 
       const reportTypeLabels = {
         all_credentials: 'All Credentials',

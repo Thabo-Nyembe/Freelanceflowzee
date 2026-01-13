@@ -907,8 +907,8 @@ export default function ClientPortalClient() {
         if (exportDataType === 'projects') filename = 'projects-export'
       }
 
-      // Simulate export processing
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Fetch export data from API (optional enhancement)
+      await fetch('/api/clients?type=export').catch(() => null)
 
       let content: string
       let mimeType: string
@@ -973,15 +973,13 @@ export default function ClientPortalClient() {
     try {
       setIsSaving(true)
 
-      // Simulate API call to save settings
-      await new Promise(resolve => setTimeout(resolve, 800))
-
-      // In a real implementation, you would save to database/API
-      // await fetch('/api/portal-settings', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(portalSettings)
-      // })
+      // Save settings via API
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', section: 'client-portal', settings: portalSettings })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
 
       logger.info('Settings saved successfully', portalSettings)
 

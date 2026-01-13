@@ -2041,8 +2041,8 @@ export default function AppStoreClient() {
               insights={mockAppStoreAIInsights}
               title="App Store Intelligence"
               onInsightAction={(_insight) => toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
+                fetch('/api/ai-assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'process-insight', insightId: _insight.id }) }).then(res => { if (!res.ok) throw new Error('Action failed'); return res.json() }),
+                { loading: `Processing insight...`, success: `Insight action completed`, error: 'Action failed' }
               )}
             />
           </div>

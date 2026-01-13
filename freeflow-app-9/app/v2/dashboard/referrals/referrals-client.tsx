@@ -132,7 +132,14 @@ const referralsActivities = [
 const referralsQuickActions = [
   { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 800)),
+      fetch('/api/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', name: 'New Referral', email: '' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Create failed')
+        return res.json()
+      }),
       {
         loading: 'Creating new referral...',
         success: 'New referral created successfully',
@@ -142,7 +149,20 @@ const referralsQuickActions = [
   }},
   { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1200)),
+      fetch('/api/referrals?action=export').then(async res => {
+        if (!res.ok) throw new Error('Export failed')
+        const data = await res.json()
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `referrals-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        a.remove()
+        return 'Export complete'
+      }),
       {
         loading: 'Exporting referral data...',
         success: 'Referral data exported successfully',
@@ -152,7 +172,10 @@ const referralsQuickActions = [
   }},
   { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 600)),
+      fetch('/api/referrals?action=settings').then(res => {
+        if (!res.ok) throw new Error('Load failed')
+        return res.json()
+      }),
       {
         loading: 'Loading referral settings...',
         success: 'Referral settings loaded',
@@ -584,8 +607,17 @@ export default function ReferralsClient() {
         company: newReferralData.company
       })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Call API to create referral
+      const response = await fetch('/api/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          ...newReferralData
+        })
+      })
+      if (!response.ok) throw new Error('Failed to create referral')
+      const apiData = await response.json()
 
       const newReferral: Referral = {
         id: referrals.length + 1,
@@ -645,8 +677,17 @@ export default function ReferralsClient() {
         clientName: KAZI_CLIENT_DATA.clientInfo.name
       })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Call API to request payout
+      const response = await fetch('/api/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'payout',
+          amount: payoutAmount,
+          method: payoutMethod
+        })
+      })
+      if (!response.ok) throw new Error('Failed to request payout')
 
       setTotalCommission(prev => prev - payoutAmount)
       setPayoutAmount(0)
@@ -680,8 +721,16 @@ export default function ReferralsClient() {
         clientName: KAZI_CLIENT_DATA.clientInfo.name
       })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Call API to save settings
+      const response = await fetch('/api/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save_settings',
+          settings: settingsData
+        })
+      })
+      if (!response.ok) throw new Error('Failed to save settings')
 
       setIsSettingsDialogOpen(false)
       setIsProcessing(false)
@@ -728,8 +777,17 @@ export default function ReferralsClient() {
         referralName: referral?.name
       })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600))
+      // Call API to send reminder
+      const response = await fetch('/api/referrals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send_reminder',
+          referralId,
+          email: referral?.email
+        })
+      })
+      if (!response.ok) throw new Error('Failed to send reminder')
 
       toast.success('Reminder sent!', {
         description: `Email reminder sent to ${referral?.email}`
@@ -757,7 +815,19 @@ export default function ReferralsClient() {
       })
 
       toast.promise(
-        new Promise(resolve => setTimeout(resolve, 1200)),
+        fetch(`/api/referrals?action=export&format=${format}`).then(async res => {
+          if (!res.ok) throw new Error('Export failed')
+          const blob = await res.blob()
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `referrals-export-${new Date().toISOString().split('T')[0]}.${format}`
+          document.body.appendChild(a)
+          a.click()
+          window.URL.revokeObjectURL(url)
+          a.remove()
+          return 'Export complete'
+        }),
         {
           loading: `Generating ${format.toUpperCase()} export...`,
           success: `Referral data exported as ${format.toUpperCase()}`,
@@ -785,7 +855,10 @@ export default function ReferralsClient() {
       })
 
       toast.promise(
-        new Promise(resolve => setTimeout(resolve, 800)),
+        fetch('/api/referrals?action=refresh').then(res => {
+          if (!res.ok) throw new Error('Refresh failed')
+          return res.json()
+        }),
         {
           loading: 'Refreshing data...',
           success: 'Referral data refreshed',

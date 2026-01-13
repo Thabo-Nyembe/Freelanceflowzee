@@ -1028,6 +1028,55 @@ export default function PayrollClient() {
     toast.success('Payroll data refreshed')
   }
 
+  // Load approval queue from API
+  const handleLoadApprovalQueue = async () => {
+    try {
+      const response = await fetch('/api/payroll?action=approval-queue')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load approval queue')
+      }
+
+      if (data.approval_queue && data.approval_queue.length > 0) {
+        toast.success(`${data.total_pending} pay run(s) pending approval`, {
+          description: `Total amount: ${formatCurrency(data.total_amount_pending)}`
+        })
+      } else {
+        toast.info('No pay runs pending approval', {
+          description: 'All pay runs have been processed'
+        })
+      }
+    } catch (error) {
+      console.error('Error loading approval queue:', error)
+      toast.error('Failed to load approval queue', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }
+
+  // Load payroll analytics from API
+  const handleLoadAnalytics = async () => {
+    try {
+      const response = await fetch('/api/payroll?action=analytics')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load analytics')
+      }
+
+      const analytics = data.analytics
+      toast.success('Payroll analytics loaded', {
+        description: `YTD: ${formatCurrency(analytics.total_payroll_ytd)} | ${analytics.pay_runs_completed} completed runs`
+      })
+    } catch (error) {
+      console.error('Error loading analytics:', error)
+      toast.error('Failed to load analytics', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">
@@ -1281,16 +1330,7 @@ export default function PayrollClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
-                onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Loading approval queue...',
-                      success: 'Select a pay run to approve from the list below',
-                      error: 'Failed to load approval queue'
-                    }
-                  )
-                }}
+                onClick={handleLoadApprovalQueue}
               >
                 <CheckCircle className="w-5 h-5" />
                 <span className="text-xs font-medium">Approve</span>
@@ -1314,16 +1354,7 @@ export default function PayrollClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 600)),
-                    {
-                      loading: 'Loading payroll analytics...',
-                      success: 'Payroll analytics ready - view detailed trends and reports',
-                      error: 'Failed to load analytics'
-                    }
-                  )
-                }}
+                onClick={handleLoadAnalytics}
               >
                 <BarChart3 className="w-5 h-5" />
                 <span className="text-xs font-medium">Analytics</span>

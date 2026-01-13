@@ -608,8 +608,13 @@ export default function PerformanceClient() {
         description: `Analyzing ${testUrl}`
       })
 
-      // Simulate audit (in production, this would call a real Lighthouse API)
-      await new Promise(resolve => setTimeout(resolve, 2500))
+      // Call performance API to run test
+      const apiRes = await fetch('/api/performance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run-test', url: testUrl, device: selectedDevice })
+      })
+      if (!apiRes.ok) throw new Error('Failed to run performance test')
 
       // Store performance metric in Supabase
       const { error } = await supabase
@@ -659,8 +664,13 @@ export default function PerformanceClient() {
         description: 'Please wait while we compile your data'
       })
 
-      // Simulate export delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Call performance API to generate export
+      const apiRes = await fetch('/api/performance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'export-report', format: 'json', url: currentTest.url })
+      })
+      if (!apiRes.ok) throw new Error('Failed to generate report')
 
       // Create exportable data
       const exportData = {
@@ -2128,7 +2138,14 @@ export default function PerformanceClient() {
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this project</p>
                           </div>
                           <Button variant="destructive" size="sm" onClick={() => toast.promise(
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
+                            fetch('/api/performance', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ action: 'delete-project' })
+                            }).then(res => {
+                              if (res.status === 403) throw new Error('blocked')
+                              return res.json()
+                            }),
                             {
                               loading: 'Checking permissions...',
                               success: 'Project deleted',
@@ -2531,11 +2548,27 @@ export default function PerformanceClient() {
                 </div>
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   toast.loading('Generating CSV...', { id: 'csv-export' })
-                  setTimeout(() => {
+                  try {
+                    const res = await fetch('/api/performance', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'export-report', format: 'csv' })
+                    })
+                    if (!res.ok) throw new Error('Export failed')
+                    const data = await res.json()
+                    const blob = new Blob([data.content], { type: 'text/csv' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = data.filename
+                    a.click()
+                    URL.revokeObjectURL(url)
                     toast.success('CSV downloaded', { id: 'csv-export', description: 'performance-report.csv saved to Downloads' })
-                  }, 1500)
+                  } catch {
+                    toast.error('Export failed', { id: 'csv-export' })
+                  }
                   setShowExportDataDialog(false)
                 }}
                 className="w-full flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
@@ -2547,11 +2580,27 @@ export default function PerformanceClient() {
                 </div>
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   toast.loading('Generating PDF report...', { id: 'pdf-export' })
-                  setTimeout(() => {
+                  try {
+                    const res = await fetch('/api/performance', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'export-report', format: 'pdf' })
+                    })
+                    if (!res.ok) throw new Error('Export failed')
+                    const data = await res.json()
+                    const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/pdf' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = data.filename
+                    a.click()
+                    URL.revokeObjectURL(url)
                     toast.success('PDF downloaded', { id: 'pdf-export', description: 'performance-report.pdf saved to Downloads' })
-                  }, 2000)
+                  } catch {
+                    toast.error('Export failed', { id: 'pdf-export' })
+                  }
                   setShowExportDataDialog(false)
                 }}
                 className="w-full flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"

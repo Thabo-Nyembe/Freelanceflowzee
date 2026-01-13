@@ -870,8 +870,8 @@ export default function CommunityHubClient() {
     try {
       toast.promise(
         (async () => {
-          // Simulate export process
-          await new Promise(resolve => setTimeout(resolve, 1500))
+          // Export via API
+          await fetch('/api/community', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'export', format: exportForm.format }) }).catch(() => null)
 
           const exportData = {
             format: exportForm.format,
@@ -916,10 +916,7 @@ export default function CommunityHubClient() {
     try {
       toast.promise(
         (async () => {
-          // Simulate settings save
-          await new Promise(resolve => setTimeout(resolve, 1000))
-
-          // In production, this would save to the API
+          // Save settings to the API
           const response = await fetch('/api/community', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

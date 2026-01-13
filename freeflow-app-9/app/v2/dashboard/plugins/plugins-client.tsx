@@ -1081,13 +1081,22 @@ export default function PluginsClient() {
     }
   }, [])
 
-  const handleUpdatePluginInDialog = useCallback((pluginId: string, pluginName: string, newVersion: string) => {
-    // Simulate updating the plugin version
-    toast.loading(`Updating "${pluginName}"...`)
-    setTimeout(() => {
-      toast.dismiss()
-      toast.success(`"${pluginName}" updated to v${newVersion}!`, { description: 'Plugin has been updated successfully.' })
-    }, 1500)
+  const handleUpdatePluginInDialog = useCallback(async (pluginId: string, pluginName: string, newVersion: string) => {
+    toast.promise(
+      fetch('/api/plugins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', pluginId, pluginName, newVersion })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to update plugin')
+        return res.json()
+      }),
+      {
+        loading: `Updating "${pluginName}"...`,
+        success: `"${pluginName}" updated to v${newVersion}!`,
+        error: 'Failed to update plugin'
+      }
+    )
   }, [])
 
   const handleDeletePluginInDialog = useCallback((pluginId: string, pluginName: string) => {
@@ -1218,18 +1227,23 @@ export default function PluginsClient() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Switch checked={plugin.isActivated} onCheckedChange={() => {
-          const action = plugin.isActivated ? 'Deactivating' : 'Activating'
+        <Switch checked={plugin.isActivated} onCheckedChange={async () => {
+          const action = plugin.isActivated ? 'deactivate' : 'activate'
+          const actionLabel = plugin.isActivated ? 'Deactivating' : 'Activating'
           const actionDone = plugin.isActivated ? 'deactivated' : 'activated'
-          toast.loading(`${action} ${plugin.name}...`, { id: `toggle-plugin-${plugin.id}` })
-          setTimeout(() => {
-            toast.success(`${plugin.name} ${actionDone}`, { id: `toggle-plugin-${plugin.id}` })
-          }, 1000)
+          toast.promise(
+            fetch('/api/plugins', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action, pluginId: plugin.id, pluginName: plugin.name })
+            }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+            { loading: `${actionLabel} ${plugin.name}...`, success: `${plugin.name} ${actionDone}`, error: 'Operation failed' }
+          )
         }} />
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleConfigurePlugin(plugin.name) }}>
           <Settings className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) { toast.loading(`Removing ${plugin.name}...`, { id: `remove-plugin-${plugin.id}` }); setTimeout(() => { toast.success(`${plugin.name} removed successfully`, { id: `remove-plugin-${plugin.id}` }) }, 1000) } }}>
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={async (e) => { e.stopPropagation(); if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) { toast.promise(fetch('/api/plugins', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'uninstall', pluginId: plugin.id, pluginName: plugin.name }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }), { loading: `Removing ${plugin.name}...`, success: `${plugin.name} removed successfully`, error: 'Failed to remove plugin' }) } }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -1741,23 +1755,29 @@ export default function PluginsClient() {
                       setShowUpdateHistoryDialog(true)
                       break
                     case 'Backup First':
-                      toast.loading('Creating backup...')
-                      setTimeout(() => {
-                        toast.dismiss()
-                        const backupData = {
-                          timestamp: new Date().toISOString(),
-                          plugins: installedPlugins.map(p => ({ name: p.name, version: p.version }))
-                        }
-                        downloadAsJson(backupData, `plugin-backup-${new Date().toISOString().split('T')[0]}.json`)
-                        toast.success('Backup created successfully', { description: 'Plugin backup file has been downloaded' })
-                      }, 1000)
+                      toast.promise(
+                        fetch('/api/plugins', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'backup' })
+                        }).then(async res => {
+                          if (!res.ok) throw new Error('Failed')
+                          const data = await res.json()
+                          downloadAsJson(data.backup, `plugin-backup-${new Date().toISOString().split('T')[0]}.json`)
+                          return data
+                        }),
+                        { loading: 'Creating backup...', success: 'Backup created successfully', error: 'Failed to create backup' }
+                      )
                       break
                     case 'Security Scan':
-                      toast.loading('Running security scan...')
-                      setTimeout(() => {
-                        toast.dismiss()
-                        toast.success('Security scan completed', { description: 'No vulnerabilities detected in installed plugins' })
-                      }, 2000)
+                      toast.promise(
+                        fetch('/api/plugins', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'security_scan' })
+                        }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
+                        { loading: 'Running security scan...', success: 'Security scan completed - No vulnerabilities detected', error: 'Scan failed' }
+                      )
                       break
                     case 'Schedule':
                       setSettingsTab('updates')
@@ -2088,7 +2108,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => { toast.loading('Saving settings...', { id: 'save-general-settings' }); setTimeout(() => { toast.success('Settings saved successfully', { id: 'save-general-settings' }) }, 1000) }}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => { toast.promise(fetch('/api/plugins', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'save_settings', settings: {} }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }), { loading: 'Saving settings...', success: 'Settings saved successfully', error: 'Failed to save settings' }) }}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -2925,14 +2945,20 @@ export default function PluginsClient() {
                       <Pause className="h-3 w-3" />
                       Deactivate
                     </Button>
-                    <Button size="sm" variant="outline" className="gap-1" onClick={() => {
-                      toast.loading('Updating plugins...')
-                      setTimeout(() => {
-                        toast.dismiss()
-                        toast.success(`Updated ${selectedBulkPlugins.length} plugins`)
-                        setShowBulkActionsDialog(false)
-                        setSelectedBulkPlugins([])
-                      }, 1500)
+                    <Button size="sm" variant="outline" className="gap-1" onClick={async () => {
+                      toast.promise(
+                        fetch('/api/plugins', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'bulk_update', pluginIds: selectedBulkPlugins })
+                        }).then(res => {
+                          if (!res.ok) throw new Error('Failed')
+                          setShowBulkActionsDialog(false)
+                          setSelectedBulkPlugins([])
+                          return res.json()
+                        }),
+                        { loading: 'Updating plugins...', success: `Updated ${selectedBulkPlugins.length} plugins`, error: 'Failed to update plugins' }
+                      )
                     }}>
                       <RefreshCw className="h-3 w-3" />
                       Update
@@ -3142,7 +3168,7 @@ export default function PluginsClient() {
                   <Button variant="outline" className="flex-1" onClick={() => setShowCollectionDialog(false)}>
                     Close
                   </Button>
-                  <Button className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => {
+                  <Button className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600" onClick={async () => {
                     const notInstalled = selectedCollection.plugins.filter(id => {
                       const plugin = mockPlugins.find(p => p.id === id)
                       return plugin && !plugin.isInstalled
@@ -3150,12 +3176,18 @@ export default function PluginsClient() {
                     if (notInstalled.length === 0) {
                       toast.info('All plugins in this collection are already installed')
                     } else {
-                      toast.loading(`Installing ${notInstalled.length} plugins...`)
-                      setTimeout(() => {
-                        toast.dismiss()
-                        toast.success(`Installed ${notInstalled.length} plugins from ${selectedCollection.name}`)
-                        setShowCollectionDialog(false)
-                      }, 2000)
+                      toast.promise(
+                        fetch('/api/plugins', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action: 'install_collection', collectionId: selectedCollection.id, pluginIds: notInstalled, collectionName: selectedCollection.name })
+                        }).then(res => {
+                          if (!res.ok) throw new Error('Failed')
+                          setShowCollectionDialog(false)
+                          return res.json()
+                        }),
+                        { loading: `Installing ${notInstalled.length} plugins...`, success: `Installed ${notInstalled.length} plugins from ${selectedCollection.name}`, error: 'Failed to install plugins' }
+                      )
                     }
                   }}>
                     <Download className="h-4 w-4 mr-2" />

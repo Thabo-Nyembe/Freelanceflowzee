@@ -397,11 +397,12 @@ export default function TeamClient() {
         'Team Member': 'operations'
       }
 
-      // Send invitation via API
-      const inviteResponse = await fetch('/api/team/invites', {
+      // Send invitation via POST /api/team with invite action
+      const inviteResponse = await fetch('/api/team', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'invite',
           email: inviteEmail,
           name: inviteName,
           role: inviteRole,
@@ -413,6 +414,8 @@ export default function TeamClient() {
         const errorData = await inviteResponse.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to send invitation')
       }
+
+      const inviteResult = await inviteResponse.json()
 
       // Save to database
       const result = await createTeamMember(userId, {
@@ -431,7 +434,7 @@ export default function TeamClient() {
 
       // Add to local state with database ID
       const newMember = {
-        id: result.data?.id || `temp_${Date.now()}`,
+        id: result.data?.id || inviteResult.data?.id || `temp_${Date.now()}`,
         name: inviteName,
         role: inviteRole,
         department: roleToDepartment[inviteRole] || 'operations',
@@ -509,7 +512,7 @@ export default function TeamClient() {
     })
   }
 
-  const confirmEditMember = () => {
+  const confirmEditMember = async () => {
     if (!editMemberId || !editMemberName.trim() || !editMemberEmail.trim()) {
       toast.error('Please fill in all required fields')
       return
@@ -518,32 +521,59 @@ export default function TeamClient() {
     const member = teamMembers.find(m => m.id === editMemberId)
     if (!member) return
 
-    setTeamMembers(teamMembers.map(m =>
-      m.id === editMemberId
-        ? {
-            ...m,
-            name: editMemberName,
-            email: editMemberEmail,
-            role: editMemberRole,
-            phone: editMemberPhone,
-            location: editMemberLocation
-          }
-        : m
-    ))
+    try {
+      // Call PUT /api/team to update member
+      const response = await fetch('/api/team', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          memberId: editMemberId,
+          name: editMemberName,
+          email: editMemberEmail,
+          role: editMemberRole,
+          phone: editMemberPhone,
+          location: editMemberLocation
+        })
+      })
 
-    logger.info('Member details updated', {
-      memberId: editMemberId,
-      name: editMemberName,
-      email: editMemberEmail,
-      role: editMemberRole
-    })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to update member')
+      }
 
-    toast.success('Member Updated', {
-      description: `${editMemberName}'s details have been updated`
-    })
+      // Update local state on success
+      setTeamMembers(teamMembers.map(m =>
+        m.id === editMemberId
+          ? {
+              ...m,
+              name: editMemberName,
+              email: editMemberEmail,
+              role: editMemberRole,
+              phone: editMemberPhone,
+              location: editMemberLocation
+            }
+          : m
+      ))
 
-    setShowEditMemberDialog(false)
-    setEditMemberId(null)
+      logger.info('Member details updated', {
+        memberId: editMemberId,
+        name: editMemberName,
+        email: editMemberEmail,
+        role: editMemberRole
+      })
+
+      toast.success('Member Updated', {
+        description: `${editMemberName}'s details have been updated`
+      })
+
+      setShowEditMemberDialog(false)
+      setEditMemberId(null)
+    } catch (error) {
+      logger.error('Failed to update member', { error, memberId: editMemberId })
+      toast.error('Failed to update member', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleRemoveMember = (id: number) => {
@@ -562,11 +592,23 @@ export default function TeamClient() {
 
     setIsRemoving(true)
     try {
-      // Remove member from database
+      // Call DELETE /api/team to remove member
+      const response = await fetch(`/api/team?memberId=${memberToRemove}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to remove member')
+      }
+
+      // Also remove from database
       const result = await deleteTeamMember(memberToRemove.toString(), userId)
 
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to remove member')
+        // Log but don't throw - API deletion was successful
+        logger.warn('Database deletion failed but API deletion succeeded', { error: result.error })
       }
 
       // Update local state
@@ -614,11 +656,16 @@ export default function TeamClient() {
     const previousRole = member.role
 
     try {
-      // Call API to update role
-      const response = await fetch(`/api/team/${changeRoleMemberId}/role`, {
-        method: 'PUT',
+      // Call POST /api/team with update-role action
+      const response = await fetch('/api/team', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: newRole, userId })
+        body: JSON.stringify({
+          action: 'update-role',
+          memberId: changeRoleMemberId,
+          newRole,
+          userId
+        })
       })
 
       if (!response.ok) {
@@ -668,24 +715,47 @@ export default function TeamClient() {
     })
   }
 
-  const confirmSetPermissions = () => {
+  const confirmSetPermissions = async () => {
     if (!permissionsMemberId) return
 
     const member = teamMembers.find(m => m.id === permissionsMemberId)
     if (!member) return
 
-    logger.info('Permissions updated', {
-      memberId: permissionsMemberId,
-      memberName: member.name,
-      permission: selectedPermission
-    })
+    try {
+      // Call POST /api/team with set-permissions action
+      const response = await fetch('/api/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'set-permissions',
+          memberId: permissionsMemberId,
+          permission: selectedPermission
+        })
+      })
 
-    toast.success('Permissions Updated', {
-      description: `${member.name} now has ${selectedPermission} permissions`
-    })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to update permissions')
+      }
 
-    setShowPermissionsDialog(false)
-    setPermissionsMemberId(null)
+      logger.info('Permissions updated', {
+        memberId: permissionsMemberId,
+        memberName: member.name,
+        permission: selectedPermission
+      })
+
+      toast.success('Permissions Updated', {
+        description: `${member.name} now has ${selectedPermission} permissions`
+      })
+
+      setShowPermissionsDialog(false)
+      setPermissionsMemberId(null)
+    } catch (error) {
+      logger.error('Failed to update permissions', { error, memberId: permissionsMemberId })
+      toast.error('Failed to update permissions', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleSendMessage = (id: number) => {
@@ -704,7 +774,7 @@ export default function TeamClient() {
     })
   }
 
-  const confirmSendMessage = () => {
+  const confirmSendMessage = async () => {
     if (!messageMemberId || !messageContent.trim()) {
       toast.error('Please enter a message')
       return
@@ -713,19 +783,42 @@ export default function TeamClient() {
     const member = teamMembers.find(m => m.id === messageMemberId)
     if (!member) return
 
-    logger.info('Message sent', {
-      memberId: messageMemberId,
-      memberName: member.name,
-      messageLength: messageContent.length
-    })
+    try {
+      // Call POST /api/team with send-message action
+      const response = await fetch('/api/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send-message',
+          memberId: messageMemberId,
+          message: messageContent
+        })
+      })
 
-    toast.success('Message Sent', {
-      description: `Message sent to ${member.name}`
-    })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to send message')
+      }
 
-    setShowMessageDialog(false)
-    setMessageMemberId(null)
-    setMessageContent('')
+      logger.info('Message sent', {
+        memberId: messageMemberId,
+        memberName: member.name,
+        messageLength: messageContent.length
+      })
+
+      toast.success('Message Sent', {
+        description: `Message sent to ${member.name}`
+      })
+
+      setShowMessageDialog(false)
+      setMessageMemberId(null)
+      setMessageContent('')
+    } catch (error) {
+      logger.error('Failed to send message', { error, memberId: messageMemberId })
+      toast.error('Failed to send message', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleViewActivity = (id: number) => {
@@ -754,7 +847,7 @@ export default function TeamClient() {
     setShowAssignProjectDialog(true)
   }
 
-  const confirmAssignProject = () => {
+  const confirmAssignProject = async () => {
     if (!assignProjectMemberId || !projectName.trim()) {
       toast.error('Please enter a project name')
       return
@@ -763,24 +856,48 @@ export default function TeamClient() {
     const member = teamMembers.find(m => m.id === assignProjectMemberId)
     if (!member) return
 
-    setTeamMembers(teamMembers.map(m =>
-      m.id === assignProjectMemberId ? { ...m, projects: m.projects + 1 } : m
-    ))
+    try {
+      // Call POST /api/team with assign-project action
+      const response = await fetch('/api/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'assign-project',
+          memberId: assignProjectMemberId,
+          projectName
+        })
+      })
 
-    logger.info('Project assigned to member', {
-      memberId: assignProjectMemberId,
-      memberName: member.name,
-      projectName,
-      newProjectCount: member.projects + 1
-    })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to assign project')
+      }
 
-    toast.success('Project Assigned', {
-      description: `${projectName} assigned to ${member.name} - Total: ${member.projects + 1} projects`
-    })
+      // Update local state on success
+      setTeamMembers(teamMembers.map(m =>
+        m.id === assignProjectMemberId ? { ...m, projects: m.projects + 1 } : m
+      ))
 
-    setShowAssignProjectDialog(false)
-    setAssignProjectMemberId(null)
-    setProjectName('')
+      logger.info('Project assigned to member', {
+        memberId: assignProjectMemberId,
+        memberName: member.name,
+        projectName,
+        newProjectCount: member.projects + 1
+      })
+
+      toast.success('Project Assigned', {
+        description: `${projectName} assigned to ${member.name} - Total: ${member.projects + 1} projects`
+      })
+
+      setShowAssignProjectDialog(false)
+      setAssignProjectMemberId(null)
+      setProjectName('')
+    } catch (error) {
+      logger.error('Failed to assign project', { error, memberId: assignProjectMemberId })
+      toast.error('Failed to assign project', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleViewProjects = (id: number) => {
@@ -882,28 +999,36 @@ export default function TeamClient() {
     }
 
     try {
-      // Send bulk invites via API
-      const response = await fetch('/api/team/invites/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emails: emailList, userId })
-      })
+      // Send bulk invites via POST /api/team with invite action for each email
+      const invitePromises = emailList.map(email =>
+        fetch('/api/team', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'invite',
+            email,
+            name: email.split('@')[0], // Use email prefix as name
+            role: 'Team Member',
+            userId
+          })
+        })
+      )
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Failed to send invitations')
+      const responses = await Promise.all(invitePromises)
+      const successCount = responses.filter(r => r.ok).length
+
+      if (successCount === 0) {
+        throw new Error('Failed to send any invitations')
       }
-
-      const result = await response.json()
 
       logger.info('Bulk invite initiated', {
         emailCount: emailList.length,
         emails: emailList,
-        successCount: result.successCount || emailList.length
+        successCount
       })
 
       toast.success('Bulk Invitations Sent', {
-        description: `${result.successCount || emailList.length} invitation emails sent`
+        description: `${successCount} of ${emailList.length} invitation emails sent`
       })
 
       setShowBulkInviteDialog(false)

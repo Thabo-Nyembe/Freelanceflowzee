@@ -193,12 +193,34 @@ export default function SettingsPage() {
         setEmail(KAZI_CLIENT_DATA.clientInfo.email)
         setPhone(KAZI_CLIENT_DATA.clientInfo.phone)
 
-        // Simulate loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Fetch settings from API
+        try {
+          const response = await fetch('/api/settings')
+          if (response.ok) {
+            const data = await response.json()
+            if (data.settings) {
+              // Apply fetched settings if available
+              if (data.settings.email) setEmail(data.settings.email)
+              if (data.settings.phone) setPhone(data.settings.phone)
+              if (data.settings.language) setLanguage(data.settings.language)
+              if (data.settings.timezone) setTimezone(data.settings.timezone)
+              if (data.settings.notifications) {
+                setNotificationSettings(prev => prev.map(n => ({
+                  ...n,
+                  enabled: data.settings.notifications[n.id] ?? n.enabled
+                })))
+              }
+              if (data.settings.privacy) {
+                setPrivacySettings(prev => prev.map(p => ({
+                  ...p,
+                  enabled: data.settings.privacy[p.id] ?? p.enabled
+                })))
+              }
+            }
+          }
+        } catch (apiError) {
+          logger.warn('Could not fetch settings from API, using defaults', { error: apiError })
+        }
 
         setIsLoading(false)
         announce('Settings loaded successfully', 'polite')
@@ -401,7 +423,174 @@ export default function SettingsPage() {
       clientName: KAZI_CLIENT_DATA.clientInfo.name
     })
 
-    toast.success('Verification email sent! Check your inbox to continue.')
+    toast.success('Sending verification email...')
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'change-password',
+          clientId: KAZI_CLIENT_DATA.clientInfo.name,
+          email,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to initiate password change')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('Verification email sent! Check your inbox to continue.')
+        logger.info('Password change email sent', {
+          clientName: KAZI_CLIENT_DATA.clientInfo.name
+        })
+      } else {
+        throw new Error(result.error || 'Failed to send verification email')
+      }
+    } catch (error: any) {
+      logger.error('Failed to initiate password change', { error })
+      toast.error(`Failed to send verification email: ${error.message || 'Please try again'}`)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 6: DEACTIVATE ACCOUNT
+  // ============================================================================
+
+  const handleDeactivateAccount = async () => {
+    logger.info('Account deactivation initiated', {
+      clientName: KAZI_CLIENT_DATA.clientInfo.name
+    })
+
+    toast.success('Processing deactivation request...')
+
+    try {
+      const response = await fetch('/api/advanced-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'deactivate-account',
+          clientId: KAZI_CLIENT_DATA.clientInfo.name,
+          email,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to initiate account deactivation')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('Deactivation email sent. Check your inbox to confirm.')
+        logger.info('Deactivation email sent', {
+          clientName: KAZI_CLIENT_DATA.clientInfo.name
+        })
+      } else {
+        throw new Error(result.error || 'Failed to send deactivation email')
+      }
+    } catch (error: any) {
+      logger.error('Failed to initiate account deactivation', { error })
+      toast.error(`Failed to process deactivation: ${error.message || 'Please try again'}`)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 7: DELETE ACCOUNT
+  // ============================================================================
+
+  const handleDeleteAccount = async () => {
+    logger.info('Account deletion initiated', {
+      clientName: KAZI_CLIENT_DATA.clientInfo.name
+    })
+
+    toast.success('Processing deletion request...')
+
+    try {
+      const response = await fetch('/api/advanced-settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-account',
+          clientId: KAZI_CLIENT_DATA.clientInfo.name,
+          email,
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to initiate account deletion')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('Verification email sent. Confirm deletion within 24 hours.')
+        logger.info('Deletion verification email sent', {
+          clientName: KAZI_CLIENT_DATA.clientInfo.name
+        })
+      } else {
+        throw new Error(result.error || 'Failed to send deletion verification email')
+      }
+    } catch (error: any) {
+      logger.error('Failed to initiate account deletion', { error })
+      toast.error(`Failed to process deletion: ${error.message || 'Please try again'}`)
+    }
+  }
+
+  // ============================================================================
+  // HANDLER 8: TOGGLE ALL NOTIFICATIONS
+  // ============================================================================
+
+  const handleToggleAllNotifications = async () => {
+    const allEnabled = notificationSettings.every(s => s.enabled)
+    const newSettings = notificationSettings.map(s => ({ ...s, enabled: !allEnabled }))
+
+    setNotificationSettings(newSettings)
+    toast.success(allEnabled ? 'Disabling all notifications...' : 'Enabling all notifications...')
+
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle-all-notifications',
+          clientId: KAZI_CLIENT_DATA.clientInfo.name,
+          notificationSettings: newSettings.map(n => ({
+            id: n.id,
+            enabled: n.enabled
+          })),
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update notification settings')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success(allEnabled ? 'All notifications disabled!' : 'All notifications enabled!')
+        logger.info('All notifications toggled', {
+          clientName: KAZI_CLIENT_DATA.clientInfo.name,
+          allEnabled: !allEnabled
+        })
+      } else {
+        // Revert on failure
+        setNotificationSettings(notificationSettings)
+        throw new Error(result.error || 'Failed to update notifications')
+      }
+    } catch (error: any) {
+      logger.error('Failed to toggle all notifications', { error })
+      setNotificationSettings(notificationSettings)
+      toast.error(`Failed to update notifications: ${error.message || 'Please try again'}`)
+    }
   }
 
   // ============================================================================
@@ -543,13 +732,7 @@ export default function SettingsPage() {
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={() => {
-                const allEnabled = notificationSettings.every(s => s.enabled)
-                setNotificationSettings(
-                  notificationSettings.map(s => ({ ...s, enabled: !allEnabled }))
-                )
-                toast.success(allEnabled ? 'All notifications disabled!' : 'All notifications enabled!')
-              }}
+              onClick={handleToggleAllNotifications}
             >
               {notificationSettings.every(s => s.enabled) ? 'Disable All' : 'Enable All'}
             </Button>
@@ -849,9 +1032,7 @@ export default function SettingsPage() {
                 </p>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    toast.success('Deactivation email sent. Check your inbox to confirm.')
-                  }}
+                  onClick={handleDeactivateAccount}
                 >
                   Deactivate Account
                 </Button>
@@ -865,9 +1046,7 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   className="border-red-300 text-red-600 hover:bg-red-50"
-                  onClick={() => {
-                    toast.success('Verification email sent. Confirm deletion within 24 hours.')
-                  }}
+                  onClick={handleDeleteAccount}
                 >
                   Delete Account
                 </Button>

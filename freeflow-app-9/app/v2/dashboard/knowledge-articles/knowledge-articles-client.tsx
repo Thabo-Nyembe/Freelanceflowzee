@@ -3140,11 +3140,19 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               </div>
             </ScrollArea>
             <div className="flex justify-between pt-4 border-t">
-              <Button variant="outline" onClick={() => {
+              <Button variant="outline" onClick={async () => {
                   toast.loading('Sending invitation...', { id: 'invite-member' })
-                  setTimeout(() => {
+                  try {
+                    const res = await fetch('/api/team', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'invite-member', email: '', role: 'member' })
+                    })
+                    if (!res.ok) throw new Error('Failed to send invitation')
                     toast.success('Invitation sent successfully!', { id: 'invite-member' })
-                  }, 1000)
+                  } catch (error) {
+                    toast.error('Failed to send invitation', { id: 'invite-member' })
+                  }
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Invite Member
@@ -3283,12 +3291,20 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             </div>
             <div className="flex items-center justify-between pt-4 border-t">
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
-              <Button onClick={() => {
+              <Button onClick={async () => {
                   toast.loading('Importing template...', { id: 'import-template' })
-                  setTimeout(() => {
+                  try {
+                    const res = await fetch('/api/knowledge-base', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'create-article', title: 'Imported Template', content: '', type: 'template' })
+                    })
+                    if (!res.ok) throw new Error('Failed to import')
                     toast.success('Template imported successfully!', { id: 'import-template' })
                     setShowImportDialog(false)
-                  }, 1000)
+                  } catch (error) {
+                    toast.error('Failed to import template', { id: 'import-template' })
+                  }
                 }}>
                 <FileCode className="w-4 h-4 mr-2" />
                 Import
@@ -3478,11 +3494,19 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               </div>
             </ScrollArea>
             <div className="flex items-center justify-between pt-4 border-t">
-              <Button variant="outline" onClick={() => {
+              <Button variant="outline" onClick={async () => {
                   toast.loading('Adding category...', { id: 'add-category' })
-                  setTimeout(() => {
+                  try {
+                    const res = await fetch('/api/knowledge-base', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'create-category', name: 'New Category', description: '' })
+                    })
+                    if (!res.ok) throw new Error('Failed to add category')
                     toast.success('Category added successfully!', { id: 'add-category' })
-                  }, 1000)
+                  } catch (error) {
+                    toast.error('Failed to add category', { id: 'add-category' })
+                  }
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Category

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useOrders } from '@/lib/hooks/use-orders'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -1385,9 +1386,22 @@ export default function OrdersClient() {
                   </div>
                   <Button
                     variant="outline"
-                    onClick={() => {
+                    onClick={async () => {
                       toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1500)),
+                        (async () => {
+                          const response = await fetch('/api/orders?type=returns&format=csv')
+                          if (!response.ok) throw new Error('Export failed')
+                          const blob = await response.blob()
+                          const url = window.URL.createObjectURL(blob)
+                          const a = document.createElement('a')
+                          a.href = url
+                          a.download = `returns-export-${new Date().toISOString().split('T')[0]}.csv`
+                          document.body.appendChild(a)
+                          a.click()
+                          window.URL.revokeObjectURL(url)
+                          a.remove()
+                          return 'Export complete'
+                        })(),
                         {
                           loading: 'Exporting returns data...',
                           success: 'Returns data exported successfully',
@@ -1437,7 +1451,18 @@ export default function OrdersClient() {
                               className="bg-green-600"
                               onClick={() => {
                                 toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1200)),
+                                  fetch('/api/orders', {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      action: 'approve_return',
+                                      returnId: ret.id,
+                                      orderId: ret.order_id
+                                    })
+                                  }).then(res => {
+                                    if (!res.ok) throw new Error('Approval failed')
+                                    return res.json()
+                                  }),
                                   {
                                     loading: `Approving return for ${ret.order_number}...`,
                                     success: `Return for ${ret.order_number} approved`,
@@ -1455,7 +1480,18 @@ export default function OrdersClient() {
                               className="text-red-600"
                               onClick={() => {
                                 toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1200)),
+                                  fetch('/api/orders', {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                      action: 'reject_return',
+                                      returnId: ret.id,
+                                      orderId: ret.order_id
+                                    })
+                                  }).then(res => {
+                                    if (!res.ok) throw new Error('Rejection failed')
+                                    return res.json()
+                                  }),
                                   {
                                     loading: `Rejecting return for ${ret.order_number}...`,
                                     success: `Return for ${ret.order_number} rejected`,
@@ -1475,7 +1511,13 @@ export default function OrdersClient() {
                             size="sm"
                             onClick={() => {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1000)),
+                                fetch(`/api/orders?action=generate_label&returnId=${ret.id}`).then(async res => {
+                                  if (!res.ok) throw new Error('Label generation failed')
+                                  const blob = await res.blob()
+                                  const url = window.URL.createObjectURL(blob)
+                                  window.open(url, '_blank')
+                                  return 'Label ready'
+                                }),
                                 {
                                   loading: 'Generating return label...',
                                   success: 'Return label generated',
@@ -1494,10 +1536,16 @@ export default function OrdersClient() {
                             size="sm"
                             onClick={() => {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 800)),
+                                fetch(`/api/orders?action=track&trackingNumber=${ret.tracking_number}`).then(async res => {
+                                  if (!res.ok) throw new Error('Tracking lookup failed')
+                                  const data = await res.json()
+                                  // Copy tracking number to clipboard
+                                  navigator.clipboard.writeText(ret.tracking_number)
+                                  return `Tracking: ${ret.tracking_number} - ${data.status || 'In transit'}`
+                                }),
                                 {
                                   loading: 'Loading tracking info...',
-                                  success: `Tracking: ${ret.tracking_number}`,
+                                  success: (msg) => msg,
                                   error: 'Failed to load tracking'
                                 }
                               )
@@ -2030,7 +2078,14 @@ export default function OrdersClient() {
                             className="border-red-300 text-red-600 hover:bg-red-100"
                             onClick={() => {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 2000)),
+                                fetch('/api/orders', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ action: 'archive_old', olderThanDays: 365 })
+                                }).then(res => {
+                                  if (!res.ok) throw new Error('Archive failed')
+                                  return res.json()
+                                }),
                                 {
                                   loading: 'Archiving old orders...',
                                   success: 'Old orders archived successfully',
@@ -2053,7 +2108,14 @@ export default function OrdersClient() {
                             className="border-red-300 text-red-600 hover:bg-red-100"
                             onClick={() => {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                fetch('/api/orders', {
+                                  method: 'DELETE',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ action: 'delete_test_orders' })
+                                }).then(res => {
+                                  if (!res.ok) throw new Error('Delete failed')
+                                  return res.json()
+                                }),
                                 {
                                   loading: 'Deleting test orders...',
                                   success: 'Test orders deleted successfully',
@@ -2253,14 +2315,27 @@ export default function OrdersClient() {
                       variant="outline"
                       className="flex-1"
                       onClick={() => {
-                        toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1000)),
-                          {
-                            loading: 'Opening order editor...',
-                            success: 'Order editor opened',
-                            error: 'Failed to open editor'
+                        // Open order edit mode
+                        toast.info('Edit Order', {
+                          description: `Editing order ${selectedOrder.order_number}`,
+                          action: {
+                            label: 'Save Changes',
+                            onClick: () => {
+                              toast.promise(
+                                fetch('/api/orders', {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ orderId: selectedOrder.id, action: 'update' })
+                                }).then(res => res.json()),
+                                {
+                                  loading: 'Saving changes...',
+                                  success: 'Order updated',
+                                  error: 'Failed to update'
+                                }
+                              )
+                            }
                           }
-                        )
+                        })
                       }}
                     >
                       <Edit className="w-4 h-4 mr-2" />
@@ -2271,7 +2346,16 @@ export default function OrdersClient() {
                       className="flex-1"
                       onClick={() => {
                         toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1200)),
+                          fetch(`/api/orders?action=print&orderId=${selectedOrder.id}`).then(async res => {
+                            if (!res.ok) throw new Error('Print failed')
+                            const blob = await res.blob()
+                            const url = window.URL.createObjectURL(blob)
+                            const printWindow = window.open(url)
+                            if (printWindow) {
+                              printWindow.onload = () => printWindow.print()
+                            }
+                            return 'Ready'
+                          }),
                           {
                             loading: 'Preparing print preview...',
                             success: 'Print preview ready',
@@ -2287,7 +2371,18 @@ export default function OrdersClient() {
                       className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
                       onClick={() => {
                         toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1500)),
+                          fetch('/api/orders', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              action: 'send_update',
+                              orderId: selectedOrder.id,
+                              customerEmail: selectedOrder.customer_email
+                            })
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Send failed')
+                            return res.json()
+                          }),
                           {
                             loading: 'Sending order update...',
                             success: 'Order update sent to customer',

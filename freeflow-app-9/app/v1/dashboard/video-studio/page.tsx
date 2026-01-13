@@ -337,45 +337,35 @@ export default function VideoStudioPage() {
     }
 
     setIsCreatingProject(true)
-    toast.loading('Creating video project...')
+    toast.success('Creating video project...')
 
     try {
-      let projectId = `proj_${Date.now()}`
-
-      // Create project in database
-      if (userId) {
-        const { createVideoProject } = await import('@/lib/video-studio-queries')
-        const [width, height] = newProject.resolution.split('x').map(Number)
-        const { data: createdProject, error } = await createVideoProject(userId, {
+      // Create project via API
+      const response = await fetch('/api/video/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           title: newProject.title,
           description: newProject.description,
-          status: 'draft',
-          resolution_width: width || 1920,
-          resolution_height: height || 1080,
-          format: newProject.format || 'mp4',
-          duration_seconds: 0
+          resolution: newProject.resolution,
+          format: newProject.format
         })
-        if (error) throw new Error(error.message)
-        if (createdProject?.id) {
-          projectId = createdProject.id
-        }
-        logger.info('Project created in database', { projectId, userId })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create project')
       }
 
-      logger.info('Project created successfully', {
-        projectId,
-        title: newProject.title
-      })
-      toast.dismiss()
+      const data = await response.json()
+      const projectId = data.project?.id || `proj_${Date.now()}`
+
+      logger.info('Project created via API', { projectId, title: newProject.title })
       toast.success('Video project created successfully!')
 
-      // Navigate to UPS after 2 seconds
-      setTimeout(() => {
-        toast.success('Opening Universal Pinpoint System')
-        setTimeout(() => {
-          router.push('/dashboard/collaboration')
-        }, 500)
-      }, 1000)
+      // Navigate to collaboration immediately
+      toast.success('Opening Universal Pinpoint System')
+      router.push('/dashboard/collaboration')
 
       setIsCreateModalOpen(false)
       setNewProject({
@@ -727,67 +717,59 @@ export default function VideoStudioPage() {
       duration: template.duration
     })
 
-    toast.loading('Creating project from template...')
+    toast.success('Creating project from template...')
 
     try {
       setIsCreatingProject(true)
 
-      let newProjectData: VideoProject
-
-      if (userId) {
-        const { createVideoProject } = await import('@/lib/video-studio-queries')
-        const result = await createVideoProject(userId, {
+      // Create project via API
+      const response = await fetch('/api/video/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           title: `${template.name} - New Project`,
           description: template.description || `Created from ${template.name} template`,
           resolution: template.resolution || '1920x1080',
-          format: 'mp4',
-          duration: template.duration,
-          category: template.category,
-          tags: template.tags || [],
-          status: 'draft'
+          template: template.id
         })
+      })
 
-        if (result.error) {
-          throw new Error(result.error)
-        }
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create project from template')
+      }
 
-        newProjectData = result.data as VideoProject
-      } else {
-        // Create local project for non-authenticated state
-        newProjectData = {
-          id: `proj_${Date.now()}`,
-          title: `${template.name} - New Project`,
-          description: template.description || `Created from ${template.name} template`,
-          duration: template.duration,
-          resolution: template.resolution || '1920x1080',
-          format: 'mp4',
-          file_size: 0,
-          thumbnail_path: template.thumbnail_path,
-          status: 'draft',
-          views: 0,
-          likes: 0,
-          comments_count: 0,
-          category: template.category,
-          tags: template.tags || [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
+      const data = await response.json()
+      const newProjectData: VideoProject = data.project || {
+        id: `proj_${Date.now()}`,
+        title: `${template.name} - New Project`,
+        description: template.description || `Created from ${template.name} template`,
+        duration: template.duration,
+        resolution: template.resolution || '1920x1080',
+        format: 'mp4',
+        file_size: 0,
+        thumbnail_path: template.thumbnail_path,
+        status: 'draft',
+        views: 0,
+        likes: 0,
+        comments_count: 0,
+        category: template.category,
+        tags: template.tags || [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
 
       setProjects(prev => [newProjectData, ...prev])
-      logger.info('Project created from template', {
+      logger.info('Project created from template via API', {
         projectId: newProjectData.id,
         title: newProjectData.title,
         templateUsed: template.name
       })
-      toast.dismiss()
       toast.success(`Project created from "${template.name}" template! Opening editor...`)
       announce(`Project created from ${template.name} template`)
 
-      // Navigate to editor after short delay
-      setTimeout(() => {
-        router.push(`/dashboard/video-studio/editor?project=${newProjectData.id}`)
-      }, 1500)
+      // Navigate to editor immediately
+      router.push(`/dashboard/video-studio/editor?project=${newProjectData.id}`)
     } catch (error: any) {
       logger.error('Failed to create project from template', { error, templateId: template.id })
       toast.error('Failed to create project from template', {
