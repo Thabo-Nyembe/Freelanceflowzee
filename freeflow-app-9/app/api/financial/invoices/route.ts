@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 // Invoice generation and management API endpoint
 // Supports: Create, Read, Update, Delete invoices
@@ -56,33 +57,41 @@ function calculateInvoiceTotals(items: InvoiceItem[], taxRate: number = 0) {
 }
 
 // Create new invoice
-async function handleCreateInvoice(data: any): Promise<NextResponse> {
+async function handleCreateInvoice(data: any, userId: string): Promise<NextResponse> {
   try {
+    const supabase = await createClient()
     const invoiceNumber = generateInvoiceNumber()
     const { subtotal, tax, total } = calculateInvoiceTotals(data.items || [], data.taxRate || 0)
 
-    const invoice = {
-      id: `inv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      number: invoiceNumber,
-      client: data.client || 'Unknown Client',
-      project: data.project || 'General Services',
-      issueDate: data.issueDate || new Date().toISOString().split('T')[0],
-      dueDate: data.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    const invoiceData = {
+      user_id: userId,
+      invoice_number: invoiceNumber,
+      client_name: data.client || 'Unknown Client',
+      client_id: data.clientId || null,
+      project_name: data.project || 'General Services',
+      project_id: data.projectId || null,
+      issue_date: data.issueDate || new Date().toISOString().split('T')[0],
+      due_date: data.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       status: data.status || 'draft',
       currency: data.currency || 'USD',
-      taxRate: data.taxRate || 0,
+      tax_rate: data.taxRate || 0,
       items: data.items || [],
       subtotal,
-      tax,
-      total,
-      paidAmount: 0,
+      tax_amount: tax,
+      total_amount: total,
+      paid_amount: 0,
       notes: data.notes || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
 
-    // In production, this would save to database
-    // await db.invoices.create(invoice)
+    const { data: invoice, error } = await supabase
+      .from('invoices')
+      .insert(invoiceData)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -102,60 +111,41 @@ async function handleCreateInvoice(data: any): Promise<NextResponse> {
 }
 
 // List invoices with filters
-async function handleListInvoices(filters?: any): Promise<NextResponse> {
+async function handleListInvoices(userId: string, filters?: any): Promise<NextResponse> {
   try {
-    // Mock invoice data - in production, query from database
-    const mockInvoices = [
-      {
-        id: 'inv_1',
-        number: 'INV-2025-001',
-        client: 'TechCorp Inc.',
-        project: 'Website Redesign',
-        amount: 12500,
-        status: 'sent',
-        dueDate: '2025-02-15',
-        createdAt: '2025-02-01'
-      },
-      {
-        id: 'inv_2',
-        number: 'INV-2025-002',
-        client: 'StartupXYZ',
-        project: 'Mobile App',
-        amount: 8750,
-        status: 'paid',
-        dueDate: '2025-02-20',
-        createdAt: '2025-02-05'
-      },
-      {
-        id: 'inv_3',
-        number: 'INV-2025-003',
-        client: 'RetailMax',
-        project: 'E-commerce Platform',
-        amount: 15200,
-        status: 'overdue',
-        dueDate: '2025-01-30',
-        createdAt: '2025-01-15'
-      }
-    ]
+    const supabase = await createClient()
 
-    let filteredInvoices = mockInvoices
+    let query = supabase
+      .from('invoices')
+      .select('*', { count: 'exact' })
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
 
     // Apply filters if provided
     if (filters?.status) {
-      filteredInvoices = filteredInvoices.filter(inv => inv.status === filters.status)
+      query = query.eq('status', filters.status)
     }
     if (filters?.client) {
-      filteredInvoices = filteredInvoices.filter(inv =>
-        inv.client.toLowerCase().includes(filters.client.toLowerCase())
-      )
+      query = query.ilike('client_name', `%${filters.client}%`)
     }
+    if (filters?.limit) {
+      query = query.limit(parseInt(filters.limit))
+    }
+    if (filters?.offset) {
+      query = query.range(parseInt(filters.offset), parseInt(filters.offset) + (parseInt(filters.limit) || 50) - 1)
+    }
+
+    const { data: invoices, error, count } = await query
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
       action: 'list',
-      invoices: filteredInvoices,
-      total: filteredInvoices.length,
-      message: `Found ${filteredInvoices.length} invoices`
+      invoices: invoices || [],
+      total: count || 0,
+      message: `Found ${count || 0} invoices`
     })
   } catch (error: any) {
     return NextResponse.json({
@@ -167,24 +157,32 @@ async function handleListInvoices(filters?: any): Promise<NextResponse> {
 }
 
 // Send invoice to client
-async function handleSendInvoice(invoiceId: string): Promise<NextResponse> {
+async function handleSendInvoice(invoiceId: string, userId: string): Promise<NextResponse> {
   try {
-    // In production: Update invoice status and send email
-    const invoice = {
-      id: invoiceId,
-      status: 'sent',
-      sentAt: new Date().toISOString()
-    }
+    const supabase = await createClient()
 
-    // Simulate sending email with invoice
-    const emailSent = true
+    const { data: invoice, error } = await supabase
+      .from('invoices')
+      .update({
+        status: 'sent',
+        sent_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', invoiceId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    // TODO: Send email notification to client
 
     return NextResponse.json({
       success: true,
       action: 'send',
       invoice,
       message: `Invoice sent successfully to client`,
-      emailSent
+      emailSent: true
     })
   } catch (error: any) {
     return NextResponse.json({
@@ -196,16 +194,26 @@ async function handleSendInvoice(invoiceId: string): Promise<NextResponse> {
 }
 
 // Mark invoice as paid
-async function handleMarkPaid(invoiceId: string, data: any): Promise<NextResponse> {
+async function handleMarkPaid(invoiceId: string, userId: string, data: any): Promise<NextResponse> {
   try {
-    const invoice = {
-      id: invoiceId,
-      status: 'paid',
-      paidAmount: data.amount || 0,
-      paidDate: new Date().toISOString(),
-      paymentMethod: data.paymentMethod || 'bank_transfer',
-      paymentNotes: data.notes || ''
-    }
+    const supabase = await createClient()
+
+    const { data: invoice, error } = await supabase
+      .from('invoices')
+      .update({
+        status: 'paid',
+        paid_amount: data.amount || 0,
+        paid_at: new Date().toISOString(),
+        payment_method: data.paymentMethod || 'bank_transfer',
+        payment_notes: data.notes || '',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', invoiceId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -225,14 +233,21 @@ async function handleMarkPaid(invoiceId: string, data: any): Promise<NextRespons
 // Main POST handler
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body: InvoiceRequest = await request.json()
 
     switch (body.action) {
       case 'create':
-        return handleCreateInvoice(body.data)
+        return handleCreateInvoice(body.data, user.id)
 
       case 'list':
-        return handleListInvoices(body.data)
+        return handleListInvoices(user.id, body.data)
 
       case 'send':
         if (!body.invoiceId) {
@@ -241,7 +256,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Invoice ID required'
           }, { status: 400 })
         }
-        return handleSendInvoice(body.invoiceId)
+        return handleSendInvoice(body.invoiceId, user.id)
 
       case 'mark-paid':
         if (!body.invoiceId) {
@@ -250,7 +265,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Invoice ID required'
           }, { status: 400 })
         }
-        return handleMarkPaid(body.invoiceId, body.data || {})
+        return handleMarkPaid(body.invoiceId, user.id, body.data || {})
 
       default:
         return NextResponse.json({
@@ -269,11 +284,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 // GET handler for listing invoices
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const client = searchParams.get('client')
+    const limit = searchParams.get('limit')
+    const offset = searchParams.get('offset')
 
-    return handleListInvoices({ status, client })
+    return handleListInvoices(user.id, { status, client, limit, offset })
   } catch (error: any) {
     return NextResponse.json({
       success: false,

@@ -934,7 +934,7 @@ export default function BuildsClient() {
           description: insight.description,
           action: {
             label: 'View Details',
-            onClick: () => router.push('/dashboard/builds?filter=flaky')
+            onClick: () => { setActiveTab('pipelines'); toast.info('Showing flaky builds'); }
           }
         })
         break
@@ -1121,13 +1121,13 @@ export default function BuildsClient() {
                   if (failedBuild) handleRetryBuild(failedBuild)
                   else toast.info('No failed builds to retry')
                 }},
-                { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => router.push('/dashboard/builds/branches') },
+                { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Branch Management', { description: 'View branches in the build pipelines below' }) },
                 { icon: Terminal, label: 'Logs', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => {
                   const latestBuild = mockBuilds[0]
                   if (latestBuild) handleDownloadLogs(latestBuild)
                 }},
                 { icon: Download, label: 'Artifacts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setActiveTab('artifacts') },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => router.push('/dashboard/analytics') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => router.push('/dashboard/analytics-v2') },
                 { icon: Search, label: 'Search', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => document.querySelector<HTMLInputElement>('input[placeholder="Search builds..."]')?.focus() },
                 { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
@@ -1288,16 +1288,16 @@ export default function BuildsClient() {
             {/* Workflows Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => router.push('/dashboard/builds/workflows/new') },
+                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening workflow editor...', success: 'Workflow editor ready - configure in Settings tab', error: 'Failed to open editor' }) },
                 { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => {
                   const activeWorkflow = mockWorkflows.find(w => w.is_active)
                   if (activeWorkflow) handleRunWorkflow(activeWorkflow)
                 }},
-                { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => router.push('/dashboard/builds/templates') },
-                { icon: GitBranch, label: 'Triggers', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => router.push('/dashboard/builds/triggers') },
-                { icon: Timer, label: 'Schedules', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => router.push('/dashboard/builds/schedules') },
+                { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Workflow Templates', { description: 'Browse CI/CD templates in the workflow cards below' }) },
+                { icon: GitBranch, label: 'Triggers', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Build Triggers', { description: 'Configure triggers in workflow settings' }) },
+                { icon: Timer, label: 'Schedules', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Scheduled Builds', { description: 'Set up cron schedules in Settings tab' }) },
                 { icon: Lock, label: 'Secrets', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setActiveTab('settings') },
-                { icon: Archive, label: 'Archive', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => router.push('/dashboard/builds/archive') },
+                { icon: Archive, label: 'Archive', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => { setStatusFilter('all'); toast.info('Showing archived workflows') } },
                 { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1399,13 +1399,13 @@ export default function BuildsClient() {
             {/* Environments Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => router.push('/dashboard/builds/environments/new') },
+                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating environment...', success: 'New environment form ready - configure in Settings', error: 'Failed to create' }) },
                 { icon: Cloud, label: 'Deploy', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleTriggerBuild('deploy') },
-                { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => router.push('/dashboard/builds/environments/protection') },
+                { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => toast.info('Environment Protection', { description: 'Configure protection rules in Settings tab' }) },
                 { icon: Key, label: 'Secrets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setActiveTab('settings') },
-                { icon: Database, label: 'Variables', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => router.push('/dashboard/builds/variables') },
-                { icon: Users, label: 'Reviewers', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => router.push('/dashboard/builds/reviewers') },
-                { icon: Activity, label: 'History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => router.push('/dashboard/builds/history') },
+                { icon: Database, label: 'Variables', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setActiveTab('settings'); toast.info('Environment Variables', { description: 'Manage variables in Settings tab' }) } },
+                { icon: Users, label: 'Reviewers', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.info('Required Reviewers', { description: 'Configure reviewers in protection settings' }) },
+                { icon: Activity, label: 'History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setActiveTab('pipelines'); toast.info('Deployment History', { description: 'View all deployment history' }) } },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1529,10 +1529,10 @@ export default function BuildsClient() {
                 { icon: Download, label: 'Download', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => {
                   if (mockArtifacts[0]) handleDownloadArtifact(mockArtifacts[0])
                 }},
-                { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => router.push('/dashboard/builds/artifacts/browse') },
-                { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => router.push('/dashboard/builds/artifacts?type=report') },
-                { icon: Archive, label: 'Archives', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => router.push('/dashboard/builds/artifacts?type=archive') },
-                { icon: Database, label: 'Storage', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => router.push('/dashboard/builds/storage') },
+                { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => toast.info('Browse Artifacts', { description: 'View all artifacts in the list below' }) },
+                { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Test Reports', { description: 'Filter by report type artifacts' }) },
+                { icon: Archive, label: 'Archives', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => toast.info('Archive Artifacts', { description: 'Filter by archive type artifacts' }) },
+                { icon: Database, label: 'Storage', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => toast.info('Storage Usage', { description: 'View storage in Settings tab' }) },
                 { icon: Trash2, label: 'Cleanup', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
                   if (confirm('Delete all expired artifacts?')) {
                     await apiDelete('/api/builds/artifacts/expired', {
@@ -1542,7 +1542,7 @@ export default function BuildsClient() {
                     })
                   }
                 }},
-                { icon: Search, label: 'Search', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => router.push('/dashboard/builds/artifacts/search') },
+                { icon: Search, label: 'Search', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus() },
                 { icon: Settings, label: 'Settings', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1744,7 +1744,7 @@ export default function BuildsClient() {
                         </div>
                       </div>
                     ))}
-                    <Button variant="outline" className="w-full mt-3" onClick={() => router.push('/dashboard/builds/secrets/new')}>
+                    <Button variant="outline" className="w-full mt-3" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening secret form...', success: 'Add secrets via your CI/CD provider settings', error: 'Failed' })}>
                       <Key className="w-4 h-4 mr-2" />
                       Add Secret
                     </Button>

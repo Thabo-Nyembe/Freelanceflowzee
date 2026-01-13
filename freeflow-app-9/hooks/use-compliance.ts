@@ -190,7 +190,110 @@ export function useCompliance(options: UseComplianceOptions = {}) {
   const [error, setError] = useState<Error | null>(null)
 
   const fetchCompliance = useCallback(async () => {
-    }, [])
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      const response = await fetch('/api/compliance')
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch compliance data')
+      }
+
+      // Map API response to hook state
+      if (result.items) {
+        setRequirements(result.items.map((item: any) => ({
+          id: item.id,
+          framework: item.compliance_type || 'custom',
+          category: item.category || 'General',
+          code: item.code || '',
+          title: item.title || item.name,
+          description: item.description || '',
+          status: item.status || 'pending_review',
+          priority: item.priority || 'medium',
+          controls: item.controls || [],
+          evidence: item.evidence || [],
+          owner: item.owner_id || '',
+          ownerName: item.owner_name || '',
+          dueDate: item.due_date,
+          lastAssessedAt: item.last_assessed_at,
+          nextAssessmentAt: item.next_assessment_at,
+          notes: item.notes || '',
+          remediationPlan: item.remediation_plan,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at
+        })))
+      }
+
+      if (result.audits) {
+        setAssessments(result.audits.map((audit: any) => ({
+          id: audit.id,
+          name: audit.name || audit.audit_name,
+          framework: audit.framework || 'custom',
+          type: audit.audit_type || 'internal',
+          status: audit.status || 'scheduled',
+          assessor: audit.assessor,
+          assessorOrg: audit.assessor_org,
+          scheduledAt: audit.scheduled_at || audit.audit_date,
+          startedAt: audit.started_at,
+          completedAt: audit.completed_at,
+          findings: audit.findings || [],
+          overallScore: audit.overall_score,
+          reportUrl: audit.report_url,
+          createdAt: audit.created_at,
+          updatedAt: audit.updated_at
+        })))
+      }
+
+      if (result.policies) {
+        setPolicies(result.policies.map((policy: any) => ({
+          id: policy.id,
+          name: policy.name || policy.policy_name,
+          description: policy.description || '',
+          category: policy.category || 'General',
+          version: policy.version || '1.0',
+          status: policy.status || 'draft',
+          content: policy.content || '',
+          documentUrl: policy.document_url,
+          frameworks: policy.frameworks || [],
+          owner: policy.owner_id || '',
+          ownerName: policy.owner_name || '',
+          approvedBy: policy.approved_by,
+          approvedAt: policy.approved_at,
+          effectiveDate: policy.effective_date,
+          reviewDate: policy.review_date,
+          acknowledgments: policy.acknowledgments || [],
+          createdAt: policy.created_at,
+          updatedAt: policy.updated_at
+        })))
+      }
+
+      if (result.stats) {
+        setStats({
+          overallScore: result.stats.complianceScore || 0,
+          totalRequirements: result.stats.total || 0,
+          compliantCount: result.stats.compliant || 0,
+          nonCompliantCount: result.stats.nonCompliant || 0,
+          partialCount: result.stats.pending || 0,
+          pendingCount: result.stats.overdue || 0,
+          byFramework: [],
+          upcomingDeadlines: [],
+          recentFindings: [],
+          scoreTrend: []
+        })
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+      // Use mock data as fallback
+      setRequirements(mockRequirements)
+      setAssessments(mockAssessments)
+      setPolicies(mockPolicies)
+      setStats(mockStats)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
 
   const addEvidence = useCallback(async (reqId: string, evidence: Omit<ComplianceEvidence, 'id'>) => {
     const newEvidence: ComplianceEvidence = { id: `ev-${Date.now()}`, ...evidence }

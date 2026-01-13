@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 // Bookings Management API
 // Supports: Create, cancel, reschedule, confirm bookings
@@ -36,41 +37,47 @@ interface BookingRequest {
 function generateBookingId(): string {
   const year = new Date().getFullYear()
   const month = String(new Date().getMonth() + 1).padStart(2, '0')
-  const random = Math.floor(Math.random() + 1000).toString().padStart(3, '0')
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
   return `B-${year}-${month}${random}`
 }
 
 // Create new booking
-async function handleCreateBooking(data: Partial<Booking>): Promise<NextResponse> {
+async function handleCreateBooking(userId: string, data: Partial<Booking>): Promise<NextResponse> {
   try {
-    const booking: Booking = {
-      id: generateBookingId(),
-      clientName: data.clientName || 'Unknown Client',
-      clientEmail: data.clientEmail,
-      clientPhone: data.clientPhone,
+    const supabase = await createClient()
+    const bookingNumber = generateBookingId()
+
+    const bookingData = {
+      user_id: userId,
+      booking_number: bookingNumber,
+      client_name: data.clientName || 'Unknown Client',
+      client_email: data.clientEmail || null,
+      client_phone: data.clientPhone || null,
       service: data.service || 'General Consultation',
-      date: data.date || new Date().toISOString().split('T')[0],
-      time: data.time || '10:00 AM',
+      booking_date: data.date || new Date().toISOString().split('T')[0],
+      booking_time: data.time || '10:00',
       duration: data.duration || '60 min',
       status: 'pending',
-      payment: 'awaiting',
+      payment_status: 'awaiting',
       amount: data.amount || 0,
       notes: data.notes || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
 
-    // In production: Save to database
-    // await db.bookings.create(booking)
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .insert(bookingData)
+      .select()
+      .single()
 
-    // Send confirmation email (in production)
-    // await sendEmail(booking.clientEmail, 'booking-confirmation', booking)
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
       action: 'create',
       booking,
-      message: `Booking ${booking.id} created successfully!`,
+      message: `Booking ${bookingNumber} created successfully!`,
       bookingId: booking.id,
       nextSteps: [
         'Send calendar invite to client',
@@ -87,86 +94,57 @@ async function handleCreateBooking(data: Partial<Booking>): Promise<NextResponse
 }
 
 // List bookings with filters
-async function handleListBookings(filters?: any): Promise<NextResponse> {
+async function handleListBookings(userId: string, filters?: any): Promise<NextResponse> {
   try {
-    // Mock booking data
-    const mockBookings: Booking[] = [
-      {
-        id: 'B-2025-001',
-        clientName: 'Alex Johnson',
-        clientEmail: 'alex@example.com',
-        service: 'Brand Strategy Session',
-        date: '2025-08-07',
-        time: '10:00 AM',
-        duration: '60 min',
-        status: 'confirmed',
-        payment: 'paid',
-        amount: 150
-      },
-      {
-        id: 'B-2025-002',
-        clientName: 'Maria Garcia',
-        clientEmail: 'maria@example.com',
-        service: 'Website Consultation',
-        date: '2025-08-07',
-        time: '2:30 PM',
-        duration: '90 min',
-        status: 'pending',
-        payment: 'awaiting',
-        amount: 225
-      },
-      {
-        id: 'B-2025-003',
-        clientName: 'John Smith',
-        clientEmail: 'john@example.com',
-        service: 'Logo Design Review',
-        date: '2025-08-08',
-        time: '11:00 AM',
-        duration: '45 min',
-        status: 'confirmed',
-        payment: 'paid',
-        amount: 120
-      }
-    ]
+    const supabase = await createClient()
 
-    let filteredBookings = mockBookings
+    let query = supabase
+      .from('bookings')
+      .select('*', { count: 'exact' })
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .order('booking_date', { ascending: true })
 
     // Apply filters
     if (filters?.status && filters.status !== 'all') {
-      filteredBookings = filteredBookings.filter(b => b.status === filters.status)
+      query = query.eq('status', filters.status)
     }
     if (filters?.date) {
-      filteredBookings = filteredBookings.filter(b => b.date === filters.date)
+      query = query.eq('booking_date', filters.date)
     }
     if (filters?.service) {
-      filteredBookings = filteredBookings.filter(b =>
-        b.service.toLowerCase().includes(filters.service.toLowerCase())
-      )
+      query = query.ilike('service', `%${filters.service}%`)
     }
     if (filters?.search) {
-      filteredBookings = filteredBookings.filter(b =>
-        b.clientName.toLowerCase().includes(filters.search.toLowerCase()) ||
-        b.service.toLowerCase().includes(filters.search.toLowerCase()) ||
-        b.id.toLowerCase().includes(filters.search.toLowerCase())
-      )
+      query = query.or(`client_name.ilike.%${filters.search}%,service.ilike.%${filters.search}%,booking_number.ilike.%${filters.search}%`)
+    }
+    if (filters?.limit) {
+      query = query.limit(parseInt(filters.limit))
     }
 
+    const { data: bookings, error, count } = await query
+
+    if (error) throw error
+
+    const bookingsList = bookings || []
+
     const stats = {
-      total: filteredBookings.length,
-      upcoming: filteredBookings.filter(b => ['pending', 'confirmed'].includes(b.status)).length,
-      confirmed: filteredBookings.filter(b => b.status === 'confirmed').length,
-      pending: filteredBookings.filter(b => b.status === 'pending').length,
-      cancelled: filteredBookings.filter(b => b.status === 'cancelled').length,
-      revenue: filteredBookings.filter(b => b.payment === 'paid').reduce((sum, b) => sum + b.amount, 0),
-      pendingRevenue: filteredBookings.filter(b => b.payment === 'awaiting').reduce((sum, b) => sum + b.amount, 0)
+      total: count || 0,
+      upcoming: bookingsList.filter(b => ['pending', 'confirmed'].includes(b.status)).length,
+      confirmed: bookingsList.filter(b => b.status === 'confirmed').length,
+      pending: bookingsList.filter(b => b.status === 'pending').length,
+      cancelled: bookingsList.filter(b => b.status === 'cancelled').length,
+      revenue: bookingsList.filter(b => b.payment_status === 'paid').reduce((sum, b) => sum + (b.amount || 0), 0),
+      pendingRevenue: bookingsList.filter(b => b.payment_status === 'awaiting').reduce((sum, b) => sum + (b.amount || 0), 0)
     }
 
     return NextResponse.json({
       success: true,
       action: 'list',
-      bookings: filteredBookings,
+      bookings: bookingsList,
       stats,
-      message: `Found ${filteredBookings.length} bookings`
+      total: count || 0,
+      message: `Found ${count || 0} bookings`
     })
   } catch (error: any) {
     return NextResponse.json({
@@ -177,17 +155,23 @@ async function handleListBookings(filters?: any): Promise<NextResponse> {
 }
 
 // Confirm booking
-async function handleConfirmBooking(bookingId: string): Promise<NextResponse> {
+async function handleConfirmBooking(userId: string, bookingId: string): Promise<NextResponse> {
   try {
-    const booking = {
-      id: bookingId,
-      status: 'confirmed',
-      updatedAt: new Date().toISOString()
-    }
+    const supabase = await createClient()
 
-    // In production: Update database and send confirmation email
-    // await db.bookings.update(bookingId, booking)
-    // await sendEmail(booking.clientEmail, 'booking-confirmed', booking)
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .update({
+        status: 'confirmed',
+        confirmed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', bookingId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -205,19 +189,24 @@ async function handleConfirmBooking(bookingId: string): Promise<NextResponse> {
 }
 
 // Cancel booking
-async function handleCancelBooking(bookingId: string, reason?: string): Promise<NextResponse> {
+async function handleCancelBooking(userId: string, bookingId: string, reason?: string): Promise<NextResponse> {
   try {
-    const booking = {
-      id: bookingId,
-      status: 'cancelled',
-      cancelReason: reason || 'No reason provided',
-      updatedAt: new Date().toISOString()
-    }
+    const supabase = await createClient()
 
-    // In production: Update database, process refund, send notification
-    // await db.bookings.update(bookingId, booking)
-    // await processRefund(bookingId)
-    // await sendEmail(booking.clientEmail, 'booking-cancelled', booking)
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .update({
+        status: 'cancelled',
+        cancel_reason: reason || 'No reason provided',
+        cancelled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', bookingId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -236,21 +225,26 @@ async function handleCancelBooking(bookingId: string, reason?: string): Promise<
 }
 
 // Reschedule booking
-async function handleRescheduleBooking(bookingId: string, data: any): Promise<NextResponse> {
+async function handleRescheduleBooking(userId: string, bookingId: string, data: any): Promise<NextResponse> {
   try {
-    const booking = {
-      id: bookingId,
-      date: data.newDate,
-      time: data.newTime,
-      previousDate: data.oldDate,
-      previousTime: data.oldTime,
-      rescheduledAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+    const supabase = await createClient()
 
-    // In production: Update database and send notifications
-    // await db.bookings.update(bookingId, booking)
-    // await sendEmail(booking.clientEmail, 'booking-rescheduled', booking)
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .update({
+        booking_date: data.newDate,
+        booking_time: data.newTime,
+        previous_date: data.oldDate,
+        previous_time: data.oldTime,
+        rescheduled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', bookingId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -268,16 +262,25 @@ async function handleRescheduleBooking(bookingId: string, data: any): Promise<Ne
 }
 
 // Complete booking
-async function handleCompleteBooking(bookingId: string, data?: any): Promise<NextResponse> {
+async function handleCompleteBooking(userId: string, bookingId: string, data?: any): Promise<NextResponse> {
   try {
-    const booking = {
-      id: bookingId,
-      status: 'completed',
-      completedAt: new Date().toISOString(),
-      feedback: data?.feedback,
-      rating: data?.rating,
-      updatedAt: new Date().toISOString()
-    }
+    const supabase = await createClient()
+
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        feedback: data?.feedback || null,
+        rating: data?.rating || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', bookingId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -300,6 +303,13 @@ async function handleCompleteBooking(bookingId: string, data?: any): Promise<Nex
 // Main POST handler
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body: BookingRequest = await request.json()
 
     switch (body.action) {
@@ -310,10 +320,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Booking data required'
           }, { status: 400 })
         }
-        return handleCreateBooking(body.data)
+        return handleCreateBooking(user.id, body.data)
 
       case 'list':
-        return handleListBookings(body.filters)
+        return handleListBookings(user.id, body.filters)
 
       case 'confirm':
         if (!body.bookingId) {
@@ -322,7 +332,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Booking ID required'
           }, { status: 400 })
         }
-        return handleConfirmBooking(body.bookingId)
+        return handleConfirmBooking(user.id, body.bookingId)
 
       case 'cancel':
         if (!body.bookingId) {
@@ -331,7 +341,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Booking ID required'
           }, { status: 400 })
         }
-        return handleCancelBooking(body.bookingId, body.data?.notes)
+        return handleCancelBooking(user.id, body.bookingId, body.data?.notes)
 
       case 'reschedule':
         if (!body.bookingId || !body.data) {
@@ -340,7 +350,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Booking ID and new date/time required'
           }, { status: 400 })
         }
-        return handleRescheduleBooking(body.bookingId, body.data)
+        return handleRescheduleBooking(user.id, body.bookingId, body.data)
 
       case 'complete':
         if (!body.bookingId) {
@@ -349,7 +359,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             error: 'Booking ID required'
           }, { status: 400 })
         }
-        return handleCompleteBooking(body.bookingId, body.data)
+        return handleCompleteBooking(user.id, body.bookingId, body.data)
 
       default:
         return NextResponse.json({
@@ -368,12 +378,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 // GET handler
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const date = searchParams.get('date')
     const search = searchParams.get('search')
+    const limit = searchParams.get('limit')
 
-    return handleListBookings({ status, date, search })
+    return handleListBookings(user.id, { status, date, search, limit })
   } catch (error: any) {
     return NextResponse.json({
       success: false,

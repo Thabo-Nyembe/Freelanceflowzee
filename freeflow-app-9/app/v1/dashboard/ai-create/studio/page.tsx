@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { AICreate } from '@/components/ai/ai-create'
 import { Card } from '@/components/ui/card'
 import { toast } from 'sonner'
@@ -24,12 +23,11 @@ import {
 const logger = createFeatureLogger('AI-Create-Studio')
 
 export default function StudioPage() {
-  const router = useRouter()
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [_isProcessing, setIsProcessing] = useState(false)
   const [savedKeys, setSavedKeys] = useState<Record<string, string>>({})
-  const [activeProvider, setActiveProvider] = useState('openai')
+  const [_activeProvider, setActiveProvider] = useState('openai')
 
   // Load saved API keys and preferences from database
   useEffect(() => {
@@ -340,9 +338,9 @@ export default function StudioPage() {
 
   // Configure default settings
   const handleConfigureDefaults = useCallback(async () => {
-    router.push('/dashboard/ai-create/settings')
-    logger.info('Navigating to settings')
-  }, [router])
+    toast.info('Default Settings', { description: 'Configure API defaults in the settings panel' })
+    logger.info('Showing settings info')
+  }, [])
 
   // Manage API permissions - REAL API call to fetch permissions
   const handleManagePermissions = useCallback(async () => {
@@ -381,9 +379,9 @@ export default function StudioPage() {
 
   // View generation history
   const handleViewHistory = useCallback(() => {
-    router.push('/dashboard/ai-create/history')
-    logger.info('Navigating to history')
-  }, [router])
+    toast.info('Generation History', { description: 'View your AI generation logs in the dashboard' })
+    logger.info('Showing history info')
+  }, [])
 
   // Optimize settings for performance - REAL database update
   const handleOptimizeSettings = useCallback(async () => {
@@ -558,9 +556,9 @@ export default function StudioPage() {
 
   // Compare AI providers
   const handleCompareProviders = useCallback(() => {
-    router.push('/dashboard/ai-create/compare')
-    logger.info('Navigating to compare')
-  }, [router])
+    toast.info('Provider Comparison', { description: 'OpenAI (GPT-4) | Anthropic (Claude) | Google (Gemini) - Compare features in docs' })
+    logger.info('Showing comparison info')
+  }, [])
 
   return (
     <Card className="p-6">

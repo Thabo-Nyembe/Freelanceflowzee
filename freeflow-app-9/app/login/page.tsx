@@ -43,8 +43,6 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      console.log('🔐 Starting login process...')
-
       // Use NextAuth for login (creates proper session for middleware)
       const result = await signIn('credentials', {
         email: formData.email,
@@ -52,20 +50,15 @@ export default function LoginPage() {
         redirect: false, // Handle redirect manually
       })
 
-      console.log('📡 Login result:', result)
-
       if (result?.error) {
-        console.error('❌ Login error:', result.error)
         throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error)
       }
 
       if (!result?.ok) {
-        console.error('❌ Login failed')
         throw new Error('Invalid email or password')
       }
 
       // Success! NextAuth session is now established
-      console.log('✅ Login successful, redirecting to dashboard...')
       toast.success('Login successful!')
 
       // Redirect to dashboard
@@ -73,9 +66,9 @@ export default function LoginPage() {
         router.push('/dashboard')
       }, 500)
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error)
-      toast.error(error.message || 'Invalid email or password')
+      toast.error(error instanceof Error ? error.message : 'Invalid email or password')
       setIsLoading(false)
     }
   }
@@ -267,7 +260,7 @@ export default function LoginPage() {
               {/* Sign Up Link */}
               <div className="text-center pt-4 border-t border-slate-700">
                 <p className="text-sm text-gray-400">
-                  Don't have an account?{' '}
+                  Don&apos;t have an account?{' '}
                   <Link href="/signup" className="font-medium text-blue-400 hover:text-blue-300 inline-flex items-center gap-1">
                     Sign up for free
                     <ArrowRight className="h-3 w-3" />

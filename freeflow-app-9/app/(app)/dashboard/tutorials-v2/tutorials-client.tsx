@@ -507,7 +507,7 @@ const getQuickActions = (router: ReturnType<typeof useRouter>) => [
 
 export default function TutorialsClient({ initialTutorials, initialStats }: TutorialsClientProps) {
   const router = useRouter()
-  const { tutorials, stats } = useTutorials(initialTutorials, initialStats)
+  const { tutorials: _tutorials, stats: _stats } = useTutorials(initialTutorials, initialStats)
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<CourseCategory | 'all'>('all')
@@ -517,7 +517,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const [activeChapter, setActiveChapter] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [showGoalDialog, setShowGoalDialog] = useState(false)
-  const [showAchievementDialog, setShowAchievementDialog] = useState(false)
+  const [_showAchievementDialog, _setShowAchievementDialog] = useState(false)
 
   // Sort and filter states for quick actions
   const [sortBy, setSortBy] = useState<'default' | 'top-rated' | 'newest' | 'trending' | 'popular'>('default')
@@ -645,7 +645,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     )
   }, [router])
 
-  const handlePublishTutorial = useCallback(async (tutorialId: string, tutorialName: string) => {
+  const _handlePublishTutorial = useCallback(async (tutorialId: string, tutorialName: string) => {
     toast.promise(
       fetch(`/api/tutorials/${tutorialId}/publish`, {
         method: 'PUT',
@@ -845,7 +845,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     // Navigate to payment settings
     toast.promise(
       (async () => {
-        router.push('/dashboard/settings/billing')
+        router.push('/dashboard/billing-v2')
         return { success: true }
       })(),
       {
@@ -989,7 +989,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     setShowGoalDialog(false)
   }, [])
 
-  const handleSaveProgress = useCallback(async (tutorialId: string, lessonId: string, progress: number) => {
+  const _handleSaveProgress = useCallback(async (tutorialId: string, lessonId: string, progress: number) => {
     toast.promise(
       fetch('/api/tutorials/progress', {
         method: 'PUT',
@@ -1029,7 +1029,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     }
   }, [])
 
-  const handleRateTutorial = useCallback(async (tutorialId: string, rating: number, review?: string) => {
+  const _handleRateTutorial = useCallback(async (tutorialId: string, rating: number, review?: string) => {
     toast.promise(
       fetch('/api/tutorials/ratings', {
         method: 'POST',
@@ -1241,7 +1241,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             </TabsList>
 
             <div className="flex items-center gap-3">
-              <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value as any)} className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+              <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value as CourseLevel | 'all')} className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
                 <option value="all">All Levels</option>
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
@@ -1324,7 +1324,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                 <span className="text-sm font-medium text-rose-700 dark:text-rose-400">Active Filters:</span>
                 {searchQuery && (
                   <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 cursor-pointer" onClick={() => setSearchQuery('')}>
-                    Search: "{searchQuery}" <span className="ml-1">x</span>
+                    Search: &quot;{searchQuery}&quot; <span className="ml-1">x</span>
                   </Badge>
                 )}
                 {sortBy !== 'default' && (
@@ -1936,7 +1936,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                           <div>
                             <div className="font-medium">Streak Reminders</div>
-                            <div className="text-sm text-gray-500">Don't break your streak!</div>
+                            <div className="text-sm text-gray-500">Don&apos;t break your streak!</div>
                           </div>
                           <Switch defaultChecked />
                         </div>
@@ -2288,7 +2288,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                           <div>
                             <div className="font-medium">Login Alerts</div>
-                            <div className="text-sm text-gray-500">Email me when there's a new login</div>
+                            <div className="text-sm text-gray-500">Email me when there&apos;s a new login</div>
                           </div>
                           <Switch defaultChecked />
                         </div>
@@ -2472,13 +2472,13 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
                   <TabsContent value="overview" className="space-y-6">
                     <div>
-                      <h3 className="font-semibold mb-3">What you'll learn</h3>
+                      <h3 className="font-semibold mb-3">What you&apos;ll learn</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {selectedCourse.whatYouLearn.map((item, i) => (<div key={i} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />{item}</div>))}
                       </div>
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-3">Skills you'll gain</h3>
+                      <h3 className="font-semibold mb-3">Skills you&apos;ll gain</h3>
                       <div className="flex flex-wrap gap-2">{selectedCourse.skills.map(skill => (<Badge key={skill} variant="outline">{skill}</Badge>))}</div>
                     </div>
                     <div>
