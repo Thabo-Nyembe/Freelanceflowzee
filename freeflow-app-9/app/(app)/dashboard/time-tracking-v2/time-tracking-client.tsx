@@ -835,11 +835,7 @@ export default function TimeTrackingClient() {
     }
 
     toast.promise(
-      (async () => {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        return invoice
-      })(),
+      fetch(`/api/time-tracking/invoices/${invoice.id}/send`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); return invoice; }),
       {
         loading: `Sending invoice ${invoice.number} to ${invoice.client}...`,
         success: (inv) => `Invoice ${inv.number} sent successfully to ${inv.client}`,
@@ -851,11 +847,7 @@ export default function TimeTrackingClient() {
   // Real Update Billing Handler - saves billing information
   const handleUpdateBilling = async () => {
     toast.promise(
-      (async () => {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 800))
-        return billingFormData
-      })(),
+      fetch('/api/time-tracking/billing', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(billingFormData) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
       {
         loading: 'Updating billing information...',
         success: 'Billing information updated successfully',
@@ -915,11 +907,7 @@ export default function TimeTrackingClient() {
     }
 
     toast.promise(
-      (async () => {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        return completedProjects.length
-      })(),
+      fetch('/api/time-tracking/projects/archive', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ projectIds: completedProjects.map(p => p.id) }) }).then(res => { if (!res.ok) throw new Error('Failed'); return completedProjects.length; }),
       {
         loading: `Archiving ${completedProjects.length} completed projects...`,
         success: (count) => `Archived ${count} projects successfully`,
@@ -934,13 +922,9 @@ export default function TimeTrackingClient() {
       return
     }
 
+    const count = dbTimeEntries?.length || mockEntries.length
     toast.promise(
-      (async () => {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        const count = dbTimeEntries?.length || mockEntries.length
-        return count
-      })(),
+      fetch('/api/time-tracking/entries/clear', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); return count; }),
       {
         loading: 'Clearing all time entries...',
         success: (count) => `Cleared ${count} time entries`,
@@ -956,11 +940,7 @@ export default function TimeTrackingClient() {
 
   const confirmDeleteWorkspace = async () => {
     toast.promise(
-      (async () => {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000))
-        return true
-      })(),
+      fetch('/api/time-tracking/workspace', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
       {
         loading: 'Deleting workspace...',
         success: 'Workspace deletion initiated. You will be redirected shortly.',
@@ -1843,7 +1823,7 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4 text-gray-500">{request.startDate} - {request.endDate}</td>
                           <td className="px-4 py-4 font-medium">{request.hours}h</td>
                           <td className="px-4 py-4"><Badge className={getStatusColor(request.status)}>{request.status}</Badge></td>
-                          <td className="px-4 py-4">{request.status === 'pending' && <div className="flex gap-1"><Button variant="ghost" size="icon" className="text-green-600" onClick={async () => { try { toast.loading('Approving time off request...'); await new Promise(r => setTimeout(r, 100)); toast.dismiss(); toast.success(`Time off request for ${request.userName} approved`); } catch { toast.error('Failed to approve request'); } }}><Check className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="text-red-600" onClick={async () => { try { toast.loading('Rejecting time off request...'); await new Promise(r => setTimeout(r, 100)); toast.dismiss(); toast.success(`Time off request for ${request.userName} rejected`); } catch { toast.error('Failed to reject request'); } }}><X className="h-4 w-4" /></Button></div>}</td>
+                          <td className="px-4 py-4">{request.status === 'pending' && <div className="flex gap-1"><Button variant="ghost" size="icon" className="text-green-600" onClick={() => { toast.promise(fetch(`/api/time-tracking/time-off/${request.id}/approve`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: 'Approving time off request...', success: `Time off request for ${request.userName} approved`, error: 'Failed to approve request' }); }}><Check className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="text-red-600" onClick={() => { toast.promise(fetch(`/api/time-tracking/time-off/${request.id}/reject`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: 'Rejecting time off request...', success: `Time off request for ${request.userName} rejected`, error: 'Failed to reject request' }); }}><X className="h-4 w-4" /></Button></div>}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -2479,12 +2459,8 @@ export default function TimeTrackingClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm" onClick={async () => {
-                              toast.loading(`Syncing ${integration.name}...`, { id: `sync-${integration.name}` })
-                              try {
-                                await new Promise(r => setTimeout(r, 1200))
-                                toast.success(`${integration.name} synced`, { id: `sync-${integration.name}`, description: `${integration.syncedItems} items updated` })
-                              } catch { toast.error('Sync failed', { id: `sync-${integration.name}` }) }
+                              <Button variant="ghost" size="sm" onClick={() => {
+                              toast.promise(fetch(`/api/time-tracking/integrations/${integration.id}/sync`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }), { loading: `Syncing ${integration.name}...`, success: `${integration.name} synced`, error: 'Sync failed' })
                             }}><RefreshCw className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="sm" className="text-red-500" onClick={() => { if (confirm(`Disconnect ${integration.name}? This will stop syncing data.`)) { toast.success(`${integration.name} disconnected`); } }}><X className="h-4 w-4" /></Button>
                             </div>
@@ -2631,10 +2607,7 @@ export default function TimeTrackingClient() {
               onInsightAction={(insight) => {
                 if (insight.type === 'warning') {
                   toast.promise(
-                    (async () => {
-                      await new Promise(r => setTimeout(r, 500))
-                      return insight
-                    })(),
+                    fetch(`/api/time-tracking/insights/${insight.id}/acknowledge`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); return insight; }),
                     { loading: 'Reviewing insight...', success: `Acknowledged: ${insight.title}`, error: 'Failed to process insight' }
                   )
                 } else if (insight.type === 'success') {
@@ -2743,21 +2716,7 @@ export default function TimeTrackingClient() {
                 return
               }
               toast.promise(
-                (async () => {
-                  const entries = dbTimeEntries || []
-                  const filteredEntries = entries.filter((e: any) => {
-                    const matchProject = !invoiceFormData.projectId || e.project_id === invoiceFormData.projectId
-                    const matchBillable = e.is_billable
-                    const entryDate = new Date(e.start_time)
-                    const matchFromDate = !invoiceFormData.fromDate || entryDate >= new Date(invoiceFormData.fromDate)
-                    const matchToDate = !invoiceFormData.toDate || entryDate <= new Date(invoiceFormData.toDate)
-                    return matchProject && matchBillable && matchFromDate && matchToDate
-                  })
-                  const totalHours = filteredEntries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0)
-                  const totalAmount = filteredEntries.reduce((sum: number, e: any) => sum + (e.billable_amount || 0), 0)
-                  await new Promise(r => setTimeout(r, 800))
-                  return { entries: filteredEntries.length, hours: totalHours, amount: totalAmount }
-                })(),
+                fetch('/api/time-tracking/invoices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(invoiceFormData) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }),
                 {
                   loading: 'Generating invoice...',
                   success: (data) => `Invoice created: ${data.entries} entries, ${data.hours.toFixed(1)}h, $${data.amount.toFixed(2)}`,
@@ -2789,10 +2748,7 @@ export default function TimeTrackingClient() {
                 return
               }
               toast.promise(
-                (async () => {
-                  await new Promise(r => setTimeout(r, 800))
-                  return clientFormData.name
-                })(),
+                fetch(selectedClient ? `/api/time-tracking/clients/${selectedClient.id}` : '/api/time-tracking/clients', { method: selectedClient ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(clientFormData) }).then(res => { if (!res.ok) throw new Error('Failed'); return clientFormData.name; }),
                 {
                   loading: selectedClient ? 'Updating client...' : 'Creating client...',
                   success: (name) => `${selectedClient ? 'Updated' : 'Created'} client: ${name}`,
@@ -2828,10 +2784,7 @@ export default function TimeTrackingClient() {
                 return
               }
               toast.promise(
-                (async () => {
-                  await new Promise(r => setTimeout(r, 500))
-                  return tagFormData.name
-                })(),
+                fetch('/api/time-tracking/tags', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(tagFormData) }).then(res => { if (!res.ok) throw new Error('Failed'); return tagFormData.name; }),
                 {
                   loading: 'Creating tag...',
                   success: (name) => `Tag "${name}" created successfully`,
@@ -2882,10 +2835,7 @@ export default function TimeTrackingClient() {
                 return
               }
               toast.promise(
-                (async () => {
-                  await new Promise(r => setTimeout(r, 800))
-                  return reportFormData.name
-                })(),
+                fetch('/api/time-tracking/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reportFormData) }).then(res => { if (!res.ok) throw new Error('Failed'); return reportFormData.name; }),
                 {
                   loading: 'Saving report...',
                   success: (name) => `Report "${name}" saved successfully${reportFormData.isScheduled ? ' (scheduled)' : ''}`,
@@ -2935,10 +2885,7 @@ export default function TimeTrackingClient() {
                   return
                 }
                 toast.promise(
-                  (async () => {
-                    await new Promise(resolve => setTimeout(resolve, 800))
-                    return projectFormData.name
-                  })(),
+                  fetch('/api/time-tracking/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(projectFormData) }).then(res => { if (!res.ok) throw new Error('Failed'); return projectFormData.name; }),
                   {
                     loading: 'Creating project...',
                     success: (name) => `Project "${name}" created successfully`,
@@ -3015,10 +2962,7 @@ export default function TimeTrackingClient() {
             <div className="grid grid-cols-3 gap-4 py-4">
               <Card className="cursor-pointer hover:border-amber-500 transition-colors" onClick={() => {
                 toast.promise(
-                  (async () => {
-                    await new Promise(resolve => setTimeout(resolve, 1000))
-                    return 'Starter'
-                  })(),
+                  fetch('/api/time-tracking/billing/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan: 'starter' }) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                   {
                     loading: 'Switching to Starter plan...',
                     success: 'Plan changed to Starter ($8/user/mo)',

@@ -2989,17 +2989,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowBulkImportDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-green-500 to-teal-500 text-white" onClick={async () => {
-                toast.loading('Importing shipments...', { id: 'bulk-import' })
-                try {
-                  // Simulate import with delay
-                  await new Promise(r => setTimeout(r, 1500))
-                  await fetchShipments()
-                  toast.success('Import complete', { id: 'bulk-import', description: 'Shipments imported successfully' })
-                  setShowBulkImportDialog(false)
-                } catch {
-                  toast.error('Import failed', { id: 'bulk-import' })
-                }
+              <Button className="bg-gradient-to-r from-green-500 to-teal-500 text-white" onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/import', { method: 'POST' }).then(async res => { if (!res.ok) throw new Error('Failed'); await fetchShipments(); setShowBulkImportDialog(false); }),
+                  { loading: 'Importing shipments...', success: 'Import complete', error: 'Import failed' }
+                )
               }}>Import</Button>
             </div>
           </DialogContent>
@@ -3030,13 +3024,12 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPrintLabelsDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={async () => {
-                toast.loading('Preparing labels for printing...', { id: 'print-labels' })
-                await new Promise(r => setTimeout(r, 1000))
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => {
                 const pendingCount = shipments.filter(s => s.status === 'pending').length
-                window.print()
-                toast.success('Print job sent', { id: 'print-labels', description: `${pendingCount} labels sent to printer` })
-                setShowPrintLabelsDialog(false)
+                toast.promise(
+                  fetch('/api/shipping/labels/print', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); window.print(); setShowPrintLabelsDialog(false); }),
+                  { loading: 'Preparing labels for printing...', success: `${pendingCount} labels sent to printer`, error: 'Failed to prepare labels' }
+                )
               }}>Print All</Button>
             </div>
           </DialogContent>
@@ -3105,17 +3098,12 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowBatchUpdateDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-pink-500 to-rose-500 text-white" onClick={async () => {
-                toast.loading('Applying batch update...', { id: 'batch-update' })
-                try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  const pendingCount = mockShipments.filter(s => s.status === 'pending').length
-                  await fetchShipments()
-                  toast.success('Batch update applied', { id: 'batch-update', description: `${pendingCount} shipments updated` })
-                  setShowBatchUpdateDialog(false)
-                } catch {
-                  toast.error('Batch update failed', { id: 'batch-update' })
-                }
+              <Button className="bg-gradient-to-r from-pink-500 to-rose-500 text-white" onClick={() => {
+                const pendingCount = mockShipments.filter(s => s.status === 'pending').length
+                toast.promise(
+                  fetch('/api/shipping/batch-update', { method: 'POST' }).then(async res => { if (!res.ok) throw new Error('Failed'); await fetchShipments(); setShowBatchUpdateDialog(false); }),
+                  { loading: 'Applying batch update...', success: `${pendingCount} shipments updated`, error: 'Batch update failed' }
+                )
               }}>Update All</Button>
             </div>
           </DialogContent>
@@ -3240,15 +3228,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowBatchLabelsDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Creating batch labels...', { id: 'batch-labels' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  toast.success('Batch labels created', { id: 'batch-labels', description: `${pendingOrders.length} labels generated` })
-                  setShowBatchLabelsDialog(false)
-                } catch {
-                  toast.error('Failed to create labels', { id: 'batch-labels' })
-                }
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/labels/batch', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); setShowBatchLabelsDialog(false); }),
+                  { loading: 'Creating batch labels...', success: `${pendingOrders.length} labels generated`, error: 'Failed to create labels' }
+                )
               }}>Create Labels</Button>
             </div>
           </DialogContent>
@@ -3266,16 +3250,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPackAllDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Marking orders as packed...', { id: 'pack-all' })
-                try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  setPendingOrders(prev => prev.map(o => ({ ...o, status: 'packed' })))
-                  toast.success('All orders marked as packed', { id: 'pack-all', description: `${pendingOrders.length} orders packed` })
-                  setShowPackAllDialog(false)
-                } catch {
-                  toast.error('Failed to pack orders', { id: 'pack-all' })
-                }
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/orders/pack-all', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); setPendingOrders(prev => prev.map(o => ({ ...o, status: 'packed' }))); setShowPackAllDialog(false); }),
+                  { loading: 'Marking orders as packed...', success: `${pendingOrders.length} orders packed`, error: 'Failed to pack orders' }
+                )
               }}>Pack All</Button>
             </div>
           </DialogContent>
@@ -3558,15 +3537,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowNotifyCustomerDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Sending notification...', { id: 'notify-customer' })
-                try {
-                  await new Promise(r => setTimeout(r, 1000))
-                  toast.success('Notification sent to customer', { id: 'notify-customer', description: 'Customer will receive email shortly' })
-                  setShowNotifyCustomerDialog(false)
-                } catch {
-                  toast.error('Failed to send notification', { id: 'notify-customer' })
-                }
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/notifications/send', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); setShowNotifyCustomerDialog(false); }),
+                  { loading: 'Sending notification...', success: 'Notification sent to customer', error: 'Failed to send notification' }
+                )
               }}>Send</Button>
             </div>
           </DialogContent>
@@ -3651,22 +3626,11 @@ export default function ShippingClient() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowCreateLabelDialog(false)}>Cancel</Button>
-              <Button onClick={async () => {
-                toast.loading('Creating shipping label...', { id: 'create-label' })
-                try {
-                  await new Promise(r => setTimeout(r, 1500))
-                  const newLabel = {
-                    id: `LBL-${Date.now()}`,
-                    trackingNumber: `TRK${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
-                    carrier: 'FedEx',
-                    status: 'created',
-                    createdAt: new Date().toISOString()
-                  }
-                  toast.success('Label created', { id: 'create-label', description: `Tracking: ${newLabel.trackingNumber}` })
-                  setShowCreateLabelDialog(false)
-                } catch {
-                  toast.error('Failed to create label', { id: 'create-label' })
-                }
+              <Button onClick={() => {
+                toast.promise(
+                  fetch('/api/shipping/labels', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }).then(label => { setShowCreateLabelDialog(false); return label; }),
+                  { loading: 'Creating shipping label...', success: (label) => `Label created (${label.trackingNumber})`, error: 'Failed to create label' }
+                )
               }}>Create Label</Button>
             </div>
           </DialogContent>
