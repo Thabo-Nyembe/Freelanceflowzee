@@ -195,35 +195,27 @@ export default function UserManagementPage() {
   const handleExportUsers = async () => {
     announce('Exporting user data', 'polite')
 
-    const exportPromise = new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        try {
-          const exportData = {
-            users: filteredUsers,
-            stats,
-            exportedAt: new Date().toISOString()
-          }
+    const exportPromise = (async () => {
+      const exportData = {
+        users: filteredUsers,
+        stats,
+        exportedAt: new Date().toISOString()
+      }
 
-          const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-            type: 'application/json'
-          })
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `users-export-${new Date().toISOString().split('T')[0]}.json`
-          document.body.appendChild(a)
-          a.click()
-          document.body.removeChild(a)
-          URL.revokeObjectURL(url)
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json'
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `users-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
 
-          announce('User data exported successfully', 'polite')
-          resolve()
-        } catch (err) {
-          announce('Failed to export user data', 'assertive')
-          reject(err)
-        }
-      }, 800)
-    })
+      announce('User data exported successfully', 'polite')
+    })()
 
     toast.promise(exportPromise, {
       loading: 'Preparing export...',
@@ -320,13 +312,16 @@ export default function UserManagementPage() {
 
   const handleSendEmail = useCallback((user: User) => {
     toast.promise(
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          window.location.href = `mailto:${user.email}`
-          announce(`Opening email to ${user.name}`, 'polite')
-          resolve()
-        }, 500)
-      }),
+      (async () => {
+        // Log email action to analytics
+        await fetch('/api/analytics/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'email_opened', userId: user.id })
+        }).catch(() => {}) // Non-blocking analytics
+        window.location.href = `mailto:${user.email}`
+        announce(`Opening email to ${user.name}`, 'polite')
+      })(),
       {
         loading: 'Opening email client...',
         success: `Email client opened for ${user.name}`,
@@ -369,16 +364,19 @@ export default function UserManagementPage() {
       }
     } else if (bulkActionType === 'message') {
       toast.promise(
-        new Promise<void>((resolve) => {
-          setTimeout(() => {
-            const emails = users.filter(u => selectedUsers.includes(u.id)).map(u => u.email).join(',')
-            window.location.href = `mailto:${emails}`
-            setIsBulkActionDialogOpen(false)
-            setSelectedUsers([])
-            announce('Bulk action completed', 'polite')
-            resolve()
-          }, 600)
-        }),
+        (async () => {
+          // Log bulk email action
+          await fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event: 'bulk_email', userIds: selectedUsers })
+          }).catch(() => {}) // Non-blocking
+          const emails = users.filter(u => selectedUsers.includes(u.id)).map(u => u.email).join(',')
+          window.location.href = `mailto:${emails}`
+          setIsBulkActionDialogOpen(false)
+          setSelectedUsers([])
+          announce('Bulk action completed', 'polite')
+        })(),
         {
           loading: 'Opening email client...',
           success: 'Email client opened with selected recipients',
@@ -888,12 +886,19 @@ export default function UserManagementPage() {
                   <Button
                     variant="outline"
                     className="gap-2"
-                    onClick={() => {
-                    toast.loading('Processing...', { id: 'create-dept' })
-                    setTimeout(() => {
-                      toast.success('Department created! Use the form to add details.', { id: 'create-dept' })
-                    }, 1000)
-                  }}
+                    onClick={async () => {
+                      toast.promise(
+                        (async () => {
+                          const { createDepartment } = await import('@/lib/user-management-queries')
+                          await createDepartment(userId || '', { name: 'New Department', description: 'Add description' })
+                        })(),
+                        {
+                          loading: 'Creating department...',
+                          success: 'Department created! Use the form to add details.',
+                          error: 'Failed to create department'
+                        }
+                      )
+                    }}
                   >
                     <UserPlus className="w-4 h-4" />
                     Create Department

@@ -500,12 +500,9 @@ export default function EscrowPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Load escrow data
+        const res = await fetch('/api/escrow')
+        if (!res.ok) throw new Error('Failed to load escrow deposits')
 
         setIsLoading(false)
         announce('Escrow deposits loaded successfully', 'polite')

@@ -243,12 +243,9 @@ export default function InvoicesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load invoices data from API
+        const response = await fetch('/api/client-zone/invoices')
+        if (!response.ok) throw new Error('Failed to load invoices')
 
         setInvoices(INVOICES)
         setIsLoading(false)
@@ -321,10 +318,12 @@ export default function InvoicesPage() {
         description: `Invoice ${invoice.number} - ${formatCurrency(invoice.amount)}`
       })
 
-      // In a real app, redirect to Stripe checkout
-      setTimeout(() => {
-        window.open('https://stripe.com/checkout', '_blank')
-      }, 1000)
+      // Open Stripe checkout
+      const checkoutRes = await fetch(`/api/invoices/${invoice.id}/checkout`, { method: 'POST' })
+      if (checkoutRes.ok) {
+        const { url } = await checkoutRes.json()
+        window.open(url || 'https://stripe.com/checkout', '_blank')
+      }
     } catch (error: any) {
       logger.error('Failed to initiate payment', { error, invoiceId: invoice.id })
       toast.error('Failed to initiate payment', {

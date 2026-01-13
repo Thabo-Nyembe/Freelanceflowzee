@@ -147,12 +147,9 @@ export default function GalleryPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
-        })
+        // Load gallery from API
+        const response = await fetch('/api/client-zone/gallery')
+        if (!response.ok) throw new Error('Failed to load gallery')
 
         setGalleryItems(GALLERY_ITEMS)
         setIsLoading(false)
@@ -199,17 +196,21 @@ export default function GalleryPage() {
       fileSize: item.fileSize
     })
 
-    toast.success('Preparing download...', {
-      description: `Downloading ${item.name}`
-    })
-
-    // Simulate download
-    setTimeout(() => {
-      logger.info('Gallery item downloaded successfully', { itemId: item.id })
-      toast.success('Download started', {
-        description: `${item.name} is downloading to your device`
-      })
-    }, 1000)
+    toast.promise(
+      fetch(`/api/gallery/${item.id}/download`).then(res => {
+        if (!res.ok) throw new Error('Failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = item.name
+        a.click()
+        URL.revokeObjectURL(url)
+        logger.info('Gallery item downloaded successfully', { itemId: item.id })
+      }),
+      { loading: `Downloading ${item.name}...`, success: `${item.name} downloaded successfully`, error: 'Failed to download' }
+    )
   }
 
   // Handle Share

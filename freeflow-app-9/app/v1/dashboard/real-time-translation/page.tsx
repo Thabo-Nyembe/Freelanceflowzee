@@ -127,14 +127,25 @@ export default function RealTimeTranslationPage() {
     loadTranslationData()
   }, [userId, announce])
 
-  const handleTranslate = () => {
+  const handleTranslate = async () => {
     setIsTranslating(true)
-
-    // Simulate translation
-    setTimeout(() => {
-      setTranslatedText('Esta es una traducción de ejemplo. En producción, esto se conectaría a la API de traducción en tiempo real.')
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: sourceText, from: sourceLanguage, to: targetLanguage })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setTranslatedText(data.translation || sourceText)
+      } else {
+        toast.error('Translation failed')
+      }
+    } catch {
+      toast.error('Translation service unavailable')
+    } finally {
       setIsTranslating(false)
-    }, 1500)
+    }
   }
 
   const handleSwapLanguages = () => {

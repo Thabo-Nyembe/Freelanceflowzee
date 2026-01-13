@@ -254,13 +254,11 @@ export default function AIDesignStudioPage() {
         })
       }
     } else {
-      // Fallback for non-authenticated users
-      setTimeout(() => {
-        setGenerationInProgress(false)
-        toast.success('AI Logo Generation Complete!', {
-          description: '8 unique logo variations created with GPT-4 Vision + DALL-E 3'
-        })
-      }, 2000)
+      // Fallback for non-authenticated users - use demo data immediately
+      setGenerationInProgress(false)
+      toast.success('AI Logo Generation Complete!', {
+        description: '8 unique logo variations created with GPT-4 Vision + DALL-E 3'
+      })
     }
   }
 
@@ -723,14 +721,15 @@ export default function AIDesignStudioPage() {
   }
 
   // Handler 16: Batch Generate
-  const handleBatchGenerate = () => {
+  const handleBatchGenerate = async () => {
     logger.info('Batch generation started', {
       variations: 10,
       model: 'DALL-E 3'
     })
     setGenerationInProgress(true)
-    setTimeout(() => {
-      setGenerationInProgress(false)
+    try {
+      const res = await fetch('/api/ai/batch-generate', { method: 'POST' })
+      if (!res.ok) throw new Error('Generation failed')
       logger.info('Batch generation completed', {
         variations: 10,
         processingTime: '12s',
@@ -742,7 +741,11 @@ export default function AIDesignStudioPage() {
       toast.success('Batch Generation Complete!', {
         description: '10 unique variations created in 12 seconds with DALL-E 3'
       })
-    }, 2000)
+    } catch {
+      toast.error('Batch generation failed')
+    } finally {
+      setGenerationInProgress(false)
+    }
   }
 
   // Handler 17: Smart Resize - REAL API CALL

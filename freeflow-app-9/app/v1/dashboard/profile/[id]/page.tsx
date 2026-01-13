@@ -291,12 +291,14 @@ export default function CommunityProfilePage() {
   ]
 
   useEffect(() => {
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoading(false)
-      announce(`Profile loaded for ${member.name}`)
-      logger.info('Profile page loaded', { memberId: member.id, name: member.name })
-    }, 500)
+    // Load profile data
+    fetch(`/api/profiles/${member.id}`).then(res => {
+      if (res.ok) {
+        setIsLoading(false)
+        announce(`Profile loaded for ${member.name}`)
+        logger.info('Profile page loaded', { memberId: member.id, name: member.name })
+      }
+    }).catch(() => setIsLoading(false))
   }, [member.id, member.name, announce])
 
   // Handlers
