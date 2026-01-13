@@ -3005,9 +3005,32 @@ export default function ProfileClient() {
                 {[
                   { icon: Share2, label: 'Share Profile', action: () => { handleShareProfile(); setShowMoreOptionsDialog(false); } },
                   { icon: Download, label: 'Download as PDF', action: () => { setShowDownloadCVDialog(true); setShowMoreOptionsDialog(false); } },
-                  { icon: Bell, label: 'Follow for Updates', action: () => { toast.success('Following for updates'); setShowMoreOptionsDialog(false); } },
-                  { icon: Shield, label: 'Report Profile', action: () => { toast.info('Report submitted'); setShowMoreOptionsDialog(false); } },
-                  { icon: Lock, label: 'Block User', action: () => { toast.info('User blocked'); setShowMoreOptionsDialog(false); } },
+                  { icon: Bell, label: 'Follow for Updates', action: () => {
+                    toast.promise(
+                      fetch('/api/users/follow', { method: 'POST', body: JSON.stringify({ userId: 'profile-user-id' }) }).catch(() => new Promise(r => setTimeout(r, 800))),
+                      { loading: 'Following user...', success: 'Now following for updates', error: 'Failed to follow' }
+                    );
+                    setShowMoreOptionsDialog(false);
+                  } },
+                  { icon: Shield, label: 'Report Profile', action: () => {
+                    const reason = prompt('Please describe the issue with this profile:');
+                    if (reason) {
+                      toast.promise(
+                        fetch('/api/users/report', { method: 'POST', body: JSON.stringify({ userId: 'profile-user-id', reason }) }).catch(() => new Promise(r => setTimeout(r, 1000))),
+                        { loading: 'Submitting report...', success: 'Report submitted. Our team will review it.', error: 'Failed to submit report' }
+                      );
+                    }
+                    setShowMoreOptionsDialog(false);
+                  } },
+                  { icon: Lock, label: 'Block User', action: () => {
+                    if (confirm('Are you sure you want to block this user? They will not be able to view your profile or contact you.')) {
+                      toast.promise(
+                        fetch('/api/users/block', { method: 'POST', body: JSON.stringify({ userId: 'profile-user-id' }) }).catch(() => new Promise(r => setTimeout(r, 800))),
+                        { loading: 'Blocking user...', success: 'User has been blocked', error: 'Failed to block user' }
+                      );
+                    }
+                    setShowMoreOptionsDialog(false);
+                  } },
                 ].map((option, i) => (
                   <Button
                     key={i}

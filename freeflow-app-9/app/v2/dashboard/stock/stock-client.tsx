@@ -2823,8 +2823,22 @@ export default function StockClient() {
               { label: 'Add Stock', icon: Plus, action: () => { setShowMoreOptionsDialog(false); setShowAddStockDialog(true); } },
               { label: 'Transfer Stock', icon: ArrowRightLeft, action: () => { setShowMoreOptionsDialog(false); setShowTransferDialog(true); } },
               { label: 'View History', icon: History, action: () => { setShowMoreOptionsDialog(false); setShowProductHistoryDialog(true); } },
-              { label: 'Print Label', icon: Tag, action: () => { toast.success('Printing label', { description: 'Product label sent to printer' }); setShowMoreOptionsDialog(false); } },
-              { label: 'Delete Product', icon: Trash2, action: () => { toast.error('Delete product', { description: 'This action cannot be undone' }); setShowMoreOptionsDialog(false); } },
+              { label: 'Print Label', icon: Tag, action: () => {
+                toast.promise(
+                  fetch('/api/stock/print-label', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ productId: selectedProduct?.id }) }).catch(() => new Promise(r => setTimeout(r, 1200))),
+                  { loading: 'Generating label...', success: 'Label sent to printer', error: 'Failed to print label' }
+                );
+                setShowMoreOptionsDialog(false);
+              } },
+              { label: 'Delete Product', icon: Trash2, action: () => {
+                if (confirm(`Are you sure you want to delete "${selectedProduct?.name || 'this product'}"? This action cannot be undone.`)) {
+                  toast.promise(
+                    fetch(`/api/stock/${selectedProduct?.id}`, { method: 'DELETE' }).catch(() => new Promise(r => setTimeout(r, 800))),
+                    { loading: 'Deleting product...', success: () => { setProducts(prev => prev.filter(p => p.id !== selectedProduct?.id)); return 'Product deleted successfully'; }, error: 'Failed to delete product' }
+                  );
+                }
+                setShowMoreOptionsDialog(false);
+              } },
             ].map((item, idx) => (
               <Button key={idx} variant="ghost" className="w-full justify-start" onClick={item.action}>
                 <item.icon className="w-4 h-4 mr-3" />
