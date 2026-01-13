@@ -999,10 +999,14 @@ export default function BugsClient() {
     if (isConnected) {
       setShowConfigureIntegrationDialog(true)
     } else {
-      toast.info(`Connecting to ${integrationName}...`)
-      setTimeout(() => {
-        toast.success(`${integrationName} connected successfully`)
-      }, 1500)
+      toast.promise(
+        fetch('/api/bugs/integrations/connect', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ integration: integrationName })
+        }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+        { loading: `Connecting to ${integrationName}...`, success: `${integrationName} connected successfully`, error: `Failed to connect to ${integrationName}` }
+      )
     }
   }
 
@@ -1050,11 +1054,20 @@ export default function BugsClient() {
 
   // Download attachment handler
   const handleDownloadAttachment = (attachment: BugAttachment) => {
-    toast.success(`Downloading ${attachment.name}...`)
-    // In a real app, this would trigger an actual download
-    setTimeout(() => {
-      toast.success(`${attachment.name} downloaded successfully`)
-    }, 1000)
+    toast.promise(
+      fetch(`/api/bugs/attachments/${attachment.id}/download`).then(res => {
+        if (!res.ok) throw new Error('Failed')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = attachment.name
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
+      { loading: `Downloading ${attachment.name}...`, success: `${attachment.name} downloaded successfully`, error: 'Failed to download attachment' }
+    )
   }
 
   // View all sprint bugs handler

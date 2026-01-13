@@ -2693,10 +2693,20 @@ docker run -d --name kazi-agent \\
                   Close
                 </Button>
                 <Button variant="outline" onClick={() => {
-                    toast.loading('Exporting logs...', { id: 'export-logs' })
-                    setTimeout(() => {
-                      toast.success('Logs exported successfully!', { id: 'export-logs' })
-                    }, 1000)
+                    toast.promise(
+                      fetch('/api/system/logs/export').then(res => {
+                        if (!res.ok) throw new Error('Failed')
+                        return res.blob()
+                      }).then(blob => {
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = 'system-logs.json'
+                        a.click()
+                        URL.revokeObjectURL(url)
+                      }),
+                      { loading: 'Exporting logs...', success: 'Logs exported successfully!', error: 'Failed to export logs' }
+                    )
                   }}>
                   <Download className="h-4 w-4 mr-2" />
                   Export Logs
@@ -2784,10 +2794,20 @@ docker run -d --name kazi-agent \\
                   Refresh
                 </Button>
                 <Button variant="outline" onClick={() => {
-                    toast.loading('Exporting metrics...', { id: 'export-metrics' })
-                    setTimeout(() => {
-                      toast.success('Metrics exported successfully!', { id: 'export-metrics' })
-                    }, 1000)
+                    toast.promise(
+                      fetch('/api/system/metrics/export').then(res => {
+                        if (!res.ok) throw new Error('Failed')
+                        return res.blob()
+                      }).then(blob => {
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = 'system-metrics.json'
+                        a.click()
+                        URL.revokeObjectURL(url)
+                      }),
+                      { loading: 'Exporting metrics...', success: 'Metrics exported successfully!', error: 'Failed to export metrics' }
+                    )
                   }}>
                   <Download className="h-4 w-4 mr-2" />
                   Export

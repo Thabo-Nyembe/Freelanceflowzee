@@ -654,8 +654,6 @@ export default function VideoStudioClient() {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-
-      await new Promise(r => setTimeout(r, 300))
     })()
 
     toast.promise(exportPromise, {
@@ -968,7 +966,6 @@ export default function VideoStudioClient() {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-      await new Promise(r => setTimeout(r, 300))
     })()
     toast.promise(exportPromise, {
       loading: 'Exporting settings...',
@@ -1223,7 +1220,6 @@ export default function VideoStudioClient() {
       link.click()
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
-      await new Promise(r => setTimeout(r, 300))
     })()
     toast.promise(downloadPromise, {
       loading: `Downloading "${jobName}"...`,
@@ -1234,10 +1230,7 @@ export default function VideoStudioClient() {
 
   // Handler for sharing rendered video
   const handleShareRender = (jobName: string) => {
-    const sharePromise = (async () => {
-      await navigator.clipboard.writeText(`https://freeflow.app/share/${jobName.toLowerCase().replace(/\s+/g, '-')}`)
-      await new Promise(r => setTimeout(r, 300))
-    })()
+    const sharePromise = navigator.clipboard.writeText(`https://freeflow.app/share/${jobName.toLowerCase().replace(/\s+/g, '-')}`)
     toast.promise(sharePromise, {
       loading: 'Generating share link...',
       success: 'Share link copied to clipboard',
@@ -1330,10 +1323,7 @@ export default function VideoStudioClient() {
 
   // Handler for sharing project
   const handleShareProject = (projectName: string) => {
-    const sharePromise = (async () => {
-      await navigator.clipboard.writeText(`https://freeflow.app/project/${projectName.toLowerCase().replace(/\s+/g, '-')}`)
-      await new Promise(r => setTimeout(r, 300))
-    })()
+    const sharePromise = navigator.clipboard.writeText(`https://freeflow.app/project/${projectName.toLowerCase().replace(/\s+/g, '-')}`)
     toast.promise(sharePromise, {
       loading: 'Generating share link...',
       success: 'Project share link copied to clipboard',

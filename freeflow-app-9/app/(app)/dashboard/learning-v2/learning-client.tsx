@@ -720,7 +720,7 @@ export default function LearningClient() {
 
   const handleDownloadCertificate = async () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/learning/certificates/generate', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
       {
         loading: 'Generating certificate...',
         success: 'Certificate download started',
@@ -731,7 +731,7 @@ export default function LearningClient() {
 
   const handleShareProgress = async () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch('/api/learning/progress/share', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
       {
         loading: 'Sharing progress...',
         success: 'Progress shared successfully',
@@ -751,7 +751,7 @@ export default function LearningClient() {
 
   const handleBookmarkLesson = async (lessonId: string, lessonName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
+      fetch('/api/learning/bookmarks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lessonId }) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
       {
         loading: 'Saving bookmark...',
         success: `"${lessonName}" saved to bookmarks`,
@@ -1708,7 +1708,7 @@ export default function LearningClient() {
                         </div>
                         <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white" onClick={() => {
                           toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1000)),
+                            fetch('/api/learning/preferences', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                             {
                               loading: 'Saving preferences...',
                               success: 'Preferences saved successfully',
@@ -1884,25 +1884,15 @@ export default function LearningClient() {
                               </div>
                             </div>
                             <Button variant="outline" size="sm" onClick={() => {
-                              if (integration.status === 'connected') {
-                                toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1500)),
-                                  {
-                                    loading: `Disconnecting ${integration.name}...`,
-                                    success: `${integration.name} disconnected successfully`,
-                                    error: 'Failed to disconnect'
-                                  }
-                                )
-                              } else {
-                                toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 2000)),
-                                  {
-                                    loading: `Connecting to ${integration.name}...`,
-                                    success: `${integration.name} connected successfully`,
-                                    error: 'Failed to connect'
-                                  }
-                                )
-                              }
+                              const method = integration.status === 'connected' ? 'DELETE' : 'POST'
+                              toast.promise(
+                                fetch(`/api/learning/integrations/${integration.name.toLowerCase().replace(/\s+/g, '-')}`, { method }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                                {
+                                  loading: integration.status === 'connected' ? `Disconnecting ${integration.name}...` : `Connecting to ${integration.name}...`,
+                                  success: integration.status === 'connected' ? `${integration.name} disconnected successfully` : `${integration.name} connected successfully`,
+                                  error: integration.status === 'connected' ? 'Failed to disconnect' : 'Failed to connect'
+                                }
+                              )
                             }}>
                               {integration.status === 'connected' ? 'Disconnect' : 'Connect'}
                             </Button>
@@ -1934,7 +1924,7 @@ export default function LearningClient() {
                         <Button variant="outline" onClick={() => {
                           if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
                             toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              fetch('/api/learning/api-key', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                               {
                                 loading: 'Regenerating API key...',
                                 success: 'New API key generated. Please update your integrations.',
@@ -2510,10 +2500,20 @@ export default function LearningClient() {
                   </div>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => {
-                  toast.loading('Preparing certificate...', { id: 'cert-download' })
-                  setTimeout(() => {
-                    toast.success(`Certificate "${cert.name}" downloaded successfully!`, { id: 'cert-download' })
-                  }, 1000)
+                  toast.promise(
+                    fetch(`/api/learning/certificates/${cert.id}/download`).then(res => {
+                      if (!res.ok) throw new Error('Failed')
+                      return res.blob()
+                    }).then(blob => {
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `${cert.name}.pdf`
+                      a.click()
+                      URL.revokeObjectURL(url)
+                    }),
+                    { loading: 'Preparing certificate...', success: `Certificate "${cert.name}" downloaded successfully!`, error: 'Failed to download certificate' }
+                  )
                 }}>
                   <Download className="w-4 h-4" />
                 </Button>

@@ -992,11 +992,20 @@ export default function AuditTrailClient() {
                         </div>
                         <button
                           onClick={() => {
-                            toast.success(`Downloading ${file.name}...`)
-                            // Simulate download - in real app this would fetch and download the file
-                            setTimeout(() => {
-                              toast.success(`${file.name} downloaded successfully`)
-                            }, 1500)
+                            toast.promise(
+                              fetch(`/api/audit-trail/files/${file.name}/download`).then(res => {
+                                if (!res.ok) throw new Error('Failed')
+                                return res.blob()
+                              }).then(blob => {
+                                const url = URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = file.name
+                                a.click()
+                                URL.revokeObjectURL(url)
+                              }),
+                              { loading: `Downloading ${file.name}...`, success: `${file.name} downloaded successfully`, error: 'Failed to download file' }
+                            )
                           }}
                           className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors"
                         >

@@ -399,12 +399,17 @@ export default function EcommerceClient() {
     toast.success('Refund processed successfully')
   }
 
-  const handleRefreshData = () => {
+  const handleRefreshData = async () => {
     setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      const res = await fetch('/api/ecommerce/refresh', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to refresh')
       toast.success('Data refreshed')
-    }, 500)
+    } catch {
+      toast.error('Failed to refresh data')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleBulkAction = (action: string) => {

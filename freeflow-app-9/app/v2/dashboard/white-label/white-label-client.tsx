@@ -363,48 +363,46 @@ export default function WhiteLabelClient() {
 
   // Handle Export (for individual format buttons in export view)
   const handleExportFormat = (format: 'css' | 'json' | 'scss' | 'assets') => {
-    const exportPromise = new Promise((resolve) => {
-      setTimeout(() => {
-        let content = ''
-        let filename = ''
-        let mimeType = 'text/plain'
+    const exportPromise = (async () => {
+      let content = ''
+      let filename = ''
+      let mimeType = 'text/plain'
 
-        switch (format) {
-          case 'css':
-            content = generateBrandingExportCss(config)
-            filename = 'branding-variables.css'
-            break
-          case 'json':
-            content = JSON.stringify(config, null, 2)
-            filename = 'branding-config.json'
-            mimeType = 'application/json'
-            break
-          case 'scss':
-            content = generateBrandingExportCss(config).replace(/--/g, '$').replace(/:/g, ':').replace(/;/g, ';')
-            filename = 'branding-variables.scss'
-            break
-          case 'assets':
-            content = JSON.stringify({
-              assets: ['logo-light.png', 'logo-dark.png', 'favicon.ico', 'icon.png'],
-              exportDate: new Date().toISOString()
-            }, null, 2)
-            filename = 'assets-manifest.json'
-            break
-        }
+      switch (format) {
+        case 'css':
+          content = generateBrandingExportCss(config)
+          filename = 'branding-variables.css'
+          break
+        case 'json':
+          content = JSON.stringify(config, null, 2)
+          filename = 'branding-config.json'
+          mimeType = 'application/json'
+          break
+        case 'scss':
+          content = generateBrandingExportCss(config).replace(/--/g, '$').replace(/:/g, ':').replace(/;/g, ';')
+          filename = 'branding-variables.scss'
+          break
+        case 'assets':
+          content = JSON.stringify({
+            assets: ['logo-light.png', 'logo-dark.png', 'favicon.ico', 'icon.png'],
+            exportDate: new Date().toISOString()
+          }, null, 2)
+          filename = 'assets-manifest.json'
+          break
+      }
 
-        const blob = new Blob([content], { type: mimeType })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = filename
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
 
-        resolve({ format, filename })
-      }, 1000)
-    })
+      return { format, filename }
+    })()
 
     toast.promise(exportPromise, {
       loading: `Exporting ${format.toUpperCase()}...`,

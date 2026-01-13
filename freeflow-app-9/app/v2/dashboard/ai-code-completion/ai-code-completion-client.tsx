@@ -607,15 +607,13 @@ export default function AiCodeCompletionClient() {
         })
       }
     } else {
-      // Fallback for non-authenticated users
-      setTimeout(() => {
-        setCompletion(mockCompletion)
-        setSuggestions(completionSuggestions)
-        setIsCompleting(false)
-        toast.success('Code Completed', {
-          description: `${mockCompletion.split('\n').length} lines generated`
-        })
-      }, 1500)
+      // Fallback for non-authenticated users - use mock data immediately
+      setCompletion(mockCompletion)
+      setSuggestions(completionSuggestions)
+      setIsCompleting(false)
+      toast.success('Code Completed', {
+        description: `${mockCompletion.split('\n').length} lines generated`
+      })
     }
   }, [codeInput, userId, selectedLanguage, announce])
 

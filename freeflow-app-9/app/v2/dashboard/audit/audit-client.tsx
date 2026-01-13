@@ -660,11 +660,20 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmExport = () => {
     setShowExportDialog(false)
-    toast.success('Export Started', { description: `Exporting audit report as ${exportFormat.toUpperCase()}...` })
-    // Simulate download
-    setTimeout(() => {
-      toast.success('Export Complete', { description: 'Your audit report has been downloaded' })
-    }, 2000)
+    toast.promise(
+      fetch(`/api/audit/export?format=${exportFormat}`).then(res => {
+        if (!res.ok) throw new Error('Failed to export')
+        return res.blob()
+      }).then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `audit-report.${exportFormat}`
+        a.click()
+        URL.revokeObjectURL(url)
+      }),
+      { loading: `Exporting audit report as ${exportFormat.toUpperCase()}...`, success: 'Your audit report has been downloaded', error: 'Failed to export audit report' }
+    )
   }
 
   const handleScheduleAudit = () => {

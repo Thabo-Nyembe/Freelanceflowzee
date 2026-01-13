@@ -529,14 +529,12 @@ export default function MessagingClient() {
       return
     }
     setIsSearching(true)
-    // Simulate search
-    setTimeout(() => {
-      const results: SearchResult[] = messages
-        .filter(m => m.content.toLowerCase().includes(query.toLowerCase()))
-        .map(m => ({ type: 'message' as const, message: m, relevance: 1 }))
-      setSearchResults(results)
-      setIsSearching(false)
-    }, 300)
+    // Local search - filter messages immediately
+    const results: SearchResult[] = messages
+      .filter(m => m.content.toLowerCase().includes(query.toLowerCase()))
+      .map(m => ({ type: 'message' as const, message: m, relevance: 1 }))
+    setSearchResults(results)
+    setIsSearching(false)
   }
 
   const getStatusColor = (status: User['status']) => {

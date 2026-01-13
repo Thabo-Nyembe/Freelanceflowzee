@@ -360,16 +360,9 @@ export default function AdvancedMicroFeaturesClient() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load advanced micro features'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load advanced micro features data
+        const res = await fetch('/api/micro-features')
+        if (!res.ok) throw new Error('Failed to load advanced micro features')
 
         setIsLoading(false)
         announce('Advanced micro features loaded successfully', 'polite')

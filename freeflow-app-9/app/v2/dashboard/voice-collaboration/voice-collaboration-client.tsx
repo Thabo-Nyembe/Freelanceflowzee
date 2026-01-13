@@ -2435,15 +2435,14 @@ export default function VoiceCollaborationClient() {
                       inputDevice: voiceInputDevice,
                       outputDevice: voiceOutputDevice
                     })
-                    toast.info('Audio test', {
-                      description: 'Testing microphone and speakers...'
-                    })
-                    // In production, this would trigger actual audio test
-                    setTimeout(() => {
-                      toast.success('Audio test complete', {
-                        description: 'Your devices are working correctly'
-                      })
-                    }, 1500)
+                    toast.promise(
+                      fetch('/api/voice/test-audio', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ inputDevice: voiceInputDevice, outputDevice: voiceOutputDevice })
+                      }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                      { loading: 'Testing microphone and speakers...', success: 'Your devices are working correctly', error: 'Audio test failed' }
+                    )
                   }}
                   className="w-full border-gray-700 hover:bg-slate-800"
                 >

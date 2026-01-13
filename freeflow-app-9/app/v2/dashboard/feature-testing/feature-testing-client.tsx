@@ -459,12 +459,9 @@ export default function FeatureTestingClient() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Load feature testing data
+        const res = await fetch('/api/feature-testing')
+        if (!res.ok) throw new Error('Failed to load feature testing suite')
 
         setIsLoading(false)
         announce('Feature testing suite loaded successfully', 'polite')

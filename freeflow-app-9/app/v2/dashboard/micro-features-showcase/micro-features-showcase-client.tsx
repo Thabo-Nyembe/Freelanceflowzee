@@ -571,16 +571,9 @@ export default function MicroFeaturesShowcaseClient() {
         setIsPageLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load micro features'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load micro features data
+        const res = await fetch('/api/micro-features/showcase')
+        if (!res.ok) throw new Error('Failed to load micro features')
 
         setIsPageLoading(false)
         announce('Micro features showcase loaded successfully', 'polite')

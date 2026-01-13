@@ -654,13 +654,9 @@ const mockConnectorsQuickActions = [
   { id: '2', label: 'Test', icon: 'play', action: () => {
     // Real functionality: Run test on selected Zap
     toast.promise(
-      new Promise(resolve => {
-        // Simulate actual test execution
-        setTimeout(() => {
-          const passed = Math.random() > 0.3
-          if (passed) resolve({ success: true })
-          else throw new Error('Test execution failed')
-        }, 800)
+      fetch('/api/connectors/test', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Test execution failed')
+        return res.json()
       }),
       {
         loading: 'Running test...',
@@ -750,15 +746,9 @@ export default function ConnectorsClient() {
   const handleTestConnector = (n: string) => {
     // Real functionality: Execute test against connector
     toast.promise(
-      new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const testPassed = Math.random() > 0.2
-          if (testPassed) {
-            resolve({ status: 'passed', duration: Math.floor(Math.random() * 2000) + 500 })
-          } else {
-            reject(new Error(`Connection test failed for "${n}"`))
-          }
-        }, 800)
+      fetch(`/api/connectors/${encodeURIComponent(n)}/test`, { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error(`Connection test failed for "${n}"`)
+        return res.json()
       }),
       {
         loading: `Testing "${n}"...`,

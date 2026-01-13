@@ -133,16 +133,9 @@ export default function BookingClient() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load booking'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load booking data
+        const res = await fetch('/api/bookings')
+        if (!res.ok) throw new Error('Failed to load booking')
 
         setIsLoading(false)
         announce('Booking page loaded successfully', 'polite')

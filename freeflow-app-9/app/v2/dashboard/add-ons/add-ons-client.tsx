@@ -575,14 +575,17 @@ export default function AddOnsClient() {
   }
 
   const handleCheckUpdates = () => {
-    toast.info('Checking for updates', {
-      description: 'Scanning installed add-ons for updates...'
-    })
-    setTimeout(() => {
-      toast.success('Update check complete', {
-        description: 'All add-ons are up to date!'
-      })
-    }, 1500)
+    toast.promise(
+      fetch('/api/addons/updates').then(res => {
+        if (!res.ok) throw new Error('Failed to check updates')
+        return res.json()
+      }),
+      {
+        loading: 'Scanning installed add-ons for updates...',
+        success: 'All add-ons are up to date!',
+        error: 'Failed to check for updates'
+      }
+    )
   }
 
   const handleOpenDocumentation = () => {

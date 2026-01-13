@@ -2650,10 +2650,10 @@ export default function PerformanceAnalyticsClient() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                toast.loading('Acknowledging alert...', { id: 'ack-alert' })
-                                setTimeout(() => {
-                                  toast.success('Alert acknowledged!', { id: 'ack-alert' })
-                                }, 800)
+                                toast.promise(
+                                  fetch(`/api/alerts/${alert.id}/acknowledge`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                                  { loading: 'Acknowledging alert...', success: 'Alert acknowledged!', error: 'Failed to acknowledge alert' }
+                                )
                               }}
                             >
                               Acknowledge

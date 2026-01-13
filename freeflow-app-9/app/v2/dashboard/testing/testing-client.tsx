@@ -752,15 +752,21 @@ export default function TestingClient() {
   }
 
   // Run all tests (triggers dialog)
-  const handleRunTests = () => {
+  const handleRunTests = async () => {
     setIsRunning(true)
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/testing/run', { method: 'POST' })
+      if (!res.ok) throw new Error('Test run failed')
+      const data = await res.json()
+      toast.success('Test run completed', {
+        description: `${data.testsRun || mockTestSpecs.length + dbTests.length} tests executed`
+      })
+    } catch {
+      toast.error('Test run failed')
+    } finally {
       setIsRunning(false)
       setShowRunDialog(false)
-      toast.success('Test run completed', {
-        description: `${mockTestSpecs.length + dbTests.length} tests executed`
-      })
-    }, 2000)
+    }
   }
 
   // Render test tree
