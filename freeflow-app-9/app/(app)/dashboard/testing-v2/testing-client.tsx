@@ -693,8 +693,8 @@ export default function TestingClient() {
   const runTests = async () => {
     setIsRunning(true)
     try {
-      // Simulate running all tests
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const res = await fetch('/api/testing/run', { method: 'POST' })
+      if (!res.ok) throw new Error('Tests failed')
       toast.success('All tests completed successfully')
     } catch (error) {
       toast.error('Some tests failed')
@@ -774,13 +774,21 @@ export default function TestingClient() {
   // Run all tests (triggers dialog)
   const handleRunTests = () => {
     setIsRunning(true)
-    setTimeout(() => {
+    fetch('/api/testing/run-all', { method: 'POST' }).then(res => {
       setIsRunning(false)
       setShowRunDialog(false)
-      toast.success('Test run completed', {
-        description: `${mockTestSpecs.length + dbTests.length} tests executed`
-      })
-    }, 2000)
+      if (res.ok) {
+        toast.success('Test run completed', {
+          description: `${mockTestSpecs.length + dbTests.length} tests executed`
+        })
+      } else {
+        toast.error('Test run failed')
+      }
+    }).catch(() => {
+      setIsRunning(false)
+      setShowRunDialog(false)
+      toast.error('Test run failed')
+    })
   }
 
   // Render test tree
@@ -1976,7 +1984,7 @@ export default defineConfig({
                             <Button variant={service.connected ? "outline" : "default"} size="sm" onClick={() => {
                               if (service.connected) {
                                 toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1000)),
+                                  fetch(`/api/testing/integrations/${service.name.toLowerCase().replace(' ', '-')}`, { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                   {
                                     loading: `Disconnecting from ${service.name}...`,
                                     success: `Disconnected from ${service.name}`,
@@ -2128,7 +2136,7 @@ export default defineConfig({
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
                             toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 2000)),
+                              fetch('/api/testing/cache', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                               {
                                 loading: 'Clearing test cache...',
                                 success: 'Cleared 245 MB of test cache',
@@ -2148,7 +2156,7 @@ export default defineConfig({
                           <Button variant="outline" size="sm" onClick={() => {
                             if (confirm('Delete 127 old reports (1.2 GB)? This cannot be undone.')) {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                fetch('/api/testing/reports/cleanup', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                 {
                                   loading: 'Cleaning up old reports...',
                                   success: 'Deleted 127 old reports, freed 1.2 GB',
@@ -2185,7 +2193,7 @@ export default defineConfig({
                           <Button variant="destructive" size="sm" onClick={() => {
                             if (confirm('Reset all settings to defaults? This will restore factory configuration.')) {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1500)),
+                                fetch('/api/testing/settings/reset', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                 {
                                   loading: 'Resetting settings...',
                                   success: 'Settings reset to defaults',
@@ -2204,7 +2212,7 @@ export default defineConfig({
                             const confirmText = prompt('Type "DELETE ALL DATA" to confirm this irreversible action:')
                             if (confirmText === 'DELETE ALL DATA') {
                               toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 3000)),
+                                fetch('/api/testing/data', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
                                 {
                                   loading: 'Deleting all test data...',
                                   success: 'All test data has been permanently deleted',

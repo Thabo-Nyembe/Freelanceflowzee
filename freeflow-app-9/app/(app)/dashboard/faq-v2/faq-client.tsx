@@ -852,9 +852,10 @@ export default function FAQClient() {
   }, [])
 
   const handleImportArticles = useCallback((file: File) => {
-    // Simulate import processing
+    const formData = new FormData()
+    formData.append('file', file)
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
+      fetch('/api/faq/import', { method: 'POST', body: formData }).then(res => { if (!res.ok) throw new Error('Failed'); }),
       {
         loading: 'Importing articles...',
         success: `Successfully imported articles from ${file.name}`,
@@ -1620,14 +1621,11 @@ export default function FAQClient() {
                   <p className="text-sm text-blue-100 mb-4">
                     Let AI analyze your knowledge base and suggest improvements
                   </p>
-                  <button onClick={async () => {
-                    toast.loading('AI is analyzing your knowledge base...', { id: 'ai-analysis' })
-                    try {
-                      await new Promise(r => setTimeout(r, 2500))
-                      toast.success('Analysis complete!', { id: 'ai-analysis', description: '3 improvement suggestions generated' })
-                    } catch {
-                      toast.error('Analysis failed', { id: 'ai-analysis' })
-                    }
+                  <button onClick={() => {
+                    toast.promise(
+                      fetch('/api/faq/ai/analyze', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                      { loading: 'AI is analyzing your knowledge base...', success: 'Analysis complete! 3 improvement suggestions generated', error: 'Analysis failed' }
+                    )
                   }} className="w-full py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors">
                     Generate Insights
                   </button>
@@ -1657,14 +1655,11 @@ export default function FAQClient() {
                   >
                     Export Data
                   </button>
-                  <button onClick={async () => {
-                    toast.loading('Saving settings...', { id: 'faq-settings' })
-                    try {
-                      await new Promise(r => setTimeout(r, 1000))
-                      toast.success('Settings saved successfully', { id: 'faq-settings', description: 'Your FAQ settings have been updated' })
-                    } catch {
-                      toast.error('Failed to save settings', { id: 'faq-settings' })
-                    }
+                  <button onClick={() => {
+                    toast.promise(
+                      fetch('/api/faq/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                      { loading: 'Saving settings...', success: 'Settings saved successfully', error: 'Failed to save settings' }
+                    )
                   }} className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-medium transition-colors">
                     Save Changes
                   </button>
@@ -1745,14 +1740,11 @@ export default function FAQClient() {
                               placeholder="help.yourdomain.com"
                               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
                             />
-                            <button onClick={async () => {
-                            toast.loading('Starting domain verification...', { id: 'domain-verify' })
-                            try {
-                              await new Promise(r => setTimeout(r, 2000))
-                              toast.success('Verification started', { id: 'domain-verify', description: 'We will verify your domain ownership within 24 hours' })
-                            } catch {
-                              toast.error('Verification failed', { id: 'domain-verify' })
-                            }
+                            <button onClick={() => {
+                            toast.promise(
+                              fetch('/api/faq/domain/verify', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                              { loading: 'Starting domain verification...', success: 'Verification started - We will verify your domain ownership within 24 hours', error: 'Verification failed' }
+                            )
                           }} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
                               Verify
                             </button>
@@ -1962,14 +1954,11 @@ export default function FAQClient() {
                                   Default
                                 </span>
                               ) : (
-                                <button onClick={async () => {
-                                  toast.loading('Setting default language...', { id: 'set-default-lang' })
-                                  try {
-                                    await new Promise(r => setTimeout(r, 800))
-                                    toast.success('Default language set', { id: 'set-default-lang', description: 'This language is now the primary language for your FAQ' })
-                                  } catch {
-                                    toast.error('Failed to set default', { id: 'set-default-lang' })
-                                  }
+                                <button onClick={() => {
+                                  toast.promise(
+                                    fetch('/api/faq/languages/default', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ language: lang }) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                                    { loading: 'Setting default language...', success: 'Default language set - This language is now the primary language for your FAQ', error: 'Failed to set default' }
+                                  )
                                 }} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-medium hover:bg-gray-200">
                                   Set as Default
                                 </button>
@@ -2047,18 +2036,15 @@ export default function FAQClient() {
                                 <p className="text-xs text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <button onClick={async () => {
+                            <button onClick={() => {
                               if (integration.connected) {
                                 window.open(`/dashboard/faq-v2/integrations/${integration.name.toLowerCase().replace(/\s+/g, '-')}`, '_blank')
                                 toast.info(`Managing ${integration.name}`, { description: 'Opening integration settings...' })
                               } else {
-                                toast.loading(`Connecting ${integration.name}...`, { id: `connect-${idx}` })
-                                try {
-                                  await new Promise(r => setTimeout(r, 1500))
-                                  toast.success(`${integration.name} connected!`, { id: `connect-${idx}`, description: 'Integration is now active' })
-                                } catch {
-                                  toast.error(`Failed to connect ${integration.name}`, { id: `connect-${idx}` })
-                                }
+                                toast.promise(
+                                  fetch(`/api/faq/integrations/${integration.name.toLowerCase().replace(/\s+/g, '-')}`, { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                                  { loading: `Connecting ${integration.name}...`, success: `${integration.name} connected! Integration is now active`, error: `Failed to connect ${integration.name}` }
+                                )
                               }
                             }} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
                               integration.connected
@@ -2206,16 +2192,15 @@ export default function FAQClient() {
                           const input = document.createElement('input')
                           input.type = 'file'
                           input.accept = '.csv,.json'
-                          input.onchange = async (e) => {
+                          input.onchange = (e) => {
                             const file = (e.target as HTMLInputElement).files?.[0]
                             if (file) {
-                              toast.loading('Importing articles...', { id: 'import-articles' })
-                              try {
-                                await new Promise(r => setTimeout(r, 2000))
-                                toast.success('Import complete!', { id: 'import-articles', description: `${file.name} imported successfully` })
-                              } catch {
-                                toast.error('Import failed', { id: 'import-articles' })
-                              }
+                              const formData = new FormData()
+                              formData.append('file', file)
+                              toast.promise(
+                                fetch('/api/faq/bulk-import', { method: 'POST', body: formData }).then(res => { if (!res.ok) throw new Error('Failed'); }),
+                                { loading: 'Importing articles...', success: `Import complete! ${file.name} imported successfully`, error: 'Import failed' }
+                              )
                             }
                           }
                           input.click()
@@ -2224,15 +2209,9 @@ export default function FAQClient() {
                           <p className="font-medium">Import Data</p>
                           <p className="text-xs text-gray-500">Bulk import articles</p>
                         </button>
-                        <button onClick={async () => {
-                          toast.loading('Loading version history...', { id: 'version-history' })
-                          try {
-                            await new Promise(r => setTimeout(r, 1000))
-                            window.open('/dashboard/faq-v2/version-history', '_blank')
-                            toast.success('Version history loaded', { id: 'version-history', description: 'Timeline view opened in new tab' })
-                          } catch {
-                            toast.error('Failed to load history', { id: 'version-history' })
-                          }
+                        <button onClick={() => {
+                          window.open('/dashboard/faq-v2/version-history', '_blank')
+                          toast.success('Version history loaded', { description: 'Timeline view opened in new tab' })
                         }} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
                           <History className="w-5 h-5 text-purple-600 mb-2" />
                           <p className="font-medium">Version History</p>
