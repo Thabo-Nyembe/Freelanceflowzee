@@ -306,10 +306,11 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     category: 'travel' as const
   })
 
-  // Fetch expenses on mount
+  // Fetch expenses on mount - only run once to avoid infinite loop
   useEffect(() => {
     refetch()
-  }, [refetch])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Handle creating a new expense
   const handleCreateExpense = async () => {
@@ -2279,8 +2280,9 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        {/* Enhanced Competitive Upgrade Components - TEMPORARILY DISABLED DUE TO RADIX UI INFINITE LOOP */}
+        {/* TODO: Fix Radix UI ref issue in competitive-upgrades components */}
+        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
               insights={mockExpensesAIInsights}
@@ -2310,7 +2312,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             actions={mockExpensesQuickActions}
             variant="grid"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Report Detail Dialog */}
