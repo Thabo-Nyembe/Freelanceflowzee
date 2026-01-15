@@ -135,10 +135,8 @@ export default function TaxIntelligenceClient() {
     }
   }
 
-  const handleLessonClick = (lessonTitle: string) => {
-    toast.info(`Opening lesson: ${lessonTitle}`, {
-      description: 'Lesson content coming soon'
-    })
+  const handleLessonClick = (lessonId: string) => {
+    router.push(`/dashboard/tax-intelligence-v2/lessons/${lessonId}`)
   }
 
   const handleCreateFiling = async () => {
@@ -895,15 +893,15 @@ export default function TaxIntelligenceClient() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
-                    { title: 'Tax Basics for Freelancers', duration: '15 min', progress: 0 },
-                    { title: 'Maximizing Deductions', duration: '20 min', progress: 0 },
-                    { title: 'Quarterly Tax Planning', duration: '10 min', progress: 0 },
-                    { title: 'International Tax Basics', duration: '25 min', progress: 0 },
+                    { id: 'tax-basics-freelancers', title: 'Tax Basics for Freelancers', duration: '15 min', progress: 0 },
+                    { id: 'maximizing-deductions', title: 'Maximizing Deductions', duration: '20 min', progress: 0 },
+                    { id: 'quarterly-tax-planning', title: 'Quarterly Tax Planning', duration: '10 min', progress: 0 },
+                    { id: 'international-tax-basics', title: 'International Tax Basics', duration: '25 min', progress: 0 },
                   ].map((lesson, index) => (
                     <div
                       key={index}
                       className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer"
-                      onClick={() => handleLessonClick(lesson.title)}
+                      onClick={() => handleLessonClick(lesson.id)}
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <BookOpen className="h-5 w-5 text-blue-500" />
