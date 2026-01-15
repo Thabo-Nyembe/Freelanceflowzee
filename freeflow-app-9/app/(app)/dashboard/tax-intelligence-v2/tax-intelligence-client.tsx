@@ -5,6 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   useTaxSummary,
   useTaxInsights,
@@ -26,13 +30,25 @@ import {
   Receipt,
   BookOpen,
   Shield,
-  X
+  X,
+  Download
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 export default function TaxIntelligenceClient() {
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [taxProfileForm, setTaxProfileForm] = useState({
+    primaryCountry: '',
+    primaryState: '',
+    businessStructure: '',
+    taxIdNumber: '',
+    fiscalYearEnd: '',
+    taxFilingFrequency: 'quarterly'
+  })
+  const router = useRouter()
 
   const { summary, isLoading: summaryLoading } = useTaxSummary(selectedYear)
   const { insights, isLoading: insightsLoading, dismissInsight, markAsRead } = useTaxInsights()
@@ -48,6 +64,64 @@ export default function TaxIntelligenceClient() {
   const handleApproveDeduction = async (deductionId: string) => {
     await approveDeduction(deductionId)
     toast.success('Deduction approved')
+  }
+
+  const handleDownloadReport = async () => {
+    const toastId = toast.loading('Generating tax report...')
+    try {
+      const response = await fetch(`/api/tax/reports?year=${selectedYear}`)
+      if (!response.ok) throw new Error('Failed to generate report')
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `tax-report-${selectedYear}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+
+      toast.success('Tax report downloaded', { id: toastId })
+    } catch (error) {
+      toast.error('Failed to download report', { id: toastId })
+    }
+  }
+
+  const handleSaveTaxSettings = async () => {
+    const toastId = toast.loading('Saving tax settings...')
+    try {
+      const { error } = await updateProfile(taxProfileForm)
+      if (error) throw error
+
+      toast.success('Tax settings saved successfully', { id: toastId })
+      setSettingsOpen(false)
+    } catch (error) {
+      toast.error('Failed to save tax settings', { id: toastId })
+    }
+  }
+
+  const handleInsightAction = (insight: any) => {
+    if (insight.actionUrl) {
+      router.push(insight.actionUrl)
+    } else {
+      toast.info('Action handler for this insight type coming soon')
+    }
+  }
+
+  const handleViewFilingCalendar = () => {
+    // Navigate to filings tab
+    const filingsTab = document.querySelector('[value="filings"]') as HTMLElement
+    if (filingsTab) {
+      filingsTab.click()
+      toast.success('Viewing filing calendar')
+    }
+  }
+
+  const handleLessonClick = (lessonTitle: string) => {
+    toast.info(`Opening lesson: ${lessonTitle}`, {
+      description: 'Lesson content coming soon'
+    })
   }
 
   return (
@@ -73,10 +147,119 @@ export default function TaxIntelligenceClient() {
               <option value={currentYear - 1}>{currentYear - 1}</option>
               <option value={currentYear - 2}>{currentYear - 2}</option>
             </select>
-            <Button variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Tax Settings
-            </Button>
+            <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Tax Settings
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Tax Settings</DialogTitle>
+                  <DialogDescription>
+                    Configure your tax profile and preferences
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryCountry">Primary Country</Label>
+                      <Select
+                        value={taxProfileForm.primaryCountry || profile?.primaryCountry || ''}
+                        onValueChange={(value) => setTaxProfileForm({ ...taxProfileForm, primaryCountry: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="US">United States</SelectItem>
+                          <SelectItem value="CA">Canada</SelectItem>
+                          <SelectItem value="GB">United Kingdom</SelectItem>
+                          <SelectItem value="AU">Australia</SelectItem>
+                          <SelectItem value="DE">Germany</SelectItem>
+                          <SelectItem value="FR">France</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryState">State/Province</Label>
+                      <Input
+                        id="primaryState"
+                        placeholder="e.g., California, Ontario"
+                        value={taxProfileForm.primaryState || profile?.primaryState || ''}
+                        onChange={(e) => setTaxProfileForm({ ...taxProfileForm, primaryState: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="businessStructure">Business Structure</Label>
+                    <Select
+                      value={taxProfileForm.businessStructure || profile?.businessStructure || ''}
+                      onValueChange={(value) => setTaxProfileForm({ ...taxProfileForm, businessStructure: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select structure" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sole_proprietor">Sole Proprietor</SelectItem>
+                        <SelectItem value="llc">LLC</SelectItem>
+                        <SelectItem value="s_corp">S Corporation</SelectItem>
+                        <SelectItem value="c_corp">C Corporation</SelectItem>
+                        <SelectItem value="partnership">Partnership</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="taxIdNumber">Tax ID Number (EIN/SSN)</Label>
+                    <Input
+                      id="taxIdNumber"
+                      placeholder="XX-XXXXXXX"
+                      value={taxProfileForm.taxIdNumber || profile?.taxIdNumber || ''}
+                      onChange={(e) => setTaxProfileForm({ ...taxProfileForm, taxIdNumber: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="fiscalYearEnd">Fiscal Year End</Label>
+                      <Input
+                        id="fiscalYearEnd"
+                        type="date"
+                        value={taxProfileForm.fiscalYearEnd || profile?.fiscalYearEnd || ''}
+                        onChange={(e) => setTaxProfileForm({ ...taxProfileForm, fiscalYearEnd: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="taxFilingFrequency">Filing Frequency</Label>
+                      <Select
+                        value={taxProfileForm.taxFilingFrequency || profile?.taxFilingFrequency || 'quarterly'}
+                        onValueChange={(value) => setTaxProfileForm({ ...taxProfileForm, taxFilingFrequency: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="quarterly">Quarterly</SelectItem>
+                          <SelectItem value="annual">Annual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setSettingsOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveTaxSettings}>
+                    Save Settings
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -216,19 +399,23 @@ export default function TaxIntelligenceClient() {
                   <CardDescription>Common tax tasks</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="h-4 w-4 mr-2" />
+                  <Button variant="outline" className="w-full justify-start" onClick={handleDownloadReport}>
+                    <Download className="h-4 w-4 mr-2" />
                     Download Tax Report
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button variant="outline" className="w-full justify-start" onClick={handleViewFilingCalendar}>
                     <Calendar className="h-4 w-4 mr-2" />
                     View Filing Calendar
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => toast.info('Tax exemption certificates feature coming soon')}
+                  >
                     <Shield className="h-4 w-4 mr-2" />
                     Tax Exemption Certificates
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => setSettingsOpen(true)}>
                     <Settings className="h-4 w-4 mr-2" />
                     Update Tax Profile
                   </Button>
@@ -372,7 +559,7 @@ export default function TaxIntelligenceClient() {
                         </Button>
                       </div>
                       {insight.actionRequired && (
-                        <Button size="sm" className="mt-3">
+                        <Button size="sm" className="mt-3" onClick={() => handleInsightAction(insight)}>
                           {insight.actionLabel || 'Take Action'}
                         </Button>
                       )}
@@ -396,7 +583,9 @@ export default function TaxIntelligenceClient() {
                 <div className="text-center py-12 text-gray-500">
                   <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
                   <p>No filings yet. They will appear here when available.</p>
-                  <Button className="mt-4">
+                  <Button className="mt-4" onClick={() => toast.info('Filing calendar and management features coming soon', {
+                    description: 'Create filings, track deadlines, and upload documents'
+                  })}>
                     <Calendar className="h-4 w-4 mr-2" />
                     View Filing Calendar
                   </Button>
@@ -425,6 +614,7 @@ export default function TaxIntelligenceClient() {
                     <div
                       key={index}
                       className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer"
+                      onClick={() => handleLessonClick(lesson.title)}
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <BookOpen className="h-5 w-5 text-blue-500" />
