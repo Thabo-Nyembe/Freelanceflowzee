@@ -82,14 +82,11 @@ export interface DeductionSuggestion {
 }
 
 export class TaxService {
-  private supabase: ReturnType<typeof createClient>
-
   // API clients (initialized with environment variables)
   private taxjarApiKey: string | undefined
   private avalaraApiKey: string | undefined
 
   constructor() {
-    this.supabase = createClient()
     this.taxjarApiKey = process.env.TAXJAR_API_KEY
     this.avalaraApiKey = process.env.AVALARA_API_KEY
   }
@@ -530,7 +527,11 @@ export class TaxService {
   /**
    * Get tax summary for user
    */
-  async getTaxSummary(userId: string, year: number): Promise<{
+  async getTaxSummary(
+    userId: string,
+    year: number,
+    supabase: Awaited<ReturnType<typeof createClient>>
+  ): Promise<{
     totalIncome: number
     totalExpenses: number
     totalDeductions: number
@@ -542,7 +543,7 @@ export class TaxService {
     const endDate = `${year}-12-31`
 
     // Get total tax paid
-    const { data: calculations } = await this.supabase
+    const { data: calculations } = await supabase
       .from('tax_calculations')
       .select('tax_amount, transaction_date')
       .eq('user_id', userId)
@@ -552,7 +553,7 @@ export class TaxService {
     const totalTaxPaid = calculations?.reduce((sum, calc) => sum + calc.tax_amount, 0) || 0
 
     // Get total deductions
-    const { data: deductions } = await this.supabase
+    const { data: deductions } = await supabase
       .from('tax_deductions')
       .select('deductible_amount')
       .eq('user_id', userId)

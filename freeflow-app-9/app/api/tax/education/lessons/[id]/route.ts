@@ -6,15 +6,18 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Await params in Next.js 15+
+    const { id } = await params
+
     // Import lessons (in real app, this would be from database)
     const { GET: getLessons } = await import('../route')
     const lessonsResponse = await getLessons(request)
     const lessonsData = await lessonsResponse.json()
 
-    const lesson = lessonsData.data.find((l: any) => l.id === params.id)
+    const lesson = lessonsData.data.find((l: any) => l.id === id)
 
     if (!lesson) {
       return NextResponse.json({ error: 'Lesson not found' }, { status: 404 })

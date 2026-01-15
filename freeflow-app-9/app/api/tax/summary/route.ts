@@ -4,7 +4,7 @@ import { taxService } from '@/lib/tax/tax-service'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())
 
     // Get tax summary
-    const summary = await taxService.getTaxSummary(user.id, year)
+    const summary = await taxService.getTaxSummary(user.id, year, supabase)
 
     return NextResponse.json({
       success: true,
