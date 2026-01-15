@@ -719,7 +719,6 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
         const text = await file.text()
         const config = JSON.parse(text)
         toast.success('Configuration imported successfully')
-        console.log('Imported config:', config)
       } catch {
         toast.error('Failed to import configuration')
       }

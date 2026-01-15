@@ -84,7 +84,6 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
       activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
     })
 
-    // TODO: Implement notifications panel/dialog
   }
 
   // ============================================================================
@@ -98,7 +97,6 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
       activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
     })
 
-    // TODO: Implement team communication dialog
   }
 
   // ============================================================================

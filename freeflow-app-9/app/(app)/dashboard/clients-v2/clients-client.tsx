@@ -439,7 +439,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Dialog states for TODO handlers
+  // Dialog states handlers
   const [showActivityDialog, setShowActivityDialog] = useState(false)
   const [showTaskDialog, setShowTaskDialog] = useState(false)
   const [showCustomFieldDialog, setShowCustomFieldDialog] = useState(false)

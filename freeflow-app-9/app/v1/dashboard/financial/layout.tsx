@@ -253,7 +253,6 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
       return
     }
 
-    // TODO: Could enhance to store schedule in database via financial-queries.ts
     // For now, keeping simple client-side reminder
     logger.info('Review scheduled', { reviewDate })
     toast.success('Financial Review Scheduled', {

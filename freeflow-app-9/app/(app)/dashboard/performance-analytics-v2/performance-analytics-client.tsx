@@ -510,7 +510,6 @@ export default function PerformanceAnalyticsClient() {
     }
 
     // In a real app, this would save to backend
-    console.log('Created alert:', newAlert)
 
     toast.success('Alert created successfully', {
       description: `Monitoring ${newAlertMetric} ${newAlertCondition} ${newAlertThreshold}`

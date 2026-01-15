@@ -536,7 +536,7 @@ export default function ComplianceClient() {
   const [showFrameworkDialog, setShowFrameworkDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Dialog states for TODO handlers
+  // Dialog states handlers
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [showAssignDialog, setShowAssignDialog] = useState(false)

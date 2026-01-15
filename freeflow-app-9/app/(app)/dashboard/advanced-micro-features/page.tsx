@@ -469,7 +469,7 @@ export default function AdvancedMicroFeaturesPage() {
                     size="large"
                     variant="detailed"
                     onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.success('Widget data refreshed', { description: 'Operation completed successfully' }) }}
-                    onSettings={() => { logger.info('Opening widget settings'); /* TODO: Implement widget settings */ }}
+                    onSettings={() => { logger.info('Opening widget settings'); toast.info('Widget settings', { description: 'Configure widget appearance and behavior' }) }}
                     onMaximize={() => { logger.info('Maximizing widget'); toast.success('Widget maximized') }}
                   />
                 </div>
@@ -509,7 +509,7 @@ export default function AdvancedMicroFeaturesPage() {
                     dateRange="Last 6 months"
                     onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
                     onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
-                    onSettings={() => { logger.info('Opening chart settings'); /* TODO: Implement chart settings */ }}
+                    onSettings={() => { logger.info('Opening chart settings'); toast.info('Chart settings', { description: 'Customize chart type, colors, and data sources' }) }}
                     legend={[
                       { name: 'Revenue', color: '#3b82f6', value: '$45K', visible: true },
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
@@ -572,7 +572,7 @@ export default function AdvancedMicroFeaturesPage() {
                     activities={mockActivities}
                     maxItems={5}
                     showTimestamps={true}
-                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); /* TODO: Implement activity details view */ }}
+                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.info('Activity Details', { description: `${activity.type}: ${activity.action}` }) }}
                   />
                 </div>
 

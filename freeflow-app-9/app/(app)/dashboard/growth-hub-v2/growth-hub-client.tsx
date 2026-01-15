@@ -1061,7 +1061,6 @@ export default function GrowthHubClient() {
                   try {
                     const channel = supabase.channel('realtime-analytics')
                     channel.on('broadcast', { event: 'metrics' }, (payload) => {
-                      console.log('Real-time metric:', payload)
                     }).subscribe((status) => {
                       toast.dismiss()
                       if (status === 'SUBSCRIBED') {

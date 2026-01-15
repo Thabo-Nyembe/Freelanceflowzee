@@ -433,7 +433,7 @@ export default function FeaturesClient() {
   const [activeTab, setActiveTab] = useState('features')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Dialog states for TODO implementations
+  // Dialog states implementations
   const [showCreateSegmentDialog, setShowCreateSegmentDialog] = useState(false)
   const [showExperimentDialog, setShowExperimentDialog] = useState(false)
   const [showRolloutDialog, setShowRolloutDialog] = useState(false)

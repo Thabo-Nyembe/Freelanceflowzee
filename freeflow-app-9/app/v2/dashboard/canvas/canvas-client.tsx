@@ -637,7 +637,6 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     // Trigger re-render/state restoration
     if (previousIndex >= 0) {
       const previousAction = actionHistory[previousIndex]
-      console.log('Undoing to action:', previousAction)
     }
 
     toast.info('Undo', { description: 'Last action undone' })
@@ -655,7 +654,6 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
     // Apply the action
     const nextAction = actionHistory[nextIndex]
-    console.log('Redoing action:', nextAction)
 
     toast.info('Redo', { description: 'Action redone' })
   }, [actionHistory, historyIndex])

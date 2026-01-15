@@ -745,7 +745,7 @@ export default function StockClient() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_showAlertSettingsDialog, setShowAlertSettingsDialog] = useState(false)
 
-  // New dialog states for TODO implementations
+  // New dialog states implementations
   const [showWarehouseDetailsDialog, setShowWarehouseDetailsDialog] = useState(false)
   const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
   const [showMovementHistoryDialog, setShowMovementHistoryDialog] = useState(false)

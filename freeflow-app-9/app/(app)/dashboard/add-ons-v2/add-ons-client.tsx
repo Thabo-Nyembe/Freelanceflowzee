@@ -631,7 +631,6 @@ export default function AddOnsClient() {
         const text = await file.text()
         const settings = JSON.parse(text)
         toast.success('Settings imported successfully!')
-        console.log('Imported settings:', settings)
       } catch {
         toast.error('Failed to import settings')
       }

@@ -197,13 +197,10 @@ export default function AICodeBuilderClient() {
     clearError
   } = useCodeBuilder({
     onStep: (step) => {
-      console.log('Step:', step);
     },
     onFile: (file) => {
-      console.log('File generated:', file.file_path);
     },
     onComplete: (task, files) => {
-      console.log('Complete:', task, files);
     }
   });
 

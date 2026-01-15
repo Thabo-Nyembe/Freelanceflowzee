@@ -263,7 +263,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const [showAPIKeyDialog, setShowAPIKeyDialog] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  // New dialog states for TODO handlers
+  // New dialog states handlers
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [showCreatePolicy, setShowCreatePolicy] = useState(false)
   const [showApplicationCatalog, setShowApplicationCatalog] = useState(false)

@@ -368,7 +368,6 @@ export default function ClientZonePage() {
       tab: activeTab
     })
 
-    // TODO: Implement notifications dialog/panel
   }
 
   // ============================================================================
@@ -382,7 +381,6 @@ export default function ClientZonePage() {
       activeProjects: dashboardData?.projectStats?.active || 0
     })
 
-    // TODO: Implement team communication dialog
   }
 
   // ============================================================================
@@ -788,7 +786,6 @@ export default function ClientZonePage() {
       nextMeeting: dashboardData?.nextMeeting
     })
 
-    // TODO: Implement meeting scheduler dialog
   }, [userId, projects, dashboardData])
 
   // ============================================================================

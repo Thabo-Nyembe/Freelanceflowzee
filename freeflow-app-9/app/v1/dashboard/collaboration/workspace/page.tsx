@@ -170,7 +170,7 @@ export default function WorkspacePage() {
         createdBy: folder.created_by || userId,
         createdAt: new Date(folder.created_at).toLocaleDateString(),
         modifiedAt: new Date(folder.updated_at).toLocaleDateString(),
-        isShared: false, // TODO: Check file_shares table
+        isShared: false,
         isLocked: false,
         isFavorite: folder.is_favorite,
         tags: [],

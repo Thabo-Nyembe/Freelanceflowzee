@@ -620,7 +620,6 @@ export default function ExtensionsClient() {
         const text = await file.text()
         const data = JSON.parse(text)
         toast.success('Settings imported successfully!')
-        console.log('Imported settings:', data)
       } catch {
         toast.error('Failed to import settings - invalid file format')
       }

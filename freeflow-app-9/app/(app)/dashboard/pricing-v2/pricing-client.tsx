@@ -529,7 +529,6 @@ export default function PricingClient({
 
       if (error) {
         // Table may not exist, use mock data
-        console.log('Using mock coupons')
       } else {
         setDbCoupons(data || [])
       }

@@ -1179,7 +1179,6 @@ export default function WebinarsClient() {
                     totalAttendees: stats.totalAttendees,
                     avgAttendance: stats.avgAttendanceRate
                   }
-                  console.log('Analytics Report:', reportData)
                   toast.success('Report Generated', { description: `${webinars.length} webinars analyzed` })
                 }},
                 { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => {

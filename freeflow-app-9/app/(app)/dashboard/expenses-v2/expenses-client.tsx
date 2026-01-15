@@ -572,7 +572,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             return { ready: true, method: 'camera' }
           }
         } catch (err) {
-          console.log('Camera access check failed, falling back to file upload')
         }
       }
 

@@ -258,7 +258,6 @@ function VideoComponent({ videoId }: { videoId: string }) {
     enabled: true,
     pollingInterval: 2000,
     onProcessingComplete: (video: VideoStatus) => {
-      console.log('Video ready!', video);
     }
   });
 

@@ -460,7 +460,7 @@ export default function DataExportClient() {
   const [showSchemaDialog, setShowSchemaDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Dialog states for TODO handlers
+  // Dialog states handlers
   const [showPipelineWizard, setShowPipelineWizard] = useState(false)
   const [showAddSourceDialog, setShowAddSourceDialog] = useState(false)
   const [showJobDetailsDialog, setShowJobDetailsDialog] = useState(false)

@@ -962,7 +962,6 @@ export default function EventsClient() {
       }, {} as Record<string, number>)
     }
     toast.success(`Trends: Revenue ${trendData.revenueTrend}, Registrations ${trendData.registrationTrend}`)
-    console.log('Trend analysis:', trendData)
   }
 
   const handleViewRevenue = () => {
@@ -971,7 +970,6 @@ export default function EventsClient() {
       .slice(0, 3)
       .map(e => `${e.title}: $${e.totalRevenue.toLocaleString()}`)
     toast.success(`Top revenue: ${revenueByEvent[0]}`)
-    console.log('Revenue breakdown:', revenueByEvent)
   }
 
   const handleViewDemographics = () => {
@@ -980,7 +978,6 @@ export default function EventsClient() {
       return acc
     }, {} as Record<string, number>)
     toast.success(`Attendee sources: Direct (${sourceBreakdown.direct || 0}), Social (${sourceBreakdown.social || 0}), Email (${sourceBreakdown.email || 0})`)
-    console.log('Demographics:', sourceBreakdown)
   }
 
   const handleViewGeoData = () => {
@@ -989,7 +986,6 @@ export default function EventsClient() {
       .map(e => e.venue?.city)
       .filter((v, i, a) => a.indexOf(v) === i)
     toast.success(`Event locations: ${geoData.join(', ')}`)
-    console.log('Geo data:', geoData)
   }
 
   const handleViewPageViews = () => {

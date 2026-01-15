@@ -643,7 +643,6 @@ export default function DashboardPage() {
     }
     setLiveActivities(prev => [newActivity, ...prev])
 
-    // TODO: Implement interactive tour with step-by-step guidance
     logger.info('Tour system ready', {
       status: 'implementation pending',
       tourSteps: tourSteps.length

@@ -554,11 +554,9 @@ export class MyPlugin extends PluginBase {
   version = '1.0.0';
 
   async onActivate(ctx: PluginContext) {
-    console.log('Plugin activated!');
   }
 
   async onDeactivate() {
-    console.log('Plugin deactivated');
   }
 }`
   },

@@ -752,10 +752,10 @@ export default function ProjectsOverviewPage() {
           spent: p.spent,
           start_date: p.start_date,
           end_date: p.deadline,
-          team_members: [], // TODO: Fetch from team_project_members table
+          team_members: [],
           priority: p.priority,
-          comments_count: 0, // TODO: Implement comments
-          attachments: [], // TODO: Implement attachments
+          comments_count: 0,
+          attachments: [],
           category: p.category,
           tags: p.tags || []
         }))

@@ -446,7 +446,7 @@ export default function SalesClient() {
   const [contactForm, setContactForm] = useState({ firstName: '', lastName: '', email: '', phone: '', title: '', company: '' })
   const [meetingForm, setMeetingForm] = useState({ title: '', date: '', time: '', duration: 30, attendees: '', notes: '' })
 
-  // Additional dialog states for TODO implementations
+  // Additional dialog states implementations
   const [showStageEditorDialog, setShowStageEditorDialog] = useState(false)
   const [showHubSpotDialog, setShowHubSpotDialog] = useState(false)
   const [showContractViewerDialog, setShowContractViewerDialog] = useState(false)

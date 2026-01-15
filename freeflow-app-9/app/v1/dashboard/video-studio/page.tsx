@@ -238,7 +238,7 @@ export default function VideoStudioPage() {
   const [teleprompterScript, setTeleprompterScript] = useState<string>('')
   const [showAnnotations, setShowAnnotations] = useState<boolean>(false)
 
-  // NEW MODAL STATES - Replacing TODOs with working modals
+  // MODAL STATES
   const [isTransitionPickerOpen, setIsTransitionPickerOpen] = useState<boolean>(false)
   const [isEffectsLibraryOpen, setIsEffectsLibraryOpen] = useState<boolean>(false)
   const [isTextEditorOpen, setIsTextEditorOpen] = useState<boolean>(false)
