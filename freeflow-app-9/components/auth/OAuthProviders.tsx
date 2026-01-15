@@ -196,6 +196,14 @@ export function OAuthProviders() {
         <p>Apple • Figma • GitLab</p>
         <p>Notion • Zoom • Slack</p>
       </div>
+
+      {/* Legal Disclaimer */}
+      <div className="text-center text-xs text-gray-400 mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+        <p>
+          Third-party logos and trademarks are property of their respective owners.
+          By connecting, you agree to their respective terms of service and privacy policies.
+        </p>
+      </div>
     </div>
   )
 }

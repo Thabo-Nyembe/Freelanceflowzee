@@ -115,14 +115,82 @@ export default function TermsPage() {
               </section>
 
               <section className="space-y-4 mt-8">
-                <h2 className="text-2xl font-bold text-white">9. Changes to Terms</h2>
+                <h2 className="text-2xl font-bold text-white">9. Governing Law and Jurisdiction</h2>
                 <p className="text-gray-300">
-                  We reserve the right to modify or replace these Terms at any time. We will provide notice of any material changes by posting the new Terms on the Platform. Your continued use of the Platform after any such changes constitutes your acceptance of the new Terms.
+                  These Terms shall be governed by and construed in accordance with the laws of the jurisdiction where KAZI is registered, without regard to its conflict of law provisions. Any legal action or proceeding arising under these Terms will be brought exclusively in the courts located in that jurisdiction, and you hereby consent to personal jurisdiction and venue therein.
                 </p>
               </section>
 
               <section className="space-y-4 mt-8">
-                <h2 className="text-2xl font-bold text-white">10. Contact Us</h2>
+                <h2 className="text-2xl font-bold text-white">10. Dispute Resolution</h2>
+                <p className="text-gray-300">
+                  In the event of any dispute arising from or relating to these Terms or your use of the Platform, the parties agree to the following resolution process:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-300">
+                  <li><strong className="text-white">Informal Negotiation:</strong> First, attempt to resolve the dispute through good faith negotiation for 30 days</li>
+                  <li><strong className="text-white">Mediation:</strong> If negotiation fails, submit the dispute to mediation with a mutually agreed mediator</li>
+                  <li><strong className="text-white">Arbitration:</strong> If mediation is unsuccessful, the dispute shall be resolved by binding arbitration</li>
+                </ul>
+                <p className="text-gray-300 mt-4">
+                  You agree to waive your right to a jury trial and to participate in class action lawsuits.
+                </p>
+              </section>
+
+              <section className="space-y-4 mt-8">
+                <h2 className="text-2xl font-bold text-white">11. DMCA Copyright Policy</h2>
+                <p className="text-gray-300">
+                  KAZI respects the intellectual property rights of others. If you believe that content on the Platform infringes your copyright, please send a written DMCA takedown notice to <a href="mailto:legal@kazi.com" className="text-blue-400 hover:underline">legal@kazi.com</a> with the following information:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-gray-300">
+                  <li>Identification of the copyrighted work claimed to be infringed</li>
+                  <li>Identification of the material claimed to be infringing and its location on the Platform</li>
+                  <li>Your contact information (name, address, telephone number, email)</li>
+                  <li>A statement that you have a good faith belief that the use is not authorized</li>
+                  <li>A statement under penalty of perjury that the information is accurate and you are authorized to act</li>
+                  <li>Your physical or electronic signature</li>
+                </ul>
+                <p className="text-gray-300 mt-4">
+                  We will respond to valid DMCA notices in accordance with the Digital Millennium Copyright Act. Repeat infringers will have their accounts terminated.
+                </p>
+              </section>
+
+              <section className="space-y-4 mt-8">
+                <h2 className="text-2xl font-bold text-white">12. Export Controls</h2>
+                <p className="text-gray-300">
+                  You agree not to export, re-export, or transfer the Platform or any technical data derived from the Platform to any country, entity, or person prohibited by applicable export control laws and regulations, including those of the United States and the European Union.
+                </p>
+              </section>
+
+              <section className="space-y-4 mt-8">
+                <h2 className="text-2xl font-bold text-white">13. Force Majeure</h2>
+                <p className="text-gray-300">
+                  KAZI shall not be liable for any failure or delay in performance due to circumstances beyond its reasonable control, including but not limited to acts of God, war, terrorism, riots, embargoes, acts of civil or military authorities, fire, floods, accidents, pandemics, strikes, or shortages of transportation, facilities, fuel, energy, labor, or materials.
+                </p>
+              </section>
+
+              <section className="space-y-4 mt-8">
+                <h2 className="text-2xl font-bold text-white">14. Severability</h2>
+                <p className="text-gray-300">
+                  If any provision of these Terms is found to be unenforceable or invalid by a court of competent jurisdiction, that provision shall be limited or eliminated to the minimum extent necessary so that these Terms shall otherwise remain in full force and effect and enforceable.
+                </p>
+              </section>
+
+              <section className="space-y-4 mt-8">
+                <h2 className="text-2xl font-bold text-white">15. Entire Agreement</h2>
+                <p className="text-gray-300">
+                  These Terms, together with our Privacy Policy and any other legal notices published on the Platform, constitute the entire agreement between you and KAZI regarding the Platform and supersede all prior agreements, understandings, and communications, whether written or oral.
+                </p>
+              </section>
+
+              <section className="space-y-4 mt-8">
+                <h2 className="text-2xl font-bold text-white">16. Changes to Terms</h2>
+                <p className="text-gray-300">
+                  We reserve the right to modify or replace these Terms at any time. We will provide notice of any material changes by posting the new Terms on the Platform and updating the "Last updated" date. Your continued use of the Platform after any such changes constitutes your acceptance of the new Terms. We encourage you to review these Terms periodically.
+                </p>
+              </section>
+
+              <section className="space-y-4 mt-8">
+                <h2 className="text-2xl font-bold text-white">17. Contact Us</h2>
                 <p className="text-gray-300">
                   If you have any questions about these Terms, please contact us at:
                 </p>

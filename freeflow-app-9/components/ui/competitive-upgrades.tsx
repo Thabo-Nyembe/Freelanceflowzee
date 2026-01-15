@@ -1005,7 +1005,7 @@ export function InlineComment({
 }
 
 // ============================================================================
-// 5. DRAGGABLE DASHBOARD WIDGETS (Like Monday.com)
+// 5. DRAGGABLE DASHBOARD WIDGETS
 // ============================================================================
 
 interface Widget {

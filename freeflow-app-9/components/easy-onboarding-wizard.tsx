@@ -470,7 +470,7 @@ export function EasyOnboardingWizard({ onComplete, userId }: EasyOnboardingWizar
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Easily migrate from Upwork, Fiverr, Trello, and 10+ other apps
+              Easily migrate from popular freelance and project management platforms
             </p>
           </CardContent>
         </Card>
@@ -487,6 +487,9 @@ export function EasyOnboardingWizard({ onComplete, userId }: EasyOnboardingWizar
 
       <p className="text-sm text-muted-foreground">
         ⏱️ Takes less than 10 minutes • 🔒 Your data is secure
+      </p>
+      <p className="text-xs text-muted-foreground/60 mt-2">
+        Third-party platform names are trademarks of their respective owners. By importing data, you confirm you have the right to export and import such data.
       </p>
     </motion.div>
   )
