@@ -117,7 +117,7 @@ export function ScreenshotViewer({ file, comments, onAddComment }: ScreenshotVie
                 tool === "comment" ? "cursor-crosshair" : 'cursor-crosshair'
               }`}
               draggable={false}
-            / loading="lazy">
+            loading="lazy" />
 
             {/* Comment Pins */}
             {comments.map((comment) =>

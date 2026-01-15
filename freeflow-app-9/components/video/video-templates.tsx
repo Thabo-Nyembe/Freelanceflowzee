@@ -187,8 +187,8 @@ export function VideoTemplates({ onSelectTemplate, onPreviewTemplate }: VideoTem
               <img src={template.thumbnail}
                 alt={template.name}
                 className="w-full h-48 object-cover rounded-t-lg"
-              / loading="lazy">
-              
+                loading="lazy" />
+
               {/* Premium Badge */}
               {template.isPremium && (
                 <Badge className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500">

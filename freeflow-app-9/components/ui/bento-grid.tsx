@@ -270,7 +270,7 @@ export function BentoFeature({
           <img src={image}
             alt={title}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-          / loading="lazy">
+          loading="lazy" />
         </div>
       )}
     </BentoCard>

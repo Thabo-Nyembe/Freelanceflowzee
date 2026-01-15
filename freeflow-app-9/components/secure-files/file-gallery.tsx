@@ -262,7 +262,7 @@ export function FileGallery({
                     <img src={file.thumbnail}
                       alt={file.fileName}
                       className="w-full h-full object-cover rounded-md"
-                    / loading="lazy">
+                    loading="lazy" />
                   ) : (
                     getFileIcon(file.fileType)
                   )}
@@ -332,7 +332,7 @@ export function FileGallery({
                       <img src={file.thumbnail}
                         alt={file.fileName}
                         className="w-full h-full object-cover rounded-md"
-                      / loading="lazy">
+                      loading="lazy" />
                     ) : (
                       getFileIcon(file.fileType)
                     )}

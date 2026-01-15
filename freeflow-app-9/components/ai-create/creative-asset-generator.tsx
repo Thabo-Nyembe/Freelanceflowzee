@@ -550,7 +550,7 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
                       <img src={uploadPreview}
                         alt="Upload preview"
                         className="max-w-sm rounded-lg border border-gray-200 dark:border-gray-700"
-                      / loading="lazy">
+                      loading="lazy" />
                     </div>
                   )}
                 </div>

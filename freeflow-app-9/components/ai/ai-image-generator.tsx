@@ -442,7 +442,7 @@ export default function AIImageGenerator() {
               <div className="grid grid-cols-5 gap-2">
                 {referenceImages.map((img, i) => (
                   <div key={i} className="relative aspect-square rounded-lg overflow-hidden group">
-                    <img src={img} alt={`Ref ${i+1}`} className="w-full h-full object-cover" / loading="lazy">
+                    <img src={img} alt={`Ref ${i+1}`} className="w-full h-full object-cover" loading="lazy" />
                     <button
                       onClick={() => removeReferenceImage(i)}
                       className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -634,7 +634,7 @@ export default function AIImageGenerator() {
                       <img src={image.url}
                         alt={`Generated ${index + 1}`}
                         className="w-full h-auto"
-                      / loading="lazy">
+                      loading="lazy" />
 
                       {/* Overlay Actions */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
@@ -707,7 +707,7 @@ export default function AIImageGenerator() {
                       className="relative group rounded-lg overflow-hidden aspect-square"
                     >
                       {item.images[0] && (
-                        <img src={item.images[0].url} alt={`History ${index}`} className="w-full h-full object-cover" / loading="lazy">
+                        <img src={item.images[0].url} alt={`History ${index}`} className="w-full h-full object-cover" loading="lazy" />
                       )}
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                         <Eye className="w-4 h-4 text-white" />
@@ -744,7 +744,7 @@ export default function AIImageGenerator() {
               <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
                 {Array.from(favorites).map((url, index) => (
                   <div key={index} className="relative group rounded-lg overflow-hidden aspect-square">
-                    <img src={url} alt={`Saved ${index + 1}`} className="w-full h-full object-cover" / loading="lazy">
+                    <img src={url} alt={`Saved ${index + 1}`} className="w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <Button
                         size="sm"

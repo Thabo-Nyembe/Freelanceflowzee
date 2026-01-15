@@ -1111,7 +1111,7 @@ export default function FilesPage() {
                                 <img src={file.thumbnail}
                                   alt={file.name}
                                   className="w-16 h-16 rounded object-cover mb-2"
-                                / loading="lazy">
+                                loading="lazy" />
                               ) : (
                                 <div className="mb-2">{getFileIcon(file.type)}</div>
                               )}
@@ -1158,7 +1158,7 @@ export default function FilesPage() {
                             <img src={file.thumbnail}
                               alt={file.name}
                               className="w-8 h-8 rounded object-cover"
-                            / loading="lazy">
+                            loading="lazy" />
                           ) : (
                             <div className="w-8 h-8 flex items-center justify-center">
                               {getFileIcon(file.type)}

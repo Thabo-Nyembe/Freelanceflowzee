@@ -426,7 +426,7 @@ export function PerspectiveImage({
         alt={alt}
         className="w-full h-full object-cover"
         style={{ transform: "translateZ(50px)" }}
-      / loading="lazy">
+      loading="lazy" />
 
       {/* Shine effect */}
       <motion.div

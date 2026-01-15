@@ -39,11 +39,11 @@ export function DashboardTestWrapper({ children }: DashboardTestWrapperProps) {
       
       <div data-testid="team-hub" style={{ display: 'none' }}>
         <div data-testid="team-member" data-member-id="1">
-          <img src="/avatars/alice.jpg" alt="Alice Johnson" / loading="lazy">
+          <img src="/avatars/alice.jpg" alt="Alice Johnson" loading="lazy" />
           <span>Alice Johnson</span>
         </div>
         <div data-testid="team-member" data-member-id="2">
-          <img src="/avatars/bob.jpg" alt="Bob Smith" / loading="lazy">
+          <img src="/avatars/bob.jpg" alt="Bob Smith" loading="lazy" />
           <span>Bob Smith</span>
         </div>
       </div>

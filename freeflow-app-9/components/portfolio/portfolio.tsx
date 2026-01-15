@@ -257,7 +257,7 @@ const Portfolio = () => {
                           <img src={project.image}
                             alt="Portfolio image"
                             className="w-full h-40 object-cover rounded mb-4"
-                          / loading="lazy">
+                          loading="lazy" />
                         )}
                         <h3 className="font-semibold">{project.title}</h3>
                         <p className="text-gray-500 mt-2">{project.description}</p>

@@ -155,7 +155,7 @@ export function RouteLoading({
               <img src="/kazi-brand/logo.svg"
                 alt="KAZI"
                 className="h-16 w-auto relative z-10"
-              / loading="lazy">
+              loading="lazy" />
             </motion.div>
           </motion.div>
         )}

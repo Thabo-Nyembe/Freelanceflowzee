@@ -301,7 +301,7 @@ export function PaymentGate({
                       <img src={itemThumbnail}
                         alt={itemTitle}
                         className="w-full h-full object-cover"
-                      / loading="lazy">
+                      loading="lazy" />
                     </div>
                   )}
                   <div className="flex-1">

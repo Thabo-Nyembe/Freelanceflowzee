@@ -1326,7 +1326,7 @@ export default function CanvasPage() {
                       <img src={canvas.thumbnail}
                         alt={canvas.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      / loading="lazy">
+                      loading="lazy" />
                       <div className="absolute top-2 left-2 flex gap-1">
                         {canvas.isStarred && (
                           <Badge className="bg-amber-500/90 text-white">
@@ -1587,7 +1587,7 @@ export default function CanvasPage() {
                   <img src={state.selectedCanvas.thumbnail}
                     alt={state.selectedCanvas.name}
                     className="w-full h-64 object-cover"
-                  / loading="lazy">
+                  loading="lazy" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">

@@ -257,7 +257,7 @@ export function OnboardingTourComponent({
                           <img src={currentStepData.imageUrl}
                             alt={currentStepData.title}
                             className="w-full h-auto"
-                          / loading="lazy">
+                          loading="lazy" />
                         </div>
                       )}
 

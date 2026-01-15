@@ -45,7 +45,7 @@ export function AccessibleImage({ src, alt, decorative = false, ...props }) {
       alt={decorative ? '' : alt || 'Image'}
       role={decorative ? 'presentation' : undefined}
       {...props}
-    / loading="lazy">
+    loading="lazy" />
   )
 }
 

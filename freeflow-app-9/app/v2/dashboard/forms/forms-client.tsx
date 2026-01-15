@@ -3031,7 +3031,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`}
                   alt="QR Code"
                   className="w-48 h-48"
-                / loading="lazy">
+                loading="lazy" />
               </div>
               <p className="text-sm text-gray-500 mt-4 text-center">
                 {selectedForm?.title || 'Form'}

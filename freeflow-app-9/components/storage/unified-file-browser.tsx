@@ -211,7 +211,7 @@ export function UnifiedFileBrowser() {
                       <img src={file.thumbnail}
                         alt={file.name}
                         className="w-16 h-16 object-cover rounded mb-2"
-                      / loading="lazy">
+                      loading="lazy" />
                     ) : (
                       <div className="w-16 h-16 flex items-center justify-center mb-2">
                         {getFileIcon(file)}

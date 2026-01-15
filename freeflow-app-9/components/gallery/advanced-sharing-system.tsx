@@ -635,7 +635,7 @@ export function AdvancedGallerySharingSystem({
               {_lightboxItem.type === 'video' ? (
                 <video src={_lightboxItem.url} />
               ) : (
-                <img src={_lightboxItem.url} alt={_lightboxItem.name} / loading="lazy">
+                <img src={_lightboxItem.url} alt={_lightboxItem.name} loading="lazy" />
               )}
               
               <Button onClick={_setLightboxItem} className="absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm">

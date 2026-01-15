@@ -207,7 +207,7 @@ export function BackgroundReplacementControls({
               <img src={selectedBackground}
                 alt="Virtual Background"
                 className="w-full h-full object-cover"
-              / loading="lazy">
+              loading="lazy" />
             </div>
           )}
         </div>

@@ -43,7 +43,7 @@ export function DemoEnhancedNav() {
           </div>
 
           <div className="flex items-center gap-3">
-            <img src={currentUser.picture?.thumbnail || '/images/demo-avatar.jpg'} alt={currentUser.name} / loading="lazy">
+            <img src={currentUser.picture?.thumbnail || '/images/demo-avatar.jpg'} alt={currentUser.name} loading="lazy" />
             <div>
               <p>{currentUser.name}</p>
               <p>Demo Account</p>

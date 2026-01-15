@@ -2385,7 +2385,7 @@ export default function CommunityHubPage() {
                       <img src={media.thumbnail || media.url} 
                         alt={media.caption || 'Post media'} 
                         className="w-full h-48 object-cover"
-                      / loading="lazy">
+                      loading="lazy" />
                       {media.caption && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
                           {media.caption}
@@ -2830,7 +2830,7 @@ export default function CommunityHubPage() {
                     <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
                       <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
                       <div className="relative">
-                        <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" / loading="lazy">
+                        <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" loading="lazy" />
                         <Badge className="absolute top-2 right-2" variant="secondary">
                           {event.type}
                         </Badge>
@@ -2968,7 +2968,7 @@ export default function CommunityHubPage() {
                           <img src={group.avatar}
                             alt={group.name}
                             className="w-12 h-12 rounded-full object-cover"
-                          / loading="lazy">
+                          loading="lazy" />
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h3 className="font-semibold text-white">{group.name}</h3>

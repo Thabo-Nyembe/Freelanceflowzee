@@ -179,7 +179,7 @@ export function CommunityTestimonials() {
                   <img src={metadata.avatar}
                     alt=""
                     className="h-10 w-10 rounded-full object-cover"
-                  / loading="lazy">
+                  loading="lazy" />
                 )}
                 <div>
                   <p className="font-medium text-sm">{testimonial.subtitle}</p>

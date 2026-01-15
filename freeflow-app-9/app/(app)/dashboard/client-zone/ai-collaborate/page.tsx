@@ -513,7 +513,7 @@ export default function AICollaboratePage() {
                           <img src={option.image}
                             alt={option.title}
                             className="w-full h-full object-cover"
-                          / loading="lazy">
+                          loading="lazy" />
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-all" />
                         </div>
 
@@ -643,7 +643,7 @@ export default function AICollaboratePage() {
                       <img src={previewOption.image}
                         alt={previewOption.title}
                         className="w-full h-full object-cover"
-                      / loading="lazy">
+                      loading="lazy" />
                     </div>
 
                     <div>

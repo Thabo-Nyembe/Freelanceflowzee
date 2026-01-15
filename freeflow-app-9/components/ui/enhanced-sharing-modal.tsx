@@ -114,7 +114,7 @@ export function EnhancedSharingModal({
         <div className="p-6 border-b">
           <div className="flex space-x-3">
             {imageUrl && (
-              <img src={imageUrl} alt={title} className="w-24 h-24 object-cover rounded-lg" / loading="lazy">
+              <img src={imageUrl} alt={title} className="w-24 h-24 object-cover rounded-lg" loading="lazy" />
             )}
             <div>
               <h3 className="font-semibold">{title}</h3>

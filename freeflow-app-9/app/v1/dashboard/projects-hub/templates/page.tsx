@@ -608,7 +608,7 @@ export default function ProjectTemplatesPage() {
                   <img src={template.thumbnail} 
                     alt={template.title}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  / loading="lazy">
+                  loading="lazy" />
                   <div className="absolute top-2 right-2">
                     <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                       <Star className="h-3 w-3 mr-1" />
@@ -715,7 +715,7 @@ export default function ProjectTemplatesPage() {
                           <img src={template.thumbnail} 
                             alt={template.title}
                             className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                          / loading="lazy">
+                          loading="lazy" />
                           <div className="absolute top-2 left-2">
                             <Badge variant="secondary" className="text-xs">
                               {template.difficulty}
@@ -775,7 +775,7 @@ export default function ProjectTemplatesPage() {
                             <img src={template.thumbnail} 
                               alt={template.title}
                               className="w-24 h-24 object-cover rounded-lg"
-                            / loading="lazy">
+                            loading="lazy" />
                             <div className="flex-1">
                               <div className="flex items-start justify-between mb-2">
                                 <div>
@@ -989,7 +989,7 @@ export default function ProjectTemplatesPage() {
                   <img src={previewTemplate.thumbnail}
                     alt={previewTemplate.title}
                     className="w-full h-48 object-cover"
-                  / loading="lazy">
+                  loading="lazy" />
                   {previewTemplate.featured && (
                     <Badge className="absolute top-2 right-2 bg-yellow-100 text-yellow-800">
                       <Star className="h-3 w-3 mr-1" />

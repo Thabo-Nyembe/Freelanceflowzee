@@ -76,7 +76,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ imageUrl, onAddComment }) => 
       onMouseUp={handleMouseUp}
       style={{ cursor: 'crosshair'  }}
     >
-      <img src={imageUrl} alt="design-proof" className="select-none" / loading="lazy">
+      <img src={imageUrl} alt="design-proof" className="select-none" loading="lazy" />
 
       {region && (
         <div

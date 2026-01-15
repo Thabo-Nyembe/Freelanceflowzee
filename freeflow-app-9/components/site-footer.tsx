@@ -121,7 +121,7 @@ export function SiteFooter() {
                 <img src="/kazi-brand/logo-light.png" 
                   alt="KAZI" 
                   className="h-6 w-auto"
-                / loading="lazy">
+                loading="lazy" />
                 <span className="font-bold text-white">KAZI</span>
               </div>
               <span>© {new Date().getFullYear()} KAZI. All rights reserved.</span>

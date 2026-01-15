@@ -92,7 +92,7 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
                         <img src={URL.createObjectURL(file)} 
                           alt={`Selected file ${index + 1}`}
                           className="w-full h-full object-cover"
-                        / loading="lazy">
+                        loading="lazy" />
                       </div>
                     ) : (
                       <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">

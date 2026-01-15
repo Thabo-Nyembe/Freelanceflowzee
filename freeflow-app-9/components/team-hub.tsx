@@ -150,7 +150,7 @@ export default function TeamHub({
                               <img src={user.avatar}
                                 alt={user.name}
                                 className="h-full w-full object-cover"
-                              / loading="lazy">
+                              loading="lazy" />
                             ) : (
                               <div className="h-full w-full bg-primary/10 flex items-center justify-center text-xs font-medium">
                                 {user.name[0]}

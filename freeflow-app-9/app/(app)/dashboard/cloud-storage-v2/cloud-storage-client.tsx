@@ -1559,7 +1559,7 @@ export default function CloudStorageClient() {
                           <CardContent className="p-4">
                             <div className="aspect-square rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3 relative overflow-hidden">
                               {file.thumbnail ? (
-                                <img src={file.thumbnail} alt={file.name} className="w-full h-full object-cover" / loading="lazy">
+                                <img src={file.thumbnail} alt={file.name} className="w-full h-full object-cover" loading="lazy" />
                               ) : (
                                 <div className={`w-12 h-12 rounded-lg ${getFileColor(file.type)} flex items-center justify-center`}>
                                   <FileIcon className="w-6 h-6" />
@@ -2433,7 +2433,7 @@ export default function CloudStorageClient() {
                   {/* Preview */}
                   <div className="aspect-video rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                     {selectedFile.thumbnail ? (
-                      <img src={selectedFile.thumbnail} alt={selectedFile.name} className="w-full h-full object-contain" / loading="lazy">
+                      <img src={selectedFile.thumbnail} alt={selectedFile.name} className="w-full h-full object-contain" loading="lazy" />
                     ) : (
                       <div className={`w-24 h-24 rounded-xl ${getFileColor(selectedFile.type)} flex items-center justify-center`}>
                         {(() => {

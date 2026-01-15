@@ -422,7 +422,7 @@ export default function CanvasPage() {
               <html>
                 <head><title>${filename}</title></head>
                 <body style="margin:0;display:flex;justify-content:center;align-items:center;">
-                  <img src="${dataUrl}" style="max-width:100%;max-height:100vh;" / loading="lazy">
+                  <img src="${dataUrl}" style="max-width:100%;max-height:100vh;" loading="lazy" />
                 </body>
               </html>
             `);

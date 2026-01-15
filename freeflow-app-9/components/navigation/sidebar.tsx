@@ -225,7 +225,7 @@ export function Sidebar() {
             <img src="/kazi-brand/logo.svg" 
               alt="KAZI" 
               className="h-8 w-auto"
-            / loading="lazy">
+            loading="lazy" />
             <h1 className="text-2xl font-bold kazi-text-dark dark:kazi-text-light kazi-headline">KAZI</h1>
           </div>
       </div>

@@ -109,7 +109,7 @@ export const PortfolioEnhancer = () => {
                 <img src={video.thumbnailUrl || '/placeholder-thumbnail.jpg'}
                   alt={video.title}
                   className="w-24 h-16 object-cover rounded"
-                / loading="lazy">
+                loading="lazy" />
                 <div>
                   <h3 className="font-semibold">{video.title}</h3>
                   <p className="text-sm text-gray-500">{video.category}</p>

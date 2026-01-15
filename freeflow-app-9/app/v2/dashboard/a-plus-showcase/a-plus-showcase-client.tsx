@@ -1165,7 +1165,7 @@ export default function APlusShowcaseClient() {
                           <img src={component.preview}
                             alt={component.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          / loading="lazy">
+                          loading="lazy" />
                           <div className="absolute top-2 left-2 flex gap-1">
                             {component.isPremium && (
                               <Badge className="bg-amber-500/90 text-white">
@@ -1267,7 +1267,7 @@ export default function APlusShowcaseClient() {
                         <img src={component.preview}
                           alt={component.name}
                           className="w-24 h-24 object-cover rounded-lg"
-                        / loading="lazy">
+                        loading="lazy" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
@@ -1368,7 +1368,7 @@ export default function APlusShowcaseClient() {
                   <img src={state.selectedComponent.preview}
                     alt={state.selectedComponent.name}
                     className="w-full h-auto"
-                  / loading="lazy">
+                  loading="lazy" />
                 </div>
               </TabsContent>
 

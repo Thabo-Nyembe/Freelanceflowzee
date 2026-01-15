@@ -207,7 +207,7 @@ export function AssetPreviewModal({
             <img src={asset.url}
               alt={asset.name}
               className="max-w-full max-h-full object-contain"
-            / loading="lazy">
+            loading="lazy" />
           </div>
         )
       

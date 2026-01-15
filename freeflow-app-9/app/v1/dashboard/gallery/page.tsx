@@ -531,7 +531,7 @@ export default function GalleryPage() {
                           <img src={item.imageUrl}
                             alt={item.name}
                             className="w-full h-full object-cover"
-                          / loading="lazy">
+                          loading="lazy" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Image className="h-12 w-12 text-gray-400"  loading="lazy"/>

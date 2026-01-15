@@ -3170,7 +3170,7 @@ export default function CvPortfolioClient() {
                             <img src={project.image}
                               alt={project.title}
                               className="w-full h-full object-cover"
-                            / loading="lazy">
+                            loading="lazy" />
                           ) : (
                             <div className="text-white text-6xl opacity-20">
                               <Briefcase />
@@ -4059,7 +4059,7 @@ export default function CvPortfolioClient() {
                   <img src={viewingProject.image}
                     alt={viewingProject.title}
                     className="w-full h-full object-cover rounded-lg"
-                  / loading="lazy">
+                  loading="lazy" />
                 ) : (
                   <Briefcase className="w-16 h-16 text-white opacity-50" />
                 )}

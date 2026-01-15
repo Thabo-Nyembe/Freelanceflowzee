@@ -339,7 +339,7 @@ export function AIEnhancedVideoRecording({
                             <img src={highlight.thumbnail}
                               alt={`Highlight ${index + 1}`}
                               className="h-16 w-24 rounded object-cover"
-                            / loading="lazy">
+                            loading="lazy" />
                           )}
                           <div>
                             <h3 className="font-medium">{highlight.title}</h3>

@@ -90,7 +90,7 @@ export function SiteHeader({ user }: SiteHeaderProps) {
               <img src="/kazi-brand/logo.svg"
                 alt="KAZI"
                 className="h-8 w-auto relative z-10 transition-transform duration-300 group-hover/logo:scale-110"
-              / loading="lazy">
+              loading="lazy" />
             </div>
             <TextShimmer className="text-xl font-bold" duration={2}>
               KAZI

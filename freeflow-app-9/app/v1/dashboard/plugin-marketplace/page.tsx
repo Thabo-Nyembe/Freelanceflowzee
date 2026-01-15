@@ -1304,7 +1304,7 @@ export default function PluginMarketplacePage() {
                       src={screenshot}
                       alt={`Screenshot ${i + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
-                    / loading="lazy">
+                    loading="lazy" />
                   ))}
                 </div>
 

@@ -251,10 +251,10 @@ export function EnhancedFileUpload({
                       {/* File Preview/Icon */}
                       <div className="flex-shrink-0">
                         {file.preview ? (
-                          <img src={file.preview} 
+                          <img src={file.preview}
                             alt={file.name}
                             className="w-12 h-12 object-cover rounded"
-                          / loading="lazy">
+                            loading="lazy" />
                         ) : (
                           <div className="w-12 h-12 flex items-center justify-center bg-muted rounded">
                             {getFileIcon(file)}
@@ -364,7 +364,7 @@ export function EnhancedFileUpload({
                     <img src={`https://images.unsplash.com/photo-${1500000000000 + i}?w=400&h=225&fit=crop`}
                       alt={`Stock asset ${i}`}
                       className="w-full h-full object-cover rounded-lg"
-                    / loading="lazy">
+                    loading="lazy" />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
                       <div className="flex gap-2">
                         <Button size="sm" variant="secondary">

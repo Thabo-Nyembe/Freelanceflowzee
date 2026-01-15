@@ -42,7 +42,7 @@ export function MobileMenu({ items, children }: MobileMenuProps) {
             <img src="/kazi-brand/logo.svg" 
               alt="KAZI" 
               className="h-6 w-auto"
-            / loading="lazy">
+            loading="lazy" />
             <span className="font-bold">KAZI</span>
           </div>
         </div>
