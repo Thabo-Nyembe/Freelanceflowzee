@@ -2281,7 +2281,7 @@ export default function VideoStudioPage() {
                 setIsUploadDialogOpen(true)
               }}
               >
-                <Image className="w-8 h-8 text-purple-600" />
+                <Image className="w-8 h-8 text-purple-600"  loading="lazy"/>
                 <span className="text-sm">Upload Images</span>
               </Button>
 
@@ -2374,7 +2374,7 @@ export default function VideoStudioPage() {
                     <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
                       {asset.type === 'video' && <Video className="w-6 h-6 text-gray-400" />}
                       {asset.type === 'audio' && <Volume2 className="w-6 h-6 text-gray-400" />}
-                      {asset.type === 'image' && <Image className="w-6 h-6 text-gray-400" />}
+                      {asset.type === 'image' && <Image className="w-6 h-6 text-gray-400"  loading="lazy"/>}
                       {asset.type === 'transition' && <Zap className="w-6 h-6 text-gray-400" />}
                     </div>
                     

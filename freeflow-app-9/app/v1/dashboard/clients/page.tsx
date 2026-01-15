@@ -2388,8 +2388,8 @@ export default function ClientsPage() {
                 variant="outline"
                 className="h-20 flex flex-col items-center justify-center gap-2"
                 onClick={handleExport}
-              >
-                <Download className="h-6 w-6" />
+               aria-label="Export data">
+                  <Download className="h-6 w-6" />
                 <span>Export as JSON</span>
               </Button>
             </div>

@@ -1114,8 +1114,8 @@ Generated on: ${new Date().toLocaleString()}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleRefresh} disabled={dealsLoading}>
-                <RefreshCw className={`w-4 h-4 ${dealsLoading ? 'animate-spin' : ''}`} />
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleRefresh} disabled={dealsLoading} aria-label="Refresh">
+                  <RefreshCw className={`w-4 h-4 ${dealsLoading ? 'animate-spin' : ''}`} />
               </Button>
               <Button className="bg-white text-green-600 hover:bg-green-50" onClick={() => setShowCreateDealDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />

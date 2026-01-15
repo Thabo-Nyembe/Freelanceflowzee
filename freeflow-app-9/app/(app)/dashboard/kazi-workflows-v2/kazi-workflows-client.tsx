@@ -1069,8 +1069,8 @@ export default function KaziWorkflowsClient() {
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button size="sm" variant="ghost">
-                                    <MoreVertical className="h-4 w-4" />
+                                  <Button size="sm" variant="ghost" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -1625,8 +1625,8 @@ export default function KaziWorkflowsClient() {
               <Button variant="outline" onClick={() => setIsExportDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleExport}>
-                <Download className="h-4 w-4 mr-2" />
+              <Button onClick={handleExport} aria-label="Export data">
+                  <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
             </DialogFooter>
@@ -1953,8 +1953,8 @@ export default function KaziWorkflowsClient() {
               <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleShare} disabled={!shareEmail}>
-                <Share2 className="h-4 w-4 mr-2" />
+              <Button onClick={handleShare} disabled={!shareEmail} aria-label="Share">
+                  <Share2 className="h-4 w-4 mr-2" />
                 Send Invitation
               </Button>
             </DialogFooter>

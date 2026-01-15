@@ -2237,7 +2237,7 @@ export default function CollaborationPage() {
                       variant="outline"
                       onClick={handleVirtualBackground}
                     >
-                      <Image className="h-4 w-4 mr-2" />
+                      <Image className="h-4 w-4 mr-2"  loading="lazy"/>
                       Background
                     </Button>
                     <Button
@@ -2384,12 +2384,12 @@ export default function CollaborationPage() {
                   {/* Supported media types */}
                   <div className="space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
-                      <Image className="h-5 w-5 text-blue-600" />
+                      <Image className="h-5 w-5 text-blue-600"  loading="lazy"/>
                       Supported Media Types
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                       <div className="p-4 border-2 rounded-lg text-center hover:bg-blue-50 transition-colors">
-                        <Image className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                        <Image className="h-8 w-8 mx-auto mb-2 text-blue-600"  loading="lazy"/>
                         <p className="text-sm font-medium">Images</p>
                         <p className="text-xs text-gray-500">JPG, PNG, GIF</p>
                       </div>
@@ -2465,7 +2465,7 @@ export default function CollaborationPage() {
                   <h3 className="font-semibold">Example Use Cases</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     <div className="p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
-                      <Image className="h-6 w-6 mb-2 text-blue-600" />
+                      <Image className="h-6 w-6 mb-2 text-blue-600"  loading="lazy"/>
                       <p className="font-medium text-sm">Design Review</p>
                       <p className="text-xs text-gray-500">Annotate UI mockups</p>
                     </div>
@@ -2868,7 +2868,7 @@ export default function CollaborationPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Image className="h-5 w-5" />
+                <Image className="h-5 w-5"  loading="lazy"/>
                 Shared Media
               </CardTitle>
               <CardDescription>
@@ -2904,7 +2904,7 @@ export default function CollaborationPage() {
                     <Card>
                       <CardContent className="pt-6">
                         <div className="aspect-video bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg mb-3 flex items-center justify-center">
-                          <Image className="h-12 w-12 text-blue-600" />
+                          <Image className="h-12 w-12 text-blue-600"  loading="lazy"/>
                         </div>
                         <p className="font-medium text-sm mb-1">Brand_Logo_v2.png</p>
                         <p className="text-xs text-gray-500 mb-3">Uploaded 2 hours ago • 1.2 MB</p>
@@ -3045,7 +3045,7 @@ export default function CollaborationPage() {
                     <Card>
                       <CardContent className="pt-6">
                         <div className="aspect-video bg-gradient-to-br from-orange-100 to-orange-200 rounded-lg mb-3 flex items-center justify-center">
-                          <Image className="h-12 w-12 text-orange-600" />
+                          <Image className="h-12 w-12 text-orange-600"  loading="lazy"/>
                         </div>
                         <p className="font-medium text-sm mb-1">Mockup_Homepage.jpg</p>
                         <p className="text-xs text-gray-500 mb-3">Uploaded 3 days ago • 2.1 MB</p>
@@ -3325,7 +3325,7 @@ export default function CollaborationPage() {
                         toast.success('Image tool selected - Click to insert image')
                       }}
                     >
-                      <Image className="h-4 w-4" />
+                      <Image className="h-4 w-4"  loading="lazy"/>
                     </Button>
                     <Button
                       variant="outline"
@@ -3836,7 +3836,7 @@ export default function CollaborationPage() {
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Image className="w-5 h-5 text-blue-500" />
+              <Image className="w-5 h-5 text-blue-500"  loading="lazy"/>
               Media Gallery
             </DialogTitle>
             <DialogDescription>
@@ -3904,7 +3904,7 @@ export default function CollaborationPage() {
                 >
                   <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative">
                     {item.type === 'image' ? (
-                      <Image className="w-8 h-8 text-gray-400" />
+                      <Image className="w-8 h-8 text-gray-400"  loading="lazy"/>
                     ) : (
                       <Play className="w-8 h-8 text-gray-400" />
                     )}

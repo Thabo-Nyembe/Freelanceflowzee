@@ -1308,7 +1308,8 @@ export default function TicketsClient() {
                     <p className="text-orange-100 text-sm">Zendesk-level help desk operations</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleRefresh}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleRefresh} aria-label="Refresh">
+                  <RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
                     <Button className="bg-white text-orange-700 hover:bg-orange-50" onClick={handleNewTicket}><Plus className="h-4 w-4 mr-2" />New Ticket</Button>
                   </div>
                 </div>
@@ -1792,7 +1793,8 @@ export default function TicketsClient() {
                     <p className="text-blue-100 text-sm">Agent workload and performance</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleRefresh}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleRefresh} aria-label="Refresh">
+                  <RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
                     <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={handleAddAgent}><UserPlus className="h-4 w-4 mr-2" />Add Agent</Button>
                   </div>
                 </div>

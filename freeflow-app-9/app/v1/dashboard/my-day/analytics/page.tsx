@@ -144,8 +144,8 @@ export default function AnalyticsPage() {
           </h2>
           <p className="text-gray-600">Based on your work patterns and performance data</p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoadingAnalytics}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAnalytics ? 'animate-spin' : ''}`} />
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoadingAnalytics} aria-label="Refresh">
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAnalytics ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
       </div>

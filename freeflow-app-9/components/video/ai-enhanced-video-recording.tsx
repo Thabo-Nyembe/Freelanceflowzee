@@ -336,11 +336,10 @@ export function AIEnhancedVideoRecording({
                           className="flex items-center gap-3 rounded-lg border p-3"
                         >
                           {highlight.thumbnail && (
-                            <img
-                              src={highlight.thumbnail}
+                            <img src={highlight.thumbnail}
                               alt={`Highlight ${index + 1}`}
                               className="h-16 w-24 rounded object-cover"
-                            />
+                            / loading="lazy">
                           )}
                           <div>
                             <h3 className="font-medium">{highlight.title}</h3>

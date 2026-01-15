@@ -391,7 +391,7 @@ const getTypeColor = (type: AnimationType): string => {
 const getLayerIcon = (type: LayerType) => {
   const icons: Record<LayerType, JSX.Element> = {
     video: <FileVideo className="w-4 h-4" />,
-    image: <Image className="w-4 h-4" />,
+    image: <Image className="w-4 h-4"  loading="lazy"/>,
     text: <Type className="w-4 h-4" />,
     shape: <Shapes className="w-4 h-4" />,
     audio: <Volume2 className="w-4 h-4" />,
@@ -2297,7 +2297,7 @@ export default function MotionGraphicsClient({
                         {selectedAnimation.collaborators.map((collab) => (
                           <div key={collab.id} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                             <Avatar className="w-6 h-6">
-                              <AvatarImage src={collab.avatar} />
+                              <AvatarImage src={collab.avatar} alt="User avatar" />
                               <AvatarFallback>{collab.name[0]}</AvatarFallback>
                             </Avatar>
                             <span className="text-sm">{collab.name}</span>

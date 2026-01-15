@@ -1047,7 +1047,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   <CardContent>
                     <div className="flex items-center gap-3 mb-3">
                       <Avatar>
-                        <AvatarImage src={mockDesigners[2].avatar} />
+                        <AvatarImage src={mockDesigners[2].avatar} alt="User avatar" />
                         <AvatarFallback>MP</AvatarFallback>
                       </Avatar>
                       <div>
@@ -2345,7 +2345,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                         <h4 className="font-medium mb-3">Designer</h4>
                         <div className="flex items-center gap-4">
                           <Avatar className="h-12 w-12">
-                            <AvatarImage src={selectedTheme.designer.avatar} />
+                            <AvatarImage src={selectedTheme.designer.avatar} alt="User avatar" />
                             <AvatarFallback>{selectedTheme.designer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -2397,7 +2397,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                       <div key={review.id} className="border rounded-lg p-4">
                         <div className="flex items-center gap-3 mb-2">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={review.user.avatar} />
+                            <AvatarImage src={review.user.avatar} alt="User avatar" />
                             <AvatarFallback>{review.user.name[0]}</AvatarFallback>
                           </Avatar>
                           <div>

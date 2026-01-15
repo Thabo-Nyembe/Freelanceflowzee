@@ -1458,7 +1458,7 @@ export default function HelpCenterClient() {
 
                       <div className="flex items-center gap-2 mb-3">
                         <Avatar className="w-6 h-6">
-                          <AvatarImage src={article.author.avatar} />
+                          <AvatarImage src={article.author.avatar} alt="User avatar" />
                           <AvatarFallback>{article.author.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <span className="text-xs text-muted-foreground">{article.author.name}</span>
@@ -1527,7 +1527,7 @@ export default function HelpCenterClient() {
                             </span>
                           </div>
                           <Avatar className="w-8 h-8">
-                            <AvatarImage src={article.author.avatar} />
+                            <AvatarImage src={article.author.avatar} alt="User avatar" />
                             <AvatarFallback>{article.author.name.charAt(0)}</AvatarFallback>
                           </Avatar>
                         </div>
@@ -2117,7 +2117,7 @@ export default function HelpCenterClient() {
                 <div className="flex items-center justify-between border-b pb-4">
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={selectedArticle.author.avatar} />
+                      <AvatarImage src={selectedArticle.author.avatar} alt="User avatar" />
                       <AvatarFallback>{selectedArticle.author.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -2214,8 +2214,8 @@ export default function HelpCenterClient() {
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" onClick={handleShare}>
-                    <Share2 className="w-4 h-4 mr-2" />
+                  <Button variant="outline" onClick={handleShare} aria-label="Share">
+                  <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
                   {selectedArticle.status === 'published' && (

@@ -105,21 +105,19 @@ export function OptimizedImage({
 
   if (fill) {
     return (
-      <Image
-        {...imageProps}
+      <Image {...imageProps}
         fill
         sizes={sizes || "100vw"}
-      />
+       loading="lazy"/>
     )
   }
 
   return (
-    <Image
-      {...imageProps}
+    <Image {...imageProps}
       width={width}
       height={height}
       sizes={sizes}
-    />
+     loading="lazy"/>
   )
 }
 

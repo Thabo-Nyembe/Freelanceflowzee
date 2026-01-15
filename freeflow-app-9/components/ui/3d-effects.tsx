@@ -422,12 +422,11 @@ export function PerspectiveImage({
       }}
       className={cn("relative overflow-hidden rounded-2xl", className)}
     >
-      <img
-        src={src}
+      <img src={src}
         alt={alt}
         className="w-full h-full object-cover"
         style={{ transform: "translateZ(50px)" }}
-      />
+      / loading="lazy">
 
       {/* Shine effect */}
       <motion.div

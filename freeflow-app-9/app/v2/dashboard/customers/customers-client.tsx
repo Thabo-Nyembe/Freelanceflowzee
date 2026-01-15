@@ -928,8 +928,8 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
+            <Button variant="outline" onClick={handleRefresh} disabled={isLoading} aria-label="Refresh">
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
             </Button>
             <Button variant="outline" onClick={handleExportCustomers}><Download className="h-4 w-4 mr-2" />Export</Button>
             <Button variant="outline" onClick={() => setShowImportDialog(true)}><Upload className="h-4 w-4 mr-2" />Import</Button>
@@ -996,7 +996,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={customer.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${customer.customer_name}`} />
+                          <AvatarImage src={customer.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${customer.customer_name}`} alt={`${customer.customer_name} avatar`} />
                           <AvatarFallback className="bg-gradient-to-r from-violet-500 to-purple-500 text-white">
                             {customer.first_name?.[0] || customer.customer_name?.[0] || 'C'}{customer.last_name?.[0] || ''}
                           </AvatarFallback>

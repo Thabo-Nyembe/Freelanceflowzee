@@ -227,8 +227,8 @@ const LivePreview = ({ files, previewUrl }: { files: GeneratedFile[]; previewUrl
             size="sm"
             className="h-7 text-gray-400"
             onClick={handleRefresh}
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+           aria-label="Refresh">
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button variant="ghost" size="sm" className="h-7 text-gray-400">
             <ExternalLink className="h-4 w-4" />

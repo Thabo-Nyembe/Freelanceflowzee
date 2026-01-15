@@ -1095,7 +1095,7 @@ export default function TeamManagementPage() {
               <div className="space-y-4 py-4">
                 <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                   <Avatar>
-                    <AvatarImage src={selectedMember.avatar} />
+                    <AvatarImage src={selectedMember.avatar} alt="User avatar" />
                     <AvatarFallback>{selectedMember.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div>

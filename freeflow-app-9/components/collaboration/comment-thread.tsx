@@ -87,11 +87,10 @@ export function CommentThread({
                   >
                     <div className="flex items-start gap-3">
                       <Avatar>
-                        <img
-                          src={comment.userAvatar || '/avatars/default.png'}
+                        <img src={comment.userAvatar || '/avatars/default.png'}
                           alt={comment.userName}
                           className="w-8 h-8 rounded-full"
-                        />
+                        / loading="lazy">
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -105,11 +104,10 @@ export function CommentThread({
                           <div key={reply.id} className="ml-6 mt-2">
                             <div className="flex items-start gap-2">
                               <Avatar>
-                                <img
-                                  src={reply.userAvatar || '/avatars/default.png'}
+                                <img src={reply.userAvatar || '/avatars/default.png'}
                                   alt={reply.userName}
                                   className="w-6 h-6 rounded-full"
-                                />
+                                / loading="lazy">
                               </Avatar>
                               <div>
                                 <div className="flex items-center gap-2">

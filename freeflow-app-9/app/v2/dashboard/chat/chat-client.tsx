@@ -1254,7 +1254,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           <div className="flex items-center gap-4">
                             <div className="relative">
                               <Avatar className="h-12 w-12">
-                                <AvatarImage src={member.avatar} />
+                                <AvatarImage src={member.avatar} alt="User avatar" />
                                 <AvatarFallback>{member.name[0]}</AvatarFallback>
                               </Avatar>
                               <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${
@@ -1573,7 +1573,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   <div className="flex items-start gap-3">
                     <div className="relative">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={conv.customer.avatar} />
+                        <AvatarImage src={conv.customer.avatar} alt="User avatar" />
                         <AvatarFallback>{conv.customer.name[0]}</AvatarFallback>
                       </Avatar>
                       {conv.customer.isOnline && (
@@ -1600,7 +1600,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         )}
                         {conv.assignee && (
                           <Avatar className="h-5 w-5">
-                            <AvatarImage src={conv.assignee.avatar} />
+                            <AvatarImage src={conv.assignee.avatar} alt="User avatar" />
                             <AvatarFallback className="text-xs">{conv.assignee.name[0]}</AvatarFallback>
                           </Avatar>
                         )}
@@ -1639,7 +1639,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={selectedConversation.customer.avatar} />
+                    <AvatarImage src={selectedConversation.customer.avatar} alt="User avatar" />
                     <AvatarFallback>{selectedConversation.customer.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -1696,7 +1696,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   {/* Sample messages */}
                   <div className="flex gap-3">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={selectedConversation.customer.avatar} />
+                      <AvatarImage src={selectedConversation.customer.avatar} alt="User avatar" />
                       <AvatarFallback>{selectedConversation.customer.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
@@ -1816,7 +1816,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               {/* Customer Info */}
               <div className="text-center mb-6">
                 <Avatar className="h-20 w-20 mx-auto mb-3">
-                  <AvatarImage src={selectedConversation.customer.avatar} />
+                  <AvatarImage src={selectedConversation.customer.avatar} alt="User avatar" />
                   <AvatarFallback className="text-2xl">{selectedConversation.customer.name[0]}</AvatarFallback>
                 </Avatar>
                 <h3 className="font-semibold text-lg">{selectedConversation.customer.name}</h3>
@@ -2010,7 +2010,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Avatar>
-                      <AvatarImage src={member.avatar} />
+                      <AvatarImage src={member.avatar} alt="User avatar" />
                       <AvatarFallback>{member.name[0]}</AvatarFallback>
                     </Avatar>
                     <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${
@@ -2196,7 +2196,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                     <div key={member.id} className="flex items-center justify-between p-4">
                       <div className="flex items-center gap-3">
                         <div className="relative">
-                          <Avatar><AvatarImage src={member.avatar} /><AvatarFallback>{member.name[0]}</AvatarFallback></Avatar>
+                          <Avatar><AvatarImage src={member.avatar} alt="User avatar" /><AvatarFallback>{member.name[0]}</AvatarFallback></Avatar>
                           <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'}`} />
                         </div>
                         <div><p className="font-medium">{member.name}</p><p className="text-sm text-gray-500">{member.email}</p></div>

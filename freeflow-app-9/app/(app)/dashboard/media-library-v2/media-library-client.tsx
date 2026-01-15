@@ -2094,8 +2094,8 @@ export default function MediaLibraryClient({
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </Button>
-              <Button variant="ghost" size="sm" onClick={clearSelection}>
-                <X className="w-4 h-4" />
+              <Button variant="ghost" size="sm" onClick={clearSelection} aria-label="Close">
+                  <X className="w-4 h-4" />
               </Button>
             </div>
           </div>

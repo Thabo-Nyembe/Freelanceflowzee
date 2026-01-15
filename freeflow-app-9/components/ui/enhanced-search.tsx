@@ -110,7 +110,7 @@ const defaultSuggestions: SearchSuggestion[] = [
     title: 'Brand assets collection',
     subtitle: 'Design resources and templates',
     type: 'content',
-    icon: <Image className="h-4 w-4" />,
+    icon: <Image className="h-4 w-4"  loading="lazy"/>,
     metadata: { category: 'Design' }
   }
 ]
@@ -120,7 +120,7 @@ const defaultFilters: SearchFilter[] = [
   { id: 'projects', label: 'Projects', value: 'projects', count: 156, icon: <Settings className="h-3 w-3" /> },
   { id: 'files', label: 'Files', value: 'files', count: 892, icon: <FileText className="h-3 w-3" /> },
   { id: 'people', label: 'People', value: 'people', count: 43, icon: <User className="h-3 w-3" /> },
-  { id: 'media', label: 'Media', value: 'media', count: 234, icon: <Image className="h-3 w-3" /> },
+  { id: 'media', label: 'Media', value: 'media', count: 234, icon: <Image className="h-3 w-3"  loading="lazy"/> },
   { id: 'bookmarks', label: 'Bookmarks', value: 'bookmarks', count: 67, icon: <Bookmark className="h-3 w-3" /> }
 ]
 

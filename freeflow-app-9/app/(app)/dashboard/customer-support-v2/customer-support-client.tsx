@@ -953,7 +953,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                               {ticket.assignee && (
                                 <div className="flex items-center gap-1">
                                   <Avatar className="h-5 w-5">
-                                    <AvatarImage src={ticket.assignee.avatar} />
+                                    <AvatarImage src={ticket.assignee.avatar} alt="User avatar" />
                                     <AvatarFallback>{ticket.assignee.name[0]}</AvatarFallback>
                                   </Avatar>
                                   <span className="text-xs text-gray-500">{ticket.assignee.name}</span>
@@ -1030,7 +1030,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                         <div key={agent.id} className="flex items-center gap-3">
                           <div className="relative">
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={agent.avatar} />
+                              <AvatarImage src={agent.avatar} alt="User avatar" />
                               <AvatarFallback>{agent.name[0]}</AvatarFallback>
                             </Avatar>
                             <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${getAgentStatusColor(agent.status)}`} />
@@ -1101,7 +1101,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                     <div className="flex items-center gap-4 mb-4">
                       <div className="relative">
                         <Avatar className="h-16 w-16">
-                          <AvatarImage src={agent.avatar} />
+                          <AvatarImage src={agent.avatar} alt="User avatar" />
                           <AvatarFallback>{agent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div className={`absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white ${getAgentStatusColor(agent.status)}`} />
@@ -1213,7 +1213,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   {mockCustomers.map(customer => (
                     <div key={customer.id} className="py-4 flex items-center gap-4">
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={customer.avatar} />
+                        <AvatarImage src={customer.avatar} alt="User avatar" />
                         <AvatarFallback>{customer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
@@ -2103,7 +2103,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                     <CardContent>
                       <div className="flex items-center gap-3 mb-3">
                         <Avatar>
-                          <AvatarImage src={selectedTicket.customer.avatar} />
+                          <AvatarImage src={selectedTicket.customer.avatar} alt="User avatar" />
                           <AvatarFallback>{selectedTicket.customer.name[0]}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -2139,7 +2139,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                       {selectedTicket.assignee ? (
                         <div className="flex items-center gap-3">
                           <Avatar>
-                            <AvatarImage src={selectedTicket.assignee.avatar} />
+                            <AvatarImage src={selectedTicket.assignee.avatar} alt="User avatar" />
                             <AvatarFallback>{selectedTicket.assignee.name[0]}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -2217,7 +2217,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={selectedAgent.avatar} />
+                    <AvatarImage src={selectedAgent.avatar} alt="User avatar" />
                     <AvatarFallback>{selectedAgent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -3070,7 +3070,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             {customers.filter(c => c.tags.includes('vip')).map(customer => (
               <div key={customer.id} className="flex items-center gap-3 p-3 border rounded-lg">
                 <Avatar>
-                  <AvatarImage src={customer.avatar} />
+                  <AvatarImage src={customer.avatar} alt="User avatar" />
                   <AvatarFallback>{customer.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
@@ -3202,7 +3202,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={selectedCustomer.avatar} />
+                  <AvatarImage src={selectedCustomer.avatar} alt="User avatar" />
                   <AvatarFallback>{selectedCustomer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -3845,7 +3845,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               >
                 <div className="relative">
                   <Avatar>
-                    <AvatarImage src={agent.avatar} />
+                    <AvatarImage src={agent.avatar} alt="User avatar" />
                     <AvatarFallback>{agent.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white ${getAgentStatusColor(agent.status)}`} />
@@ -4437,7 +4437,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 <div key={customer.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={customer.avatar} />
+                      <AvatarImage src={customer.avatar} alt="User avatar" />
                       <AvatarFallback>{customer.name[0]}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -4475,7 +4475,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <div key={agent.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={agent.avatar} />
+                        <AvatarImage src={agent.avatar} alt="User avatar" />
                         <AvatarFallback>{agent.name[0]}</AvatarFallback>
                       </Avatar>
                       <div>
@@ -4556,7 +4556,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 {customers.slice(0, 3).map(customer => (
                   <div key={customer.id} className="flex items-center gap-3 p-2 border rounded-lg">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={customer.avatar} />
+                      <AvatarImage src={customer.avatar} alt="User avatar" />
                       <AvatarFallback>{customer.name[0]}</AvatarFallback>
                     </Avatar>
                     <div>

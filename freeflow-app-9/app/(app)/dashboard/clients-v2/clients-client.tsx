@@ -1314,8 +1314,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       </div>
 
                       <div className="flex flex-col items-end gap-2">
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="w-4 h-4" />
+                        <Button variant="ghost" size="sm" aria-label="More options">
+                  <MoreVertical className="w-4 h-4" />
                         </Button>
                         <span className="text-xs text-gray-500">{formatRelativeTime(client.lastActivity)}</span>
                       </div>

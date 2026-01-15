@@ -1251,7 +1251,7 @@ export default function ReportsClient() {
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <Avatar className="h-6 w-6">
-                <AvatarImage src={report.author.avatar} />
+                <AvatarImage src={report.author.avatar} alt="User avatar" />
                 <AvatarFallback>{report.author.name[0]}</AvatarFallback>
               </Avatar>
               <span className="text-xs text-gray-500">{report.author.name}</span>
@@ -1551,7 +1551,7 @@ export default function ReportsClient() {
 
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={report.author.avatar} />
+                            <AvatarImage src={report.author.avatar} alt="User avatar" />
                             <AvatarFallback>{report.author.name[0]}</AvatarFallback>
                           </Avatar>
                         </div>

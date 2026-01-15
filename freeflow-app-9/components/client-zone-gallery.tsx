@@ -385,12 +385,11 @@ export default function ClientZoneGallery() {
                             <motion.div layout key={gallery.id}>
                                 <Card className="group bg-white/70 backdrop-blur-sm border-slate-200/50 hover:shadow-xl transition-all duration-300 overflow-hidden">
                                     <div className="relative aspect-video overflow-hidden">
-                                        <Image
-                                            src={gallery.coverImage}
+                                        <Image src={gallery.coverImage}
                                             alt={gallery.title}
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
+                                         loading="lazy"/>
                                         {gallery.status === 'locked' && (
                                             <div className="absolute inset-0 bg-purple-100/80 flex items-center justify-center">
                                                 <div className="text-center p-4 bg-white/80 rounded-lg shadow-lg">

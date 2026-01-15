@@ -305,8 +305,8 @@ function TaskCard({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <MoreVertical className="h-4 w-4" />
+               aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -562,7 +562,7 @@ function TaskCard({
                 {task.assignee ? (
                   <>
                     <Avatar className="h-4 w-4 mr-1">
-                      <AvatarImage src={task.assignee.avatar_url || undefined} />
+                      <AvatarImage src={task.assignee.avatar_url || undefined} alt="User avatar" />
                       <AvatarFallback className="text-[8px]">
                         {task.assignee.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>
@@ -1363,7 +1363,7 @@ export function TasksClient() {
                   Delete
                 </Button>
 
-                <Button variant="ghost" size="sm" onClick={handleClearSelection}>
+                <Button variant="ghost" size="sm" onClick={handleClearSelection} aria-label="Close">
                   <X className="h-4 w-4" />
                 </Button>
               </div>

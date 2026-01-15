@@ -1363,8 +1363,8 @@ export default function PayrollClient() {
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
                 onClick={handleRefresh}
-              >
-                <RefreshCw className="w-5 h-5" />
+               aria-label="Refresh">
+                  <RefreshCw className="w-5 h-5" />
                 <span className="text-xs font-medium">Refresh</span>
               </Button>
               <Button
@@ -1755,7 +1755,7 @@ export default function PayrollClient() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={employee.avatar} />
+                        <AvatarImage src={employee.avatar} alt="User avatar" />
                         <AvatarFallback className="bg-gradient-to-br from-green-400 to-emerald-500 text-white">
                           {employee.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
@@ -2549,7 +2549,7 @@ export default function PayrollClient() {
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={selectedEmployee.avatar} />
+                    <AvatarImage src={selectedEmployee.avatar} alt="User avatar" />
                     <AvatarFallback className="bg-gradient-to-br from-green-400 to-emerald-500 text-white text-xl">
                       {selectedEmployee.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>

@@ -1183,7 +1183,7 @@ export default function BuildsClient() {
                     >
                       <div className="flex items-start gap-4">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={build.author_avatar} />
+                          <AvatarImage src={build.author_avatar} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-sm">
                             {build.author_name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>

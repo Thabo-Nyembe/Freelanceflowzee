@@ -986,11 +986,10 @@ export default function AiCollaborateClient() {
                       >
                         {/* Image */}
                         <div className="relative h-48 bg-gray-100 overflow-hidden">
-                          <img
-                            src={option.image}
+                          <img src={option.image}
                             alt={option.title}
                             className="w-full h-full object-cover"
-                          />
+                          / loading="lazy">
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-all" />
                         </div>
 
@@ -1117,11 +1116,10 @@ export default function AiCollaborateClient() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="rounded-lg overflow-hidden bg-gray-100 h-40">
-                      <img
-                        src={previewOption.image}
+                      <img src={previewOption.image}
                         alt={previewOption.title}
                         className="w-full h-full object-cover"
-                      />
+                      / loading="lazy">
                     </div>
 
                     <div>

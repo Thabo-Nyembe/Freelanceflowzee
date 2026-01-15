@@ -1203,7 +1203,7 @@ export default function MilestonesClient() {
                         <div className="flex -space-x-2">
                           {milestone.team.slice(0, 4).map((member, idx) => (
                             <Avatar key={idx} className="w-8 h-8 border-2 border-white dark:border-slate-900">
-                              <AvatarImage src={member.avatar} />
+                              <AvatarImage src={member.avatar} alt="User avatar" />
                               <AvatarFallback className="bg-gradient-to-br from-rose-500 to-pink-500 text-white text-xs">
                                 {member.name.split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
@@ -2065,7 +2065,7 @@ export default function MilestonesClient() {
                         {selectedMilestone.team.map((member) => (
                           <div key={member.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                             <Avatar className="w-6 h-6">
-                              <AvatarImage src={member.avatar} />
+                              <AvatarImage src={member.avatar} alt="User avatar" />
                               <AvatarFallback className="bg-gradient-to-br from-rose-500 to-pink-500 text-white text-xs">
                                 {member.name.split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
@@ -2129,7 +2129,7 @@ export default function MilestonesClient() {
                             <div key={update.id} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                               <div className="flex items-center gap-2 mb-2">
                                 <Avatar className="w-6 h-6">
-                                  <AvatarImage src={update.author.avatar} />
+                                  <AvatarImage src={update.author.avatar} alt="User avatar" />
                                   <AvatarFallback className="bg-gradient-to-br from-rose-500 to-pink-500 text-white text-xs">
                                     {update.author.name.split(' ').map(n => n[0]).join('')}
                                   </AvatarFallback>

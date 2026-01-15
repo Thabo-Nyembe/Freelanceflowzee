@@ -46,12 +46,11 @@ export default function UniversalMediaPreview({
       case 'image':
         return (
           <div className="relative w-full aspect-video">
-            <Image
-              src={file.url}
+            <Image src={file.url}
               alt={file.title}
               fill
               className="object-contain"
-            />
+             loading="lazy"/>
           </div>
         )
       case 'video':

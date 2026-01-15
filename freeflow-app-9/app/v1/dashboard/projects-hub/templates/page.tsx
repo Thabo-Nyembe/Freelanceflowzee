@@ -605,11 +605,10 @@ export default function ProjectTemplatesPage() {
             {featuredTemplates.map((template) => (
               <Card key={template.id} className="kazi-card overflow-hidden group cursor-pointer">
                 <div className="relative">
-                  <img 
-                    src={template.thumbnail} 
+                  <img src={template.thumbnail} 
                     alt={template.title}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  / loading="lazy">
                   <div className="absolute top-2 right-2">
                     <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
                       <Star className="h-3 w-3 mr-1" />
@@ -713,11 +712,10 @@ export default function ProjectTemplatesPage() {
                     {filteredTemplates.map((template) => (
                       <Card key={template.id} className="kazi-card overflow-hidden group cursor-pointer">
                         <div className="relative">
-                          <img 
-                            src={template.thumbnail} 
+                          <img src={template.thumbnail} 
                             alt={template.title}
                             className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                          / loading="lazy">
                           <div className="absolute top-2 left-2">
                             <Badge variant="secondary" className="text-xs">
                               {template.difficulty}
@@ -774,11 +772,10 @@ export default function ProjectTemplatesPage() {
                       <Card key={template.id} className="kazi-card">
                         <CardContent className="p-4">
                           <div className="flex items-start gap-4">
-                            <img 
-                              src={template.thumbnail} 
+                            <img src={template.thumbnail} 
                               alt={template.title}
                               className="w-24 h-24 object-cover rounded-lg"
-                            />
+                            / loading="lazy">
                             <div className="flex-1">
                               <div className="flex items-start justify-between mb-2">
                                 <div>
@@ -989,11 +986,10 @@ export default function ProjectTemplatesPage() {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="relative rounded-lg overflow-hidden">
-                  <img
-                    src={previewTemplate.thumbnail}
+                  <img src={previewTemplate.thumbnail}
                     alt={previewTemplate.title}
                     className="w-full h-48 object-cover"
-                  />
+                  / loading="lazy">
                   {previewTemplate.featured && (
                     <Badge className="absolute top-2 right-2 bg-yellow-100 text-yellow-800">
                       <Star className="h-3 w-3 mr-1" />

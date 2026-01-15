@@ -1420,7 +1420,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                   <GitBranch className="h-4 w-4 mr-2" />
                   Compare
                 </Button>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleNotifications}>
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleNotifications} aria-label="Notifications">
                   <Bell className="h-4 w-4" />
                 </Button>
                 <DropdownMenu>
@@ -1445,7 +1445,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleShare}>
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={handleShare} aria-label="Share">
                   <Share2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -1649,8 +1649,8 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
               <FileText className="h-4 w-4 mr-2" />
               Save Report
             </Button>
-            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading} aria-label="Refresh">
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
@@ -2004,8 +2004,8 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                         <span>Previous: {formatValue(metric.previousValue, metric.type)}</span>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2">
-                              <MoreVertical className="h-3 w-3" />
+                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-6 px-2" aria-label="More options">
+                  <MoreVertical className="h-3 w-3" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">

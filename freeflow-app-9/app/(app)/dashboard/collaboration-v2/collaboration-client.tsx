@@ -951,7 +951,8 @@ export default function CollaborationClient() {
                       <Button variant="ghost" size="icon" onClick={() => handlePinChannel(selectedChannel?.id || 'c1', selectedChannel?.name || 'general')}><Pin className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => handleOpenSearch()}><Search className="h-4 w-4" /></Button>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setShowChannelSettingsDialog(true)}><Settings className="h-4 w-4 mr-2" />Settings</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => { if (selectedChannel) { setMutedChannels(prev => prev.includes(selectedChannel.id) ? prev.filter(id => id !== selectedChannel.id) : [...prev, selectedChannel.id]); toast.success(mutedChannels.includes(selectedChannel.id) ? 'Channel unmuted' : 'Channel muted', { description: `Notifications ${mutedChannels.includes(selectedChannel.id) ? 'enabled' : 'disabled'} for #${selectedChannel.name}` }) } }}><BellOff className="h-4 w-4 mr-2" />{selectedChannel && mutedChannels.includes(selectedChannel.id) ? 'Unmute' : 'Mute'}</DropdownMenuItem>

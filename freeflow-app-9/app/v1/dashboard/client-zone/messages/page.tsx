@@ -566,7 +566,7 @@ export default function MessagesPage() {
                       <p className="text-xs text-gray-500 mb-1">From</p>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={selectedMessage.avatar} />
+                          <AvatarImage src={selectedMessage.avatar} alt="User avatar" />
                           <AvatarFallback>
                             {selectedMessage.sender.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>

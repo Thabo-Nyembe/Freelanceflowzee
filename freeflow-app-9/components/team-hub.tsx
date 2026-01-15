@@ -147,11 +147,10 @@ export default function TeamHub({
                             className="h-6 w-6 rounded-full border-2 border-background overflow-hidden"
                           >
                             {user.avatar ? (
-                              <img
-                                src={user.avatar}
+                              <img src={user.avatar}
                                 alt={user.name}
                                 className="h-full w-full object-cover"
-                              />
+                              / loading="lazy">
                             ) : (
                               <div className="h-full w-full bg-primary/10 flex items-center justify-center text-xs font-medium">
                                 {user.name[0]}

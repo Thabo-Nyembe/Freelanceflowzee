@@ -951,8 +951,8 @@ export default function ShadcnShowcaseClient() {
             <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleExport} disabled={isExporting}>
-              <Download className="w-4 h-4 mr-2" />
+            <Button onClick={handleExport} disabled={isExporting} aria-label="Export data">
+                  <Download className="w-4 h-4 mr-2" />
               {isExporting ? 'Exporting...' : 'Export'}
             </Button>
           </div>

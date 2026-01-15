@@ -1279,7 +1279,7 @@ export default function TemplatesClient() {
                     <div key={asset.id} className="flex items-center justify-between p-3 rounded-lg border">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                          <Image className="w-6 h-6 text-gray-400" />
+                          <Image className="w-6 h-6 text-gray-400"  loading="lazy"/>
                         </div>
                         <span className="font-medium">{asset.name}</span>
                       </div>

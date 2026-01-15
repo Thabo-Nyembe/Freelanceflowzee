@@ -57,7 +57,7 @@ export function UnifiedFileBrowser() {
 
     const mimeType = file.mimeType.toLowerCase()
 
-    if (mimeType.includes('image')) return <Image className="w-5 h-5 text-green-500" />
+    if (mimeType.includes('image')) return <Image className="w-5 h-5 text-green-500"  loading="lazy"/>
     if (mimeType.includes('video')) return <Video className="w-5 h-5 text-purple-500" />
     if (mimeType.includes('audio')) return <Music className="w-5 h-5 text-pink-500" />
     if (mimeType.includes('zip') || mimeType.includes('archive')) return <FileArchive className="w-5 h-5 text-orange-500" />
@@ -208,11 +208,10 @@ export function UnifiedFileBrowser() {
                 >
                   <div className="flex flex-col items-center text-center">
                     {file.thumbnail ? (
-                      <img
-                        src={file.thumbnail}
+                      <img src={file.thumbnail}
                         alt={file.name}
                         className="w-16 h-16 object-cover rounded mb-2"
-                      />
+                      / loading="lazy">
                     ) : (
                       <div className="w-16 h-16 flex items-center justify-center mb-2">
                         {getFileIcon(file)}

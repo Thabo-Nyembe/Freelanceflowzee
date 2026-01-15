@@ -103,11 +103,10 @@ const MessageItem: React.FC<MessageItemProps> = ({
     if (isImage) {
       return (
         <div className="mt-2">
-          <img
-            src={attachment.url}
+          <img src={attachment.url}
             alt={attachment.name}
             className="max-w-sm max-h-64 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
-            onClick={() => window.open(attachment.url, '_blank')}
+            onClick={() = loading="lazy"> window.open(attachment.url, '_blank')}
           />
         </div>
       )
@@ -523,7 +522,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
               className="flex items-center space-x-2 bg-muted p-2 rounded-lg"
             >
               <div className="flex items-center space-x-2 flex-1">
-                {file.type.startsWith('image/') && <Image className="w-4 h-4" />}
+                {file.type.startsWith('image/') && <Image className="w-4 h-4"  loading="lazy"/>}
                 {file.type.startsWith('video/') && <Video className="w-4 h-4" />}
                 {file.type.startsWith('audio/') && <Mic className="w-4 h-4" />}
                 {!file.type.startsWith('image/') && !file.type.startsWith('video/') && !file.type.startsWith('audio/') && (

@@ -709,8 +709,8 @@ export default function EnhancedClient() {
             <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
+            <Button onClick={handleExport} aria-label="Export data">
+                  <Download className="h-4 w-4 mr-2" />
               Export Data
             </Button>
           </DialogFooter>
@@ -1407,8 +1407,8 @@ export default function EnhancedClient() {
             <Button variant="outline" onClick={() => setShareDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleShare}>
-              <Share2 className="h-4 w-4 mr-2" />
+            <Button onClick={handleShare} aria-label="Share">
+                  <Share2 className="h-4 w-4 mr-2" />
               Generate Link
             </Button>
           </DialogFooter>

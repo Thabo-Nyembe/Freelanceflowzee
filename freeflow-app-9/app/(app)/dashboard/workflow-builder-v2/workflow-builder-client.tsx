@@ -1666,7 +1666,8 @@ export default function WorkflowBuilderClient() {
                     className="pl-9"
                   />
                 </div>
-                <Button variant="outline" onClick={handleFilter}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                <Button variant="outline" onClick={handleFilter} aria-label="Filter">
+                  <Filter className="w-4 h-4 mr-2" />Filter</Button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">

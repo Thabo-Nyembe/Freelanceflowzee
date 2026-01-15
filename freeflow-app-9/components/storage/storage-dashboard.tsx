@@ -352,7 +352,7 @@ export function StorageDashboard({ className }: StorageDashboardProps) {
                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                       <div className="flex items-center space-x-3">
                         <div className="p-2 rounded-md bg-gray-100">
-                          {file.mimeType?.startsWith('image/') && <Image className="w-4 h-4" />}
+                          {file.mimeType?.startsWith('image/') && <Image className="w-4 h-4"  loading="lazy"/>}
                           {file.mimeType?.startsWith('video/') && <Video className="w-4 h-4" />}
                           {!file.mimeType?.startsWith('image/') && !file.mimeType?.startsWith('video/') && <FileText className="w-4 h-4" />}
                         </div>

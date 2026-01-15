@@ -1818,7 +1818,7 @@ export default function MessagingClient() {
                                 {att.type === 'image' && (
                                   <div className="relative max-w-sm rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                                     <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
-                                      <Image className="w-12 h-12 text-gray-400" />
+                                      <Image className="w-12 h-12 text-gray-400"  loading="lazy"/>
                                     </div>
                                   </div>
                                 )}

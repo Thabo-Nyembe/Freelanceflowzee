@@ -963,8 +963,8 @@ export default function FeedbackPage() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -1001,7 +1001,7 @@ export default function FeedbackPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
-                        <AvatarImage src={feedback.authorAvatar} />
+                        <AvatarImage src={feedback.authorAvatar} alt="User avatar" />
                         <AvatarFallback>
                           {feedback.author
                             .split(" ")
@@ -1063,7 +1063,7 @@ export default function FeedbackPage() {
                       {feedback.replies.map((reply) => (
                         <div key={reply.id} className="flex gap-3">
                           <Avatar className="h-6 w-6">
-                            <AvatarImage src={reply.authorAvatar} />
+                            <AvatarImage src={reply.authorAvatar} alt="User avatar" />
                             <AvatarFallback>
                               {reply.author
                                 .split(" ")

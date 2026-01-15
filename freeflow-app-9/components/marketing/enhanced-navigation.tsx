@@ -197,11 +197,10 @@ export function EnhancedNavigation() {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur-sm group-hover:blur-md transition-all opacity-50 group-hover:opacity-75" />
-              <img
-                src="/kazi-brand/logo.svg"
+              <img src="/kazi-brand/logo.svg"
                 alt="KAZI"
                 className="h-8 w-auto relative z-10"
-              />
+              / loading="lazy">
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               KAZI

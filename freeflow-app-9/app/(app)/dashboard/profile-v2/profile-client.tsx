@@ -1270,7 +1270,7 @@ export default function ProfileClient() {
               <div className="flex flex-col lg:flex-row gap-6 -mt-16">
                 <div className="relative flex-shrink-0">
                   <Avatar className="w-32 h-32 border-4 border-white shadow-xl">
-                    <AvatarImage src={displayProfile.avatar} />
+                    <AvatarImage src={displayProfile.avatar} alt="User avatar" />
                     <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
                       {displayProfile.firstName[0]}{displayProfile.lastName[0]}
                     </AvatarFallback>
@@ -1489,7 +1489,7 @@ export default function ProfileClient() {
                               </div>
                             ) : (
                               <Avatar className="w-10 h-10">
-                                <AvatarImage src={viewer.avatar} />
+                                <AvatarImage src={viewer.avatar} alt="User avatar" />
                                 <AvatarFallback>{viewer.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                               </Avatar>
                             )}
@@ -1549,7 +1549,7 @@ export default function ProfileClient() {
                     {displayExperiences.slice(0, 2).map((exp) => (
                       <div key={exp.id} className="flex gap-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={exp.companyLogo} />
+                          <AvatarImage src={exp.companyLogo} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">{exp.company[0]}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -1650,7 +1650,7 @@ export default function ProfileClient() {
                     {displayExperiences.map((exp) => (
                       <div key={exp.id} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <Avatar className="w-14 h-14">
-                          <AvatarImage src={(exp as any).companyLogo} />
+                          <AvatarImage src={(exp as any).companyLogo} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-lg">{exp.company[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -1695,7 +1695,7 @@ export default function ProfileClient() {
                       <div key={cert.id} className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex gap-4">
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={cert.issuingOrgLogo} />
+                            <AvatarImage src={cert.issuingOrgLogo} alt="User avatar" />
                             <AvatarFallback>{cert.issuingOrg[0]}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -1723,7 +1723,7 @@ export default function ProfileClient() {
                     {displayEducation.map((edu) => (
                       <div key={edu.id} className="flex gap-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={(edu as any).schoolLogo} />
+                          <AvatarImage src={(edu as any).schoolLogo} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">{edu.school[0]}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -2091,7 +2091,7 @@ export default function ProfileClient() {
                       <div key={connection.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-center gap-4">
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={connection.avatar} />
+                            <AvatarImage src={connection.avatar} alt="User avatar" />
                             <AvatarFallback>{connection.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -2191,7 +2191,7 @@ export default function ProfileClient() {
                       <div key={job.id} className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-start gap-4">
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={job.companyLogo} />
+                            <AvatarImage src={job.companyLogo} alt="User avatar" />
                             <AvatarFallback>{job.company[0]}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -2299,7 +2299,7 @@ export default function ProfileClient() {
                       <div key={post.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-start gap-4">
                           <Avatar>
-                            <AvatarImage src={mockProfile.avatar} />
+                            <AvatarImage src={mockProfile.avatar} alt="User avatar" />
                             <AvatarFallback>{mockProfile.firstName[0]}{mockProfile.lastName[0]}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
@@ -2941,7 +2941,7 @@ export default function ProfileClient() {
                           </div>
                         ) : (
                           <Avatar>
-                            <AvatarImage src={viewer.avatar} />
+                            <AvatarImage src={viewer.avatar} alt="User avatar" />
                             <AvatarFallback>{viewer.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                         )}

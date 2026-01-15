@@ -818,8 +818,8 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button variant="outline" className="gap-2 border-slate-700 text-slate-300 hover:bg-slate-800" onClick={handleSettings}>
-              <Settings className="w-4 h-4" />
+            <Button variant="outline" className="gap-2 border-slate-700 text-slate-300 hover:bg-slate-800" onClick={handleSettings} aria-label="Settings">
+                  <Settings className="w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -934,8 +934,8 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                 <option value="30d">Last 30 days</option>
                 <option value="custom">Custom range</option>
               </select>
-              <Button className="bg-green-600 hover:bg-green-700 gap-2" onClick={handleSearch}>
-                <Search className="w-4 h-4" />
+              <Button className="bg-green-600 hover:bg-green-700 gap-2" onClick={handleSearch} aria-label="Search">
+                  <Search className="w-4 h-4" />
                 Search
               </Button>
             </div>
@@ -1053,8 +1053,8 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                         <Badge variant="outline" className="border-slate-600 text-slate-300">
                           {filteredEvents.length} events
                         </Badge>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white" onClick={handleRefresh}>
-                          <RefreshCw className="w-4 h-4" />
+                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white" onClick={handleRefresh} aria-label="Refresh">
+                  <RefreshCw className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>

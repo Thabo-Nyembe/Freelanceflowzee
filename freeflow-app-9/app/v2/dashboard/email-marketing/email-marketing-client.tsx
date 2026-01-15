@@ -1192,7 +1192,7 @@ export default function EmailMarketingClient({
                         >
                           <div className="flex items-center gap-3">
                             <Avatar>
-                              <AvatarImage src={subscriber.avatar} />
+                              <AvatarImage src={subscriber.avatar} alt="User avatar" />
                               <AvatarFallback>{subscriber.firstName[0]}{subscriber.lastName[0]}</AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
@@ -1849,7 +1849,7 @@ export default function EmailMarketingClient({
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
                 <Avatar className="w-12 h-12">
-                  <AvatarImage src={selectedSubscriber?.avatar} />
+                  <AvatarImage src={selectedSubscriber?.avatar} alt="User avatar" />
                   <AvatarFallback>{selectedSubscriber?.firstName[0]}{selectedSubscriber?.lastName[0]}</AvatarFallback>
                 </Avatar>
                 <div>
@@ -2172,7 +2172,7 @@ export default function EmailMarketingClient({
                   >
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={subscriber.avatar} />
+                        <AvatarImage src={subscriber.avatar} alt="User avatar" />
                         <AvatarFallback>{subscriber.firstName[0]}{subscriber.lastName[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">

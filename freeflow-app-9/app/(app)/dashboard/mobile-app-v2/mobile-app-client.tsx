@@ -1576,7 +1576,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                       <CardHeader>
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                            <Image className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                            <Image className="h-5 w-5 text-purple-600 dark:text-purple-400"  loading="lazy"/>
                           </div>
                           <div>
                             <CardTitle>Store Presence</CardTitle>

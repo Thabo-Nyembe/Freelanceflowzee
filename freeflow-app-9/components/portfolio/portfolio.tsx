@@ -254,11 +254,10 @@ const Portfolio = () => {
                     <Card key={project.id}>
                       <CardContent className="p-4">
                         {project.image && (
-                          <img
-                            src={project.image}
+                          <img src={project.image}
                             alt="Portfolio image"
                             className="w-full h-40 object-cover rounded mb-4"
-                          />
+                          / loading="lazy">
                         )}
                         <h3 className="font-semibold">{project.title}</h3>
                         <p className="text-gray-500 mt-2">{project.description}</p>

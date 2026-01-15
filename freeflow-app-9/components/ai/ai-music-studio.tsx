@@ -824,7 +824,7 @@ export default function AIMusicStudio() {
                   {/* Album Art */}
                   <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500">
                     {currentTrack.imageUrl ? (
-                      <img src={currentTrack.imageUrl} alt={currentTrack.title} className="w-full h-full object-cover" />
+                      <img src={currentTrack.imageUrl} alt={currentTrack.title} className="w-full h-full object-cover" / loading="lazy">
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Music className="w-20 h-20 text-white/50" />
@@ -1005,7 +1005,7 @@ export default function AIMusicStudio() {
                       }`}
                     >
                       {track.imageUrl ? (
-                        <img src={track.imageUrl} alt={track.title} className="w-12 h-12 rounded-lg object-cover" />
+                        <img src={track.imageUrl} alt={track.title} className="w-12 h-12 rounded-lg object-cover" / loading="lazy">
                       ) : (
                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
                           <Music className="w-6 h-6 text-white" />
@@ -1063,7 +1063,7 @@ export default function AIMusicStudio() {
                     }}
                   >
                     {track.imageUrl ? (
-                      <img src={track.imageUrl} alt={track.title} className="w-12 h-12 rounded-lg object-cover" />
+                      <img src={track.imageUrl} alt={track.title} className="w-12 h-12 rounded-lg object-cover" / loading="lazy">
                     ) : (
                       <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
                         <Music className="w-6 h-6 text-white" />
@@ -1161,7 +1161,7 @@ export default function AIMusicStudio() {
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <div className="flex items-center gap-3">
                   {currentTrack.imageUrl ? (
-                    <img src={currentTrack.imageUrl} alt={currentTrack.title} className="w-16 h-16 rounded-lg object-cover" />
+                    <img src={currentTrack.imageUrl} alt={currentTrack.title} className="w-16 h-16 rounded-lg object-cover" / loading="lazy">
                   ) : (
                     <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
                       <Music className="w-8 h-8 text-white" />

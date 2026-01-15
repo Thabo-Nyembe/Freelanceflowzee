@@ -3028,11 +3028,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             </DialogHeader>
             <div className="flex flex-col items-center py-6">
               <div className="p-4 bg-white rounded-lg shadow-inner">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`}
+                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`}
                   alt="QR Code"
                   className="w-48 h-48"
-                />
+                / loading="lazy">
               </div>
               <p className="text-sm text-gray-500 mt-4 text-center">
                 {selectedForm?.title || 'Form'}

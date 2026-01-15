@@ -940,8 +940,8 @@ export default function KaziAutomationsClient() {
 
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button size="sm" variant="ghost">
-                                    <MoreVertical className="h-4 w-4" />
+                                  <Button size="sm" variant="ghost" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -1911,8 +1911,8 @@ export default function KaziAutomationsClient() {
               <Button variant="outline" onClick={() => setIsExportDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleExport}>
-                <Download className="h-4 w-4 mr-2" />
+              <Button onClick={handleExport} aria-label="Export data">
+                  <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
             </DialogFooter>

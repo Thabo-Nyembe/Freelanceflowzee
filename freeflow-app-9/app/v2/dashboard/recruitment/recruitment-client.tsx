@@ -1532,7 +1532,7 @@ export default function RecruitmentClient() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
                           <Avatar className="w-12 h-12">
-                            <AvatarImage src={candidate.avatar} />
+                            <AvatarImage src={candidate.avatar} alt="User avatar" />
                             <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
                               {candidate.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>

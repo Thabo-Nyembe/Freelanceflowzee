@@ -1219,8 +1219,8 @@ export function BadgesClient() {
             onClick={handleRefresh}
             disabled={isRefreshing}
             title="Refresh badges"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+           aria-label="Refresh">
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
           <Button
             variant="outline"
@@ -1475,7 +1475,7 @@ export function BadgesClient() {
                         >
                           <div className="flex items-center gap-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={member.avatar} />
+                              <AvatarImage src={member.avatar} alt="User avatar" />
                               <AvatarFallback>
                                 {member.name.split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
@@ -2214,7 +2214,7 @@ export function BadgesClient() {
                       >
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={member.avatar} />
+                            <AvatarImage src={member.avatar} alt="User avatar" />
                             <AvatarFallback className="text-xs">
                               {member.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>

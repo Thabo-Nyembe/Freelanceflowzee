@@ -125,11 +125,10 @@ export function UnifiedSidebar() {
         <div className="flex items-center gap-3 mb-8 group/logo">
           <div className="relative">
             <GlowEffect className="absolute -inset-2 bg-gradient-to-r from-purple-500/50 to-blue-500/50 rounded-lg blur opacity-0 group-hover/logo:opacity-75 transition-opacity duration-300" />
-            <img
-              src="/kazi-brand/logo.svg"
+            <img src="/kazi-brand/logo.svg"
               alt="KAZI"
               className="h-8 w-auto relative z-10 transition-transform duration-300 group-hover/logo:scale-110"
-            />
+            / loading="lazy">
           </div>
           <TextShimmer className="text-2xl font-bold" duration={2}>
             KAZI

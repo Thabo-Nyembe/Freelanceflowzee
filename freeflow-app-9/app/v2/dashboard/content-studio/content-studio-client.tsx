@@ -1003,8 +1003,8 @@ export default function ContentStudioClient() {
                         <Badge className={getStatusColor(entry.status)}>{entry.status}</Badge>
                         <Badge variant="outline">{entry.content_type_name}</Badge>
                       </div>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="w-4 h-4" />
+                      <Button variant="ghost" size="sm" aria-label="More options">
+                  <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{entry.title}</h3>

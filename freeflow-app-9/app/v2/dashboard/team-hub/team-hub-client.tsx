@@ -1336,7 +1336,7 @@ export default function TeamHubClient() {
                     <div className="flex items-start gap-3">
                       <div className="relative">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={member.avatar} />
+                          <AvatarImage src={member.avatar} alt="User avatar" />
                           <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 ${getStatusColor(member.status)}`} />
@@ -1516,7 +1516,7 @@ export default function TeamHubClient() {
                           <div key={message.id} className="group p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                             <div className="flex items-start gap-3">
                               <Avatar className="w-9 h-9">
-                                <AvatarImage src={message.senderAvatar} />
+                                <AvatarImage src={message.senderAvatar} alt="User avatar" />
                                 <AvatarFallback>{message.senderName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                               </Avatar>
                               <div className="flex-1 min-w-0">
@@ -1588,7 +1588,8 @@ export default function TeamHubClient() {
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleAddReaction}><Smile className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleOpenThread}><MessageCircle className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleBookmark}><Bookmark className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleLoadOptions}><MoreVertical className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleLoadOptions} aria-label="More options">
+                  <MoreVertical className="w-3.5 h-3.5" /></Button>
                               </div>
                             </div>
                           </div>
@@ -1690,7 +1691,7 @@ export default function TeamHubClient() {
                       <div className="flex -space-x-2">
                         {huddle.participants.slice(0, 4).map((p, i) => (
                           <Avatar key={i} className="w-8 h-8 border-2 border-white dark:border-gray-900">
-                            <AvatarImage src={p.avatar} />
+                            <AvatarImage src={p.avatar} alt="User avatar" />
                             <AvatarFallback className="text-xs">{p.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                         ))}
@@ -2310,7 +2311,7 @@ export default function TeamHubClient() {
                   <div className="flex items-center gap-4">
                     <div className="relative">
                       <Avatar className="w-16 h-16">
-                        <AvatarImage src={selectedMember.avatar} />
+                        <AvatarImage src={selectedMember.avatar} alt="User avatar" />
                         <AvatarFallback>{selectedMember.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
                       <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${getStatusColor(selectedMember.status)}`} />
@@ -2651,7 +2652,7 @@ export default function TeamHubClient() {
               {activities.slice(0, 5).map(activity => (
                 <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src={activity.userAvatar} />
+                    <AvatarImage src={activity.userAvatar} alt="User avatar" />
                     <AvatarFallback>{activity.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
@@ -3044,7 +3045,7 @@ export default function TeamHubClient() {
               <div className="space-y-4 py-4">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <Avatar className="w-10 h-10">
-                    <AvatarImage src={messageMemberTarget.avatar} />
+                    <AvatarImage src={messageMemberTarget.avatar} alt="User avatar" />
                     <AvatarFallback>{messageMemberTarget.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -3088,7 +3089,7 @@ export default function TeamHubClient() {
               <div className="space-y-4 py-4">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <Avatar className="w-10 h-10">
-                    <AvatarImage src={messageMemberTarget.avatar} />
+                    <AvatarImage src={messageMemberTarget.avatar} alt="User avatar" />
                     <AvatarFallback>{messageMemberTarget.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div>

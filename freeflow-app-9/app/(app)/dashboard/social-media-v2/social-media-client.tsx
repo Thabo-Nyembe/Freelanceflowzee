@@ -491,7 +491,7 @@ export default function SocialMediaClient() {
   const getContentTypeIcon = (type: ContentType) => {
     const icons: Record<ContentType, React.ReactNode> = {
       text: <FileText className="w-4 h-4" />,
-      image: <Image className="w-4 h-4" />,
+      image: <Image className="w-4 h-4"  loading="lazy"/>,
       video: <Video className="w-4 h-4" />,
       carousel: <Layers className="w-4 h-4" />,
       story: <Camera className="w-4 h-4" />,
@@ -1269,7 +1269,7 @@ export default function SocialMediaClient() {
                       Best Time to Post
                     </Button>
                     <Button variant="outline" className="w-full justify-start" onClick={handleCreateVisual}>
-                      <Image className="w-4 h-4 mr-2" />
+                      <Image className="w-4 h-4 mr-2"  loading="lazy"/>
                       Create Visual
                     </Button>
                   </CardContent>

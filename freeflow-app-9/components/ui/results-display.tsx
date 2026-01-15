@@ -440,11 +440,10 @@ export function RankingList({
 
             {/* Avatar */}
             {item.avatar && (
-              <img
-                src={item.avatar}
+              <img src={item.avatar}
                 alt={item.name}
                 className="w-10 h-10 rounded-full object-cover"
-              />
+              / loading="lazy">
             )}
 
             {/* Name */}

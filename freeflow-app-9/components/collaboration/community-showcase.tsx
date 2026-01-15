@@ -95,12 +95,11 @@ export default function CommunityShowcase({
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       {item.thumbnail && (
         <div className="relative h-48 w-full">
-          <Image
-            src={item.thumbnail}
+          <Image src={item.thumbnail}
             alt={item.title}
             fill
             className="object-cover"
-          />
+           loading="lazy"/>
         </div>
       )}
       <div className="p-4">

@@ -419,7 +419,7 @@ export function EnhancedFileStorage({
   // File type icons mapping
   const getFileIcon = (type: FileItem['type']) => {
     switch (type) {
-      case 'image': return <Image className="w-5 h-5 text-blue-500" />
+      case 'image': return <Image className="w-5 h-5 text-blue-500"  loading="lazy"/>
       case 'video': return <Video className="w-5 h-5 text-purple-500" />
       case 'audio': return <Music className="w-5 h-5 text-green-500" />
       case 'document': return <FileText className="w-5 h-5 text-red-500" />

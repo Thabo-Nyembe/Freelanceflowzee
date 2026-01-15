@@ -1857,7 +1857,7 @@ export default function FAQClient() {
 
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
                       <h3 className="font-semibold mb-4 flex items-center gap-2">
-                        <Image className="w-5 h-5 text-blue-600" />
+                        <Image className="w-5 h-5 text-blue-600"  loading="lazy"/>
                         Logo & Images
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
@@ -2353,7 +2353,7 @@ export default function FAQClient() {
                   <div className="mt-1 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                     <div className="flex items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                       <button type="button" className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Edit className="w-4 h-4" /></button>
-                      <button type="button" className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Image className="w-4 h-4" /></button>
+                      <button type="button" className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Image className="w-4 h-4"  loading="lazy"/></button>
                       <button type="button" className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Link className="w-4 h-4" /></button>
                     </div>
                     <textarea

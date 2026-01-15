@@ -759,8 +759,8 @@ export default function AiBusinessAdvisorClient() {
             <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleExport} className="bg-blue-600 hover:bg-blue-700">
-              <Download className="h-4 w-4 mr-2" />
+            <Button onClick={handleExport} className="bg-blue-600 hover:bg-blue-700" aria-label="Export data">
+                  <Download className="h-4 w-4 mr-2" />
               Export Report
             </Button>
           </DialogFooter>

@@ -524,7 +524,7 @@ function VirtualScrollingDemo() {
                   onClick={() => setNewItemType('image')}
                   className="flex-1"
                 >
-                  <Image className="w-4 h-4 mr-2" />
+                  <Image className="w-4 h-4 mr-2"  loading="lazy"/>
                   Image
                 </Button>
                 <Button

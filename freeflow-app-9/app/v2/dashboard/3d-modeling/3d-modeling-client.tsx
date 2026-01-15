@@ -716,7 +716,7 @@ export default function ThreeDModelingClient() {
               Materials
             </TabsTrigger>
             <TabsTrigger value="textures" className="gap-2">
-              <Image className="w-4 h-4" />
+              <Image className="w-4 h-4"  loading="lazy"/>
               Textures
             </TabsTrigger>
             <TabsTrigger value="render" className="gap-2">
@@ -1158,7 +1158,7 @@ export default function ThreeDModelingClient() {
                 <Card key={texture.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-4">
                     <div className="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg mb-3 flex items-center justify-center">
-                      <Image className="w-8 h-8 text-gray-400" />
+                      <Image className="w-8 h-8 text-gray-400"  loading="lazy"/>
                     </div>
                     <h3 className="font-medium text-sm truncate">{texture.name}</h3>
                     <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
@@ -2380,13 +2380,13 @@ export default function ThreeDModelingClient() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Image className="w-5 h-5" />
+              <Image className="w-5 h-5"  loading="lazy"/>
               Upload Texture
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
-              <Image className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <Image className="w-12 h-12 mx-auto text-gray-400 mb-4"  loading="lazy"/>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                 Drag and drop texture files here
               </p>
@@ -2404,7 +2404,7 @@ export default function ThreeDModelingClient() {
             {selectedFile && fileBrowserMode === 'upload-texture' && (
               <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <Image className="w-8 h-8 text-green-500" />
+                  <Image className="w-8 h-8 text-green-500"  loading="lazy"/>
                   <div className="flex-1">
                     <p className="font-medium text-sm">{selectedFile.name}</p>
                     <p className="text-xs text-gray-500">{selectedFile.size} - {selectedFile.type}</p>
@@ -2948,7 +2948,7 @@ export default function ThreeDModelingClient() {
                 </div>
                 <div className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Image className="w-4 h-4 text-blue-500" />
+                    <Image className="w-4 h-4 text-blue-500"  loading="lazy"/>
                     <span className="text-sm">Unused Textures</span>
                   </div>
                   <Badge variant="secondary">8</Badge>
@@ -3194,7 +3194,7 @@ export default function ThreeDModelingClient() {
                       }`}
                       onClick={() => setSelectedFile(file)}
                     >
-                      <Image className="w-5 h-5 text-green-500" />
+                      <Image className="w-5 h-5 text-green-500"  loading="lazy"/>
                       <div className="flex-1">
                         <p className="font-medium text-sm">{file.name}</p>
                         <p className="text-xs text-gray-500">{file.size}</p>
@@ -3237,7 +3237,7 @@ export default function ThreeDModelingClient() {
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center gap-3">
                   {fileBrowserMode === 'import-model' && <Box className="w-8 h-8 text-blue-500" />}
-                  {fileBrowserMode === 'upload-texture' && <Image className="w-8 h-8 text-green-500" />}
+                  {fileBrowserMode === 'upload-texture' && <Image className="w-8 h-8 text-green-500"  loading="lazy"/>}
                   {fileBrowserMode === 'install-plugin' && <Package className="w-8 h-8 text-purple-500" />}
                   <div className="flex-1">
                     <p className="font-medium">{selectedFile.name}</p>

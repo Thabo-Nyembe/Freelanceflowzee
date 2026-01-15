@@ -2879,8 +2879,8 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                   </div>
                 </div>
               </div>
-              <Button variant="outline" className="w-full text-red-600 hover:text-red-700">
-                <X className="w-4 h-4 mr-2" />
+              <Button variant="outline" className="w-full text-red-600 hover:text-red-700" aria-label="Close">
+                  <X className="w-4 h-4 mr-2" />
                 Disconnect Integration
               </Button>
             </div>

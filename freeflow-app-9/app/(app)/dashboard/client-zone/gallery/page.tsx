@@ -519,14 +519,13 @@ export default function GalleryPage() {
                       {/* Preview */}
                       <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden group">
                         {item.imageUrl ? (
-                          <img
-                            src={item.imageUrl}
+                          <img src={item.imageUrl}
                             alt={item.name}
                             className="w-full h-full object-cover"
-                          />
+                          / loading="lazy">
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
-                            <Image className="h-12 w-12 text-gray-400" />
+                            <Image className="h-12 w-12 text-gray-400"  loading="lazy"/>
                           </div>
                         )}
 
@@ -656,7 +655,7 @@ export default function GalleryPage() {
 
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                           {item.type === 'image' && (
-                            <Image className="h-6 w-6 text-gray-400" />
+                            <Image className="h-6 w-6 text-gray-400"  loading="lazy"/>
                           )}
                           {item.type === 'video' && (
                             <div className="h-6 w-6 text-gray-400">📹</div>

@@ -1179,8 +1179,8 @@ export default function AccessLogsClient() {
                         <Grid3X3 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
-                      <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                    <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading} aria-label="Refresh">
+                  <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                       Refresh
                     </Button>
                   </div>
@@ -2001,7 +2001,8 @@ export default function AccessLogsClient() {
                             <p className="font-medium">Clear Cache</p>
                             <p className="text-sm text-gray-500">Refresh cached log data</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={handleRefresh}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                          <Button variant="outline" size="sm" onClick={handleRefresh} aria-label="Refresh">
+                  <RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>

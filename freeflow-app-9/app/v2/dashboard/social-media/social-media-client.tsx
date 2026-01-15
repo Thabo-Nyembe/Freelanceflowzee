@@ -470,7 +470,7 @@ export default function SocialMediaClient() {
   const getContentTypeIcon = (type: ContentType) => {
     const icons: Record<ContentType, React.ReactNode> = {
       text: <FileText className="w-4 h-4" />,
-      image: <Image className="w-4 h-4" />,
+      image: <Image className="w-4 h-4"  loading="lazy"/>,
       video: <Video className="w-4 h-4" />,
       carousel: <Layers className="w-4 h-4" />,
       story: <Camera className="w-4 h-4" />,
@@ -740,8 +740,8 @@ export default function SocialMediaClient() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="w-4 h-4" />
+                            <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="More options">
+                  <MoreVertical className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -878,7 +878,7 @@ export default function SocialMediaClient() {
                       Best Time to Post
                     </Button>
                     <Button variant="outline" className="w-full justify-start" onClick={handleCreateVisual}>
-                      <Image className="w-4 h-4 mr-2" />
+                      <Image className="w-4 h-4 mr-2"  loading="lazy"/>
                       Create Visual
                     </Button>
                   </CardContent>
@@ -2393,7 +2393,7 @@ export default function SocialMediaClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 {['Instagram Post', 'Story', 'Facebook Cover', 'Twitter Header'].map(template => (
                   <div key={template} className="p-4 border rounded-lg text-center cursor-pointer hover:border-violet-500">
-                    <Image className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                    <Image className="w-8 h-8 mx-auto mb-2 text-gray-400"  loading="lazy"/>
                     <p className="text-sm font-medium">{template}</p>
                   </div>
                 ))}

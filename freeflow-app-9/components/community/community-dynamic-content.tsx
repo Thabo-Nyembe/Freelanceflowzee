@@ -176,11 +176,10 @@ export function CommunityTestimonials() {
               <p className="text-sm italic mb-4">{testimonial.content}</p>
               <div className="flex items-center gap-3">
                 {metadata?.avatar && (
-                  <img
-                    src={metadata.avatar}
+                  <img src={metadata.avatar}
                     alt=""
                     className="h-10 w-10 rounded-full object-cover"
-                  />
+                  / loading="lazy">
                 )}
                 <div>
                   <p className="font-medium text-sm">{testimonial.subtitle}</p>

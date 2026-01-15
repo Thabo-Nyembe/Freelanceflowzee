@@ -1142,7 +1142,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
                           <div className="flex items-center gap-2">
                             <Avatar className="w-6 h-6">
-                              <AvatarImage src={article.author.avatar} />
+                              <AvatarImage src={article.author.avatar} alt="User avatar" />
                               <AvatarFallback>{article.author.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <span className="text-xs text-muted-foreground">
@@ -1522,7 +1522,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     {mockAuthors.map((author, i) => (
                       <div key={author.id} className="flex items-center gap-3">
                         <Avatar>
-                          <AvatarImage src={author.avatar} />
+                          <AvatarImage src={author.avatar} alt="User avatar" />
                           <AvatarFallback>{author.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -2008,7 +2008,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 {/* Author */}
                 <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <Avatar>
-                    <AvatarImage src={selectedArticle?.author.avatar} />
+                    <AvatarImage src={selectedArticle?.author.avatar} alt="User avatar" />
                     <AvatarFallback>{selectedArticle?.author.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -2067,7 +2067,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     <div className="flex -space-x-2">
                       {selectedArticle.contributors.map(contributor => (
                         <Avatar key={contributor.id} className="border-2 border-white">
-                          <AvatarImage src={contributor.avatar} />
+                          <AvatarImage src={contributor.avatar} alt="User avatar" />
                           <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                       ))}

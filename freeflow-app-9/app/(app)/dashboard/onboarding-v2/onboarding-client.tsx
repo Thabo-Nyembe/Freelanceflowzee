@@ -1743,7 +1743,7 @@ export default function OnboardingClient() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="w-8 h-8">
-                                <AvatarImage src={user.avatar} />
+                                <AvatarImage src={user.avatar} alt="User avatar" />
                                 <AvatarFallback>{user.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                               </Avatar>
                               <div>

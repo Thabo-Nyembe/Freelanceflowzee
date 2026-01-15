@@ -53,12 +53,11 @@ const VideoListItem = memo(function VideoListItem({ video, isMobile, onVideoClic
         {/* Thumbnail */}
         <div className="relative aspect-video overflow-hidden rounded-md bg-muted">
           {video.thumbnailUrl ? (
-            <Image
-              src={video.thumbnailUrl}
+            <Image src={video.thumbnailUrl}
               alt={video.title}
               fill
               className="object-cover transition-transform group-hover:scale-105"
-            />
+             loading="lazy"/>
           ) : (
             <div className="flex h-full items-center justify-center">
               <Play className="h-12 w-12 text-muted-foreground" />

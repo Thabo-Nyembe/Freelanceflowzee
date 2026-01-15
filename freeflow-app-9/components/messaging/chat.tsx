@@ -152,11 +152,10 @@ const Chat = () => {
                   aria-label={`Chat with ${chat.name}`}
                 >
                   <CardContent className="p-4 flex items-center space-x-4">
-                    <img
-                      src={chat.avatar}
+                    <img src={chat.avatar}
                       alt={chat.name}
                       className="w-12 h-12 rounded-full"
-                    />
+                    / loading="lazy">
                     <div className="flex-1">
                       <div className="flex justify-between">
                         <h3 className="font-semibold">{chat.name}</h3>
@@ -182,11 +181,10 @@ const Chat = () => {
         <div className="flex-1 flex flex-col">
           <div className="p-4 border-b">
             <div className="flex items-center space-x-4">
-              <img
-                src={selectedChat.avatar}
+              <img src={selectedChat.avatar}
                 alt={selectedChat.name}
                 className="w-10 h-10 rounded-full"
-              />
+              / loading="lazy">
               <h2 className="text-xl font-semibold">{selectedChat.name}</h2>
             </div>
           </div>

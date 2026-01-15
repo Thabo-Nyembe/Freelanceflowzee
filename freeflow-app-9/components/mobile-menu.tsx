@@ -39,11 +39,10 @@ export function MobileMenu({ items, children }: MobileMenuProps) {
       <SheetContent side="left" className="pl-1 pr-0">
         <div className="px-7">
           <div className="flex items-center gap-2">
-            <img 
-              src="/kazi-brand/logo.svg" 
+            <img src="/kazi-brand/logo.svg" 
               alt="KAZI" 
               className="h-6 w-auto"
-            />
+            / loading="lazy">
             <span className="font-bold">KAZI</span>
           </div>
         </div>

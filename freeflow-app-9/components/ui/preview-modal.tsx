@@ -23,7 +23,7 @@ export default function PreviewModal({ open, title, description, src, fallbackDa
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <div className="w-full aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center">
-          {src && <img src={src} alt={title} className="w-full h-full object-contain" />}
+          {src && <img src={src} alt={title} className="w-full h-full object-contain" / loading="lazy">}
           {!src && <div className="text-sm text-gray-500">No preview available</div>}
         </div>
         <DialogFooter>

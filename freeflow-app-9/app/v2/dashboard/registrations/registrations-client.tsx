@@ -1548,7 +1548,7 @@ export default function RegistrationsClient() {
                     >
                       <div className="flex items-center gap-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={registration.attendee.avatar} />
+                          <AvatarImage src={registration.attendee.avatar} alt="User avatar" />
                           <AvatarFallback className="bg-purple-100 text-purple-700">
                             {registration.attendee.firstName[0]}{registration.attendee.lastName[0]}
                           </AvatarFallback>

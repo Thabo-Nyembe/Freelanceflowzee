@@ -222,11 +222,10 @@ export function Sidebar() {
     <div className="flex flex-col h-full kazi-bg-light dark:kazi-bg-dark border-r border-gray-200 dark:border-gray-700">
       <div className="p-6 kazi-bg-light dark:kazi-bg-dark border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3 mb-8">
-            <img 
-              src="/kazi-brand/logo.svg" 
+            <img src="/kazi-brand/logo.svg" 
               alt="KAZI" 
               className="h-8 w-auto"
-            />
+            / loading="lazy">
             <h1 className="text-2xl font-bold kazi-text-dark dark:kazi-text-light kazi-headline">KAZI</h1>
           </div>
       </div>

@@ -786,7 +786,7 @@ export default function UserManagementPage() {
                         />
 
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={user.avatar} />
+                          <AvatarImage src={user.avatar} alt="User avatar" />
                           <AvatarFallback>{user.firstName[0]}{user.lastName[0]}</AvatarFallback>
                         </Avatar>
 
@@ -1150,7 +1150,7 @@ export default function UserManagementPage() {
               <div className="space-y-6 py-4">
                 <div className="flex items-center gap-4">
                   <Avatar className="w-16 h-16">
-                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarImage src={selectedUser.avatar} alt="User avatar" />
                     <AvatarFallback className="text-xl">
                       {selectedUser.firstName[0]}{selectedUser.lastName[0]}
                     </AvatarFallback>

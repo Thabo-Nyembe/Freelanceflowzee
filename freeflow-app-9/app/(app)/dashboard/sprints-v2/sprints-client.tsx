@@ -1157,7 +1157,7 @@ export default function SprintsClient() {
                       <div className="flex -space-x-2">
                         {sprint.team_members.slice(0, 5).map((member, idx) => (
                           <Avatar key={idx} className="w-8 h-8 border-2 border-white dark:border-slate-900">
-                            <AvatarImage src={member.avatar} />
+                            <AvatarImage src={member.avatar} alt="User avatar" />
                             <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xs">
                               {member.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
@@ -1447,7 +1447,7 @@ export default function SprintsClient() {
                                   <span className="text-xs text-slate-500">{task.story_points} pts</span>
                                   {task.assignee && (
                                     <Avatar className="w-5 h-5">
-                                      <AvatarImage src={task.assignee.avatar} />
+                                      <AvatarImage src={task.assignee.avatar} alt="User avatar" />
                                       <AvatarFallback className="bg-teal-500 text-white text-[8px]">
                                         {task.assignee.name.split(' ').map(n => n[0]).join('')}
                                       </AvatarFallback>
@@ -2475,7 +2475,7 @@ export default function SprintsClient() {
                         {selectedSprint.team_members.map((member) => (
                           <div key={member.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                             <Avatar className="w-6 h-6">
-                              <AvatarImage src={member.avatar} />
+                              <AvatarImage src={member.avatar} alt="User avatar" />
                               <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xs">
                                 {member.name.split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
@@ -2562,7 +2562,7 @@ export default function SprintsClient() {
                   {selectedTask.assignee && (
                     <div className="flex items-center gap-3">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={selectedTask.assignee.avatar} />
+                        <AvatarImage src={selectedTask.assignee.avatar} alt="User avatar" />
                         <AvatarFallback className="bg-teal-500 text-white text-xs">
                           {selectedTask.assignee.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>

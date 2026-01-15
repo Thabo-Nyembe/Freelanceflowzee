@@ -391,7 +391,7 @@ const getTypeColor = (type: AnimationType): string => {
 const getLayerIcon = (type: LayerType) => {
   const icons: Record<LayerType, JSX.Element> = {
     video: <FileVideo className="w-4 h-4" />,
-    image: <Image className="w-4 h-4" />,
+    image: <Image className="w-4 h-4"  loading="lazy"/>,
     text: <Type className="w-4 h-4" />,
     shape: <Shapes className="w-4 h-4" />,
     audio: <Volume2 className="w-4 h-4" />,
@@ -2376,7 +2376,7 @@ export default function MotionGraphicsClient({
                         {selectedAnimation.collaborators.map((collab) => (
                           <div key={collab.id} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                             <Avatar className="w-6 h-6">
-                              <AvatarImage src={collab.avatar} />
+                              <AvatarImage src={collab.avatar} alt="User avatar" />
                               <AvatarFallback>{collab.name[0]}</AvatarFallback>
                             </Avatar>
                             <span className="text-sm">{collab.name}</span>
@@ -2673,7 +2673,7 @@ export default function MotionGraphicsClient({
                       key={i}
                       className="aspect-square rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center cursor-pointer hover:ring-2 ring-cyan-500 transition-all"
                     >
-                      <Image className="w-8 h-8 text-gray-400" />
+                      <Image className="w-8 h-8 text-gray-400"  loading="lazy"/>
                     </div>
                   ))}
                 </div>
@@ -3133,8 +3133,8 @@ export default function MotionGraphicsClient({
               <Button variant="outline" onClick={() => setShowShareDialog(false)}>
                 Close
               </Button>
-              <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={handleShare}>
-                <Share2 className="w-4 h-4 mr-2" />
+              <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={handleShare} aria-label="Share">
+                  <Share2 className="w-4 h-4 mr-2" />
                 Copy Link
               </Button>
             </div>

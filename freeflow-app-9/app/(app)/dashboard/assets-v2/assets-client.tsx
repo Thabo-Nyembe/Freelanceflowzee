@@ -1445,8 +1445,8 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                               <h4 className="font-semibold truncate">{asset.name}</h4>
                               <p className="text-xs text-muted-foreground capitalize">{asset.type.replace('_', ' ')} • {asset.format}</p>
                             </div>
-                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100">
-                              <MoreVertical className="w-4 h-4" />
+                            <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100" aria-label="More options">
+                  <MoreVertical className="w-4 h-4" />
                             </Button>
                           </div>
                           <div className="flex items-center gap-2 mb-3">

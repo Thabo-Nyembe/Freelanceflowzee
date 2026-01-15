@@ -834,8 +834,8 @@ export default function OverviewClient() {
                 variant="outline"
                 className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 onClick={handleRefresh}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+               aria-label="Refresh">
+                  <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
             </div>

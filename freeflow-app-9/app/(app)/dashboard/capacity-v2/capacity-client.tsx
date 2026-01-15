@@ -2497,8 +2497,8 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             </p>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setExportDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleExport}>
-                <Download className="w-4 h-4 mr-2" />
+              <Button onClick={handleExport} aria-label="Export data">
+                  <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
             </div>

@@ -2212,8 +2212,8 @@ export default function KnowledgeBaseClient() {
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
-                          <MoreVertical className="w-4 h-4" />
+                        <Button variant="outline" size="icon" aria-label="More options">
+                  <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -2360,8 +2360,8 @@ export default function KnowledgeBaseClient() {
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>
-                  <Button variant="outline" onClick={handleExport}>
-                    <Download className="w-4 h-4 mr-2" />
+                  <Button variant="outline" onClick={handleExport} aria-label="Export data">
+                  <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>
                 </div>

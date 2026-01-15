@@ -1993,7 +1993,7 @@ export default function MessagesClient() {
                     <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          {file.type.includes('image') ? <Image className="w-6 h-6 text-blue-500" /> :
+                          {file.type.includes('image') ? <Image className="w-6 h-6 text-blue-500"  loading="lazy"/> :
                            file.type.includes('video') ? <Video className="w-6 h-6 text-purple-500" /> :
                            file.type.includes('pdf') ? <FileText className="w-6 h-6 text-red-500" /> :
                            <FolderOpen className="w-6 h-6 text-gray-500" />}
@@ -3097,7 +3097,7 @@ export default function MessagesClient() {
               <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    {file.type.includes('image') ? <Image className="w-5 h-5 text-blue-500" /> :
+                    {file.type.includes('image') ? <Image className="w-5 h-5 text-blue-500"  loading="lazy"/> :
                      file.type.includes('video') ? <Video className="w-5 h-5 text-purple-500" /> :
                      file.type.includes('pdf') ? <FileText className="w-5 h-5 text-red-500" /> :
                      <FolderOpen className="w-5 h-5 text-gray-500" />}

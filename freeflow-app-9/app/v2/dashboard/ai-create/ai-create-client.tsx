@@ -498,7 +498,7 @@ const getStyleColor = (style: StylePreset) => {
 
 const getTypeIcon = (type: GenerationType) => {
   const icons: Record<GenerationType, React.ReactNode> = {
-    image: <Image className="w-4 h-4" />,
+    image: <Image className="w-4 h-4"  loading="lazy"/>,
     video: <Video className="w-4 h-4" />,
     audio: <Music className="w-4 h-4" />,
     text: <FileText className="w-4 h-4" />,
@@ -2321,7 +2321,7 @@ export default function AICreateClient() {
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Image className="w-5 h-5 text-blue-500" />
+                <Image className="w-5 h-5 text-blue-500"  loading="lazy"/>
                 Your Gallery
               </DialogTitle>
             </DialogHeader>

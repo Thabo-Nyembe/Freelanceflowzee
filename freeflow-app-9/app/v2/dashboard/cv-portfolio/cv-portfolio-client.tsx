@@ -3167,11 +3167,10 @@ export default function CvPortfolioClient() {
                       <CardContent className="p-0">
                         <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 rounded-t-lg flex items-center justify-center relative overflow-hidden">
                           {project.image && project.image !== '/portfolio-default.jpg' ? (
-                            <img
-                              src={project.image}
+                            <img src={project.image}
                               alt={project.title}
                               className="w-full h-full object-cover"
-                            />
+                            / loading="lazy">
                           ) : (
                             <div className="text-white text-6xl opacity-20">
                               <Briefcase />
@@ -4057,11 +4056,10 @@ export default function CvPortfolioClient() {
             <div className="space-y-4 py-4">
               <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 {viewingProject.image && viewingProject.image !== '/portfolio-default.jpg' ? (
-                  <img
-                    src={viewingProject.image}
+                  <img src={viewingProject.image}
                     alt={viewingProject.title}
                     className="w-full h-full object-cover rounded-lg"
-                  />
+                  / loading="lazy">
                 ) : (
                   <Briefcase className="w-16 h-16 text-white opacity-50" />
                 )}

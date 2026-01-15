@@ -1343,8 +1343,8 @@ export default function ClientZonePage() {
                 </motion.div>
               )}
             </div>
-            <Button variant="outline" onClick={handleNotifications} data-testid="notifications-btn">
-              <Bell className="h-4 w-4 mr-2" />
+            <Button variant="outline" onClick={handleNotifications} data-testid="notifications-btn" aria-label="Notifications">
+                  <Bell className="h-4 w-4 mr-2" />
               Notifications
             </Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={handleContactTeam} data-testid="contact-team-btn">
@@ -1597,7 +1597,7 @@ export default function ClientZonePage() {
                 My Projects
               </TabsTrigger>
               <TabsTrigger value="gallery" className="flex items-center gap-2 whitespace-nowrap">
-                <Image className="h-4 w-4" />
+                <Image className="h-4 w-4"  loading="lazy"/>
                 Gallery
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex items-center gap-2 whitespace-nowrap">

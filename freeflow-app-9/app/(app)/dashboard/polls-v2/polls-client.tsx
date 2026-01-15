@@ -2068,7 +2068,7 @@ export default function PollsClient() {
                         <div className="space-y-2">
                           <Label>Logo Upload</Label>
                           <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
-                            <Image className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                            <Image className="w-12 h-12 text-gray-400 mx-auto mb-2"  loading="lazy"/>
                             <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
                             <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
                           </div>

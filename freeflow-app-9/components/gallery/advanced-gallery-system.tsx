@@ -324,11 +324,10 @@ export function AdvancedGallerySystem() {
                       <Card key={item.id} className="group relative">
                         <CardContent className="p-3">
                           <div className="aspect-square relative overflow-hidden rounded-lg bg-muted mb-3">
-                            <img
-                              src={item.thumbnail}
+                            <img src={item.thumbnail}
                               alt={item.name}
                               className="w-full h-full object-cover"
-                            />
+                            / loading="lazy">
                             {item.type === 'video' && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <Play className="w-8 h-8 text-white bg-black bg-opacity-50 rounded-full p-1" />

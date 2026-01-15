@@ -298,11 +298,10 @@ export function PaymentGate({
                 <div className="flex gap-4">
                   {itemThumbnail && (
                     <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
-                      <img
-                        src={itemThumbnail}
+                      <img src={itemThumbnail}
                         alt={itemTitle}
                         className="w-full h-full object-cover"
-                      />
+                      / loading="lazy">
                     </div>
                   )}
                   <div className="flex-1">

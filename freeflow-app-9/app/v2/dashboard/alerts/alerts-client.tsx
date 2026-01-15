@@ -994,7 +994,7 @@ export default function AlertsClient() {
                         <p className="text-xs text-green-600 dark:text-green-400 mb-2">Currently On-Call</p>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={schedule.currentOnCall.avatar} />
+                            <AvatarImage src={schedule.currentOnCall.avatar} alt="User avatar" />
                             <AvatarFallback>{schedule.currentOnCall.name[0]}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -1033,7 +1033,7 @@ export default function AlertsClient() {
                         <p className="text-xs text-gray-500 mb-2">Next On-Call</p>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={schedule.nextOnCall.avatar} />
+                            <AvatarImage src={schedule.nextOnCall.avatar} alt="User avatar" />
                             <AvatarFallback>{schedule.nextOnCall.name[0]}</AvatarFallback>
                           </Avatar>
                           <div>

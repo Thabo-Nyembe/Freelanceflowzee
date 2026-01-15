@@ -1048,7 +1048,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                             <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                               <span className="flex items-center gap-1">
                                 <Avatar className="h-4 w-4">
-                                  <AvatarImage src={report.submittedBy.avatar} />
+                                  <AvatarImage src={report.submittedBy.avatar} alt="User avatar" />
                                   <AvatarFallback>{report.submittedBy.name[0]}</AvatarFallback>
                                 </Avatar>
                                 {report.submittedBy.name}
@@ -1154,7 +1154,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                     {reports.filter(r => r.status === 'pending').slice(0, 3).map(report => (
                       <div key={report.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => openReportDetails(report)}>
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={report.submittedBy.avatar} />
+                          <AvatarImage src={report.submittedBy.avatar} alt="User avatar" />
                           <AvatarFallback>{report.submittedBy.name[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -1403,7 +1403,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                         <div key={emp.id} className="flex items-center gap-3">
                           <span className="text-lg font-bold text-gray-400 w-6">{i + 1}</span>
                           <Avatar>
-                            <AvatarImage src={emp.avatar} />
+                            <AvatarImage src={emp.avatar} alt="User avatar" />
                             <AvatarFallback>{emp.name[0]}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
@@ -2330,7 +2330,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
                     <div className="flex items-center gap-4">
                       <Avatar>
-                        <AvatarImage src={selectedReport.submittedBy.avatar} />
+                        <AvatarImage src={selectedReport.submittedBy.avatar} alt="User avatar" />
                         <AvatarFallback>{selectedReport.submittedBy.name[0]}</AvatarFallback>
                       </Avatar>
                       <div>

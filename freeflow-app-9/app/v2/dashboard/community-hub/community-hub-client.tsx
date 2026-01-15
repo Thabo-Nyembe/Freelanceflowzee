@@ -2527,11 +2527,10 @@ export default function CommunityHubClient() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   {post.media.map((media, index) => (
                     <div key={index} className="relative rounded-lg overflow-hidden">
-                      <img 
-                        src={media.thumbnail || media.url} 
+                      <img src={media.thumbnail || media.url} 
                         alt={media.caption || 'Post media'} 
                         className="w-full h-48 object-cover"
-                      />
+                      / loading="lazy">
                       {media.caption && (
                         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2 text-sm">
                           {media.caption}
@@ -2966,7 +2965,7 @@ export default function CommunityHubClient() {
                     <LiquidGlassCard className="relative hover:shadow-2xl transition-shadow">
                       <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
                       <div className="relative">
-                        <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" />
+                        <img src={event.image} alt={event.title} className="w-full h-32 object-cover rounded-t-lg" / loading="lazy">
                         <Badge className="absolute top-2 right-2" variant="secondary">
                           {event.type}
                         </Badge>
@@ -3060,11 +3059,10 @@ export default function CommunityHubClient() {
                       <BorderTrail className={`bg-gradient-to-r from-${gradient.from} to-${gradient.to}`} size={60} duration={6} />
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3 mb-3">
-                          <img
-                            src={group.avatar}
+                          <img src={group.avatar}
                             alt={group.name}
                             className="w-12 h-12 rounded-full object-cover"
-                          />
+                          / loading="lazy">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h3 className="font-semibold text-white">{group.name}</h3>

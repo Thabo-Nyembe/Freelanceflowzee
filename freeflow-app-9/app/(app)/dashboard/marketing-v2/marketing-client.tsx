@@ -832,7 +832,7 @@ const getContentTypeIcon = (type: ContentType) => {
     social: <Share2 className="w-4 h-4" />,
     email: <Mail className="w-4 h-4" />,
     video: <Video className="w-4 h-4" />,
-    infographic: <Image className="w-4 h-4" />,
+    infographic: <Image className="w-4 h-4"  loading="lazy"/>,
     ebook: <Bookmark className="w-4 h-4" />,
     webinar: <Users className="w-4 h-4" />
   }
@@ -1484,7 +1484,7 @@ export default function MarketingClient() {
                             </span>
                             <span className="flex items-center gap-1">
                               <Avatar className="w-4 h-4">
-                                <AvatarImage src={campaign.ownerAvatar} />
+                                <AvatarImage src={campaign.ownerAvatar} alt="User avatar" />
                                 <AvatarFallback className="text-[8px]">{campaign.owner.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                               </Avatar>
                               {campaign.owner}
@@ -2971,7 +2971,7 @@ export default function MarketingClient() {
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <span className="flex items-center gap-1">
-                  <Image className="w-4 h-4" />
+                  <Image className="w-4 h-4"  loading="lazy"/>
                   Add media
                 </span>
                 <span className="flex items-center gap-1">

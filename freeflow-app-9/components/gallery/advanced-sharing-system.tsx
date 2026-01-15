@@ -404,7 +404,7 @@ export function AdvancedGallerySharingSystem({
           {filteredAndSortedItems.map((item) => (
             <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-shadow">
               <div className="relative aspect-square overflow-hidden">
-                <img src={item.thumbnailUrl} alt={item.name} onClick={() => _setLightboxItem(item)} />
+                <img src={item.thumbnailUrl} alt={item.name} onClick={() = loading="lazy"> _setLightboxItem(item)} />
                 
                 {/* Overlay controls */}
                 <div className="absolute inset-0 flex items-center justify-between">
@@ -498,7 +498,7 @@ export function AdvancedGallerySharingSystem({
           {filteredAndSortedItems.map((item) => (
             <Card key={item.id}>
               <div>
-                <img src={item.thumbnailUrl} alt={item.name} onClick={() => _setLightboxItem(item)} />
+                <img src={item.thumbnailUrl} alt={item.name} onClick={() = loading="lazy"> _setLightboxItem(item)} />
                 
                 <div>
                   <h3>{item.name}</h3>
@@ -635,7 +635,7 @@ export function AdvancedGallerySharingSystem({
               {_lightboxItem.type === 'video' ? (
                 <video src={_lightboxItem.url} />
               ) : (
-                <img src={_lightboxItem.url} alt={_lightboxItem.name} />
+                <img src={_lightboxItem.url} alt={_lightboxItem.name} / loading="lazy">
               )}
               
               <Button onClick={_setLightboxItem} className="absolute top-2 right-2 bg-purple-600/90 text-white hover:bg-purple-700/90 backdrop-blur-sm">

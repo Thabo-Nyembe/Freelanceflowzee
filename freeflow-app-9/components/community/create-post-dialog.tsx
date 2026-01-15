@@ -89,11 +89,10 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
                   <div key={index} className="relative group">
                     {file.type.startsWith('image/') ? (
                       <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                        <img 
-                          src={URL.createObjectURL(file)} 
+                        <img src={URL.createObjectURL(file)} 
                           alt={`Selected file ${index + 1}`}
                           className="w-full h-full object-cover"
-                        />
+                        / loading="lazy">
                       </div>
                     ) : (
                       <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
@@ -122,7 +121,7 @@ export function CreatePostDialog({ open, onOpenChange, onSubmit }: CreatePostDia
               onClick={() => document.getElementById('image-upload')?.click()}
               className="flex-1"
             >
-              <Image className="w-4 h-4 mr-2" />
+              <Image className="w-4 h-4 mr-2"  loading="lazy"/>
               Add Image
             </Button>
             <Button 

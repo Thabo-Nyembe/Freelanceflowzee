@@ -480,7 +480,7 @@ export default function VideoStudioClient() {
     const icons: Record<AssetType, React.ReactNode> = {
       video: <FileVideo className="w-4 h-4" />,
       audio: <Music className="w-4 h-4" />,
-      image: <Image className="w-4 h-4" />,
+      image: <Image className="w-4 h-4"  loading="lazy"/>,
       graphic: <Layers className="w-4 h-4" />,
       title: <Type className="w-4 h-4" />,
       transition: <Zap className="w-4 h-4" />

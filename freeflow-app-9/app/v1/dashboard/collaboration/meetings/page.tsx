@@ -815,7 +815,7 @@ export default function MeetingsPage() {
                       {participant.isVideoOff ? (
                         <div className="flex h-full items-center justify-center">
                           <Avatar className="h-24 w-24">
-                            <AvatarImage src={participant.avatar} />
+                            <AvatarImage src={participant.avatar} alt="User avatar" />
                             <AvatarFallback className="text-3xl">
                               {participant.name
                                 .split(" ")
@@ -1320,8 +1320,8 @@ export default function MeetingsPage() {
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
+                              <Button variant="ghost" size="icon" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">

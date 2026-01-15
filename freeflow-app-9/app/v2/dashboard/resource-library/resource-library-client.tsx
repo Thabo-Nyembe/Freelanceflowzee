@@ -1475,8 +1475,8 @@ export default function ResourceLibraryClient() {
             <Button
               className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
               onClick={handleExport}
-            >
-              <Download className="h-4 w-4 mr-2" />
+             aria-label="Export data">
+                  <Download className="h-4 w-4 mr-2" />
               Export Now
             </Button>
           </DialogFooter>

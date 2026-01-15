@@ -459,7 +459,7 @@ export default function MediaPage() {
   const getMediaIcon = (type: MediaItem["type"]) => {
     switch (type) {
       case "image":
-        return <Image className="h-8 w-8" />;
+        return <Image className="h-8 w-8"  loading="lazy"/>;
       case "video":
         return <Video className="h-8 w-8" />;
       case "audio":
@@ -743,8 +743,8 @@ export default function MediaPage() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">

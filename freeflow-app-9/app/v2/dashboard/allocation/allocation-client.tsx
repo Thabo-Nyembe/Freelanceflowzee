@@ -1164,7 +1164,7 @@ export default function AllocationClient() {
                     >
                       <div className="flex items-start gap-4">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={allocation.resource_avatar} />
+                          <AvatarImage src={allocation.resource_avatar} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-fuchsia-500 to-purple-500 text-white text-sm">
                             {allocation.resource_name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
@@ -1276,7 +1276,7 @@ export default function AllocationClient() {
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4 mb-4">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={resource.avatar} />
+                        <AvatarImage src={resource.avatar} alt="User avatar" />
                         <AvatarFallback className="bg-gradient-to-br from-fuchsia-500 to-purple-500 text-white">
                           {resource.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>

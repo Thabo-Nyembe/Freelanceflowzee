@@ -956,8 +956,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
-              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
+            <Button variant="outline" onClick={handleRefresh} disabled={isLoading} aria-label="Refresh">
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
             </Button>
             <Button variant="outline" onClick={handleExportCustomers}><Download className="h-4 w-4 mr-2" />Export</Button>
             <Button variant="outline" onClick={() => setShowImportDialog(true)}><Upload className="h-4 w-4 mr-2" />Import</Button>

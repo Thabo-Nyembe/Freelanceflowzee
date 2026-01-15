@@ -1162,11 +1162,10 @@ export default function APlusShowcaseClient() {
                           className="relative h-40 bg-slate-800 rounded-t-xl overflow-hidden"
                           onClick={() => handleViewComponent(component)}
                         >
-                          <img
-                            src={component.preview}
+                          <img src={component.preview}
                             alt={component.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
+                          / loading="lazy">
                           <div className="absolute top-2 left-2 flex gap-1">
                             {component.isPremium && (
                               <Badge className="bg-amber-500/90 text-white">
@@ -1243,8 +1242,8 @@ export default function APlusShowcaseClient() {
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button size="sm" variant="ghost">
-                                  <MoreVertical className="h-3 w-3" />
+                                <Button size="sm" variant="ghost" aria-label="More options">
+                  <MoreVertical className="h-3 w-3" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
@@ -1265,11 +1264,10 @@ export default function APlusShowcaseClient() {
 
                     {state.viewMode === 'list' && (
                       <div className="p-4 flex items-center gap-4">
-                        <img
-                          src={component.preview}
+                        <img src={component.preview}
                           alt={component.name}
                           className="w-24 h-24 object-cover rounded-lg"
-                        />
+                        / loading="lazy">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
@@ -1367,11 +1365,10 @@ export default function APlusShowcaseClient() {
 
               <TabsContent value="preview" className="space-y-4">
                 <div className="rounded-lg overflow-hidden">
-                  <img
-                    src={state.selectedComponent.preview}
+                  <img src={state.selectedComponent.preview}
                     alt={state.selectedComponent.name}
                     className="w-full h-auto"
-                  />
+                  / loading="lazy">
                 </div>
               </TabsContent>
 

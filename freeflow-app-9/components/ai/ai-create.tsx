@@ -1210,11 +1210,10 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
                         <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg">
                           <div className="flex-shrink-0">
                             {uploadPreview ? (
-                              <img
-                                src={uploadPreview}
+                              <img src={uploadPreview}
                                 alt="Upload preview"
                                 className="w-16 h-16 object-cover rounded"
-                              />
+                              / loading="lazy">
                             ) : (
                               <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
                                 <ImageIcon className="h-6 w-6 text-gray-400" />

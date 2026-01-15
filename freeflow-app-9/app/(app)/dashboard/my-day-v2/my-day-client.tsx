@@ -1273,7 +1273,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
           <div className="flex items-center gap-2 flex-shrink-0">
             {task.assigneeAvatar && (
               <Avatar className="w-6 h-6">
-                <AvatarImage src={task.assigneeAvatar} />
+                <AvatarImage src={task.assigneeAvatar} alt="User avatar" />
                 <AvatarFallback>{task.assigneeName?.charAt(0)}</AvatarFallback>
               </Avatar>
             )}
@@ -1364,8 +1364,8 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
               <Keyboard className="w-5 h-5" />
             </Button>
 
-            <Button variant="ghost" size="icon" onClick={handleSettings}>
-              <Settings className="w-5 h-5" />
+            <Button variant="ghost" size="icon" onClick={handleSettings} aria-label="Settings">
+                  <Settings className="w-5 h-5" />
             </Button>
 
             <Button
@@ -2263,7 +2263,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                       {selectedTask.comments.map(comment => (
                         <div key={comment.id} className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Avatar className="w-8 h-8">
-                            <AvatarImage src={comment.userAvatar} />
+                            <AvatarImage src={comment.userAvatar} alt="User avatar" />
                             <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1">

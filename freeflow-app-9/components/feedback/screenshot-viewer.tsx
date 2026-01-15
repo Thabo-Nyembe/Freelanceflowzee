@@ -111,14 +111,13 @@ export function ScreenshotViewer({ file, comments, onAddComment }: ScreenshotVie
             style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
             onClick={handleImageClick}
           >
-            <img 
-              src={(file.url as string) || "/placeholder.svg"} 
+            <img src={(file.url as string) || "/placeholder.svg"} 
               alt={(file.name as string) || "Screenshot"} 
               className={`max-w-full max-h-full shadow-lg rounded ${
                 tool === "comment" ? "cursor-crosshair" : 'cursor-crosshair'
               }`}
               draggable={false}
-            />
+            / loading="lazy">
 
             {/* Comment Pins */}
             {comments.map((comment) =>

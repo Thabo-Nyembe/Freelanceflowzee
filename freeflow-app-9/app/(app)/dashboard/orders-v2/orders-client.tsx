@@ -1081,7 +1081,7 @@ export default function OrdersClient() {
                     >
                       <div className="flex items-start gap-4">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={order.customer_avatar} />
+                          <AvatarImage src={order.customer_avatar} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white text-sm">
                             {order.customer_name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
@@ -1591,7 +1591,7 @@ export default function OrdersClient() {
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4 mb-4">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={customer.avatar} />
+                        <AvatarImage src={customer.avatar} alt="User avatar" />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
                           {customer.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>

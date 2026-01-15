@@ -654,7 +654,7 @@ export default function AIDesignClient() {
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Image className="w-4 h-4 text-fuchsia-500" />
+                <Image className="w-4 h-4 text-fuchsia-500"  loading="lazy"/>
                 <span className="text-xs text-gray-500 dark:text-gray-400">Generations</span>
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-white">
@@ -922,7 +922,7 @@ export default function AIDesignClient() {
               Generate
             </TabsTrigger>
             <TabsTrigger value="gallery" className="data-[state=active]:bg-fuchsia-100 data-[state=active]:text-fuchsia-700">
-              <Image className="w-4 h-4 mr-2" />
+              <Image className="w-4 h-4 mr-2"  loading="lazy"/>
               Gallery
             </TabsTrigger>
             <TabsTrigger value="styles" className="data-[state=active]:bg-fuchsia-100 data-[state=active]:text-fuchsia-700">
@@ -1055,7 +1055,7 @@ export default function AIDesignClient() {
                               {gen.status === 'processing' ? (
                                 <RefreshCw className="w-8 h-8 text-fuchsia-500 animate-spin" />
                               ) : (
-                                <Image className="w-8 h-8 text-gray-400" />
+                                <Image className="w-8 h-8 text-gray-400"  loading="lazy"/>
                               )}
                             </div>
                           )}
@@ -1207,7 +1207,7 @@ export default function AIDesignClient() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <Image className="w-7 h-7 text-white" />
+                      <Image className="w-7 h-7 text-white"  loading="lazy"/>
                     </div>
                     <div>
                       <h3 className="text-xl font-bold">Your Gallery</h3>

@@ -460,7 +460,7 @@ export function AdvancedCommentFilters({
             >
               {type === "voice" && <Mic className="w-3 h-3 mr-1" />}
               {type === "screen" && <Video className="w-3 h-3 mr-1" />}
-              {type === "drawing" && <Image className="w-3 h-3 mr-1" />}
+              {type === "drawing" && <Image className="w-3 h-3 mr-1"  loading="lazy"/>}
               {type === "text" && <MessageCircle className="w-3 h-3 mr-1" />}
               {type}
             </Button>

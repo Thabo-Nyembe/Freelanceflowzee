@@ -336,8 +336,8 @@ export function BusinessIntelligenceClient() {
               <Calendar className="w-4 h-4" />
             </Button>
 
-            <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing}>
-              <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing} aria-label="Refresh">
+                  <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
 
             <Button variant="outline" onClick={() => setShowExportDialog(true)}>
@@ -829,8 +829,8 @@ export function BusinessIntelligenceClient() {
             <Button variant="outline" onClick={() => setShowExportDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />
+            <Button onClick={handleExport} aria-label="Export data">
+                  <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
           </DialogFooter>
@@ -1207,8 +1207,8 @@ export function BusinessIntelligenceClient() {
             <Button variant="outline" onClick={() => setShowShareDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleShare}>
-              <Share2 className="w-4 h-4 mr-2" />
+            <Button onClick={handleShare} aria-label="Share">
+                  <Share2 className="w-4 h-4 mr-2" />
               Share
             </Button>
           </DialogFooter>

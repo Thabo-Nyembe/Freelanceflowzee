@@ -744,8 +744,8 @@ export default function TeamsPage() {
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -941,7 +941,7 @@ export default function TeamsPage() {
                     <div className="flex items-start gap-4">
                       <div className="relative">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={member.avatar} />
+                          <AvatarImage src={member.avatar} alt="User avatar" />
                           <AvatarFallback>
                             {member.name
                               .split(" ")
@@ -1045,7 +1045,7 @@ export default function TeamsPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={member.avatar} />
+                          <AvatarImage src={member.avatar} alt="User avatar" />
                           <AvatarFallback>
                             {member.name
                               .split(" ")

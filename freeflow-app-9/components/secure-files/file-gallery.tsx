@@ -259,11 +259,10 @@ export function FileGallery({
               <CardHeader className="pb-4">
                 <div className="aspect-video bg-muted rounded-md flex items-center justify-center mb-2">
                   {file.thumbnail ? (
-                    <img
-                      src={file.thumbnail}
+                    <img src={file.thumbnail}
                       alt={file.fileName}
                       className="w-full h-full object-cover rounded-md"
-                    />
+                    / loading="lazy">
                   ) : (
                     getFileIcon(file.fileType)
                   )}
@@ -330,11 +329,10 @@ export function FileGallery({
                 <div className="flex items-center gap-4">
                   <div className="flex-shrink-0 w-16 h-16 bg-muted rounded-md flex items-center justify-center">
                     {file.thumbnail ? (
-                      <img
-                        src={file.thumbnail}
+                      <img src={file.thumbnail}
                         alt={file.fileName}
                         className="w-full h-full object-cover rounded-md"
-                      />
+                      / loading="lazy">
                     ) : (
                       getFileIcon(file.fileType)
                     )}

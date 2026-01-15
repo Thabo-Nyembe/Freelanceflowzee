@@ -832,8 +832,8 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleExport} aria-label="Export data">
+                  <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
             <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={handleScheduleRenewal}>
@@ -2030,8 +2030,8 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                         <Calendar className="w-4 h-4 mr-2" />
                         Schedule Meeting
                       </Button>
-                      <Button variant="outline">
-                        <MoreVertical className="w-4 h-4" />
+                      <Button variant="outline" aria-label="More options">
+                  <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>

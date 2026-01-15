@@ -220,11 +220,10 @@ export function EnhancedGridItem({
       {/* Image/Visual */}
       {image && (
         <div className="relative h-48 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-t-xl overflow-hidden">
-          <img
-            src={image}
+          <img src={image}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          / loading="lazy">
           {badge && (
             <div className="absolute top-3 right-3">
               <span className="px-2 py-1 bg-primary text-primary-foreground text-xs font-medium rounded-full shadow-lg">

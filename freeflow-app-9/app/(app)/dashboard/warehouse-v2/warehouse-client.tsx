@@ -3129,8 +3129,8 @@ export default function WarehouseClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
-              <Button onClick={handleExport} className="gap-2">
-                <Download className="w-4 h-4" />
+              <Button onClick={handleExport} className="gap-2" aria-label="Export data">
+                  <Download className="w-4 h-4" />
                 Export
               </Button>
             </div>

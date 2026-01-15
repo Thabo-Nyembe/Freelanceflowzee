@@ -2449,8 +2449,8 @@ export default function ReleasesClient() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="icon">
-                        <MoreVertical className="w-4 h-4" />
+                      <Button variant="outline" size="icon" aria-label="More options">
+                  <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">

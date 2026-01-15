@@ -891,7 +891,7 @@ export default function ThreeDModelingClient() {
               Materials
             </TabsTrigger>
             <TabsTrigger value="textures" className="gap-2">
-              <Image className="w-4 h-4" />
+              <Image className="w-4 h-4"  loading="lazy"/>
               Textures
             </TabsTrigger>
             <TabsTrigger value="render" className="gap-2">
@@ -1257,7 +1257,7 @@ export default function ThreeDModelingClient() {
                 <Card key={texture.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-4">
                     <div className="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg mb-3 flex items-center justify-center">
-                      <Image className="w-8 h-8 text-gray-400" />
+                      <Image className="w-8 h-8 text-gray-400"  loading="lazy"/>
                     </div>
                     <h3 className="font-medium text-sm truncate">{texture.name}</h3>
                     <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
@@ -2217,7 +2217,7 @@ export default function ThreeDModelingClient() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Image className="w-5 h-5" />
+              <Image className="w-5 h-5"  loading="lazy"/>
               Upload Texture
             </DialogTitle>
           </DialogHeader>
@@ -2248,7 +2248,7 @@ export default function ThreeDModelingClient() {
               </Select>
             </div>
             <div className="p-6 border-2 border-dashed rounded-lg text-center">
-              <Image className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+              <Image className="w-8 h-8 mx-auto mb-2 text-gray-400"  loading="lazy"/>
               <p className="text-sm text-gray-500">Drag and drop your texture here</p>
               <p className="text-xs text-gray-400 mt-1">PNG, JPG, EXR, HDR supported</p>
             </div>

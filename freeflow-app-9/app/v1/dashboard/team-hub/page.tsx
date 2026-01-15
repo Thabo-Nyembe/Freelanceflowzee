@@ -1569,7 +1569,7 @@ export default function TeamHubPage() {
                             {index + 1}
                           </div>
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={member.avatar} />
+                            <AvatarImage src={member.avatar} alt="User avatar" />
                             <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                           <div>
@@ -1701,7 +1701,7 @@ export default function TeamHubPage() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{i + 1}.</span>
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={member.avatar} />
+                      <AvatarImage src={member.avatar} alt="User avatar" />
                       <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm">{member.name}</span>
@@ -2146,7 +2146,7 @@ export default function TeamHubPage() {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={member.avatar} />
+                      <AvatarImage src={member.avatar} alt="User avatar" />
                       <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(member.status)}`} />

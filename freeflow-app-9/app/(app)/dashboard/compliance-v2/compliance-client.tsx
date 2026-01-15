@@ -1022,8 +1022,8 @@ export default function ComplianceClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleExport}>
-                <Download className="w-4 h-4 mr-2" />
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleExport} aria-label="Export data">
+                  <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
               <Button className="bg-white text-green-600 hover:bg-green-50" onClick={handleRunAudit}>
@@ -1925,8 +1925,8 @@ export default function ComplianceClient() {
                     <Badge className={evidence.status === 'approved' ? 'bg-green-100 text-green-700' : evidence.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}>
                       {evidence.status}
                     </Badge>
-                    <Button variant="ghost" size="icon" onClick={handleExport}>
-                      <Download className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" onClick={handleExport} aria-label="Export data">
+                  <Download className="w-4 h-4" />
                     </Button>
                   </div>
                 </Card>
@@ -2400,8 +2400,8 @@ export default function ComplianceClient() {
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1" onClick={handleExport}>
-                            <Download className="h-4 w-4 mr-2" />
+                          <Button variant="outline" className="flex-1" onClick={handleExport} aria-label="Export data">
+                  <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
                           <Button variant="outline" className="flex-1" onClick={handleGenerateReport}>

@@ -204,11 +204,10 @@ export function BackgroundReplacementControls({
 
           {selectedBackground && (
             <div className="relative aspect-video rounded-lg overflow-hidden">
-              <img
-                src={selectedBackground}
+              <img src={selectedBackground}
                 alt="Virtual Background"
                 className="w-full h-full object-cover"
-              />
+              / loading="lazy">
             </div>
           )}
         </div>

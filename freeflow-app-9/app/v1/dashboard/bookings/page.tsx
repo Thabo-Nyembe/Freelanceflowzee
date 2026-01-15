@@ -959,8 +959,8 @@ export default function UpcomingBookingsPage() {
             className="gap-2"
             onClick={handleSettings}
             data-testid="settings-btn"
-          >
-            <Settings className="h-4 w-4" />
+           aria-label="Settings">
+                  <Settings className="h-4 w-4" />
             Settings
           </Button>
           <Button
@@ -1109,7 +1109,7 @@ export default function UpcomingBookingsPage() {
                   size="icon"
                   onClick={handleRefresh}
                   data-testid="refresh-btn"
-                >
+                 aria-label="Refresh">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>

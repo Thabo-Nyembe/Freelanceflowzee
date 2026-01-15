@@ -884,12 +884,11 @@ export function UniversalPinpointFeedbackSystemEnhanced({
           >
             {selectedFile ? (
               <div className="w-full h-full flex items-center justify-center">
-                <img
-                  src={selectedFile.url}
+                <img src={selectedFile.url}
                   alt={selectedFile.name}
                   className="max-w-full max-h-full object-contain"
                   style={{ transform: `scale(${zoom / 100})` }}
-                />
+                / loading="lazy">
               </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center">

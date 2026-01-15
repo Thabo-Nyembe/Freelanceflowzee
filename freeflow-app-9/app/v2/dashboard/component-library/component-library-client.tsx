@@ -1596,28 +1596,28 @@ export default function App() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
-                          <Download className="h-6 w-6" />
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport} aria-label="Export data">
+                  <Download className="h-6 w-6" />
                           <span>Export Tokens as CSS</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
-                          <Download className="h-6 w-6" />
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport} aria-label="Export data">
+                  <Download className="h-6 w-6" />
                           <span>Export Tokens as JSON</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
-                          <Download className="h-6 w-6" />
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport} aria-label="Export data">
+                  <Download className="h-6 w-6" />
                           <span>Export Icons as SVG</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
-                          <Download className="h-6 w-6" />
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport} aria-label="Export data">
+                  <Download className="h-6 w-6" />
                           <span>Export Components</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
-                          <Download className="h-6 w-6" />
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport} aria-label="Export data">
+                  <Download className="h-6 w-6" />
                           <span>Export Documentation</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
-                          <Download className="h-6 w-6" />
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport} aria-label="Export data">
+                  <Download className="h-6 w-6" />
                           <span>Export Full Library</span>
                         </Button>
                       </div>

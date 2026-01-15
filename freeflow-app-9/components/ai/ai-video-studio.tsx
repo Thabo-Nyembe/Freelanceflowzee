@@ -355,7 +355,7 @@ export function AIVideoStudio() {
                     >
                       {uploadedImage ? (
                         <div className="relative">
-                          <img src={uploadedImage} alt="Uploaded" className="max-h-48 mx-auto rounded-lg" />
+                          <img src={uploadedImage} alt="Uploaded" className="max-h-48 mx-auto rounded-lg" / loading="lazy">
                           <Button
                             variant="destructive"
                             size="icon"
@@ -410,7 +410,7 @@ export function AIVideoStudio() {
                         >
                           {startFrame ? (
                             <div className="relative w-full h-full">
-                              <img src={startFrame} alt="Start" className="w-full h-full object-cover rounded-lg" />
+                              <img src={startFrame} alt="Start" className="w-full h-full object-cover rounded-lg" / loading="lazy">
                               <Button
                                 variant="destructive"
                                 size="icon"
@@ -443,7 +443,7 @@ export function AIVideoStudio() {
                         >
                           {endFrame ? (
                             <div className="relative w-full h-full">
-                              <img src={endFrame} alt="End" className="w-full h-full object-cover rounded-lg" />
+                              <img src={endFrame} alt="End" className="w-full h-full object-cover rounded-lg" / loading="lazy">
                               <Button
                                 variant="destructive"
                                 size="icon"

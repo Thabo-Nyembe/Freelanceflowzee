@@ -491,8 +491,8 @@ export default function CommunityProfilePage() {
                         Hire Me
                       </Button>
 
-                      <Button variant="outline" size="icon" onClick={handleShare}>
-                        <Share2 className="w-4 h-4" />
+                      <Button variant="outline" size="icon" onClick={handleShare} aria-label="Share">
+                  <Share2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -703,7 +703,7 @@ export default function CommunityProfilePage() {
                 <CardContent className="pt-6">
                   <div className="flex gap-4">
                     <Avatar>
-                      <AvatarImage src={testimonial.clientAvatar} />
+                      <AvatarImage src={testimonial.clientAvatar} alt="User avatar" />
                       <AvatarFallback>
                         {testimonial.clientName.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>

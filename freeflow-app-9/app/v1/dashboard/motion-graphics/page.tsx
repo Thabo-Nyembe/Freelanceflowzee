@@ -577,7 +577,7 @@ export default function MotionGraphicsPage() {
                       <Type className="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="icon" className={`border-gray-700 hover:bg-slate-800 ${activeTool === 'image' ? 'bg-violet-600 border-violet-500' : ''}`} onClick={() => handleSetTool('image')}>
-                      <Image className="w-4 h-4" />
+                      <Image className="w-4 h-4"  loading="lazy"/>
                     </Button>
                     <Button variant="outline" size="icon" className={`border-gray-700 hover:bg-slate-800 ${activeTool === 'video' ? 'bg-violet-600 border-violet-500' : ''}`} onClick={() => handleSetTool('video')}>
                       <Video className="w-4 h-4" />
@@ -839,7 +839,7 @@ export default function MotionGraphicsPage() {
                     <LiquidGlassCard className="p-4">
                       <div className="space-y-3">
                         <div className="aspect-square bg-slate-950 rounded-lg border border-gray-700 flex items-center justify-center">
-                          <Image className="w-8 h-8 text-gray-600" />
+                          <Image className="w-8 h-8 text-gray-600"  loading="lazy"/>
                         </div>
 
                         <div>

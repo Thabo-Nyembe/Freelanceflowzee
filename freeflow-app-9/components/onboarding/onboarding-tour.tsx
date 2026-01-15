@@ -254,11 +254,10 @@ export function OnboardingTourComponent({
                       {/* Image/Screenshot */}
                       {currentStepData.imageUrl && (
                         <div className="rounded-lg overflow-hidden border-2 border-gray-200 shadow-md">
-                          <img
-                            src={currentStepData.imageUrl}
+                          <img src={currentStepData.imageUrl}
                             alt={currentStepData.title}
                             className="w-full h-auto"
-                          />
+                          / loading="lazy">
                         </div>
                       )}
 

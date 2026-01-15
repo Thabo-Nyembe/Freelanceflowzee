@@ -1531,7 +1531,7 @@ export default function SettingsClient() {
                   <CardContent className="space-y-6">
                     <div className="flex items-center gap-6">
                       <Avatar className="w-20 h-20">
-                        <AvatarImage src={profile.avatar} />
+                        <AvatarImage src={profile.avatar} alt="User avatar" />
                         <AvatarFallback className="text-2xl">{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
                       </Avatar>
                       <div className="space-y-2">

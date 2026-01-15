@@ -2482,7 +2482,7 @@ export default function AnnouncementsClient() {
                       {selectedAnnouncement.media.map((m, i) => (
                         <div key={i} className="rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 aspect-video flex items-center justify-center">
                           {m.type === 'image' ? (
-                            <Image className="h-16 w-16 text-gray-400" />
+                            <Image className="h-16 w-16 text-gray-400"  loading="lazy"/>
                           ) : (
                             <Video className="h-16 w-16 text-gray-400" />
                           )}

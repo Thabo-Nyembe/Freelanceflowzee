@@ -499,7 +499,7 @@ const getStyleColor = (style: StylePreset) => {
 
 const getTypeIcon = (type: GenerationType) => {
   const icons: Record<GenerationType, React.ReactNode> = {
-    image: <Image className="w-4 h-4" />,
+    image: <Image className="w-4 h-4"  loading="lazy"/>,
     video: <Video className="w-4 h-4" />,
     audio: <Music className="w-4 h-4" />,
     text: <FileText className="w-4 h-4" />,
@@ -2505,7 +2505,7 @@ export default function AICreateClient() {
               {importedFile && (
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Image className="w-4 h-4" />
+                    <Image className="w-4 h-4"  loading="lazy"/>
                     <span className="text-sm truncate max-w-[200px]">{importedFile.name}</span>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setImportedFile(null)}>

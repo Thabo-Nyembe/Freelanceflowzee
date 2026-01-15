@@ -2117,8 +2117,8 @@ export default function KnowledgeBaseClient() {
                     <Button variant="outline" size="icon" onClick={() => handleToggleWatch(selectedPage)}>
                       {selectedPage.isWatching ? <Bell className="w-4 h-4 text-indigo-500" /> : <BellOff className="w-4 h-4" />}
                     </Button>
-                    <Button variant="outline" size="icon" onClick={handleShare}>
-                      <Share2 className="w-4 h-4" />
+                    <Button variant="outline" size="icon" onClick={handleShare} aria-label="Share">
+                  <Share2 className="w-4 h-4" />
                     </Button>
                     <Button variant="outline" size="icon" onClick={() => {
                       toast.info('Options: Duplicate, Move, Archive, Delete')
@@ -2256,8 +2256,8 @@ export default function KnowledgeBaseClient() {
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete
                   </Button>
-                  <Button variant="outline" onClick={handleExport}>
-                    <Download className="w-4 h-4 mr-2" />
+                  <Button variant="outline" onClick={handleExport} aria-label="Export data">
+                  <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>
                 </div>

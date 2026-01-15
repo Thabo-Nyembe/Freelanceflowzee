@@ -41,12 +41,11 @@ AccessibleButton.displayName = 'AccessibleButton'
 // Accessible image with proper alt text
 export function AccessibleImage({ src, alt, decorative = false, ...props }) {
   return (
-    <img
-      src={src}
+    <img src={src}
       alt={decorative ? '' : alt || 'Image'}
       role={decorative ? 'presentation' : undefined}
       {...props}
-    />
+    / loading="lazy">
   )
 }
 

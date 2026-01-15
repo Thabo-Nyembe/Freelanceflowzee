@@ -839,7 +839,7 @@ export default function FilesPage() {
       case 'folder': return <FolderOpen className="h-8 w-8 text-blue-500" />
       case 'video': return <Video className="h-8 w-8 text-green-500" />
       case 'excel': return <FileSpreadsheet className="h-8 w-8 text-green-600" />
-      case 'image': return <Image className="h-8 w-8 text-orange-500" />
+      case 'image': return <Image className="h-8 w-8 text-orange-500"  loading="lazy"/>
       case 'archive': return <Archive className="h-8 w-8 text-gray-500" />
       case 'word': return <FileText className="h-8 w-8 text-blue-600" />
       case 'code': return <FileCode className="h-8 w-8 text-cyan-500" />
@@ -1108,11 +1108,10 @@ export default function FilesPage() {
                               setIsViewModalOpen(true)
                             }}>
                               {file.thumbnail ? (
-                                <img
-                                  src={file.thumbnail}
+                                <img src={file.thumbnail}
                                   alt={file.name}
                                   className="w-16 h-16 rounded object-cover mb-2"
-                                />
+                                / loading="lazy">
                               ) : (
                                 <div className="mb-2">{getFileIcon(file.type)}</div>
                               )}
@@ -1156,11 +1155,10 @@ export default function FilesPage() {
                         />
                         <div className="flex items-center gap-3">
                           {file.thumbnail ? (
-                            <img
-                              src={file.thumbnail}
+                            <img src={file.thumbnail}
                               alt={file.name}
                               className="w-8 h-8 rounded object-cover"
-                            />
+                            / loading="lazy">
                           ) : (
                             <div className="w-8 h-8 flex items-center justify-center">
                               {getFileIcon(file.type)}

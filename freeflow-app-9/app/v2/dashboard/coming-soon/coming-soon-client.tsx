@@ -388,8 +388,8 @@ export default function ComingSoonClient() {
               <Button variant="outline" onClick={() => setShowExportDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleExport} className="bg-green-600 hover:bg-green-700">
-                <Download className="h-4 w-4 mr-2" />
+              <Button onClick={handleExport} className="bg-green-600 hover:bg-green-700" aria-label="Export data">
+                  <Download className="h-4 w-4 mr-2" />
                 Start Export
               </Button>
             </DialogFooter>

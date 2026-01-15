@@ -939,7 +939,7 @@ export default function WorkspacePage() {
 
   const getFileIcon = (item: WorkspaceItem) => {
     if (item.type === "folder") return <Folder className="h-8 w-8" />;
-    if (item.fileType === "image") return <Image className="h-8 w-8" />;
+    if (item.fileType === "image") return <Image className="h-8 w-8"  loading="lazy"/>;
     if (item.fileType === "video") return <Video className="h-8 w-8" />;
     return <FileText className="h-8 w-8" />;
   };
@@ -1172,8 +1172,8 @@ export default function WorkspacePage() {
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
+                              <Button variant="ghost" size="icon" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">

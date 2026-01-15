@@ -475,7 +475,7 @@ export function EnhancedInvoices() {
                               <>
                                 <span>•</span>
                                 <span className= "flex items-center gap-1">
-                                  <Image className= "h-3 w-3" />
+                                  <Image className= "h-3 w-3"  loading="lazy"/>
                                   Background
                                 </span>
                               </>

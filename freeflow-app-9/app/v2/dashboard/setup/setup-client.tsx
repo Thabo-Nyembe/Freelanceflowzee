@@ -1382,8 +1382,8 @@ export default function SetupClient() {
             <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleExport}>
-              <Download className="mr-2 h-4 w-4" />
+            <Button onClick={handleExport} aria-label="Export data">
+                  <Download className="mr-2 h-4 w-4" />
               Export Now
             </Button>
           </DialogFooter>

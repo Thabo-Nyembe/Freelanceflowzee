@@ -963,7 +963,7 @@ export default function WhiteLabelClient() {
               {/* Logo Upload */}
               <LiquidGlassCard className="p-6">
                 <div className="flex items-center gap-2 mb-6">
-                  <Image className="w-5 h-5 text-purple-400" />
+                  <Image className="w-5 h-5 text-purple-400"  loading="lazy"/>
                   <h3 className="font-semibold text-white">Logo & Assets</h3>
                 </div>
 

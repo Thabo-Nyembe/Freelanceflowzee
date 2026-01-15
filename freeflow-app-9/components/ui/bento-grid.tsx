@@ -267,11 +267,10 @@ export function BentoFeature({
     >
       {image && (
         <div className="mt-4 rounded-xl overflow-hidden border border-border/20">
-          <img
-            src={image}
+          <img src={image}
             alt={title}
             className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-          />
+          / loading="lazy">
         </div>
       )}
     </BentoCard>

@@ -1300,12 +1300,11 @@ export default function PluginMarketplacePage() {
                 {/* Screenshots */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
                   {state.selectedPlugin.screenshots.map((screenshot, i) => (
-                    <img
-                      key={i}
+                    <img key={i}
                       src={screenshot}
                       alt={`Screenshot ${i + 1}`}
                       className="w-full h-32 object-cover rounded-lg"
-                    />
+                    / loading="lazy">
                   ))}
                 </div>
 

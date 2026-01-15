@@ -152,11 +152,10 @@ export function RouteLoading({
               className="relative"
             >
               <GlowEffect className="absolute -inset-12 bg-gradient-to-r from-purple-500/30 via-blue-500/30 to-purple-500/30 rounded-full blur-3xl animate-pulse" />
-              <img
-                src="/kazi-brand/logo.svg"
+              <img src="/kazi-brand/logo.svg"
                 alt="KAZI"
                 className="h-16 w-auto relative z-10"
-              />
+              / loading="lazy">
             </motion.div>
           </motion.div>
         )}

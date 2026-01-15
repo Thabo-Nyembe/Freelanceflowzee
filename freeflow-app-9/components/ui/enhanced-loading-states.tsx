@@ -378,7 +378,7 @@ export function FileProcessing({
 }) {
   const getIcon = () => {
     switch (fileType) {
-      case 'image': return <Image className="h-5 w-5" />
+      case 'image': return <Image className="h-5 w-5"  loading="lazy"/>
       case 'video': return <Video className="h-5 w-5" />
       case 'document': return <FileText className="h-5 w-5" />
       default: return <Upload className="h-5 w-5" />

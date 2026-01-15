@@ -1323,11 +1323,10 @@ export default function CanvasPage() {
                       className="relative h-48 bg-slate-800 rounded-t-xl overflow-hidden"
                       onClick={() => handleViewCanvas(canvas)}
                     >
-                      <img
-                        src={canvas.thumbnail}
+                      <img src={canvas.thumbnail}
                         alt={canvas.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      / loading="lazy">
                       <div className="absolute top-2 left-2 flex gap-1">
                         {canvas.isStarred && (
                           <Badge className="bg-amber-500/90 text-white">
@@ -1361,8 +1360,8 @@ export default function CanvasPage() {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="ghost" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
+                            <Button size="icon" variant="ghost" className="h-8 w-8" aria-label="More options">
+                  <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -1585,11 +1584,10 @@ export default function CanvasPage() {
 
               <TabsContent value="overview" className="space-y-4">
                 <div className="rounded-lg overflow-hidden">
-                  <img
-                    src={state.selectedCanvas.thumbnail}
+                  <img src={state.selectedCanvas.thumbnail}
                     alt={state.selectedCanvas.name}
                     className="w-full h-64 object-cover"
-                  />
+                  / loading="lazy">
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">

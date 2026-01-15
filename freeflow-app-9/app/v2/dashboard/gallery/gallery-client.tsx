@@ -1055,7 +1055,7 @@ export default function GalleryClient() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                    <Image className="w-6 h-6 text-white" />
+                    <Image className="w-6 h-6 text-white"  loading="lazy"/>
                   </div>
                   <h1 className="text-3xl font-bold text-white">Photo Gallery</h1>
                   <span className="px-3 py-1 bg-white/20 rounded-full text-white text-sm font-medium backdrop-blur-sm">
@@ -1239,7 +1239,7 @@ export default function GalleryClient() {
                       }}
                     >
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Image className="w-12 h-12 text-white/30" />
+                        <Image className="w-12 h-12 text-white/30"  loading="lazy"/>
                       </div>
                     </div>
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors">
@@ -1306,7 +1306,7 @@ export default function GalleryClient() {
                     }}
                   >
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Image className="w-12 h-12 text-white/30" />
+                      <Image className="w-12 h-12 text-white/30"  loading="lazy"/>
                     </div>
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors">
                       <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -2241,7 +2241,7 @@ export default function GalleryClient() {
                   }}
                 >
                   <div className="w-full h-full flex items-center justify-center">
-                    <Image className="w-20 h-20 text-white/30" />
+                    <Image className="w-20 h-20 text-white/30"  loading="lazy"/>
                   </div>
                 </div>
 
@@ -3182,7 +3182,7 @@ export default function GalleryClient() {
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="w-10 h-10 bg-white dark:bg-gray-900 rounded flex items-center justify-center">
-                        <Image className="w-6 h-6 text-amber-500" />
+                        <Image className="w-6 h-6 text-amber-500"  loading="lazy"/>
                       </div>
                     </div>
                   </div>

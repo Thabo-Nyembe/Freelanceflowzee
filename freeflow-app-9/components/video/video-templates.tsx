@@ -184,11 +184,10 @@ export function VideoTemplates({ onSelectTemplate, onPreviewTemplate }: VideoTem
         {filteredTemplates.map(template => (
           <Card key={template.id} className="group hover:shadow-lg transition-all duration-200">
             <div className="relative">
-              <img
-                src={template.thumbnail}
+              <img src={template.thumbnail}
                 alt={template.name}
                 className="w-full h-48 object-cover rounded-t-lg"
-              />
+              / loading="lazy">
               
               {/* Premium Badge */}
               {template.isPremium && (
@@ -284,7 +283,7 @@ export function VideoTemplates({ onSelectTemplate, onPreviewTemplate }: VideoTem
                       {template.assets.videos}
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Image className="w-3 h-3" />
+                      <Image className="w-3 h-3"  loading="lazy"/>
                       {template.assets.images}
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">

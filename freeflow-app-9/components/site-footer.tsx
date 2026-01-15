@@ -118,11 +118,10 @@ export function SiteFooter() {
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img 
-                  src="/kazi-brand/logo-light.png" 
+                <img src="/kazi-brand/logo-light.png" 
                   alt="KAZI" 
                   className="h-6 w-auto"
-                />
+                / loading="lazy">
                 <span className="font-bold text-white">KAZI</span>
               </div>
               <span>© {new Date().getFullYear()} KAZI. All rights reserved.</span>

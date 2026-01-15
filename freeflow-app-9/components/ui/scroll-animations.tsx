@@ -389,7 +389,7 @@ export function HorizontalScroll({ children, className }: ScrollAnimationProps) 
  * Usage:
  * ```tsx
  * <ZoomOnScroll>
- *   <img src="image.jpg" alt="Zoom effect" />
+ *   <img src="image.jpg" alt="Zoom effect" / loading="lazy">
  * </ZoomOnScroll>
  * ```
  */

@@ -1270,7 +1270,7 @@ export default function ResourcesClient() {
                       {/* Header */}
                       <div className="flex items-start gap-4 mb-4">
                         <Avatar className="w-14 h-14 border-2 border-white dark:border-slate-800 shadow-lg">
-                          <AvatarImage src={resource.avatar} />
+                          <AvatarImage src={resource.avatar} alt="User avatar" />
                           <AvatarFallback className="bg-gradient-to-br from-sky-500 to-blue-500 text-white text-lg">
                             {resource.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
@@ -1613,7 +1613,7 @@ export default function ResourcesClient() {
                       {team.members.map((member) => (
                         <div key={member.id} className="flex items-center gap-4">
                           <Avatar className="w-10 h-10">
-                            <AvatarImage src={member.avatar} />
+                            <AvatarImage src={member.avatar} alt="User avatar" />
                             <AvatarFallback className="bg-gradient-to-br from-sky-500 to-blue-500 text-white text-sm">
                               {member.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
@@ -1697,7 +1697,7 @@ export default function ResourcesClient() {
                       className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-sky-500/50 transition-colors"
                     >
                       <Avatar className="w-10 h-10">
-                        <AvatarImage src={booking.resource.avatar} />
+                        <AvatarImage src={booking.resource.avatar} alt="User avatar" />
                         <AvatarFallback className="bg-gradient-to-br from-sky-500 to-blue-500 text-white text-sm">
                           {booking.resource.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
@@ -2239,7 +2239,7 @@ export default function ResourcesClient() {
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-4">
                     <Avatar className="w-14 h-14">
-                      <AvatarImage src={selectedResource.avatar} />
+                      <AvatarImage src={selectedResource.avatar} alt="User avatar" />
                       <AvatarFallback className="bg-gradient-to-br from-sky-500 to-blue-500 text-white text-lg">
                         {selectedResource.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>

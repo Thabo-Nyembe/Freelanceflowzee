@@ -841,7 +841,7 @@ export default function EmployeesClient() {
                     <Card key={employee.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow overflow-hidden">
                       <div className="h-20 bg-gradient-to-r from-green-500 to-emerald-600 relative">
                         <Avatar className="absolute -bottom-8 left-6 w-16 h-16 border-4 border-white dark:border-gray-800">
-                          <AvatarImage src={employee.avatar_url || undefined} />
+                          <AvatarImage src={employee.avatar_url || undefined} alt="User avatar" />
                           <AvatarFallback className="bg-green-100 text-green-700 text-lg">
                             {employee.employee_name?.split(' ').map(n => n[0]).join('') || 'E'}
                           </AvatarFallback>

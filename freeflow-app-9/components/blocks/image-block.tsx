@@ -83,12 +83,11 @@ export function ImageBlock({
       'text-right': properties.alignment === 'right'
     })}>
       <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-        <Image
-          src={properties.url}
+        <Image src={properties.url}
           alt={properties.caption || 'Uploaded image'}
           fill
           className="object-cover"
-        />
+         loading="lazy"/>
       </div>
       
       <Input

@@ -1381,7 +1381,7 @@ export default function ClientZonePage() {
                 My Projects
               </TabsTrigger>
               <TabsTrigger value="gallery" className="flex items-center gap-2 whitespace-nowrap">
-                <Image className="h-4 w-4" />
+                <Image className="h-4 w-4"  loading="lazy"/>
                 Gallery
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex items-center gap-2 whitespace-nowrap">
